@@ -15,7 +15,7 @@ import { createHashHistory } from 'history';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverCustomizationContext, FetchStatus } from '../../../../types';
+import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -29,6 +29,7 @@ import {
   getDiscoverStateContainer,
 } from '../../../services/discover_state';
 import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
+import { mockCustomizationContext } from '../../../../../customizations/__mocks__/customization_context';
 
 const documentObservables = {
   main$: new BehaviorSubject({
@@ -124,17 +125,12 @@ function getSavedSearch(dataView: DataView) {
   } as unknown as SavedSearch;
 }
 
-const customizationContext: DiscoverCustomizationContext = {
-  displayMode: 'standalone',
-  showLogsExplorerTabs: false,
-};
-
 export function getDocumentsLayoutProps(dataView: DataView) {
   const stateContainer = getDiscoverStateContainer({
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
-    customizationContext,
+    customizationContext: mockCustomizationContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
@@ -159,7 +155,7 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
-    customizationContext,
+    customizationContext: mockCustomizationContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],

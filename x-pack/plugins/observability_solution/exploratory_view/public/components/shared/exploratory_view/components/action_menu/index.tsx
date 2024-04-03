@@ -11,7 +11,6 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExpViewActionMenuContent } from './action_menu';
 import { useExploratoryView } from '../../contexts/exploratory_view_config';
-import { useKibana } from '../../hooks/use_kibana';
 
 interface Props {
   timeRange?: { from: string; to: string };
@@ -20,21 +19,12 @@ interface Props {
 export function ExpViewActionMenu(props: Props) {
   const { setHeaderActionMenu, theme$ } = useExploratoryView();
 
-  const {
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-  } = useKibana().services;
-
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <ExpViewActionMenuContent {...props} />
         </EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? (
-          <EuiFlexItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
     </HeaderMenuPortal>
   );

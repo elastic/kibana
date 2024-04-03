@@ -26,17 +26,5 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.isArray(body.connectors)).toBe(true);
       });
     });
-    describe('GET connectors', function () {
-      it('returns list of connector_types', async () => {
-        const { body } = await supertest
-          .get(`${API_BASE_PATH}/connector_types`)
-          .set(svlCommonApi.getInternalRequestHeader())
-          .expect(200);
-
-        expect(body.connectors).toBeDefined();
-        expect(Array.isArray(body.connectors)).toBe(true);
-        expect(body.connectors.length).toBeGreaterThan(0);
-      });
-    });
   });
 }

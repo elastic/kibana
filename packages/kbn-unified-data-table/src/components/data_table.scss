@@ -9,6 +9,14 @@
   font-family: $euiCodeFontFamily;
 }
 
+.unifiedDataTable__cell--expanded {
+  background-color: $euiColorHighlight;
+}
+
+.unifiedDataTable__cell--selected {
+  background-color: $euiColorHighlight;
+}
+
 .unifiedDataTable__cellPopover {
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
   .lines-content.monaco-editor-background {
@@ -172,7 +180,7 @@
 }
 
 // Ensure full screen data grids are not covered by elements with a z-index
-.euiDataGrid__restrictBody *:not(
+.unifiedDataTable__fullScreen *:not(
 .euiDataGrid--fullScreen,
 .euiDataGrid--fullScreen *,
 [data-euiportal='true'],

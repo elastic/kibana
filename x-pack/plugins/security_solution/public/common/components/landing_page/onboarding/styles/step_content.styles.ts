@@ -10,9 +10,8 @@ import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const LEFT_CONTENT_PANEL_WIDTH = 486;
-export const RIGHT_CONTENT_PANEL_WIDTH = 510;
-export const RIGHT_CONTENT_HEIGHT = 320;
-export const RIGHT_CONTENT_WIDTH = 480;
+export const RIGHT_CONTENT_PANEL_WIDTH = 540;
+export const RIGHT_CONTENT_WIDTH = 513;
 
 export const useStepContentStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -56,21 +55,19 @@ export const useStepContentStyles = () => {
       }),
       rightPanelContentStyles: css({
         '&.right-panel-wrapper': {
-          height: `${RIGHT_CONTENT_HEIGHT}px`,
           width: `${RIGHT_CONTENT_WIDTH}px`,
         },
       }),
       getRightContentStyles: ({ shadow }: { shadow: boolean }) =>
-        css({
-          '&.right-panel-content': {
-            height: '100%',
-            width: '100%',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: shadow ? imageShadow : '',
-            borderRadius: euiTheme.border.radius.medium,
-          },
-        }),
+        css(`
+          &.right-panel-content {
+            height: 100%;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: ${euiTheme.border.radius.medium};
+            ${shadow ? imageShadow : ''}
+        }`),
     }),
     [
       euiTheme.animation.normal,

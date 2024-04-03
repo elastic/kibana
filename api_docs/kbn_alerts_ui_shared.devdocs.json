@@ -836,7 +836,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"recovered\" | \"active\" | \"untracked\""
+              "\"active\" | \"recovered\" | \"untracked\""
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
@@ -1381,6 +1381,14 @@
                 "section": "def-common.DataViewListItem",
                 "text": "DataViewListItem"
               },
+              "[]>; getAllDataViewLazy: (refresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1405,7 +1413,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1509,7 +1517,47 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              "; createAndSave: (spec: ",
+              "; getDataViewLazy: (id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createDataViewLazy: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createAndSaveDataViewLazy: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", overwrite?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createAndSave: (spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1526,6 +1574,18 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
+              "AbstractDataView",
+              ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
+              "AbstractDataView",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | null>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1533,7 +1593,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
+              " | null>; toDataView: (dataViewLazy: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1541,7 +1609,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; updateSavedObject: (indexPattern: ",
+              ">; toDataViewLazy: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1549,23 +1617,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
               },
-              ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; }"
+              ">; }"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
@@ -1674,6 +1734,14 @@
                 "section": "def-common.DataViewListItem",
                 "text": "DataViewListItem"
               },
+              "[]>; getAllDataViewLazy: (refresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -1698,7 +1766,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1802,7 +1870,47 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              "; createAndSave: (spec: ",
+              "; getDataViewLazy: (id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createDataViewLazy: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createAndSaveDataViewLazy: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", overwrite?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createAndSave: (spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1819,6 +1927,18 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
+              "AbstractDataView",
+              ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
+              "AbstractDataView",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | null>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1826,7 +1946,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
+              " | null>; toDataView: (dataViewLazy: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1834,7 +1962,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; updateSavedObject: (indexPattern: ",
+              ">; toDataViewLazy: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1842,23 +1970,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
               },
-              ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; }"
+              ">; }"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_alert_data_view.ts",
             "deprecated": false,

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import {
@@ -47,11 +48,7 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
       return getEndSelector(state.inputs.global);
     }
   });
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
   const { pathname } = useLocation();
   const { selectedPatterns: nonTimelinePatterns } = useSourcererDataView(
     getScopeFromPath(pathname)

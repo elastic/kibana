@@ -29,7 +29,6 @@ import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { useApplication } from './use_application';
 import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
@@ -40,8 +39,6 @@ export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   owner: string[];
-  appId?: string;
-  appTitle?: string;
   permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
@@ -79,13 +76,10 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
   },
   queryClient = casesQueryClient,
 }) => {
-  const { appId, appTitle } = useApplication();
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
   const value: CasesContextValue = useMemo(
     () => ({
-      appId,
-      appTitle,
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       owner,
@@ -113,15 +107,12 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
       dispatch,
     }),
     /**
-     * We want to trigger a rerender only if the appId, the appTitle, or
-     * the permissions will change. The registries, the owner, and the rest
-     * of the values should not change during the lifecycle of the
-     * cases application.
+     * We want to trigger a rerender only when the permissions will change.
+     * The registries, the owner, and the rest of the values should
+     * not change during the lifecycle of the cases application.
      */
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      appId,
-      appTitle,
       permissions.all,
       permissions.connectors,
       permissions.create,

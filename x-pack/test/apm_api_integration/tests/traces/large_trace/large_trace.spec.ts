@@ -29,6 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
   const es = getService('es');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177660
   registry.when('Large trace', { config: 'basic', archives: [] }, () => {
     describe('when the trace is large (>15.000 items)', () => {
       before(() => {

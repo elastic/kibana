@@ -532,7 +532,25 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('the button before pressing it', async () => {
       return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
     });
-    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+    await this.retry.waitForWithTimeout('view all matches to load', 60000, async () => {
+      try {
+        // We need to manually click the button since testSubjects.click will
+        // use a retry, but we want this to throw if the click fails since it
+        // means the button disappeared before we could click it
+        const button = await this.testSubjects.find('discoverNoResultsViewAllMatches', 1000);
+        // Don't click the button if it's disabled since it means the previous
+        // click succeeded and the request is still loading
+        if (await button.isEnabled()) {
+          await button.click();
+        }
+      } catch {
+        // We could get an exception here if the button isn't found or isn't in
+        // the DOM by the time we try to click it, so just ignore it and move on
+      }
+      await this.waitUntilSearchingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
+      return !(await this.testSubjects.exists('discoverNoResultsViewAllMatches'));
+    });
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
@@ -745,9 +763,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async addRuntimeField(name: string, script: string) {
+  public async addRuntimeField(name: string, script: string, type?: string) {
     await this.clickAddField();
     await this.fieldEditor.setName(name);
+    if (type) {
+      await this.fieldEditor.setFieldType(type);
+    }
     await this.fieldEditor.enableValue();
     await this.fieldEditor.typeScript(script);
     await this.fieldEditor.save();
@@ -789,12 +810,12 @@ export class DiscoverPageObject extends FtrService {
    * */
   public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
-      `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+      `[data-test-subj="dscFieldListPanelField-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
     );
     await field.focus();
     await this.retry.try(async () => {
       await this.browser.pressKeys(this.browser.keys.ENTER);
-      await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+      await this.testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);

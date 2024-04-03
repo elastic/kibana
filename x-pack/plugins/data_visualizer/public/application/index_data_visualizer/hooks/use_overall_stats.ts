@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { from, Subscription, Observable } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import type { Subscription, Observable } from 'rxjs';
+import { from } from 'rxjs';
+import { mergeMap, last, map, toArray } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
@@ -17,24 +18,26 @@ import type {
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import {
+import type {
   AggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
+} from '../search_strategy/requests/overall_stats';
+import {
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
   getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
   isNonAggregatableSampledDocs,
-  NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
-import {
+import type {
   DataStatsFetchProgress,
-  isRandomSamplingOption,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
+import { isRandomSamplingOption } from '../../../../common/types/field_stats';
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import {

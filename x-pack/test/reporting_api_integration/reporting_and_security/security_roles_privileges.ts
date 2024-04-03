@@ -23,42 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe('Dashboard: CSV download file', () => {
-      it('does not allow user that does not have the role-based privilege', async () => {
-        const res = await reportingAPI.downloadCsv(
-          reportingAPI.DATA_ANALYST_USERNAME,
-          reportingAPI.DATA_ANALYST_PASSWORD,
-          {
-            searchSource: {
-              query: { query: '', language: 'kuery' },
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              filter: [],
-            } as unknown as SerializedSearchSourceFields,
-            browserTimezone: 'UTC',
-            title: 'testfooyu78yt90-',
-          }
-        );
-        expect(res.status).to.eql(403);
-      });
-
-      it('does allow user with the role privilege', async () => {
-        const res = await reportingAPI.downloadCsv(
-          reportingAPI.REPORTING_USER_USERNAME,
-          reportingAPI.REPORTING_USER_PASSWORD,
-          {
-            searchSource: {
-              query: { query: '', language: 'kuery' },
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              filter: [],
-            } as unknown as SerializedSearchSourceFields,
-            browserTimezone: 'UTC',
-            title: 'testfooyu78yt90-',
-          }
-        );
-        expect(res.status).to.eql(200);
-      });
-    });
-
     describe('Dashboard: Generate PDF report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generatePdf(

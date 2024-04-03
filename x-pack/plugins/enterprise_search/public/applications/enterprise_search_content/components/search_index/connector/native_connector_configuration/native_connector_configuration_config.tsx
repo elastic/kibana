@@ -17,6 +17,8 @@ import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 
 import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components/configuration/connector_configuration';
 
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
+
 import { Status } from '../../../../../../../common/types/api';
 
 import { docLinks } from '../../../../../shared/doc_links';
@@ -24,8 +26,6 @@ import { HttpLogic } from '../../../../../shared/http';
 import { LicensingLogic } from '../../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../../api/connector/update_connector_configuration_api_logic';
-import { IndexNameLogic } from '../../index_name_logic';
-import { ConnectorDefinition } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
   connector: Connector;
@@ -37,7 +37,6 @@ export const NativeConnectorConfigurationConfig: React.FC<
   NativeConnectorConfigurationConfigProps
 > = ({ connector, nativeConnector, status }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-  const { indexName } = useValues(IndexNameLogic);
   const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
   const { http } = useValues(HttpLogic);
@@ -50,7 +49,6 @@ export const NativeConnectorConfigurationConfig: React.FC<
         makeRequest({
           configuration,
           connectorId: connector.id,
-          indexName,
         })
       }
       subscriptionLink={docLinks.licenseManagement}

@@ -5,6 +5,42 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ChartSwitchTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "ChartSwitchTrigger",
+        "description": [],
+        "signature": [
+          "({ label, icon, onClick, dataTestSubj, }: { label: string; icon?: ",
+          "IconType",
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ChartSwitchTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ label: string; icon?: ",
+              "IconType",
+              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.ColorPicker",
         "type": "Function",
         "tags": [],
@@ -219,31 +255,32 @@
         "label": "DimensionButton",
         "description": [],
         "signature": [
-          "({\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}: ",
+          "React.NamedExoticComponent<",
           "DimensionButtonProps",
-          ") => JSX.Element"
+          "> & { readonly type: ({ groupLabel, children, onClick, onRemoveClick, accessorConfig, label, message, ...otherProps }: ",
+          "DimensionButtonProps",
+          ") => JSX.Element; }"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/visualization-ui-components",
             "id": "def-public.DimensionButton.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "DimensionButtonProps"
+              "P"
             ],
-            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -313,7 +350,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
@@ -368,7 +405,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],

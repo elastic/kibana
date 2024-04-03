@@ -65,7 +65,7 @@ const CONFIG_WITHOUT_ES_HOSTS = {
   },
 };
 
-function mockOutputSO(id: string, attributes: any = {}) {
+function mockOutputSO(id: string, attributes: any = {}, updatedAt?: string) {
   return {
     id: outputIdToUuid(id),
     type: 'ingest-outputs',
@@ -74,6 +74,7 @@ function mockOutputSO(id: string, attributes: any = {}) {
       output_id: id,
       ...attributes,
     },
+    updated_at: updatedAt,
   };
 }
 
@@ -146,7 +147,9 @@ function getMockedSoClient(
       }
 
       default:
-        throw new Error('not found: ' + id);
+        return mockOutputSO(id, {
+          type: 'remote_elasticsearch',
+        });
     }
   });
   soClient.update.mockImplementation(async (type, id, data) => {
@@ -1868,6 +1871,11 @@ describe('Output Service', () => {
   });
 
   describe('getLatestOutputHealth', () => {
+    let soClient: any;
+    beforeEach(() => {
+      soClient = getMockedSoClient();
+    });
+
     it('should return unknown state if no hits', async () => {
       esClientMock.search.mockResolvedValue({
         hits: {
@@ -1906,6 +1914,51 @@ describe('Output Service', () => {
         message: 'connection error',
         timestamp: '2023-11-30T14:25:31Z',
       });
+    });
+
+    it('should apply range filter if updated_at available', async () => {
+      const updatedAt = '2023-11-30T14:25:31Z';
+      soClient.get.mockResolvedValue(
+        mockOutputSO(
+          'id',
+          {
+            type: 'remote_elasticsearch',
+          },
+          updatedAt
+        )
+      );
+
+      await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect((esClientMock.search.mock.lastCall?.[0] as any)?.query.bool.must).toEqual([
+        {
+          range: {
+            '@timestamp': {
+              gte: updatedAt,
+            },
+          },
+        },
+      ]);
+    });
+
+    it('should not apply range filter if updated_at is not available', async () => {
+      soClient.get.mockResolvedValue(
+        mockOutputSO('id', {
+          type: 'remote_elasticsearch',
+        })
+      );
+
+      await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect((esClientMock.search.mock.lastCall?.[0] as any)?.query.bool.must).toEqual([]);
+    });
+
+    it('should not apply range filter if output query returns error', async () => {
+      soClient.get.mockResolvedValue({ error: { message: 'error' } });
+
+      await outputService.getLatestOutputHealth(esClientMock, 'id');
+
+      expect((esClientMock.search.mock.lastCall?.[0] as any)?.query.bool.must).toEqual([]);
     });
   });
 

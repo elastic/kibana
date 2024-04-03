@@ -40,7 +40,7 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler, DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -49,7 +49,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
-  DataTableColumnTypes,
+  DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
   CustomControlColumnConfiguration,
@@ -63,7 +63,7 @@ import {
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
-  hasSourceTimeFieldValue,
+  canPrependTimeFieldColumn,
 } from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
@@ -78,6 +78,7 @@ import {
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
+import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
@@ -123,10 +124,10 @@ export interface UnifiedDataTableProps {
   columns: string[];
   /**
    * If not provided, types will be derived by default from the dataView field types.
-   * For displaying text-based search results, pass column types (which are available separately in the fetch request) down here.
-   * Check available utils in `utils/get_column_types.ts`
+   * For displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.
+   * Check available utils in `utils/get_columns_meta.ts`
    */
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   /**
    * Field tokens could be rendered in column header next to the field name.
    */
@@ -282,7 +283,7 @@ export interface UnifiedDataTableProps {
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
-    columnTypes?: DataTableColumnTypes
+    columnsMeta?: DataTableColumnsMeta
   ) => JSX.Element | undefined;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
@@ -366,6 +367,12 @@ export interface UnifiedDataTableProps {
    * Optional row line height override. Default is 1.6em.
    */
   rowLineHeightOverride?: string;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -375,7 +382,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 export const UnifiedDataTable = ({
   ariaLabelledBy,
   columns,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   configHeaderRowHeight,
   headerRowHeightState,
@@ -429,11 +436,13 @@ export const UnifiedDataTable = ({
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
+  cellActionsMetadata,
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
+
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -630,15 +639,23 @@ export const UnifiedDataTable = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
-  const shouldShowTimeField = useMemo(
-    () =>
-      hasSourceTimeFieldValue(displayedColumns, dataView, columnTypes, showTimeCol, isPlainRecord),
-    [dataView, displayedColumns, isPlainRecord, showTimeCol, columnTypes]
+  const timeFieldName = dataView.timeFieldName;
+  const shouldPrependTimeFieldColumn = useCallback(
+    (activeColumns: string[]) =>
+      canPrependTimeFieldColumn(
+        activeColumns,
+        timeFieldName,
+        columnsMeta,
+        showTimeCol,
+        isPlainRecord
+      ),
+    [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
   );
 
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, shouldShowTimeField),
-    [dataView, displayedColumns, shouldShowTimeField]
+    () =>
+      getVisibleColumns(displayedColumns, dataView, shouldPrependTimeFieldColumn(displayedColumns)),
+    [dataView, displayedColumns, shouldPrependTimeFieldColumn]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
@@ -662,12 +679,17 @@ export const UnifiedDataTable = ({
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
+  const allCellActionsMetadata = useMemo(
+    () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
+    [dataView, cellActionsMetadata]
+  );
 
   const columnsCellActions = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
+    metadata: allCellActionsMetadata,
   });
 
   const {
@@ -713,13 +735,14 @@ export const UnifiedDataTable = ({
         onFilter,
         editField,
         visibleCellActions,
-        columnTypes,
+        columnsMeta,
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
       }),
     [
-      columnTypes,
+      showColumnTokens,
+      columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
       dataView,
@@ -732,7 +755,6 @@ export const UnifiedDataTable = ({
       isSortEnabled,
       onFilter,
       settings,
-      showColumnTokens,
       toastNotifications,
       uiSettings,
       valueToStringConverter,
@@ -741,19 +763,16 @@ export const UnifiedDataTable = ({
     ]
   );
 
-  const hideTimeColumn = useMemo(
-    () => services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    [services.uiSettings]
-  );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
       visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
-        onSetColumns(newColumns, hideTimeColumn);
+        const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
+        onSetColumns(newColumns, dontModifyColumns);
       },
     }),
-    [visibleColumns, hideTimeColumn, onSetColumns]
+    [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
   );
 
   /**
@@ -925,6 +944,8 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -965,6 +986,7 @@ export const UnifiedDataTable = ({
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
         <div
+          ref={setDataGridWrapper}
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
@@ -974,6 +996,7 @@ export const UnifiedDataTable = ({
           className={classnames(className, 'unifiedDataTable__table')}
         >
           <EuiDataGridMemoized
+            id={dataGridId}
             aria-describedby={randomId}
             aria-labelledby={ariaLabelledBy}
             columns={euiGridColumns}
@@ -1032,7 +1055,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnTypes)}
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

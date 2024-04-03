@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -31,16 +31,14 @@ import {
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -66,6 +64,12 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
+    coreSetup.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
@@ -94,7 +98,6 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),
     };
   }
 

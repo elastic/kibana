@@ -82,6 +82,7 @@ export const prepareModelVersionTestKit = async ({
     loggerFactory,
     kibanaIndex,
     defaultIndexTypesMap: {},
+    hashToVersionMap: {},
     kibanaVersion,
     kibanaBranch,
     nodeRoles: defaultNodeRoles,
@@ -121,7 +122,7 @@ export const prepareModelVersionTestKit = async ({
 
   await runMigrations(secondMigrator);
 
-  const tearsDown = async () => {
+  const tearDown = async () => {
     await esClient.indices.delete({ index: `${kibanaIndex}_*`, allow_no_indices: true });
   };
 
@@ -129,7 +130,7 @@ export const prepareModelVersionTestKit = async ({
     esClient,
     repositoryBefore,
     repositoryAfter,
-    tearsDown,
+    tearDown,
   };
 };
 
@@ -213,6 +214,7 @@ const getMigrator = async ({
   kibanaIndex,
   typeRegistry,
   defaultIndexTypesMap,
+  hashToVersionMap,
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
@@ -224,6 +226,7 @@ const getMigrator = async ({
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
@@ -250,6 +253,7 @@ const getMigrator = async ({
     kibanaIndex,
     typeRegistry,
     defaultIndexTypesMap,
+    hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),

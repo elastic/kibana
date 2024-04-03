@@ -157,6 +157,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
+      connectorsClientDeploy: `${ENTERPRISE_SEARCH_DOCS}deploy-connector-client.html`,
+      connectorsMappings: `${ENTERPRISE_SEARCH_DOCS}connectors-usage.html#connectors-usage-index-create-configure-existing-index`,
       connectorsAzureBlobStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-azure-blob.html`,
       connectorsBox: `${ENTERPRISE_SEARCH_DOCS}connectors-box.html`,
       connectorsClients: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-build`,
@@ -536,6 +538,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       customUrls: `${MACHINE_LEARNING_DOCS}ml-configuring-url.html`,
       dataFrameAnalytics: `${MACHINE_LEARNING_DOCS}ml-dfanalytics.html`,
       dFAPrepareData: `${MACHINE_LEARNING_DOCS}ml-dfa-overview.html#prepare-transform-data`,
+      dFAStartJob: `${ELASTICSEARCH_DOCS}start-dfanalytics.html`,
+      dFACreateJob: `${ELASTICSEARCH_DOCS}put-dfanalytics.html`,
       featureImportance: `${MACHINE_LEARNING_DOCS}ml-feature-importance.html`,
       outlierDetectionRoc: `${MACHINE_LEARNING_DOCS}ml-dfa-finding-outliers.html#ml-dfanalytics-roc`,
       regressionEvaluation: `${MACHINE_LEARNING_DOCS}ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,
@@ -597,7 +601,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       actionTypes: isServerless
         ? `${SERVERLESS_DOCS}action-connectors`
         : `${KIBANA_DOCS}action-types.html`,
-      apmRules: `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesErrorCount: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-error-count-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesTransactionDuration: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-latency-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesTransactionError: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-failed-transaction-rate-threshold-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesAnomaly: isServerless
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-anomaly-alert-rule`
+        : `${KIBANA_DOCS}apm-alerts.html`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
       emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
@@ -820,6 +835,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
       remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
+      scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,

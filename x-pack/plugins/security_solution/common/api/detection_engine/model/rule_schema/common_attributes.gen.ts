@@ -17,20 +17,7 @@ import { isValidDateMath } from '@kbn/zod-helpers';
  *   version: not applicable
  */
 
-/**
- * A string that is not empty and does not contain only whitespace
- */
-export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z
-  .string()
-  .min(1)
-  .regex(/^(?! *$).+$/);
-
-/**
- * A universally unique identifier
- */
-export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
+import { UUID, NonEmptyString } from '../../../model/primitives.gen';
 
 export type RuleObjectId = z.infer<typeof RuleObjectId>;
 export const RuleObjectId = UUID;

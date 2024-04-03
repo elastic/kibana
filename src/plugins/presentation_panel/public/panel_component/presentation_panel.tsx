@@ -36,6 +36,8 @@ export const PresentationPanel = <
     ]);
     const Panel = panelModule.PresentationPanelInternal;
     return { Panel, unwrappedComponent };
+    // Ancestry chain is expected to use 'key' attribute to reset DOM and state
+    // when unwrappedComponent needs to be re-loaded
   }, []);
 
   if (error || (!loading && (!value?.Panel || !value?.unwrappedComponent))) {
@@ -53,7 +55,11 @@ export const PresentationPanel = <
 
   if (loading || !value?.Panel || !value?.unwrappedComponent)
     return (
-      <PanelLoader showShadow={props.showShadow} dataTestSubj="embeddablePanelLoadingIndicator" />
+      <PanelLoader
+        showShadow={props.showShadow}
+        showBorder={props.showBorder}
+        dataTestSubj="embeddablePanelLoadingIndicator"
+      />
     );
 
   return (

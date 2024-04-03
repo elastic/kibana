@@ -6,14 +6,14 @@
  */
 
 import { isJsonString } from '../../../../../../common/validators';
-import {
-  isPivotAggsConfigWithUiBase,
+import type {
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
+import { isPivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
 import { FILTERS } from './constants';
 import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
-import {
+import type {
   FilterAggConfigBool,
   FilterAggConfigExists,
   FilterAggConfigRange,

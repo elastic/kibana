@@ -27,6 +27,6 @@ export interface JobSummary {
  * @internal
  */
 export interface JobSummarySet {
-  completed: JobSummary[];
-  failed: JobSummary[];
+  completed?: JobSummary[];
+  failed?: JobSummary[];
 }

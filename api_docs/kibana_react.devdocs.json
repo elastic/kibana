@@ -41,7 +41,9 @@
                 "tags": [],
                 "label": "allowEmptyRange",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -53,7 +55,9 @@
                 "tags": [],
                 "label": "fullWidth",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -65,7 +69,9 @@
                 "tags": [],
                 "label": "compressed",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -93,7 +99,9 @@
                 "tags": [],
                 "label": "nextProps",
                 "description": [],
-                "signature": ["Props"],
+                "signature": [
+                  "Props"
+                ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -106,7 +114,9 @@
                 "tags": [],
                 "label": "prevState",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -134,7 +144,9 @@
             "tags": [],
             "label": "_onChange",
             "description": [],
-            "signature": ["(value: [string | number, string | number]) => void"],
+            "signature": [
+              "(value: [string | number, string | number]) => void"
+            ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -146,7 +158,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["[string | number, string | number]"],
+                "signature": [
+                  "[string | number, string | number]"
+                ],
                 "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -162,7 +176,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["() => JSX.Element"],
+            "signature": [
+              "() => JSX.Element"
+            ],
             "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -211,7 +227,9 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": ["Services"],
+            "signature": [
+              "Services"
+            ],
             "path": "src/plugins/kibana_react/public/context/context.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -339,7 +357,9 @@
         "type": "Function",
         "tags": [],
         "label": "ElasticAgentCard",
-        "description": ["\nApplies extra styling to a typical EuiAvatar"],
+        "description": [
+          "\nApplies extra styling to a typical EuiAvatar"
+        ],
         "signature": [
           "({ solution, recommended, title, href, button, layout, category, ...cardRest }: React.PropsWithChildren<",
           {
@@ -389,7 +409,9 @@
         "tags": [],
         "label": "KibanaContextProvider",
         "description": [],
-        "signature": ["React.FunctionComponent<{ services?: {} | undefined; }>"],
+        "signature": [
+          "React.FunctionComponent<{ services?: {} | undefined; }>"
+        ],
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -402,7 +424,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -414,7 +438,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -428,7 +454,9 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplateSolutionNavAvatar",
-        "description": ["\nApplies extra styling to a typical EuiAvatar"],
+        "description": [
+          "\nApplies extra styling to a typical EuiAvatar"
+        ],
         "signature": [
           "({ className, size, ...rest }: React.PropsWithChildren<",
           "KibanaPageTemplateSolutionNavAvatarProps",
@@ -463,7 +491,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaThemeProvider",
         "type": "Function",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "KibanaThemeProvider",
         "description": [],
         "signature": [
@@ -634,6 +664,126 @@
             "path": "src/plugins/console/public/shared_imports.ts"
           },
           {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
           },
@@ -692,30 +842,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -854,126 +980,6 @@
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
           },
@@ -984,6 +990,30 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
           },
           {
             "plugin": "triggersActionsUi",
@@ -1022,18 +1052,6 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
           },
@@ -1044,6 +1062,126 @@
           {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/render_app.tsx"
+          },
+          {
+            "plugin": "expressionImage",
+            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionImage",
+            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionImage",
+            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionMetric",
+            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
+          },
+          {
+            "plugin": "expressionMetric",
+            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
+          },
+          {
+            "plugin": "expressionMetric",
+            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
+          },
+          {
+            "plugin": "expressionError",
+            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
+          },
+          {
+            "plugin": "expressionError",
+            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
+          },
+          {
+            "plugin": "expressionError",
+            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
+          },
+          {
+            "plugin": "expressionError",
+            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
+          },
+          {
+            "plugin": "expressionError",
+            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
+          },
+          {
+            "plugin": "expressionError",
+            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
+          },
+          {
+            "plugin": "expressionRevealImage",
+            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionRevealImage",
+            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionRevealImage",
+            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionRepeatImage",
+            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionRepeatImage",
+            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionRepeatImage",
+            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
+          },
+          {
+            "plugin": "expressionShape",
+            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
+          },
+          {
+            "plugin": "expressionShape",
+            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
+          },
+          {
+            "plugin": "expressionShape",
+            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
+          },
+          {
+            "plugin": "expressionShape",
+            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
+          },
+          {
+            "plugin": "expressionShape",
+            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
+          },
+          {
+            "plugin": "expressionShape",
+            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
           },
           {
             "plugin": "licenseManagement",
@@ -1062,30 +1200,6 @@
             "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/render_app.tsx"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx"
           },
@@ -1194,18 +1308,6 @@
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/integrations/app.tsx"
           },
@@ -1230,8 +1332,80 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
           },
           {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+            "plugin": "crossClusterReplication",
+            "path": "x-pack/plugins/cross_cluster_replication/public/shared_imports.ts"
+          },
+          {
+            "plugin": "crossClusterReplication",
+            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
+          },
+          {
+            "plugin": "crossClusterReplication",
+            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
+          },
+          {
+            "plugin": "crossClusterReplication",
+            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/application.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/application.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/application.tsx"
+          },
+          {
+            "plugin": "grokdebugger",
+            "path": "x-pack/plugins/grokdebugger/public/shared_imports.ts"
+          },
+          {
+            "plugin": "indexLifecycleManagement",
+            "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
+          },
+          {
+            "plugin": "indexLifecycleManagement",
+            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "indexLifecycleManagement",
+            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "indexLifecycleManagement",
+            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
+            "plugin": "logstash",
+            "path": "x-pack/plugins/logstash/public/application/index.tsx"
+          },
+          {
+            "plugin": "logstash",
+            "path": "x-pack/plugins/logstash/public/application/index.tsx"
+          },
+          {
+            "plugin": "logstash",
+            "path": "x-pack/plugins/logstash/public/application/index.tsx"
           },
           {
             "plugin": "metricsDataAccess",
@@ -1240,6 +1414,22 @@
           {
             "plugin": "metricsDataAccess",
             "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
           },
           {
             "plugin": "osquery",
@@ -1294,212 +1484,16 @@
             "path": "x-pack/plugins/osquery/public/application.tsx"
           },
           {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionImage",
-            "path": "src/plugins/expression_image/public/expression_renderers/image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionMetric",
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionError",
-            "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRevealImage",
-            "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionRepeatImage",
-            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "expressionShape",
-            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/shared_imports.ts"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "grokdebugger",
-            "path": "x-pack/plugins/grokdebugger/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+            "plugin": "infra",
+            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
+            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "monitoring",
@@ -1512,18 +1506,6 @@
           {
             "plugin": "monitoring",
             "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
           },
           {
             "plugin": "painlessLab",
@@ -1618,18 +1600,6 @@
             "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app.tsx"
           },
@@ -1658,18 +1628,6 @@
             "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
           },
           {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
             "plugin": "watcher",
             "path": "x-pack/plugins/watcher/public/application/shared_imports.ts"
           },
@@ -1696,6 +1654,66 @@
           {
             "plugin": "cloudDataMigration",
             "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
+          },
+          {
+            "plugin": "profiling",
+            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
+          },
+          {
+            "plugin": "profiling",
+            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
+          },
+          {
+            "plugin": "profiling",
+            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
+          },
+          {
+            "plugin": "apm",
+            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "observabilityOnboarding",
+            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "ux",
@@ -1923,7 +1941,11 @@
         "tags": [],
         "label": "Markdown",
         "description": [],
-        "signature": ["(props: ", "MarkdownProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "MarkdownProps",
+          ") => JSX.Element"
+        ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1935,7 +1957,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["MarkdownProps"],
+            "signature": [
+              "MarkdownProps"
+            ],
             "path": "src/plugins/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1952,7 +1976,11 @@
         "tags": [],
         "label": "MarkdownSimple",
         "description": [],
-        "signature": ["(props: ", "MarkdownSimpleProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "MarkdownSimpleProps",
+          ") => JSX.Element"
+        ],
         "path": "src/plugins/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1964,7 +1992,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["MarkdownSimpleProps"],
+            "signature": [
+              "MarkdownSimpleProps"
+            ],
             "path": "src/plugins/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2093,7 +2123,9 @@
             "tags": [],
             "label": "{\n  addDataHref,\n  application,\n  devToolsHref,\n  hidden,\n  managementHref,\n  showDevToolsLink,\n  showManagementLink,\n}",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2124,7 +2156,9 @@
             "tags": [],
             "label": "{\n  addBasePath,\n  path,\n  onSetDefaultRoute,\n  onChangeDefaultRoute,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<Props>"],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
             "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2189,7 +2223,9 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": ["string | LocationObject"],
+            "signature": [
+              "string | LocationObject"
+            ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2202,7 +2238,9 @@
             "tags": [],
             "label": "onClickCallback",
             "description": [],
-            "signature": ["Function | undefined"],
+            "signature": [
+              "Function | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2267,7 +2305,9 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": ["string | LocationObject"],
+            "signature": [
+              "string | LocationObject"
+            ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2280,7 +2320,9 @@
             "tags": [],
             "label": "onClickCallback",
             "description": [],
-            "signature": ["Function | undefined"],
+            "signature": [
+              "Function | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2294,7 +2336,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.toMountPoint",
         "type": "Function",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "toMountPoint",
         "description": [],
         "signature": [
@@ -2453,6 +2497,38 @@
             "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
           },
           {
+            "plugin": "licensing",
+            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
+          },
+          {
+            "plugin": "licensing",
+            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
+            "plugin": "navigation",
+            "path": "src/plugins/navigation/public/solution_nav_userprofile_toggle/solution_nav_userprofile_toggle.tsx"
+          },
+          {
+            "plugin": "navigation",
+            "path": "src/plugins/navigation/public/solution_nav_userprofile_toggle/solution_nav_userprofile_toggle.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -2483,62 +2559,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "licensing",
-            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
-          },
-          {
-            "plugin": "licensing",
-            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -2613,20 +2633,52 @@
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
             "plugin": "triggersActionsUi",
@@ -2729,12 +2781,12 @@
             "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+            "plugin": "banners",
+            "path": "x-pack/plugins/banners/public/plugin.tsx"
           },
           {
-            "plugin": "telemetry",
-            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+            "plugin": "banners",
+            "path": "x-pack/plugins/banners/public/plugin.tsx"
           },
           {
             "plugin": "maps",
@@ -2745,116 +2797,12 @@
             "path": "x-pack/plugins/maps/public/render_app.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
+            "plugin": "@kbn/reporting-public",
+            "path": "packages/kbn-reporting/public/share/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
+            "plugin": "@kbn/reporting-public",
+            "path": "packages/kbn-reporting/public/share/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
           },
           {
             "plugin": "reporting",
@@ -2925,12 +2873,108 @@
             "path": "x-pack/plugins/reporting/public/notifier/job_warning.tsx"
           },
           {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
+            "plugin": "timelines",
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
           },
           {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx"
+            "plugin": "timelines",
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_open_unverified.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_package_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/hooks/use_confirm_force_install.tsx"
+          },
+          {
+            "plugin": "telemetry",
+            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+          },
+          {
+            "plugin": "telemetry",
+            "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/components/devtools_request_flyout/devtools_request_flyout.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/detail/settings/update_button.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/public/applications/integrations/components/header/header_portal.tsx"
           },
           {
             "plugin": "cloudSecurityPosture",
@@ -2983,6 +3027,14 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/application.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
           },
           {
             "plugin": "monitoring",
@@ -3077,6 +3129,14 @@
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
           },
           {
+            "plugin": "cloudLinks",
+            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
+          },
+          {
+            "plugin": "cloudLinks",
+            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
+          },
+          {
             "plugin": "synthetics",
             "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
           },
@@ -3142,31 +3202,23 @@
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
           },
           {
             "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
+            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
           },
           {
             "plugin": "dataViewManagement",
@@ -3241,7 +3293,9 @@
             "tags": [],
             "label": "node",
             "description": [],
-            "signature": ["React.ReactNode"],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "src/plugins/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3328,7 +3382,9 @@
         "tags": [],
         "label": "useDarkMode",
         "description": [],
-        "signature": ["(defaultValue?: boolean | undefined) => boolean"],
+        "signature": [
+          "(defaultValue?: boolean | undefined) => boolean"
+        ],
         "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3340,7 +3396,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3356,7 +3414,9 @@
         "type": "Function",
         "tags": [],
         "label": "useExecutionContext",
-        "description": ["\nSet and clean up application level execution context"],
+        "description": [
+          "\nSet and clean up application level execution context"
+        ],
         "signature": [
           "(executionContext: ",
           {
@@ -3436,7 +3496,9 @@
         "description": [
           "\nReturns the current global UI-settings value.\n\nUsage:\n\n```js\nconst customBranding = useGlobalUiSetting('customBranding:pageTitle');\n```"
         ],
-        "signature": ["<T>(key: string, defaultValue?: T | undefined) => T"],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => T"
+        ],
         "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3448,7 +3510,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3461,7 +3525,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3480,7 +3546,9 @@
         "description": [
           "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [customBranding, setCustomBranding] = useGlobalUiSetting$('customBranding:pageTitle');\n```"
         ],
-        "signature": ["<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
+        ],
         "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3492,7 +3560,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3505,7 +3575,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3557,7 +3629,9 @@
         "description": [
           "\nReturns the current UI-settings value.\n\nUsage:\n\n```js\nconst darkMode = useUiSetting('theme:darkMode');\n```"
         ],
-        "signature": ["<T>(key: string, defaultValue?: T | undefined) => T"],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => T"
+        ],
         "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3569,7 +3643,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3582,7 +3658,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3601,7 +3679,9 @@
         "description": [
           "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [darkMode, setDarkMode] = useUiSetting$('theme:darkMode');\n```"
         ],
-        "signature": ["<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"],
+        "signature": [
+          "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
+        ],
         "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3613,7 +3693,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3626,7 +3708,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3665,7 +3749,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["React.ComponentType<Props>"],
+            "signature": [
+              "React.ComponentType<Props>"
+            ],
             "path": "src/plugins/kibana_react/public/context/context.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3706,7 +3792,9 @@
             "tags": [],
             "label": "node",
             "description": [],
-            "signature": ["React.ReactNode"],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "src/plugins/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3791,7 +3879,9 @@
             "tags": [],
             "label": "Provider",
             "description": [],
-            "signature": ["React.FunctionComponent<{ services?: T | undefined; }>"],
+            "signature": [
+              "React.FunctionComponent<{ services?: T | undefined; }>"
+            ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3804,7 +3894,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P & { children?: React.ReactNode; }"],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3816,7 +3908,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3853,7 +3947,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3891,7 +3987,9 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": ["Services"],
+            "signature": [
+              "Services"
+            ],
             "path": "src/plugins/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4046,7 +4144,9 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": ["React.ReactNode"],
+                "signature": [
+                  "React.ReactNode"
+                ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4113,7 +4213,9 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": ["React.ReactNode"],
+                "signature": [
+                  "React.ReactNode"
+                ],
                 "path": "src/plugins/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4188,8 +4290,12 @@
             "type": "string",
             "tags": [],
             "label": "logo",
-            "description": ["\nOptionally replace the auto-generated logo"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptionally replace the auto-generated logo"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4200,7 +4306,9 @@
             "type": "string",
             "tags": [],
             "label": "docsLink",
-            "description": ["\nRequired to set the docs link for the whole solution"],
+            "description": [
+              "\nRequired to set the docs link for the whole solution"
+            ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4211,8 +4319,12 @@
             "type": "string",
             "tags": [],
             "label": "pageTitle",
-            "description": ["\nOptionally replace the auto-generated page title (h1)"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptionally replace the auto-generated page title (h1)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4290,7 +4402,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"],
+            "signature": [
+              "\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4302,7 +4416,10 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4314,7 +4431,9 @@
             "tags": [],
             "label": "toastLifeTimeMs",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4326,7 +4445,9 @@
             "tags": [],
             "label": "onClose",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4338,7 +4459,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.ToMountPointOptions",
         "type": "Interface",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ToMountPointOptions",
         "description": [],
         "path": "src/plugins/kibana_react/public/util/index.tsx",
@@ -4422,7 +4545,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4485,7 +4610,11 @@
             "tags": [],
             "label": "onEditor",
             "description": [],
-            "signature": ["((editor: ", "editor", ".IStandaloneCodeEditor) => void) | undefined"],
+            "signature": [
+              "((editor: ",
+              "editor",
+              ".IStandaloneCodeEditor) => void) | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -4497,7 +4626,10 @@
                 "tags": [],
                 "label": "editor",
                 "description": [],
-                "signature": ["editor", ".IStandaloneCodeEditor"],
+                "signature": [
+                  "editor",
+                  ".IStandaloneCodeEditor"
+                ],
                 "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4513,7 +4645,9 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4572,7 +4706,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4584,7 +4720,9 @@
             "tags": [],
             "label": "documentation",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4596,7 +4734,10 @@
             "tags": [],
             "label": "kind",
             "description": [],
-            "signature": ["languages", ".CompletionItemKind | undefined"],
+            "signature": [
+              "languages",
+              ".CompletionItemKind | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4608,7 +4749,9 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4785,6 +4928,14 @@
             "section": "def-common.PluginsServiceStart",
             "text": "PluginsServiceStart"
           },
+          " | undefined; security?: ",
+          {
+            "pluginId": "@kbn/core-security-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreSecurityBrowserPluginApi",
+            "section": "def-common.SecurityServiceStart",
+            "text": "SecurityServiceStart"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
@@ -4796,7 +4947,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaThemeProviderProps",
         "type": "Type",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "KibanaThemeProviderProps",
         "description": [],
         "signature": [
@@ -4882,7 +5035,9 @@
         "tags": [],
         "label": "Value",
         "description": [],
-        "signature": ["[string | number, string | number]"],
+        "signature": [
+          "[string | number, string | number]"
+        ],
         "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -4940,7 +5095,9 @@
         "type": "Function",
         "tags": [],
         "label": "createGlobalStyle",
-        "description": ["/** see https://styled-components.com/docs/api#createglobalstyle */"],
+        "description": [
+          "/** see https://styled-components.com/docs/api#createglobalstyle */"
+        ],
         "signature": [
           "<P extends object = {}>(first: TemplateStringsArray | ",
           "CSSObject",
@@ -5012,7 +5169,12 @@
             "tags": [],
             "label": "interpolations",
             "description": [],
-            "signature": ["Interpolation", "<", "ThemedStyledProps", "<P, T>>[]"],
+            "signature": [
+              "Interpolation",
+              "<",
+              "ThemedStyledProps",
+              "<P, T>>[]"
+            ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5026,7 +5188,9 @@
         "type": "Function",
         "tags": [],
         "label": "css",
-        "description": ["/** see https://styled-components.com/docs/api#css-prop */"],
+        "description": [
+          "/** see https://styled-components.com/docs/api#css-prop */"
+        ],
         "signature": [
           "BaseThemedCssFunction",
           "<",
@@ -5050,7 +5214,9 @@
         "type": "Function",
         "tags": [],
         "label": "euiStyled",
-        "description": ["/** see https://styled-components.com/docs/api#styled */"],
+        "description": [
+          "/** see https://styled-components.com/docs/api#styled */"
+        ],
         "signature": [
           "ThemedBaseStyledInterface",
           "<",
@@ -5074,7 +5240,9 @@
         "type": "Function",
         "tags": [],
         "label": "keyframes",
-        "description": ["/** see https://styled-components.com/docs/api#keyframes */"],
+        "description": [
+          "/** see https://styled-components.com/docs/api#keyframes */"
+        ],
         "signature": [
           "(strings: TemplateStringsArray | ",
           "CSSKeyframes",
@@ -5095,7 +5263,10 @@
             "tags": [],
             "label": "strings",
             "description": [],
-            "signature": ["TemplateStringsArray | ", "CSSKeyframes"],
+            "signature": [
+              "TemplateStringsArray | ",
+              "CSSKeyframes"
+            ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5107,7 +5278,10 @@
             "tags": [],
             "label": "interpolations",
             "description": [],
-            "signature": ["SimpleInterpolation", "[]"],
+            "signature": [
+              "SimpleInterpolation",
+              "[]"
+            ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5121,7 +5295,9 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaStyledComponentsThemeProvider",
-        "description": ["\nA `styled-components` `ThemeProvider` that incorporates EUI dark mode."],
+        "description": [
+          "\nA `styled-components` `ThemeProvider` that incorporates EUI dark mode."
+        ],
         "signature": [
           "<OuterTheme extends ",
           "DefaultTheme",
@@ -5176,7 +5352,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-common.KibanaStyledComponentsThemeProviderDecorator",
         "type": "Function",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "KibanaStyledComponentsThemeProviderDecorator",
         "description": [
           "\nStorybook decorator using the EUI theme provider. Uses the value from\n`globals` provided by the Storybook theme switcher.\n"
@@ -5256,7 +5434,9 @@
         "type": "Function",
         "tags": [],
         "label": "withTheme",
-        "description": ["/** see https://styled-components.com/docs/api#withtheme */"],
+        "description": [
+          "/** see https://styled-components.com/docs/api#withtheme */"
+        ],
         "signature": [
           "<C extends React.ComponentType<any>>(component: React.ComponentProps<C> extends { theme?: ",
           {
@@ -5288,7 +5468,9 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": ["React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"],
+            "signature": [
+              "React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"
+            ],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5317,7 +5499,9 @@
             "type": "Object",
             "tags": [],
             "label": "eui",
-            "description": ["EUI theme vars that automaticall adjust to light and dark mode."],
+            "description": [
+              "EUI theme vars that automaticall adjust to light and dark mode."
+            ],
             "signature": [
               "{ euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; }"
             ],
@@ -5331,7 +5515,9 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": ["True if the theme is in \"dark\" mode, false otherwise."],
+            "description": [
+              "True if the theme is in \"dark\" mode, false otherwise."
+            ],
             "path": "packages/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false

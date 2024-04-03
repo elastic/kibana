@@ -37,7 +37,9 @@
             "type": "Function",
             "tags": [],
             "label": "isSavedObjectsClientError",
-            "description": ["\nDetermines if an error is a saved objects client error"],
+            "description": [
+              "\nDetermines if an error is a saved objects client error"
+            ],
             "signature": [
               "(error: any) => error is ",
               {
@@ -58,15 +60,21 @@
                 "type": "Any",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to check"],
-                "signature": ["any"],
+                "description": [
+                  "the error to check"
+                ],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a saved objects client error"]
+            "returnComment": [
+              "boolean - true if error is a saved objects client error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -74,7 +82,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateBadRequestError",
-            "description": ["\nDecorates a bad request error (400) by adding a reason"],
+            "description": [
+              "\nDecorates a bad request error (400) by adding a reason"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -95,8 +105,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -108,15 +122,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the bad request (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the bad request (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -147,15 +167,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the bad request (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the bad request (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -186,15 +212,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["the unsupported saved object type"],
-                "signature": ["string"],
+                "description": [
+                  "the unsupported saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -202,7 +234,9 @@
             "type": "Function",
             "tags": [],
             "label": "isBadRequestError",
-            "description": ["\nDetermines if an error is a bad request error (400)"],
+            "description": [
+              "\nDetermines if an error is a bad request error (400)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -224,7 +258,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -241,7 +277,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a bad request error"]
+            "returnComment": [
+              "boolean - true if error is a bad request error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -272,15 +310,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "versionInput",
-                "description": ["the version string (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the version string (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -312,7 +356,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -329,7 +375,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is an invalid version error"]
+            "returnComment": [
+              "boolean - true if error is an invalid version error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -337,7 +385,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateNotAuthorizedError",
-            "description": ["\nDecorates an error as an not authorized error (401)"],
+            "description": [
+              "\nDecorates an error as an not authorized error (401)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -358,8 +408,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -371,15 +425,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the not authorized error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the not authorized error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -387,7 +447,9 @@
             "type": "Function",
             "tags": [],
             "label": "isNotAuthorizedError",
-            "description": ["\nDetermines if an error is a not authorized error (401)"],
+            "description": [
+              "\nDetermines if an error is a not authorized error (401)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -409,7 +471,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -426,7 +490,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a not authorized error"]
+            "returnComment": [
+              "boolean - true if error is a not authorized error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -434,7 +500,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateForbiddenError",
-            "description": ["\nDecorates an error as a forbidden error (403)"],
+            "description": [
+              "\nDecorates an error as a forbidden error (403)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -455,8 +523,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -468,15 +540,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the forbidden error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the forbidden error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -484,7 +562,9 @@
             "type": "Function",
             "tags": [],
             "label": "isForbiddenError",
-            "description": ["\nDetermines if an error is a forbidden error (403)"],
+            "description": [
+              "\nDetermines if an error is a forbidden error (403)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -506,7 +586,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -523,7 +605,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a forbidden error"]
+            "returnComment": [
+              "boolean - true if error is a forbidden error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -531,7 +615,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateRequestEntityTooLargeError",
-            "description": ["\nDecorates a request entity too large error (413)"],
+            "description": [
+              "\nDecorates a request entity too large error (413)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -552,8 +638,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -565,15 +655,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the request entity too large error"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the request entity too large error"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -581,7 +677,9 @@
             "type": "Function",
             "tags": [],
             "label": "isRequestEntityTooLargeError",
-            "description": ["\nDetermines if an error is a request entity too large error(413)"],
+            "description": [
+              "\nDetermines if an error is a request entity too large error(413)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -603,7 +701,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -620,7 +720,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a request entity too large error"]
+            "returnComment": [
+              "boolean - true if error is a request entity too large error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -628,7 +730,9 @@
             "type": "Function",
             "tags": [],
             "label": "createGenericNotFoundError",
-            "description": ["\nCreates a generic not found error (404)"],
+            "description": [
+              "\nCreates a generic not found error (404)"
+            ],
             "signature": [
               "(type?: string | null, id?: string | null) => ",
               {
@@ -649,8 +753,12 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
-                "description": ["the saved object type or null (default is null)"],
-                "signature": ["string | null"],
+                "description": [
+                  "the saved object type or null (default is null)"
+                ],
+                "signature": [
+                  "string | null"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -662,15 +770,21 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "id",
-                "description": ["the saved object id or null (default is null)"],
-                "signature": ["string | null"],
+                "description": [
+                  "the saved object id or null (default is null)"
+                ],
+                "signature": [
+                  "string | null"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -678,7 +792,9 @@
             "type": "Function",
             "tags": [],
             "label": "createIndexAliasNotFoundError",
-            "description": ["\nCreates an alias not found error (flavor of general error 500)"],
+            "description": [
+              "\nCreates an alias not found error (flavor of general error 500)"
+            ],
             "signature": [
               "(alias: string) => ",
               {
@@ -699,15 +815,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "alias",
-                "description": ["the unfound saved object alias"],
-                "signature": ["string"],
+                "description": [
+                  "the unfound saved object alias"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -738,8 +860,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -751,15 +877,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "alias",
-                "description": ["the unfound index alias"],
-                "signature": ["string"],
+                "description": [
+                  "the unfound index alias"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -767,7 +899,9 @@
             "type": "Function",
             "tags": [],
             "label": "isNotFoundError",
-            "description": ["\nDetermines if an error is a not found error (404)"],
+            "description": [
+              "\nDetermines if an error is a not found error (404)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -789,7 +923,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -806,7 +942,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a not found error"]
+            "returnComment": [
+              "boolean - true if error is a not found error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -814,7 +952,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateConflictError",
-            "description": ["\nDecorates a conflict error (409)"],
+            "description": [
+              "\nDecorates a conflict error (409)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -835,8 +975,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -848,15 +992,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the conflict error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the conflict error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -864,7 +1014,9 @@
             "type": "Function",
             "tags": [],
             "label": "createConflictError",
-            "description": ["\nCreates a conflict error (409)"],
+            "description": [
+              "\nCreates a conflict error (409)"
+            ],
             "signature": [
               "(type: string, id: string, reason?: string | undefined) => ",
               {
@@ -885,8 +1037,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["the saved object type"],
-                "signature": ["string"],
+                "description": [
+                  "the saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -898,8 +1054,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["the saved object id"],
-                "signature": ["string"],
+                "description": [
+                  "the saved object id"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -911,15 +1071,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the conflict error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the conflict error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -927,7 +1093,9 @@
             "type": "Function",
             "tags": [],
             "label": "isConflictError",
-            "description": ["\nDetermines if an error is a conflict error (409)"],
+            "description": [
+              "\nDetermines if an error is a conflict error (409)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -949,7 +1117,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -966,7 +1136,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a conflict error"]
+            "returnComment": [
+              "boolean - true if error is a conflict error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -974,7 +1146,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateTooManyRequestsError",
-            "description": ["\nDecorates a too many requests error (429)"],
+            "description": [
+              "\nDecorates a too many requests error (429)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -995,8 +1169,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1008,15 +1186,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the too many requests error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the too many requests error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1024,7 +1208,9 @@
             "type": "Function",
             "tags": [],
             "label": "createTooManyRequestsError",
-            "description": ["\nCreates a too many requests error (429)"],
+            "description": [
+              "\nCreates a too many requests error (429)"
+            ],
             "signature": [
               "(type: string, id: string) => ",
               {
@@ -1045,8 +1231,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["the saved object type"],
-                "signature": ["string"],
+                "description": [
+                  "the saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1058,15 +1248,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["the saved object id"],
-                "signature": ["string"],
+                "description": [
+                  "the saved object id"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1074,7 +1270,9 @@
             "type": "Function",
             "tags": [],
             "label": "isTooManyRequestsError",
-            "description": ["\nDetermines if an error is a too many requests error (429)"],
+            "description": [
+              "\nDetermines if an error is a too many requests error (429)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -1096,7 +1294,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -1113,7 +1313,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a too many requests error"]
+            "returnComment": [
+              "boolean - true if error is a too many requests error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1144,8 +1346,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1157,15 +1363,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the cannot execute error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the cannot execute error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1197,7 +1409,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -1214,7 +1428,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a cannot execute error"]
+            "returnComment": [
+              "boolean - true if error is a cannot execute error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1222,7 +1438,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateEsUnavailableError",
-            "description": ["\nDecorates an elastic search unavailable error (503)"],
+            "description": [
+              "\nDecorates an elastic search unavailable error (503)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -1243,8 +1461,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1256,15 +1478,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the elastic search unavailable error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the elastic search unavailable error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1296,7 +1524,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -1313,7 +1543,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is an elastic search unavailable error"]
+            "returnComment": [
+              "boolean - true if error is an elastic search unavailable error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1321,7 +1553,9 @@
             "type": "Function",
             "tags": [],
             "label": "decorateGeneralError",
-            "description": ["\nDecorates a general error (500)"],
+            "description": [
+              "\nDecorates a general error (500)"
+            ],
             "signature": [
               "(error: Error, reason?: string | undefined) => ",
               {
@@ -1342,8 +1576,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["the error to decorate"],
-                "signature": ["Error"],
+                "description": [
+                  "the error to decorate"
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1355,15 +1593,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "reason",
-                "description": ["the reason for the error (optional)"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the reason for the error (optional)"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1371,7 +1615,9 @@
             "type": "Function",
             "tags": [],
             "label": "isGeneralError",
-            "description": ["\nDetermines if an error is a general error (500)"],
+            "description": [
+              "\nDetermines if an error is a general error (500)"
+            ],
             "signature": [
               "(error: Error | ",
               {
@@ -1393,7 +1639,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
-                "description": ["the error or decorated error"],
+                "description": [
+                  "the error or decorated error"
+                ],
                 "signature": [
                   "Error | ",
                   {
@@ -1410,7 +1658,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean - true if error is a general error"]
+            "returnComment": [
+              "boolean - true if error is a general error"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -1418,7 +1668,9 @@
             "type": "Function",
             "tags": [],
             "label": "createGenericNotFoundEsUnavailableError",
-            "description": ["\nCreates a generic elastic search not present error"],
+            "description": [
+              "\nCreates a generic elastic search not present error"
+            ],
             "signature": [
               "(type?: string | null, id?: string | null) => ",
               {
@@ -1439,8 +1691,12 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
-                "description": ["the saved object type or null, default null"],
-                "signature": ["string | null"],
+                "description": [
+                  "the saved object type or null, default null"
+                ],
+                "signature": [
+                  "string | null"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1452,15 +1708,21 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "id",
-                "description": ["the saved object id or null, default null"],
-                "signature": ["string | null"],
+                "description": [
+                  "the saved object id or null, default null"
+                ],
+                "signature": [
+                  "string | null"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["the decorated error"]
+            "returnComment": [
+              "the decorated error"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1490,7 +1752,9 @@
             "description": [
               "\nAn array of authorized spaces for the associated type/action\nin the associated record/map."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1501,8 +1765,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isGloballyAuthorized",
-            "description": ["\nIs the associated type/action globally authorized?"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nIs the associated type/action globally authorized?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1540,7 +1808,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["\nThe objects to authorize"],
+            "description": [
+              "\nThe objects to authorize"
+            ],
             "signature": [
               "(",
               {
@@ -1597,7 +1867,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
+            "description": [
+              "The objects to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1621,7 +1893,10 @@
             "description": [
               "\noptions for the operation\n- purpose: 'collectMultiNamespaceReferences' or 'updateObjectsSpaces'\ndefault purpose is 'collectMultiNamespaceReferences'."
             ],
-            "signature": ["MultiNamespaceReferencesOptions", " | undefined"],
+            "signature": [
+              "MultiNamespaceReferencesOptions",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1659,7 +1934,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
+            "description": [
+              "The objects to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -1707,7 +1984,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
+            "description": [
+              "The objects to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -1764,7 +2043,9 @@
             "description": [
               "\nThe namespaces to include when retrieving this object. Populated by options\npassed to the repository's update or bulkUpdate method."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1778,7 +2059,9 @@
             "description": [
               "\nWhether or not an error occurred when getting this object. Populated by\nthe result of a query. Default is false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1816,7 +2099,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
+            "description": [
+              "The objects to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -1864,7 +2149,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
+            "description": [
+              "The objects to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -1912,8 +2199,13 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
-            "signature": ["AuthorizeObject", "[]"],
+            "description": [
+              "The objects to authorize"
+            ],
+            "signature": [
+              "AuthorizeObject",
+              "[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1960,7 +2252,9 @@
             "description": [
               "\nInitial spaces to include the created object. Populated by options\npassed to the repository's bulkCreate method."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1998,7 +2292,9 @@
             "type": "Object",
             "tags": [],
             "label": "object",
-            "description": ["The object to authorize"],
+            "description": [
+              "The object to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2045,8 +2341,12 @@
             "type": "Object",
             "tags": [],
             "label": "object",
-            "description": ["The object to authorize"],
-            "signature": ["AuthorizeObject"],
+            "description": [
+              "The object to authorize"
+            ],
+            "signature": [
+              "AuthorizeObject"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2073,8 +2373,12 @@
             "type": "Object",
             "tags": [],
             "label": "namespaces",
-            "description": ["The namespaces in which to find objects"],
-            "signature": ["Set<string>"],
+            "description": [
+              "The namespaces in which to find objects"
+            ],
+            "signature": [
+              "Set<string>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2085,8 +2389,12 @@
             "type": "Object",
             "tags": [],
             "label": "types",
-            "description": ["The types of objects to find"],
-            "signature": ["Set<string>"],
+            "description": [
+              "The types of objects to find"
+            ],
+            "signature": [
+              "Set<string>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2124,7 +2432,9 @@
             "type": "Object",
             "tags": [],
             "label": "object",
-            "description": ["The object to authorize"],
+            "description": [
+              "The object to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2144,8 +2454,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "objectNotFound",
-            "description": ["Whether or not the object was not found, defaults to false"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Whether or not the object was not found, defaults to false"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2186,7 +2500,9 @@
             "description": [
               "\nSpaces where the object is known to exist. Usually populated\nby document data from the result of an es query."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2233,7 +2549,9 @@
             "description": [
               "\nThe namespace in which to update this object. Populated by options\npassed to the repository's update or bulkUpdate method."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2271,7 +2589,9 @@
             "type": "Object",
             "tags": [],
             "label": "object",
-            "description": ["The object to authorize"],
+            "description": [
+              "The object to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2318,8 +2638,12 @@
             "type": "Array",
             "tags": [],
             "label": "spacesToAdd",
-            "description": ["The spaces in which to add the objects"],
-            "signature": ["string[]"],
+            "description": [
+              "The spaces in which to add the objects"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2330,8 +2654,12 @@
             "type": "Array",
             "tags": [],
             "label": "spacesToRemove",
-            "description": ["The spaces from which to remove the objects"],
-            "signature": ["string[]"],
+            "description": [
+              "The spaces from which to remove the objects"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2342,7 +2670,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["The objects to authorize"],
+            "description": [
+              "The objects to authorize"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2366,7 +2696,9 @@
         "type": "Interface",
         "tags": [],
         "label": "BulkResolveError",
-        "description": ["\nError result for the internal bulk resolve method."],
+        "description": [
+          "\nError result for the internal bulk resolve method."
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2377,7 +2709,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["The type of the saved object"],
+            "description": [
+              "The type of the saved object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2388,7 +2722,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["The id of the saved object"],
+            "description": [
+              "The id of the saved object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2399,7 +2735,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": ["The decorated resolve error"],
+            "description": [
+              "The decorated resolve error"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -2448,7 +2786,9 @@
             "description": [
               "\nThe overall status of the authorization check as a string:\n'fully_authorized' | 'partially_authorized' | 'unauthorized'"
             ],
-            "signature": ["\"unauthorized\" | \"fully_authorized\" | \"partially_authorized\""],
+            "signature": [
+              "\"unauthorized\" | \"fully_authorized\" | \"partially_authorized\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2511,8 +2851,12 @@
             "type": "string",
             "tags": [],
             "label": "[code]",
-            "description": ["the 'SavedObjectsClientErrorCode' symbol"],
-            "signature": ["string | undefined"],
+            "description": [
+              "the 'SavedObjectsClientErrorCode' symbol"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2539,7 +2883,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["The Saved Object type"],
+            "description": [
+              "The Saved Object type"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2550,7 +2896,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["The Saved Object ID"],
+            "description": [
+              "The Saved Object ID"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2564,7 +2912,9 @@
             "description": [
               "Namespace for use in index migration...\nIf the object is being decrypted during index migration, the object was previously\nencrypted with its namespace in the descriptor portion of the AAD; on the other hand,\nif the object is being decrypted during object migration, the object was never encrypted\nwith its namespace in the descriptor portion of the AAD."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2591,8 +2941,12 @@
             "type": "Object",
             "tags": [],
             "label": "previouslyCheckedNamespaces",
-            "description": ["The namespaces previously checked by the AuthorizeFind method"],
-            "signature": ["Set<string>"],
+            "description": [
+              "The namespaces previously checked by the AuthorizeFind method"
+            ],
+            "signature": [
+              "Set<string>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2642,8 +2996,12 @@
             "type": "Function",
             "tags": [],
             "label": "isEncryptableType",
-            "description": ["\nReturns true if a type has been registered as encryptable."],
-            "signature": ["(type: string) => boolean"],
+            "description": [
+              "\nReturns true if a type has been registered as encryptable."
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2654,15 +3012,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["- the string name of the object type"],
-                "signature": ["string"],
+                "description": [
+                  "- the string name of the object type"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["boolean, true if type is encryptable"]
+            "returnComment": [
+              "boolean, true if type is encryptable"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -2694,8 +3058,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "response",
-                "description": ["- any object R that extends SavedObject with attributes T"],
-                "signature": ["R"],
+                "description": [
+                  "- any object R that extends SavedObject with attributes T"
+                ],
+                "signature": [
+                  "R"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2710,14 +3078,18 @@
                 "description": [
                   "- optional, original attributes T from when the object was created (NOT encrypted).\nThese are used to avoid decryption execution cost if they are supplied."
                 ],
-                "signature": ["T | undefined"],
+                "signature": [
+                  "T | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
-            "returnComment": ["R with decrypted or stripped attributes"]
+            "returnComment": [
+              "R with decrypted or stripped attributes"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -2775,14 +3147,18 @@
                 "description": [
                   "- T, attributes of the specified object, some of which to be encrypted."
                 ],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/encryption.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["T, encrypted attributes"]
+            "returnComment": [
+              "T, encrypted attributes"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -2793,7 +3169,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ISavedObjectsExporter",
-        "description": ["\nUtility class used to export savedObjects.\n"],
+        "description": [
+          "\nUtility class used to export savedObjects.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2802,7 +3180,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.ISavedObjectsExporter.exportByTypes",
             "type": "Function",
-            "tags": ["throws"],
+            "tags": [
+              "throws"
+            ],
             "label": "exportByTypes",
             "description": [
               "\nGenerates an export stream for given types.\n\nSee the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.\n"
@@ -2852,7 +3232,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.ISavedObjectsExporter.exportByObjects",
             "type": "Function",
-            "tags": ["throws"],
+            "tags": [
+              "throws"
+            ],
             "label": "exportByObjects",
             "description": [
               "\nGenerates an export stream for given object references.\n\nSee the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.\n"
@@ -2907,7 +3289,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ISavedObjectsImporter",
-        "description": ["\nUtility class used to import savedObjects.\n"],
+        "description": [
+          "\nUtility class used to import savedObjects.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2916,7 +3300,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.ISavedObjectsImporter.import",
             "type": "Function",
-            "tags": ["throws"],
+            "tags": [
+              "throws"
+            ],
             "label": "import",
             "description": [
               "\nImport saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more\ndetailed information.\n"
@@ -2972,7 +3358,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.ISavedObjectsImporter.resolveImportErrors",
             "type": "Function",
-            "tags": ["throws"],
+            "tags": [
+              "throws"
+            ],
             "label": "resolveImportErrors",
             "description": [
               "\nResolve and return saved object import errors.\nSee the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.\n"
@@ -3046,7 +3434,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeCreate",
-            "description": ["\nPerforms authorization for the CREATE security action"],
+            "description": [
+              "\nPerforms authorization for the CREATE security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3076,7 +3466,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and object to authorize"],
+                "description": [
+                  "the namespace and object to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3102,7 +3494,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeBulkCreate",
-            "description": ["\nPerforms authorization for the BULK_CREATE security action"],
+            "description": [
+              "\nPerforms authorization for the BULK_CREATE security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3132,7 +3526,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and objects to authorize"],
+                "description": [
+                  "the namespace and objects to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3158,7 +3554,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeUpdate",
-            "description": ["\nPerforms authorization for the UPDATE security action"],
+            "description": [
+              "\nPerforms authorization for the UPDATE security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3188,7 +3586,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and object to authorize"],
+                "description": [
+                  "the namespace and object to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3214,7 +3614,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeBulkUpdate",
-            "description": ["\nPerforms authorization for the BULK_UPDATE security action"],
+            "description": [
+              "\nPerforms authorization for the BULK_UPDATE security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3244,7 +3646,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and objects to authorize"],
+                "description": [
+                  "the namespace and objects to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3270,7 +3674,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeDelete",
-            "description": ["\nPerforms authorization for the DELETE security action"],
+            "description": [
+              "\nPerforms authorization for the DELETE security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3300,7 +3706,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and object to authorize"],
+                "description": [
+                  "the namespace and object to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3326,7 +3734,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeBulkDelete",
-            "description": ["\nPerforms authorization for the BULK_DELETE security action"],
+            "description": [
+              "\nPerforms authorization for the BULK_DELETE security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3356,7 +3766,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and objects to authorize"],
+                "description": [
+                  "the namespace and objects to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3382,7 +3794,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeGet",
-            "description": ["\nPerforms authorization for the GET security action"],
+            "description": [
+              "\nPerforms authorization for the GET security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3440,7 +3854,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeBulkGet",
-            "description": ["\nPerforms authorization for the BULK_GET security action"],
+            "description": [
+              "\nPerforms authorization for the BULK_GET security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3470,7 +3886,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and objects to authorize"],
+                "description": [
+                  "the namespace and objects to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3496,7 +3914,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeCheckConflicts",
-            "description": ["\nPerforms authorization for the CHECK_CONFLICTS security action"],
+            "description": [
+              "\nPerforms authorization for the CHECK_CONFLICTS security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3526,7 +3946,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and objects to authorize"],
+                "description": [
+                  "the namespace and objects to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3584,7 +4006,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespace and object to authorize"],
+                "description": [
+                  "the namespace and object to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3610,7 +4034,9 @@
             "type": "Function",
             "tags": [],
             "label": "authorizeOpenPointInTime",
-            "description": ["\nPerforms authorization for the OPEN_POINT_IN_TIME security action"],
+            "description": [
+              "\nPerforms authorization for the OPEN_POINT_IN_TIME security action"
+            ],
             "signature": [
               "<A extends string>(params: ",
               {
@@ -3640,7 +4066,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["the namespaces and types to authorize"],
+                "description": [
+                  "the namespaces and types to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3666,8 +4094,12 @@
             "type": "Function",
             "tags": [],
             "label": "auditClosePointInTime",
-            "description": ["\nPerforms audit logging for the CLOSE_POINT_IN_TIME security action"],
-            "signature": ["() => void"],
+            "description": [
+              "\nPerforms audit logging for the CLOSE_POINT_IN_TIME security action"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3730,7 +4162,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["SavedObjectReferenceWithContext[] - array of collected references"]
+            "returnComment": [
+              "SavedObjectReferenceWithContext[] - array of collected references"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -3778,7 +4212,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["- the namespace and objects to authorize"],
+                "description": [
+                  "- the namespace and objects to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3897,7 +4333,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["- namespaces and types to authorize"],
+                "description": [
+                  "- namespaces and types to authorize"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -3973,7 +4411,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["- the updated type map used for redaction"]
+            "returnComment": [
+              "- the updated type map used for redaction"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -4013,7 +4453,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["- the saved object and an authorization map"],
+                "description": [
+                  "- the saved object and an authorization map"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -4030,7 +4472,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["SavedObject - saved object with filtered spaces"]
+            "returnComment": [
+              "SavedObject - saved object with filtered spaces"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -4062,7 +4506,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "aliases",
-                "description": ["- array of legacy url alias targets"],
+                "description": [
+                  "- array of legacy url alias targets"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
@@ -4111,8 +4557,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "spaceId",
-                "description": ["- the id of the space being deleted"],
-                "signature": ["string"],
+                "description": [
+                  "- the id of the space being deleted"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4124,7 +4574,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "objects",
-                "description": ["- the objects to audit"],
+                "description": [
+                  "- the objects to audit"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
@@ -4197,7 +4649,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "doc",
-                "description": ["- The raw ES document to be tested"],
+                "description": [
+                  "- The raw ES document to be tested"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -4218,7 +4672,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- Options for parsing the raw document."],
+                "description": [
+                  "- Options for parsing the raw document."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -4283,7 +4739,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "doc",
-                "description": ["- The raw ES document to be converted to saved object format."],
+                "description": [
+                  "- The raw ES document to be converted to saved object format."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -4304,7 +4762,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- Options for parsing the raw document."],
+                "description": [
+                  "- Options for parsing the raw document."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -4360,7 +4820,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "savedObj",
-                "description": ["- The saved object to be converted to raw ES format."],
+                "description": [
+                  "- The saved object to be converted to raw ES format."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -4388,7 +4850,9 @@
             "description": [
               "\nGiven a saved object type and id, generates the compound id that is stored in the raw document.\n"
             ],
-            "signature": ["(namespace: string | undefined, type: string, id: string) => string"],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4399,8 +4863,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": ["- The namespace of the saved object"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "- The namespace of the saved object"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4412,8 +4880,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["- The saved object type"],
-                "signature": ["string"],
+                "description": [
+                  "- The saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4425,8 +4897,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["- The id of the saved object"],
-                "signature": ["string"],
+                "description": [
+                  "- The id of the saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4444,7 +4920,9 @@
             "description": [
               "\nGiven a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.\n"
             ],
-            "signature": ["(namespace: string | undefined, type: string, id: string) => string"],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4455,8 +4933,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": ["- The namespace of the saved object"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "- The namespace of the saved object"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4468,8 +4950,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["- The saved object type"],
-                "signature": ["string"],
+                "description": [
+                  "- The saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4481,8 +4967,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["- The id of the saved object"],
-                "signature": ["string"],
+                "description": [
+                  "- The id of the saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4516,7 +5006,9 @@
             "description": [
               "\nRetrieves the active namespace ID. This is *not* the same as a namespace string. See also: `namespaceIdToString` and\n`namespaceStringToId`.\n\nThis takes the saved objects repository's namespace option as a parameter, and doubles as a validation function; if the namespace\noption has already been set some other way, this will throw an error."
             ],
-            "signature": ["(namespace: string | undefined) => string | undefined"],
+            "signature": [
+              "(namespace: string | undefined) => string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4528,7 +5020,9 @@
                 "tags": [],
                 "label": "namespace",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4546,7 +5040,9 @@
             "description": [
               "\nGiven a list of namespace strings, returns a subset that the user is authorized to search in.\nIf a wildcard '*' is used, it is expanded to an explicit list of namespace strings."
             ],
-            "signature": ["(namespaces: string[] | undefined) => Promise<string[]>"],
+            "signature": [
+              "(namespaces: string[] | undefined) => Promise<string[]>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4558,7 +5054,9 @@
                 "tags": [],
                 "label": "namespaces",
                 "description": [],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/spaces.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4614,7 +5112,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4736,7 +5236,9 @@
             "description": [
               "\nReturns whether the type is namespace-agnostic (global);\nresolves to `false` if the type is not registered"
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4748,7 +5250,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4766,7 +5270,9 @@
             "description": [
               "\nReturns whether the type is single-namespace (isolated);\nresolves to `true` if the type is not registered"
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4778,7 +5284,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4796,7 +5304,9 @@
             "description": [
               "\nReturns whether the type is multi-namespace (shareable *or* isolated);\nresolves to `false` if the type is not registered"
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4808,7 +5318,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4826,7 +5338,9 @@
             "description": [
               "\nReturns whether the type is multi-namespace (shareable);\nresolves to `false` if the type is not registered"
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4838,7 +5352,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4856,7 +5372,9 @@
             "description": [
               "\nReturns the `hidden` property for given type, or `false` if\nthe type is not registered."
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4868,7 +5386,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4886,7 +5406,9 @@
             "description": [
               "\nReturns the `hiddenFromHttpApis` property for a given type, or `false` if\nthe type is not registered"
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4898,7 +5420,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4916,7 +5440,9 @@
             "description": [
               "\nReturns the `indexPattern` property for given type, or `undefined` if\nthe type is not registered."
             ],
-            "signature": ["(type: string) => string | undefined"],
+            "signature": [
+              "(type: string) => string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4928,7 +5454,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4946,7 +5474,9 @@
             "description": [
               "\nReturns the `management.importableAndExportable` property for given type, or\n`false` if the type is not registered or does not define a management section."
             ],
-            "signature": ["(type: string) => boolean"],
+            "signature": [
+              "(type: string) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4958,7 +5488,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4999,7 +5531,9 @@
             "type": "Object",
             "tags": [],
             "label": "savedObject",
-            "description": ["Relevant saved object"],
+            "description": [
+              "Relevant saved object"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -5047,7 +5581,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObject",
-        "description": ["\nDefinition of the Saved Object interface\n"],
+        "description": [
+          "\nDefinition of the Saved Object interface\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -5082,7 +5618,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+              " The type of Saved Object. Each plugin can define its own custom Saved Object types."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -5097,7 +5633,9 @@
             "description": [
               "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5108,8 +5646,12 @@
             "type": "string",
             "tags": [],
             "label": "created_at",
-            "description": ["Timestamp of the time this document had been created."],
-            "signature": ["string | undefined"],
+            "description": [
+              "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5120,8 +5662,12 @@
             "type": "string",
             "tags": [],
             "label": "updated_at",
-            "description": ["Timestamp of the last time this document had been updated."],
-            "signature": ["string | undefined"],
+            "description": [
+              "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5158,7 +5704,9 @@
             "description": [
               "The data for a Saved Object is stored as an object in the `attributes` property."
             ],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5169,7 +5717,9 @@
             "type": "Array",
             "tags": [],
             "label": "references",
-            "description": ["{@inheritdoc SavedObjectReference}"],
+            "description": [
+              "{@inheritdoc SavedObjectReference}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -5188,9 +5738,13 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObject.migrationVersion",
             "type": "Object",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrationVersion",
-            "description": ["\n{@inheritdoc SavedObjectsMigrationVersion}"],
+            "description": [
+              "\n{@inheritdoc SavedObjectsMigrationVersion}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -5404,7 +5958,9 @@
             "description": [
               "A semver value that is used when upgrading objects between Kibana versions."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5418,7 +5974,9 @@
             "description": [
               "A semver value that is used when migrating documents between Kibana versions."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5432,7 +5990,9 @@
             "description": [
               "\nSpace(s) that this saved object exists in. This attribute is not used for \"global\" saved object types which are registered with\n`namespaceType: 'agnostic'`."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5446,7 +6006,9 @@
             "description": [
               "\nThe ID of the saved object this originated from. This is set if this object's `id` was regenerated; that can happen during migration\nfrom a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import\nto ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given\nspace."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5460,7 +6022,9 @@
             "description": [
               "\nFlag indicating if a saved object is managed by Kibana (default=false)\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5472,7 +6036,9 @@
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SavedObjectAttributes",
         "type": "Interface",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectAttributes",
         "description": [
           "\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
@@ -5777,7 +6343,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectDoc",
-        "description": ["\nSaved Object base document\n"],
+        "description": [
+          "\nSaved Object base document\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -5799,7 +6367,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5833,7 +6403,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5845,7 +6417,9 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5878,7 +6452,9 @@
             "tags": [],
             "label": "coreMigrationVersion",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5890,7 +6466,9 @@
             "tags": [],
             "label": "typeMigrationVersion",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5902,7 +6480,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5914,7 +6494,9 @@
             "tags": [],
             "label": "updated_at",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5926,7 +6508,9 @@
             "tags": [],
             "label": "created_at",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5938,7 +6522,9 @@
             "tags": [],
             "label": "originId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5950,7 +6536,9 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5975,7 +6563,9 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": ["The http request initiating the export."],
+            "description": [
+              "The http request initiating the export."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -5996,8 +6586,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "includeReferencesDeep",
-            "description": ["flag to also include all related saved objects in the export stream."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "flag to also include all related saved objects in the export stream."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6011,7 +6605,9 @@
             "description": [
               "\nFlag to also include namespace information in the export stream. By default, namespace information is not included in exported objects.\nThis is only intended to be used internally during copy-to-space operations, and it is not exposed as an option for the external HTTP\nroute for exports."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6025,7 +6621,9 @@
             "description": [
               "flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6039,7 +6637,9 @@
             "description": [
               "optional namespace to override the namespace used by the savedObjectsClient."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6066,7 +6666,9 @@
             "type": "Object",
             "tags": [],
             "label": "log",
-            "description": ["\nlogger instance to be used by the migration handler"],
+            "description": [
+              "\nlogger instance to be used by the migration handler"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -6086,7 +6688,9 @@
             "type": "string",
             "tags": [],
             "label": "migrationVersion",
-            "description": ["\nThe migration version that this migration function is defined for"],
+            "description": [
+              "\nThe migration version that this migration function is defined for"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6095,12 +6699,16 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectMigrationContext.convertToMultiNamespaceTypeVersion",
             "type": "string",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "convertToMultiNamespaceTypeVersion",
             "description": [
               "\nThe version in which this object type is being converted to a multi-namespace type"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -6121,7 +6729,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isSingleNamespaceType",
-            "description": ["\nWhether this is a single-namespace type or not"],
+            "description": [
+              "\nWhether this is a single-namespace type or not"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6173,7 +6783,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectMigrationParams",
-        "description": ["\nSaved Objects migration with parameters."],
+        "description": [
+          "\nSaved Objects migration with parameters."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -6192,12 +6804,16 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectMigrationParams.deferred",
             "type": "boolean",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "deferred",
             "description": [
               "\nA flag that can defer the migration until either an object is accessed (read) or if there is another non-deferred migration with a higher version."
             ],
-            "signature": ["false | undefined"],
+            "signature": [
+              "false | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6208,7 +6824,9 @@
             "type": "Function",
             "tags": [],
             "label": "transform",
-            "description": ["{@inheritDoc SavedObjectMigrationFn}"],
+            "description": [
+              "{@inheritDoc SavedObjectMigrationFn}"
+            ],
             "signature": [
               "(doc: ",
               {
@@ -6325,7 +6943,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["{ [P in keyof DocAttrs]?: DocAttrs[P] | undefined; }"],
+            "signature": [
+              "{ [P in keyof DocAttrs]?: DocAttrs[P] | undefined; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6352,7 +6972,9 @@
             "type": "Object",
             "tags": [],
             "label": "log",
-            "description": ["\nlogger instance to be used by the migration handler"],
+            "description": [
+              "\nlogger instance to be used by the migration handler"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -6372,7 +6994,9 @@
             "type": "number",
             "tags": [],
             "label": "modelVersion",
-            "description": ["\nThe model version this migration is registered for"],
+            "description": [
+              "\nThe model version this migration is registered for"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6386,7 +7010,9 @@
             "description": [
               "\nThe namespace type of the savedObject type this migration is registered for"
             ],
-            "signature": ["\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""],
+            "signature": [
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/transformations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6455,7 +7081,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectReference",
-        "description": ["\nA reference to another saved object.\n"],
+        "description": [
+          "\nA reference to another saved object.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6502,7 +7130,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsClientProviderOptions",
-        "description": ["\nOptions to control the creation of the Saved Objects Client."],
+        "description": [
+          "\nOptions to control the creation of the Saved Objects Client."
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6513,8 +7143,12 @@
             "type": "Array",
             "tags": [],
             "label": "includedHiddenTypes",
-            "description": ["Array of hidden types to include"],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "Array of hidden types to include"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6528,7 +7162,9 @@
             "description": [
               "array of extensions to exclude (ENCRYPTION_EXTENSION_ID | SECURITY_EXTENSION_ID | SPACES_EXTENSION_ID)"
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6572,7 +7208,9 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["optional array of objects to export."],
+            "description": [
+              "optional array of objects to export."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -6626,8 +7264,12 @@
             "type": "Array",
             "tags": [],
             "label": "types",
-            "description": ["array of saved object types."],
-            "signature": ["string[]"],
+            "description": [
+              "array of saved object types."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6638,7 +7280,9 @@
             "type": "Array",
             "tags": [],
             "label": "hasReference",
-            "description": ["optional array of references to search object for."],
+            "description": [
+              "optional array of references to search object for."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -6659,8 +7303,12 @@
             "type": "string",
             "tags": [],
             "label": "search",
-            "description": ["optional query string to filter exported objects."],
-            "signature": ["string | undefined"],
+            "description": [
+              "optional query string to filter exported objects."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6685,7 +7333,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["id of the excluded object"],
+            "description": [
+              "id of the excluded object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6696,7 +7346,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["type of the excluded object"],
+            "description": [
+              "type of the excluded object"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6707,8 +7359,12 @@
             "type": "string",
             "tags": [],
             "label": "reason",
-            "description": ["optional cause of the exclusion"],
-            "signature": ["string | undefined"],
+            "description": [
+              "optional cause of the exclusion"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6722,7 +7378,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsExportResultDetails",
-        "description": ["\nStructure of the export result details entry"],
+        "description": [
+          "\nStructure of the export result details entry"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6733,7 +7391,9 @@
             "type": "number",
             "tags": [],
             "label": "exportedCount",
-            "description": ["number of successfully exported objects"],
+            "description": [
+              "number of successfully exported objects"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6744,7 +7404,9 @@
             "type": "number",
             "tags": [],
             "label": "missingRefCount",
-            "description": ["number of missing references"],
+            "description": [
+              "number of missing references"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6755,7 +7417,9 @@
             "type": "Array",
             "tags": [],
             "label": "missingReferences",
-            "description": ["missing references details"],
+            "description": [
+              "missing references details"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -6776,7 +7440,9 @@
             "type": "number",
             "tags": [],
             "label": "excludedObjectsCount",
-            "description": ["number of objects that were excluded from the export"],
+            "description": [
+              "number of objects that were excluded from the export"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6787,7 +7453,9 @@
             "type": "Array",
             "tags": [],
             "label": "excludedObjects",
-            "description": ["excluded objects details"],
+            "description": [
+              "excluded objects details"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -6935,7 +7603,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportHookResult",
-        "description": ["\nResult from a {@link SavedObjectsImportHook | import hook}\n"],
+        "description": [
+          "\nResult from a {@link SavedObjectsImportHook | import hook}\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6972,7 +7642,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsImportOptions",
-        "description": ["\nOptions to control the import operation."],
+        "description": [
+          "\nOptions to control the import operation."
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6983,8 +7655,12 @@
             "type": "Object",
             "tags": [],
             "label": "readStream",
-            "description": ["The stream of {@link SavedObject | saved objects} to import"],
-            "signature": ["Readable"],
+            "description": [
+              "The stream of {@link SavedObject | saved objects} to import"
+            ],
+            "signature": [
+              "Readable"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7011,7 +7687,9 @@
             "description": [
               "if specified, will import in given namespace, else will import as global object"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7035,8 +7713,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refresh",
-            "description": ["Refresh setting, defaults to `wait_for`"],
-            "signature": ["boolean | \"wait_for\" | undefined"],
+            "description": [
+              "Refresh setting, defaults to `wait_for`"
+            ],
+            "signature": [
+              "boolean | \"wait_for\" | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7050,7 +7732,9 @@
             "description": [
               "\nIf true, Kibana will apply various adjustments to the data that's being imported to maintain compatibility between\ndifferent Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs)."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7064,7 +7748,9 @@
             "description": [
               "\nIf true, will import as a managed object, else will import as not managed.\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7127,7 +7813,9 @@
             "tags": [],
             "label": "debug",
             "description": [],
-            "signature": ["(msg: string) => void"],
+            "signature": [
+              "(msg: string) => void"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7139,7 +7827,9 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7155,7 +7845,9 @@
             "tags": [],
             "label": "info",
             "description": [],
-            "signature": ["(msg: string) => void"],
+            "signature": [
+              "(msg: string) => void"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7167,7 +7859,9 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7183,7 +7877,9 @@
             "tags": [],
             "label": "warn",
             "description": [],
-            "signature": ["(msg: string) => void"],
+            "signature": [
+              "(msg: string) => void"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7195,7 +7891,9 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7241,7 +7939,9 @@
                 "tags": [],
                 "label": "msg",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7254,7 +7954,9 @@
                 "tags": [],
                 "label": "meta",
                 "description": [],
-                "signature": ["Meta"],
+                "signature": [
+                  "Meta"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7296,7 +7998,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"data_backfill\""],
+            "signature": [
+              "\"data_backfill\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7307,7 +8011,9 @@
             "type": "Function",
             "tags": [],
             "label": "backfillFn",
-            "description": ["\nThe backfill function to run."],
+            "description": [
+              "\nThe backfill function to run."
+            ],
             "signature": [
               "(document: ",
               {
@@ -7414,7 +8120,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"data_removal\""],
+            "signature": [
+              "\"data_removal\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7425,8 +8133,12 @@
             "type": "Array",
             "tags": [],
             "label": "removedAttributePaths",
-            "description": ["\nThe list of attribute paths to remove."],
-            "signature": ["string[]"],
+            "description": [
+              "\nThe list of attribute paths to remove."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7454,7 +8166,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"mappings_addition\""],
+            "signature": [
+              "\"mappings_addition\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7465,7 +8179,9 @@
             "type": "Object",
             "tags": [],
             "label": "addedMappings",
-            "description": ["\nThe new mappings introduced in this version."],
+            "description": [
+              "\nThe new mappings introduced in this version."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -7502,7 +8218,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"mappings_deprecation\""],
+            "signature": [
+              "\"mappings_deprecation\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7513,8 +8231,12 @@
             "type": "Array",
             "tags": [],
             "label": "deprecatedMappings",
-            "description": ["\nA list of paths to mappings to flag as deprecated."],
-            "signature": ["string[]"],
+            "description": [
+              "\nA list of paths to mappings to flag as deprecated."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7552,7 +8274,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"unsafe_transform\""],
+            "signature": [
+              "\"unsafe_transform\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7563,7 +8287,9 @@
             "type": "Function",
             "tags": [],
             "label": "transformFn",
-            "description": ["\nThe transform function to execute."],
+            "description": [
+              "\nThe transform function to execute."
+            ],
             "signature": [
               "(document: ",
               {
@@ -7817,7 +8543,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsRawDoc",
-        "description": ["\nA raw document as represented directly in the saved object index.\n"],
+        "description": [
+          "\nA raw document as represented directly in the saved object index.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7860,7 +8588,9 @@
             "tags": [],
             "label": "_seq_no",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7872,7 +8602,9 @@
             "tags": [],
             "label": "_primary_term",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7902,7 +8634,9 @@
             "description": [
               "\nOptional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously\nsingle-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade\nmigrations.\n\nIf not specified, the default treatment is `strict`."
             ],
-            "signature": ["\"strict\" | \"lax\" | undefined"],
+            "signature": [
+              "\"strict\" | \"lax\" | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7911,12 +8645,16 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsRawDocParseOptions.migrationVersionCompatibility",
             "type": "CompoundType",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "migrationVersionCompatibility",
             "description": [
               "\nOptional setting to allow compatible handling of the `migrationVersion` field.\nThis is needed to return the `migrationVersion` field in the same format as it was before migrating to the `typeMigrationVersion` property.\n"
             ],
-            "signature": ["\"raw\" | \"compatible\" | undefined"],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7955,7 +8693,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7967,7 +8707,9 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8000,7 +8742,9 @@
             "tags": [],
             "label": "typeMigrationVersion",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8012,7 +8756,9 @@
             "tags": [],
             "label": "updated_at",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8024,7 +8770,9 @@
             "tags": [],
             "label": "created_at",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8057,7 +8805,9 @@
             "tags": [],
             "label": "originId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8069,7 +8819,9 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8081,7 +8833,9 @@
             "tags": [],
             "label": "[typeMapping: string]: any",
             "description": [],
-            "signature": ["[typeMapping: string]:  any"],
+            "signature": [
+              "[typeMapping: string]:  any"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8172,7 +8926,9 @@
                 "description": [
                   "- A list of additional hidden types the repository should have access to."
                 ],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8245,7 +9001,9 @@
                 "description": [
                   "- A list of additional hidden types the repository should have access to."
                 ],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8287,7 +9045,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsRequestHandlerContext",
-        "description": ["\nCore's `savedObjects` request handler context."],
+        "description": [
+          "\nCore's `savedObjects` request handler context."
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8501,7 +9261,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsResolveImportErrorsOptions",
-        "description": ["\nOptions to control the \"resolve import\" operation."],
+        "description": [
+          "\nOptions to control the \"resolve import\" operation."
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8515,7 +9277,9 @@
             "description": [
               "The stream of {@link SavedObject | saved objects} to resolve errors from"
             ],
-            "signature": ["Readable"],
+            "signature": [
+              "Readable"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8526,7 +9290,9 @@
             "type": "Array",
             "tags": [],
             "label": "retries",
-            "description": ["saved object import references to retry"],
+            "description": [
+              "saved object import references to retry"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -8547,8 +9313,12 @@
             "type": "string",
             "tags": [],
             "label": "namespace",
-            "description": ["if specified, will import in given namespace"],
-            "signature": ["string | undefined"],
+            "description": [
+              "if specified, will import in given namespace"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8575,7 +9345,9 @@
             "description": [
               "\nIf true, Kibana will apply various adjustments to the data that's being retried to import to maintain compatibility between\ndifferent Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs)."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8589,7 +9361,9 @@
             "description": [
               "\nIf true, will import as a managed object, else will import as not managed.\n\nThis can be leveraged by applications to e.g. prevent edits to a managed\nsaved object. Instead, users can be guided to create a copy first and\nmake their edits to the copy."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8857,8 +9631,12 @@
             "type": "Function",
             "tags": [],
             "label": "getDefaultIndex",
-            "description": ["\nReturns the default index used for saved objects."],
-            "signature": ["() => string"],
+            "description": [
+              "\nReturns the default index used for saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9012,7 +9790,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "req",
-                "description": ["- The request to create the scoped repository from."],
+                "description": [
+                  "- The request to create the scoped repository from."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -9037,7 +9817,9 @@
                 "description": [
                   "- A list of additional hidden types the repository should have access to."
                 ],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9110,7 +9892,9 @@
                 "description": [
                   "- A list of additional hidden types the repository should have access to."
                 ],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9284,7 +10068,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["SavedObjectsImporterOptions", " | undefined"],
+                "signature": [
+                  "SavedObjectsImporterOptions",
+                  " | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9327,7 +10114,9 @@
             "description": [
               "\nReturns the (alias to the) index that the specified saved object type is stored in.\n"
             ],
-            "signature": ["(type: string) => string"],
+            "signature": [
+              "(type: string) => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9338,8 +10127,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["The SO type to retrieve the index/alias for."],
-                "signature": ["string"],
+                "description": [
+                  "The SO type to retrieve the index/alias for."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9357,7 +10150,9 @@
             "description": [
               "\nReturns the (alias to the) index that the specified saved object type is stored in.\n"
             ],
-            "signature": ["(types: string[]) => string[]"],
+            "signature": [
+              "(types: string[]) => string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9368,8 +10163,12 @@
                 "type": "Array",
                 "tags": [],
                 "label": "types",
-                "description": ["The SO types to retrieve the index/alias for."],
-                "signature": ["string[]"],
+                "description": [
+                  "The SO types to retrieve the index/alias for."
+                ],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9384,8 +10183,12 @@
             "type": "Function",
             "tags": [],
             "label": "getDefaultIndex",
-            "description": ["\nReturns the default index used for saved objects."],
-            "signature": ["() => string"],
+            "description": [
+              "\nReturns the default index used for saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9401,7 +10204,9 @@
             "description": [
               "\nReturns all (aliases to) kibana system indices used for saved object storage.\n"
             ],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9431,7 +10236,9 @@
             "tags": [],
             "label": "migratedIndices",
             "description": [],
-            "signature": ["{ [status: string]: number; skipped: number; migrated: number; }"],
+            "signature": [
+              "{ [status: string]: number; skipped: number; migrated: number; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9445,7 +10252,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsType",
-        "description": ["\nDefinition of a type of savedObject.\n"],
+        "description": [
+          "\nDefinition of a type of savedObject.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -9466,7 +10275,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nThe name of the type, which is also used as the internal id."],
+            "description": [
+              "\nThe name of the type, which is also used as the internal id."
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9493,7 +10304,9 @@
             "description": [
               "\nIs the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.\nIt is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9507,7 +10320,9 @@
             "description": [
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
-            "signature": ["\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""],
+            "signature": [
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9521,7 +10336,9 @@
             "description": [
               "\nIf defined, the type instances will be stored in the given index instead of the default one."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9532,8 +10349,12 @@
             "type": "string",
             "tags": [],
             "label": "convertToAliasScript",
-            "description": ["\nIf defined, will be used to convert the type to an alias."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nIf defined, will be used to convert the type to an alias."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9587,7 +10408,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.migrations",
             "type": "CompoundType",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "migrations",
             "description": [
               "\nAn optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type."
@@ -9671,16 +10494,16 @@
                 "path": "packages/core/usage-data/core-usage-data-server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "actions",
@@ -9743,52 +10566,24 @@
                 "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/saved_objects/slo.ts"
-              },
-              {
                 "plugin": "apmDataAccess",
-                "path": "x-pack/plugins/apm_data_access/server/saved_objects/apm_indices.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+                "path": "x-pack/plugins/observability_solution/apm_data_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
-                "plugin": "apm",
-                "path": "x-pack/plugins/apm/server/saved_objects/apm_service_groups.ts"
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -9807,20 +10602,36 @@
                 "path": "x-pack/plugins/canvas/server/saved_objects/workpad_template.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
               },
               {
                 "plugin": "logsShared",
-                "path": "x-pack/plugins/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
+                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
               },
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/sources/saved_object_type.ts"
               },
               {
                 "plugin": "lists",
@@ -9833,6 +10644,10 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/server/saved_objects/setup_saved_objects.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -9855,12 +10670,20 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
               },
               {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/server/saved_objects/apm_service_groups.ts"
+              },
+              {
+                "plugin": "slo",
+                "path": "x-pack/plugins/observability_solution/slo/server/saved_objects/slo.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
               },
               {
                 "plugin": "dashboard",
@@ -10009,6 +10832,26 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-base-server-internal",
@@ -10288,7 +11131,9 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.schemas",
             "type": "CompoundType",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "schemas",
             "description": [
               "\nAn optional schema that can be used to validate the attributes of the type.\n\nWhen provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.\n\nSee {@link SavedObjectsValidationMap} for more details."
@@ -10326,6 +11171,18 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migrations.ts"
               },
               {
                 "plugin": "spaces",
@@ -10428,6 +11285,22 @@
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/test_helpers/repository.test.common.ts"
               },
               {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-migration-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/validate_migration.test.ts"
+              },
+              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/helpers/validation_fixtures.ts"
               },
@@ -10445,12 +11318,16 @@
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObjectsType.convertToMultiNamespaceTypeVersion",
             "type": "string",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "convertToMultiNamespaceTypeVersion",
             "description": [
               "\nIf defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this\nversion.\n\nRequirements:\n\n 1. This string value must be a valid semver version\n 2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}\n 3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`} *or*\n    {@link SavedObjectsNamespaceType | `namespaceType: 'multiple-isolated'`}\n\nExample of a single-namespace type in 7.12:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'single',\n  mappings: {...}\n}\n```\n\nExample after converting to a multi-namespace (isolated) type in 8.0:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple-isolated',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nExample after converting to a multi-namespace (shareable) type in 8.1:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nNote: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -10524,10 +11401,6 @@
                 "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
@@ -10542,6 +11415,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/saved_objects/custom_element.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
                 "plugin": "graph",
@@ -10744,7 +11621,9 @@
             "description": [
               "\nAllows to opt-in to the model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10781,8 +11660,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "importableAndExportable",
-            "description": ["\nIs the type importable or exportable. Defaults to `false`."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nIs the type importable or exportable. Defaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10796,7 +11679,9 @@
             "description": [
               "\nWhen specified, will be used instead of the type's name in SO management section's labels."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10810,7 +11695,9 @@
             "description": [
               "\nWhen set to false, the type will not be listed or searchable in the SO management section.\nMain usage of setting this property to false for a type is when objects from the type should\nbe included in the export via references or export hooks, but should not directly appear in the SOM.\nDefaults to `true`.\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10821,8 +11708,12 @@
             "type": "string",
             "tags": [],
             "label": "defaultSearchField",
-            "description": ["\nThe default search field to use for this type. Defaults to `id`."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe default search field to use for this type. Defaults to `id`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10836,7 +11727,9 @@
             "description": [
               "\nThe eui icon name to display in the management table.\nIf not defined, the default icon will be used."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11068,7 +11961,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectsTypeMappingDefinition",
-        "description": ["\nDescribe a saved object type mapping.\n"],
+        "description": [
+          "\nDescribe a saved object type mapping.\n"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11082,7 +11977,9 @@
             "description": [
               "The dynamic property of the mapping, either `false` or `'strict'`. If\nunspecified `dynamic: 'strict'` will be inherited from the top-level\nindex mappings."
             ],
-            "signature": ["false | \"strict\" | undefined"],
+            "signature": [
+              "false | \"strict\" | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11093,7 +11990,9 @@
             "type": "Object",
             "tags": [],
             "label": "properties",
-            "description": ["The underlying properties of the type mapping"],
+            "description": [
+              "The underlying properties of the type mapping"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -11169,7 +12068,9 @@
         "tags": [],
         "label": "ALL_SAVED_OBJECT_INDICES",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11264,7 +12165,9 @@
         "tags": [],
         "label": "ENCRYPTION_EXTENSION_ID",
         "description": [],
-        "signature": ["\"encryptedSavedObjects\""],
+        "signature": [
+          "\"encryptedSavedObjects\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11291,7 +12194,9 @@
         "description": [
           "\nCollect and centralize the names of the different saved object indices.\nNote that all of them start with the '.kibana' prefix.\nThere are multiple places in the code that these indices have the form .kibana*.\nHowever, beware that there are some system indices that have the same prefix\nbut are NOT used to store saved objects, e.g.: .kibana_security_session_1"
         ],
-        "signature": ["\".kibana\""],
+        "signature": [
+          "\".kibana\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11303,7 +12208,9 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectAttribute",
-        "description": ["\nType definition for a Saved Object attribute value\n"],
+        "description": [
+          "\nType definition for a Saved Object attribute value\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -11576,7 +12483,9 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectModelTransformationDoc",
-        "description": ["\nDocument type used during model migration.\n"],
+        "description": [
+          "\nDocument type used during model migration.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -11795,7 +12704,9 @@
         "description": [
           "\nPlain javascript function alternative for {@link SavedObjectModelVersionForwardCompatibilitySchema}\n"
         ],
-        "signature": ["(attributes: InAttrs) => OutAttrs"],
+        "signature": [
+          "(attributes: InAttrs) => OutAttrs"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11808,7 +12719,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["InAttrs"],
+            "signature": [
+              "InAttrs"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/model_version/schemas.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11983,7 +12896,9 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsClientFactoryProvider",
-        "description": ["\nProvider to invoke to retrieve a {@link SavedObjectsClientFactory}."],
+        "description": [
+          "\nProvider to invoke to retrieve a {@link SavedObjectsClientFactory}."
+        ],
         "signature": [
           "(repositoryFactory: ",
           {
@@ -12250,7 +13165,9 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsExtensionFactory",
-        "description": ["\nDescribes the base Saved Objects Extension factory."],
+        "description": [
+          "\nDescribes the base Saved Objects Extension factory."
+        ],
         "signature": [
           "(params: { typeRegistry: ",
           {
@@ -12651,7 +13568,9 @@
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SavedObjectTypeExcludeFromUpgradeFilterHook",
         "type": "Type",
-        "tags": ["alpha"],
+        "tags": [
+          "alpha"
+        ],
         "label": "SavedObjectTypeExcludeFromUpgradeFilterHook",
         "description": [
           "\nIf defined, allows a type to run a search query and return a query filter that may match any documents which may\nbe excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which\nare no longer needed and may slow the migration process.\n\nIf this hook fails, the migration will proceed without these documents having been filtered out, so this\nshould not be used as a guarantee that these documents have been deleted.\n"
@@ -12746,7 +13665,9 @@
         "tags": [],
         "label": "SECURITY_EXTENSION_ID",
         "description": [],
-        "signature": ["\"security\""],
+        "signature": [
+          "\"security\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12771,7 +13692,9 @@
         "tags": [],
         "label": "SPACES_EXTENSION_ID",
         "description": [],
-        "signature": ["\"spaces\""],
+        "signature": [
+          "\"spaces\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
         "deprecated": false,
         "trackAdoption": false,

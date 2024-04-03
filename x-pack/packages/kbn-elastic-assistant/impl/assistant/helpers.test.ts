@@ -8,22 +8,24 @@
 import {
   getBlockBotConversation,
   getDefaultConnector,
-  getFormattedMessageContent,
   getOptionalRequestParams,
-  hasParsableResponse,
+  mergeBaseWithPersistedConversations,
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { AIConnector } from '../connectorland/connector_selector';
 
-describe('getBlockBotConversation', () => {
+describe('helpers', () => {
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
       const conversation = {
         id: 'conversation_id',
+        category: 'assistant',
         theme: {},
         messages: [],
-        apiConfig: {},
+        apiConfig: { connectorId: '123' },
+        replacements: {},
+        title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages).toEqual(enterpriseMessaging);
@@ -33,7 +35,6 @@ describe('getBlockBotConversation', () => {
     it('When conversation history and the last message is not enterprise messaging, appends enterprise messaging to conversation', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
         messages: [
           {
             role: 'user' as const,
@@ -45,7 +46,10 @@ describe('getBlockBotConversation', () => {
             },
           },
         ],
-        apiConfig: {},
+        apiConfig: { connectorId: '123' },
+        replacements: {},
+        category: 'assistant',
+        title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(2);
@@ -54,9 +58,11 @@ describe('getBlockBotConversation', () => {
     it('returns the conversation without changes when the last message is enterprise messaging', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
         messages: enterpriseMessaging,
-        apiConfig: {},
+        apiConfig: { connectorId: '123' },
+        replacements: {},
+        category: 'assistant',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(1);
@@ -66,7 +72,8 @@ describe('getBlockBotConversation', () => {
     it('returns the conversation with new enterprise message when conversation has enterprise messaging, but not as the last message', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
+        category: 'assistant',
         messages: [
           ...enterpriseMessaging,
           {
@@ -79,7 +86,8 @@ describe('getBlockBotConversation', () => {
             },
           },
         ],
-        apiConfig: {},
+        apiConfig: { connectorId: '123' },
+        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
@@ -91,9 +99,11 @@ describe('getBlockBotConversation', () => {
     it('when no conversation history, returns the welcome conversation', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
+        category: 'assistant',
         messages: [],
-        apiConfig: {},
+        apiConfig: { connectorId: '123' },
+        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
@@ -101,7 +111,8 @@ describe('getBlockBotConversation', () => {
     it('returns a conversation history with the welcome conversation appended', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
+        category: 'assistant',
         messages: [
           {
             role: 'user' as const,
@@ -113,7 +124,8 @@ describe('getBlockBotConversation', () => {
             },
           },
         ],
-        apiConfig: {},
+        apiConfig: { connectorId: '123' },
+        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
@@ -129,15 +141,14 @@ describe('getBlockBotConversation', () => {
     });
 
     it('should return undefined if connectors array is empty', () => {
-      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> =
-        [];
+      const connectors: AIConnector[] = [];
       const result = getDefaultConnector(connectors);
 
       expect(result).toBeUndefined();
     });
 
     it('should return the connector id if there is only one connector', () => {
-      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+      const connectors: AIConnector[] = [
         {
           actionTypeId: '.gen-ai',
           isPreconfigured: false,
@@ -160,7 +171,7 @@ describe('getBlockBotConversation', () => {
     });
 
     it('should return undefined if there are multiple connectors', () => {
-      const connectors: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>> = [
+      const connectors: AIConnector[] = [
         {
           actionTypeId: '.gen-ai',
           isPreconfigured: false,
@@ -197,43 +208,6 @@ describe('getBlockBotConversation', () => {
     });
   });
 
-  describe('getFormattedMessageContent', () => {
-    it('returns the value of the action_input property when `content` has properly prefixed and suffixed JSON with the action_input property', () => {
-      const content = '```json\n{"action_input": "value from action_input"}\n```';
-
-      expect(getFormattedMessageContent(content)).toBe('value from action_input');
-    });
-
-    it('returns the original content when `content` has properly formatted JSON WITHOUT the action_input property', () => {
-      const content = '```json\n{"some_key": "some value"}\n```';
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` has improperly formatted JSON', () => {
-      const content = '```json\n{"action_input": "value from action_input",}\n```'; // <-- the trailing comma makes it invalid
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` is missing the prefix', () => {
-      const content = '{"action_input": "value from action_input"}\n```'; // <-- missing prefix
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` is missing the suffix', () => {
-      const content = '```json\n{"action_input": "value from action_input"}'; // <-- missing suffix
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-
-    it('returns the original content when `content` does NOT contain a JSON string', () => {
-      const content = 'plain text content';
-
-      expect(getFormattedMessageContent(content)).toBe(content);
-    });
-  });
-
   describe('getOptionalRequestParams', () => {
     it('should return an empty object when alerts is false', () => {
       const params = {
@@ -241,7 +215,6 @@ describe('getBlockBotConversation', () => {
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
         size: 10,
       };
 
@@ -256,7 +229,6 @@ describe('getBlockBotConversation', () => {
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
         size: 10,
       };
 
@@ -266,7 +238,6 @@ describe('getBlockBotConversation', () => {
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
         size: 10,
       });
     });
@@ -285,41 +256,161 @@ describe('getBlockBotConversation', () => {
     });
   });
 
-  describe('hasParsableResponse', () => {
-    it('returns true when just isEnabledKnowledgeBase is true', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: false,
-        isEnabledKnowledgeBase: true,
-      });
+  describe('mergeBaseWithPersistedConversations', () => {
+    const messages = [
+      { content: 'Message 1', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
+      { content: 'Message 2', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
+    ];
+    const defaultProps = {
+      messages,
+      category: 'assistant',
+      theme: {},
+      apiConfig: { connectorId: '123' },
+      replacements: {},
+    };
+    const baseConversations = {
+      conversation1: {
+        ...defaultProps,
+        title: 'Conversation 1',
+        id: 'conversation_1',
+      },
+      conversation2: {
+        ...defaultProps,
+        title: 'Conversation 2',
+        id: 'conversation_2',
+      },
+    };
+    const conversationsData = {
+      page: 1,
+      perPage: 10,
+      total: 2,
+      data: Object.values(baseConversations).map((c) => c),
+    };
 
-      expect(result).toBe(true);
+    it('should merge base conversations with user conversations when both are non-empty', () => {
+      const moreData = {
+        ...conversationsData,
+        data: [
+          {
+            ...defaultProps,
+            title: 'Conversation 3',
+            id: 'conversation_3',
+          },
+          {
+            ...defaultProps,
+            title: 'Conversation 4',
+            id: 'conversation_4',
+          },
+        ],
+      };
+
+      const result = mergeBaseWithPersistedConversations(baseConversations, moreData);
+
+      expect(result).toEqual({
+        conversation1: {
+          title: 'Conversation 1',
+          id: 'conversation_1',
+          ...defaultProps,
+        },
+        conversation2: {
+          title: 'Conversation 2',
+          id: 'conversation_2',
+          ...defaultProps,
+        },
+        'Conversation 3': {
+          title: 'Conversation 3',
+          id: 'conversation_3',
+          ...defaultProps,
+        },
+        'Conversation 4': {
+          title: 'Conversation 4',
+          id: 'conversation_4',
+          ...defaultProps,
+        },
+      });
     });
 
-    it('returns true when just isEnabledRAGAlerts is true', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: true,
-        isEnabledKnowledgeBase: false,
+    it('should return base conversations when user conversations are empty', () => {
+      const result = mergeBaseWithPersistedConversations(baseConversations, {
+        ...conversationsData,
+        total: 0,
+        data: [],
       });
 
-      expect(result).toBe(true);
+      expect(result).toEqual(baseConversations);
     });
 
-    it('returns true when both isEnabledKnowledgeBase and isEnabledRAGAlerts are true', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: true,
-        isEnabledKnowledgeBase: true,
-      });
+    it('should return user conversations when base conversations are empty', () => {
+      const result = mergeBaseWithPersistedConversations({}, conversationsData);
 
-      expect(result).toBe(true);
+      expect(result).toEqual({
+        'Conversation 1': {
+          ...defaultProps,
+          title: 'Conversation 1',
+          id: 'conversation_1',
+        },
+        'Conversation 2': {
+          ...defaultProps,
+          title: 'Conversation 2',
+          id: 'conversation_2',
+        },
+      });
     });
 
-    it('returns false when both isEnabledKnowledgeBase and isEnabledRAGAlerts are false', () => {
-      const result = hasParsableResponse({
-        isEnabledRAGAlerts: false,
-        isEnabledKnowledgeBase: false,
-      });
+    it('should handle and merge conversations with duplicate titles', () => {
+      const result = mergeBaseWithPersistedConversations(
+        {
+          'Conversation 1': {
+            title: 'Conversation 1',
+            id: 'conversation1',
+            ...defaultProps,
+          },
+        },
+        {
+          page: 1,
+          perPage: 10,
+          total: 1,
+          data: [
+            {
+              title: 'Conversation 1',
+              id: 'conversation1',
+              ...defaultProps,
+              messages: [
+                {
+                  content: 'Message 3',
+                  role: 'user' as const,
+                  timestamp: '2024-02-14T22:29:43.862Z',
+                },
+                {
+                  content: 'Message 4',
+                  role: 'user' as const,
+                  timestamp: '2024-02-14T22:29:43.862Z',
+                },
+              ],
+            },
+          ],
+        }
+      );
 
-      expect(result).toBe(false);
+      expect(result).toEqual({
+        'Conversation 1': {
+          title: 'Conversation 1',
+          id: 'conversation1',
+          ...defaultProps,
+          messages: [
+            {
+              content: 'Message 3',
+              role: 'user',
+              timestamp: '2024-02-14T22:29:43.862Z',
+            },
+            {
+              content: 'Message 4',
+              role: 'user',
+              timestamp: '2024-02-14T22:29:43.862Z',
+            },
+          ],
+        },
+      });
     });
   });
 });

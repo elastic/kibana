@@ -13,7 +13,11 @@ import {
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ISO_DATE_REGEX } from './constants';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -25,20 +29,22 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Custom Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
-    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
+    const DATA_VIEW_NAME = 'data-view-name';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
 
     before(async () => {
       dataForgeConfig = {
         schedule: [
           {
             template: 'good',
-            start: 'now-15m',
+            start: 'now-10m',
             end: 'now+5m',
             metrics: [
               { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
@@ -55,9 +61,12 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-      await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 60 });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: dataForgeIndices.join(','),
+        docCountTarget: 45,
+      });
       await dataViewApi.create({
-        name: DATA_VIEW,
+        name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
       });
@@ -89,8 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/175499
-    describe.skip('Rule creation', () => {
+    describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
           name: 'Index Connector: Threshold API test',
@@ -109,14 +117,14 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: Aggregators.COUNT }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: {
               query: {
-                query: '',
+                query: 'host.name:*',
                 language: 'kuery',
               },
               index: DATA_VIEW_ID,
@@ -130,6 +138,10 @@ export default function ({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -164,6 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
@@ -191,7 +204,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([1, 2]);
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.group');
+        expect(resp.hits.hits[0]._source).not.have.property('kibana.alert.evaluation.threshold');
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -201,13 +215,46 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: 'count' }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: 'count' }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: 'data-view-id',
+              query: { query: 'host.name:*', language: 'kuery' },
+            },
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
+          indexName: ALERT_ACTION_INDEX,
+          docCountTarget: 1,
+        });
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `http://localhost:5620/app/observability/alerts/${alertId}`
+        );
+
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATA_VIEW_NAME})`
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('3');
+
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATA_VIEW_ID,
+          timeRange: { to: 'now' },
+          query: { query: 'host.name:* and container.id:*', language: 'kuery' },
+          filters: [],
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

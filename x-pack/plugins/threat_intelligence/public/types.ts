@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   DataViewField,
+  type DataViewSpec,
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
@@ -21,7 +22,7 @@ import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public/types';
+import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Policy } from './modules/block_list/hooks/use_policies';
 
@@ -33,7 +34,7 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 export interface ThreatIntelligencePluginSetup {}
 
 export interface SetupPlugins {
-  cases: CasesUiSetup;
+  cases: CasesPublicSetup;
 }
 
 export interface ThreatIntelligencePluginStart {
@@ -47,7 +48,7 @@ export interface ThreatIntelligencePluginStartDeps {
 }
 
 export type Services = {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   data: DataPublicPluginStart;
   storage: Storage;
   dataViews: DataViewsPublicPluginStart;
@@ -64,7 +65,8 @@ export interface LicenseAware {
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
-export interface SourcererDataView {
+export interface SelectedDataView {
+  sourcererDataView: DataViewSpec | undefined;
   indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   selectedPatterns: string[];
@@ -90,6 +92,17 @@ export interface BlockListFormProps {
   item: CreateExceptionListItemSchema;
 }
 
+export interface Blocking {
+  canWriteBlocklist: boolean;
+  exceptionListApiClient: unknown;
+  useSetUrlParams: () => (
+    params: Record<string, string | number | null | undefined>,
+    replace?: boolean | undefined
+  ) => void;
+  getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
+  getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
+}
+
 /**
  * Methods exposed from the security solution to the threat intelligence application.
  */
@@ -112,7 +125,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
    */
-  sourcererDataView: SourcererDataView;
+  sourcererDataView: SelectedDataView;
 
   /**
    * Security Solution store
@@ -149,16 +162,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Add to blocklist feature
    */
-  blockList: {
-    canWriteBlocklist: boolean;
-    exceptionListApiClient: unknown;
-    useSetUrlParams: () => (
-      params: Record<string, string | number | null | undefined>,
-      replace?: boolean | undefined
-    ) => void;
-    getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
-    getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
-  };
+  blockList: Blocking;
 }
 
 /**

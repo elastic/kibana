@@ -837,6 +837,11 @@
           "panelsJSON": {
             "index": false,
             "type": "text"
+          },
+          "showApplySelections": {
+            "doc_values": false,
+            "index": false,
+            "type": "boolean"
           }
         }
       },
@@ -2429,6 +2434,9 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },

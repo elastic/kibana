@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { Connector } from '@kbn/search-connectors';
+
 import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
 import { isCrawlerIndex, isConnectorIndex, getIngestionMethod } from '../../../../utils/indices';
 import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
@@ -17,13 +19,14 @@ import { SyncsContextMenu } from './syncs_context_menu';
 // Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left
 export const getHeaderActions = (
   indexData: ElasticsearchIndexWithIngestion | undefined,
-  hasAppSearchAccess: boolean
+  hasAppSearchAccess: boolean,
+  connector?: Connector
 ) => {
   const ingestionMethod = getIngestionMethod(indexData);
   return [
     ...(isCrawlerIndex(indexData) && indexData.connector ? [<CrawlerStatusIndicator />] : []),
-    ...(isConnectorIndex(indexData) ? [<SyncsContextMenu />] : []),
-    ...(hasAppSearchAccess
+    ...(isConnectorIndex(indexData) || connector ? [<SyncsContextMenu />] : []),
+    ...(hasAppSearchAccess && indexData
       ? [
           <SearchEnginesPopover
             indexName={indexData?.name}

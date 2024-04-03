@@ -73,6 +73,9 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-server",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -15,20 +16,22 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-r
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
-import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
+import type { NavigateToPath } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import type { MlRoute, PageProps } from '../router';
+import { createPath, PageLoader } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useRouteResolver } from '../use_resolver';
 import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
-import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useTableInterval } from '../../components/controls/select_interval';
@@ -36,7 +39,6 @@ import { useTableSeverity } from '../../components/controls/select_severity';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 import { MlPageHeader } from '../../components/page_header';
 import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
@@ -103,14 +105,14 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const {
-    services: { cases, presentationUtil },
+    services: { cases, presentationUtil, uiSettings },
   } = useMlKibana();
 
   const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
-  const timeBuckets = useTimeBuckets();
+  const timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -118,8 +120,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     (job) => jobIds.includes(job.id) && job.isRunning === true
   );
 
-  const explorerState = useObservable(explorerService.state$);
   const anomalyExplorerContext = useAnomalyExplorerContext();
+  const { explorerService } = anomalyExplorerContext;
+  const explorerState = useObservable(anomalyExplorerContext.explorerService.state$);
 
   const refresh = useRefresh();
   const lastRefresh = refresh?.lastRefresh ?? 0;
@@ -177,6 +180,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       // clear any data to prevent next page from rendering old charts
       explorerService.clearExplorerData();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [explorerData, loadExplorerData] = useExplorerData();
@@ -185,6 +189,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
       explorerService.setExplorerData(explorerData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [explorerData]);
 
   const [tableInterval] = useTableInterval();

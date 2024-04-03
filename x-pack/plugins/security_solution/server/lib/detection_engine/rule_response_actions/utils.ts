@@ -6,13 +6,19 @@
  */
 
 import { get } from 'lodash';
-import { FIELD_NOT_EXIST } from '../../../endpoint/services/actions/create/validate';
-import type { AlertAgent, AlertWithAgent, AlertsAction } from './types';
+import { i18n } from '@kbn/i18n';
+import type { AlertAgent, AlertsAction, AlertWithAgent } from './types';
 import type { ProcessesParams } from '../../../../common/api/detection_engine';
 
 interface ProcessAlertsAcc {
   [key: string]: Record<string, AlertsAction>;
 }
+
+export const FIELD_NOT_EXIST = (field: string): string =>
+  i18n.translate('xpack.securitySolution.responseActionsList.error.nonExistingFieldName', {
+    defaultMessage: 'The action was called with a non-existing event field name: {field}',
+    values: { field },
+  });
 
 export const getProcessAlerts = (
   alerts: AlertWithAgent[],

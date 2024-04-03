@@ -261,7 +261,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(403);
     });
 
-    it('should not allow non superusers', async () => {
+    it('should allow user with all access', async () => {
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -269,7 +269,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .type('application/gzip')
         .send(buf)
-        .expect(403);
+        .expect(200);
     });
   });
 }

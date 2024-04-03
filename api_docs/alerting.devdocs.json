@@ -39,7 +39,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "rule",
-            "description": ["The rule to view"],
+            "description": [
+              "The rule to view"
+            ],
             "signature": [
               "Omit<",
               {
@@ -83,7 +85,10 @@
           "parentPluginId": "alerting",
           "id": "def-public.PluginSetupContract.registerNavigation",
           "type": "Function",
-          "tags": ["throws", "deprecated"],
+          "tags": [
+            "throws",
+            "deprecated"
+          ],
           "label": "registerNavigation",
           "description": [
             "\nRegister a customized view of the particular rule type. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.\n"
@@ -138,7 +143,9 @@
               "description": [
                 "The application id that the user should be navigated to, to view a particular rule in a custom way."
               ],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -153,7 +160,9 @@
               "description": [
                 "The rule type that has been registered with Alerting.Server.PluginSetupContract.registerType. If\nno such rule with that id exists, a warning is output to the console log. It used to throw an error, but that was temporarily moved\nbecause it was causing flaky test failures with https://github.com/elastic/kibana/issues/59229 and needs to be\ninvestigated more."
               ],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -189,7 +198,9 @@
           "parentPluginId": "alerting",
           "id": "def-public.PluginSetupContract.registerDefaultNavigation",
           "type": "Function",
-          "tags": ["deprecated"],
+          "tags": [
+            "deprecated"
+          ],
           "label": "registerDefaultNavigation",
           "description": [
             "\nRegister a customized view for all rule types with this application id. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.\n"
@@ -219,7 +230,9 @@
               "description": [
                 "The application id that the user should be navigated to, to view a particular rule in a custom way."
               ],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -273,7 +286,9 @@
           "tags": [],
           "label": "getNavigation",
           "description": [],
-          "signature": ["(ruleId: string) => Promise<string | undefined>"],
+          "signature": [
+            "(ruleId: string) => Promise<string | undefined>"
+          ],
           "path": "x-pack/plugins/alerting/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -285,7 +300,9 @@
               "tags": [],
               "label": "ruleId",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/alerting/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -319,7 +336,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -331,7 +350,9 @@
                 "tags": [],
                 "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    getSpace,\n    getSpaceId,\n  }",
                 "description": [],
-                "signature": ["ConstructorOptions"],
+                "signature": [
+                  "ConstructorOptions"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -347,7 +368,9 @@
             "tags": [],
             "label": "getSpaceId",
             "description": [],
-            "signature": ["() => string | undefined"],
+            "signature": [
+              "() => string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -401,7 +424,9 @@
                 "tags": [],
                 "label": "featureIds",
                 "description": [],
-                "signature": ["readonly string[]"],
+                "signature": [
+                  "readonly string[]"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -485,7 +510,9 @@
                 "tags": [],
                 "label": "{\n    ruleTypeId,\n    consumer: legacyConsumer,\n    operation,\n    entity,\n  }",
                 "description": [],
-                "signature": ["EnsureAuthorizedOpts"],
+                "signature": [
+                  "EnsureAuthorizedOpts"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -562,7 +589,9 @@
                 "tags": [],
                 "label": "filterOpts",
                 "description": [],
-                "signature": ["AlertingAuthorizationFilterOpts"],
+                "signature": [
+                  "AlertingAuthorizationFilterOpts"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -575,7 +604,9 @@
                 "tags": [],
                 "label": "featuresIds",
                 "description": [],
-                "signature": ["Set<string> | undefined"],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -636,7 +667,9 @@
                 "tags": [],
                 "label": "featuresIds",
                 "description": [],
-                "signature": ["Set<string> | undefined"],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -729,7 +762,9 @@
                 "tags": [],
                 "label": "filterOpts",
                 "description": [],
-                "signature": ["AlertingAuthorizationFilterOpts"],
+                "signature": [
+                  "AlertingAuthorizationFilterOpts"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -771,7 +806,9 @@
                 "tags": [],
                 "label": "featuresIds",
                 "description": [],
-                "signature": ["Set<string> | undefined"],
+                "signature": [
+                  "Set<string> | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -829,7 +866,11 @@
                 "tags": [],
                 "label": "ruleTypes",
                 "description": [],
-                "signature": ["Set<", "RegistryRuleType", ">"],
+                "signature": [
+                  "Set<",
+                  "RegistryRuleType",
+                  ">"
+                ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -921,7 +962,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -959,7 +1002,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -980,7 +1025,11 @@
         "description": [
           "\nInstalls index template that uses installed component template\nPrior to installation, simulates the installation to check for possible\nconflicts. Simulate should return an empty mapping if a template\nconflicts with an already installed template."
         ],
-        "signature": ["(opts: ", "CreateConcreteWriteIndexOpts", ") => Promise<void>"],
+        "signature": [
+          "(opts: ",
+          "CreateConcreteWriteIndexOpts",
+          ") => Promise<void>"
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -992,7 +1041,9 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "signature": ["CreateConcreteWriteIndexOpts"],
+            "signature": [
+              "CreateConcreteWriteIndexOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1023,7 +1074,9 @@
             "tags": [],
             "label": "{\n  logger,\n  esClient,\n  template,\n  totalFieldsLimit,\n}",
             "description": [],
-            "signature": ["CreateOrUpdateComponentTemplateOpts"],
+            "signature": [
+              "CreateOrUpdateComponentTemplateOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_component_template.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1039,7 +1092,9 @@
         "type": "Function",
         "tags": [],
         "label": "createOrUpdateIlmPolicy",
-        "description": ["\nCreates ILM policy if it doesn't already exist, updates it if it does"],
+        "description": [
+          "\nCreates ILM policy if it doesn't already exist, updates it if it does"
+        ],
         "signature": [
           "({ logger, esClient, name, policy, dataStreamAdapter, }: CreateOrUpdateIlmPolicyOpts) => Promise<void>"
         ],
@@ -1054,7 +1109,9 @@
             "tags": [],
             "label": "{\n  logger,\n  esClient,\n  name,\n  policy,\n  dataStreamAdapter,\n}",
             "description": [],
-            "signature": ["CreateOrUpdateIlmPolicyOpts"],
+            "signature": [
+              "CreateOrUpdateIlmPolicyOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_ilm_policy.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1087,7 +1144,9 @@
             "tags": [],
             "label": "{\n  logger,\n  esClient,\n  template,\n}",
             "description": [],
-            "signature": ["CreateOrUpdateIndexTemplateOpts"],
+            "signature": [
+              "CreateOrUpdateIndexTemplateOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1119,7 +1178,9 @@
             "tags": [],
             "label": "{\n  fieldMap,\n  context,\n  name,\n  dynamic,\n  includeSettings,\n}",
             "description": [],
-            "signature": ["GetComponentTemplateOpts"],
+            "signature": [
+              "GetComponentTemplateOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/resource_installer_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1159,7 +1220,9 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "signature": ["GetDataStreamAdapterOpts"],
+            "signature": [
+              "GetDataStreamAdapterOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1176,7 +1239,11 @@
         "tags": [],
         "label": "getEsErrorMessage",
         "description": [],
-        "signature": ["(error: ", "ElasticsearchError", ") => string"],
+        "signature": [
+          "(error: ",
+          "ElasticsearchError",
+          ") => string"
+        ],
         "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1188,7 +1255,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["ElasticsearchError"],
+            "signature": [
+              "ElasticsearchError"
+            ],
             "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1220,7 +1289,9 @@
             "tags": [],
             "label": "{\n  componentTemplateRefs,\n  ilmPolicyName,\n  indexPatterns,\n  kibanaVersion,\n  namespace,\n  totalFieldsLimit,\n  dataStreamAdapter,\n}",
             "description": [],
-            "signature": ["GetIndexTemplateOpts"],
+            "signature": [
+              "GetIndexTemplateOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1251,7 +1322,9 @@
             "tags": [],
             "label": "{\n  description,\n  installFn,\n  pluginStop$,\n  logger,\n  timeoutMs = INSTALLATION_TIMEOUT,\n}",
             "description": [],
-            "signature": ["InstallWithTimeoutOpts"],
+            "signature": [
+              "InstallWithTimeoutOpts"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1268,7 +1341,9 @@
         "tags": [],
         "label": "isRuleSnoozed",
         "description": [],
-        "signature": ["(rule: RuleSnoozeProps) => boolean"],
+        "signature": [
+          "(rule: RuleSnoozeProps) => boolean"
+        ],
         "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1280,7 +1355,9 @@
             "tags": [],
             "label": "rule",
             "description": [],
-            "signature": ["RuleSnoozeProps"],
+            "signature": [
+              "RuleSnoozeProps"
+            ],
             "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1297,7 +1374,9 @@
         "tags": [],
         "label": "isValidAlertIndexName",
         "description": [],
-        "signature": ["(indexName: string) => boolean"],
+        "signature": [
+          "(indexName: string) => boolean"
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/lib/is_valid_alert_index_name.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1309,7 +1388,9 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/is_valid_alert_index_name.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1326,7 +1407,9 @@
         "tags": [],
         "label": "parseDuration",
         "description": [],
-        "signature": ["(duration: string) => number"],
+        "signature": [
+          "(duration: string) => number"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1338,7 +1421,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1428,7 +1513,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["ActionGroupIds"],
+            "signature": [
+              "ActionGroupIds"
+            ],
             "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1488,7 +1575,10 @@
             "tags": [],
             "label": "getRulesSettingsClient",
             "description": [],
-            "signature": ["() => ", "RulesSettingsClient"],
+            "signature": [
+              "() => ",
+              "RulesSettingsClient"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1502,7 +1592,10 @@
             "tags": [],
             "label": "getMaintenanceWindowClient",
             "description": [],
-            "signature": ["() => ", "MaintenanceWindowClient"],
+            "signature": [
+              "() => ",
+              "MaintenanceWindowClient"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1516,7 +1609,11 @@
             "tags": [],
             "label": "listTypes",
             "description": [],
-            "signature": ["() => Set<", "RegistryRuleType", ">"],
+            "signature": [
+              "() => Set<",
+              "RegistryRuleType",
+              ">"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1554,7 +1651,9 @@
             "tags": [],
             "label": "areApiKeysEnabled",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1647,7 +1746,9 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/rules_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1659,10 +1760,102 @@
             "tags": [],
             "label": "rule",
             "description": [],
-            "signature": ["{ id: string; name: string; }"],
+            "signature": [
+              "{ id: string; name: string; }"
+            ],
             "path": "x-pack/plugins/alerting/server/rules_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.ConnectorAdapter",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorAdapter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.ConnectorAdapter",
+            "text": "ConnectorAdapter"
+          },
+          "<RuleActionParams, ConnectorParams>"
+        ],
+        "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.ConnectorAdapter.connectorTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorTypeId",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.ConnectorAdapter.ruleActionParamsSchema",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleActionParamsSchema",
+            "description": [
+              "\nThe schema of the action persisted\nin the rule. The schema will be validated\nwhen a rule is created or updated.\nThe schema should be backwards compatible\nand should never introduce any breaking\nchanges."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<any>"
+            ],
+            "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.ConnectorAdapter.buildActionParams",
+            "type": "Function",
+            "tags": [],
+            "label": "buildActionParams",
+            "description": [],
+            "signature": [
+              "(args: BuildActionParamsArgs<RuleActionParams>) => ConnectorParams"
+            ],
+            "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.ConnectorAdapter.buildActionParams.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "BuildActionParamsArgs<RuleActionParams>"
+                ],
+                "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1685,7 +1878,9 @@
             "tags": [],
             "label": "isUsingDataStreams",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1699,7 +1894,10 @@
             "tags": [],
             "label": "getIndexTemplateFields",
             "description": [],
-            "signature": ["(alias: string, pattern: string) => ", "IndexTemplateFields"],
+            "signature": [
+              "(alias: string, pattern: string) => ",
+              "IndexTemplateFields"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1711,7 +1909,9 @@
                 "tags": [],
                 "label": "alias",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1724,7 +1924,9 @@
                 "tags": [],
                 "label": "pattern",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1740,7 +1942,11 @@
             "tags": [],
             "label": "createStream",
             "description": [],
-            "signature": ["(opts: ", "CreateConcreteWriteIndexOpts", ") => Promise<void>"],
+            "signature": [
+              "(opts: ",
+              "CreateConcreteWriteIndexOpts",
+              ") => Promise<void>"
+            ],
             "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1752,7 +1958,9 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": ["CreateConcreteWriteIndexOpts"],
+                "signature": [
+                  "CreateConcreteWriteIndexOpts"
+                ],
                 "path": "x-pack/plugins/alerting/server/alerts_service/lib/data_stream_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1900,7 +2108,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1912,7 +2122,9 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1963,7 +2175,9 @@
             "description": [
               "\nSpecifies custom mappings for the target alerts-as-data\nindex. These mappings will be translated into a component template\nand used in the index template for the index."
             ],
-            "signature": ["ComponentTemplateSpec"],
+            "signature": [
+              "ComponentTemplateSpec"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1977,7 +2191,9 @@
             "description": [
               "\nOptional flag to opt into writing alerts as data. When not specified\ndefaults to false. We need this because we needed all previous rule\nregistry rules to register with the framework in order to install\nElasticsearch assets but we don't want to migrate them to using\nthe framework for writing alerts as data until all the pieces are ready"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1991,7 +2207,9 @@
             "description": [
               "\nOptional flag to include a reference to the ECS component template."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2005,7 +2223,9 @@
             "description": [
               "\nOptional flag to include a reference to the legacy alert component template.\nAny rule type that is migrating from the rule registry should set this\nflag to true to ensure their alerts-as-data indices are backwards compatible."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2019,7 +2239,9 @@
             "description": [
               "\nOptional flag to indicate that resources should be space-aware. When set to\ntrue, alerts-as-data resources will be created for every space where a rule\nof this type runs."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2033,7 +2255,9 @@
             "description": [
               "\nOptional secondary alias to use. This alias should not include the namespace."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2047,7 +2271,10 @@
             "description": [
               "\nOptional function to format each alert in summarizedAlerts right after fetching them."
             ],
-            "signature": ["FormatAlert", "<AlertData> | undefined"],
+            "signature": [
+              "FormatAlert",
+              "<AlertData> | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2066,6 +2293,61 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.PluginSetupContract.registerConnectorAdapter",
+            "type": "Function",
+            "tags": [],
+            "label": "registerConnectorAdapter",
+            "description": [],
+            "signature": [
+              "<RuleActionParams extends ",
+              "ConnectorAdapterParams",
+              " = ",
+              "ConnectorAdapterParams",
+              ", ConnectorParams extends ",
+              "ConnectorAdapterParams",
+              " = ",
+              "ConnectorAdapterParams",
+              ">(adapter: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.ConnectorAdapter",
+                "text": "ConnectorAdapter"
+              },
+              "<RuleActionParams, ConnectorParams>) => void"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginSetupContract.registerConnectorAdapter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "adapter",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.ConnectorAdapter",
+                    "text": "ConnectorAdapter"
+                  },
+                  "<RuleActionParams, ConnectorParams>"
+                ],
+                "path": "x-pack/plugins/alerting/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
           {
             "parentPluginId": "alerting",
             "id": "def-server.PluginSetupContract.registerType",
@@ -2176,7 +2458,11 @@
             "tags": [],
             "label": "getSecurityHealth",
             "description": [],
-            "signature": ["() => Promise<", "SecurityHealth", ">"],
+            "signature": [
+              "() => Promise<",
+              "SecurityHealth",
+              ">"
+            ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2213,7 +2499,10 @@
             "tags": [],
             "label": "frameworkAlerts",
             "description": [],
-            "signature": ["PublicAlertsService", " & { enabled: () => boolean; }"],
+            "signature": [
+              "PublicAlertsService",
+              " & { enabled: () => boolean; }"
+            ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2262,7 +2551,11 @@
             "tags": [],
             "label": "listTypes",
             "description": [],
-            "signature": ["() => Set<", "RegistryRuleType", ">"],
+            "signature": [
+              "() => Set<",
+              "RegistryRuleType",
+              ">"
+            ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2276,7 +2569,9 @@
             "tags": [],
             "label": "getAllTypes",
             "description": [],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2384,7 +2679,9 @@
             "tags": [],
             "label": "getAlertIndicesAlias",
             "description": [],
-            "signature": ["(rulesTypes: string[], spaceId?: string | undefined) => string[]"],
+            "signature": [
+              "(rulesTypes: string[], spaceId?: string | undefined) => string[]"
+            ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2397,7 +2694,9 @@
                 "tags": [],
                 "label": "rulesTypes",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/alerting/server/lib/create_get_alert_indices_alias.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2409,7 +2708,9 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/server/lib/create_get_alert_indices_alias.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2615,7 +2916,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2649,7 +2952,9 @@
             "tags": [],
             "label": "schedule",
             "description": [],
-            "signature": ["{ readonly interval: string; }"],
+            "signature": [
+              "{ readonly interval: string; }"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2662,7 +2967,29 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: \"appState\" | \"globalState\"; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
+              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.FilterStateStore",
+                "text": "FilterStateStore"
+              },
+              "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.Rule.systemActions",
+            "type": "Array",
+            "tags": [],
+            "label": "systemActions",
+            "description": [],
+            "signature": [
+              "Readonly<{ uuid?: string | undefined; useAlertDataAsTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; }>[] | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -2675,7 +3002,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Params"],
+            "signature": [
+              "Params"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2687,7 +3016,9 @@
             "tags": [],
             "label": "mapped_params",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2699,7 +3030,9 @@
             "tags": [],
             "label": "scheduledTaskId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2711,7 +3044,9 @@
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2723,7 +3058,9 @@
             "tags": [],
             "label": "updatedBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2735,7 +3072,9 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2747,7 +3086,9 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2759,7 +3100,9 @@
             "tags": [],
             "label": "apiKeyOwner",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2771,7 +3114,9 @@
             "tags": [],
             "label": "apiKeyCreatedByUser",
             "description": [],
-            "signature": ["boolean | null | undefined"],
+            "signature": [
+              "boolean | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2783,7 +3128,9 @@
             "tags": [],
             "label": "throttle",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2820,7 +3167,9 @@
             "tags": [],
             "label": "mutedInstanceIds",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2832,7 +3181,9 @@
             "tags": [],
             "label": "executionStatus",
             "description": [],
-            "signature": ["RuleExecutionStatus"],
+            "signature": [
+              "RuleExecutionStatus"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2845,7 +3196,7 @@
             "label": "monitoring",
             "description": [],
             "signature": [
-              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: Readonly<{ warning?: \"execute\" | \"license\" | \"validate\" | \"timeout\" | \"unknown\" | \"read\" | \"decrypt\" | \"disabled\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ recovered?: number | null | undefined; active?: number | null | undefined; new?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; } & {}>; }>; }>; }> | undefined"
+              "Readonly<{} & { run: Readonly<{} & { history: Readonly<{ outcome?: Readonly<{ warning?: \"execute\" | \"unknown\" | \"license\" | \"read\" | \"decrypt\" | \"timeout\" | \"disabled\" | \"validate\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | undefined; duration?: number | undefined; } & { timestamp: number; success: boolean; }>[]; calculated_metrics: Readonly<{ p50?: number | undefined; p95?: number | undefined; p99?: number | undefined; } & { success_ratio: number; }>; last_run: Readonly<{} & { timestamp: string; metrics: Readonly<{ duration?: number | undefined; total_search_duration_ms?: number | null | undefined; total_indexing_duration_ms?: number | null | undefined; total_alerts_detected?: number | null | undefined; total_alerts_created?: number | null | undefined; gap_duration_s?: number | null | undefined; } & {}>; }>; }>; }> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -2859,7 +3210,7 @@
             "label": "snoozeSchedule",
             "description": [],
             "signature": [
-              "Readonly<{ id?: string | undefined; skipRecurrences?: string[] | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 6 | 5 | 4 | 3 | 1 | undefined; until?: string | undefined; byweekday?: (string | number)[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; bysetpos?: number[] | undefined; byyearday?: number[] | undefined; byweekno?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; bysecond?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>[] | undefined"
+              "Readonly<{ id?: string | undefined; skipRecurrences?: string[] | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | undefined; bymonth?: number[] | undefined; bysetpos?: number[] | undefined; bymonthday?: number[] | undefined; byyearday?: number[] | undefined; byweekno?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; bysecond?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>[] | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -2872,7 +3223,9 @@
             "tags": [],
             "label": "activeSnoozes",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2884,7 +3237,9 @@
             "tags": [],
             "label": "isSnoozedUntil",
             "description": [],
-            "signature": ["Date | null | undefined"],
+            "signature": [
+              "Date | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2897,7 +3252,7 @@
             "label": "lastRun",
             "description": [],
             "signature": [
-              "Readonly<{ warning?: \"execute\" | \"license\" | \"validate\" | \"timeout\" | \"unknown\" | \"read\" | \"decrypt\" | \"disabled\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ recovered?: number | null | undefined; active?: number | null | undefined; new?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | null | undefined"
+              "Readonly<{ warning?: \"execute\" | \"unknown\" | \"license\" | \"read\" | \"decrypt\" | \"timeout\" | \"disabled\" | \"validate\" | \"maxExecutableActions\" | \"maxAlerts\" | \"maxQueuedActions\" | null | undefined; outcomeOrder?: number | undefined; outcomeMsg?: string[] | null | undefined; } & { outcome: \"warning\" | \"succeeded\" | \"failed\"; alertsCount: Readonly<{ active?: number | null | undefined; new?: number | null | undefined; recovered?: number | null | undefined; ignored?: number | null | undefined; } & {}>; }> | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -2910,7 +3265,9 @@
             "tags": [],
             "label": "nextRun",
             "description": [],
-            "signature": ["Date | null | undefined"],
+            "signature": [
+              "Date | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2933,7 +3290,9 @@
             "tags": [],
             "label": "running",
             "description": [],
-            "signature": ["boolean | null | undefined"],
+            "signature": [
+              "boolean | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2945,7 +3304,9 @@
             "tags": [],
             "label": "viewInAppRelativeUrl",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2957,7 +3318,9 @@
             "tags": [],
             "label": "alertDelay",
             "description": [],
-            "signature": ["Readonly<{} & { active: number; }> | undefined"],
+            "signature": [
+              "Readonly<{} & { active: number; }> | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3024,7 +3387,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Params"],
+            "signature": [
+              "Params"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3036,7 +3401,9 @@
             "tags": [],
             "label": "previousStartedAt",
             "description": [],
-            "signature": ["Date | null"],
+            "signature": [
+              "Date | null"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3102,7 +3469,9 @@
             "tags": [],
             "label": "startedAt",
             "description": [],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3114,7 +3483,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3126,7 +3497,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3158,7 +3531,9 @@
             "tags": [],
             "label": "maintenanceWindowIds",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3184,7 +3559,9 @@
                 "tags": [],
                 "label": "timeWindow",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3301,7 +3678,9 @@
             "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.alertFactory",
             "type": "CompoundType",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "alertFactory",
             "description": [
               "\nDeprecate alertFactory and remove when all rules are onboarded to\nthe alertsClient"
@@ -3328,34 +3707,6 @@
                 "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/custom_threshold/custom_threshold_executor.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
-              },
-              {
-                "plugin": "infra",
-                "path": "x-pack/plugins/infra/server/lib/alerting/inventory_metric_threshold/inventory_metric_threshold_executor.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
               },
@@ -3377,27 +3728,27 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/common.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/common.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/status_check.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/tls.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/tls.ts"
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
+                "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
               },
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/utils/rule_executor.test_helpers.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.test.ts"
+                "plugin": "slo",
+                "path": "x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/executor.test.ts"
               }
             ]
           },
@@ -3425,7 +3776,9 @@
             "tags": [],
             "label": "shouldWriteAlerts",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3439,7 +3792,9 @@
             "tags": [],
             "label": "shouldStopExecution",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3453,7 +3808,10 @@
             "tags": [],
             "label": "ruleMonitoringService",
             "description": [],
-            "signature": ["PublicMetricsSetters", " | undefined"],
+            "signature": [
+              "PublicMetricsSetters",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3526,6 +3884,14 @@
                 "section": "def-common.DataViewListItem",
                 "text": "DataViewListItem"
               },
+              "[]>; getAllDataViewLazy: (refresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -3550,7 +3916,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3654,7 +4020,47 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              "; createAndSave: (spec: ",
+              "; getDataViewLazy: (id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createDataViewLazy: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createAndSaveDataViewLazy: (spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", overwrite?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">; createAndSave: (spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3671,6 +4077,18 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
+              "AbstractDataView",
+              ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
+              "AbstractDataView",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | null>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3678,7 +4096,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
+              " | null>; toDataView: (dataViewLazy: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3686,7 +4112,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ">; updateSavedObject: (indexPattern: ",
+              ">; toDataViewLazy: (dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3694,23 +4120,15 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
               },
-              ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; }"
+              ">; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -3723,7 +4141,10 @@
             "tags": [],
             "label": "ruleResultService",
             "description": [],
-            "signature": ["PublicLastRunSetters", " | undefined"],
+            "signature": [
+              "PublicLastRunSetters",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3780,7 +4201,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Params"],
+            "signature": [
+              "Params"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3838,7 +4261,11 @@
             "tags": [],
             "label": "validate",
             "description": [],
-            "signature": ["{ params: ", "RuleTypeParamsValidator", "<Params>; }"],
+            "signature": [
+              "{ params: ",
+              "RuleTypeParamsValidator",
+              "<Params>; }"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3893,7 +4320,9 @@
             "tags": [],
             "label": "defaultActionGroupId",
             "description": [],
-            "signature": ["ActionGroupIds"],
+            "signature": [
+              "ActionGroupIds"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4095,7 +4524,9 @@
             "tags": [],
             "label": "defaultScheduleInterval",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4107,7 +4538,9 @@
             "tags": [],
             "label": "ruleTaskTimeout",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4119,7 +4552,9 @@
             "tags": [],
             "label": "cancelAlertsOnRuleTimeout",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4131,7 +4566,9 @@
             "tags": [],
             "label": "doesSetRecoveryContext",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4166,7 +4603,9 @@
             "description": [
               "\nDetermines whether framework should\nautomatically make recovery determination. Defaults to true."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4178,7 +4617,10 @@
             "tags": [],
             "label": "getViewInAppRelativeUrl",
             "description": [],
-            "signature": ["GetViewInAppRelativeUrlFn", "<Params> | undefined"],
+            "signature": [
+              "GetViewInAppRelativeUrlFn",
+              "<Params> | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4190,7 +4632,9 @@
             "tags": [],
             "label": "fieldsForAAD",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4227,7 +4671,10 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["AlertHit", "[]"],
+            "signature": [
+              "AlertHit",
+              "[]"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4338,7 +4785,7 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{ overwriteProducer?: \"siem\" | \"observability\" | \"stackAlerts\" | undefined; } & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; maxScheduledPerMinute: number; }>, \"minimumScheduleInterval\" | \"maxScheduledPerMinute\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
@@ -4352,7 +4799,9 @@
         "tags": [],
         "label": "AlertInstanceContext",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4366,7 +4815,15 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; group: string; }>[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 3 | 1 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
+          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: (Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
         "path": "x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "deprecated": false,
@@ -4382,7 +4839,9 @@
         "description": [
           "\nDefault alert index ILM policy\n- _meta.managed: notify users this is a managed policy and should be modified\n    at their own risk\n- no delete phase as we want to keep these indices around indefinitely\n\nThis should be used by all alerts-as-data indices"
         ],
-        "signature": ["\".alerts-ilm-policy\""],
+        "signature": [
+          "\".alerts-ilm-policy\""
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4395,7 +4854,9 @@
         "tags": [],
         "label": "DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT",
         "description": [],
-        "signature": ["10"],
+        "signature": [
+          "10"
+        ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4420,7 +4881,9 @@
         "tags": [],
         "label": "ECS_CONTEXT",
         "description": [],
-        "signature": ["\"ecs\""],
+        "signature": [
+          "\"ecs\""
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4480,7 +4943,9 @@
         "tags": [],
         "label": "LatestAlertInstanceStateSchema",
         "description": [],
-        "signature": ["{ [x: string]: any; }"],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4569,7 +5034,10 @@
         "tags": [],
         "label": "PublicFrameworkAlertsService",
         "description": [],
-        "signature": ["PublicAlertsService", " & { enabled: () => boolean; }"],
+        "signature": [
+          "PublicAlertsService",
+          " & { enabled: () => boolean; }"
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4582,7 +5050,9 @@
         "tags": [],
         "label": "RULE_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": ["\"alert\""],
+        "signature": [
+          "\"alert\""
+        ],
         "path": "x-pack/plugins/alerting/server/saved_objects/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4807,17 +5277,15 @@
             "section": "def-server.BulkOperationError",
             "text": "BulkOperationError"
           },
-          "[]; rules: (",
+          "[]; rules: ",
           {
             "pluginId": "alerting",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.Rule",
+            "section": "def-server.Rule",
             "text": "Rule"
           },
-          "<never> | ",
-          "RuleWithLegacyId",
-          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; untrack?: boolean | undefined; } & {}>) => Promise<",
+          "<Record<string, any>>[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; untrack?: boolean | undefined; } & {}>) => Promise<",
           "BulkDisableRulesResult",
           "<Record<string, any>>>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; untrack?: boolean | undefined; }) => Promise<void>; snooze: (options: ",
           "SnoozeRuleOptions",
@@ -4883,7 +5351,9 @@
         "tags": [],
         "label": "RuleTypeParams",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4896,7 +5366,9 @@
         "tags": [],
         "label": "RuleTypeState",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4909,7 +5381,9 @@
         "tags": [],
         "label": "ScopedQueryAlerts",
         "description": [],
-        "signature": ["{ [x: string]: string[]; }"],
+        "signature": [
+          "{ [x: string]: string[]; }"
+        ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4922,7 +5396,9 @@
         "tags": [],
         "label": "TOTAL_FIELDS_LIMIT",
         "description": [],
-        "signature": ["2500"],
+        "signature": [
+          "2500"
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4935,7 +5411,9 @@
         "tags": [],
         "label": "VALID_ALERT_INDEX_PREFIXES",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/plugins/alerting/server/alerts_service/resource_installer_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4997,7 +5475,9 @@
             "tags": [],
             "label": "shouldWrite",
             "description": [],
-            "signature": ["true"],
+            "signature": [
+              "true"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5129,7 +5609,9 @@
         "tags": [],
         "label": "contextToSchemaName",
         "description": [],
-        "signature": ["(context: string) => string"],
+        "signature": [
+          "(context: string) => string"
+        ],
         "path": "x-pack/plugins/alerting/common/alert_schema/context_to_schema_name.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5141,7 +5623,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_schema/context_to_schema_name.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5158,7 +5642,9 @@
         "tags": [],
         "label": "convertDurationToFrequency",
         "description": [],
-        "signature": ["(duration: string, denomination: number) => number"],
+        "signature": [
+          "(duration: string, denomination: number) => number"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5170,7 +5656,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5183,7 +5671,9 @@
             "tags": [],
             "label": "denomination",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5200,7 +5690,9 @@
         "tags": [],
         "label": "formatDuration",
         "description": [],
-        "signature": ["(duration: string, fullUnit: boolean | undefined) => string"],
+        "signature": [
+          "(duration: string, fullUnit: boolean | undefined) => string"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5212,7 +5704,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5225,7 +5719,9 @@
             "tags": [],
             "label": "fullUnit",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5377,7 +5873,9 @@
             "tags": [],
             "label": "{\n  name,\n  fieldMap,\n  dynamic,\n  includeSettings,\n}",
             "description": [],
-            "signature": ["GetComponentTemplateFromFieldMapOpts"],
+            "signature": [
+              "GetComponentTemplateFromFieldMapOpts"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/component_template_from_field_map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5394,7 +5892,9 @@
         "tags": [],
         "label": "getDurationNumberInItsUnit",
         "description": [],
-        "signature": ["(duration: string) => number"],
+        "signature": [
+          "(duration: string) => number"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5406,7 +5906,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5423,7 +5925,9 @@
         "tags": [],
         "label": "getDurationUnitValue",
         "description": [],
-        "signature": ["(duration: string) => string"],
+        "signature": [
+          "(duration: string) => string"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5435,7 +5939,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5477,7 +5983,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5525,7 +6033,9 @@
                 "tags": [],
                 "label": "rules",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5559,7 +6069,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["GetRuleTagsAggregationParams | undefined"],
+            "signature": [
+              "GetRuleTagsAggregationParams | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5576,7 +6088,9 @@
         "tags": [],
         "label": "getScopedQueryErrorMessage",
         "description": [],
-        "signature": ["(errorMessage: string) => string"],
+        "signature": [
+          "(errorMessage: string) => string"
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5588,7 +6102,9 @@
             "tags": [],
             "label": "errorMessage",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5605,7 +6121,9 @@
         "tags": [],
         "label": "isActionGroupDisabledForActionTypeId",
         "description": [],
-        "signature": ["(actionGroup: string, actionTypeId: string) => boolean"],
+        "signature": [
+          "(actionGroup: string, actionTypeId: string) => boolean"
+        ],
         "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5617,7 +6135,9 @@
             "tags": [],
             "label": "actionGroup",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5630,7 +6150,9 @@
             "tags": [],
             "label": "actionTypeId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5647,7 +6169,9 @@
         "tags": [],
         "label": "isScopedQueryError",
         "description": [],
-        "signature": ["(errorMessage: string) => boolean"],
+        "signature": [
+          "(errorMessage: string) => boolean"
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5659,7 +6183,9 @@
             "tags": [],
             "label": "errorMessage",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window_scoped_query_error_message.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5720,7 +6246,9 @@
             "tags": [],
             "label": "dynamic",
             "description": [],
-            "signature": ["boolean | \"strict\""],
+            "signature": [
+              "boolean | \"strict\""
+            ],
             "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/mapping_from_field_map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5737,7 +6265,9 @@
         "tags": [],
         "label": "parseDuration",
         "description": [],
-        "signature": ["(duration: string) => number"],
+        "signature": [
+          "(duration: string) => number"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5749,7 +6279,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5766,7 +6298,9 @@
         "tags": [],
         "label": "parseRuleCircuitBreakerErrorMessage",
         "description": [],
-        "signature": ["(message: string) => { summary: string; details?: string | undefined; }"],
+        "signature": [
+          "(message: string) => { summary: string; details?: string | undefined; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5778,7 +6312,9 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_circuit_breaker_error_message.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5795,7 +6331,9 @@
         "tags": [],
         "label": "validateDurationSchema",
         "description": [],
-        "signature": ["(duration: string) => string | undefined"],
+        "signature": [
+          "(duration: string) => string | undefined"
+        ],
         "path": "x-pack/plugins/alerting/common/parse_duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5807,7 +6345,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/parse_duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5824,7 +6364,9 @@
         "tags": [],
         "label": "validateNotifyWhenType",
         "description": [],
-        "signature": ["(notifyWhen: string) => string | undefined"],
+        "signature": [
+          "(notifyWhen: string) => string | undefined"
+        ],
         "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5836,7 +6378,9 @@
             "tags": [],
             "label": "notifyWhen",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5876,7 +6420,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["ActionGroupIds"],
+            "signature": [
+              "ActionGroupIds"
+            ],
             "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5935,7 +6481,9 @@
             "tags": [],
             "label": "deprecated",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5947,7 +6495,9 @@
             "tags": [],
             "label": "useWithTripleBracesInTemplates",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5959,7 +6509,9 @@
             "tags": [],
             "label": "usesPublicBaseUrl",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6206,7 +6758,9 @@
             "tags": [],
             "label": "hours",
             "description": [],
-            "signature": ["{ start: string; end: string; }"],
+            "signature": [
+              "{ start: string; end: string; }"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6312,7 +6866,9 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6324,7 +6880,9 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["\"OK\" | \"Active\""],
+            "signature": [
+              "\"OK\" | \"Active\""
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6347,7 +6905,9 @@
             "tags": [],
             "label": "actionGroupId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6359,7 +6919,9 @@
             "tags": [],
             "label": "activeStartDate",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6382,7 +6944,9 @@
             "tags": [],
             "label": "maintenanceWindowIds",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6441,7 +7005,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6486,7 +7052,9 @@
             "tags": [],
             "label": "throttle",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6531,7 +7099,9 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["\"OK\" | \"Active\" | \"Error\""],
+            "signature": [
+              "\"OK\" | \"Active\" | \"Error\""
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6543,7 +7113,9 @@
             "tags": [],
             "label": "lastRun",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6555,7 +7127,9 @@
             "tags": [],
             "label": "errorMessages",
             "description": [],
-            "signature": ["{ date: string; message: string; }[]"],
+            "signature": [
+              "{ date: string; message: string; }[]"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6645,7 +7219,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6657,7 +7233,9 @@
             "tags": [],
             "label": "skip_reason",
             "description": [],
-            "signature": ["\"RULE_NOT_MODIFIED\""],
+            "signature": [
+              "\"RULE_NOT_MODIFIED\""
+            ],
             "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6730,7 +7308,9 @@
             "tags": [],
             "label": "valuesWithTimestamp",
             "description": [],
-            "signature": ["{ [x: string]: number; }"],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7058,7 +7638,9 @@
             "tags": [],
             "label": "space_ids",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7081,7 +7663,9 @@
             "tags": [],
             "label": "maintenance_window_ids",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7273,7 +7857,9 @@
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7285,7 +7871,9 @@
             "tags": [],
             "label": "updatedBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7319,7 +7907,9 @@
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowSOProperties",
         "type": "Interface",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MaintenanceWindowSOProperties",
         "description": [],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
@@ -7429,7 +8019,9 @@
             "tags": [],
             "label": "categoryIds",
             "description": [],
-            "signature": ["string[] | null | undefined"],
+            "signature": [
+              "string[] | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7476,7 +8068,9 @@
             "tags": [],
             "label": "risk_score",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7488,7 +8082,9 @@
             "tags": [],
             "label": "severity",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7557,7 +8153,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7627,12 +8225,35 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.Rule.systemActions",
+            "type": "Array",
+            "tags": [],
+            "label": "systemActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleSystemAction",
+                "text": "RuleSystemAction"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.Rule.params",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Params"],
+            "signature": [
+              "Params"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7665,7 +8286,9 @@
             "tags": [],
             "label": "scheduledTaskId",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7677,7 +8300,9 @@
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7689,7 +8314,9 @@
             "tags": [],
             "label": "updatedBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7701,7 +8328,9 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7713,7 +8342,9 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7725,7 +8356,9 @@
             "tags": [],
             "label": "apiKey",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7737,7 +8370,9 @@
             "tags": [],
             "label": "apiKeyOwner",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7749,7 +8384,9 @@
             "tags": [],
             "label": "apiKeyCreatedByUser",
             "description": [],
-            "signature": ["boolean | null | undefined"],
+            "signature": [
+              "boolean | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7761,7 +8398,9 @@
             "tags": [],
             "label": "throttle",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7798,7 +8437,9 @@
             "tags": [],
             "label": "mutedInstanceIds",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7872,7 +8513,9 @@
             "tags": [],
             "label": "activeSnoozes",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7884,7 +8527,9 @@
             "tags": [],
             "label": "isSnoozedUntil",
             "description": [],
-            "signature": ["Date | null | undefined"],
+            "signature": [
+              "Date | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7917,7 +8562,9 @@
             "tags": [],
             "label": "nextRun",
             "description": [],
-            "signature": ["Date | null | undefined"],
+            "signature": [
+              "Date | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7940,7 +8587,9 @@
             "tags": [],
             "label": "running",
             "description": [],
-            "signature": ["boolean | null | undefined"],
+            "signature": [
+              "boolean | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7952,7 +8601,9 @@
             "tags": [],
             "label": "viewInAppRelativeUrl",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7999,7 +8650,9 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8106,7 +8759,9 @@
             "tags": [],
             "label": "useAlertDataForTemplate",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8160,7 +8815,9 @@
             "tags": [],
             "label": "notifyWhen",
             "description": [],
-            "signature": ["\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""],
+            "signature": [
+              "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8172,7 +8829,9 @@
             "tags": [],
             "label": "throttle",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8199,7 +8858,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"ok\" | \"error\" | \"active\" | \"warning\" | \"pending\" | \"unknown\""
+              "\"unknown\" | \"ok\" | \"error\" | \"active\" | \"warning\" | \"pending\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -8212,7 +8871,9 @@
             "tags": [],
             "label": "lastExecutionDate",
             "description": [],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8224,7 +8885,9 @@
             "tags": [],
             "label": "lastDuration",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8294,7 +8957,9 @@
             "tags": [],
             "label": "outcome",
             "description": [],
-            "signature": ["\"warning\" | \"succeeded\" | \"failed\""],
+            "signature": [
+              "\"warning\" | \"succeeded\" | \"failed\""
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8306,7 +8971,9 @@
             "tags": [],
             "label": "outcomeOrder",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8347,7 +9014,9 @@
             "tags": [],
             "label": "outcomeMsg",
             "description": [],
-            "signature": ["string[] | null | undefined"],
+            "signature": [
+              "string[] | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8456,7 +9125,9 @@
             "tags": [],
             "label": "p50",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8468,7 +9139,9 @@
             "tags": [],
             "label": "p95",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8480,7 +9153,9 @@
             "tags": [],
             "label": "p99",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8556,7 +9231,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8568,7 +9245,9 @@
             "tags": [],
             "label": "outcome",
             "description": [],
-            "signature": ["\"warning\" | \"succeeded\" | \"failed\" | undefined"],
+            "signature": [
+              "\"warning\" | \"succeeded\" | \"failed\" | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8673,7 +9352,9 @@
             "tags": [],
             "label": "duration",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8685,7 +9366,9 @@
             "tags": [],
             "label": "total_search_duration_ms",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8697,7 +9380,9 @@
             "tags": [],
             "label": "total_indexing_duration_ms",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8709,7 +9394,9 @@
             "tags": [],
             "label": "total_alerts_detected",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8721,7 +9408,9 @@
             "tags": [],
             "label": "total_alerts_created",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8733,7 +9422,9 @@
             "tags": [],
             "label": "gap_duration_s",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8800,7 +9491,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8812,7 +9505,9 @@
             "tags": [],
             "label": "skipRecurrences",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8941,7 +9636,9 @@
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8953,7 +9650,9 @@
             "tags": [],
             "label": "updatedBy",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9066,6 +9765,76 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.RuleSystemAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleSystemAction",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSystemAction.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSystemAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSystemAction.actionTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "actionTypeId",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSystemAction.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttributes",
+                "text": "SavedObjectAttributes"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleTagsAggregationFormattedResult",
         "type": "Interface",
         "tags": [],
@@ -9082,7 +9851,9 @@
             "tags": [],
             "label": "ruleTags",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9108,7 +9879,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["{ buckets: { key: { tags: string; }; doc_count: number; }[]; }"],
+            "signature": [
+              "{ buckets: { key: { tags: string; }; doc_count: number; }[]; }"
+            ],
             "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9246,7 +10019,9 @@
             "tags": [],
             "label": "defaultActionGroupId",
             "description": [],
-            "signature": ["ActionGroupIds"],
+            "signature": [
+              "ActionGroupIds"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9305,7 +10080,9 @@
             "tags": [],
             "label": "ruleTaskTimeout",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9317,7 +10094,9 @@
             "tags": [],
             "label": "defaultScheduleInterval",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9329,7 +10108,9 @@
             "tags": [],
             "label": "doesSetRecoveryContext",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9352,7 +10133,9 @@
             "tags": [],
             "label": "authorizedConsumers",
             "description": [],
-            "signature": ["{ [x: string]: ConsumerPrivileges; }"],
+            "signature": [
+              "{ [x: string]: ConsumerPrivileges; }"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9463,7 +10246,10 @@
             "tags": [],
             "label": "filters",
             "description": [],
-            "signature": ["ScopeQueryFilter", "[]"],
+            "signature": [
+              "ScopeQueryFilter",
+              "[]"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9475,7 +10261,9 @@
             "tags": [],
             "label": "dsl",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9554,7 +10342,9 @@
         "tags": [],
         "label": "actionErrorLogSortableColumns",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9567,7 +10357,9 @@
         "tags": [],
         "label": "ActionErrorLogSortFields",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9606,26 +10398,30 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.AlertInstanceContext",
-        "type": "Type",
+        "id": "def-common.ALERTING_FEATURE_ID",
+        "type": "string",
         "tags": [],
-        "label": "AlertInstanceContext",
+        "label": "ALERTING_FEATURE_ID",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
-        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
+        "signature": [
+          "\"alerts\""
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.ALERTS_FEATURE_ID",
-        "type": "string",
+        "id": "def-common.AlertInstanceContext",
+        "type": "Type",
         "tags": [],
-        "label": "ALERTS_FEATURE_ID",
+        "label": "AlertInstanceContext",
         "description": [],
-        "signature": ["\"alerts\""],
-        "path": "x-pack/plugins/alerting/common/index.ts",
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9637,7 +10433,9 @@
         "tags": [],
         "label": "AlertStatusValues",
         "description": [],
-        "signature": ["\"OK\" | \"Active\""],
+        "signature": [
+          "\"OK\" | \"Active\""
+        ],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9650,7 +10448,9 @@
         "tags": [],
         "label": "ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID",
         "description": [],
-        "signature": ["\"allFlappingSettings\""],
+        "signature": [
+          "\"allFlappingSettings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9663,7 +10463,9 @@
         "tags": [],
         "label": "ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID",
         "description": [],
-        "signature": ["\"allQueryDelaySettings\""],
+        "signature": [
+          "\"allQueryDelaySettings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9676,7 +10478,9 @@
         "tags": [],
         "label": "BASE_ALERTING_API_PATH",
         "description": [],
-        "signature": ["\"/api/alerting\""],
+        "signature": [
+          "\"/api/alerting\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9689,7 +10493,9 @@
         "tags": [],
         "label": "BulkEditSkipReason",
         "description": [],
-        "signature": ["\"RULE_NOT_MODIFIED\""],
+        "signature": [
+          "\"RULE_NOT_MODIFIED\""
+        ],
         "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9702,7 +10508,9 @@
         "tags": [],
         "label": "DEFAULT_LOOK_BACK_WINDOW",
         "description": [],
-        "signature": ["20"],
+        "signature": [
+          "20"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9715,7 +10523,9 @@
         "tags": [],
         "label": "DEFAULT_QUERY_DELAY",
         "description": [],
-        "signature": ["0"],
+        "signature": [
+          "0"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9728,7 +10538,9 @@
         "tags": [],
         "label": "DEFAULT_SERVERLESS_QUERY_DELAY",
         "description": [],
-        "signature": ["15"],
+        "signature": [
+          "15"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9741,7 +10553,9 @@
         "tags": [],
         "label": "DEFAULT_STATUS_CHANGE_THRESHOLD",
         "description": [],
-        "signature": ["4"],
+        "signature": [
+          "4"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9754,7 +10568,9 @@
         "tags": [],
         "label": "DefaultActionGroupId",
         "description": [],
-        "signature": ["\"default\""],
+        "signature": [
+          "\"default\""
+        ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9767,7 +10583,9 @@
         "tags": [],
         "label": "ENABLE_MAINTENANCE_WINDOWS",
         "description": [],
-        "signature": ["true"],
+        "signature": [
+          "true"
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9810,7 +10628,9 @@
         "tags": [],
         "label": "INTERNAL_ALERTING_API_FIND_RULES_PATH",
         "description": [],
-        "signature": ["\"/internal/alerting/rules/_find\""],
+        "signature": [
+          "\"/internal/alerting/rules/_find\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9823,7 +10643,9 @@
         "tags": [],
         "label": "INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH",
         "description": [],
-        "signature": ["\"/internal/alerting/rules/maintenance_window/_active\""],
+        "signature": [
+          "\"/internal/alerting/rules/maintenance_window/_active\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9836,7 +10658,9 @@
         "tags": [],
         "label": "INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH",
         "description": [],
-        "signature": ["\"/internal/alerting/rules/maintenance_window\""],
+        "signature": [
+          "\"/internal/alerting/rules/maintenance_window\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9849,7 +10673,9 @@
         "tags": [],
         "label": "INTERNAL_ALERTING_SNOOZE_RULE",
         "description": [],
-        "signature": ["\"/internal/alerting/rule/{id}/_snooze\""],
+        "signature": [
+          "\"/internal/alerting/rule/{id}/_snooze\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9862,7 +10688,9 @@
         "tags": [],
         "label": "INTERNAL_BASE_ALERTING_API_PATH",
         "description": [],
-        "signature": ["\"/internal/alerting\""],
+        "signature": [
+          "\"/internal/alerting\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9897,7 +10725,9 @@
         "tags": [],
         "label": "IsoWeekday",
         "description": [],
-        "signature": ["2 | 7 | 6 | 5 | 4 | 3 | 1"],
+        "signature": [
+          "2 | 1 | 7 | 6 | 5 | 4 | 3"
+        ],
         "path": "x-pack/plugins/alerting/common/iso_weekdays.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9925,7 +10755,9 @@
         "tags": [],
         "label": "LatestAlertInstanceStateSchema",
         "description": [],
-        "signature": ["{ [x: string]: any; }"],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9983,7 +10815,9 @@
         "tags": [],
         "label": "LatestThrottledActionSchema",
         "description": [],
-        "signature": ["{ [x: string]: Readonly<{} & { date: string; }>; }"],
+        "signature": [
+          "{ [x: string]: Readonly<{} & { date: string; }>; }"
+        ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9996,7 +10830,9 @@
         "tags": [],
         "label": "LEGACY_BASE_ALERT_API_PATH",
         "description": [],
-        "signature": ["\"/api/alerts\""],
+        "signature": [
+          "\"/api/alerts\""
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10009,7 +10845,9 @@
         "tags": [],
         "label": "MAINTENANCE_WINDOW_DATE_FORMAT",
         "description": [],
-        "signature": ["\"MM/DD/YY hh:mm A\""],
+        "signature": [
+          "\"MM/DD/YY hh:mm A\""
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10022,7 +10860,9 @@
         "tags": [],
         "label": "MAINTENANCE_WINDOW_FEATURE_ID",
         "description": [],
-        "signature": ["\"maintenanceWindow\""],
+        "signature": [
+          "\"maintenanceWindow\""
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10035,7 +10875,9 @@
         "tags": [],
         "label": "MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": ["\"maintenance-window\""],
+        "signature": [
+          "\"maintenance-window\""
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10048,7 +10890,9 @@
         "tags": [],
         "label": "MAINTENANCE_WINDOWS_APP_ID",
         "description": [],
-        "signature": ["\"maintenanceWindows\""],
+        "signature": [
+          "\"maintenanceWindows\""
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10058,7 +10902,9 @@
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindow",
         "type": "Type",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MaintenanceWindow",
         "description": [],
         "signature": [
@@ -10216,7 +11062,9 @@
         "tags": [],
         "label": "MaintenanceWindowDeepLinkIds",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10226,7 +11074,9 @@
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowSOAttributes",
         "type": "Type",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MaintenanceWindowSOAttributes",
         "description": [],
         "signature": [
@@ -10259,7 +11109,9 @@
         "tags": [],
         "label": "MANAGEMENT_APP_ID",
         "description": [],
-        "signature": ["\"management\""],
+        "signature": [
+          "\"management\""
+        ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10301,7 +11153,9 @@
         "tags": [],
         "label": "MAX_LOOK_BACK_WINDOW",
         "description": [],
-        "signature": ["20"],
+        "signature": [
+          "20"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10314,7 +11168,9 @@
         "tags": [],
         "label": "MAX_QUERY_DELAY",
         "description": [],
-        "signature": ["60"],
+        "signature": [
+          "60"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10327,7 +11183,9 @@
         "tags": [],
         "label": "MAX_STATUS_CHANGE_THRESHOLD",
         "description": [],
-        "signature": ["20"],
+        "signature": [
+          "20"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10340,7 +11198,9 @@
         "tags": [],
         "label": "MIN_LOOK_BACK_WINDOW",
         "description": [],
-        "signature": ["2"],
+        "signature": [
+          "2"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10353,7 +11213,9 @@
         "tags": [],
         "label": "MIN_QUERY_DELAY",
         "description": [],
-        "signature": ["0"],
+        "signature": [
+          "0"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10366,7 +11228,9 @@
         "tags": [],
         "label": "MIN_STATUS_CHANGE_THRESHOLD",
         "description": [],
-        "signature": ["2"],
+        "signature": [
+          "2"
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10379,7 +11243,9 @@
         "tags": [],
         "label": "MONITORING_HISTORY_LIMIT",
         "description": [],
-        "signature": ["200"],
+        "signature": [
+          "200"
+        ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10392,7 +11258,9 @@
         "tags": [],
         "label": "preconfiguredConnectorActionRefPrefix",
         "description": [],
-        "signature": ["\"preconfigured:\""],
+        "signature": [
+          "\"preconfigured:\""
+        ],
         "path": "x-pack/plugins/alerting/common/action_ref_prefix.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10405,7 +11273,9 @@
         "tags": [],
         "label": "READ_FLAPPING_SETTINGS_SUB_FEATURE_ID",
         "description": [],
-        "signature": ["\"readFlappingSettings\""],
+        "signature": [
+          "\"readFlappingSettings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10418,7 +11288,9 @@
         "tags": [],
         "label": "READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID",
         "description": [],
-        "signature": ["\"readQueryDelaySettings\""],
+        "signature": [
+          "\"readQueryDelaySettings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10431,7 +11303,9 @@
         "tags": [],
         "label": "RecoveredActionGroupId",
         "description": [],
-        "signature": ["\"recovered\""],
+        "signature": [
+          "\"recovered\""
+        ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10444,7 +11318,9 @@
         "tags": [],
         "label": "ReservedActionGroups",
         "description": [],
-        "signature": ["RecoveryActionGroupId | \"recovered\""],
+        "signature": [
+          "\"recovered\" | RecoveryActionGroupId"
+        ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10530,7 +11406,7 @@
         "signature": [
           "Omit<",
           "Options",
-          ", \"dtstart\" | \"until\" | \"byweekday\" | \"wkst\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
+          ", \"dtstart\" | \"until\" | \"wkst\" | \"byweekday\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
           {
             "pluginId": "@kbn/rrule",
             "scope": "common",
@@ -10567,6 +11443,28 @@
             "docId": "kibAlertingPluginApi",
             "section": "def-common.AlertsFilterTimeframe",
             "text": "AlertsFilterTimeframe"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleActionKey",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleActionKey",
+        "description": [],
+        "signature": [
+          "keyof ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleAction",
+            "text": "RuleAction"
           }
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
@@ -10632,7 +11530,9 @@
         "tags": [],
         "label": "RuleAlertData",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10645,7 +11545,9 @@
         "tags": [],
         "label": "RuleAlertingOutcome",
         "description": [],
-        "signature": ["\"warning\" | \"unknown\" | \"success\" | \"failure\""],
+        "signature": [
+          "\"unknown\" | \"warning\" | \"success\" | \"failure\""
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10658,7 +11560,9 @@
         "tags": [],
         "label": "RuleExecutionStatuses",
         "description": [],
-        "signature": ["\"ok\" | \"error\" | \"active\" | \"warning\" | \"pending\" | \"unknown\""],
+        "signature": [
+          "\"unknown\" | \"ok\" | \"error\" | \"active\" | \"warning\" | \"pending\""
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10671,7 +11575,9 @@
         "tags": [],
         "label": "RuleLastRunOutcomes",
         "description": [],
-        "signature": ["\"warning\" | \"succeeded\" | \"failed\""],
+        "signature": [
+          "\"warning\" | \"succeeded\" | \"failed\""
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10684,7 +11590,9 @@
         "tags": [],
         "label": "RuleNotifyWhenType",
         "description": [],
-        "signature": ["\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""],
+        "signature": [
+          "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
+        ],
         "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10697,7 +11605,9 @@
         "tags": [],
         "label": "RULES_SETTINGS_FEATURE_ID",
         "description": [],
-        "signature": ["\"rulesSettings\""],
+        "signature": [
+          "\"rulesSettings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10710,7 +11620,9 @@
         "tags": [],
         "label": "RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID",
         "description": [],
-        "signature": ["\"rules-settings\""],
+        "signature": [
+          "\"rules-settings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10723,7 +11635,9 @@
         "tags": [],
         "label": "RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID",
         "description": [],
-        "signature": ["\"query-delay-settings\""],
+        "signature": [
+          "\"query-delay-settings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10736,7 +11650,9 @@
         "tags": [],
         "label": "RULES_SETTINGS_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": ["\"rules-settings\""],
+        "signature": [
+          "\"rules-settings\""
+        ],
         "path": "x-pack/plugins/alerting/common/rules_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10830,8 +11746,32 @@
         "tags": [],
         "label": "RuleStatusValues",
         "description": [],
-        "signature": ["\"OK\" | \"Active\" | \"Error\""],
+        "signature": [
+          "\"OK\" | \"Active\" | \"Error\""
+        ],
         "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleSystemActionKey",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleSystemActionKey",
+        "description": [],
+        "signature": [
+          "keyof ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSystemAction",
+            "text": "RuleSystemAction"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10862,7 +11802,9 @@
         "tags": [],
         "label": "RuleTaskParams",
         "description": [],
-        "signature": ["{ alertId: string; } & { spaceId?: string | undefined; }"],
+        "signature": [
+          "{ alertId: string; } & { spaceId?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10875,7 +11817,9 @@
         "tags": [],
         "label": "RuleTypeMetaData",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10888,7 +11832,9 @@
         "tags": [],
         "label": "RuleTypeParams",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10901,7 +11847,9 @@
         "tags": [],
         "label": "RuleTypeState",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10999,7 +11947,9 @@
         "tags": [],
         "label": "systemConnectorActionRefPrefix",
         "description": [],
-        "signature": ["\"system_action:\""],
+        "signature": [
+          "\"system_action:\""
+        ],
         "path": "x-pack/plugins/alerting/common/action_ref_prefix.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11080,7 +12030,9 @@
             "tags": [],
             "label": "dynamic",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11114,7 +12066,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"boolean\""],
+                    "signature": [
+                      "\"boolean\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11139,7 +12093,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"text\""],
+                    "signature": [
+                      "\"text\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11173,7 +12129,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11213,7 +12171,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11238,7 +12198,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11285,7 +12247,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11314,7 +12278,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11339,7 +12305,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11364,7 +12332,9 @@
                     "tags": [],
                     "label": "dynamic",
                     "description": [],
-                    "signature": ["false"],
+                    "signature": [
+                      "false"
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11376,7 +12346,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"nested\""],
+                    "signature": [
+                      "\"nested\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11410,7 +12382,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11435,7 +12409,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11460,7 +12436,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11489,7 +12467,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"flattened\""],
+                    "signature": [
+                      "\"flattened\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11547,7 +12527,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"float\""],
+                            "signature": [
+                              "\"float\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11572,7 +12554,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -11601,7 +12585,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11626,7 +12612,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11651,7 +12639,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11676,7 +12666,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"date\""],
+                    "signature": [
+                      "\"date\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11701,7 +12693,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"date\""],
+                    "signature": [
+                      "\"date\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11728,7 +12722,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11753,7 +12749,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11778,7 +12776,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"boolean\""],
+                    "signature": [
+                      "\"boolean\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11803,7 +12803,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"keyword\""],
+                    "signature": [
+                      "\"keyword\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -11898,7 +12900,9 @@
                                             "tags": [],
                                             "label": "type",
                                             "description": [],
-                                            "signature": ["\"long\""],
+                                            "signature": [
+                                              "\"long\""
+                                            ],
                                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -11923,7 +12927,9 @@
                                             "tags": [],
                                             "label": "type",
                                             "description": [],
-                                            "signature": ["\"long\""],
+                                            "signature": [
+                                              "\"long\""
+                                            ],
                                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -11948,7 +12954,9 @@
                                             "tags": [],
                                             "label": "type",
                                             "description": [],
-                                            "signature": ["\"long\""],
+                                            "signature": [
+                                              "\"long\""
+                                            ],
                                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -11973,7 +12981,9 @@
                                             "tags": [],
                                             "label": "type",
                                             "description": [],
-                                            "signature": ["\"float\""],
+                                            "signature": [
+                                              "\"float\""
+                                            ],
                                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -12024,7 +13034,9 @@
                                             "tags": [],
                                             "label": "type",
                                             "description": [],
-                                            "signature": ["\"date\""],
+                                            "signature": [
+                                              "\"date\""
+                                            ],
                                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                             "deprecated": false,
                                             "trackAdoption": false
@@ -12071,7 +13083,9 @@
                                                     "tags": [],
                                                     "label": "type",
                                                     "description": [],
-                                                    "signature": ["\"long\""],
+                                                    "signature": [
+                                                      "\"long\""
+                                                    ],
                                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -12096,7 +13110,9 @@
                                                     "tags": [],
                                                     "label": "type",
                                                     "description": [],
-                                                    "signature": ["\"long\""],
+                                                    "signature": [
+                                                      "\"long\""
+                                                    ],
                                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -12121,7 +13137,9 @@
                                                     "tags": [],
                                                     "label": "type",
                                                     "description": [],
-                                                    "signature": ["\"long\""],
+                                                    "signature": [
+                                                      "\"long\""
+                                                    ],
                                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -12146,7 +13164,9 @@
                                                     "tags": [],
                                                     "label": "type",
                                                     "description": [],
-                                                    "signature": ["\"float\""],
+                                                    "signature": [
+                                                      "\"float\""
+                                                    ],
                                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -12171,7 +13191,9 @@
                                                     "tags": [],
                                                     "label": "type",
                                                     "description": [],
-                                                    "signature": ["\"float\""],
+                                                    "signature": [
+                                                      "\"float\""
+                                                    ],
                                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -12196,7 +13218,9 @@
                                                     "tags": [],
                                                     "label": "type",
                                                     "description": [],
-                                                    "signature": ["\"float\""],
+                                                    "signature": [
+                                                      "\"float\""
+                                                    ],
                                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                                     "deprecated": false,
                                                     "trackAdoption": false
@@ -12225,7 +13249,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "revision",
-                "description": ["// There is need to query for a rule by a specific revision"],
+                "description": [
+                  "// There is need to query for a rule by a specific revision"
+                ],
                 "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12237,7 +13263,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"long\""],
+                    "signature": [
+                      "\"long\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12262,7 +13290,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"nested\""],
+                    "signature": [
+                      "\"nested\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12296,7 +13326,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12321,7 +13353,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"long\""],
+                            "signature": [
+                              "\"long\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12346,7 +13380,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"date\""],
+                            "signature": [
+                              "\"date\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12410,7 +13446,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"long\""],
+                            "signature": [
+                              "\"long\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12435,7 +13473,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12460,7 +13500,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"date\""],
+                            "signature": [
+                              "\"date\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12485,7 +13527,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"long\""],
+                            "signature": [
+                              "\"long\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12532,7 +13576,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"keyword\""],
+                                    "signature": [
+                                      "\"keyword\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12557,7 +13603,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"keyword\""],
+                                    "signature": [
+                                      "\"keyword\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12608,7 +13656,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"keyword\""],
+                                    "signature": [
+                                      "\"keyword\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12633,7 +13683,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"keyword\""],
+                                    "signature": [
+                                      "\"keyword\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12688,7 +13740,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"keyword\""],
+                            "signature": [
+                              "\"keyword\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12713,7 +13767,9 @@
                             "tags": [],
                             "label": "type",
                             "description": [],
-                            "signature": ["\"float\""],
+                            "signature": [
+                              "\"float\""
+                            ],
                             "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                             "deprecated": false,
                             "trackAdoption": false
@@ -12762,7 +13818,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"float\""],
+                                    "signature": [
+                                      "\"float\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12787,7 +13845,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"float\""],
+                                    "signature": [
+                                      "\"float\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12812,7 +13872,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"float\""],
+                                    "signature": [
+                                      "\"float\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12837,7 +13899,9 @@
                                     "tags": [],
                                     "label": "type",
                                     "description": [],
-                                    "signature": ["\"float\""],
+                                    "signature": [
+                                      "\"float\""
+                                    ],
                                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                                     "deprecated": false,
                                     "trackAdoption": false
@@ -12870,7 +13934,9 @@
                     "tags": [],
                     "label": "type",
                     "description": [],
-                    "signature": ["\"boolean\""],
+                    "signature": [
+                      "\"boolean\""
+                    ],
                     "path": "x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -12958,7 +14024,9 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "signature": ["true"],
+            "signature": [
+              "true"
+            ],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13056,7 +14124,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13068,7 +14138,9 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13083,7 +14155,9 @@
         "tags": [],
         "label": "DisabledActionTypeIdsForActionGroup",
         "description": [],
-        "signature": ["Map<string, string[]>"],
+        "signature": [
+          "Map<string, string[]>"
+        ],
         "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13367,7 +14441,9 @@
         "tags": [],
         "label": "RecoveredActionGroup",
         "description": [],
-        "signature": ["{ readonly id: \"recovered\"; readonly name: string; }"],
+        "signature": [
+          "{ readonly id: \"recovered\"; readonly name: string; }"
+        ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13442,7 +14518,9 @@
         "tags": [],
         "label": "RuleLastRunOutcomeValues",
         "description": [],
-        "signature": ["readonly [\"succeeded\", \"warning\", \"failed\"]"],
+        "signature": [
+          "readonly [\"succeeded\", \"warning\", \"failed\"]"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,

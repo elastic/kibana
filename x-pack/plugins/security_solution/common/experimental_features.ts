@@ -21,6 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
   kubernetesEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
+
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -70,32 +71,55 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionUploadEnabled: true,
 
-  /*
+  /**
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne
+   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
+   * response actions in Response Console.
+   *
+   * Release: v8.13.0
    */
-  responseActionsSentinelOneV1Enabled: false,
+  responseActionsSentinelOneV1Enabled: true,
+
+  /**
+   * Enables use of SentinelOne response actions that complete asynchronously as well as support
+   * for more response actions.
+   */
+  responseActionsSentinelOneV2Enabled: false,
 
   /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
+
   /**
    * Enables the alert type column in KPI visualizations on Alerts Page
    */
   alertTypeEnabled: false,
+
   /**
    * Enables expandable flyout in create rule page, alert preview
    */
   expandableFlyoutInCreateRuleEnabled: true,
+
+  /**
+   * Enables expandable flyout for event type documents
+   */
+  expandableEventFlyoutEnabled: false,
+
+  /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: false,
   /*
+
+  /**
    * Enables new Set of filters on the Alerts page.
-   *
-   **/
+   */
   alertsPageFiltersEnabled: true,
 
   /**
@@ -103,23 +127,20 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /*
+  /**
    * Enables the new user details flyout displayed on the Alerts table.
-   *
-   **/
+   */
   newUserDetailsFlyout: true,
 
-  /*
+  /**
    * Enables the Managed User section inside the new user details flyout.
    * To see this section you also need newUserDetailsFlyout flag enabled.
-   *
-   **/
+   */
   newUserDetailsFlyoutManagedUser: false,
 
-  /*
+  /**
    * Enables the new host details flyout displayed on the Alerts table.
-   *
-   **/
+   */
   newHostDetailsFlyout: true,
 
   /**
@@ -155,26 +176,21 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables alerts suppression for indicator match rules
-   */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
-
-  /*
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
-  sentinelOneDataInAnalyzerEnabled: false,
+  sentinelOneDataInAnalyzerEnabled: true,
 
   /**
    * Enables SentinelOne manual host manipulation actions
    */
   sentinelOneManualHostActionsEnabled: true,
 
-  /*
+  /**
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
 
-  /*
+  /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
@@ -191,6 +207,10 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
+  /*
+   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineEnabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -203,9 +223,16 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Ticket: https://github.com/elastic/kibana/issues/166489
    * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Feb 12, 2023 in https://github.com/elastic/kibana/pull/174564
+   * Added: on Feb 12, 2024 in https://github.com/elastic/kibana/pull/174564
+   * Turned: on Feb 23, 2024 in https://github.com/elastic/kibana/pull/177495
+   * Expires: on Apr 23, 2024
    */
-  perFieldPrebuiltRulesDiffingEnabled: false,
+  perFieldPrebuiltRulesDiffingEnabled: true,
+
+  /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

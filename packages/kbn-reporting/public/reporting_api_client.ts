@@ -11,17 +11,18 @@ import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
-  REPORTING_MANAGEMENT_HOME,
-  buildKibanaPath,
-  getRedirectAppPath,
   INTERNAL_ROUTES,
   PUBLIC_ROUTES,
+  REPORTING_MANAGEMENT_HOME,
+  buildKibanaPath,
+  REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
 import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { Job, add } from '.';
+import { Job } from '.';
+import { jobCompletionNotifications } from './job_completion_notifications';
 
 /*
  * For convenience, apps do not have to provide the browserTimezone and Kibana version.
@@ -40,7 +41,7 @@ interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
   getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
+  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job | undefined>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
@@ -66,6 +67,7 @@ interface IReportingAPI {
  */
 export class ReportingAPIClient implements IReportingAPI {
   private http: HttpSetup;
+  private addPendingJobId = jobCompletionNotifications().addPendingJobId;
 
   constructor(
     http: HttpSetup,
@@ -81,7 +83,7 @@ export class ReportingAPIClient implements IReportingAPI {
     const path = buildKibanaPath({
       basePath: this.http.basePath.serverBasePath,
       spaceId: job.spaceId,
-      appPath: getRedirectAppPath(),
+      appPath: REPORTING_REDIRECT_APP,
     });
 
     const href = `${path}?${searchParams}`;
@@ -175,17 +177,29 @@ export class ReportingAPIClient implements IReportingAPI {
    */
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
-    const resp: { job: ReportApiJSON } = await this.http.post(
-      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ jobParams: jobParamsRison }),
+    try {
+      const resp: { job?: ReportApiJSON } | undefined = await this.http.post(
+        `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ jobParams: jobParamsRison }),
+        }
+      );
+      if (resp?.job) {
+        this.addPendingJobId(resp.job.id);
+        return new Job(resp.job);
       }
-    );
-    add(resp.job.id);
-    return new Job(resp.job);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      throw new Error('invalid response!');
+    }
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
     return this.http.post(INTERNAL_ROUTES.DOWNLOAD_CSV, {

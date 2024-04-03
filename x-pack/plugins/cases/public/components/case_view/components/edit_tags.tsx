@@ -15,8 +15,9 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -36,27 +37,6 @@ export interface EditTagsProps {
   tags: string[];
 }
 
-const MyFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    width: 100%;
-    p {
-      font-size: ${theme.eui.euiSizeM};
-      margin-block-end: unset;
-    }
-  `}
-`;
-
-const ColumnFlexGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    & {
-      max-width: 100%;
-      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
-        flex-direction: row;
-      }
-    }
-  `}
-`;
-
 export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps) => {
   const { permissions } = useCasesContext();
   const initialState = { tags };
@@ -69,6 +49,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
 
   const { submit } = form;
   const [isEditTags, setIsEditTags] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   const onSubmitTags = useCallback(async () => {
     const { isValid, data: newData } = await submit();
@@ -113,7 +94,17 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
+        <EuiFlexGroup
+          css={css`
+            width: 100%;
+            p {
+              font-size: ${euiTheme.size.m};
+              margin-block-end: unset;
+            }
+          `}
+          gutterSize="none"
+          data-test-subj="case-tags"
+        >
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {!isEditTags && (
             <EuiFlexItem>
@@ -121,7 +112,18 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
             </EuiFlexItem>
           )}
           {isEditTags && (
-            <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
+            <EuiFlexGroup
+              css={css`
+                & {
+                  max-width: 100%;
+                  @media only screen and (max-width: ${euiTheme.breakpoint.m}) {
+                    flex-direction: row;
+                  }
+                }
+              `}
+              data-test-subj="edit-tags"
+              direction="column"
+            >
               <EuiFlexItem>
                 <Form form={form}>
                   <UseField
@@ -167,9 +169,9 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </ColumnFlexGroup>
+            </EuiFlexGroup>
           )}
-        </MyFlexGroup>
+        </EuiFlexGroup>
       </EuiText>
     </EuiFlexItem>
   );

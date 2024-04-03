@@ -21,7 +21,7 @@ export const FLOATS_ONLY = /^[0-9]+(.?[0-9]+)?$/;
 type ValidationLibrary = Record<string, Validator>;
 
 // returns true if invalid
-export function validateHeaders<T>(headers: T): boolean {
+export function validateHeaders(headers: object): boolean {
   return Object.keys(headers).some((key) => {
     if (key) {
       const whiteSpaceRegEx = /[\s]/g;
@@ -110,11 +110,11 @@ const validateHTTP: ValidationLibrary = {
   },
   [ConfigKey.RESPONSE_HEADERS_CHECK]: ({ [ConfigKey.RESPONSE_HEADERS_CHECK]: value }) => {
     const headers = value as MonitorFields[ConfigKey.RESPONSE_HEADERS_CHECK];
-    return validateHeaders<MonitorFields[ConfigKey.RESPONSE_HEADERS_CHECK]>(headers);
+    return validateHeaders(headers);
   },
   [ConfigKey.REQUEST_HEADERS_CHECK]: ({ [ConfigKey.REQUEST_HEADERS_CHECK]: value }) => {
     const headers = value as MonitorFields[ConfigKey.REQUEST_HEADERS_CHECK];
-    return validateHeaders<MonitorFields[ConfigKey.REQUEST_HEADERS_CHECK]>(headers);
+    return validateHeaders(headers);
   },
   [ConfigKey.MAX_REDIRECTS]: ({ [ConfigKey.MAX_REDIRECTS]: value }) =>
     (!!value && !`${value}`.match(DIGITS_ONLY)) ||

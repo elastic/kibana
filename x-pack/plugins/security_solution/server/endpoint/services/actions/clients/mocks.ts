@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { DeepPartial } from 'utility-types';
@@ -60,6 +61,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     isolate: jest.fn().mockReturnValue(Promise.resolve()),
     release: jest.fn().mockReturnValue(Promise.resolve()),
     runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
+    processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -247,7 +249,22 @@ const createConnectorActionExecuteResponseMock = <TData>(
     status: 'ok',
   };
 
+  // @ts-expect-error upgrade typescript v4.9.5
   return merge(result, overrides);
+};
+
+const createConnectorActionsClientMock = ({
+  getAllResponse,
+}: {
+  getAllResponse?: ConnectorWithExtraFindData[];
+} = {}): ActionsClientMock => {
+  const client = actionsClientMock.create();
+
+  (client.getAll as jest.Mock).mockImplementation(async () => {
+    return getAllResponse ?? [];
+  });
+
+  return client;
 };
 
 export const responseActionsClientMock = Object.freeze({
@@ -266,7 +283,8 @@ export const responseActionsClientMock = Object.freeze({
   createIndexedResponse: createEsIndexTransportResponseMock,
 
   // Some common mocks when working with connector actions
-  createConnectorActionsClient: actionsClientMock.create,
+  createConnectorActionsClient: createConnectorActionsClientMock,
+  /** Create a mock connector instance */
   createConnector: createConnectorMock,
   createConnectorActionExecuteResponse: createConnectorActionExecuteResponseMock,
 });

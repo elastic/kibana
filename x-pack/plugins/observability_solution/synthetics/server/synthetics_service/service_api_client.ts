@@ -7,7 +7,7 @@
 
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
@@ -280,15 +280,20 @@ export class ServiceAPIClient {
     };
   }
 
+  isLoggable(result: unknown): result is { status?: any; request?: any } {
+    const objCast = result as object;
+    return Object.keys(objCast).some((k) => k === 'status' || k === 'request');
+  }
+
   logSuccessMessage(
     url: string,
     method: string,
     numMonitors: number,
-    result: AxiosResponse<any> | ServicePayload
+    result: AxiosResponse<unknown> | ServicePayload
   ) {
-    if ('status' in result || 'request' in result) {
+    if (this.isLoggable(result)) {
       if (result.data) {
-        this.logger.debug(result.data);
+        this.logger.debug(result.data as any);
       }
       this.logger.debug(
         `Successfully called service location ${url}${result.request?.path} with method ${method} with ${numMonitors} monitors`

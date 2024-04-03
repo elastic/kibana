@@ -32,7 +32,7 @@ export class DataViewLocatorDefinition
     });
 
     return constructLocatorPath({
-      datasetSelection: dataViewSelection.toPlainSelection(),
+      dataSourceSelection: dataViewSelection.toPlainSelection(),
       locatorParams,
       useHash,
     });

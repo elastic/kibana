@@ -416,6 +416,35 @@
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityLogsExplorer",
+            "id": "def-common.ObservabilityLogsExplorerLocators.datasetQualityLocator",
+            "type": "Object",
+            "tags": [],
+            "label": "datasetQualityLocator",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.DatasetQualityLocatorParams",
+                "text": "DatasetQualityLocatorParams"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

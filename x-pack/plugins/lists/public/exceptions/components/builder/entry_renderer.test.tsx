@@ -82,6 +82,7 @@ describe('BuilderEntryItem', () => {
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
+        exceptionItemIndex={0}
         showLabel
       />
     );
@@ -116,6 +117,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         allowCustomOptions
+        exceptionItemIndex={0}
       />
     );
 
@@ -153,6 +155,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         allowCustomOptions
+        exceptionItemIndex={0}
       />
     );
 
@@ -188,6 +191,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         allowCustomOptions={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -225,6 +229,7 @@ describe('BuilderEntryItem', () => {
         showLabel
         allowCustomOptions
         getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
+        exceptionItemIndex={0}
       />
     );
 
@@ -261,6 +266,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -300,6 +306,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -339,6 +346,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -378,6 +386,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -418,6 +427,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel
+        exceptionItemIndex={0}
       />
     );
 
@@ -459,6 +469,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel
+        exceptionItemIndex={0}
       />
     );
 
@@ -499,6 +510,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -542,6 +554,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -585,6 +598,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -628,6 +642,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -662,6 +677,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -721,6 +737,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -764,6 +781,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -805,6 +823,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -846,6 +865,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -887,6 +907,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -928,6 +949,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -975,6 +997,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -1016,6 +1039,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={mockSetErrorExists}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -1056,6 +1080,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={mockSetErrorExists}
         setWarningsExist={jest.fn()}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -1105,6 +1130,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={mockSetWarningsExists}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -1154,6 +1180,7 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={jest.fn()}
         setWarningsExist={mockSetWarningsExists}
         showLabel={false}
+        exceptionItemIndex={0}
       />
     );
 
@@ -1202,6 +1229,7 @@ describe('BuilderEntryItem', () => {
         osTypes={['windows']}
         showLabel={false}
         isDisabled={true}
+        exceptionItemIndex={0}
       />
     );
     expect(

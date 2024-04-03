@@ -6,10 +6,12 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
+  DashboardType,
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamDetails,
   DataStreamStatServiceResponse,
@@ -30,20 +32,16 @@ interface TableCriteria {
   };
 }
 
-export interface TimeRangeConfig {
-  from: string;
-  to: string;
-  refresh: {
-    isPaused: boolean;
-    interval: number;
-  };
-}
+export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
+  refresh: RefreshInterval;
+};
 
 interface FiltersCriteria {
   inactive: boolean;
   fullNames: boolean;
   timeRange: TimeRangeConfig;
   integrations: string[];
+  namespaces: string[];
   query?: string;
 }
 
@@ -118,6 +116,14 @@ export type DatasetQualityControllerTypeState =
   | {
       value: 'datasets.loaded';
       context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.dataStreamDetails.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.integrationDashboards.fetching';
+      context: DefaultDatasetQualityStateContext;
     };
 
 export type DatasetQualityControllerContext = DatasetQualityControllerTypeState['context'];
@@ -160,9 +166,14 @@ export type DatasetQualityControllerEvent =
       integrations: string[];
     }
   | {
+      type: 'UPDATE_NAMESPACES';
+      namespaces: string[];
+    }
+  | {
       type: 'UPDATE_QUERY';
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<Error>;

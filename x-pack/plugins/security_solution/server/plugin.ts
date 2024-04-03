@@ -20,6 +20,7 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
+import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
@@ -109,7 +110,6 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
@@ -152,6 +152,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
+  private completeExternalResponseActionsTask: CompleteExternalResponseActionsTask;
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
@@ -183,6 +184,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       experimentalFeatures: this.config.experimentalFeatures,
     };
+    this.completeExternalResponseActionsTask = new CompleteExternalResponseActionsTask({
+      endpointAppContext: this.endpointContext,
+    });
   }
 
   public setup(
@@ -209,6 +213,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         taskManager: plugins.taskManager,
         telemetry: core.analytics,
+        entityAnalyticsConfig: config.entityAnalytics,
       });
     }
 
@@ -397,6 +402,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         taskManager: plugins.taskManager!,
       });
+    }
+
+    if (plugins.taskManager) {
+      this.completeExternalResponseActionsTask.setup({ taskManager: plugins.taskManager });
     }
 
     core.getStartServices().then(([_, depsStart]) => {
@@ -632,16 +641,19 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      // TODO:PT remove this and use new method of EndpointAppServices
-      actionCreateService: actionCreateService(
-        core.elasticsearch.client.asInternalUser,
-        this.endpointContext
-      ),
       createFleetActionsClient,
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsClient,
+      connectorActions: plugins.actions,
     });
+
+    if (plugins.taskManager) {
+      this.completeExternalResponseActionsTask.start({
+        taskManager: plugins.taskManager,
+        esClient: core.elasticsearch.client.asInternalUser,
+      });
+    }
 
     this.telemetryReceiver.start(
       core,
@@ -715,6 +727,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
+    this.completeExternalResponseActionsTask.stop();
     licenseService.stop();
   }
 }
