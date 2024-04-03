@@ -11,7 +11,6 @@ import { pick } from 'lodash';
 
 import { Embeddable, embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
 import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
-import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +49,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   public readonly functionDescription: BehaviorSubject<string | undefined>;
   public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
   public readonly selectedDetectorIndex: BehaviorSubject<number | undefined>;
-  public readonly selectedEntities: BehaviorSubject<MlEntityField[] | undefined>;
+  public readonly selectedEntities: BehaviorSubject<Record<string, any> | undefined>;
 
   private apiSubscriptions = new Subscription();
 
@@ -78,7 +77,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
     >(this.apiSubscriptions, this, 'selectedDetectorIndex');
 
     this.selectedEntities = embeddableInputToSubject<
-      MlEntityField[] | undefined,
+      Record<string, any> | undefined,
       SingleMetricViewerEmbeddableInput
     >(this.apiSubscriptions, this, 'selectedEntities');
   }

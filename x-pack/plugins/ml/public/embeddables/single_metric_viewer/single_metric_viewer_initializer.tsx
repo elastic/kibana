@@ -21,7 +21,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SingleMetricViewerEmbeddableInput } from '..';
@@ -67,7 +66,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
 
   const handleStateUpdate = (
     action: TimeseriesexplorerActionType,
-    payload: string | number | MlEntityField
+    payload: string | number | Record<string, any>
   ) => {
     switch (action) {
       case APP_STATE_ACTION.SET_ENTITIES:
