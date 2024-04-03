@@ -8,12 +8,15 @@ import type { TimelineItem } from '../../../../../../common/search_strategy';
 import type { inputsModel } from '../../../../../common/store';
 
 interface TimerangeSimilarityProps {
-    end: inputsModel.InputsRange['timerange']['to'];
-    start: inputsModel.InputsRange['timerange']['from'];
-    timerangeKind: inputsModel.InputsRange['timerange']['kind'];
+  end: inputsModel.InputsRange['timerange']['to'];
+  start: inputsModel.InputsRange['timerange']['from'];
+  timerangeKind: inputsModel.InputsRange['timerange']['kind'];
 }
 
-export const isTimerangeSame = (prevProps: TimerangeSimilarityProps, nextProps: TimerangeSimilarityProps) =>
+export const isTimerangeSame = (
+  prevProps: TimerangeSimilarityProps,
+  nextProps: TimerangeSimilarityProps
+) =>
   prevProps.end === nextProps.end &&
   prevProps.start === nextProps.start &&
   prevProps.timerangeKind === nextProps.timerangeKind;

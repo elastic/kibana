@@ -6,14 +6,14 @@
  */
 
 import {
-    EuiFlexGroup,
-    EuiFlexItem,
-    EuiFlyoutHeader,
-    EuiFlyoutBody,
-    EuiFlyoutFooter,
-    EuiBadge,
-  } from '@elastic/eui';
-  import styled from 'styled-components';
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiBadge,
+} from '@elastic/eui';
+import styled from 'styled-components';
 
 export const TabHeaderContainer = styled.div`
   width: 100%;
@@ -47,7 +47,6 @@ export const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     display: flex;
   }
 `;
-
 
 export const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   background: none;

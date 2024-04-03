@@ -68,7 +68,7 @@ import {
   TabHeaderContainer,
 } from '../shared/layout';
 import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
-import { TimelineTabCommonProps } from '../shared/types';
+import type { TimelineTabCommonProps } from '../shared/types';
 
 const memoizedGetColumnHeaders: (
   headers: ColumnHeaderOptions[],

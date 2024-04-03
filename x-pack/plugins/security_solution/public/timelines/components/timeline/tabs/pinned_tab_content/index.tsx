@@ -44,7 +44,7 @@ import {
   StyledEuiFlyoutFooter,
   VerticalRule,
 } from '../shared/layout';
-import { TimelineTabCommonProps } from '../shared/types';
+import type { TimelineTabCommonProps } from '../shared/types';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
