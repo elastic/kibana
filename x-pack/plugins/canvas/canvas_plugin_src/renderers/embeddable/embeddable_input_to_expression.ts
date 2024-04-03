@@ -43,5 +43,5 @@ export function embeddableInputToExpression<
     ) as ConditionalReturnType;
   }
 
-  return undefined as C;
+  return undefined as ConditionalReturnType;
 }
