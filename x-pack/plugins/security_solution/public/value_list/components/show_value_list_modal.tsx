@@ -8,26 +8,28 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useState } from 'react';
 import { useListsPrivileges } from '../../detections/containers/detection_engine/lists/use_lists_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ValueListModal } from './value_list_modal';
 
 export const ShowValueListModal = ({
   listId,
   children,
-  shouldShowChildrenIfNoPermissions,
+  shouldShowContentIfModalNotAvailable,
 }: {
   listId: string;
   children: React.ReactNode;
-  shouldShowChildrenIfNoPermissions: boolean;
+  shouldShowContentIfModalNotAvailable: boolean;
 }) => {
   const [showModal, setShowModal] = useState(false);
   const { canWriteIndex, canReadIndex, loading } = useListsPrivileges();
+  const isValueItemsListModalEnabled = useIsExperimentalFeatureEnabled('valueListItemsModal');
 
   const onCloseModal = () => setShowModal(false);
 
   if (loading) return null;
 
-  if (!canReadIndex) {
-    return shouldShowChildrenIfNoPermissions ? <>{children}</> : null;
+  if (!canReadIndex || !isValueItemsListModalEnabled) {
+    return shouldShowContentIfModalNotAvailable ? <>{children}</> : null;
   }
 
   return (

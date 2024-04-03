@@ -233,6 +233,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModal: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

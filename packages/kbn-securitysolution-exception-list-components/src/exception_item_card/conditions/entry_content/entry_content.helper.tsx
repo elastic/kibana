@@ -23,7 +23,7 @@ const getEntryValue = (type: string, value: string | string[], showValueListModa
     ));
   } else if (type === 'list' && value) {
     return (
-      <ShowValueListModal shouldShowChildrenIfNoPermissions listId={value.toString()}>
+      <ShowValueListModal shouldShowContentIfModalNotAvailable listId={value.toString()}>
         {value}
       </ShowValueListModal>
     );

@@ -97,7 +97,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
         return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
       } else if (type === 'list' && value) {
         return (
-          <ShowValueListModal shouldShowChildrenIfNoPermissions listId={value.toString()}>
+          <ShowValueListModal shouldShowContentIfModalNotAvailable listId={value.toString()}>
             {value}
           </ShowValueListModal>
         );

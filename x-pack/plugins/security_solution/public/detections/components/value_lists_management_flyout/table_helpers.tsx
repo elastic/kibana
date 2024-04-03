@@ -30,7 +30,7 @@ export const buildColumns = (
     name: i18n.COLUMN_FILE_NAME,
     truncateText: false,
     render: (name: ListSchema['name'], item: ListSchema) => (
-      <ShowValueListModal shouldShowChildrenIfNoPermissions listId={item.id}>
+      <ShowValueListModal shouldShowContentIfModalNotAvailable listId={item.id}>
         {name}
       </ShowValueListModal>
     ),

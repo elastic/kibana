@@ -126,7 +126,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     return (
       <>
         {selectedValue && (
-          <ShowValueListModal shouldShowChildrenIfNoPermissions={false} listId={selectedValue}>
+          <ShowValueListModal shouldShowContentIfModalNotAvailable={false} listId={selectedValue}>
             Show value list
           </ShowValueListModal>
         )}
