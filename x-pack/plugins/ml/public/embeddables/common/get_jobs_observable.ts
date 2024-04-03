@@ -7,8 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { parseInterval } from '../../../common/util/parse_interval';
 import type { ExplorerJob } from '../../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';

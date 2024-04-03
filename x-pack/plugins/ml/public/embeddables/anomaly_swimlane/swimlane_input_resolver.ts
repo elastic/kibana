@@ -10,17 +10,20 @@ import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, from, of } from 'rxjs';
 import {
+  BehaviorSubject,
   catchError,
+  combineLatest,
   debounceTime,
+  from,
   map,
+  of,
   shareReplay,
   skipWhile,
   startWith,
   switchMap,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import type { AnomalySwimlaneServices } from '..';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';

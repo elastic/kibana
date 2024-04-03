@@ -33,16 +33,19 @@ import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } fro
 export const getServices = async (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ): Promise<AnomalySwimlaneEmbeddableServices> => {
-  const [coreStart, pluginsStart] = await getStartServices();
-
-  const { AnomalyDetectorService } = await import(
-    '../../application/services/anomaly_detector_service'
-  );
-  const { AnomalyTimelineService } = await import(
-    '../../application/services/anomaly_timeline_service'
-  );
-  const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
-  const { mlResultsServiceProvider } = await import('../../application/services/results_service');
+  const [
+    [coreStart, pluginsStart],
+    { AnomalyDetectorService },
+    { AnomalyTimelineService },
+    { mlApiServicesProvider },
+    { mlResultsServiceProvider },
+  ] = await Promise.all([
+    getStartServices(),
+    import('../../application/services/anomaly_detector_service'),
+    import('../../application/services/anomaly_timeline_service'),
+    import('../../application/services/ml_api_service'),
+    import('../../application/services/results_service'),
+  ]);
 
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
