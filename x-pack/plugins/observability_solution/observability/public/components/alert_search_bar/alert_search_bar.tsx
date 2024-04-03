@@ -101,6 +101,7 @@ export function ObservabilityAlertSearchBar({
           kuery,
           queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
           filters,
+          config: getEsQueryConfig(uiSettings),
         })
       );
     } catch (error) {
@@ -118,6 +119,7 @@ export function ObservabilityAlertSearchBar({
     rangeFrom,
     rangeTo,
     status,
+    uiSettings,
     toasts,
   ]);
 
