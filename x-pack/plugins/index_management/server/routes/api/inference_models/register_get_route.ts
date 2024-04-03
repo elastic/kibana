@@ -19,7 +19,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
-      // TODO: Use the client's built-in function rather than the transport whwn it's available
+      // TODO: Use the client's built-in function rather than the transport when it's available
       try {
         const { models } = await client.asCurrentUser.transport.request<{
           models: InferenceAPIConfigResponse[];
