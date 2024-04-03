@@ -44,6 +44,7 @@ interface AlertSearchBarContainerState {
   kuery: string;
   status: AlertStatus;
   filters: Filter[];
+  controlFilters: Filter[];
   savedQueryId?: string;
   filterControls: FilterItemObj[];
 }
@@ -64,6 +65,9 @@ interface AlertSearchBarStateTransitions {
   setFilters: (
     state: AlertSearchBarContainerState
   ) => (filters: Filter[]) => AlertSearchBarContainerState;
+  setControlFilters: (
+    state: AlertSearchBarContainerState
+  ) => (controlFilters: Filter[]) => AlertSearchBarContainerState;
   setSavedQueryId: (
     state: AlertSearchBarContainerState
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
@@ -78,6 +82,7 @@ const defaultState: AlertSearchBarContainerState = {
   kuery: '',
   status: ALERT_STATUS_ALL,
   filters: [],
+  controlFilters: [],
   filterControls: [],
 };
 
@@ -87,6 +92,7 @@ const transitions: AlertSearchBarStateTransitions = {
   setKuery: (state) => (kuery) => ({ ...state, kuery }),
   setStatus: (state) => (status) => ({ ...state, status }),
   setFilters: (state) => (filters) => ({ ...state, filters }),
+  setControlFilters: (state) => (controlFilters) => ({ ...state, controlFilters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
   setFilterControls: (state) => (filterControls) => ({ ...state, filterControls }),
 };
@@ -113,11 +119,20 @@ export function useAlertSearchBarStateContainer(
     setKuery,
     setStatus,
     setFilters,
+    setControlFilters,
     setSavedQueryId,
     setFilterControls,
   } = stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId, filterControls } =
-    useContainerSelector(stateContainer, (state) => state);
+  const {
+    rangeFrom,
+    rangeTo,
+    kuery,
+    status,
+    filters,
+    controlFilters,
+    savedQueryId,
+    filterControls,
+  } = useContainerSelector(stateContainer, (state) => state);
 
   useEffect(() => {
     if (!savedQuery) {
@@ -154,6 +169,8 @@ export function useAlertSearchBarStateContainer(
     onKueryChange: setKuery,
     filters,
     onFiltersChange: setFilters,
+    controlFilters,
+    onControlFiltersChange: setControlFilters,
     filterControls,
     onFilterControlsChange: setFilterControls,
     rangeFrom,

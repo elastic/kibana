@@ -32,7 +32,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
-import { AlertsFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -424,7 +424,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : dataViewSpec ? (
-        <AlertsFilterControls
+        <AlertFilterControls
           controlsUrlState={filterControlsUrlState}
           spaceId={spaceId}
           featureIds={[AlertConsumers.SIEM]}

@@ -10,7 +10,6 @@ import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
 import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
-import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { State } from '../../../common/store';
@@ -22,11 +21,12 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
-import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
+import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
+import { DetectionEnginePage } from './detection_engine';
 import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
-import { getMockedFilterGroupWithCustomFilters } from '@kbn/alerts-ui-shared/src/alert_filter_controls/mocks';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { mockAlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls/mocks';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -39,7 +39,7 @@ jest.mock('../../../common/components/query_bar', () => ({
 jest.mock('../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
 }));
-jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group');
+jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
 
 const mockStatusCapture = jest.fn();
 const GroupedAlertsTable: React.FC<AlertsTableComponentProps> = ({
@@ -139,6 +139,15 @@ jest.mock('../../../common/lib/kibana', () => {
         sessionView: {
           getSessionView: jest.fn().mockReturnValue(<div />),
         },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+            addDanger: jest.fn(),
+            remove: jest.fn(),
+          },
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
@@ -220,9 +229,9 @@ describe('DetectionEnginePageComponent', () => {
       indexPattern: {},
       browserFields: mockBrowserFields,
     });
-    (FilterGroup as jest.Mock).mockImplementation(() => {
-      return <span />;
-    });
+    jest
+      .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
+      .mockImplementation(() => <span data-test-subj="filter-group__loading" />);
     (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
   beforeEach(() => {
@@ -256,58 +265,51 @@ describe('DetectionEnginePageComponent', () => {
   });
 
   it('should pass building block filter to the alert Page Controls', async () => {
-    const MockedFilterGroup = FilterGroup as jest.Mock;
-    MockedFilterGroup.mockImplementationOnce(getMockedFilterGroupWithCustomFilters());
-    await waitFor(() => {
-      render(
-        <TestProviders store={createMockStore(stateWithBuildingBlockAlertsEnabled)}>
-          <Router history={mockHistory}>
-            <DetectionEnginePage />
-          </Router>
-        </TestProviders>
-      );
-    });
+    render(
+      <TestProviders store={createMockStore(stateWithBuildingBlockAlertsEnabled)}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
 
-    expect(MockedFilterGroup).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filters: [
-          {
-            meta: {
-              alias: null,
-              negate: true,
-              disabled: false,
-              type: 'exists',
-              key: 'kibana.alert.building_block_type',
-              value: 'exists',
-              index: dataViewId,
-            },
-            query: {
-              exists: {
-                field: 'kibana.alert.building_block_type',
+    await waitFor(() =>
+      expect(jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls')).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: [
+            {
+              meta: {
+                alias: null,
+                negate: true,
+                disabled: false,
+                type: 'exists',
+                key: 'kibana.alert.building_block_type',
+                value: 'exists',
+                index: dataViewId,
+              },
+              query: {
+                exists: {
+                  field: 'kibana.alert.building_block_type',
+                },
               },
             },
-          },
-        ],
-      }),
-      expect.anything()
+          ],
+        }),
+        expect.anything()
+      )
     );
   });
 
   it('should pass threat Indicator filter to the alert Page Controls', async () => {
-    const MockedFilterGroup = FilterGroup as jest.Mock;
-    MockedFilterGroup.mockImplementationOnce(getMockedFilterGroupWithCustomFilters());
+    render(
+      <TestProviders store={createMockStore(stateWithThreatIndicatorsAlertEnabled)}>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
 
-    await waitFor(() => {
-      render(
-        <TestProviders store={createMockStore(stateWithThreatIndicatorsAlertEnabled)}>
-          <Router history={mockHistory}>
-            <DetectionEnginePage />
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    expect(MockedFilterGroup).toHaveBeenCalledWith(
+    expect(jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls')).toHaveBeenCalledWith(
       expect.objectContaining({
         filters: [
           {
@@ -333,8 +335,8 @@ describe('DetectionEnginePageComponent', () => {
   });
 
   it('the pageFiltersUpdateHandler updates status when a multi status filter is passed', async () => {
-    (FilterGroup as jest.Mock).mockImplementationOnce(
-      getMockedFilterGroupWithCustomFilters([
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(
+      mockAlertFilterControls([
         {
           meta: {
             index: 'security-solution-default',
@@ -344,23 +346,22 @@ describe('DetectionEnginePageComponent', () => {
         },
       ])
     );
-    await waitFor(() => {
-      render(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <DetectionEnginePage />
-          </Router>
-        </TestProviders>
-      );
-    });
+
+    render(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
     // when statusFilter updates, we call mockStatusCapture in test mocks
     expect(mockStatusCapture).toHaveBeenNthCalledWith(1, []);
     expect(mockStatusCapture).toHaveBeenNthCalledWith(2, ['open', 'acknowledged']);
   });
 
   it('the pageFiltersUpdateHandler updates status when a single status filter is passed', async () => {
-    (FilterGroup as jest.Mock).mockImplementationOnce(
-      getMockedFilterGroupWithCustomFilters([
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(
+      mockAlertFilterControls([
         {
           meta: {
             index: 'security-solution-default',
@@ -387,23 +388,22 @@ describe('DetectionEnginePageComponent', () => {
         },
       ])
     );
-    await waitFor(() => {
-      render(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <DetectionEnginePage />
-          </Router>
-        </TestProviders>
-      );
-    });
+
+    render(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
     // when statusFilter updates, we call mockStatusCapture in test mocks
     expect(mockStatusCapture).toHaveBeenNthCalledWith(1, []);
     expect(mockStatusCapture).toHaveBeenNthCalledWith(2, ['open']);
   });
 
   it('the pageFiltersUpdateHandler clears status when no status filter is passed', async () => {
-    (FilterGroup as jest.Mock).mockImplementationOnce(
-      getMockedFilterGroupWithCustomFilters([
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(
+      mockAlertFilterControls([
         {
           meta: {
             index: 'security-solution-default',
@@ -418,15 +418,14 @@ describe('DetectionEnginePageComponent', () => {
         },
       ])
     );
-    await waitFor(() => {
-      render(
-        <TestProviders>
-          <Router history={mockHistory}>
-            <DetectionEnginePage />
-          </Router>
-        </TestProviders>
-      );
-    });
+
+    render(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <DetectionEnginePage />
+        </Router>
+      </TestProviders>
+    );
     // when statusFilter updates, we call mockStatusCapture in test mocks
     expect(mockStatusCapture).toHaveBeenNthCalledWith(1, []);
     expect(mockStatusCapture).toHaveBeenNthCalledWith(2, []);

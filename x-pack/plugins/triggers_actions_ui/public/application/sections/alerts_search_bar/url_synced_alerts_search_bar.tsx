@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { AlertsFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
@@ -65,6 +65,8 @@ export const UrlSyncedAlertsSearchBar = ({
     onKueryChange,
     filters,
     onFiltersChange,
+    controlFilters,
+    onControlFiltersChange,
     rangeFrom,
     onRangeFromChange,
     rangeTo,
@@ -97,7 +99,7 @@ export const UrlSyncedAlertsSearchBar = ({
             from: rangeFrom,
           },
           kuery,
-          filters,
+          filters: [...filters, ...controlFilters],
         })
       );
     } catch (error) {
@@ -107,6 +109,7 @@ export const UrlSyncedAlertsSearchBar = ({
       onKueryChange('');
     }
   }, [
+    controlFilters,
     filters,
     kuery,
     onActiveFeatureFiltersChange,
@@ -135,15 +138,15 @@ export const UrlSyncedAlertsSearchBar = ({
         rangeTo={rangeTo}
         query={kuery}
         onQuerySubmit={onQueryChange}
-        // filters={filters}
-        // onFiltersUpdated={onFiltersChange}
+        filters={filters}
+        onFiltersUpdated={onFiltersChange}
         savedQuery={savedQuery}
         onSavedQueryUpdated={setSavedQuery}
         onClearSavedQuery={clearSavedQuery}
         {...rest}
       />
       {showFilterControls && (
-        <AlertsFilterControls
+        <AlertFilterControls
           dataViewSpec={{
             id: 'unified-alerts-dv',
             title: '.alerts-*',
@@ -151,8 +154,8 @@ export const UrlSyncedAlertsSearchBar = ({
           spaceId={spaceId}
           chainingSystem="HIERARCHICAL"
           controlsUrlState={filterControls}
-          filters={filters}
-          onFilterChange={onFiltersChange}
+          filters={controlFilters}
+          onFilterChange={onControlFiltersChange}
           dependencies={{
             http,
             notifications,

@@ -10,13 +10,13 @@ import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
+import { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
 import { TEST_IDS } from '../constants';
-import type { FilterGroupProps } from '../types';
 import { getControlGroupMock } from './control_group';
 
 /**
  *
- *  Retrieves a simple of FilterGroup Item.
+ *  Retrieves a simple of AlertFilterControls Item.
  *   - Can also call callback onFilterChange with custom args
  *
  * @example
@@ -25,7 +25,7 @@ import { getControlGroupMock } from './control_group';
  *
  *const TestComponent = () => (
  *  <TestProviders>
- *    <FilterGroup
+ *    <AlertFilterControls
  *      chainingSystem="NONE"
  *      dataViewId=""
  *      initialControls={[]}
@@ -39,8 +39,8 @@ import { getControlGroupMock } from './control_group';
  *
  *describe('Some test', () => {
  *  it('basic test', () => {
- *    (FilterGroup as jest.Mock).mockImplementationOnce(
- *      getMockedFilterGroupWithCustomFilters([
+ *    (AlertFilterControls as jest.Mock).mockImplementationOnce(
+ *      mockAlertFilterControls([
  *        {
  *          meta: {
  *            params: ['open'],
@@ -62,8 +62,8 @@ import { getControlGroupMock } from './control_group';
  *});
  *
  */
-export function getMockedFilterGroupWithCustomFilters(outputFilters?: Filter[]) {
-  const FilterGroup: FC<FilterGroupProps> = ({ onInit, onFilterChange }) => {
+export const mockAlertFilterControls = (outputFilters?: Filter[]) => {
+  const Component: FC<AlertFilterControlsProps> = ({ onInit, onFilterChange }) => {
     useEffect(() => {
       if (onInit) {
         onInit(getControlGroupMock() as unknown as ControlGroupContainer);
@@ -77,5 +77,5 @@ export function getMockedFilterGroupWithCustomFilters(outputFilters?: Filter[]) 
     return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
   };
 
-  return FilterGroup;
-}
+  return Component as unknown as typeof AlertFilterControls;
+};

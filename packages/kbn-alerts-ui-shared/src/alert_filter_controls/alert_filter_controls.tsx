@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ComponentProps, memo } from 'react';
+import { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { isEqual } from 'lodash';
 import { EuiFlexItem } from '@elastic/eui';
 import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -51,7 +50,7 @@ export type AlertFilterControlsProps = Omit<
 /**
  * A configurable alert filters bar based on the controls embeddable
  */
-export const AlertsFilterControls = memo((props: AlertFilterControlsProps) => {
+export const AlertFilterControls = (props: AlertFilterControlsProps) => {
   const {
     featureIds = [AlertConsumers.STACK_ALERTS],
     defaultControls = DEFAULT_CONTROLS,
@@ -131,4 +130,4 @@ export const AlertsFilterControls = memo((props: AlertFilterControlsProps) => {
       defaultControls={defaultControls}
     />
   );
-}, isEqual);
+};
