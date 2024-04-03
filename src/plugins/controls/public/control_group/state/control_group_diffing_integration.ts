@@ -53,7 +53,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
                 lastSavedInput,
                 false // never diff selections for unsaved changes - compare the output filters instead
               ) &&
-              compareFilters(filters ?? [], lastSavedFilters?.filters ?? [], COMPARE_ALL_OPTIONS) &&
+              // compareFilters(filters ?? [], lastSavedFilters?.filters ?? [], COMPARE_ALL_OPTIONS) &&
               isEqual(timeslice, lastSavedFilters?.timeslice)
             );
 

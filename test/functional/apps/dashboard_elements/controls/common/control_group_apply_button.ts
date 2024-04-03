@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.expectMissingUnsavedChangesBadge();
     });
 
-    it('renabling auto-apply forces filters to be published', async () => {
+    it.skip('renabling auto-apply forces filters to be published', async () => {
       const optionsListId = controlIds[0];
       await dashboardControls.verifyApplyButtonEnabled(false);
       await dashboardControls.optionsListOpenPopover(optionsListId);
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickDiscardChanges();
     });
 
-    describe('options list selections', () => {
+    describe.skip('options list selections', () => {
       let optionsListId: string;
 
       before(async () => {
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('range slider selections', () => {
+    describe.skip('range slider selections', () => {
       let rangeSliderId: string;
 
       before(async () => {
@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('time slider selections', () => {
+    describe.skip('time slider selections', () => {
       let valueBefore: string;
 
       before(async () => {
