@@ -286,8 +286,7 @@ export const EditorMenu = ({
               ...factoryGroup.factories.map((factory) => {
                 return getEmbeddableFactoryMenuItem(factory, closePopover);
               }),
-              // @ts-expect-error
-              ...addPanelGroup.items,
+              ...(addPanelGroup?.items ?? []),
             ],
           });
         } else if (factoryGroup) {
@@ -303,11 +302,9 @@ export const EditorMenu = ({
           additionalPanels.push({
             id: panelId,
             title: factoryGroup.appName,
-            items: [
-              ...factoryGroup.factories.map((factory) => {
-                return getEmbeddableFactoryMenuItem(factory, closePopover);
-              }),
-            ],
+            items: factoryGroup.factories.map((factory) => {
+              return getEmbeddableFactoryMenuItem(factory, closePopover);
+            }),
           });
         } else if (addPanelGroup) {
           const panelId = addPanelGroup.id;
@@ -315,7 +312,6 @@ export const EditorMenu = ({
           initialPanelGroups.push({
             'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
             name: addPanelGroup.title,
-            // @ts-expect-error
             icon: addPanelGroup.icon,
             panel: panelId,
           });
@@ -325,7 +321,6 @@ export const EditorMenu = ({
             title: addPanelGroup.title,
             items: addPanelGroup.items,
           });
-          panelCount++;
         }
       }
     );

@@ -68,10 +68,11 @@ describe('getAddPanelActionMenuItems', () => {
         toolTipContent: 'Action tooltip',
       },
     ]);
-    expect(grouped).toEqual({
+    expect(grouped).toStrictEqual({
       groupedAddPanelAction: {
         id: 'groupedAddPanelAction',
         title: 'Custom group',
+        icon: 'logoElasticsearch',
         items: [
           {
             'data-test-subj': 'create-action-Action name 01',
