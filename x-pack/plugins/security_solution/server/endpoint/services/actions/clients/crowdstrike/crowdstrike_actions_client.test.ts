@@ -89,7 +89,7 @@ describe('CrowdstrikeActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes', async () => {
+    it('should write action request to endpoint indexes', async () => {
       await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
 
       // we do not write response to es yet
@@ -158,7 +158,7 @@ describe('CrowdstrikeActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes', async () => {
+    it('should write action request to endpoint indexes', async () => {
       await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
 
       // we do not write response to es yet
