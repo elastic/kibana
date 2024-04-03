@@ -91,7 +91,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
               'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
               {
                 defaultMessage:
-                  'The referenced model for this inference endpoint will be stated when adding this field.',
+                  'The referenced model for this inference endpoint will be started when adding this field.',
               }
             )}
           />

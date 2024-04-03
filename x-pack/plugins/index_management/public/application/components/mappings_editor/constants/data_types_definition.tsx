@@ -912,7 +912,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.semanticTextLongDescription"
-          defaultMessage="Semantic text field references inference id used for text embeddings."
+          defaultMessage="Semantic text fields enable semantic search using text embeddings."
         />
       </p>
     ),
