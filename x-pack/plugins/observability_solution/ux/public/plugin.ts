@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   FetchDataParams,
@@ -60,7 +60,7 @@ export interface ApmPluginSetupDeps {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -72,7 +72,7 @@ export interface ApmPluginStartDeps {
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;

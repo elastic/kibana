@@ -341,8 +341,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/176882
-  describe.skip('Search source Alert', () => {
+  describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
