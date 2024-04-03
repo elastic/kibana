@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { sumBy } from 'lodash';
 
 import type { Filter } from '@kbn/es-query';
+
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
@@ -221,7 +222,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       visualizationId,
     });
     const embeddedDataLoaded = !loading && !isEmpty(responses);
-
     const aggregationBucketsCount = useMemo(
       () =>
         loading
@@ -231,6 +231,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             ),
       [loading, responses]
     );
+
     const embeddedDataAvailable = !!aggregationBucketsCount;
 
     const subtitle = showHistogram
