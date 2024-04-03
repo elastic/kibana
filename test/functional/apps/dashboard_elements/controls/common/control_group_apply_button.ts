@@ -12,6 +12,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
+  const browser = getService('browser');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
@@ -56,10 +58,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListWaitForLoading(controlIds[0]);
       await dashboardControls.rangeSliderWaitForLoading(controlIds[1]);
 
+      const before = await browser.getSessionStorage('dashboardStateManagerPanels');
+      log.debug('BEFORE', before);
+
       // save the dashboard
       await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
+
+      const after = await browser.getSessionStorage('dashboardStateManagerPanels');
+      log.debug('after', after);
       await dashboard.expectMissingUnsavedChangesBadge();
     });
 

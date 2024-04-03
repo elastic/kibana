@@ -596,6 +596,12 @@ class BrowserService extends FtrService {
     await this.driver.executeScript('return window.sessionStorage.clear();');
   }
 
+  public async getSessionStorage(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(
+      `return window.sessionStorage.getItem("${key}");`
+    );
+  }
+
   /**
    * Get from the "local storage" by key
    *
