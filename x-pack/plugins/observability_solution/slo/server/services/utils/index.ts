@@ -23,7 +23,7 @@ export const getFlattenedGroupings = ({
   groupings: Record<string, unknown>;
 }): Groupings => {
   const groupByFields = groupBy ? [groupBy].flat() : [];
-  const hasGroupings = Object.keys(groupings || []).length;
+  const hasGroupings = Object.keys(groupings ?? {}).length;
   const formattedGroupings = hasGroupings
     ? groupByFields.reduce<Groupings>((acc, group) => {
         acc[group] = `${get(groupings, group)}`;

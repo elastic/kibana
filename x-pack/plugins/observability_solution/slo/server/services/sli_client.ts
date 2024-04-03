@@ -21,14 +21,14 @@ import {
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Duration, IndicatorData, SLO } from '../domain/models';
+import { DateRange, Duration, IndicatorData, SLODefinition } from '../domain/models';
 import { InternalQueryError } from '../errors';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';
 
 export interface SLIClient {
   fetchSLIDataFrom(
-    slo: SLO,
+    slo: SLODefinition,
     instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>>;
@@ -47,7 +47,7 @@ export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
   async fetchSLIDataFrom(
-    slo: SLO,
+    slo: SLODefinition,
     instanceId: string,
     lookbackWindows: LookbackWindow[],
     remoteName?: string
@@ -100,7 +100,7 @@ export class DefaultSLIClient implements SLIClient {
 }
 
 function commonQuery(
-  slo: SLO,
+  slo: SLODefinition,
   instanceId: string,
   dateRange: DateRange
 ): Pick<MsearchMultisearchBody, 'size' | 'query'> {

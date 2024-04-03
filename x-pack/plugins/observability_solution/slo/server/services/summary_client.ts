@@ -16,34 +16,41 @@ import {
 } from '@kbn/slo-schema';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, SLO, Summary, Groupings, Meta } from '../domain/models';
+import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
 
-interface Props {
-  slo: SLO;
+interface Params {
+  slo: SLODefinition;
   instanceId?: string;
   remoteName?: string;
 }
 
+interface SummaryResult {
+  summary: Summary;
+  groupings: Groupings;
+  meta: Meta;
+}
+
+// TODO Kevin: This is called "SummaryClient" but is responsible for:
+// - computing summary
+// - formatting groupings
+// - adding extra Meta parameter for synthetics
 export interface SummaryClient {
-  computeSummary(props: Props): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }>;
+  computeSummary(params: Params): Promise<SummaryResult>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async computeSummary({
-    instanceId,
-    slo,
-    remoteName,
-  }: Props): Promise<{ summary: Summary; groupings: Groupings; meta: Meta }> {
+  async computeSummary({ slo, instanceId, remoteName }: Params): Promise<SummaryResult> {
     const dateRange = toDateRange(slo.timeWindow);
     const isDefinedWithGroupBy = ![slo.groupBy].flat().includes(ALL_VALUE);
     const hasInstanceId = instanceId !== ALL_VALUE;
-    const includeInstanceIdQueries = isDefinedWithGroupBy && hasInstanceId;
-    const extraInstanceIdFilter = includeInstanceIdQueries
+    const shouldIncludeInstanceIdFilter = isDefinedWithGroupBy && hasInstanceId;
+
+    const instanceIdFilter = shouldIncludeInstanceIdFilter
       ? [{ term: { 'slo.instanceId': instanceId } }]
       : [];
     const extraGroupingsAgg = {
@@ -79,13 +86,13 @@ export class DefaultSummaryClient implements SummaryClient {
                 '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
               },
             },
-            ...extraInstanceIdFilter,
+            ...instanceIdFilter,
           ],
         },
       },
       // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
       aggs: {
-        ...(includeInstanceIdQueries && extraGroupingsAgg),
+        ...(shouldIncludeInstanceIdFilter && extraGroupingsAgg),
         ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
           good: {
             sum: { field: 'slo.isGoodSlice' },
@@ -141,7 +148,7 @@ export class DefaultSummaryClient implements SummaryClient {
         status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
       },
       groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
-      meta: getMetaFields(slo, source || {}),
+      meta: getMetaFields(slo, source ?? {}),
     };
   }
 }
@@ -155,7 +162,7 @@ function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: 
 }
 
 function getMetaFields(
-  slo: SLO,
+  slo: SLODefinition,
   source: { monitor?: { id?: string }; config_id?: string; observer?: { name?: string } }
 ): Meta {
   const {
@@ -165,9 +172,9 @@ function getMetaFields(
     case 'sli.synthetics.availability':
       return {
         synthetics: {
-          monitorId: source.monitor?.id || '',
-          locationId: source.observer?.name || '',
-          configId: source.config_id || '',
+          monitorId: source.monitor?.id ?? '',
+          locationId: source.observer?.name ?? '',
+          configId: source.config_id ?? '',
         },
       };
     default:

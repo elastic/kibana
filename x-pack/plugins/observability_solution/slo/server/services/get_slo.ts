@@ -6,9 +6,8 @@
  */
 
 import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
-import { Groupings, Meta, SLO, Summary } from '../domain/models';
-import { SummaryClient } from './summary_client';
 import { SloDefinitionClient } from './slo_definition_client';
+import { SummaryClient } from './summary_client';
 
 export class GetSLO {
   constructor(
@@ -23,31 +22,21 @@ export class GetSLO {
   ): Promise<GetSLOResponse> {
     const instanceId = params.instanceId ?? ALL_VALUE;
     const remoteName = params.remoteName;
-    const slo = await this.definitionClient.execute(sloId, spaceId, remoteName);
-    if (!slo) {
-      throw new Error(`SLO [id=${sloId}] not found [spaceId=${spaceId}, remoteName=${remoteName}]`);
-    }
-
+    const { slo, remote } = await this.definitionClient.execute(sloId, spaceId, remoteName);
     const { summary, groupings, meta } = await this.summaryClient.computeSummary({
       slo,
       instanceId,
       remoteName,
     });
 
-    return getSLOResponseSchema.encode(
-      mergeSloWithSummary(slo, summary, instanceId, groupings, meta, remoteName, slo.kibanaUrl)
-    );
+    return getSLOResponseSchema.encode({
+      ...slo,
+      instanceId,
+      summary,
+      groupings,
+      meta,
+      remoteName,
+      kibanaUrl: remote?.kibanaUrl,
+    });
   }
-}
-
-function mergeSloWithSummary(
-  slo: SLO,
-  summary: Summary,
-  instanceId: string,
-  groupings: Groupings,
-  meta: Meta,
-  remoteName?: string,
-  kibanaUrl?: string
-) {
-  return { ...slo, instanceId, summary, groupings, meta, remoteName, kibanaUrl };
 }

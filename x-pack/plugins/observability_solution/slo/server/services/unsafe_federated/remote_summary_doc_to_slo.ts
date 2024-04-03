@@ -69,7 +69,7 @@ function getIndicatorParams(logger: Logger, summaryDoc: EsSummaryDocument): Indi
   return getDummyIndicatorParams(summaryDoc);
 }
 
-function getDummyIndicatorParams(summaryDoc: EsSummaryDocument) {
+function getDummyIndicatorParams(summaryDoc: EsSummaryDocument): Indicator['params'] {
   let params: Indicator['params'] | undefined;
   switch (summaryDoc.slo.indicator.type) {
     case 'sli.kql.custom':

@@ -7,10 +7,17 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { SLO } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { SLORepository } from './slo_repository';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
+
+type SLODefinitionResult = {
+  slo: SLODefinition;
+  remote?: {
+    kibanaUrl: string;
+  };
+};
 
 export class SloDefinitionClient {
   constructor(
@@ -23,7 +30,7 @@ export class SloDefinitionClient {
     sloId: string,
     spaceId: string,
     remoteName?: string
-  ): Promise<SLO | undefined> {
+  ): Promise<SLODefinitionResult> {
     if (remoteName) {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
@@ -35,12 +42,31 @@ export class SloDefinitionClient {
       });
 
       if (summarySearch.hits.hits.length === 0) {
-        return undefined;
+        throw new Error(
+          `Remote SLO [id=${sloId}, spaceId=${spaceId}, remoteName=${remoteName}] not found`
+        );
       }
+
       const doc = summarySearch.hits.hits[0]._source!;
-      return fromRemoteSummaryDocumentToSloDefinition(doc, this.logger);
+      const remoteSloDefinition = fromRemoteSummaryDocumentToSloDefinition(doc, this.logger);
+      if (!remoteSloDefinition) {
+        throw new Error(
+          `Remote SLO [id=${sloId}, spaceId=${spaceId}, remoteName=${remoteName}] is invalid`
+        );
+      }
+
+      return toRemoteResult(remoteSloDefinition, doc);
     }
 
-    return await this.repository.findById(sloId);
+    const localSloDefinition = await this.repository.findById(sloId);
+    return toLocalResult(localSloDefinition);
   }
+}
+
+function toRemoteResult(sloDefinition: SLODefinition, doc: EsSummaryDocument) {
+  return { slo: sloDefinition, remote: { kibanaUrl: doc.kibanaUrl ?? '' } };
+}
+
+function toLocalResult(sloDefinition: SLODefinition) {
+  return { slo: sloDefinition };
 }
