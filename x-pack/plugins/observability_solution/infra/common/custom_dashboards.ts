@@ -14,3 +14,7 @@ export interface InfraCustomDashboard {
   assetType: InfraCustomDashboardAssetType;
   dashboardFilterAssetIdEnabled: boolean;
 }
+
+export interface InfraSavedCustomDashboard extends InfraCustomDashboard {
+  id: string;
+}

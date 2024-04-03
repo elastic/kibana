@@ -37,26 +37,8 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
       const params = request.params;
       const customDashboards = await findCustomDashboard(params.assetType, savedObjectsClient);
 
-      if (customDashboards.total === 0) {
-        return response.ok({
-          body: InfraGetCustomDashboardsResponseBodyRT.encode([
-            {
-              dashboardSavedObjectId: '',
-              dashboardFilterAssetIdEnabled: false,
-              assetType: params.assetType,
-            },
-          ]),
-        });
-      }
-
-      const responseBody = customDashboards.saved_objects.map(({ attributes }) => ({
-        assetType: attributes.assetType,
-        dashboardSavedObjectId: attributes.dashboardSavedObjectId,
-        dashboardFilterAssetIdEnabled: attributes.dashboardFilterAssetIdEnabled,
-      }));
-
       return response.ok({
-        body: InfraGetCustomDashboardsResponseBodyRT.encode(responseBody),
+        body: InfraGetCustomDashboardsResponseBodyRT.encode(customDashboards),
       });
     })
   );

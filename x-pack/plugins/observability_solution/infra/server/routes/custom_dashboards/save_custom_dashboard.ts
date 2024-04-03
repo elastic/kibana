@@ -9,14 +9,13 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraCustomDashboard } from '../../../common/custom_dashboards';
 import {
   InfraSaveCustomDashboardsRequestPayloadRT,
-  InfraSaveCustomDashboardsResponseBody,
+  InfraSaveCustomDashboardsRequestPayload,
   InfraSaveCustomDashboardsResponseBodyRT,
   InfraGetCustomDashboardsRequestParamsRT,
 } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
-import { findCustomDashboard, findCustomDashboardByDashboardId } from './lib/find_custom_dashboard';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
 
 export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
@@ -40,21 +39,17 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const payload: InfraSaveCustomDashboardsResponseBody = {
+      const payload: InfraSaveCustomDashboardsRequestPayload = {
         ...request.body,
-        assetType: request.params.assetType,
       };
-      const customDashboards = await findCustomDashboard(payload.assetType, savedObjectsClient);
 
-      const existingCustomDashboard = await findCustomDashboardByDashboardId(
-        payload.dashboardSavedObjectId,
-        savedObjectsClient
-      );
-
-      if (customDashboards.total === 0 || !existingCustomDashboard?.saved_objects[0]) {
+      if (!payload?.id) {
         const savedCustomDashboard = await savedObjectsClient.create<InfraCustomDashboard>(
           INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-          payload
+          {
+            assetType: request.params.assetType,
+            ...payload,
+          }
         );
 
         return response.ok({
@@ -64,12 +59,16 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       const savedCustomDashboard = await savedObjectsClient.update<InfraCustomDashboard>(
         INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        existingCustomDashboard.saved_objects[0].id,
-        payload
+        payload.id,
+        {
+          assetType: request.params.assetType,
+          ...payload,
+        }
       );
 
       return response.ok({
         body: InfraSaveCustomDashboardsResponseBodyRT.encode({
+          assetType: request.params.assetType,
           ...payload,
           ...savedCustomDashboard.attributes,
         }),

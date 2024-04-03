@@ -17,10 +17,14 @@ const PayloadRT = rt.type({
   dashboardFilterAssetIdEnabled: rt.boolean,
 });
 
+const existingIdRT = rt.partial({
+  id: rt.string,
+});
+
 const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT]);
 
-const dashboardSavedObjectIdRT = rt.type({
-  dashboardSavedObjectId: rt.string,
+const savedObjectIdRT = rt.type({
+  savedObjectId: rt.string,
 });
 
 /**
@@ -38,9 +42,11 @@ export type InfraGetCustomDashboardsResponseBody = rt.TypeOf<
 /**
  * POST endpoint
  */
-export const InfraSaveCustomDashboardsRequestPayloadRT = PayloadRT;
+export const InfraSaveCustomDashboardsRequestPayloadRT = rt.intersection([PayloadRT, existingIdRT]);
 export const InfraSaveCustomDashboardsResponseBodyRT = InfraCustomDashboardRT;
-export type InfraSaveCustomDashboardsRequestPayload = rt.TypeOf<typeof PayloadRT>;
+export type InfraSaveCustomDashboardsRequestPayload = rt.TypeOf<
+  typeof InfraSaveCustomDashboardsRequestPayloadRT
+>;
 export type InfraSaveCustomDashboardsResponseBody = rt.TypeOf<
   typeof InfraSaveCustomDashboardsResponseBodyRT
 >;
@@ -50,5 +56,5 @@ export type InfraSaveCustomDashboardsResponseBody = rt.TypeOf<
  */
 export const InfraDeleteCustomDashboardsRequestParamsRT = rt.intersection([
   AssetTypeRT,
-  dashboardSavedObjectIdRT,
+  savedObjectIdRT,
 ]);

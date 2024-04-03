@@ -55,13 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const response = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(response.body).to.be.eql([
-          {
-            assetType: 'host',
-            dashboardSavedObjectId: '',
-            dashboardFilterAssetIdEnabled: false,
-          },
-        ]);
+        expect(response.body).to.be.eql([]);
       });
 
       it('responds with the custom dashboard configuration for a given asset type when it exists', async () => {
@@ -81,7 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const response = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(response.body).to.be.eql([customDashboard]);
+        expect(response.body).to.have.length(1);
+        expect(response.body[0]).to.have.property('dashboardFilterAssetIdEnabled', true);
+        expect(response.body[0]).to.have.property('assetType', 'host');
+        expect(response.body[0]).to.have.property('dashboardSavedObjectId', '123');
       });
     });
 
@@ -150,16 +147,16 @@ export default function ({ getService }: FtrProviderContext) {
           type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
           attributes: {
             assetType: 'host',
-            dashboardSavedObjectId: '123',
+            dashboardSavedObjectId: '456',
             dashboardFilterAssetIdEnabled: true,
           },
           overwrite: true,
         });
-        await kibanaServer.savedObjects.create({
+        const existingDashboardSavedObject = await kibanaServer.savedObjects.create({
           type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
           attributes: {
             assetType: 'host',
-            dashboardSavedObjectId: '456',
+            dashboardSavedObjectId: '123',
             dashboardFilterAssetIdEnabled: true,
           },
           overwrite: true,
@@ -168,6 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
           dashboardSavedObjectId: '123',
           dashboardFilterAssetIdEnabled: false,
+          id: existingDashboardSavedObject.id,
         };
         const updateResponse = await supertest
           .post(getCustomDashboardsUrl('host'))
@@ -177,14 +175,14 @@ export default function ({ getService }: FtrProviderContext) {
         const getResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
         expect(updateResponse.body).to.be.eql({ ...payload, assetType: 'host' });
-        expect(getResponse.body).to.be.eql([
-          {
-            dashboardSavedObjectId: '456',
-            dashboardFilterAssetIdEnabled: true,
-            assetType: 'host',
-          },
-          { ...payload, assetType: 'host' },
-        ]);
+
+        expect(getResponse.body).to.have.length(2);
+        expect(getResponse.body[0]).to.have.property('dashboardSavedObjectId', '123');
+        expect(getResponse.body[0]).to.have.property('dashboardFilterAssetIdEnabled', false);
+        expect(getResponse.body[0]).to.have.property('assetType', 'host');
+        expect(getResponse.body[1]).to.have.property('dashboardSavedObjectId', '456');
+        expect(getResponse.body[1]).to.have.property('dashboardFilterAssetIdEnabled', true);
+        expect(getResponse.body[1]).to.have.property('assetType', 'host');
       });
     });
 
@@ -218,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.savedObjects.clean({
           types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
         });
-        await kibanaServer.savedObjects.create({
+        const existingDashboardSavedObject = await kibanaServer.savedObjects.create({
           type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
           attributes: {
             assetType: 'host',
@@ -229,19 +227,13 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .delete(getCustomDashboardsUrl('host', '123'))
+          .delete(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
         const afterDeleteResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(afterDeleteResponse.body).to.be.eql([
-          {
-            assetType: 'host',
-            dashboardSavedObjectId: '',
-            dashboardFilterAssetIdEnabled: false,
-          },
-        ]);
+        expect(afterDeleteResponse.body).to.be.eql([]);
       });
     });
   });

@@ -12,24 +12,22 @@ import type {
   InfraCustomDashboardAssetType,
 } from '../../../../common/custom_dashboards';
 
-export function findCustomDashboard(
+export async function findCustomDashboard(
   assetType: InfraCustomDashboardAssetType,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return savedObjectsClient.find<InfraCustomDashboard>({
+  const result = await savedObjectsClient.find<InfraCustomDashboard>({
     type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
     search: assetType,
     searchFields: ['assetType'] as [keyof InfraCustomDashboard],
+    page: 1,
+    perPage: 1000,
+    sortField: 'updated_at',
+    sortOrder: 'desc',
   });
-}
 
-export function findCustomDashboardByDashboardId(
-  dashboardSavedObjectId: string,
-  savedObjectsClient: SavedObjectsClientContract
-) {
-  return savedObjectsClient.find<InfraCustomDashboard>({
-    type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-    search: dashboardSavedObjectId,
-    searchFields: ['dashboardSavedObjectId'] as [keyof InfraCustomDashboard],
-  });
+  return result.saved_objects.map(({ id, attributes }) => ({
+    id,
+    ...attributes,
+  }));
 }

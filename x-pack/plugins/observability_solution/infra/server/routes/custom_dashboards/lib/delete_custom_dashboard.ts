@@ -12,6 +12,6 @@ interface Options {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectId: string;
 }
-export async function deleteCustomDashboard({ savedObjectsClient, savedObjectId }: Options) {
+export function deleteCustomDashboard({ savedObjectsClient, savedObjectId }: Options) {
   return savedObjectsClient.delete(INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE, savedObjectId);
 }
