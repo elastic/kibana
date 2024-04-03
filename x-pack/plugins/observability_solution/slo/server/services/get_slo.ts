@@ -35,8 +35,7 @@ export class GetSLO {
       summary,
       groupings,
       meta,
-      remoteName,
-      kibanaUrl: remote?.kibanaUrl,
+      remote,
     });
   }
 }

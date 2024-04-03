@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { sloDefinitionSchema, sloSchema } from '@kbn/slo-schema';
+import { sloDefinitionSchema } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLOIdConflict, SLONotFound } from '../errors';
@@ -97,10 +97,14 @@ describe('KibanaSavedObjectsSLORepository', () => {
         perPage: 1,
         filter: `slo.attributes.id:(${slo.id})`,
       });
-      expect(soClientMock.create).toHaveBeenCalledWith(SO_SLO_TYPE, sloSchema.encode(slo), {
-        id: undefined,
-        overwrite: true,
-      });
+      expect(soClientMock.create).toHaveBeenCalledWith(
+        SO_SLO_TYPE,
+        sloDefinitionSchema.encode(slo),
+        {
+          id: undefined,
+          overwrite: true,
+        }
+      );
     });
 
     it('throws when the SLO id already exists and "throwOnConflict" is true', async () => {
@@ -134,10 +138,14 @@ describe('KibanaSavedObjectsSLORepository', () => {
         perPage: 1,
         filter: `slo.attributes.id:(${slo.id})`,
       });
-      expect(soClientMock.create).toHaveBeenCalledWith(SO_SLO_TYPE, sloSchema.encode(slo), {
-        id: 'my-id',
-        overwrite: true,
-      });
+      expect(soClientMock.create).toHaveBeenCalledWith(
+        SO_SLO_TYPE,
+        sloDefinitionSchema.encode(slo),
+        {
+          id: 'my-id',
+          overwrite: true,
+        }
+      );
     });
   });
 

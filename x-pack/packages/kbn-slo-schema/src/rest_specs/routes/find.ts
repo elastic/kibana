@@ -5,13 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import {
-  allOrAnyString,
-  groupingsSchema,
-  remoteMetaSchema,
-  sloDefinitionSchema,
-  summarySchema,
-} from '../../schema';
+import { sloWithDataResponseSchema } from '../slo';
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.union([
@@ -31,15 +25,6 @@ const findSLOParamsSchema = t.partial({
     sortDirection: sortDirectionSchema,
   }),
 });
-
-const sloWithDataResponseSchema = t.intersection([
-  sloDefinitionSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
-  t.partial({
-    instanceId: allOrAnyString, // TODO Kevin: can be moved to t.type() since we always backfill it with '*'
-    remote: remoteMetaSchema,
-  }),
-]);
 
 const findSLOResponseSchema = t.type({
   page: t.number,

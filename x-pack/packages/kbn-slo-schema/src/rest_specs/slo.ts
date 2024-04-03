@@ -8,53 +8,32 @@
 import * as t from 'io-ts';
 import {
   allOrAnyString,
-  allOrAnyStringOrArray,
-  budgetingMethodSchema,
-  dateType,
   groupingsSchema,
-  indicatorSchema,
   metaSchema,
-  objectiveSchema,
-  settingsSchema,
-  sloIdSchema,
+  remoteSchema,
+  sloDefinitionSchema,
   summarySchema,
-  tagsSchema,
-  timeWindowSchema,
 } from '../schema';
 
 const sloResponseSchema = t.intersection([
-  t.type({
-    id: sloIdSchema,
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    revision: t.number,
-    settings: settingsSchema,
-    enabled: t.boolean,
-    tags: tagsSchema,
-    groupBy: allOrAnyStringOrArray,
-    createdAt: dateType,
-    updatedAt: dateType,
-    version: t.number,
-  }),
+  sloDefinitionSchema,
   t.partial({
-    instanceId: allOrAnyString,
-    remoteName: t.string,
-    kibanaUrl: t.string,
+    instanceId: allOrAnyString, // TODO Kevin: can be moved to t.type() since we always backfill it with '*'
   }),
 ]);
 
-const sloWithSummaryResponseSchema = t.intersection([
-  sloResponseSchema,
+const sloWithDataResponseSchema = t.intersection([
+  sloDefinitionSchema,
   t.type({ summary: summarySchema, groupings: groupingsSchema }),
-  t.partial({ meta: metaSchema }),
+  t.partial({
+    instanceId: allOrAnyString, // TODO Kevin: can be moved to t.type() since we always backfill it with '*'
+    meta: metaSchema,
+    remote: remoteSchema,
+  }),
 ]);
 
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
-type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
-export { sloWithSummaryResponseSchema };
+export { sloWithDataResponseSchema };
 export type { SLOResponse, SLOWithSummaryResponse };

@@ -16,6 +16,7 @@ type SLODefinitionResult = {
   slo: SLODefinition;
   remote?: {
     kibanaUrl: string;
+    remoteName: string;
   };
 };
 
@@ -55,18 +56,10 @@ export class SloDefinitionClient {
         );
       }
 
-      return toRemoteResult(remoteSloDefinition, doc);
+      return { slo: remoteSloDefinition, remote: { kibanaUrl: doc.kibanaUrl ?? '', remoteName } };
     }
 
     const localSloDefinition = await this.repository.findById(sloId);
-    return toLocalResult(localSloDefinition);
+    return { slo: localSloDefinition };
   }
-}
-
-function toRemoteResult(sloDefinition: SLODefinition, doc: EsSummaryDocument) {
-  return { slo: sloDefinition, remote: { kibanaUrl: doc.kibanaUrl ?? '' } };
-}
-
-function toLocalResult(sloDefinition: SLODefinition) {
-  return { slo: sloDefinition };
 }

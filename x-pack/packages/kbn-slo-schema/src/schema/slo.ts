@@ -6,13 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import {
-  allOrAnyStringOrArray,
-  dateType,
-  summarySchema,
-  groupingsSchema,
-  metaSchema,
-} from './common';
+import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
@@ -61,35 +55,6 @@ const sloDefinitionSchema = t.type({
   version: t.number,
 });
 
-const sloSchema = t.intersection([
-  t.type({
-    id: sloIdSchema,
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    timeWindow: timeWindowSchema,
-    budgetingMethod: budgetingMethodSchema,
-    objective: objectiveSchema,
-    settings: settingsSchema,
-    revision: t.number,
-    enabled: t.boolean,
-    tags: tagsSchema,
-    createdAt: dateType,
-    updatedAt: dateType,
-    groupBy: groupBySchema,
-    version: t.number,
-  }),
-  t.partial({
-    kibanaUrl: t.string,
-  }),
-]);
-
-const sloWithSummarySchema = t.intersection([
-  sloSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
-  t.partial({ meta: metaSchema }),
-]);
-
 export {
   budgetingMethodSchema,
   objectiveSchema,
@@ -99,8 +64,6 @@ export {
   settingsSchema,
   sloDefinitionSchema,
   sloIdSchema,
-  sloSchema,
-  sloWithSummarySchema,
   tagsSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,

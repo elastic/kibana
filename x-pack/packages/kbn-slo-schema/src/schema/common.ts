@@ -59,7 +59,7 @@ const metaSchema = t.partial({
   }),
 });
 
-const remoteMetaSchema = t.type({
+const remoteSchema = t.type({
   remoteName: t.string,
   kibanaUrl: t.string,
 });
@@ -95,5 +95,5 @@ export {
   summarySchema,
   metaSchema,
   groupSummarySchema,
-  remoteMetaSchema,
+  remoteSchema,
 };

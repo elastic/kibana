@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { allOrAnyString } from '../../schema/common';
 import { sloIdSchema } from '../../schema/slo';
-import { sloWithSummaryResponseSchema } from '../slo';
+import { sloWithDataResponseSchema } from '../slo';
 
 const getSLOQuerySchema = t.partial({
   query: t.partial({
@@ -25,7 +25,7 @@ const getSLOParamsSchema = t.intersection([
   getSLOQuerySchema,
 ]);
 
-const getSLOResponseSchema = sloWithSummaryResponseSchema;
+const getSLOResponseSchema = sloWithDataResponseSchema;
 
 type GetSLOParams = t.TypeOf<typeof getSLOQuerySchema.props.query>;
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
