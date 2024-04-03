@@ -85,6 +85,12 @@
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-http-browser-mocks"
   ]
 }
