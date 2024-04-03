@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 
@@ -169,12 +168,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
       </EuiFlexItem>
       <EuiFlexItem>
         <StatCard
-          title={
-            <FormattedMessage
-              id="xpack.enterpriseSearch.connectorStats.statCard.indexLabel"
-              defaultMessage="Index"
-            />
-          }
+          title={i18n.translate('xpack.enterpriseSearch.connectorStats.statCard.indexLabel', {
+            defaultMessage: 'Index',
+          })}
           content={
             connector.index_name ? (
               indexData ? (
