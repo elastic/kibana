@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { ElementType, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
@@ -120,7 +120,7 @@ export const ExceptionBuilderComponent = ({
   operatorsList,
   allowCustomFieldOptions = false,
   getExtendedFields,
-  showValueListModal
+  showValueListModal,
 }: ExceptionBuilderProps): JSX.Element => {
   const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
