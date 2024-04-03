@@ -9,7 +9,6 @@ export interface CasesSubActionParamsUI {
   timeWindow: string;
   reopenClosedCases: boolean;
   groupingBy: string[];
-  owner: string;
 }
 export interface CasesActionParams {
   subAction: string;
