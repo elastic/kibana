@@ -74,12 +74,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           })
         : new OpenAI({
             baseURL: this.config.apiUrl,
-            // default to empty string for unit tests x-pack/plugins/actions/server/integration_tests/connector_types.test.ts
-            apiKey: this.secrets.apiKey ?? '',
-            // without, this test fails x-pack/plugins/actions/server/integration_tests/connector_types.test.ts
-            // it seems the OpenAI sdk thinks the server emulation in jest is a browser environment
-            // without setting this flag, the sdk throws an error and the test will fail
-            dangerouslyAllowBrowser: true,
+            apiKey: this.secrets.apiKey,
           });
 
     this.registerSubActions();
