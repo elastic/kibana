@@ -176,6 +176,18 @@ export class AssetCriticalityDataClient {
     });
   }
 
+  /**
+   * Bulk upsert asset criticality records from a stream.
+   * @param recordsStream a stream of records to upsert, records may also be an error e.g if there was an error parsing
+   * @param batchSize the number of records to upsert in a single batch
+   * @returns an object containing the number of records updated, created, errored, and the total number of records processed
+   * @throws an error if the stream emits an error
+   * @remarks
+   * - The stream must emit records in the format of {@link AssetCriticalityUpsert} or an error instance
+   * - The stream must emit records in the order they should be upserted
+   * - The stream must emit records in a valid JSON format
+   * - We allow errors to be emitted in the stream to allow for partial upserts and to maintain the order of records
+   **/
   public bulkUpsertFromStream = async ({
     recordsStream,
     batchSize,
@@ -184,7 +196,7 @@ export class AssetCriticalityDataClient {
     batchSize: number;
   }): Promise<{
     errors: Array<{ message: string; index: number }>;
-    results: {
+    stats: {
       updated: number;
       created: number;
       errors: number;
@@ -195,10 +207,10 @@ export class AssetCriticalityDataClient {
       let index = 0;
       let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
       const errors: Array<{ index: number; message: string }> = [];
-      const results = { updated: 0, created: 0, errors: 0, total: 0 };
+      const stats = { updated: 0, created: 0, errors: 0, total: 0 };
       const batchPromises: Array<Promise<void>> = [];
 
-      const upsertBatch = async (
+      const flushBatch = async (
         batch: Array<{ record: AssetCriticalityUpsert; index: number }>
       ) => {
         if (batch.length === 0) {
@@ -209,29 +221,31 @@ export class AssetCriticalityDataClient {
           const upsertResult = await this.bulkUpsert(batch.map((b) => b.record));
           const startIndex = batch[0].index;
           upsertResult.forEach((result, resultIndex) => {
-            results.total++;
+            stats.total++;
             if ('error' in result) {
               errors.push({
                 message: result.error,
                 index: startIndex + resultIndex,
               });
-              results.errors++;
+              stats.errors++;
             } else {
-              results[result.result]++;
+              stats[result.result]++;
             }
           });
         } catch (error) {
+          // If there was an error upserting the batch, add all records in the batch to the errors array
+          // this maintains the order of records
           batch.forEach((b) => {
             errors.push({
               message: error.message,
               index: b.index,
             });
           });
-          results.errors += batch.length;
+          stats.errors += batch.length;
         }
       };
 
-      const processRecord = (record: AssetCriticalityUpsert | Error) => {
+      const addToBatch = (record: AssetCriticalityUpsert | Error) => {
         if (record instanceof Error) {
           errors.push({
             message: record.message,
@@ -240,26 +254,25 @@ export class AssetCriticalityDataClient {
           return;
         }
 
-        const batchRecord = { record, index };
-        currentBatch.push(batchRecord);
+        currentBatch.push({ record, index });
 
         if (currentBatch.length === batchSize) {
-          batchPromises.push(upsertBatch(currentBatch));
+          batchPromises.push(flushBatch(currentBatch));
           currentBatch = [];
         }
         index++;
       };
 
-      const finish = async () => {
+      const flushLastBatchAndResolve = async () => {
         if (currentBatch.length > 0) {
-          batchPromises.push(upsertBatch(currentBatch));
+          batchPromises.push(flushBatch(currentBatch));
         }
 
         await Promise.all(batchPromises);
-        resolve({ errors, results });
+        resolve({ errors, stats });
       };
 
-      recordsStream.on('data', processRecord).on('end', finish).on('error', reject);
+      recordsStream.on('data', addToBatch).on('end', flushLastBatchAndResolve).on('error', reject);
     });
   };
 

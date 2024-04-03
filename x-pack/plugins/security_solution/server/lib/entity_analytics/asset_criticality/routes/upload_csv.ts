@@ -58,12 +58,12 @@ export const assetCriticalityCSVUploadRoute = (
 
           const recordsStream = fileStream.pipe(csvStream).pipe(transformCSVToUpsertRecords());
 
-          const { errors, results } = await assetCriticalityClient.bulkUpsertFromStream({
+          const { errors, stats } = await assetCriticalityClient.bulkUpsertFromStream({
             recordsStream,
             batchSize: 100,
           });
 
-          return response.ok({ body: { errors, results } });
+          return response.ok({ body: { errors, stats } });
         } catch (error) {
           logger.error(`Error during asset criticality csv upload: ${error}`);
           return siemResponse.error({ statusCode: 500 });
