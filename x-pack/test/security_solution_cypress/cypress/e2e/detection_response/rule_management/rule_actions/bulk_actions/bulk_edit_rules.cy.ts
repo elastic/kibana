@@ -182,7 +182,8 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('be.disabled');
     });
 
-    it('Only prebuilt rules selected', () => {
+    // github.com/elastic/kibana/issues/179954
+    it('Only prebuilt rules selected', { tags: ['@brokenInServerlessQA'] }, () => {
       createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
@@ -200,47 +201,56 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
-      getRulesManagementTableRows().then((existedRulesRows) => {
+    // https://github.com/elastic/kibana/issues/179955
+    it(
+      'Prebuilt and custom rules selected: user proceeds with custom rules editing',
+      { tags: ['@brokenInServerlessQA'] },
+      () => {
+        getRulesManagementTableRows().then((existedRulesRows) => {
+          createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
+
+          // modal window should show how many rules can be edit, how many not
+          selectAllRules();
+          clickAddTagsMenuItem();
+
+          waitForMixedRulesBulkEditModal(existedRulesRows.length);
+
+          getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+            checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          });
+
+          // user can proceed with custom rule editing
+          cy.get(MODAL_CONFIRMATION_BTN)
+            .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
+            .click();
+
+          // action should finish
+          typeTags(['test-tag']);
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
+        });
+      }
+    );
+
+    // https://github.com/elastic/kibana/issues/179956
+    it(
+      'Prebuilt and custom rules selected: user cancels action',
+      { tags: ['@brokenInServerlessQA'] },
+      () => {
         createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
-        // modal window should show how many rules can be edit, how many not
-        selectAllRules();
-        clickAddTagsMenuItem();
+        getRulesManagementTableRows().then((rows) => {
+          // modal window should show how many rules can be edit, how many not
+          selectAllRules();
+          clickAddTagsMenuItem();
+          waitForMixedRulesBulkEditModal(rows.length);
+          checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
 
-        waitForMixedRulesBulkEditModal(existedRulesRows.length);
-
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-          checkPrebuiltRulesCannotBeModified(availablePrebuiltRulesCount);
+          // user cancels action and modal disappears
+          cancelConfirmationModal();
         });
-
-        // user can proceed with custom rule editing
-        cy.get(MODAL_CONFIRMATION_BTN)
-          .should('have.text', `Edit ${existedRulesRows.length} custom rules`)
-          .click();
-
-        // action should finish
-        typeTags(['test-tag']);
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: existedRulesRows.length });
-      });
-    });
-
-    it('Prebuilt and custom rules selected: user cancels action', () => {
-      createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
-
-      getRulesManagementTableRows().then((rows) => {
-        // modal window should show how many rules can be edit, how many not
-        selectAllRules();
-        clickAddTagsMenuItem();
-        waitForMixedRulesBulkEditModal(rows.length);
-
-        checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
-
-        // user cancels action and modal disappears
-        cancelConfirmationModal();
-      });
-    });
+      }
+    );
 
     it('should not lose rules selection after edit action', () => {
       const rulesToUpdate = [RULE_NAME, 'New EQL Rule', 'New Terms Rule'] as const;
