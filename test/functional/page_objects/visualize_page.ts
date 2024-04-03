@@ -170,7 +170,9 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async navigateToNewAggBasedVisualization() {
-    await this.navigateToNewVisualization();
+    await this.gotoVisualizationLandingPage();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.clickNewVisualization();
     await this.clickAggBasedVisualizations();
     await this.waitForVisualizationSelectPage();
   }
