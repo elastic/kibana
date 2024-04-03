@@ -23,7 +23,7 @@ const ExistingIdRT = rt.partial({
 
 const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT]);
 
-const savedObjectIdRT = rt.type({
+const SavedObjectIdRT = rt.type({
   savedObjectId: rt.string,
 });
 
@@ -55,5 +55,5 @@ export type InfraSaveCustomDashboardsResponseBody = rt.TypeOf<
  */
 export const InfraDeleteCustomDashboardsRequestParamsRT = rt.intersection([
   AssetTypeRT,
-  savedObjectIdRT,
+  SavedObjectIdRT,
 ]);
