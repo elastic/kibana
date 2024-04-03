@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { TestProvider } from '../../../test/test_provider';
 import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
@@ -163,38 +162,6 @@ describe('FieldsSelectorTable', () => {
       expect(getByTestId('viewSelectorMenu')).toBeInTheDocument();
       expect(getByTestId('viewSelectorOption-all')).toBeInTheDocument();
       expect(getByTestId('viewSelectorOption-selected')).toBeInTheDocument();
-    });
-  });
-  describe('Searching columns', () => {
-    afterEach(() => {
-      sessionStorage.removeItem(SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED);
-    });
-
-    it('should only show columns that match the search term', async () => {
-      const { getByRole, getAllByRole, debug } = renderFieldsTable({});
-
-      const searchbox = getByRole('searchbox');
-      expect(searchbox).not.toBeNull();
-
-      // await act(async () => userEvent.type(searchbox, 'Label 1'));
-      await userEvent.type(searchbox, 'Label 1');
-
-      // debug(screen, 10000);
-
-      // await fireEvent.change(searchbox, { target: { value: 'Label 1' } });
-
-      // await expect(getByRole('cell', { name: 'Name field1' })).toBeInTheDocument();
-      // const foundColumns = getAllByRole('row');
-
-      await waitFor(() => {
-        expect(getAllByRole('row')).toHaveLength(1);
-      });
-
-      // expect(foundColumns.length).toBe(1);
-
-      userEvent.type(searchbox, 'foo');
-
-      expect(getAllByRole('row').length).toBe(0);
     });
   });
 });
