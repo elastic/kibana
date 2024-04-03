@@ -55,8 +55,8 @@ export const ReactEmbeddableRenderer = <
     | 'hideInspector'
   >;
   /**
-   * This `onAnyStateChange` callback creates a backdoor for Canvas so that it can
-   * respond to React embeddables being edited
+   * This `onAnyStateChange` callback allows the parent to track the state of the embeddable.
+   * This is not expected to change over the lifetime of the component.
    */
   onAnyStateChange?: (state: SerializedPanelState<StateType>) => void;
 }) => {

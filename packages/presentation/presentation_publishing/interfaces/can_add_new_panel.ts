@@ -12,7 +12,7 @@ export interface PanelPackage {
 }
 
 /**
- * This API can access a view mode, either its own or from its parent API.
+ * This API can add a new panel as a child.
  */
 export interface CanAddNewPanel {
   addNewPanel: <ApiType extends unknown = unknown>(
@@ -22,7 +22,7 @@ export interface CanAddNewPanel {
 }
 
 /**
- * A type guard which can be used to determine if a given API has access to a view mode, its own or from its parent.
+ * A type guard which can be used to determine if a given API can add a new panel.
  */
 export const apiCanAddNewPanel = (api: unknown): api is CanAddNewPanel => {
   return typeof (api as CanAddNewPanel)?.addNewPanel === 'function';
