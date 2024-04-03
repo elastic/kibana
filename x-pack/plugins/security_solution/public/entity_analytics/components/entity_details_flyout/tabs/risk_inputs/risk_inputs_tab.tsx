@@ -184,12 +184,23 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     </>
   );
 
+  const totals = !riskScore
+    ? { count: 0, score: 0 }
+    : isUserRiskScore(riskScore)
+    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
+    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+
+  const displayed = {
+    count: alerts.data?.length || 0,
+    score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
+  };
   return (
     <>
       {isAssetCriticalityEnabled && (
         <RiskInputsAssetCriticalitySection loading={loadingRiskScore} riskScore={riskScore} />
       )}
       {riskInputsAlertSection}
+      <AlertInputMessage totals={totals} inputs={displayed} />
     </>
   );
 };
@@ -243,3 +254,33 @@ const RiskInputsAssetCriticalitySection: React.FC<{
 };
 
 RiskInputsTab.displayName = 'RiskInputsTab';
+
+interface AlertInputMessageProps {
+  totals: {
+    count: number;
+    score: number;
+  };
+  inputs: {
+    count: number;
+    score: number;
+  };
+}
+const AlertInputMessage: React.FC<AlertInputMessageProps> = ({ totals, inputs }) => {
+  const leftover = {
+    count: totals.count - inputs.count,
+    score: totals.score - inputs.score,
+  };
+
+  if (inputs.count >= totals.count) {
+    return null;
+  }
+
+  // <EuiText size="xs">{`${leftover.count} more alerts contributed ${leftover.score} to the calculated risk score`}</EuiText>
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.riskInputs.extraAlertsMessage"
+      defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
+      values={leftover}
+    />
+  );
+};
