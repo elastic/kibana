@@ -16,13 +16,20 @@ import type {
 } from '@kbn/fleet-plugin/server';
 
 import type {
+  AgentPolicy,
+  NewAgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import type {
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
+} from '@kbn/fleet-plugin/server/types';
+import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
@@ -44,7 +51,7 @@ import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage'
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
-import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
@@ -83,7 +90,7 @@ export const getPackagePolicyCreateCallback = (
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
-  appFeatures: AppFeaturesService
+  productFeatures: ProductFeaturesService
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -104,6 +111,7 @@ export const getPackagePolicyCreateCallback = (
     }
 
     if (newPackagePolicy?.inputs) {
+      validatePolicyAgainstProductFeatures(newPackagePolicy.inputs, productFeatures);
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
     // Optional endpoint integration configuration
@@ -155,7 +163,7 @@ export const getPackagePolicyCreateCallback = (
       endpointIntegrationConfig,
       cloud,
       esClientInfo,
-      appFeatures
+      productFeatures
     );
 
     return {
@@ -191,7 +199,7 @@ export const getPackagePolicyUpdateCallback = (
   endpointMetadataService: EndpointMetadataService,
   cloud: CloudSetup,
   esClient: ElasticsearchClient,
-  appFeatures: AppFeaturesService
+  productFeatures: ProductFeaturesService
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
@@ -208,6 +216,9 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    // Validate that Endpoint Security policy uses only enabled App Features
+    validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
@@ -247,11 +258,11 @@ export const getPackagePolicyUpdateCallback = (
     // If no Policy Protection allowed (ex. serverless)
     const eventsOnlyPolicy = isPolicySetToEventCollectionOnly(newEndpointPackagePolicy);
     if (
-      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointPolicyProtections) &&
+      !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointPolicyProtections) &&
       !eventsOnlyPolicy.isOnlyCollectingEvents
     ) {
       logger.warn(
-        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] appFeature not being enabled. Trigger [${eventsOnlyPolicy.message}]`
+        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] adjusted due to [endpointPolicyProtections] productFeature not being enabled. Trigger [${eventsOnlyPolicy.message}]`
       );
 
       endpointIntegrationData.inputs[0].config.policy.value =
@@ -283,6 +294,54 @@ export const getPackagePolicyPostCreateCallback = (
       );
     }
     return packagePolicy;
+  };
+};
+
+const throwAgentTamperProtectionUnavailableError = (
+  logger: Logger,
+  policyName?: string,
+  policyId?: string
+): void => {
+  const agentTamperProtectionUnavailableError: Error & {
+    statusCode?: number;
+    apiPassThrough?: boolean;
+  } = new Error('Agent Tamper Protection is not allowed in current environment');
+  // Agent Policy Service will check for apiPassThrough and rethrow. Route handler will check for statusCode and overwrite.
+  agentTamperProtectionUnavailableError.statusCode = 403;
+  agentTamperProtectionUnavailableError.apiPassThrough = true;
+  logger.error(
+    `Policy [${policyName}:${policyId}] error: Agent Tamper Protection requires Complete Endpoint Security tier`
+  );
+  throw agentTamperProtectionUnavailableError;
+};
+
+export const getAgentPolicyCreateCallback = (
+  logger: Logger,
+  productFeatures: ProductFeaturesService
+): PostAgentPolicyCreateCallback => {
+  return async (agentPolicy: NewAgentPolicy): Promise<NewAgentPolicy> => {
+    if (
+      agentPolicy.is_protected &&
+      !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointAgentTamperProtection)
+    ) {
+      throwAgentTamperProtectionUnavailableError(logger, agentPolicy.name, agentPolicy.id);
+    }
+    return agentPolicy;
+  };
+};
+
+export const getAgentPolicyUpdateCallback = (
+  logger: Logger,
+  productFeatures: ProductFeaturesService
+): PostAgentPolicyUpdateCallback => {
+  return async (agentPolicy: Partial<AgentPolicy>): Promise<Partial<AgentPolicy>> => {
+    if (
+      agentPolicy.is_protected &&
+      !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointAgentTamperProtection)
+    ) {
+      throwAgentTamperProtectionUnavailableError(logger, agentPolicy.name, agentPolicy.id);
+    }
+    return agentPolicy;
   };
 };
 

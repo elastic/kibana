@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { pairwise, startWith } from 'rxjs/operators';
+import { pairwise, startWith } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';

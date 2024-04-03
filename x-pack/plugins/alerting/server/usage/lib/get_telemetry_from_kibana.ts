@@ -22,6 +22,7 @@ import { groupRulesByStatus } from './group_rules_by_status';
 import { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import { groupRulesBySearchType } from './group_rules_by_search_type';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -258,6 +259,11 @@ export async function getTotalCountAggregations({
               },
             },
           },
+          by_search_type: {
+            terms: {
+              field: 'alert.params.searchType',
+            },
+          },
           sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
           sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
           sum_rules_muted: { sum: { field: 'rule_muted' } },
@@ -285,6 +291,7 @@ export async function getTotalCountAggregations({
       by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       by_notify_when: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       connector_types_by_consumers: AggregationsTermsAggregateBase<ConnectorsByConsumersBucket>;
+      by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
@@ -306,10 +313,17 @@ export async function getTotalCountAggregations({
       aggregations.connector_types_by_consumers.buckets
     );
 
+    const countRulesBySearchType = groupRulesBySearchType(
+      parseSimpleRuleTypeBucket(aggregations.by_search_type.buckets)
+    );
+
     return {
       hasErrors: false,
       count_total: totalRulesCount ?? 0,
-      count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+        ...countRulesBySearchType,
+      },
       count_rules_by_execution_status: countRulesByExecutionStatus,
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
       count_rules_by_notify_when: countRulesByNotifyWhen,
@@ -422,6 +436,11 @@ export async function getTotalCountInUse({
               size: NUM_ALERTING_RULE_TYPES,
             },
           },
+          by_search_type: {
+            terms: {
+              field: 'alert.params.searchType',
+            },
+          },
         },
       },
     };
@@ -434,15 +453,23 @@ export async function getTotalCountInUse({
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       namespaces_count: AggregationsCardinalityAggregate;
+      by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
     };
 
     const totalEnabledRulesCount =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
+    const countRulesBySearchType = groupRulesBySearchType(
+      parseSimpleRuleTypeBucket(aggregations.by_search_type.buckets)
+    );
+
     return {
       hasErrors: false,
       countTotal: totalEnabledRulesCount ?? 0,
-      countByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      countByType: {
+        ...parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+        ...countRulesBySearchType,
+      },
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {

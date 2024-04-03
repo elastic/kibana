@@ -73,7 +73,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType'
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath'
   >;
   esJavaOpts?: string;
   /**
@@ -242,9 +242,15 @@ export function createTestEsCluster<
       } else if (esFrom === 'snapshot') {
         installPath = (await firstNode.installSnapshot(config)).installPath;
       } else if (esFrom === 'serverless') {
+        if (!esServerlessOptions) {
+          throw new Error(
+            `'esServerlessOptions' must be defined to start Elasticsearch in serverless mode`
+          );
+        }
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
+          dataPath: `stateless-${clusterName}`,
           ...esServerlessOptions,
           port,
           clean: true,

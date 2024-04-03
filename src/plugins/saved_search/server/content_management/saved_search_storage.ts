@@ -38,6 +38,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'viewMode',
         'hideAggregatedPreview',
         'rowHeight',
+        'headerRowHeight',
         'timeRestore',
         'timeRange',
         'refreshInterval',

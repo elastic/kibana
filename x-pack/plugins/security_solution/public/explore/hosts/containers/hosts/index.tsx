@@ -62,7 +62,8 @@ export const useAllHost = ({
     getHostsSelector(state, type)
   );
 
-  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
+  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
+    useIsNewRiskScoreModuleInstalled();
 
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptionsInput | null>(null);
 
@@ -129,6 +130,9 @@ export const useAllHost = ({
   );
 
   useEffect(() => {
+    if (riskScoreStatusLoading) {
+      return;
+    }
     setHostRequest((prevRequest) => {
       const myRequest: HostsRequestOptionsInput = {
         ...(prevRequest ?? {}),
@@ -162,6 +166,7 @@ export const useAllHost = ({
     startDate,
     sortField,
     isNewRiskScoreModuleInstalled,
+    riskScoreStatusLoading,
   ]);
 
   useEffect(() => {

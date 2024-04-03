@@ -67,7 +67,6 @@ export async function getCurrentIndexTypesMap({
         client.indices.getMapping({
           index: mainIndex,
         }),
-      logger,
       retryDelay
     );
 

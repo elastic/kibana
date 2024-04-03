@@ -171,7 +171,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show matches when time range is expanded', async () => {
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);
           expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);

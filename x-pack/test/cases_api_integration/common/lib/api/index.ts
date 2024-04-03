@@ -37,6 +37,7 @@ import {
   Case,
   Cases,
   CaseStatuses,
+  CaseCustomField,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
   AlertResponse,
@@ -45,6 +46,7 @@ import {
   CasesFindResponse,
   CasesPatchRequest,
   CasesStatusResponse,
+  CustomFieldPutRequest,
   GetRelatedCasesByAlertResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
@@ -807,4 +809,39 @@ export const searchCases = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const replaceCustomField = async ({
+  supertest,
+  caseId,
+  customFieldId,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  customFieldId: string;
+  params: CustomFieldPutRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, unknown>;
+}): Promise<CaseCustomField> => {
+  const apiCall = supertest.put(
+    `${getSpaceUrlPrefix(
+      auth?.space
+    )}${CASES_INTERNAL_URL}/${caseId}/custom_fields/${customFieldId}`
+  );
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: theCustomField } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCustomField;
 };

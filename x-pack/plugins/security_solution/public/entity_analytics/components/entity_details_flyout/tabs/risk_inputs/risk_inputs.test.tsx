@@ -20,6 +20,16 @@ jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
 
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
 const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
 
 jest.mock('../../../../api/hooks/use_risk_score', () => ({
@@ -40,6 +50,10 @@ const riskScore = {
 };
 
 describe('RiskInputsTab', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders', () => {
     mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
@@ -52,16 +66,57 @@ describe('RiskInputsTab', () => {
       data: [riskScore],
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-contexts-title')).toBeInTheDocument();
+    expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
-      'Risk inputRule Name'
+      'Rule nameRule Name'
     );
+  });
+
+  it('Does not render the context section if enabled but no asset criticality', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
+  });
+
+  it('Renders the context section if enabled and risks contains asset criticality', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    const riskScorewWithAssetCriticality = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          criticality_level: 'extreme_impact',
+        },
+      },
+    };
+
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScorewWithAssetCriticality],
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-asset-criticality-title')).toBeInTheDocument();
   });
 
   it('paginates', () => {

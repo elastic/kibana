@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './src/app_features_keys';
+export * from './src/product_features_keys';

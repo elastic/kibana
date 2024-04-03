@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -17,6 +17,11 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiBadge,
+  EuiToolTip,
+  EuiFilterGroup,
+  EuiSelectable,
+  EuiFilterButton,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -31,6 +36,27 @@ export interface Props {
   onDeletePipelineClick: (pipelineName: string[]) => void;
 }
 
+export const deprecatedPipelineBadge = {
+  badge: i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeLabel', {
+    defaultMessage: 'Deprecated',
+  }),
+  badgeTooltip: i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeTooltip', {
+    defaultMessage:
+      'This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one.',
+  }),
+};
+
+const deprecatedFilterLabel = i18n.translate(
+  'xpack.ingestPipelines.list.table.deprecatedFilterLabel',
+  {
+    defaultMessage: 'Deprecated',
+  }
+);
+
+const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.managedFilterLabel', {
+  defaultMessage: 'Managed',
+});
+
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onReloadClick,
@@ -38,6 +64,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
+  const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
+    { key: 'managed', label: managedFilterLabel },
+    { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
+  ]);
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
   const [showPopover, setShowPopover] = useState(false);
@@ -64,6 +94,43 @@ export const PipelineTable: FunctionComponent<Props> = ({
       'data-test-subj': `createPipelineFromCsv`,
     },
   ];
+
+  const filteredPipelines = useMemo(() => {
+    return (pipelines || []).filter((pipeline) => {
+      const deprecatedFilter = filterOptions.find(({ key }) => key === 'deprecated')?.checked;
+      const managedFilter = filterOptions.find(({ key }) => key === 'managed')?.checked;
+      return !(
+        (deprecatedFilter === 'off' && pipeline.deprecated) ||
+        (deprecatedFilter === 'on' && !pipeline.deprecated) ||
+        (managedFilter === 'off' && pipeline.isManaged) ||
+        (managedFilter === 'on' && !pipeline.isManaged)
+      );
+    });
+  }, [pipelines, filterOptions]);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      badgeColor="success"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
+      hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
+      numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
+    >
+      {i18n.translate('xpack.ingestPipelines.list.table.filtersButtonLabel', {
+        defaultMessage: 'Filters',
+      })}
+    </EuiFilterButton>
+  );
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
@@ -111,6 +178,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           })}
         </EuiButton>,
         <EuiPopover
+          key="createPipelinePopover"
           isOpen={showPopover}
           closePopover={() => setShowPopover(false)}
           button={
@@ -144,14 +212,38 @@ export const PipelineTable: FunctionComponent<Props> = ({
       ],
       box: {
         incremental: true,
+        'data-test-subj': 'pipelineTableSearch',
       },
       filters: [
         {
-          type: 'is',
-          field: 'isManaged',
-          name: i18n.translate('xpack.ingestPipelines.list.table.isManagedFilterLabel', {
-            defaultMessage: 'Managed',
-          }),
+          type: 'custom_component',
+          component: () => {
+            return (
+              <EuiFilterGroup>
+                <EuiPopover
+                  id="popoverID"
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    allowExclusions
+                    aria-label={i18n.translate(
+                      'xpack.ingestPipelines.list.table.filtersAriaLabel',
+                      {
+                        defaultMessage: 'Filters',
+                      }
+                    )}
+                    options={filterOptions as EuiSelectableOption[]}
+                    onChange={setFilterOptions}
+                  >
+                    {(list) => <div style={{ width: 300 }}>{list}</div>}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
+            );
+          },
         },
       ],
     },
@@ -175,6 +267,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
             })}
           >
             {name}
+            {pipeline.deprecated && (
+              <>
+                &nbsp;
+                <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                  <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
+                    {deprecatedPipelineBadge.badge}
+                  </EuiBadge>
+                </EuiToolTip>
+              </>
+            )}
             {pipeline.isManaged && (
               <>
                 &nbsp;
@@ -236,7 +338,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         ],
       },
     ],
-    items: pipelines ?? [],
+    items: filteredPipelines,
   };
 
   return <EuiInMemoryTable {...tableProps} />;

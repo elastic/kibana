@@ -110,7 +110,7 @@ export async function bulkInstallPackages({
           result: {
             assets: [...installedEs, ...installedKibana],
             status: 'already_installed',
-            installType: installedPackageResult.installType,
+            installType: 'unknown',
           } as InstallResult,
         };
       }

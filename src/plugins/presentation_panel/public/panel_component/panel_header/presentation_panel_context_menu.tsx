@@ -43,8 +43,8 @@ export const PresentationPanelContextMenu = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
-  const { title, parentViewMode } = useBatchedPublishingSubjects({
-    title: api.panelTitle,
+  const [title, parentViewMode] = useBatchedPublishingSubjects(
+    api.panelTitle,
 
     /**
      * View mode changes often have the biggest influence over which actions will be compatible,
@@ -52,8 +52,8 @@ export const PresentationPanelContextMenu = ({
      * actions should eventually all be Frequent Compatibility Change Actions which can track their
      * own dependencies.
      */
-    parentViewMode: getViewModeSubject(api),
-  });
+    getViewModeSubject(api)
+  );
 
   useEffect(() => {
     /**

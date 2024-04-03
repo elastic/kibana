@@ -9,17 +9,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { ExperimentalFeatures } from '../../common/config';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
-import type { DiscoverCustomizationContext } from './types';
+import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
   customizationContext: DiscoverCustomizationContext;
-  isDev: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const renderApp = ({
@@ -27,11 +28,10 @@ export const renderApp = ({
   services,
   profileRegistry,
   customizationContext,
-  isDev,
+  experimentalFeatures,
 }: RenderAppProps) => {
-  const { history: getHistory, capabilities, chrome, data, core } = services;
+  const { history, capabilities, chrome, data, core } = services;
 
-  const history = getHistory();
   if (!capabilities.discover.save) {
     chrome.setBadge({
       text: i18n.translate('discover.badge.readOnly.text', {
@@ -48,8 +48,8 @@ export const renderApp = ({
       services={services}
       profileRegistry={profileRegistry}
       customizationContext={customizationContext}
+      experimentalFeatures={experimentalFeatures}
       history={history}
-      isDev={isDev}
     />,
     {
       theme: core.theme,

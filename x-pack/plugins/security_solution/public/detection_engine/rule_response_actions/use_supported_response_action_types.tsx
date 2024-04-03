@@ -17,8 +17,8 @@ export const useSupportedResponseActionTypes = () => {
   >();
 
   const isEndpointEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
-  const { canIsolateHost } = useUserPrivileges().endpointPrivileges;
-
+  const { canIsolateHost, canKillProcess, canSuspendProcess } =
+    useUserPrivileges().endpointPrivileges;
   const enabledFeatures = useMemo(
     () => ({
       endpoint: isEndpointEnabled,
@@ -28,9 +28,9 @@ export const useSupportedResponseActionTypes = () => {
 
   const userHasPermissionsToExecute = useMemo(
     () => ({
-      endpoint: canIsolateHost,
+      endpoint: canIsolateHost || canKillProcess || canSuspendProcess,
     }),
-    [canIsolateHost]
+    [canIsolateHost, canKillProcess, canSuspendProcess]
   );
 
   useEffect(() => {

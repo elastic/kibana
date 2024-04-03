@@ -15,6 +15,7 @@ import {
   RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
   SanitizedRule,
+  SanitizedRuleAction,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -284,7 +285,7 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     return {
       ...action,
       id: action.uuid,
-    };
+    } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,
 };
@@ -454,7 +455,7 @@ export const generateAlertInstance = (
       flapping: false,
       maintenanceWindowIds: maintenanceWindowIds || [],
       pendingRecoveredCount: 0,
-      activeCount: 0,
+      activeCount: 1,
     },
     state: {
       bar: false,

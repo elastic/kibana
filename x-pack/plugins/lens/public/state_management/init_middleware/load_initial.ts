@@ -111,7 +111,7 @@ export function loadInitial(
     storeDeps;
   const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
     getPreloadedState(storeDeps);
-  const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
+  const { attributeService, notifications, data } = lensServices;
   const { lens } = store.getState();
 
   const loaderSharedArgs = {
@@ -344,11 +344,11 @@ export function loadInitial(
                     filters: data.query.filterManager.getFilters(),
                     query: doc.state.query,
                     searchSessionId:
-                      dashboardFeatureFlag.allowByValueEmbeddables &&
-                      !(initialInput as LensByReferenceInput)?.savedObjectId &&
-                      currentSessionId
+                      !(initialInput as LensByReferenceInput)?.savedObjectId && currentSessionId
                         ? currentSessionId
-                        : data.search.session.start(),
+                        : !inlineEditing
+                        ? data.search.session.start()
+                        : undefined,
                     persistedDoc: doc,
                     activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                     visualization: {

@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { AggregateQuery } from '@kbn/es-query';
 import {
-  AggregateQuery,
+  getESQLAdHocDataview,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
-} from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+} from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 

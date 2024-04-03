@@ -7,14 +7,8 @@
  */
 
 import React from 'react';
-import { State } from './state';
 
 export interface ExpandableFlyoutApi {
-  /**
-   * Right, left and preview panels
-   */
-  panels: State;
-
   /**
    * Open the flyout with left, right and/or preview panels
    */

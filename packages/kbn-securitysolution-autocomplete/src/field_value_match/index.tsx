@@ -54,6 +54,7 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
+  'aria-label'?: string;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
@@ -70,6 +71,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   autocompleteService,
   onChange,
   onError,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
@@ -245,27 +247,29 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
           sortMatchesBy="startsWith"
           data-test-subj="valuesAutocompleteMatch"
           style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+          aria-label={ariaLabel}
           fullWidth
           async
         />
       </EuiFormRow>
     );
   }, [
-    comboOptions,
-    error,
-    fieldInputWidth,
-    inputPlaceholder,
-    isClearable,
-    isDisabled,
-    isLoadingState,
     rowLabel,
-    selectedComboOptions,
+    error,
     selectedField,
     showSpacesWarning,
-    handleCreateOption,
-    handleSearchChange,
+    inputPlaceholder,
+    isDisabled,
+    isLoadingState,
+    isClearable,
+    comboOptions,
+    selectedComboOptions,
     handleValuesChange,
+    handleSearchChange,
+    handleCreateOption,
     setIsTouchedValue,
+    fieldInputWidth,
+    ariaLabel,
   ]);
 
   if (!isSuggestingValues && selectedField != null) {
@@ -290,6 +294,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
               onChange={handleNonComboBoxInputChange}
               data-test-subj="valueAutocompleteFieldMatchNumber"
               style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+              aria-label={ariaLabel}
               fullWidth
             />
           </EuiFormRow>
@@ -310,6 +315,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
               onChange={handleBooleanInputChange}
               data-test-subj="valuesAutocompleteMatchBoolean"
               style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+              aria-label={ariaLabel}
               fullWidth
             />
           </EuiFormRow>

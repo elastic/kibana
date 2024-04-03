@@ -21,6 +21,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
@@ -62,6 +63,8 @@ import {
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
+import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
 
@@ -71,7 +74,10 @@ export interface TextBasedLanguagesEditorProps {
   /** Callback running everytime the query changes */
   onTextLangQueryChange: (query: AggregateQuery) => void;
   /** Callback running when the user submits the query */
-  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  onTextLangQuerySubmit: (
+    query?: AggregateQuery,
+    abortController?: AbortController
+  ) => Promise<void>;
   /** Can be used to expand/minimize the editor */
   expandCodeEditor: (status: boolean) => void;
   /** If it is true, the editor initializes with height EDITOR_INITIAL_HEIGHT_EXPANDED */
@@ -85,7 +91,9 @@ export interface TextBasedLanguagesEditorProps {
   errors?: Error[];
   /** Warning string as it comes from ES */
   warning?: string;
-  /** Disables the editor and displays loading icon in run button */
+  /** Disables the editor and displays loading icon in run button
+   * It is also used for hiding the history component if it is not defined
+   */
   isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
@@ -105,9 +113,19 @@ export interface TextBasedLanguagesEditorProps {
   editorIsInline?: boolean;
   /** Disables the submit query action*/
   disableSubmitAction?: boolean;
+
+  /** when set to true enables query cancellation **/
+  allowQueryCancellation?: boolean;
+
+  /** hide @timestamp info **/
+  hideTimeFilterInfo?: boolean;
+
+  /** hide query history **/
+  hideQueryHistory?: boolean;
 }
 
 interface TextBasedEditorDeps {
+  core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
@@ -158,13 +176,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
+  allowQueryCancellation,
+  hideTimeFilterInfo,
+  hideQueryHistory,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
-  const [code, setCode] = useState(queryString ?? '');
+  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
+    kibana.services;
+  const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const [code, setCode] = useState<string>(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -172,10 +195,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
   const [isSpaceReduced, setIsSpaceReduced] = useState(false);
+  const [editorWidth, setEditorWidth] = useState(0);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-
+  const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [abortController, setAbortController] = useState(new AbortController());
+  // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
@@ -183,19 +210,58 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+  // contains only client side validation messages
+  const [clientParserMessages, setClientParserMessages] = useState<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>({
+    errors: [],
+    warnings: [],
+  });
+  const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
+
+  // as the duration on the history component is being calculated from
+  // the isLoading property, if this property is not defined we want
+  // to hide the history component
+  const hideHistoryComponent = hideQueryHistory || isLoading == null;
+
+  const onQueryUpdate = useCallback(
+    (value: string) => {
+      setCode(value);
+      onTextLangQueryChange({ [language]: value } as AggregateQuery);
+    },
+    [language, onTextLangQueryChange]
+  );
 
   const onQuerySubmit = useCallback(() => {
-    const currentValue = editor1.current?.getValue();
-    if (currentValue != null) {
-      setCodeStateOnSubmission(currentValue);
+    if (isQueryLoading && allowQueryCancellation) {
+      abortController?.abort();
+      setIsQueryLoading(false);
+    } else {
+      setIsQueryLoading(true);
+      const abc = new AbortController();
+      setAbortController(abc);
+
+      const currentValue = editor1.current?.getValue();
+      if (currentValue != null) {
+        setCodeStateOnSubmission(currentValue);
+      }
+      onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-    onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery);
-  }, [language, onTextLangQuerySubmit]);
+  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  useEffect(() => {
+    if (!isLoading) setIsQueryLoading(false);
+  }, [isLoading]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
 
   const codeRef = useRef<string>(code);
+
+  const toggleHistory = useCallback((status: boolean) => {
+    setIsHistoryOpen(status);
+  }, []);
 
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
@@ -215,7 +281,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections),
-    Boolean(editorIsInline)
+    Boolean(editorIsInline),
+    isHistoryOpen
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -310,12 +377,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
       ({ esql }) => esql
     );
+
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
@@ -333,7 +401,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
           try {
-            const table = await memoizedFieldsFromESQL(esqlQuery, expressions).result;
+            const table = await memoizedFieldsFromESQL(
+              esqlQuery,
+              expressions,
+              undefined,
+              abortController
+            ).result;
             return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
           } catch (e) {
             // no action yet
@@ -341,6 +414,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
+      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -350,18 +424,62 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
     }),
-    [dataViews, expressions, indexManagementApiService, esqlFieldsCache, memoizedFieldsFromESQL]
+    [
+      dataViews,
+      expressions,
+      indexManagementApiService,
+      esqlFieldsCache,
+      memoizedFieldsFromESQL,
+      abortController,
+    ]
   );
+
+  const parseMessages = useCallback(async () => {
+    if (editorModel.current) {
+      return await ESQLLang.validate(editorModel.current, queryString, esqlCallbacks);
+    }
+    return {
+      errors: [],
+      warnings: [],
+    };
+  }, [esqlCallbacks, queryString]);
+
+  useEffect(() => {
+    const validateQuery = async () => {
+      if (editorModel?.current) {
+        const parserMessages = await parseMessages();
+        setClientParserMessages({
+          errors: parserMessages?.errors ?? [],
+          warnings: parserMessages?.warnings ?? [],
+        });
+      }
+    };
+    if (isQueryLoading || isLoading) {
+      addQueriesToCache({
+        queryString,
+        timeZone,
+      });
+      validateQuery();
+      setRefetchHistoryItems(false);
+    } else {
+      updateCachedQueries({
+        queryString,
+        status: clientParserMessages.errors?.length
+          ? 'error'
+          : clientParserMessages.warnings.length
+          ? 'warning'
+          : 'success',
+      });
+
+      setRefetchHistoryItems(true);
+    }
+  }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
-        editorModel.current,
-        code,
-        esqlCallbacks
-      );
+      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
       const markers = [];
 
       if (parserErrors.length) {
@@ -373,11 +491,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return;
       }
     },
-    [esqlCallbacks, language, code]
+    [language, parseMessages]
   );
 
   useDebounceWithOptions(
-    () => {
+    async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
       if (code === codeWhenSubmitted) {
@@ -393,6 +511,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             'Unified search',
             parsedErrors.length ? parsedErrors : []
           );
+          const parserMessages = await parseMessages();
+          setClientParserMessages({
+            errors: parserMessages?.errors ?? [],
+            warnings: parserMessages?.warnings ?? [],
+          });
           return;
         }
       } else {
@@ -485,6 +608,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
+  useEffect(() => {
+    // make sure to always update the code in expanded editor when query prop changes
+    if (isCodeEditorExpanded && editor1.current?.getValue() !== queryString) {
+      setCode(queryString);
+    }
+  }, [isCodeEditorExpanded, queryString]);
+
   const linesBreaksButtonsStatus = useMemo(() => {
     const pipes = code?.split('|');
     const pipesWithNewLine = code?.split('\n|');
@@ -497,18 +627,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onResize = ({ width }: { width: number }) => {
     setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
     calculateVisibleCode(width);
+    setEditorWidth(width);
     if (editor1.current) {
       editor1.current.layout({ width, height: editorHeight });
     }
   };
-
-  const onQueryUpdate = useCallback(
-    (value: string) => {
-      setCode(value);
-      onTextLangQueryChange({ [language]: value } as AggregateQuery);
-    },
-    [language, onTextLangQueryChange]
-  );
 
   useEffect(() => {
     async function getDocumentation() {
@@ -679,6 +802,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
                       searchInDescription
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
                       buttonProps={{
                         color: 'text',
                         size: 's',
@@ -733,44 +859,22 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       </EuiBadge>
                     )}
                     {!isCompactFocused && editorMessages.errors.length > 0 && (
-                      <EuiBadge
-                        color={euiTheme.colors.danger}
-                        css={styles.errorsBadge}
-                        iconType="error"
-                        iconSide="left"
-                        data-test-subj="TextBasedLangEditor-inline-errors-badge"
-                        title={i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.errorCountTitle',
-                          {
-                            defaultMessage:
-                              '{count} {count, plural, one {error} other {errors}} found',
-                            values: { count: editorMessages.errors.length },
-                          }
-                        )}
-                      >
-                        {editorMessages.errors.length}
-                      </EuiBadge>
+                      <ErrorsWarningsCompactViewPopover
+                        items={editorMessages.errors}
+                        type="error"
+                        onErrorClick={onErrorClick}
+                        popoverCSS={styles.errorsBadge}
+                      />
                     )}
                     {!isCompactFocused &&
                       editorMessages.warnings.length > 0 &&
                       editorMessages.errors.length === 0 && (
-                        <EuiBadge
-                          color={euiTheme.colors.warning}
-                          css={styles.errorsBadge}
-                          iconType="warning"
-                          iconSide="left"
-                          data-test-subj="TextBasedLangEditor-inline-warning-badge"
-                          title={i18n.translate(
-                            'textBasedEditor.query.textBasedLanguagesEditor.warningCountTitle',
-                            {
-                              defaultMessage:
-                                '{count} {count, plural, one {warning} other {warnings}} found',
-                              values: { count: editorMessages.warnings.length },
-                            }
-                          )}
-                        >
-                          {editorMessages.warnings.length}
-                        </EuiBadge>
+                        <ErrorsWarningsCompactViewPopover
+                          items={editorMessages.warnings}
+                          type="warning"
+                          onErrorClick={onErrorClick}
+                          popoverCSS={styles.errorsBadge}
+                        />
                       )}
                     <CodeEditor
                       languageId={languageId(language)}
@@ -814,6 +918,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           }
                         });
 
+                        // this is fixing a bug between the EUIPopover and the monaco editor
+                        // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+                        // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+                        // and the user needs to click again the editor.
+                        // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+                        editor.onMouseDown(() => {
+                          setTimeout(() => {
+                            editor.focus();
+                          }, 100);
+                        });
+
                         editor.onDidFocusEditorText(() => {
                           onEditorFocus();
                         });
@@ -838,20 +953,27 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     {isCompactFocused && !isCodeEditorExpanded && (
                       <EditorFooter
                         lines={lines}
-                        containerCSS={styles.bottomContainer}
+                        styles={{
+                          bottomContainer: styles.bottomContainer,
+                          historyContainer: styles.historyContainer,
+                        }}
                         {...editorMessages}
                         onErrorClick={onErrorClick}
-                        runQuery={() => {
-                          if (editorMessages.errors.some((e) => e.source !== 'client')) {
-                            onQuerySubmit();
-                          }
-                        }}
+                        runQuery={onQuerySubmit}
+                        updateQuery={onQueryUpdate}
                         detectTimestamp={detectTimestamp}
                         editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
                         hideRunQueryText={hideRunQueryText}
                         isSpaceReduced={isSpaceReduced}
-                        isLoading={isLoading}
+                        isLoading={isQueryLoading}
+                        allowQueryCancellation={allowQueryCancellation}
+                        hideTimeFilterInfo={hideTimeFilterInfo}
+                        isHistoryOpen={isHistoryOpen}
+                        setIsHistoryOpen={toggleHistory}
+                        containerWidth={editorWidth}
+                        hideQueryHistory={hideHistoryComponent}
+                        refetchHistoryItems={refetchHistoryItems}
                       />
                     )}
                   </div>
@@ -902,6 +1024,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={
                         String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
                       }
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
                       searchInDescription
                       sections={documentationSections}
                       buttonProps={{
@@ -933,16 +1058,27 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       {isCodeEditorExpanded && (
         <EditorFooter
           lines={lines}
-          containerCSS={styles.bottomContainer}
+          styles={{
+            bottomContainer: styles.bottomContainer,
+            historyContainer: styles.historyContainer,
+          }}
           onErrorClick={onErrorClick}
           runQuery={onQuerySubmit}
+          updateQuery={onQueryUpdate}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
-          isLoading={isLoading}
+          isLoading={isQueryLoading}
+          allowQueryCancellation={allowQueryCancellation}
+          hideTimeFilterInfo={hideTimeFilterInfo}
           {...editorMessages}
+          isHistoryOpen={isHistoryOpen}
+          setIsHistoryOpen={toggleHistory}
+          containerWidth={editorWidth}
+          hideQueryHistory={hideHistoryComponent}
+          refetchHistoryItems={refetchHistoryItems}
         />
       )}
       {isCodeEditorExpanded && (

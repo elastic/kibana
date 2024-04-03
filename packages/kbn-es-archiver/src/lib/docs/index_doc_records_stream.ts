@@ -96,8 +96,8 @@ export function createIndexDocRecordsStream(
 }
 
 export interface LoadActionPerfOptions {
-  batchSize: number;
-  concurrency: number;
+  batchSize?: number;
+  concurrency?: number;
 }
 
 const DEFAULT_PERFORMANCE_OPTIONS: LoadActionPerfOptions = {

@@ -7,13 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import { getSecurityTelemetryStats, removeTimeFieldsFromTelemetryStats } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getSecurityTelemetryStats,
-  removeTimeFieldsFromTelemetryStats,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -52,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
           detection_rules: [
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -60,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
           security_lists: [
             [
               {
-                name: 'Security Solution Lists Telemetry',
+                name: 'security:telemetry-lists',
                 passed: true,
               },
             ],
@@ -68,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
           endpoints: [
             [
               {
-                name: 'Security Solution Telemetry Endpoint Metrics and Info task',
+                name: 'security:endpoint-meta-telemetry',
                 passed: true,
               },
             ],
@@ -76,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           diagnostics: [
             [
               {
-                name: 'Security Solution Telemetry Diagnostics task',
+                name: 'security:endpoint-diagnostics',
                 passed: true,
               },
             ],

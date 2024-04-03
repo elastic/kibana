@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiPublishesPhaseEvents,
@@ -28,6 +28,7 @@ export const PresentationPanelInternal = <
   index,
   hideHeader,
   showShadow,
+  showBorder,
 
   showBadges,
   showNotifications,
@@ -47,27 +48,25 @@ export const PresentationPanelInternal = <
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
   })();
 
-  const {
-    rawViewMode,
+  const [
+    dataLoading,
     blockingError,
     panelTitle,
-    dataLoading,
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    rawViewMode,
     parentHidePanelTitle,
-  } = useBatchedPublishingSubjects({
-    dataLoading: api?.dataLoading,
-    blockingError: api?.blockingError,
-
-    panelTitle: api?.panelTitle,
-    hidePanelTitle: api?.hidePanelTitle,
-    panelDescription: api?.panelDescription,
-    defaultPanelTitle: api?.defaultPanelTitle,
-
-    rawViewMode: viewModeSubject,
-    parentHidePanelTitle: api?.parentApi?.hidePanelTitle,
-  });
+  ] = useBatchedPublishingSubjects(
+    api?.dataLoading,
+    api?.blockingError,
+    api?.panelTitle,
+    api?.hidePanelTitle,
+    api?.panelDescription,
+    api?.defaultPanelTitle,
+    viewModeSubject,
+    api?.parentApi?.hidePanelTitle
+  );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
@@ -105,6 +104,7 @@ export const PresentationPanelInternal = <
         'embPanel--editing': viewMode === 'edit',
       })}
       hasShadow={showShadow}
+      hasBorder={showBorder}
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
@@ -136,13 +136,15 @@ export const PresentationPanelInternal = <
       )}
       {!initialLoadComplete && <PanelLoader />}
       <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
-        <Component
-          {...(componentProps as React.ComponentProps<typeof Component>)}
-          {...contentAttrs}
-          ref={(newApi) => {
-            if (newApi && !api) setApi(newApi);
-          }}
-        />
+        <EuiErrorBoundary>
+          <Component
+            {...(componentProps as React.ComponentProps<typeof Component>)}
+            {...contentAttrs}
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
+        </EuiErrorBoundary>
       </div>
     </EuiPanel>
   );

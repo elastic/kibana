@@ -18,6 +18,13 @@ import { ProductLine, ProductTier } from './configs';
 jest.mock('./toggle_panel');
 jest.mock('./hooks/use_project_features_url');
 jest.mock('./hooks/use_projects_url');
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+  return {
+    ...original,
+    useAppUrl: jest.fn().mockReturnValue({ getAppUrl: jest.fn().mockReturnValue('mock url') }),
+  };
+});
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -62,7 +69,7 @@ describe('OnboardingComponent', () => {
     const pageTitle = getByText('Hi Unknown!');
     const subtitle = getByText(`Get started with Security`);
     const description = getByText(
-      `This area shows you everything you need to know. Feel free to explore all content. You can always come back later at any time.`
+      `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
     );
 
     expect(pageTitle).toBeInTheDocument();

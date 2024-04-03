@@ -47,6 +47,7 @@ import {
   buildAlertSuppressionWindowDescription,
   buildAlertSuppressionMissingFieldsDescription,
   buildHighlightedFieldsOverrideDescription,
+  getQueryLabel,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -56,7 +57,12 @@ import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
-import { isThresholdRule, isQueryRule } from '../../../../../common/detection_engine/utils';
+import {
+  isThresholdRule,
+  isSuppressionRuleConfiguredWithMissingFields,
+  isSuppressionRuleConfiguredWithGroupBy,
+  isSuppressionRuleConfiguredWithDuration,
+} from '../../../../../common/detection_engine/utils';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -71,6 +77,7 @@ interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: DataViewBase;
+  // @ts-expect-error upgrade typescript v4.9.5
   schema: FormSchema<T>;
 }
 
@@ -148,6 +155,7 @@ export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
 export const buildListItems = <T,>(
   data: unknown,
+  // @ts-expect-error upgrade typescript v4.9.5
   schema: FormSchema<T>,
   filterManager: FilterManager,
   license: LicenseService,
@@ -193,11 +201,14 @@ export const getDescriptionItem = (
     const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     const savedQueryName = get('queryBar.title', data);
+    const ruleType: Type = get('ruleType', data);
+    const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,
       filters,
       filterManager,
       query,
+      queryLabel,
       savedId,
       savedQueryName,
       indexPatterns,
@@ -206,7 +217,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveGroupByFields = isQueryRule(ruleType);
+
+    const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
     if (!ruleCanHaveGroupByFields) {
       return [];
     }
@@ -216,7 +228,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByDuration') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveDuration = isQueryRule(ruleType) || isThresholdRule(ruleType);
+
+    const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
     if (!ruleCanHaveDuration) {
       return [];
     }
@@ -239,7 +252,9 @@ export const getDescriptionItem = (
     }
   } else if (field === 'suppressionMissingFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveSuppressionMissingFields = isQueryRule(ruleType);
+    const ruleCanHaveSuppressionMissingFields =
+      isSuppressionRuleConfiguredWithMissingFields(ruleType);
+
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }

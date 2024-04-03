@@ -13,20 +13,13 @@ import { fields } from '@kbn/data-plugin/common/mocks';
 import { render } from '@testing-library/react';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 import { PreviewHistogram } from './preview_histogram';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { createStore } from '../../../../common/store';
 import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
 import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
@@ -87,24 +80,17 @@ describe('PreviewHistogram', () => {
     });
   });
 
-  const { storage } = createSecuritySolutionStorageMock();
-
-  const store = createStore(
-    {
-      ...mockGlobalState,
-      dataTable: {
-        ...mockGlobalState.dataTable,
-        tableById: {
-          [TableId.rulePreview]: {
-            ...mockGlobalState.dataTable.tableById[TableId.test],
-          },
+  const store = createMockStore({
+    ...mockGlobalState,
+    dataTable: {
+      ...mockGlobalState.dataTable,
+      tableById: {
+        [TableId.rulePreview]: {
+          ...mockGlobalState.dataTable.tableById[TableId.test],
         },
       },
     },
-    SUB_PLUGINS_REDUCER,
-    kibanaObservable,
-    storage
-  );
+  });
 
   afterEach(() => {
     jest.clearAllMocks();

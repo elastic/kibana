@@ -18,8 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
-  const browser = getService('browser');
   const rules = getService('rules');
+  const toasts = getService('toasts');
 
   async function getAlertsByName(name: string) {
     const {
@@ -54,8 +54,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     await comboBox.set('thresholdIndexesComboBox', 'k');
@@ -73,8 +73,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
+    await testSubjects.setValue('ruleNameInput', alertName);
   }
 
   async function discardNewRuleCreation() {
@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
@@ -186,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -214,7 +214,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
@@ -236,7 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -267,7 +267,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -286,10 +286,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
@@ -335,27 +337,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
-
-      await discardNewRuleCreation();
-    });
-
-    it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
-      await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', 'alertName');
-      const ruleTypeSearchBox = await testSubjects.find('ruleSearchField');
-      await ruleTypeSearchBox.type('notexisting rule type');
-      await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
-
-      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__ruleTypeNodeHeading');
-      expect(ruleTypes).to.have.length(0);
-
-      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
-      await searchClearButton.click();
-
-      const ruleTypesClearFilter = await find.allByCssSelector(
-        '.triggersActionsUI__ruleTypeNodeHeading'
-      );
-      expect(ruleTypesClearFilter.length).to.above(0);
 
       await discardNewRuleCreation();
     });

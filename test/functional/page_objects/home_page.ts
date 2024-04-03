@@ -14,6 +14,7 @@ export class HomePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
   public readonly log = this.ctx.getService('log');
+  private readonly toasts = this.ctx.getService('toasts');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -47,9 +48,12 @@ export class HomePageObject extends FtrService {
 
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const installStatus = await (
+      await sampleDataCard.findByCssSelector('[data-status]')
+    ).getAttribute('data-status');
     const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
     this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
-    return deleteButton.length > 0;
+    return installStatus === 'installed' && deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -165,7 +169,7 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
-    await this.common.closeToastIfExists();
+    await this.toasts.dismissIfExists();
     await this.retry.try(async () => {
       await this.testSubjects.click(`launchSampleDataSet${id}`);
       await this.find.byCssSelector(

@@ -9,11 +9,21 @@ import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import {
+  isActionType,
+  isAgentType,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
-import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
+import {
+  type ActionsLogPopupFilters,
+  type FilterItems,
+  type TypesFilters,
+  useActionsLogFilter,
+} from './hooks';
 import { ClearAllButton } from './clear_all_button';
 import { UX_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -21,16 +31,22 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 export const ActionsLogFilter = memo(
   ({
     filterName,
+    typesFilters,
     isFlyout,
     onChangeFilterOptions,
     'data-test-subj': dataTestSubj,
   }: {
-    filterName: FilterName;
+    filterName: ActionsLogPopupFilters;
+    typesFilters?: TypesFilters;
     isFlyout: boolean;
-    onChangeFilterOptions: (selectedOptions: string[]) => void;
+    onChangeFilterOptions?: (selectedOptions: string[]) => void;
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
 
     // popover states and handlers
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -55,11 +71,11 @@ export const ActionsLogFilter = memo(
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
+      setUrlTypesFilters,
       setUrlTypeFilters,
     } = useActionsLogFilter({
       filterName,
       isFlyout,
-      isPopoverOpen,
       searchString,
     });
 
@@ -82,18 +98,18 @@ export const ActionsLogFilter = memo(
       [filterName, isPopoverOpen]
     );
 
-    // augmented options based on hosts filter
+    // augmented options based on the host filter
     const sortedHostsFilterOptions = useMemo(() => {
       if (shouldPinSelectedHosts() || areHostsSelectedOnMount) {
         // pin checked items to the top
         return orderBy('checked', 'asc', items);
       }
-      // return options as is for other filters
+      // return options as are for other filters
       return items;
     }, [areHostsSelectedOnMount, shouldPinSelectedHosts, items]);
 
     const isSearchable = useMemo(
-      () => filterName !== 'statuses' && filterName !== 'type',
+      () => filterName !== 'statuses' && filterName !== 'types',
       [filterName]
     );
 
@@ -102,13 +118,30 @@ export const ActionsLogFilter = memo(
         // update filter UI options state
         setItems(newOptions.map((option) => option));
 
-        // compute selected list of options
+        // compute a selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
-          if (curr.checked === 'on') {
+          if (curr.checked === 'on' && curr.key) {
             acc.push(curr.key);
           }
           return acc;
         }, []);
+
+        const groupedSelectedTypeFilterOptions = selectedItems.reduce<{
+          agentTypes: string[];
+          actionTypes: string[];
+        }>(
+          (acc, item) => {
+            if (isAgentType(item)) {
+              acc.agentTypes.push(item);
+            }
+            if (isActionType(item)) {
+              acc.actionTypes.push(item);
+            }
+
+            return acc;
+          },
+          { actionTypes: [], agentTypes: [] }
+        );
 
         if (!isFlyout) {
           // update URL params
@@ -127,20 +160,39 @@ export const ActionsLogFilter = memo(
             setUrlHostsFilters(selectedItems.join());
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
-          } else if (filterName === 'type') {
-            setUrlTypeFilters(selectedItems.join());
+          } else if (filterName === 'types') {
+            if (isSentinelOneV1Enabled) {
+              setUrlTypesFilters({
+                agentTypes: groupedSelectedTypeFilterOptions.agentTypes.join(),
+                actionTypes: groupedSelectedTypeFilterOptions.actionTypes.join(),
+              });
+            } else {
+              setUrlTypeFilters(selectedItems.join());
+            }
           }
           // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
           shouldPinSelectedHosts(false);
           setAreHostsSelectedOnMount(false);
         }
 
-        // update query state
-        onChangeFilterOptions(selectedItems);
+        // update overall query state
+        if (typesFilters && typeof onChangeFilterOptions === 'undefined') {
+          typesFilters.agentTypes.onChangeFilterOptions(
+            groupedSelectedTypeFilterOptions.agentTypes
+          );
+          typesFilters.actionTypes.onChangeFilterOptions(
+            groupedSelectedTypeFilterOptions.actionTypes
+          );
+        } else {
+          if (typeof onChangeFilterOptions !== 'undefined') {
+            onChangeFilterOptions(selectedItems);
+          }
+        }
       },
       [
         setItems,
         isFlyout,
+        typesFilters,
         onChangeFilterOptions,
         filterName,
         shouldPinSelectedHosts,
@@ -148,6 +200,8 @@ export const ActionsLogFilter = memo(
         setUrlActionsFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
+        isSentinelOneV1Enabled,
+        setUrlTypesFilters,
         setUrlTypeFilters,
       ]
     );
@@ -163,29 +217,38 @@ export const ActionsLogFilter = memo(
       );
 
       if (!isFlyout) {
-        // update URL params based on filter
+        // update URL params based on filter on page
         if (filterName === 'actions') {
           setUrlActionsFilters('');
         } else if (filterName === 'hosts') {
           setUrlHostsFilters('');
         } else if (filterName === 'statuses') {
           setUrlStatusesFilters('');
-        } else if (filterName === 'type') {
-          setUrlTypeFilters('');
+        } else if (filterName === 'types') {
+          setUrlTypesFilters({ agentTypes: '', actionTypes: '' });
         }
       }
-      // update query state
-      onChangeFilterOptions([]);
+
+      // update query state for flyout filters
+      if (typesFilters && typeof onChangeFilterOptions === 'undefined') {
+        typesFilters.agentTypes.onChangeFilterOptions([]);
+        typesFilters.actionTypes.onChangeFilterOptions([]);
+      } else {
+        if (typeof onChangeFilterOptions !== 'undefined') {
+          onChangeFilterOptions([]);
+        }
+      }
     }, [
       setItems,
       items,
       isFlyout,
+      typesFilters,
       onChangeFilterOptions,
       filterName,
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
-      setUrlTypeFilters,
+      setUrlTypesFilters,
     ]);
 
     return (

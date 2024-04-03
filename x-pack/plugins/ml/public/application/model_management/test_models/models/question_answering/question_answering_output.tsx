@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 import { useCurrentThemeVars } from '../../../../contexts/kibana';

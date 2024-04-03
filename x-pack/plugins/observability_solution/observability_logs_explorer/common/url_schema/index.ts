@@ -9,5 +9,6 @@ export {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
 } from './common';
-export * as logExplorerUrlSchemaV1 from './url_schema_v1';
+export * as logsExplorerUrlSchemaV1 from './logs_explorer/url_schema_v1';
+export * as logsExplorerUrlSchemaV2 from './logs_explorer/url_schema_v2';
 export * as datasetQualityUrlSchemaV1 from './dataset_quality/url_schema_v1';

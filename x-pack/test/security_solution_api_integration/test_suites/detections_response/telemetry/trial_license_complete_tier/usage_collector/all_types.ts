@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 
-import { createAlertsIndex, deleteAllRules, deleteAllAlerts, getStats } from '../../../utils';
+import { getStats } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
+
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

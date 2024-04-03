@@ -14,6 +14,7 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
@@ -32,7 +33,7 @@ import {
   VULNERABILITY_FIELDS,
 } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { VULNERABILITIES_UNIT, groupingTitle } from '../translations';
+import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
 
 const getTermAggregation = (key: keyof VulnerabilitiesGroupingAggregation, field: string) => ({
   [key]: {
@@ -110,9 +111,15 @@ export const isVulnerabilitiesRootGroupingAggregation = (
 export const useLatestVulnerabilitiesGrouping = ({
   groupPanelRenderer,
   groupStatsRenderer,
+  groupingLevel = 0,
+  groupFilters = [],
+  selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<VulnerabilitiesGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<VulnerabilitiesGroupingAggregation>;
+  groupingLevel?: number;
+  groupFilters?: Filter[];
+  selectedGroup?: string;
 }) => {
   const { dataView } = useDataViewContext();
 
@@ -121,7 +128,6 @@ export const useLatestVulnerabilitiesGrouping = ({
     grouping,
     pageSize,
     query,
-    selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
     setUrlQuery,
@@ -130,6 +136,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     onResetFilters,
     error,
     filters,
+    setActivePageIndex,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -139,19 +146,23 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupPanelRenderer,
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
-    maxGroupingLevels: 1,
+    groupingLevel,
+    groupsUnit: VULNERABILITIES_GROUPS_UNIT,
   });
 
+  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
+  const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
+
   const groupingQuery = getGroupingQuery({
-    additionalFilters: query ? [query] : [],
-    groupByField: selectedGroup,
+    additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
+    groupByField: currentSelectedGroup,
     uniqueValue,
     from: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
-    statsAggregations: getAggregationsByGroupField(selectedGroup),
+    statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({
@@ -162,11 +173,11 @@ export const useLatestVulnerabilitiesGrouping = ({
   const groupData = useMemo(
     () =>
       parseGroupingQuery(
-        selectedGroup,
+        currentSelectedGroup,
         uniqueValue,
         data as GroupingAggregation<VulnerabilitiesGroupingAggregation>
       ),
-    [data, selectedGroup, uniqueValue]
+    [data, currentSelectedGroup, uniqueValue]
   );
 
   const isEmptyResults =
@@ -179,6 +190,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     grouping,
     isFetching,
     activePageIndex,
+    setActivePageIndex,
     pageSize,
     selectedGroup,
     onChangeGroupsItemsPerPage,

@@ -34,8 +34,6 @@ export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-modal-new-timeline
 export const BOTTOM_BAR_CREATE_NEW_TIMELINE =
   '[data-test-subj="timeline-bottom-bar-create-new-timeline"]';
 
-export const CREATE_NEW_TIMELINE_TEMPLATE =
-  '[data-test-subj="timeline-modal-new-timeline-template"]';
 export const BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE =
   '[data-test-subj="timeline-bottom-bar-create-new-timeline-template"]';
 
@@ -128,8 +126,6 @@ export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerAct
 export const TIMELINE_ADD_FIELD_BUTTON = '[data-test-subj="addField"]';
 
 export const TIMELINE_DATA_PROVIDER_FIELD = '[data-test-subj="field"]';
-
-export const TIMELINE_DATA_PROVIDER_FIELD_INPUT = '[data-test-subj="comboBoxSearchInput"]';
 
 export const TIMELINE_DATA_PROVIDER_OPERATOR = `[data-test-subj="operator"]`;
 
@@ -254,9 +250,6 @@ export const TIMELINE_SHOW_ROW_RENDERERS_GEAR = '[data-test-subj="show-row-rende
 export const TIMELINE_TABS = '[data-test-subj="timeline"] .euiTabs';
 
 export const TIMELINE_TAB_CONTENT_EQL = '[data-test-subj="timeline-tab-content-eql"]';
-
-export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
-  '[data-test-subj="timeline-tab-content-graph-notes"]';
 
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';

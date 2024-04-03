@@ -11,6 +11,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
@@ -311,6 +312,18 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with defaultValue', () => {
+      const query = TextCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        defaultValue: 'foobar',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, defaultValue: 'foobar' },
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = TextCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
@@ -318,6 +331,41 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('defaultValue fails if the type is not string', () => {
+      expect(
+        PathReporter.report(
+          TextCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
+    });
+
+    it(`throws an error if the default value is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
+      expect(
+        PathReporter.report(
+          TextCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
+          })
+        )[0]
+      ).toContain(
+        `The length of the defaultValue is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+      );
+    });
+
+    it('throws an error if the default value is an empty string', () => {
+      expect(
+        PathReporter.report(
+          TextCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: '',
+          })
+        )[0]
+      ).toContain('The defaultValue field cannot be an empty string.');
     });
   });
 
@@ -345,6 +393,18 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('defaultValue fails if the type is not boolean', () => {
+      expect(
+        PathReporter.report(
+          ToggleCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            required: true,
+            defaultValue: 'foobar',
+          })
+        )[0]
+      ).toContain('Invalid value "foobar" supplied');
     });
   });
 });

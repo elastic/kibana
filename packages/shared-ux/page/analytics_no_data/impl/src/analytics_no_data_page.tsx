@@ -18,6 +18,7 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.compo
  */
 export const AnalyticsNoDataPage = ({
   onDataViewCreated,
+  onESQLNavigationComplete,
   allowAdHocDataView,
 }: AnalyticsNoDataPageProps) => {
   const { customBranding, ...services } = useServices();
@@ -29,6 +30,7 @@ export const AnalyticsNoDataPage = ({
       showPlainSpinner={showPlainSpinner}
       allowAdHocDataView={allowAdHocDataView}
       onDataViewCreated={onDataViewCreated}
+      onESQLNavigationComplete={onESQLNavigationComplete}
     />
   );
 };

@@ -112,12 +112,11 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     if (opts.serverless) {
       setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
 
-      // Load mock identity provider plugin and configure realm if supported (ES only supports SAML when run with SSL)
+      // Configure realm if supported (ES only supports SAML when run with SSL)
       if (opts.ssl && MOCK_IDP_PLUGIN_SUPPORTED) {
         // Ensure the plugin is loaded in dynamically to exclude from production build
         // eslint-disable-next-line import/no-dynamic-require
         const { MOCK_IDP_REALM_NAME } = require(MOCK_IDP_PLUGIN_PATH);
-        const pluginPath = resolve(require.resolve(MOCK_IDP_PLUGIN_PATH), '..');
 
         if (has('server.basePath')) {
           console.log(
@@ -126,7 +125,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
           _.unset(rawConfig, 'server.basePath');
         }
 
-        set('plugins.paths', _.compact([].concat(get('plugins.paths'), pluginPath)));
         set(`xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
           order: Number.MAX_SAFE_INTEGER,
           realm: MOCK_IDP_REALM_NAME,

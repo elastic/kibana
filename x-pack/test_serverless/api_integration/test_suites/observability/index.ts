@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless observability API', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./fleet/fleet'));
     loadTestFile(require.resolve('./telemetry/snapshot_telemetry'));
     loadTestFile(require.resolve('./telemetry/telemetry_config'));
     loadTestFile(require.resolve('./apm_api_integration/feature_flags.ts'));

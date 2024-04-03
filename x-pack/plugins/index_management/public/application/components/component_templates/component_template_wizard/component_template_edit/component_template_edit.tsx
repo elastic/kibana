@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
@@ -124,6 +124,28 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       />
 
       <EuiSpacer size="l" />
+
+      {componentTemplate?.deprecated && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"
+                defaultMessage="This component template is deprecated"
+              />
+            }
+            iconType="warning"
+            color="warning"
+            data-test-subj="deprecatedTemplateCallout"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
+              defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}

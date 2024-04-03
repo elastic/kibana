@@ -6,27 +6,29 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import type { LogExplorerConfig } from '../common/plugin_config';
-import { LogExplorerPlugin } from './plugin';
+import type { LogsExplorerConfig } from '../common/plugin_config';
+import { LogsExplorerPlugin } from './plugin';
 
 export type {
-  CreateLogExplorerController,
-  LogExplorerController,
-  LogExplorerPublicState,
-  LogExplorerPublicStateUpdate,
+  CreateLogsExplorerController,
+  LogsExplorerController,
+  LogsExplorerPublicState,
+  LogsExplorerPublicStateUpdate,
 } from './controller';
 export type {
-  LogExplorerCustomizations,
-  LogExplorerFlyoutContentProps,
+  LogsExplorerCustomizations,
+  LogsExplorerCustomizationEvents,
+  LogsExplorerFlyoutContentProps,
 } from './customizations/types';
-export type { LogExplorerControllerContext } from './state_machines/log_explorer_controller';
-export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
+export type { LogsExplorerControllerContext } from './state_machines/logs_explorer_controller';
+export type { LogsExplorerPluginSetup, LogsExplorerPluginStart } from './types';
 export {
   getDiscoverColumnsFromDisplayOptions,
   getDiscoverGridFromDisplayOptions,
   getDiscoverFiltersFromState,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
 } from './utils/convert_discover_app_state';
 
-export function plugin(context: PluginInitializerContext<LogExplorerConfig>) {
-  return new LogExplorerPlugin(context);
+export function plugin(context: PluginInitializerContext<LogsExplorerConfig>) {
+  return new LogsExplorerPlugin(context);
 }

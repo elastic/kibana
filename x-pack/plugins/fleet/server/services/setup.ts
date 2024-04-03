@@ -197,24 +197,6 @@ async function createSetupSideEffects(
       throw error;
     }
   }
-
-  logger.debug('Generating Agent uninstall tokens');
-  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-    logger.warn(
-      'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
-    );
-  }
-  await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
-
-  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-    logger.debug('Checking for and encrypting plain text uninstall tokens');
-    await appContextService.getUninstallTokenService()?.encryptTokens();
-  }
-
-  logger.debug('Checking validity of Uninstall Tokens');
-  const uninstallTokenError = await appContextService
-    .getUninstallTokenService()
-    ?.checkTokenValidityForAllPolicies();
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
@@ -234,7 +216,6 @@ async function createSetupSideEffects(
     ...preconfiguredPackagesNonFatalErrors,
     ...packagePolicyUpgradeErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
-    ...(uninstallTokenError ? [uninstallTokenError] : []),
   ];
 
   if (nonFatalErrors.length > 0) {

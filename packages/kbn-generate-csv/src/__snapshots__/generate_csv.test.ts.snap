@@ -226,6 +226,14 @@ exports[`CsvGenerator Scroll strategy uses the scroll context to page all the da
 "
 `;
 
+exports[`CsvGenerator export behavior when scroll duration config is auto csv gets generated if search resolves without errors before the computed timeout value passed to the search data client elapses 1`] = `
+"a,b
+a1,b1
+a1,b1
+a1,b1
+"
+`;
+
 exports[`CsvGenerator fields from job.columns (7.13+ generated) cells can be multi-value 1`] = `
 "product,category
 coconut,\\"cool, rad\\"

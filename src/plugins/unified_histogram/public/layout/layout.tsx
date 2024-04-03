@@ -183,6 +183,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
 
   table?: Datatable;
+  abortController?: AbortController;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -223,6 +224,7 @@ export const UnifiedHistogramLayout = ({
   onBrushEnd,
   children,
   withDefaultActions,
+  abortController,
 }: UnifiedHistogramLayoutProps) => {
   const {
     allSuggestions,
@@ -308,6 +310,7 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <ChartMemoized
+          abortController={abortController}
           isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
@@ -347,7 +350,8 @@ export const UnifiedHistogramLayout = ({
       </InPortal>
       <InPortal node={mainPanelNode}>
         {React.isValidElement(children)
-          ? React.cloneElement(children, { isChartAvailable })
+          ? // @ts-expect-error upgrade typescript v4.9.5
+            React.cloneElement(children, { isChartAvailable })
           : children}
       </InPortal>
       <ResizableLayout

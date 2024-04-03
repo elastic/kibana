@@ -23,7 +23,7 @@ export interface SearchCursorClients {
 
 export type SearchCursorSettings = Pick<
   CsvExportSettings,
-  'scroll' | 'includeFrozen' | 'maxConcurrentShardRequests'
+  'scroll' | 'includeFrozen' | 'maxConcurrentShardRequests' | 'taskInstanceFields'
 >;
 
 export abstract class SearchCursor {
@@ -33,6 +33,7 @@ export abstract class SearchCursor {
     protected indexPatternTitle: string,
     protected settings: SearchCursorSettings,
     protected clients: SearchCursorClients,
+    protected abortController: AbortController,
     protected logger: Logger
   ) {}
 

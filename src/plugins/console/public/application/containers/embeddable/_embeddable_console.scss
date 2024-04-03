@@ -1,3 +1,8 @@
+.kbnBody--hasEmbeddableConsole .euiPageTemplate main {
+  // Ensure page content is not overlapped by console control bar
+  padding-bottom: $embeddableConsoleInitialHeight;
+}
+
 .embeddableConsole {
   background: $embeddableConsoleBackground;
   color: $embeddableConsoleText;
@@ -14,7 +19,7 @@
 
   &--fixed {
     position: fixed;
-    z-index: $euiZLevel1;
+    z-index: $euiZLevel1 - 2;
   }
 
   &--projectChrome {

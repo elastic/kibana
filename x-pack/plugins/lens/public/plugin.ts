@@ -17,7 +17,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
@@ -42,7 +41,6 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import {
   UiActionsStart,
   ACTION_VISUALIZE_FIELD,
@@ -64,6 +62,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -117,7 +116,7 @@ import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
 import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
 
-import type { LensEmbeddableInput } from './embeddable';
+import type { LensByValueInput, LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
@@ -130,8 +129,14 @@ import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import {
+  CONTENT_ID,
+  LATEST_VERSION,
+  LensSavedObjectAttributes,
+} from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
+import { ChartType } from './lens_suggestions_api';
 
 export type { SaveProps } from './app_plugin';
 
@@ -158,7 +163,6 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  dashboard: DashboardStart;
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
@@ -274,7 +278,8 @@ export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigura
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
   dataViews: DataView,
-  excludedVisualizations?: string[]
+  excludedVisualizations?: string[],
+  preferredChartType?: ChartType
 ) => Suggestion[] | undefined;
 
 export class LensPlugin {
@@ -424,13 +429,28 @@ export class LensPlugin {
       () => startServices().plugins.data.nowProvider.get()
     );
 
+    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        const panel = {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+
+        return panel;
+      }
+    );
+
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
@@ -684,13 +704,14 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestions: (context, dataView, excludedVisualizations) => {
+          suggestions: (context, dataView, excludedVisualizations, preferredChartType) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
               context,
               dataView,
               excludedVisualizations,
+              preferredChartType,
             });
           },
         };

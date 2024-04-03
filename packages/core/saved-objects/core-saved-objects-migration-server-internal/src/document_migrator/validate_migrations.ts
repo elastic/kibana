@@ -69,6 +69,23 @@ export function validateTypeMigrations({
     });
   }
 
+  if (type.schemas) {
+    const schemaMap = typeof type.schemas === 'object' ? type.schemas : {};
+    assertObject(
+      schemaMap,
+      `Schemas map for type ${type.name} should be an object like { '2.0.0': {schema} }.`
+    );
+
+    Object.entries(schemaMap).forEach(([version, schema]) => {
+      assertValidSemver(kibanaVersion, version, type.name);
+      if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
+        throw new Error(
+          `Schema for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
+        );
+      }
+    });
+  }
+
   if (type.modelVersions) {
     const modelVersionMap =
       typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};

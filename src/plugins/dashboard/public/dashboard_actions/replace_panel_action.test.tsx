@@ -7,6 +7,7 @@
  */
 
 import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { ReplacePanelSOFinder } from '.';
 import { ReplacePanelAction, ReplacePanelActionApi } from './replace_panel_action';
@@ -28,10 +29,7 @@ describe('replace panel action', () => {
       embeddable: {
         uuid: 'superId',
         viewMode: new BehaviorSubject<ViewMode>('edit'),
-        parentApi: {
-          removePanel: jest.fn(),
-          replacePanel: jest.fn(),
-        },
+        parentApi: getMockPresentationContainer(),
       },
     };
   });

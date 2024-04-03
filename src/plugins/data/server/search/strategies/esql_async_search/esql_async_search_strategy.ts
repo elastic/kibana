@@ -7,10 +7,11 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
@@ -22,12 +23,18 @@ import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../.
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 
+// `drop_null_columns` is going to change the response
+// now we get `all_columns` and `columns`
+// `columns` contain only columns with data
+// `all_columns` contain everything
+type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest['body'];
+
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<
-  IKibanaSearchRequest<SqlQueryRequest['body']>,
+  IKibanaSearchRequest<ESQLQueryRequest>,
   IKibanaSearchResponse<SqlGetAsyncResponse>
 > => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -46,12 +53,12 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   function asyncSearch(
-    { id, ...request }: IKibanaSearchRequest<SqlQueryRequest['body']>,
+    { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-
+    const { dropNullColumns, ...requestParams } = request.params ?? {};
     const search = async () => {
       const params = id
         ? {
@@ -63,15 +70,24 @@ export const esqlAsyncSearchStrategyProvider = (
           }
         : {
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
-            ...request.params,
+            ...requestParams,
           };
       const { body, headers, meta } = id
         ? await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'GET', path: `/_query/async/${id}`, querystring: { ...params } },
+            {
+              method: 'GET',
+              path: `/_query/async/${id}`,
+              querystring: { ...params },
+            },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'POST', path: `/_query/async`, body: params },
+            {
+              method: 'POST',
+              path: `/_query/async`,
+              body: params,
+              querystring: dropNullColumns ? 'drop_null_columns' : '',
+            },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
 

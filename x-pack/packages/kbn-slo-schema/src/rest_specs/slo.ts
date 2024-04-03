@@ -11,15 +11,18 @@ import {
   allOrAnyString,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
   budgetingMethodSchema,
   dateType,
   durationType,
+  groupingsSchema,
   histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
   indicatorTypesSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  metaSchema,
   timesliceMetricIndicatorSchema,
   objectiveSchema,
   optionalSettingsSchema,
@@ -27,12 +30,16 @@ import {
   settingsSchema,
   sloIdSchema,
   summarySchema,
+  groupSummarySchema,
   tagsSchema,
   timeWindowSchema,
   timeWindowTypeSchema,
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
+  allOrAnyStringOrArray,
+  kqlWithFiltersSchema,
+  querySchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -49,7 +56,7 @@ const createSLOParamsSchema = t.type({
       id: sloIdSchema,
       settings: optionalSettingsSchema,
       tags: tagsSchema,
-      groupBy: allOrAnyString,
+      groupBy: allOrAnyStringOrArray,
       revision: t.number,
     }),
   ]),
@@ -70,6 +77,9 @@ const getPreviewDataParamsSchema = t.type({
     }),
     t.partial({
       objective: objectiveSchema,
+      instanceId: t.string,
+      groupBy: t.string,
+      groupings: t.record(t.string, t.unknown),
     }),
   ]),
 });
@@ -101,6 +111,23 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
+const groupBySchema = t.union([
+  t.literal('ungrouped'),
+  t.literal('slo.tags'),
+  t.literal('status'),
+  t.literal('slo.indicator.type'),
+]);
+
+const findSLOGroupsParamsSchema = t.partial({
+  query: t.partial({
+    page: t.string,
+    perPage: t.string,
+    groupBy: groupBySchema,
+    kqlQuery: t.string,
+    filters: t.string,
+  }),
+});
+
 const sloResponseSchema = t.intersection([
   t.type({
     id: sloIdSchema,
@@ -114,7 +141,7 @@ const sloResponseSchema = t.intersection([
     settings: settingsSchema,
     enabled: t.boolean,
     tags: tagsSchema,
-    groupBy: allOrAnyString,
+    groupBy: allOrAnyStringOrArray,
     createdAt: dateType,
     updatedAt: dateType,
     version: t.number,
@@ -126,8 +153,17 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.type({ summary: summarySchema }),
+  t.intersection([
+    t.type({ summary: summarySchema, groupings: groupingsSchema }),
+    t.partial({ meta: metaSchema }),
+  ]),
 ]);
+
+const sloGroupWithSummaryResponseSchema = t.type({
+  group: t.string,
+  groupBy: t.string,
+  summary: groupSummarySchema,
+});
 
 const getSLOQuerySchema = t.partial({
   query: t.partial({
@@ -158,7 +194,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
-    groupBy: allOrAnyString,
+    groupBy: allOrAnyStringOrArray,
   }),
 });
 
@@ -181,12 +217,21 @@ const findSLOResponseSchema = t.type({
   results: t.array(sloWithSummaryResponseSchema),
 });
 
+const findSLOGroupsResponseSchema = t.type({
+  page: t.number,
+  perPage: t.number,
+  total: t.number,
+  results: t.array(sloGroupWithSummaryResponseSchema),
+});
+
 const deleteSLOInstancesParamsSchema = t.type({
   body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })) }),
 });
 
 const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: allOrAnyString })) }),
+  body: t.type({
+    list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })),
+  }),
 });
 
 const fetchHistoricalSummaryResponseSchema = t.array(
@@ -241,12 +286,14 @@ const getSLOInstancesParamsSchema = t.type({
 });
 
 const getSLOInstancesResponseSchema = t.type({
-  groupBy: t.string,
+  groupBy: t.union([t.string, t.array(t.string)]),
   instances: t.array(t.string),
 });
 
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
+
+type SLOGroupWithSummaryResponse = t.OutputOf<typeof sloGroupWithSummaryResponseSchema>;
 
 type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
@@ -266,6 +313,9 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
+
+type FindSLOGroupsParams = t.TypeOf<typeof findSLOGroupsParamsSchema.props.query>;
+type FindSLOGroupsResponse = t.OutputOf<typeof findSLOGroupsResponseSchema>;
 
 type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
@@ -290,6 +340,7 @@ type Indicator = t.OutputOf<typeof indicatorSchema>;
 type Objective = t.OutputOf<typeof objectiveSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
+type SyntheticsAvailabilityIndicator = t.OutputOf<typeof syntheticsAvailabilityIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
 type TimesliceMetricIndicator = t.OutputOf<typeof timesliceMetricIndicatorSchema>;
 type TimesliceMetricBasicMetricWithField = t.OutputOf<typeof timesliceMetricBasicMetricWithField>;
@@ -297,6 +348,9 @@ type TimesliceMetricDocCountMetric = t.OutputOf<typeof timesliceMetricDocCountMe
 type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercentileMetric>;
 type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
+type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
+type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
+type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
   createSLOParamsSchema,
@@ -304,6 +358,8 @@ export {
   deleteSLOInstancesParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  findSLOGroupsParamsSchema,
+  findSLOGroupsResponseSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
   getSLOParamsSchema,
@@ -317,6 +373,7 @@ export {
   resetSLOResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
+  sloGroupWithSummaryResponseSchema,
   updateSLOParamsSchema,
   updateSLOResponseSchema,
   getSLOBurnRatesParamsSchema,
@@ -333,6 +390,8 @@ export type {
   DeleteSLOInstancesParams,
   FindSLOParams,
   FindSLOResponse,
+  FindSLOGroupsParams,
+  FindSLOGroupsResponse,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   GetSLOParams,
@@ -347,11 +406,13 @@ export type {
   ResetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
+  SLOGroupWithSummaryResponse,
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   GetSLOBurnRatesResponse,
   GetSLOInstancesResponse,
   IndicatorType,
@@ -365,4 +426,7 @@ export type {
   HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
+  GroupSummary,
+  KqlWithFiltersSchema,
+  QuerySchema,
 };

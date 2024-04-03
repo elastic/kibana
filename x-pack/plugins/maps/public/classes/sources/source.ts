@@ -59,18 +59,12 @@ export interface ISource {
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
-  /*
-   * Returns true when source implements IESSource interface
-   */
-  isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   cloneDescriptor(): AbstractSourceDescriptor;
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
   getApplyForceRefresh(): boolean;
-  getIndexPatternIds(): string[];
-  getQueryableIndexPatternIds(): string[];
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -135,18 +129,6 @@ export class AbstractSource implements ISource {
   }
 
   getApplyForceRefresh(): boolean {
-    return false;
-  }
-
-  getIndexPatternIds(): string[] {
-    return [];
-  }
-
-  getQueryableIndexPatternIds(): string[] {
-    return [];
-  }
-
-  isESSource(): boolean {
     return false;
   }
 

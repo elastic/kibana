@@ -73,6 +73,7 @@ const previouslyRegisteredTypes = [
   'index-pattern',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
+  'infra-custom-dashboards',
   'ingest-agent-policies',
   'ingest-download-sources',
   'ingest-outputs',

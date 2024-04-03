@@ -20,6 +20,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/url-state"
+    "@kbn/kibana-utils-plugin"
   ]
 }

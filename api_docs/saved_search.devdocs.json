@@ -1075,7 +1075,9 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; fetch: (options?: ",
+              "; history: ",
+              "SearchRequest",
+              "[]; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1087,9 +1089,7 @@
               "SearchResponse",
               "<unknown, Record<string, ",
               "AggregationsAggregate",
-              ">>>; history: ",
-              "SearchRequest",
-              "[]; setField: <K extends keyof ",
+              ">>>; setField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1462,6 +1462,20 @@
             "type": "number",
             "tags": [],
             "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
             "description": [],
             "signature": [
               "number | undefined"

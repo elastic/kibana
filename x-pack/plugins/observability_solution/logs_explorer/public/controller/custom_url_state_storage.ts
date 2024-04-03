@@ -7,9 +7,9 @@
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
-import { LogExplorerDiscoverServices } from './types';
+import { LogsExplorerDiscoverServices } from './types';
 
-type DiscoverHistory = ReturnType<LogExplorerDiscoverServices['history']>;
+type DiscoverHistory = LogsExplorerDiscoverServices['history'];
 
 /**
  * Create a MemoryHistory instance. It is initialized with an application state

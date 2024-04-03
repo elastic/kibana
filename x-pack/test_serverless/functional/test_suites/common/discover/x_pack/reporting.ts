@@ -18,10 +18,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
+  const PageObjects = getPageObjects([
+    'reporting',
+    'common',
+    'svlCommonPage',
+    'discover',
+    'timePicker',
+    'share',
+  ]);
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -30,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getReport = async () => {
     // close any open notification toasts
-    await PageObjects.reporting.clearToastNotifications();
+    await toasts.dismissAll();
 
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
@@ -56,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
+        await PageObjects.svlCommonPage.loginAsAdmin();
         // TODO: emptyKibanaIndex fails in Serverless with
         // "index_not_found_exception: no such index [.kibana_ingest]",
         // so it was switched to `savedObjects.cleanStandardList()`

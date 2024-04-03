@@ -84,7 +84,6 @@ exports[`EditLayerPanel is rendered 1`] = `
               "hasErrors": [Function],
               "hasJoins": [Function],
               "renderSourceSettingsEditor": [Function],
-              "supportsElasticsearchFilters": [Function],
               "supportsFeatureEditing": [Function],
               "supportsFitToBounds": [Function],
             }
@@ -116,7 +115,6 @@ exports[`EditLayerPanel is rendered 1`] = `
                 "hasErrors": [Function],
                 "hasJoins": [Function],
                 "renderSourceSettingsEditor": [Function],
-                "supportsElasticsearchFilters": [Function],
                 "supportsFeatureEditing": [Function],
                 "supportsFitToBounds": [Function],
               }

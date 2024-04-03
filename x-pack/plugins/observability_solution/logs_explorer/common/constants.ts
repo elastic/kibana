@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const LOG_EXPLORER_PROFILE_ID = 'logs-explorer';
+import { SmartFieldGridColumnOptions } from './display_options';
+
+export const LOGS_EXPLORER_PROFILE_ID = 'logs-explorer';
 
 // Fields constants
 export const TIMESTAMP_FIELD = '@timestamp';
@@ -34,6 +36,14 @@ export const ORCHESTRATOR_NAMESPACE_FIELD = 'orchestrator.namespace';
 export const CONTAINER_NAME_FIELD = 'container.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 
+// Degraded Docs
+export const DEGRADED_DOCS_FIELD = 'ignored_field_values';
+
+// Error Stacktrace
+export const ERROR_STACK_TRACE = 'error.stack_trace';
+export const ERROR_EXCEPTION_STACKTRACE = 'error.exception.stacktrace';
+export const ERROR_LOG_STACKTRACE = 'error.log.stacktrace';
+
 // Virtual column fields
 export const CONTENT_FIELD = 'content';
 export const RESOURCE_FIELD = 'resource';
@@ -41,15 +51,46 @@ export const RESOURCE_FIELD = 'resource';
 // Sizing
 export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
 export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
+export const ACTIONS_COLUMN_WIDTH = 80;
+
+export const RESOURCE_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
+  type: 'smart-field',
+  smartField: RESOURCE_FIELD,
+  fallbackFields: [HOST_NAME_FIELD, SERVICE_NAME_FIELD],
+  width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
+};
+
+export const CONTENT_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
+  type: 'smart-field',
+  smartField: CONTENT_FIELD,
+  fallbackFields: [MESSAGE_FIELD],
+};
+
+export const SMART_FALLBACK_FIELDS = {
+  [CONTENT_FIELD]: CONTENT_FIELD_CONFIGURATION,
+  [RESOURCE_FIELD]: RESOURCE_FIELD_CONFIGURATION,
+};
 
 // UI preferences
-export const DEFAULT_COLUMNS = [
-  {
-    field: RESOURCE_FIELD,
-    width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
-  },
-  {
-    field: CONTENT_FIELD,
-  },
-];
+export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
 export const DEFAULT_ROWS_PER_PAGE = 100;
+
+// List of prefixes which needs to be filtered out for Display in Content Column
+export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
+  '_', // Filter fields like '_id', '_score'
+  '@timestamp',
+  'agent.',
+  'elastic_agent.',
+  'data_stream.',
+  'ecs.',
+  'host.',
+  'container.',
+  'cloud.',
+  'kubernetes.',
+  'orchestrator.',
+  'log.',
+  'service.',
+];
+
+export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
+export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];

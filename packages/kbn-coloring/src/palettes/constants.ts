@@ -14,3 +14,7 @@ export const DEFAULT_RANGE_TYPE = 'percent';
 export const DEFAULT_MIN_STOP = 0;
 export const DEFAULT_MAX_STOP = 100;
 export const DEFAULT_COLOR_STEPS = 5;
+
+export const DEFAULT_FALLBACK_PALETTE = 'default';
+export const LEGACY_COMPLIMENTARY_PALETTE = 'complimentary';
+export const COMPLEMENTARY_PALETTE = 'complementary';

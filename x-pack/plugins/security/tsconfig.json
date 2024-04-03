@@ -60,7 +60,6 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-common",
     "@kbn/core-custom-branding-server-mocks",
-    "@kbn/ecs",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
@@ -74,6 +73,9 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-server",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",

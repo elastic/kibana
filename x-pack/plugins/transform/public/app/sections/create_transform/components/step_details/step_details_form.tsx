@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,7 +32,7 @@ import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/d
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
-import { TransformId } from '../../../../../../common/types/transform';
+import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -46,13 +47,13 @@ import {
   useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
-import { EsIndexName } from './common';
+import type { EsIndexName } from './common';
 import {
   isContinuousModeDelay,
   isRetentionPolicyMaxAge,
@@ -60,10 +61,11 @@ import {
   integerRangeMinus1To100Validator,
   transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
-import { StepDefineExposedState } from '../step_define/common';
+import type { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { getDefaultStepDetailsState, StepDetailsExposedState } from './common';
+import type { StepDetailsExposedState } from './common';
+import { getDefaultStepDetailsState } from './common';
 
 interface StepDetailsFormProps {
   overrides?: StepDetailsExposedState;

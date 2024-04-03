@@ -45,7 +45,7 @@
           },
           ", setCellProps: (props: ",
           "EuiDataGridSetCellProps",
-          ") => void, defaultStyles?: React.CSSProperties | undefined) => void"
+          ") => void) => void"
         ],
         "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
         "deprecated": false,
@@ -109,21 +109,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultStyles",
-            "description": [],
-            "signature": [
-              "React.CSSProperties | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],

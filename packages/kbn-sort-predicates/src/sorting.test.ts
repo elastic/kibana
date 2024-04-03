@@ -46,6 +46,96 @@ function testSorting({
 }
 
 describe('Data sorting criteria', () => {
+  describe('Date values', () => {
+    for (const direction of ['asc', 'desc'] as const) {
+      it(`should provide the date criteria for date values (${direction})`, () => {
+        const now = Date.now();
+        testSorting({
+          input: [now, now - 150000, 0],
+          output: [0, now - 150000, now],
+          direction,
+          type: 'date',
+        });
+      });
+
+      it(`should provide the date criteria for array date values (${direction})`, () => {
+        const now = Date.now();
+        testSorting({
+          input: [now, [0, now], [0], now - 150000],
+          output: [[0], [0, now], now - 150000, now],
+          direction,
+          type: 'date',
+        });
+      });
+
+      it(`should provide the date criteria for ISO string date values (${direction})`, () => {
+        const now = new Date(Date.now()).toISOString();
+        const beforeNow = new Date(Date.now() - 150000).toISOString();
+        const originString = new Date(0).toISOString();
+        testSorting({
+          input: [now, beforeNow, originString],
+          output: [originString, beforeNow, now],
+          direction,
+          type: 'date',
+        });
+      });
+
+      it(`should provide the date criteria for array ISO string date values (${direction})`, () => {
+        const now = new Date(Date.now()).toISOString();
+        const beforeNow = new Date(Date.now() - 150000).toISOString();
+        const originString = new Date(0).toISOString();
+        testSorting({
+          input: [now, [originString, now], [originString], beforeNow],
+          output: [[originString], [originString, now], beforeNow, now],
+          direction,
+          type: 'date',
+        });
+      });
+
+      it(`should provide the date criteria for date values (${direction})`, () => {
+        const now = Date.now();
+        const originString = new Date(0).toISOString();
+        testSorting({
+          input: [now, now - 150000, originString],
+          output: [originString, now - 150000, now],
+          direction,
+          type: 'date',
+        });
+      });
+
+      it(`should provide the date criteria for array date values of mixed types (${direction})`, () => {
+        const now = Date.now();
+        const beforeNow = Date.now() - 150000;
+        const originString = new Date(0).toISOString();
+        testSorting({
+          input: [now, [originString, now], [originString], beforeNow],
+          output: [[originString], [originString, now], beforeNow, now],
+          direction,
+          type: 'date',
+        });
+      });
+    }
+
+    it(`should sort undefined and null to the end`, () => {
+      const now = new Date(Date.now()).toISOString();
+      const beforeNow = new Date(Date.now() - 150000).toISOString();
+      testSorting({
+        input: [null, now, 0, undefined, null, beforeNow],
+        output: [0, beforeNow, now, null, undefined, null],
+        direction: 'asc',
+        type: 'date',
+        reverseOutput: false,
+      });
+
+      testSorting({
+        input: [null, now, 0, undefined, null, beforeNow],
+        output: [now, beforeNow, 0, null, undefined, null],
+        direction: 'desc',
+        type: 'date',
+        reverseOutput: false,
+      });
+    });
+  });
   describe('Numeric values', () => {
     for (const direction of ['asc', 'desc'] as const) {
       it(`should provide the number criteria of numeric values (${direction})`, () => {
@@ -54,16 +144,6 @@ describe('Data sorting criteria', () => {
           output: [-Infinity, 5, 6, 7, Infinity],
           direction,
           type: 'number',
-        });
-      });
-
-      it(`should provide the number criteria for date values (${direction})`, () => {
-        const now = Date.now();
-        testSorting({
-          input: [now, 0, now - 150000],
-          output: [0, now - 150000, now],
-          direction,
-          type: 'date',
         });
       });
 
@@ -76,13 +156,12 @@ describe('Data sorting criteria', () => {
         });
       });
 
-      it(`should provide the number criteria for array date values (${direction})`, () => {
-        const now = Date.now();
+      it(`should provide the number criteria of array numeric values (${direction})`, () => {
         testSorting({
-          input: [now, [0, now], [0], now - 150000],
-          output: [[0], [0, now], now - 150000, now],
+          input: [7, [0, 7], [0], 1],
+          output: [[0], [0, 7], 1, 7],
           direction,
-          type: 'date',
+          type: 'number',
         });
       });
     }

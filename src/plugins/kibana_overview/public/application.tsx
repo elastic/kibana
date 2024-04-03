@@ -34,7 +34,11 @@ export const renderApp = (
     const solutions = home.featureCatalogue
       .getSolutions()
       .filter(({ id }) => id !== 'kibana')
-      .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
+      .filter(({ id }) =>
+        navLinks.find(
+          ({ category, visibleIn }) => visibleIn.includes('kibanaOverview') && category?.id === id
+        )
+      );
 
     ReactDOM.render(
       <I18nProvider>

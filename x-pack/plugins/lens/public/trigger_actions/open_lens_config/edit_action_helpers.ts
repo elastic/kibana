@@ -24,6 +24,7 @@ interface Context {
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
+  if (!embeddable?.getInput) return false;
   // display the action only if dashboard is on editable mode
   const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
@@ -44,6 +45,7 @@ export async function executeEditAction({
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
   const ConfigPanel = await embeddable.openConfingPanel(startDependencies, isNewPanel, deletePanel);
+
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(

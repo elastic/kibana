@@ -25,7 +25,7 @@ import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/ty
 import { PluginsStart, ClientData, ESConfig } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
@@ -66,9 +66,18 @@ export const renderApp = (
     workplaceSearch,
   } = data;
   const { history } = params;
-  const { application, chrome, http, uiSettings } = core;
+  const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+  const {
+    charts,
+    cloud,
+    guidedOnboarding,
+    indexManagement: indexManagementPlugin,
+    lens,
+    security,
+    share,
+    ml,
+  } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -99,6 +108,9 @@ export const renderApp = (
   } catch {
     user = null;
   }
+  const indexMappingComponent = indexManagementPlugin.getIndexMappingComponent({ history });
+
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -106,11 +118,13 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    connectorTypes,
     console: plugins.console,
-    esConfig,
     data: plugins.data,
+    esConfig,
     guidedOnboarding,
     history,
+    indexMappingComponent,
     isSidebarEnabled,
     lens,
     ml,
@@ -121,6 +135,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
@@ -138,7 +153,7 @@ export const renderApp = (
     http,
     readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
 
   ReactDOM.render(
     <I18nProvider>
@@ -158,7 +173,6 @@ export const renderApp = (
                   searchOAuth={searchOAuth}
                   workplaceSearch={workplaceSearch}
                 />
-                <Toasts />
               </Router>
             </Provider>
           </CloudContext>

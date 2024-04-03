@@ -477,6 +477,7 @@ export const getNewThreatIndicatorRule = (
   description: 'The threat indicator rule description.',
   query: '*:*',
   threat_query: '*:*',
+  threat_language: 'kuery',
   index: ['suspicious-*'],
   severity: 'critical',
   risk_score: 20,

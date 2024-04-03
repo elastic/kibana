@@ -13,6 +13,7 @@ export {
   getKbnFieldType,
   getKbnTypeNames,
   getFilterableKbnTypeNames,
+  esFieldTypeToKibanaFieldType,
 } from './src/kbn_field_types';
 
 export type { KbnFieldTypeOptions } from './src/types';

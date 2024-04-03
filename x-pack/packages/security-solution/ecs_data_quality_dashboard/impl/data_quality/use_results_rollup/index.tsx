@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 
 import { isEmpty } from 'lodash/fp';
 import {
@@ -19,14 +19,16 @@ import {
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type { OnCheckCompleted, PatternRollup } from '../types';
+import type { DataQualityCheckResult, OnCheckCompleted, PatternRollup } from '../types';
 import {
   getDocsCount,
   getIndexId,
-  getResults,
+  getStorageResults,
   getSizeInBytes,
   getTotalPatternSameFamily,
-  postResult,
+  postStorageResult,
+  formatStorageResult,
+  formatResultFromStorage,
 } from '../helpers';
 import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
@@ -60,9 +62,11 @@ interface UseResultsRollup {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const useStoredPatternRollups = (patterns: string[]) => {
+const useStoredPatternResults = (patterns: string[]) => {
   const { httpFetch, toasts } = useDataQualityContext();
-  const [storedRollups, setStoredRollups] = useState<Record<string, PatternRollup>>({});
+  const [storedPatternResults, setStoredPatternResults] = useState<
+    Array<{ pattern: string; results: Record<string, DataQualityCheckResult> }>
+  >([]);
 
   useEffect(() => {
     if (isEmpty(patterns)) {
@@ -71,20 +75,31 @@ const useStoredPatternRollups = (patterns: string[]) => {
 
     let ignore = false;
     const abortController = new AbortController();
-    const fetchStoredRollups = async () => {
-      const results = await getResults({ httpFetch, abortController, patterns, toasts });
-      if (results?.length && !ignore) {
-        setStoredRollups(Object.fromEntries(results.map(({ rollup }) => [rollup.pattern, rollup])));
+    const fetchStoredPatternResults = async () => {
+      const requests = patterns.map((pattern) =>
+        getStorageResults({ pattern, httpFetch, abortController, toasts }).then((results = []) => ({
+          pattern,
+          results: Object.fromEntries(
+            results.map((storageResult) => [
+              storageResult.indexName,
+              formatResultFromStorage({ storageResult, pattern }),
+            ])
+          ),
+        }))
+      );
+      const patternResults = await Promise.all(requests);
+      if (patternResults?.length && !ignore) {
+        setStoredPatternResults(patternResults);
       }
     };
 
-    fetchStoredRollups();
+    fetchStoredPatternResults();
     return () => {
       ignore = true;
     };
   }, [httpFetch, patterns, toasts]);
 
-  return storedRollups;
+  return storedPatternResults;
 };
 
 export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
@@ -92,28 +107,36 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
-  const storedPatternsRollups = useStoredPatternRollups(patterns);
+  const storedPatternsResults = useStoredPatternResults(patterns);
 
   useEffect(() => {
-    if (!isEmpty(storedPatternsRollups)) {
-      setPatternRollups((current) => ({ ...current, ...storedPatternsRollups }));
+    if (!isEmpty(storedPatternsResults)) {
+      setPatternRollups((current) =>
+        storedPatternsResults.reduce(
+          (acc, { pattern, results }) => ({
+            ...acc,
+            [pattern]: {
+              ...current[pattern],
+              pattern,
+              results,
+            },
+          }),
+          current
+        )
+      );
     }
-  }, [storedPatternsRollups]);
-
-  const updatePatternRollups = useCallback(
-    (updateRollups: (current: Record<string, PatternRollup>) => Record<string, PatternRollup>) => {
-      setPatternRollups((current) => updateRollups(current));
-    },
-    []
-  );
+  }, [storedPatternsResults]);
 
   const { telemetryEvents, isILMAvailable } = useDataQualityContext();
-  const updatePatternRollup = useCallback(
-    (patternRollup: PatternRollup) => {
-      updatePatternRollups((current) => ({ ...current, [patternRollup.pattern]: patternRollup }));
-    },
-    [updatePatternRollups]
-  );
+  const updatePatternRollup = useCallback((patternRollup: PatternRollup) => {
+    setPatternRollups((current) => ({
+      ...current,
+      [patternRollup.pattern]: {
+        ...patternRollup,
+        results: patternRollup.results ?? current[patternRollup.pattern]?.results, // prevent undefined results override existing
+      },
+    }));
+  }, []);
 
   const totalDocsCount = useMemo(() => getTotalDocsCount(patternRollups), [patternRollups]);
   const totalIncompatible = useMemo(() => getTotalIncompatible(patternRollups), [patternRollups]);
@@ -170,7 +193,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           requestTime > 0 &&
           partitionedFieldMetadata
         ) {
-          const metadata = {
+          const report = {
             batchId,
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
@@ -199,10 +222,13 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
               partitionedFieldMetadata.incompatible
             ),
           };
-          telemetryEvents.reportDataQualityIndexChecked?.(metadata);
+          telemetryEvents.reportDataQualityIndexChecked?.(report);
 
-          const result = { meta: metadata, rollup: updatedRollup };
-          postResult({ result, httpFetch, toasts, abortController: new AbortController() });
+          const result = results[indexName];
+          if (result) {
+            const storageResult = formatStorageResult({ result, report, partitionedFieldMetadata });
+            postStorageResult({ storageResult, httpFetch, toasts });
+          }
         }
 
         if (isLastCheck) {

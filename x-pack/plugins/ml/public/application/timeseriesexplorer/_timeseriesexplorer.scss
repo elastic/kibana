@@ -74,6 +74,11 @@
       pointer-events: none;
     }
 
+    .values-dots circle {
+      fill: $euiColorPrimary;
+      stroke-width: 0;
+    }
+
     .metric-value {
       opacity: 1;
       fill: transparent;

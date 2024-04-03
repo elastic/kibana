@@ -17,10 +17,7 @@ interface SendEmailGraphApiOptions {
   options: SendEmailOptions;
   headers: Record<string, string>;
   messageHTML: string;
-  graphApiUrl?: string;
 }
-
-const MICROSOFT_GRAPH_API_HOST = 'https://graph.microsoft.com/v1.0';
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
@@ -28,7 +25,7 @@ export async function sendEmailGraphApi(
   configurationUtilities: ActionsConfigurationUtilities,
   axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
-  const { options, headers, messageHTML, graphApiUrl } = sendEmailOptions;
+  const { options, headers, messageHTML } = sendEmailOptions;
 
   // Create a new axios instance if one is not provided
   axiosInstance = axiosInstance ?? axios.create();
@@ -36,7 +33,9 @@ export async function sendEmailGraphApi(
   // POST /users/{id | userPrincipalName}/sendMail
   const res = await request({
     axios: axiosInstance,
-    url: `${graphApiUrl ?? MICROSOFT_GRAPH_API_HOST}/users/${options.routing.from}/sendMail`,
+    url: `${configurationUtilities.getMicrosoftGraphApiUrl()}/users/${
+      options.routing.from
+    }/sendMail`,
     method: 'post',
     logger,
     data: getMessage(options, messageHTML),

@@ -187,10 +187,34 @@ describe('Data control editor', () => {
         expect(searchOptions.exists()).toBe(false);
       });
 
-      test('when creating range slider, does not have custom settings', async () => {
+      test('when creating range slider, does have custom settings', async () => {
         findTestSubject(controlEditor, 'create__rangeSliderControl').simulate('click');
         const searchOptions = findTestSubject(controlEditor, 'control-editor-custom-settings');
-        expect(searchOptions.exists()).toBe(false);
+        expect(searchOptions.exists()).toBe(true);
+      });
+
+      test('when creating range slider, validates step setting is greater than 0', async () => {
+        findTestSubject(controlEditor, 'create__rangeSliderControl').simulate('click');
+        const stepOption = findTestSubject(
+          controlEditor,
+          'rangeSliderControl__stepAdditionalSetting'
+        );
+        expect(stepOption.exists()).toBe(true);
+
+        const saveButton = findTestSubject(controlEditor, 'control-editor-save');
+        expect(saveButton.instance()).toBeEnabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: undefined } });
+        expect(saveButton.instance()).toBeDisabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 0.5 } });
+        expect(saveButton.instance()).toBeEnabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 0 } });
+        expect(saveButton.instance()).toBeDisabled();
+
+        stepOption.simulate('change', { target: { valueAsNumber: 1 } });
+        expect(saveButton.instance()).toBeEnabled();
       });
     });
 

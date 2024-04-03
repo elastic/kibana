@@ -150,6 +150,7 @@ export const TimestampField = ({ options$, isLoadingOptions$, matchedIndices$ }:
                     }
                   )}
                   isLoading={isLoadingOptions}
+                  data-is-loading={isLoadingOptions ? '1' : '0'}
                   fullWidth
                 />
                 <EuiFormHelpText>

@@ -18,7 +18,6 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
-import { uniqBy } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
 import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
@@ -30,7 +29,6 @@ import type {
   ArchivePackage,
   BulkInstallPackageInfo,
   EpmPackageInstallStatus,
-  EsAssetReference,
   InstallablePackage,
   Installation,
   InstallResult,
@@ -40,12 +38,12 @@ import type {
   NewPackagePolicy,
   PackageInfo,
   PackageVerificationResult,
-  RegistryDataStream,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
   DATASET_VAR_NAME,
+  GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
   FleetError,
@@ -69,19 +67,16 @@ import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
-import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
-import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
 
 import { formatVerificationResultForSO } from './package_verification';
-import { getInstallation, getInstallationObject } from '.';
+import { getInstallation, getInstallationObject } from './get';
 import { removeInstallation } from './remove';
 import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
-import { withPackageSpan } from './utils';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
 import { createAssets } from './custom_integrations';
@@ -89,6 +84,10 @@ import { generateDatastreamEntries } from './custom_integrations/assets/dataset/
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
+import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+
+const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -98,27 +97,53 @@ export async function isPackageInstalled(options: {
   return installedPackage !== undefined;
 }
 
+// Error used to retry in isPackageVersionOrLaterInstalled
+class CurrentlyInstallingError extends Error {}
+
+/**
+ * Check if a package is currently installed,
+ * if the package is currently installing it will retry until MAX_ENSURE_INSTALL_TIME is reached
+ */
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
-}): Promise<{ package: Installation; installType: InstallType } | false> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedPackage = installedPackageObject?.attributes;
-  if (
-    installedPackage &&
-    (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
-  ) {
-    let installType: InstallType;
-    try {
-      installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
-    } catch (e) {
-      installType = 'unknown';
+}): Promise<{ package: Installation } | false> {
+  return pRetry(
+    async () => {
+      const { savedObjectsClient, pkgName, pkgVersion } = options;
+      const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+      const installedPackage = installedPackageObject?.attributes;
+      if (
+        installedPackage &&
+        (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
+      ) {
+        if (installedPackage.install_status === 'installing') {
+          throw new CurrentlyInstallingError(
+            `Package ${pkgName}-${pkgVersion} is currently installing`
+          );
+        } else if (installedPackage.install_status === 'install_failed') {
+          return false;
+        }
+
+        return { package: installedPackage };
+      }
+      return false;
+    },
+    {
+      maxRetryTime: MAX_ENSURE_INSTALL_TIME,
+      onFailedAttempt: (error) => {
+        if (!(error instanceof CurrentlyInstallingError)) {
+          throw error;
+        }
+      },
     }
-    return { package: installedPackage, installType };
-  }
-  return false;
+  ).catch((err): false => {
+    if (err instanceof CurrentlyInstallingError) {
+      return false;
+    }
+    throw err;
+  });
 }
 
 export async function ensureInstalledPackage(options: {
@@ -150,6 +175,7 @@ export async function ensureInstalledPackage(options: {
     pkgName: pkgKeyProps.name,
     pkgVersion: pkgKeyProps.version,
   });
+
   if (installedPackageResult) {
     return installedPackageResult.package;
   }
@@ -379,6 +405,7 @@ async function installPackageFromRegistry({
 
   try {
     // get the currently installed package
+
     const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
@@ -564,12 +591,12 @@ async function installPackageCommon(options: {
       return { error: err, installType, installSource };
     }
 
-    const savedObjectsImporter = appContextService
-      .getSavedObjects()
-      .createImporter(savedObjectsClient, { importSizeLimit: 15_000 });
-
     // Saved object client need to be scopped with the package space for saved object tagging
     const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
 
     const savedObjectTagAssignmentService = appContextService
       .getSavedObjectsTagging()
@@ -986,7 +1013,9 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
+  const toSaveESIndexPatterns = generateESIndexPatterns(
+    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+  );
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1064,131 +1093,6 @@ export const saveKibanaAssetsRefs = async (
   return assetRefs;
 };
 
-/**
- * Utility function for updating the installed_es field of a package
- */
-export const updateEsAssetReferences = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  currentAssets: EsAssetReference[],
-  {
-    assetsToAdd = [],
-    assetsToRemove = [],
-    refresh = false,
-  }: {
-    assetsToAdd?: EsAssetReference[];
-    assetsToRemove?: EsAssetReference[];
-    /**
-     * Whether or not the update should force a refresh on the SO index.
-     * Defaults to `false` for faster updates, should only be `wait_for` if the update needs to be queried back from ES
-     * immediately.
-     */
-    refresh?: 'wait_for' | false;
-  }
-): Promise<EsAssetReference[]> => {
-  const withAssetsRemoved = currentAssets.filter(({ type, id }) => {
-    if (
-      assetsToRemove.some(
-        ({ type: removeType, id: removeId }) => removeType === type && removeId === id
-      )
-    ) {
-      return false;
-    }
-    return true;
-  });
-
-  const deduplicatedAssets = uniqBy(
-    [...withAssetsRemoved, ...assetsToAdd],
-    ({ type, id }) => `${type}-${id}`
-  );
-
-  auditLoggingService.writeCustomSoAuditLog({
-    action: 'update',
-    id: pkgName,
-    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
-  });
-
-  const {
-    attributes: { installed_es: updatedAssets },
-  } =
-    // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
-    // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
-    // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
-    await pRetry(
-      () =>
-        savedObjectsClient.update<Installation>(
-          PACKAGES_SAVED_OBJECT_TYPE,
-          pkgName,
-          {
-            installed_es: deduplicatedAssets,
-          },
-          {
-            refresh,
-          }
-        ),
-      // Use a lower number of retries for ES assets since they're installed in serial and can only conflict with
-      // the single Kibana update call.
-      { retries: 5 }
-    );
-
-  return updatedAssets ?? [];
-};
-/**
- * Utility function for adding assets the installed_es field of a package
- * uses optimistic concurrency control to prevent missed updates
- */
-export const optimisticallyAddEsAssetReferences = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  assetsToAdd: EsAssetReference[]
-): Promise<EsAssetReference[]> => {
-  const addEsAssets = async () => {
-    // TODO: Should this be replaced by a `get()` call from epm/get.ts?
-    const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
-    auditLoggingService.writeCustomSoAuditLog({
-      action: 'get',
-      id: pkgName,
-      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
-    });
-
-    const installedEs = so.attributes.installed_es ?? [];
-
-    const deduplicatedAssets = uniqBy(
-      [...installedEs, ...assetsToAdd],
-      ({ type, id }) => `${type}-${id}`
-    );
-
-    auditLoggingService.writeCustomSoAuditLog({
-      action: 'update',
-      id: pkgName,
-      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
-    });
-
-    const {
-      attributes: { installed_es: updatedAssets },
-    } = await savedObjectsClient.update<Installation>(
-      PACKAGES_SAVED_OBJECT_TYPE,
-      pkgName,
-      {
-        installed_es: deduplicatedAssets,
-      },
-      {
-        version: so.version,
-      }
-    );
-
-    return updatedAssets ?? [];
-  };
-
-  const onlyRetryConflictErrors = (err: Error) => {
-    if (!SavedObjectsErrorHelpers.isConflictError(err)) {
-      throw err;
-    }
-  };
-
-  return pRetry(addEsAssets, { retries: 10, onFailedAttempt: onlyRetryConflictErrors });
-};
-
 export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
@@ -1221,92 +1125,6 @@ export async function ensurePackagesCompletedInstall(
   );
   await Promise.all(installingPromises);
   return installingPackages;
-}
-
-export async function installIndexTemplatesAndPipelines({
-  installedPkg,
-  packageInstallContext,
-  esReferences,
-  savedObjectsClient,
-  esClient,
-  logger,
-  onlyForDataStreams,
-}: {
-  installedPkg?: Installation;
-  packageInstallContext: PackageInstallContext;
-  esReferences: EsAssetReference[];
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  onlyForDataStreams?: RegistryDataStream[];
-}) {
-  /**
-   * In order to install assets in parallel, we need to split the preparation step from the installation step. This
-   * allows us to know which asset references are going to be installed so that we can save them on the packages
-   * SO before installation begins. In the case of a failure during installing any individual asset, we'll have the
-   * references necessary to remove any assets in that were successfully installed during the rollback phase.
-   *
-   * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
-   * more easily write unit tests against the asset generation code without needing to mock ES responses.
-   */
-  const experimentalDataStreamFeatures = installedPkg?.experimental_data_stream_features ?? [];
-
-  const preparedIngestPipelines = prepareToInstallPipelines(
-    packageInstallContext,
-    onlyForDataStreams
-  );
-  const preparedIndexTemplates = prepareToInstallTemplates(
-    packageInstallContext,
-    esReferences,
-    experimentalDataStreamFeatures,
-    onlyForDataStreams
-  );
-
-  // Update the references for the templates and ingest pipelines together. Need to be done together to avoid race
-  // conditions on updating the installed_es field at the same time
-  // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
-  // cleanup in the case that a single asset fails to install.
-  let newEsReferences: EsAssetReference[] = [];
-
-  if (onlyForDataStreams) {
-    // if onlyForDataStreams is present that means we are in create package policy flow
-    // not install flow, meaning we do not have a lock on the installation SO
-    // so we need to use optimistic concurrency control
-    newEsReferences = await optimisticallyAddEsAssetReferences(
-      savedObjectsClient,
-      packageInstallContext.packageInfo.name,
-      [...preparedIngestPipelines.assetsToAdd, ...preparedIndexTemplates.assetsToAdd]
-    );
-  } else {
-    newEsReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      packageInstallContext.packageInfo.name,
-      esReferences,
-      {
-        assetsToRemove: preparedIndexTemplates.assetsToRemove,
-        assetsToAdd: [
-          ...preparedIngestPipelines.assetsToAdd,
-          ...preparedIndexTemplates.assetsToAdd,
-        ],
-      }
-    );
-  }
-
-  // Install index templates and ingest pipelines in parallel since they typically take the longest
-  const [installedTemplates] = await Promise.all([
-    withPackageSpan('Install index templates', () =>
-      preparedIndexTemplates.install(esClient, logger)
-    ),
-    // installs versionized pipelines without removing currently installed ones
-    withPackageSpan('Install ingest pipelines', () =>
-      preparedIngestPipelines.install(esClient, logger)
-    ),
-  ]);
-
-  return {
-    esReferences: newEsReferences,
-    installedTemplates,
-  };
 }
 
 export async function installAssetsForInputPackagePolicy(opts: {
@@ -1347,7 +1165,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
       );
     } else {
       logger.info(
-        `Data stream ${dataStream.name} already exists, skipping index template creation for ${packagePolicy.id}`
+        `Data stream for dataset ${datasetName} already exists, skipping index template creation for ${packagePolicy.id}`
       );
       return;
     }
@@ -1414,6 +1232,13 @@ export async function installAssetsForInputPackagePolicy(opts: {
     logger,
     onlyForDataStreams: [dataStream],
   });
+  // Upate ES index patterns
+  await optimisticallyAddEsAssetReferences(
+    soClient,
+    installedPkgWithAssets.installation.name,
+    [],
+    generateESIndexPatterns([dataStream])
+  );
 }
 
 interface NoPkgArgs {

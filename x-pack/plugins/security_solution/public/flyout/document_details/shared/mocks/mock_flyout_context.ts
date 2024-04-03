@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 /**
- * Mock flyout context
+ * Mock flyout api
  */
-export const mockFlyoutContextValue: ExpandableFlyoutContextValue = {
+export const mockFlyoutApi: ExpandableFlyoutApi = {
   openFlyout: jest.fn(),
   openRightPanel: jest.fn(),
   openLeftPanel: jest.fn(),
@@ -20,9 +20,4 @@ export const mockFlyoutContextValue: ExpandableFlyoutContextValue = {
   closePreviewPanel: jest.fn(),
   previousPreviewPanel: jest.fn(),
   closeFlyout: jest.fn(),
-  panels: {
-    left: undefined,
-    right: undefined,
-    preview: [],
-  },
 };

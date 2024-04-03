@@ -17,11 +17,11 @@ import {
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
-const assistant = '\n\nAssistant:';
 
 export const DEFAULT_BODY = JSON.stringify({
-  prompt: `${human} Hello world! ${assistant}`,
-  max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+  anthropic_version: 'bedrock-2023-05-31',
+  messages: [{ content: 'Hello world', role: 'user' }],
+  max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: [human],
 });
 
@@ -39,7 +39,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
           bedrockAPIUrlDocs: (
             <EuiLink
               data-test-subj="bedrock-api-doc"
-              href="https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html"
+              href="https://docs.aws.amazon.com/general/latest/gr/bedrock.html"
               target="_blank"
             >
               {`${i18n.BEDROCK} ${i18n.DOCUMENTATION}`}

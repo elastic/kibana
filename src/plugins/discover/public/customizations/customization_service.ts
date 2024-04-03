@@ -13,6 +13,7 @@ import {
   SearchBarCustomization,
   TopNavCustomization,
   UnifiedHistogramCustomization,
+  FieldListCustomization,
 } from './customization_types';
 
 export type DiscoverCustomization =
@@ -20,7 +21,8 @@ export type DiscoverCustomization =
   | SearchBarCustomization
   | TopNavCustomization
   | UnifiedHistogramCustomization
-  | DataTableCustomization;
+  | DataTableCustomization
+  | FieldListCustomization;
 
 export type DiscoverCustomizationId = DiscoverCustomization['id'];
 

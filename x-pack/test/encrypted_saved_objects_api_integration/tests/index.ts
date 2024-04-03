@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('encryptedSavedObjects', function encryptedSavedObjectsSuite() {
     loadTestFile(require.resolve('./encrypted_saved_objects_api'));
     loadTestFile(require.resolve('./encrypted_saved_objects_decryption'));
+    loadTestFile(require.resolve('./encrypted_saved_objects_aad_include_list'));
   });
 }

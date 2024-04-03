@@ -33,4 +33,5 @@ export interface TemplateContext {
   ironbank?: boolean;
   revision: string;
   architecture?: string;
+  fips?: boolean;
 }

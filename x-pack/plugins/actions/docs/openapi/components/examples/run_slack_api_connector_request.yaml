@@ -1,0 +1,8 @@
+summary: Run a Slack connector that uses the web API method to post a message on a channel.
+value:
+  params:
+    subAction: postMessage
+    subActionParams:
+      channelIds:
+        - C123ABC456
+      text: A test message.

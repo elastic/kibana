@@ -3794,7 +3794,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      shouldUseSizeTransitionVeil,\n      interactive,\n      hasCompatibleActions = async () => false,\n      getCompatibleCellValueActions = async () => [],\n      executionContext,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      getCompatibleCellValueActions = async () => [],\n      executionContext,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -4769,7 +4769,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -6829,7 +6829,7 @@
         "label": "useExpressionRenderer",
         "description": [],
         "signature": [
-          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }: ",
+          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }: ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -6863,7 +6863,7 @@
             "id": "def-public.useExpressionRenderer.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }",
+            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }",
             "description": [],
             "signature": [
               {
@@ -7036,6 +7036,20 @@
                 "section": "def-common.DatatableColumnMeta",
                 "text": "DatatableColumnMeta"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -7252,24 +7266,6 @@
             "label": "isSyncTooltipsEnabled",
             "description": [
               "\nReturns the state (true|false) of the sync tooltips across panels switch."
-            ],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.ExecutionContext.shouldUseSizeTransitionVeil",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
-            "description": [
-              "\nReturns whether or not to use the size transition veil when resizing visualizations."
             ],
             "signature": [
               "(() => boolean) | undefined"
@@ -9579,6 +9575,20 @@
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10029,7 +10039,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -10901,20 +10911,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.IExpressionLoaderParams.shouldUseSizeTransitionVeil",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/expressions/public/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.hasCompatibleActions",
             "type": "Function",
             "tags": [],
@@ -10965,6 +10961,20 @@
                 "text": "KibanaExecutionContext"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false,
@@ -11334,22 +11344,6 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncTooltipsEnabled",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-public.IInterpreterRenderHandlers.shouldUseSizeTransitionVeil",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
             "description": [],
             "signature": [
               "() => boolean"
@@ -11954,7 +11948,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -18475,6 +18469,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -18687,24 +18695,6 @@
             "label": "isSyncTooltipsEnabled",
             "description": [
               "\nReturns the state (true|false) of the sync tooltips across panels switch."
-            ],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-server.ExecutionContext.shouldUseSizeTransitionVeil",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
-            "description": [
-              "\nReturns whether or not to use the size transition veil when resizing visualizations."
             ],
             "signature": [
               "(() => boolean) | undefined"
@@ -21404,22 +21394,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-server.IInterpreterRenderHandlers.shouldUseSizeTransitionVeil",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-server.IInterpreterRenderHandlers.uiState",
             "type": "Unknown",
             "tags": [],
@@ -21876,7 +21850,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -26763,7 +26737,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -30262,6 +30236,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -30285,9 +30273,27 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "\nThe Kibana normalized type of the column"
+            ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumnMeta.esType",
+            "type": "string",
+            "tags": [],
+            "label": "esType",
+            "description": [
+              "\nThe original type of the column from ES"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -30762,24 +30768,6 @@
             "label": "isSyncTooltipsEnabled",
             "description": [
               "\nReturns the state (true|false) of the sync tooltips across panels switch."
-            ],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "src/plugins/expressions/common/execution/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExecutionContext.shouldUseSizeTransitionVeil",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
-            "description": [
-              "\nReturns whether or not to use the size transition veil when resizing visualizations."
             ],
             "signature": [
               "(() => boolean) | undefined"
@@ -32436,20 +32424,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "syncTooltips",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/expressions/common/service/expressions_services.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressions",
-            "id": "def-common.ExpressionExecutionParams.shouldUseSizeTransitionVeil",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -34561,7 +34535,7 @@
                 "section": "def-common.ExecutionContract",
                 "text": "ExecutionContract"
               },
-              "<Input, Output, unknown>"
+              "<Input, Output, object>"
             ],
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
@@ -35718,22 +35692,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-common.IInterpreterRenderHandlers.shouldUseSizeTransitionVeil",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldUseSizeTransitionVeil",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-common.IInterpreterRenderHandlers.uiState",
             "type": "Unknown",
             "tags": [],
@@ -36605,7 +36563,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,

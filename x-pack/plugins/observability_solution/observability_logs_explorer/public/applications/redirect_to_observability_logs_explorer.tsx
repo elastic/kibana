@@ -12,13 +12,13 @@ import { Router } from '@kbn/shared-ux-router';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
-export const renderObservabilityLogExplorerRedirect = (
+export const renderObservabilityLogsExplorerRedirect = (
   core: CoreStart,
   appParams: AppMountParameters
 ) => {
   ReactDOM.render(
     <Router history={appParams.history}>
-      <ObservabilityLogExplorerRedirect core={core} />
+      <ObservabilityLogsExplorerRedirect core={core} />
     </Router>,
     appParams.element
   );
@@ -28,7 +28,7 @@ export const renderObservabilityLogExplorerRedirect = (
   };
 };
 
-export const ObservabilityLogExplorerRedirect = ({ core }: { core: CoreStart }) => {
+export const ObservabilityLogsExplorerRedirect = ({ core }: { core: CoreStart }) => {
   const location = useLocation();
   const path = `${location.pathname}${location.search}`;
   core.application.navigateToApp(OBSERVABILITY_LOGS_EXPLORER_APP_ID, { replace: true, path });

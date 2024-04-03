@@ -15,6 +15,7 @@ export interface IHttpConfig {
   maxPayload: ByteSizeValue;
   keepaliveTimeout: number;
   socketTimeout: number;
+  payloadTimeout: number;
   cors: ICorsConfig;
   ssl: ISslConfig;
   shutdownTimeout: Duration;

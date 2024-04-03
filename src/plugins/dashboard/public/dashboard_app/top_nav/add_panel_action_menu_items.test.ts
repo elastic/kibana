@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { getAddPanelActionMenuItems } from './add_panel_action_menu_items';
 
 describe('getAddPanelActionMenuItems', () => {
@@ -21,7 +22,11 @@ describe('getAddPanelActionMenuItems', () => {
         execute: jest.fn(),
       },
     ];
-    const items = getAddPanelActionMenuItems(registeredActions, jest.fn(), jest.fn(), jest.fn());
+    const items = getAddPanelActionMenuItems(
+      getMockPresentationContainer(),
+      registeredActions,
+      jest.fn()
+    );
     expect(items).toStrictEqual([
       {
         'data-test-subj': 'create-action-Action name',
@@ -34,7 +39,7 @@ describe('getAddPanelActionMenuItems', () => {
   });
 
   it('returns empty array if no actions have been registered', async () => {
-    const items = getAddPanelActionMenuItems([], jest.fn(), jest.fn(), jest.fn());
+    const items = getAddPanelActionMenuItems(getMockPresentationContainer(), [], jest.fn());
     expect(items).toStrictEqual([]);
   });
 });

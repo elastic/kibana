@@ -17,11 +17,11 @@ import type {
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import { TimelineType } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import {
@@ -41,7 +41,7 @@ import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
 import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
-import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
+import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
 import type { AnalyzerState } from '../../resolver/types';
@@ -49,6 +49,7 @@ import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
 import { createMiddlewares } from './middlewares';
+import { addNewTimeline } from '../../timelines/store/helpers';
 
 let store: Store<State, Action> | null = null;
 
@@ -59,7 +60,10 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  let signal: { name: string | null } = { name: null };
+  let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
+    name: null,
+    index_mapping_outdated: null,
+  };
   try {
     if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
@@ -68,7 +72,7 @@ export const createStoreFactory = async (
       });
     }
   } catch {
-    signal = { name: null };
+    signal = { name: null, index_mapping_outdated: null };
   }
 
   const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
@@ -96,8 +100,6 @@ export const createStoreFactory = async (
     defaultDataView = { ...initDataView, error };
     kibanaDataViews = [];
   }
-  const appLibs: AppObservableLibs = { kibana: coreStart };
-  const libs$ = new BehaviorSubject(appLibs);
 
   const timelineInitialState = {
     timeline: {
@@ -105,6 +107,15 @@ export const createStoreFactory = async (
       ...subPlugins.timelines.store.initialState.timeline!,
       timelineById: {
         ...subPlugins.timelines.store.initialState.timeline.timelineById,
+        ...addNewTimeline({
+          id: TimelineId.active,
+          timelineById: {},
+          show: false,
+          timelineType: TimelineType.default,
+          columns: [],
+          dataViewId: null,
+          indexNames: [],
+        }),
       },
     },
   };
@@ -148,6 +159,7 @@ export const createStoreFactory = async (
       defaultDataView,
       kibanaDataViews,
       signalIndexName: signal.name,
+      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,
@@ -161,7 +173,7 @@ export const createStoreFactory = async (
     ...subPlugins.management.store.reducer,
   };
 
-  return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
+  return createStore(initialState, rootReducer, coreStart, storage, [
     ...(subPlugins.management.store.middleware ?? []),
     ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
@@ -222,7 +234,6 @@ const sanitizeDataView = (dataView: SourcererDataView) => {
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
-    filterManager: 'filterManager',
     footerText: 'footerText',
     loadingText: 'loadingText',
   };
@@ -249,7 +260,7 @@ const stateSanitizer = (state: State) => {
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  kibana$: Observable<CoreStart>,
+  kibana: CoreStart,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
@@ -265,16 +276,6 @@ export const createStore = (
   };
 
   const composeEnhancers = composeWithDevTools(enhancerOptions);
-
-  // TODO: Once `createStore` does not use redux-observable, we will not need to pass a
-  // kibana observable anymore. Then we can remove this `any` cast and replace kibana$
-  // with a regular kibana instance.
-  // I'm not doing it in this PR, as this will have an impact on literally hundreds of test files.
-  // A separate PR will be created to clean this up.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const kibanaObsv = kibana$ as any;
-  const kibana =
-    'source' in kibanaObsv ? kibanaObsv.source._value.kibana : kibanaObsv._value.kibana;
 
   const middlewareEnhancer = applyMiddleware(
     ...createMiddlewares(kibana, storage),

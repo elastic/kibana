@@ -7,7 +7,7 @@
  */
 
 import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { pick } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';
@@ -76,8 +76,8 @@ export class HttpService
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
     ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
-    this.prebootServer = new HttpServer(logger, 'Preboot', shutdownTimeout$);
-    this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
+    this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
+    this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 

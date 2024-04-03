@@ -13,13 +13,13 @@ export {
   monitoringSchema,
   ruleSchema,
   ruleDomainSchema,
-  notificationDelaySchema,
+  alertDelaySchema,
 } from './rule_schemas';
 
 export {
   actionParamsSchema,
-  actionDomainSchema,
-  actionSchema,
+  defaultActionDomainSchema,
+  systemActionDomainSchema,
   actionAlertsFilterSchema,
 } from './action_schemas';
 

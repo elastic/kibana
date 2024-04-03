@@ -19,7 +19,8 @@ import {
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   FieldOption,
@@ -28,6 +29,7 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SourceFields } from '../../components/source_fields_select';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
@@ -39,7 +41,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http } = useTriggerUiActionServices();
+  const { expressions, http, fieldFormats } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -64,6 +66,7 @@ export const EsqlQueryExpression: React.FC<
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -107,13 +110,25 @@ export const EsqlQueryExpression: React.FC<
     }
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    const table = await fetchFieldsFromESQL(esqlQuery, expressions, {
-      from: new Date(now - timeWindow).toISOString(),
-      to: new Date(now).toISOString(),
-    });
+    setIsLoading(true);
+    const table = await fetchFieldsFromESQL(
+      esqlQuery,
+      expressions,
+      {
+        from: new Date(now - timeWindow).toISOString(),
+        to: new Date(now).toISOString(),
+      },
+      undefined,
+      // create a data view with the timefield to pass into the query
+      new DataView({
+        spec: { timeFieldName: timeField },
+        fieldFormats,
+      })
+    );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
       const hits = toEsQueryHits(esqlTable);
+      setIsLoading(false);
       return {
         testResults: parseAggregationResults({
           isCountAgg: true,
@@ -130,13 +145,22 @@ export const EsqlQueryExpression: React.FC<
         rawResults: {
           cols: esqlTable.columns.map((col) => ({
             id: col.name,
+            actions: false,
           })),
           rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
         },
       };
     }
     return emptyResult;
-  }, [timeWindowSize, timeWindowUnit, currentRuleParams, esqlQuery, expressions]);
+  }, [
+    timeWindowSize,
+    timeWindowUnit,
+    currentRuleParams,
+    esqlQuery,
+    expressions,
+    fieldFormats,
+    timeField,
+  ]);
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
@@ -200,10 +224,11 @@ export const EsqlQueryExpression: React.FC<
           }, 1000)}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
-          onTextLangQuerySubmit={() => {}}
+          onTextLangQuerySubmit={async () => {}}
           detectTimestamp={detectTimestamp}
           hideMinimizeButton={true}
           hideRunQueryText={true}
+          isLoading={isLoading}
         />
       </EuiFormRow>
       <SourceFields

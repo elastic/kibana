@@ -27,6 +27,8 @@ import {
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
+import { generatePath } from 'react-router-dom';
+import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
@@ -39,7 +41,8 @@ import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT } from '../test_subjects';
-import { createDetectionRuleFromFinding } from '../utils/create_detection_rule_from_finding';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 
 const tabs = [
   {
@@ -110,11 +113,21 @@ export const CisKubernetesIcons = ({
 );
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
+  const { application } = useKibana().services;
+
+  const ruleFlyoutLink = application.getUrlForApp('security', {
+    path: generatePath(benchmarksNavigation.rules.path, {
+      benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
+      benchmarkId: findings.rule.benchmark.id,
+      ruleId: findings.rule.id,
+    }),
+  });
+
   switch (tab.id) {
     case 'overview':
-      return <OverviewTab data={findings} />;
+      return <OverviewTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'rule':
-      return <RuleTab data={findings} />;
+      return <RuleTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'table':
       return <TableTab data={findings} />;
     case 'json':
@@ -134,7 +147,7 @@ export const FindingsRuleFlyout = ({
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromFinding(http, findings);
+    await createDetectionRuleFromBenchmarkRule(http, findings.rule);
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>

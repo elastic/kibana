@@ -1,0 +1,28 @@
+@import '../mixins';
+
+.lnsSettingWithSiblingFlyout {
+  // Use the EuiFlyout style
+  @include euiFlyout;
+  // But with custom positioning to keep it within the sidebar contents
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+  // making just a bit higher than the dimension flyout to stack on top of it
+  z-index: $euiZLevel3 + 1
+}
+
+.lnsSettingWithSiblingFlyout__header {
+  padding: $euiSize;
+}
+
+.lnsSettingWithSiblingFlyout__content {
+  @include euiYScroll;
+  flex: 1;
+}
+
+.lnsSettingWithSiblingFlyout__footer {
+  padding: $euiSize;
+}

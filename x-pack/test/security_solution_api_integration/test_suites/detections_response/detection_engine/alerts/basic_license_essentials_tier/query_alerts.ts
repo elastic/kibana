@@ -12,8 +12,21 @@ import {
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { getAlertStatus, createAlertsIndex, deleteAllAlerts } from '../../../utils';
+import { getAlertStatus } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
+const query = {
+  ...getAlertStatus(),
+  query: {
+    bool: {
+      should: [{ match_all: {} }],
+    },
+  },
+};
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -23,13 +36,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
-      // This fails and should be investigated or removed if it no longer applies
-      it.skip('should not give errors when querying and the alerts index does exist and is empty', async () => {
+      it('should not give errors when querying and the alerts index does exist and is empty', async () => {
         await createAlertsIndex(supertest, log);
         const { body } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(getAlertStatus())
+          .send(query)
           .expect(200);
 
         // remove any server generated items that are indeterministic
@@ -60,12 +72,11 @@ export default ({ getService }: FtrProviderContext) => {
         await createAlertsIndex(supertest, log);
       });
       after(async () => {
-        // await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         await deleteAllAlerts(supertest, log, es);
       });
 
       it('should be able to filter using a runtime field defined in the request', async () => {
-        const query = {
+        const queryRuntime = {
           query: {
             bool: {
               should: [{ match_phrase: { signal_status_querytime: 'open' } }],
@@ -83,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(query)
+          .send(queryRuntime)
           .expect(200);
         expect(body.hits.total.value).to.eql(3);
       });
@@ -91,13 +102,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('find_alerts_route', () => {
       describe('validation checks', () => {
-        // This fails and should be investigated or removed if it no longer applies
-        it.skip('should not give errors when querying and the alerts index does exist and is empty', async () => {
+        it('should not give errors when querying and the alerts index does exist and is empty', async () => {
           await createAlertsIndex(supertest, log);
           const { body } = await supertest
             .post(ALERTS_AS_DATA_FIND_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ...getAlertStatus(), index: '.siem-signals-default' })
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send({
+              ...query,
+              index: '.siem-signals-default',
+            })
             .expect(200);
 
           // remove any server generated items that are indeterministic

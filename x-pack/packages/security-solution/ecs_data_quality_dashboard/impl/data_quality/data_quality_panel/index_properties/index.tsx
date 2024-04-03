@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@kbn/ecs';
+import { EcsFlat, EcsVersion } from '@elastic/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -44,7 +44,7 @@ import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { useDataQualityContext } from '../data_quality_context';
-import { getSizeInBytes, postResult } from '../../helpers';
+import { formatStorageResult, postStorageResult, getSizeInBytes } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -249,6 +249,8 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
+        const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
+
         const updatedRollup = {
           ...patternRollup,
           results: {
@@ -262,13 +264,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               markdownComments,
               pattern,
               sameFamily: indexSameFamily,
+              checkedAt,
             },
           },
         };
         updatePatternRollup(updatedRollup);
 
         if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
-          const checkMetadata = {
+          const report = {
             batchId: uuidv4(),
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
@@ -294,10 +297,13 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               partitionedFieldMetadata.incompatible
             ),
           };
-          telemetryEvents.reportDataQualityIndexChecked?.(checkMetadata);
+          telemetryEvents.reportDataQualityIndexChecked?.(report);
 
-          const result = { meta: checkMetadata, rollup: updatedRollup };
-          postResult({ result, httpFetch, toasts, abortController: new AbortController() });
+          const result = updatedRollup.results[indexName];
+          if (result) {
+            const storageResult = formatStorageResult({ result, report, partitionedFieldMetadata });
+            postStorageResult({ storageResult, httpFetch, toasts });
+          }
         }
       }
     }

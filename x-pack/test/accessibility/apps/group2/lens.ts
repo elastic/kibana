@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens datatable with palette panel open', async () => {
-      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await PageObjects.lens.openPalettePanel();
       await a11y.testAppSnapshot();
     });
 

@@ -6,11 +6,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -29,10 +31,11 @@ import {
   createIngestPipelineSchema,
   modelDownloadsQuery,
 } from './schemas/inference_schema';
-import {
+import type {
+  InferenceAPIConfigResponse,
   PipelineDefinition,
-  type TrainedModelConfigResponse,
 } from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
@@ -53,6 +56,45 @@ export function filterForEnabledFeatureModels<
 
   return filteredModels;
 }
+
+export const populateInferenceServicesProvider = (client: IScopedClusterClient) => {
+  return async function populateInferenceServices(
+    trainedModels: TrainedModelConfigResponse[],
+    asInternal: boolean = false
+  ) {
+    const esClient = asInternal ? client.asInternalUser : client.asCurrentUser;
+
+    try {
+      // Check if model is used by an inference service
+      const { models } = await esClient.transport.request<{
+        models: InferenceAPIConfigResponse[];
+      }>({
+        method: 'GET',
+        path: `/_inference/_all`,
+      });
+
+      const inferenceAPIMap = groupBy(
+        models,
+        (model) => model.service === 'elser' && model.service_settings.model_id
+      );
+
+      for (const model of trainedModels) {
+        const inferenceApis = inferenceAPIMap[model.model_id];
+        model.hasInferenceServices = !!inferenceApis;
+        if (model.hasInferenceServices && !asInternal) {
+          model.inference_apis = inferenceApis;
+        }
+      }
+    } catch (e) {
+      if (!asInternal && e.statusCode === 403) {
+        // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
+        await populateInferenceServices(trainedModels, true);
+      } else {
+        mlLog.error(e);
+      }
+    }
+  };
+};
 
 export function trainedModelsRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,
@@ -103,6 +145,10 @@ export function trainedModelsRoutes(
           // model_type is missing
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];
+
+          const populateInferenceServices = populateInferenceServicesProvider(client);
+          await populateInferenceServices(result, false);
+
           try {
             if (withPipelines) {
               // Also need to retrieve the list of deployment IDs from stats
@@ -287,12 +333,13 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
           const body = await mlClient.getTrainedModelsStats({
             ...(modelId ? { model_id: modelId } : {}),
           });
+
           return response.ok({
             body,
           });

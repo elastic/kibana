@@ -51,6 +51,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
+import { isESVectorTileSource } from '../../sources/es_source';
 import { LayerIcon, ILayer, LayerMessage } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
@@ -58,7 +59,7 @@ import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { IESSource } from '../../sources/es_source';
+import { hasESSourceMethod } from '../../sources/es_source';
 import type { IJoinSource, ITermJoinSource } from '../../sources/join_sources';
 import { isTermJoinSource } from '../../sources/join_sources';
 import type { IESAggSource } from '../../sources/es_agg_source';
@@ -361,17 +362,36 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getIndexPatternIds() {
-    const indexPatternIds = this.getSource().getIndexPatternIds();
+    const indexPatternIds = [];
+    const source = this.getSource();
+    if (hasESSourceMethod(source, 'getIndexPatternId')) {
+      indexPatternIds.push(source.getIndexPatternId());
+    }
+
     this.getValidJoins().forEach((join) => {
-      indexPatternIds.push(...join.getIndexPatternIds());
+      const rightSource = join.getRightJoinSource();
+      if (hasESSourceMethod(rightSource, 'getIndexPatternId')) {
+        indexPatternIds.push(rightSource.getIndexPatternId());
+      }
     });
     return indexPatternIds;
   }
 
   getQueryableIndexPatternIds() {
-    const indexPatternIds = this.getSource().getQueryableIndexPatternIds();
+    const indexPatternIds = [];
+    const source = this.getSource();
+    if (source.getApplyGlobalQuery() && hasESSourceMethod(source, 'getIndexPatternId')) {
+      indexPatternIds.push(source.getIndexPatternId());
+    }
+
     this.getValidJoins().forEach((join) => {
-      indexPatternIds.push(...join.getQueryableIndexPatternIds());
+      const rightSource = join.getRightJoinSource();
+      if (
+        rightSource.getApplyGlobalQuery() &&
+        hasESSourceMethod(rightSource, 'getIndexPatternId')
+      ) {
+        indexPatternIds.push(rightSource.getIndexPatternId());
+      }
     });
     return indexPatternIds;
   }
@@ -462,7 +482,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
-    if (!source.isESSource() || dynamicStyleProps.length === 0) {
+    if (!hasESSourceMethod(source, 'loadStylePropsMeta') || dynamicStyleProps.length === 0) {
       return;
     }
 
@@ -488,7 +508,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
-      const { styleMeta, warnings } = await (source as IESSource).loadStylePropsMeta({
+      const { styleMeta, warnings } = await source.loadStylePropsMeta({
         layerName,
         style,
         dynamicStyleProps,
@@ -873,7 +893,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getPointFilterExpression(
       isSourceGeoJson,
-      this.getSource().isESSource(),
+      isESVectorTileSource(this.getSource()),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );
@@ -980,7 +1000,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     const isSourceGeoJson = !this.getSource().isMvt();
     const filterExpr = getLabelFilterExpression(
       isSourceGeoJson,
-      this.getSource().isESSource(),
+      isESVectorTileSource(this.getSource()),
       this._getJoinFilterExpression(),
       timesliceMaskConfig
     );

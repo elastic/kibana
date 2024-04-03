@@ -12,6 +12,7 @@ export interface CreateTestConfigOptions {
   kbnTestServerEnv?: Record<string, string>;
 }
 import { services } from '../../../../test_serverless/api_integration/services';
+import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -28,6 +29,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           '--serverless=security',
+          `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(options.kbnTestServerArgs || []),
         ],
         env: {

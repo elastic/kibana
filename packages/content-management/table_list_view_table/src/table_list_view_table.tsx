@@ -87,18 +87,13 @@ export interface TableListViewTableProps<
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
-  onClickTitle?: (item: T) => void;
+  getOnClickTitle?: (item: T) => (() => void) | undefined;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   /**
    * Edit action onClick handler. Edit action not provided when property is not provided
    */
   editItem?(item: T): void;
-
-  /**
-   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable. Note: Items with the managed property set to true will always be non-editable.
-   */
-  itemIsEditable?(item: T): boolean;
 
   /**
    * Name for the column containing the "title" value.
@@ -259,10 +254,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   findItems,
   createItem,
   editItem,
-  itemIsEditable,
   deleteItems,
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   id: listingId = 'userContent',
   contentEditor = { enabled: false },
   titleColumnName,
@@ -275,9 +269,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     setPageDataTestSubject(`${entityName}LandingPage`);
   }, [entityName, setPageDataTestSubject]);
 
-  if (!getDetailViewLink && !onClickTitle) {
+  if (!getDetailViewLink && !getOnClickTitle) {
     throw new Error(
-      `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
+      `[TableListView] One o["getDetailViewLink" or "getOnClickTitle"] prop must be provided.`
     );
   }
 
@@ -440,14 +434,28 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     items,
   });
 
-  const isEditable = useCallback(
-    (item: T) => {
-      // If the So is `managed` it is never editable.
-      if (item.managed) return false;
-      return itemIsEditable?.(item) ?? true;
-    },
-    [itemIsEditable]
-  );
+  const tableItemsRowActions = useMemo(() => {
+    return items.reduce<TableItemsRowActions>((acc, item) => {
+      const ret = {
+        ...acc,
+        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
+      };
+
+      if (item.managed) {
+        ret[item.id] = {
+          edit: {
+            enabled: false,
+            reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
+              defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+            }),
+          },
+          ...ret[item.id],
+        };
+      }
+
+      return ret;
+    }, {});
+  }, [items, rowItemActions]);
 
   const inspectItem = useCallback(
     (item: T) => {
@@ -464,7 +472,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...contentEditor,
-        isReadonly: contentEditor.isReadonly || !isEditable(item),
+        isReadonly:
+          contentEditor.isReadonly || tableItemsRowActions[item.id]?.edit?.enabled === false,
+        readonlyReason: tableItemsRowActions[item.id]?.edit?.reason,
         onSave:
           contentEditor.onSave &&
           (async (args) => {
@@ -475,7 +485,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           }),
       });
     },
-    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, isEditable, fetchItems]
+    [
+      getTagIdsFromReferences,
+      openContentEditor,
+      entityName,
+      contentEditor,
+      tableItemsRowActions,
+      fetchItems,
+    ]
   );
 
   const tableColumns = useMemo(() => {
@@ -494,7 +511,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               id={listingId}
               item={record}
               getDetailViewLink={getDetailViewLink}
-              onClickTitle={onClickTitle}
+              getOnClickTitle={getOnClickTitle}
               onClickTag={(tag, withModifierKey) => {
                 if (withModifierKey) {
                   addOrRemoveExcludeTagFilter(tag);
@@ -549,7 +566,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (item) => isEditable(item),
+          available: (item) => Boolean(tableItemsRowActions[item.id]?.edit?.enabled),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
@@ -600,12 +617,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     contentEditor.enabled,
     listingId,
     getDetailViewLink,
-    onClickTitle,
+    getOnClickTitle,
     searchQuery.text,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
     DateFormatterComp,
-    isEditable,
+    tableItemsRowActions,
     inspectItem,
   ]);
 
@@ -616,15 +633,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const selectedItems = useMemo(() => {
     return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
-
-  const tableItemsRowActions = useMemo(() => {
-    return items.reduce<TableItemsRowActions>((acc, item) => {
-      return {
-        ...acc,
-        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
-      };
-    }, {});
-  }, [items, rowItemActions]);
 
   // ------------
   // Callbacks

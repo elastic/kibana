@@ -46,7 +46,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
-  shouldUseSizeTransitionVeil?: boolean;
+  abortController?: AbortController;
 }
 
 export function ExpressionWrapper({
@@ -72,7 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
-  shouldUseSizeTransitionVeil,
+  abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -86,6 +86,7 @@ export function ExpressionWrapper({
           interactive={interactive}
           searchContext={searchContext}
           searchSessionId={searchSessionId}
+          // @ts-expect-error upgrade typescript v4.9.5
           onData$={onData$}
           onRender$={onRender$}
           inspectorAdapters={lensInspector.adapters}
@@ -94,7 +95,7 @@ export function ExpressionWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
           executionContext={executionContext}
-          shouldUseSizeTransitionVeil={shouldUseSizeTransitionVeil ?? true}
+          abortController={abortController}
           renderError={(errorMessage, error) => {
             const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);

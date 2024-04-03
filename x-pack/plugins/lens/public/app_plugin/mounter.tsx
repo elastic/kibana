@@ -132,7 +132,6 @@ export async function getLensServices(
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
-    dashboard: startDependencies.dashboard,
     charts: startDependencies.charts,
     getOriginatingAppName: () => {
       const originatingApp =
@@ -140,8 +139,6 @@ export async function getLensServices(
       return originatingApp ? stateTransfer?.getAppNameFromId(originatingApp) : undefined;
     },
     dataViews: startDependencies.dataViews,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
     share,
     unifiedSearch,
@@ -185,7 +182,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data, savedObjectStore } = lensServices;
+  const { stateTransfer, data, savedObjectStore, share } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -343,6 +340,7 @@ export async function mountApp(
           coreStart,
           dataViews: data.dataViews,
           dataViewEditor: startDependencies.dataViewEditor,
+          share,
         };
         const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
         const AnalyticsNoDataPageKibanaProvider = withSuspense(

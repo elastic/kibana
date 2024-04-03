@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
@@ -15,6 +14,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { TestProviders } from '../../../../common/mock';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';

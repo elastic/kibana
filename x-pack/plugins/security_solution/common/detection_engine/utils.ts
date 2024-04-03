@@ -17,6 +17,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type { Threshold, ThresholdNormalized } from '../api/detection_engine/model/rule_schema';
+import { SUPPRESSIBLE_ALERT_RULES } from './constants';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -68,3 +69,15 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
 
 export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
+
+export const isSuppressibleAlertRule = (ruleType: Type): boolean => {
+  return SUPPRESSIBLE_ALERT_RULES.includes(ruleType);
+};
+export const isSuppressionRuleConfiguredWithDuration = (ruleType: Type) =>
+  isSuppressibleAlertRule(ruleType);
+
+export const isSuppressionRuleConfiguredWithGroupBy = (ruleType: Type) =>
+  !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);
+
+export const isSuppressionRuleConfiguredWithMissingFields = (ruleType: Type) =>
+  !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);

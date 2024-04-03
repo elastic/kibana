@@ -29,14 +29,11 @@ import {
   EuiLink,
   EuiComboBox,
   EuiBetaBadge,
-  useEuiTheme,
   EuiText,
   EuiAccordion,
   EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { css } from '@emotion/react';
 
 import type { OutputType, ValueOf } from '../../../../../../../common/types';
 
@@ -65,21 +62,22 @@ import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
 
 export interface EditOutputFlyoutProps {
+  defaultOuput?: Output;
   output?: Output;
   onClose: () => void;
   proxies: FleetProxy[];
 }
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
+  defaultOuput,
   onClose,
   output,
   proxies,
 }) => {
   useBreadcrumbs('settings');
-  const form = useOutputForm(onClose, output);
+  const form = useOutputForm(onClose, output, defaultOuput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
-  const { euiTheme } = useEuiTheme();
   const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
   const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
   const onToggleSecretStorage = (secretEnabled: boolean) => {
@@ -168,18 +166,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderTypeSpecificWarning = () => {
-    const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
-    if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
+    if (!isESOutput && !isRemoteESOutput) {
       return null;
     }
 
     const generateWarningMessage = () => {
       switch (inputs.typeInput.value) {
-        case outputType.Kafka:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOutputTypeCallout', {
-            defaultMessage:
-              'Kafka output is currently not supported on Agents using the Elastic Defend integration.',
-          });
         default:
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {
@@ -293,20 +285,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   id="xpack.fleet.settings.editOutputFlyout.typeInputLabel"
                   defaultMessage="Type"
                 />
-                {inputs.typeInput.value === outputType.Kafka && (
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.fleet.settings.betaBadgeLabel', {
-                      defaultMessage: 'Beta',
-                    })}
-                    size="s"
-                    css={css`
-                      margin-left: ${euiTheme.size.s};
-                      color: ${euiTheme.colors.text};
-                      vertical-align: middle;
-                      margin-bottom: ${euiTheme.size.xxs};
-                    `}
-                  />
-                )}
               </>
             }
           >

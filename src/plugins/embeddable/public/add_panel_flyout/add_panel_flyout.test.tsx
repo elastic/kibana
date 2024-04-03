@@ -68,7 +68,7 @@ describe('add panel flyout', () => {
         getEmbeddableFactory: embeddableStart.getEmbeddableFactory,
       }
     );
-    container.addNewEmbeddable = jest.fn();
+    container.addNewEmbeddable = jest.fn().mockResolvedValue({ id: 'foo' });
   });
 
   test('add panel flyout renders SavedObjectFinder', async () => {

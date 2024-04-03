@@ -6,24 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 
-import { CONNECTORS_INDEX } from '..';
-import { Connector, ConnectorStatus } from '../types/connectors';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export const putUpdateNative = async (
   client: ElasticsearchClient,
   connectorId: string,
   isNative: boolean
 ) => {
-  const result = await client.update<Connector>({
-    doc: {
+  const result = await client.transport.request<Result>({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_native`,
+    body: {
       is_native: isNative,
-      status: ConnectorStatus.CONFIGURED,
     },
-    id: connectorId,
-    index: CONNECTORS_INDEX,
   });
-
   return result;
 };

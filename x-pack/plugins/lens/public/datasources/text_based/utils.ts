@@ -8,11 +8,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import {
-  type AggregateQuery,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-} from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
@@ -145,12 +142,16 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   return indexPattern;
 }
 
+export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
+  column?.meta?.type === 'number';
+export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
+
 export function canColumnBeDroppedInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],
   selectedColumnType?: string
 ): boolean {
   // check if at least one numeric field exists
-  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  const hasNumberTypeColumns = columns?.some(isNumeric);
   return !hasNumberTypeColumns || (hasNumberTypeColumns && selectedColumnType === 'number');
 }
 
@@ -159,7 +160,7 @@ export function canColumnBeUsedBeInMetricDimension(
   selectedColumnType?: string
 ): boolean {
   // check if at least one numeric field exists
-  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  const hasNumberTypeColumns = columns?.some(isNumeric);
   return (
     !hasNumberTypeColumns ||
     columns.length >= MAX_NUM_OF_COLUMNS ||

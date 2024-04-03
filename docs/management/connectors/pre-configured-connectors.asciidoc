@@ -147,8 +147,8 @@ xpack.actions.preconfigured:
     name: preconfigured-bedrock-connector-type
     actionTypeId: .bedrock
     config:
-      apiUrl: https://bedrock.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-v2 <2>
+      apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
+      defaultModel: anthropic.claude-3-sonnet-20240229-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>

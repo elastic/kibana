@@ -61,16 +61,19 @@ export function mapHitSource(
     id,
     references,
     updatedAt,
+    managed,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
     updatedAt?: string;
+    managed?: boolean;
   }
 ) {
   const newAttributes: {
     id: string;
     references: SavedObjectReference[];
+    managed?: boolean;
     url: string;
     savedObjectType?: string;
     editor?: { editUrl?: string };
@@ -86,6 +89,7 @@ export function mapHitSource(
     references,
     url: urlFor(id),
     updatedAt,
+    managed,
     ...attributes,
   };
 

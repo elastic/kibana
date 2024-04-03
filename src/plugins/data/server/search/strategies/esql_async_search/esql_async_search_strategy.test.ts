@@ -10,8 +10,8 @@ import { firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { esqlAsyncSearchStrategyProvider } from './esql_async_search_strategy';
 import { getMockSearchConfig } from '../../../../config.mock';
@@ -123,7 +123,7 @@ describe('ES|QL async search strategy', () => {
       it('sets transport options on POST requests', async () => {
         const transportOptions = { maxRetries: 1 };
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-        const params = {};
+        const params = { query: 'from logs' };
         const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
         await firstValueFrom(
@@ -139,6 +139,7 @@ describe('ES|QL async search strategy', () => {
               keep_alive: '60000ms',
               wait_for_completion_timeout: '100ms',
               keep_on_completion: false,
+              query: 'from logs',
             },
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
@@ -242,7 +243,7 @@ describe('ES|QL async search strategy', () => {
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(indexNotFoundException);
+      expect(err?.errBody).toEqual(indexNotFoundException);
     });
 
     it('throws normalized error if Error is thrown', async () => {
@@ -307,7 +308,7 @@ describe('ES|QL async search strategy', () => {
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(xContentParseException);
+      expect(err?.errBody).toEqual(xContentParseException);
     });
   });
 

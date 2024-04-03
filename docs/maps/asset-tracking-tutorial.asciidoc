@@ -1,6 +1,5 @@
 :ems-asset-index-name: TriMet Positions
 
-
 [role="xpack"]
 [[asset-tracking-tutorial]]
 == Track, visualize, and alert on assets in real time
@@ -37,7 +36,7 @@ To get to the fun of visualizing and alerting on Portland public transport vehic
 ==== Step 1: Set up an Elasticsearch index
 
 . In Kibana, open the main menu, then click *Dev Tools*.
-. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted. 
+. In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted.
 +
 .ILM policy definition
 [%collapsible%open]
@@ -46,42 +45,42 @@ To get to the fun of visualizing and alerting on Portland public transport vehic
 ----------------------------------
 PUT _ilm/policy/tri_met_tracks
 {
-  "policy": {
-    "phases": {
-      "hot": {
-        "min_age": "0ms",
-        "actions": {
-          "rollover": {
-            "max_primary_shard_size": "50gb",
-            "max_age": "7d"
-          },
-          "set_priority": {
-            "priority": 100
-          }
-        }
-      },
-      "warm": {
-        "min_age": "0d",
-        "actions": {
-          "set_priority": {
-            "priority": 50
-          }
-        }
-      },
-      "delete": {
-        "min_age": "365d",
-        "actions": {
-          "delete": {
-            "delete_searchable_snapshot": true
-          }
-        }
-      }
-    }
-  }
+ "policy": {
+   "phases": {
+     "hot": {
+       "min_age": "0ms",
+       "actions": {
+         "rollover": {
+           "max_primary_shard_size": "50gb",
+           "max_age": "7d"
+         },
+         "set_priority": {
+           "priority": 100
+         }
+       }
+     },
+     "warm": {
+       "min_age": "0d",
+       "actions": {
+         "set_priority": {
+           "priority": 50
+         }
+       }
+     },
+     "delete": {
+       "min_age": "365d",
+       "actions": {
+         "delete": {
+           "delete_searchable_snapshot": true
+         }
+       }
+     }
+   }
+ }
 }
 ----------------------------------
 ====
-. In **Console**, add the `tri_met_tracks_for_elastic_agent` ingest pipeline. 
+. In **Console**, add the `tri_met_tracks_for_elastic_agent` ingest pipeline.
 +
 .Ingest policy definition
 [%collapsible%open]
@@ -90,57 +89,57 @@ PUT _ilm/policy/tri_met_tracks
 ----------------------------------
 PUT _ingest/pipeline/tri_met_tracks_for_elastic_agent
 {
-  "processors": [
-    {
-      "set": {
-        "field": "trimet.inCongestion",
-        "value": "false",
-        "if": "ctx?.trimet?.inCongestion == null"
-      }
-    },
-    {
-      "convert": {
-        "field": "trimet.bearing",
-        "type": "float"
-      }
-    },
-    {
-      "convert": {
-        "field": "trimet.inCongestion",
-        "type": "boolean"
-      }
-    },
-    {
-      "script": {
-        "source": """
-          double lat=Math.round(ctx['trimet']['latitude']*1e6)/1e6;
-          double lon=Math.round(ctx['trimet']['longitude']*1e6)/1e6;
-          ctx['trimet']['location'] = lat + "," + lon
-          """,
-        "description": "Generate the geometry rounding to six decimals"
-      }
-    },
-    {
-      "script": {
-        "source": """ctx['_id'] = ctx['trimet']['vehicleID'] + "_" + ctx['trimet']['time']""",
-        "description": "Generate documentID"
-      }
-    },
-    {
-      "remove": {
-        "field": [
-          "message",
-          "input",
-          "agent",
-          "ecs",
-          "host",
-          "event",
-          "trimet.longitude",
-          "trimet.latitude"
-        ]
-      }
-    }
-  ]
+ "processors": [
+   {
+     "set": {
+       "field": "trimet.inCongestion",
+       "value": "false",
+       "if": "ctx?.trimet?.inCongestion == null"
+     }
+   },
+   {
+     "convert": {
+       "field": "trimet.bearing",
+       "type": "float"
+     }
+   },
+   {
+     "convert": {
+       "field": "trimet.inCongestion",
+       "type": "boolean"
+     }
+   },
+   {
+     "script": {
+       "source": """
+         double lat=Math.round(ctx['trimet']['latitude']*1e6)/1e6;
+         double lon=Math.round(ctx['trimet']['longitude']*1e6)/1e6;
+         ctx['trimet']['location'] = lat + "," + lon
+         """,
+       "description": "Generate the geometry rounding to six decimals"
+     }
+   },
+   {
+     "script": {
+       "source": """ctx['_id'] = ctx['trimet']['vehicleID'] + "_" + ctx['trimet']['time']""",
+       "description": "Generate documentID"
+     }
+   },
+   {
+     "remove": {
+       "field": [
+         "message",
+         "input",
+         "agent",
+         "ecs",
+         "host",
+         "event",
+         "trimet.longitude",
+         "trimet.latitude"
+       ]
+     }
+   }
+ ]
 }
 ----------------------------------
 ====
@@ -153,182 +152,182 @@ PUT _ingest/pipeline/tri_met_tracks_for_elastic_agent
 ----------------------------------
 PUT _component_template/logs-httpjson.trimet@package
 {
-  "template": {
-    "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "tri_met_tracks"
-        },
-        "codec": "best_compression",
-        "default_pipeline": "tri_met_tracks_for_elastic_agent"
-      }
-    },
-    "mappings": {
-      "_routing": {
-        "required": false
-      },
-      "numeric_detection": false,
-      "dynamic_date_formats": [
-        "strict_date_optional_time",
-        "yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z"
-      ],
-      "dynamic": true,
-      "_source": {
-        "excludes": [],
-        "includes": [],
-        "enabled": true
-      },
-      "dynamic_templates": [],
-      "date_detection": true,
-      "properties": {
-        "input": {
-          "properties": {
-            "type": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            }
-          }
-        },
-        "@timestamp": {
-          "ignore_malformed": false,
-          "type": "date"
-        },
-        "ecs": {
-          "properties": {
-            "version": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            }
-          }
-        },
-        "data_stream": {
-          "properties": {
-            "namespace": {
-              "type": "constant_keyword"
-            },
-            "type": {
-              "type": "constant_keyword"
-            },
-            "dataset": {
-              "type": "constant_keyword"
-            }
-          }
-        },
-        "event": {
-          "properties": {
-            "created": {
-              "type": "date"
-            },
-            "module": {
-              "type": "constant_keyword",
-              "value": "httpjson"
-            },
-            "dataset": {
-              "type": "constant_keyword",
-              "value": "httpjson.trimet"
-            }
-          }
-        },
-        "message": {
-          "type": "match_only_text"
-        },
-        "tags": {
-          "ignore_above": 1024,
-          "type": "keyword"
-        },
-        "trimet": {
-          "type": "object",
-          "properties": {
-            "expires": {
-              "type": "date"
-            },
-            "signMessage": {
-              "type": "text"
-            },
-            "serviceDate": {
-              "type": "date"
-            },
-            "loadPercentage": {
-              "type": "float"
-            },
-            "nextStopSeq": {
-              "type": "integer"
-            },
-            "source": {
-              "type": "keyword"
-            },
-            "type": {
-              "type": "keyword"
-            },
-            "blockID": {
-              "type": "integer"
-            },
-            "signMessageLong": {
-              "type": "text"
-            },
-            "lastLocID": {
-              "type": "keyword"
-            },
-            "nextLocID": {
-              "type": "keyword"
-            },
-            "locationInScheduleDay": {
-              "type": "integer"
-            },
-            "newTrip": {
-              "type": "boolean"
-            },
-            "direction": {
-              "type": "integer"
-            },
-            "inCongestion": {
-              "type": "boolean"
-            },
-            "routeNumber": {
-              "type": "integer"
-            },
-            "bearing": {
-              "type": "integer"
-            },
-            "garage": {
-              "type": "keyword"
-            },
-            "tripID": {
-              "type": "keyword"
-            },
-            "delay": {
-              "type": "integer"
-            },
-            "extraBlockID": {
-              "type": "keyword"
-            },
-            "messageCode": {
-              "type": "integer"
-            },
-            "lastStopSeq": {
-              "type": "integer"
-            },
-            "location": {
-              "type": "geo_point"
-            },
-            "time": {
-              "index": true,
-              "ignore_malformed": false,
-              "store": false,
-              "type": "date",
-              "doc_values": true
-            },
-            "vehicleID": {
-              "type": "keyword"
-            },
-            "offRoute": {
-              "type": "boolean"
-            }
-          }
-        }
-      }
-    }
-  }
+ "template": {
+   "settings": {
+     "index": {
+       "lifecycle": {
+         "name": "tri_met_tracks"
+       },
+       "codec": "best_compression",
+       "default_pipeline": "tri_met_tracks_for_elastic_agent"
+     }
+   },
+   "mappings": {
+     "_routing": {
+       "required": false
+     },
+     "numeric_detection": false,
+     "dynamic_date_formats": [
+       "strict_date_optional_time",
+       "yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z"
+     ],
+     "dynamic": true,
+     "_source": {
+       "excludes": [],
+       "includes": [],
+       "enabled": true
+     },
+     "dynamic_templates": [],
+     "date_detection": true,
+     "properties": {
+       "input": {
+         "properties": {
+           "type": {
+             "ignore_above": 1024,
+             "type": "keyword"
+           }
+         }
+       },
+       "@timestamp": {
+         "ignore_malformed": false,
+         "type": "date"
+       },
+       "ecs": {
+         "properties": {
+           "version": {
+             "ignore_above": 1024,
+             "type": "keyword"
+           }
+         }
+       },
+       "data_stream": {
+         "properties": {
+           "namespace": {
+             "type": "constant_keyword"
+           },
+           "type": {
+             "type": "constant_keyword"
+           },
+           "dataset": {
+             "type": "constant_keyword"
+           }
+         }
+       },
+       "event": {
+         "properties": {
+           "created": {
+             "type": "date"
+           },
+           "module": {
+             "type": "constant_keyword",
+             "value": "httpjson"
+           },
+           "dataset": {
+             "type": "constant_keyword",
+             "value": "httpjson.trimet"
+           }
+         }
+       },
+       "message": {
+         "type": "match_only_text"
+       },
+       "tags": {
+         "ignore_above": 1024,
+         "type": "keyword"
+       },
+       "trimet": {
+         "type": "object",
+         "properties": {
+           "expires": {
+             "type": "date"
+           },
+           "signMessage": {
+             "type": "text"
+           },
+           "serviceDate": {
+             "type": "date"
+           },
+           "loadPercentage": {
+             "type": "float"
+           },
+           "nextStopSeq": {
+             "type": "integer"
+           },
+           "source": {
+             "type": "keyword"
+           },
+           "type": {
+             "type": "keyword"
+           },
+           "blockID": {
+             "type": "integer"
+           },
+           "signMessageLong": {
+             "type": "text"
+           },
+           "lastLocID": {
+             "type": "keyword"
+           },
+           "nextLocID": {
+             "type": "keyword"
+           },
+           "locationInScheduleDay": {
+             "type": "integer"
+           },
+           "newTrip": {
+             "type": "boolean"
+           },
+           "direction": {
+             "type": "integer"
+           },
+           "inCongestion": {
+             "type": "boolean"
+           },
+           "routeNumber": {
+             "type": "integer"
+           },
+           "bearing": {
+             "type": "integer"
+           },
+           "garage": {
+             "type": "keyword"
+           },
+           "tripID": {
+             "type": "keyword"
+           },
+           "delay": {
+             "type": "integer"
+           },
+           "extraBlockID": {
+             "type": "keyword"
+           },
+           "messageCode": {
+             "type": "integer"
+           },
+           "lastStopSeq": {
+             "type": "integer"
+           },
+           "location": {
+             "type": "geo_point"
+           },
+           "time": {
+             "index": true,
+             "ignore_malformed": false,
+             "store": false,
+             "type": "date",
+             "doc_values": true
+           },
+           "vehicleID": {
+             "type": "keyword"
+           },
+           "offRoute": {
+             "type": "boolean"
+           }
+         }
+       }
+     }
+   }
+ }
 }
 ----------------------------------
 ====
@@ -340,65 +339,68 @@ PUT _component_template/logs-httpjson.trimet@package
 ----------------------------------
 PUT _index_template/logs-httpjson.trimet
 {
-  "index_patterns": [
-    "logs-httpjson.trimet-*"
-  ],
-  "composed_of": [
-    "logs-httpjson.trimet@package",
-    ".fleet_globals-1",
-    ".fleet_agent_id_verification-1"
-  ],
-  "priority": 200,
-  "data_stream": {
-    "hidden": false,
-    "allow_custom_routing": false
-  }
+ "index_patterns": [
+   "logs-httpjson.trimet-*"
+ ],
+ "composed_of": [
+   "logs-httpjson.trimet@package",
+   ".fleet_globals-1",
+   ".fleet_agent_id_verification-1"
+ ],
+ "priority": 200,
+ "data_stream": {
+   "hidden": false,
+   "allow_custom_routing": false
+ }
 }
 ----------------------------------
 ====
 
-
 [float]
 ==== Step 2: Configure {agent}
 
+
 ++++
 <div class="tabs" data-tab-group="get-policy-id">
-  <div role="tablist" aria-label="Get the agent policy id">
-    <button role="tab"
-            aria-selected="true"
-            aria-controls="get-policy-tab-existing"
-            id="get-policy-id-existing">
-      Existing agent policy 
-    </button>
-    <button role="tab"
-            aria-selected="false"
-            aria-controls="get-policy-tab-create"
-            id="get-policy-group-create"
-            tabindex="-1">
-      Create a new agent policy
-    </button>
-  </div>
-  <div tabindex="0"
-       role="tabpanel"
-       id="get-policy-tab-existing"
-       aria-labelledby="get-policy-id-existing">
+ <div role="tablist" aria-label="Get the agent policy id">
+   <button role="tab"
+           aria-selected="true"
+           aria-controls="get-policy-tab-existing"
+           id="get-policy-id-existing">
+     Existing agent policy
+   </button>
+   <button role="tab"
+           aria-selected="false"
+           aria-controls="get-policy-tab-create"
+           id="get-policy-group-create"
+           tabindex="-1">
+     Create a new agent policy
+   </button>
+ </div>
+ <div tabindex="0"
+      role="tabpanel"
+      id="get-policy-tab-existing"
+      aria-labelledby="get-policy-id-existing">
 ++++
 If you already have an agent policy, get its identifier from the `View policy` action fly out
+
 
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/agent-policy-id.png[]
 
+
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/policy_id.png[]
 ++++
-  </div>
-  <div tabindex="1"
-       role="tabpanel"
-       id="get-policy-tab-create"
-       aria-labelledby="get-policy-group-create"
-       hidden="">
+ </div>
+ <div tabindex="1"
+      role="tabpanel"
+      id="get-policy-tab-create"
+      aria-labelledby="get-policy-group-create"
+      hidden="">
 ++++
 If you don't have yet an agent policy ready:
+
 
 . Still in the **Console**, create an agent policy for this data source
 +
@@ -406,22 +408,24 @@ If you don't have yet an agent policy ready:
 ----------------------------------
 POST kbn:/api/fleet/agent_policies?sys_monitoring=true
 {
-  "name": "trimet",
-  "description": "Policy to gather TriMet data",
-  "namespace": "default",
-  "monitoring_enabled": ["logs", "metrics"],
-  "inactivity_timeout": 1209600,
-  "is_protected": false
+ "name": "trimet",
+ "description": "Policy to gather TriMet data",
+ "namespace": "default",
+ "monitoring_enabled": ["logs", "metrics"],
+ "inactivity_timeout": 1209600,
+ "is_protected": false
 }
 ----------------------------------
 . Note the `item.id` value of the request result, it will be used later when registering your integration
 . Enroll a new {agent} into this new policy using any of the methods provided by the UI (linux, Mac, Windows, etc.)
 ++++
-  </div>
+ </div>
 </div>
 ++++
 
+
 Execute the following request from the **Console** to install a new Custom API integration. Put the corresponding values for the `policy_id` and `tri_met_app_id`.
+
 
 .Create a new Custom API integration
 [%collapsible%open]
@@ -430,39 +434,40 @@ Execute the following request from the **Console** to install a new Custom API i
 ----------------------------------
 POST kbn:/api/fleet/package_policies
 {
-  "policy_id": "<policy_id>", <1>
-  "package": {
-    "name": "httpjson",
-    "version": "1.18.0"
-  },
-  "name": "httpjson-trimet",
-  "description": "TriMet data upload",
-  "namespace": "default",
-  "inputs": {
-    "generic-httpjson": {
-      "enabled": true,
-      "streams": {
-        "httpjson.generic": {
-          "enabled": true,
-          "vars": {
-            "data_stream.dataset": "httpjson.trimet",
-            "request_url": "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>", <2>
-            "request_interval": "1m", <3>
-            "request_method": "GET",
-            "response_split": "target: body.resultSet.vehicle",
-            "request_redirect_headers_ban_list": [],
-            "oauth_scopes": [],
-            "processors": "- decode_json_fields:\n    fields: [\"message\"]\n    target: \"trimet\"\n",
-            "tags": [
-              "trimet"
-              ]
-          }
-        }
-      }
-    }
-  }
+ "policy_id": "<policy_id>", <1>
+ "package": {
+   "name": "httpjson",
+   "version": "1.18.0"
+ },
+ "name": "httpjson-trimet",
+ "description": "TriMet data upload",
+ "namespace": "default",
+ "inputs": {
+   "generic-httpjson": {
+     "enabled": true,
+     "streams": {
+       "httpjson.generic": {
+         "enabled": true,
+         "vars": {
+           "data_stream.dataset": "httpjson.trimet",
+           "request_url": "https://developer.trimet.org/ws/v2/vehicles?appID=<tri_met_app_id>", <2>
+           "request_interval": "1m", <3>
+           "request_method": "GET",
+           "response_split": "target: body.resultSet.vehicle",
+           "request_redirect_headers_ban_list": [],
+           "oauth_scopes": [],
+           "processors": "- decode_json_fields:\n    fields: [\"message\"]\n    target: \"trimet\"\n",
+           "tags": [
+             "trimet"
+             ]
+         }
+       }
+     }
+   }
+ }
 }
 ----------------------------------
+
 
 <1> Agent policy identifier
 <2> TriMet application identifier
@@ -470,7 +475,6 @@ POST kbn:/api/fleet/package_policies
 ====
 
 This request will configure the integration to make requests to the TriMet REST API every minute, splitting the API response into one message per vehicle into the `httpjson.trimet` data stream, and encoding the vehicle's data into the `trimet` field. The rest of the data management will be handled by the ingest policy defined in the first step.
-
 
 [float]
 ==== Step 3: Create a data view for the tri_met_tracks {es} index
@@ -481,11 +485,11 @@ In **Console** execute this request to create a new {kib} Data View called {ems-
 ----------------------------------
 POST kbn:/api/data_views/data_view
 {
-  "data_view": {
-     "title": "logs-httpjson.trimet-*",
-     "name": "{ems-asset-index-name}",
-     "timeFieldName": "trimet.time"
-  }
+ "data_view": {
+    "title": "logs-httpjson.trimet-*",
+    "name": "{ems-asset-index-name}",
+    "timeFieldName": "trimet.time"
+ }
 }
 ----------------------------------
 
@@ -504,22 +508,27 @@ TIP: You may want to tweak this Data View to adjust the field names and number o
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 15 minutes.
 . Expand a document and explore some of the fields that you will use later in this tutorial: `trimet.bearing`, `trimet.inCongestion`, `trimet.location`, and `trimet.vehicleID`.
 
+
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/discover.png[]
+
 
 [float]
 === Part 2: Build an operational map
 It's hard to get an overview of Portland vehicles by looking at individual events. Let's create a map to show the routes and current location for each vehicle, along with the direction they are heading.
 
+
 [float]
 ==== Step 1: Create your map
 Create your map and set the theme for the default layer to dark mode.
+
 
 . Open the main menu, and click *Maps*.
 . Click *Create map*.
 . In the *Layers* list, click *Road map*, and then click *Edit layer settings*.
 . Open the *Tile service* dropdown, and select *Road map - dark*.
 . Click *Keep changes*.
+
 
 [float]
 ==== Step 2. Add a tracks layer
@@ -581,14 +590,17 @@ Your map should automatically refresh every 10 seconds to show the latest vehicl
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/tracks_and_top_hits.png[]
 
+
 [float]
 === Part 3: Setup geo-fencing alerts
 Let's make TriMet Portland data actionable and alert when vehicles enter construction zones.
+
 
 [float]
 ==== Step 1. Add a construction zone
 
 Add a layer for construction zones, which you will draw on the map. The construction zones will be used as your geofence boundary or threshold that serves as the basis for triggering alerts.
+
 
 . Click *Add layer*.
 . Click *Create index*.
@@ -614,13 +626,13 @@ Your map is now complete for now, congratulations!
 [role="screenshot"]
 image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
-
 [float]
 ==== Step 2. Configure an alert
 
-Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will insert a new document into an {es} index. 
+Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will insert a new document into an {es} index.
 
 NOTE: For this example, you will set the rule to check every minute. However, when running in production this value may need to be adjusted to a higher check interval to avoid performance issues. Refer to <<alerting-production-considerations,Alerting production considerations>> for more information.
+
 
 . In the {kib} **Console** create a new index and Data view
 +
@@ -632,31 +644,32 @@ NOTE: For this example, you will set the rule to check every minute. However, wh
 # Create the alerts index
 PUT trimet_alerts
 {
-  "settings": {
-    "number_of_replicas": 1,
-    "number_of_shards": 1
-  },
-  "mappings": {
-    "properties": {
-      "vehicleId": {"type": "keyword"},
-      "documentId": {"type": "text"},
-      "vehicleTime": {"type": "date"},
-      "detectionTime": {"type": "date"},
-      "location": {"type": "geo_point"},
-      "boundaryId": {"type": "keyword"},
-      "message": {"type": "text"}
-    }
-  }
+ "settings": {
+   "number_of_replicas": 1,
+   "number_of_shards": 1
+ },
+ "mappings": {
+   "properties": {
+     "vehicleId": {"type": "keyword"},
+     "documentId": {"type": "text"},
+     "vehicleTime": {"type": "date"},
+     "detectionTime": {"type": "date"},
+     "location": {"type": "geo_point"},
+     "boundaryId": {"type": "keyword"},
+     "message": {"type": "text"}
+   }
+ }
 }
+
 
 # Create the alerts index data view
 POST kbn:/api/data_views/data_view
 {
-  "data_view": {
-     "title": "trimet_alerts",
-     "name": "TriMet Alerts",
-     "timeFieldName": "detectionTime"
-  }
+ "data_view": {
+    "title": "trimet_alerts",
+    "name": "TriMet Alerts",
+    "timeFieldName": "detectionTime"
+ }
 }
 ----------------------------------
 ====
@@ -670,7 +683,7 @@ POST kbn:/api/data_views/data_view
 .. Select `trimet.location` as the *location field*
 .. Select `trimet.vehicleID` as the *entity field*
 . In the *Boundaries* block
-.. Select the *trimet_construction_zones* Data View 
+.. Select the *trimet_construction_zones* Data View
 .. Select `coordinates` as the *location field*
 .. Leave the *Display name* and *Filter* empty
 . Select the rule to check every minute
@@ -690,12 +703,12 @@ image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
 [source,js]
 ----------------------------------
 {
-  "vehicleId": "{{context.entityId}}",
-  "vehicleTime": "{{context.entityDateTime}}",
-  "documentId": "{{context.entityDocumentId}}",
-  "detectionTime": "{{context.detectionDateTime}}",
-  "location": "{{context.entityLocation}}",
-  "boundaryId": "{{context.containingBoundaryId}}"
+ "vehicleId": "{{context.entityId}}",
+ "vehicleTime": "{{context.entityDateTime}}",
+ "documentId": "{{context.entityDocumentId}}",
+ "detectionTime": "{{context.detectionDateTime}}",
+ "location": "{{context.entityLocation}}",
+ "boundaryId": "{{context.containingBoundaryId}}"
 }
 ----------------------------------
 +
@@ -703,9 +716,8 @@ image::maps/images/asset-tracking-tutorial/rule_configuration.png[]
 image::maps/images/asset-tracking-tutorial/alert_connector.png[]
 . Click *Save*.
 
+
 The *TriMet Alerts connector* is added to the *{connectors-ui}* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type,Email>> connectors.
-
-
 
 [float]
 ==== Step 3. View alerts in real time

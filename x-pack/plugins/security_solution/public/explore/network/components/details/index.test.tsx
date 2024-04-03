@@ -10,15 +10,7 @@ import React from 'react';
 import type { ActionCreator } from 'typescript-fsa';
 
 import '../../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
+import { TestProviders } from '../../../../common/mock';
 import { networkModel } from '../../store';
 
 import { IpOverview } from '.';
@@ -28,15 +20,6 @@ import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 describe('IP Overview Component', () => {
-  const state: State = mockGlobalState;
-
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-  beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
   describe('rendering', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
@@ -60,7 +43,7 @@ describe('IP Overview Component', () => {
 
     test('it renders the default IP Overview', () => {
       const wrapper = shallow(
-        <TestProviders store={store}>
+        <TestProviders>
           <IpOverview {...mockProps} />
         </TestProviders>
       );
@@ -74,7 +57,7 @@ describe('IP Overview Component', () => {
         isInDetailsSidePanel: true,
       };
       const wrapper = shallow(
-        <TestProviders store={store}>
+        <TestProviders>
           <IpOverview {...panelViewProps} />
         </TestProviders>
       );

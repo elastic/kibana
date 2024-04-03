@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { CasesSubFeatureId } from '../app_features_keys';
+import { CasesSubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
 import type { CasesFeatureParams } from './types';
 
