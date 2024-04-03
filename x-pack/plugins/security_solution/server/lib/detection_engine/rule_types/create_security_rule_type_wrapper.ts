@@ -260,17 +260,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 true
               );
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
-              const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
 
-              const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
-                await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                });
+              if (existingIndices.length > 0) {
+                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
 
-              wroteWarningStatus = wroteWarningMessage;
-              warningMessage = readIndexWarningMessage;
+                const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
+                  await hasReadIndexPrivileges({
+                    privileges,
+                    ruleExecutionLogger,
+                    uiSettingsClient,
+                  });
+
+                wroteWarningStatus = wroteWarningMessage;
+                warningMessage = readIndexWarningMessage;
+              }
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
