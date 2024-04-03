@@ -11,7 +11,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CasesConnector } from './cases_connector';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CASES_CONNECTOR_ID } from './constants';
+import { CASES_CONNECTOR_ID } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';

@@ -12,7 +12,7 @@ import Os from 'os';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { mergeMap, reduce } from 'rxjs/operators';
+import { mergeMap, reduce } from 'rxjs';
 import { supportsColor } from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';

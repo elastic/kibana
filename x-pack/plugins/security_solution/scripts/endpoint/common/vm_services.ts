@@ -170,15 +170,12 @@ export const generateVmName = (identifier: string = baseGenerator.randomUser()):
  * @param threshold
  */
 export const getMultipassVmCountNotice = async (threshold: number = 1): Promise<string> => {
-  const response = await execa.command(`multipass list --format=json`);
+  const listOfVMs = await findVm('multipass');
 
-  const output: { list: Array<{ ipv4: string; name: string; release: string; state: string }> } =
-    JSON.parse(response.stdout);
-
-  if (output.list.length > threshold) {
+  if (listOfVMs.data.length > threshold) {
     return `-----------------------------------------------------------------
 ${chalk.red('NOTE:')} ${chalk.bold(
-      chalk.red(`You currently have ${chalk.red(output.list.length)} VMs running.`)
+      chalk.red(`You currently have ${chalk.red(listOfVMs.data.length)} VMs running.`)
     )}
       Remember to delete those no longer being used.
       View running VMs: ${chalk.cyan('multipass list')}
@@ -377,4 +374,56 @@ export const getHostVmClient = (
   return type === 'vagrant'
     ? createVagrantHostVmClient(hostname, vagrantFile, log)
     : createMultipassHostVmClient(hostname, log);
+};
+
+/**
+ * Retrieve a list of running VM names
+ * @param type
+ * @param name
+ * @param log
+ */
+export const findVm = async (
+  type: SupportedVmManager,
+  /** Filter results by VM name */
+  name?: string | RegExp,
+  log: ToolingLog = createToolingLogger()
+): Promise<{ data: string[] }> => {
+  log.verbose(`Finding [${type}] VMs with name [${name}]`);
+
+  if (type === 'multipass') {
+    const list = JSON.parse((await execa.command(`multipass list --format json`)).stdout) as {
+      list: Array<{
+        ipv4: string[];
+        name: string;
+        release: string;
+        state: string;
+      }>;
+    };
+
+    log.verbose(`List of VM running:`, list);
+
+    if (!list.list || list.list.length === 0) {
+      return { data: [] };
+    }
+
+    return {
+      data: !name
+        ? list.list.map((vmEntry) => vmEntry.name)
+        : list.list.reduce((acc, vmEntry) => {
+            if (typeof name === 'string') {
+              if (vmEntry.name === name) {
+                acc.push(vmEntry.name);
+              }
+            } else {
+              if (name.test(vmEntry.name)) {
+                acc.push(vmEntry.name);
+              }
+            }
+
+            return acc;
+          }, [] as string[]),
+    };
+  }
+
+  throw new Error(`findVm() does not yet have support for [${type}]`);
 };
