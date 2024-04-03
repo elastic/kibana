@@ -54,19 +54,25 @@ describe(
         cy.get(RULES_UPDATES_TAB).should('not.exist');
       });
 
-      it('should NOT display install or update notifications when latest rules are installed', () => {
-        visitRulesManagementTable();
-        createAndInstallMockedPrebuiltRules([RULE_1]);
+      // https://github.com/elastic/kibana/issues/179967
+      it(
+        'should NOT display install or update notifications when latest rules are installed',
+        { tags: '@brokenInServerlessQA' },
+        () => {
+          visitRulesManagementTable();
+          createAndInstallMockedPrebuiltRules([RULE_1]);
 
-        /* Assert that there are no installation or update notifications */
-        /* Add Elastic Rules button should not contain a number badge */
-        /* and Rule Upgrade tab should not be displayed */
-        cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules');
-        cy.get(RULES_UPDATES_TAB).should('not.exist');
-      });
+          /* Assert that there are no installation or update notifications */
+          /* Add Elastic Rules button should not contain a number badge */
+          /* and Rule Upgrade tab should not be displayed */
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules');
+          cy.get(RULES_UPDATES_TAB).should('not.exist');
+        }
+      );
     });
 
-    describe('Notifications', () => {
+    // https://github.com/elastic/kibana/issues/179968
+    describe('Notifications', { tags: '@brokenInServerlessQA' }, () => {
       beforeEach(() => {
         installPrebuiltRuleAssets([RULE_1]);
       });
