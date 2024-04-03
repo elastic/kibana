@@ -98,7 +98,7 @@ describe('useConversation helpers', () => {
       category: 'assistant',
       id: '1',
       messages: [],
-      replacements: [],
+      replacements: {},
       title: '1',
     };
 
@@ -111,7 +111,7 @@ describe('useConversation helpers', () => {
     test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: { connectorId: '123' },
-        replacements: [],
+        replacements: {},
         category: 'assistant',
         id: '1',
         messages: [],
@@ -128,7 +128,7 @@ describe('useConversation helpers', () => {
     test('should return the default (starred) isNewConversationDefault system prompt if conversation system prompt does not exist within all system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: { connectorId: '123' },
-        replacements: [],
+        replacements: {},
         category: 'assistant',
         id: '4', // this id does not exist within allSystemPrompts
         messages: [],
@@ -145,7 +145,7 @@ describe('useConversation helpers', () => {
     test('should return the first prompt if both conversation system prompt and default new system prompt do not exist', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: { connectorId: '123' },
-        replacements: [],
+        replacements: {},
         category: 'assistant',
         id: '1',
         messages: [],
@@ -162,7 +162,7 @@ describe('useConversation helpers', () => {
     test('should return undefined if conversation system prompt does not exist and there are no system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: { connectorId: '123' },
-        replacements: [],
+        replacements: {},
         category: 'assistant',
         id: '1',
         messages: [],
@@ -179,7 +179,7 @@ describe('useConversation helpers', () => {
     test('should return undefined if conversation system prompt does not exist within all system prompts', () => {
       const conversationWithoutSystemPrompt: Conversation = {
         apiConfig: { connectorId: '123' },
-        replacements: [],
+        replacements: {},
         category: 'assistant',
         id: '4', // this id does not exist within allSystemPrompts
         messages: [],

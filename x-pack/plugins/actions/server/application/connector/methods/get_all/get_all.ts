@@ -127,6 +127,12 @@ async function getAllHelper({
     connectors: mergedResult,
   });
 
+  validateConnectors(connectors, logger);
+
+  return connectors;
+}
+
+const validateConnectors = (connectors: ConnectorWithExtraFindData[], logger: Logger) => {
   connectors.forEach((connector) => {
     // Try to validate the connectors, but don't throw.
     try {
@@ -135,6 +141,48 @@ async function getAllHelper({
       logger.warn(`Error validating connector: ${connector.id}, ${e}`);
     }
   });
+};
+
+export async function getAllSystemConnectors({
+  context,
+}: {
+  context: GetAllParams['context'];
+}): Promise<ConnectorWithExtraFindData[]> {
+  try {
+    await context.authorization.ensureAuthorized({ operation: 'get' });
+  } catch (error) {
+    context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.FIND,
+        error,
+      })
+    );
+
+    throw error;
+  }
+
+  const systemConnectors = context.inMemoryConnectors.filter(
+    (connector) => connector.isSystemAction
+  );
+
+  const transformedSystemConnectors = systemConnectors
+    .map((systemConnector) => ({
+      id: systemConnector.id,
+      actionTypeId: systemConnector.actionTypeId,
+      name: systemConnector.name,
+      isPreconfigured: systemConnector.isPreconfigured,
+      isDeprecated: isConnectorDeprecated(systemConnector),
+      isSystemAction: systemConnector.isSystemAction,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const connectors = await injectExtraFindData({
+    kibanaIndices: context.kibanaIndices,
+    esClient: context.scopedClusterClient.asInternalUser,
+    connectors: transformedSystemConnectors,
+  });
+
+  validateConnectors(connectors, context.logger);
 
   return connectors;
 }

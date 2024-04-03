@@ -49,6 +49,8 @@ export enum ChatFormFields {
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
   summarizationModel = 'summarization_model',
+  sourceFields = 'source_fields',
+  docSize = 'docSize',
 }
 
 export interface ChatForm {
@@ -59,6 +61,8 @@ export interface ChatForm {
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: string;
   [ChatFormFields.elasticsearchQuery]: QueryDslQueryContainer;
+  [ChatFormFields.sourceFields]: string[];
+  [ChatFormFields.docSize]: number;
 }
 
 export enum MessageRole {
@@ -128,7 +132,7 @@ export type JSONValue = null | string | number | boolean | { [x: string]: JSONVa
 
 export interface ChatRequestOptions {
   options?: RequestOptions;
-  data?: Record<string, string | boolean>;
+  data?: Record<string, string | number | boolean>;
 }
 
 export type CreateMessage = Omit<Message, 'id'> & {
