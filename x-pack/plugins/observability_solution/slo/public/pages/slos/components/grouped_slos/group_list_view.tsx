@@ -115,7 +115,7 @@ export function GroupListView({
               </EuiFlexGroup>
             }
             extraAction={
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup responsive={false} alignItems="center">
                 {summary!.violated > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="danger">

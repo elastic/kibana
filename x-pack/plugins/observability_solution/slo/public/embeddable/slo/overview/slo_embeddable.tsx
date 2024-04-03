@@ -160,4 +160,8 @@ const Wrapper = styled.div`
   width: 100%;
   padding: 5px 15px;
   overflow: scroll;
+
+  .euiAccordion__buttonContent {
+    min-width: 100px;
+  }
 `;
