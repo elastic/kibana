@@ -86,7 +86,7 @@ export interface APMPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   // optional dependencies
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingPlugin['setup'];
@@ -112,7 +112,7 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
-  observabilityAIAssistant: ObservabilityAIAssistantServerStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   // optional dependencies
   actions?: ActionsPlugin['start'];
   alerting?: AlertingPlugin['start'];

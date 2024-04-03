@@ -16,7 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-chrome-browser",
     "@kbn/i18n",
-  ],
+    "@kbn/core-chrome-browser",
+  ]
 }
