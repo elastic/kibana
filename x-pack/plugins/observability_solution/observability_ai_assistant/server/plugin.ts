@@ -34,6 +34,7 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -153,6 +154,8 @@ export class ObservabilityAIAssistantPlugin
     service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
+
+    plugins.actions.registerType(getObsAIAssistantConnectorType());
 
     registerServerRoutes({
       core,

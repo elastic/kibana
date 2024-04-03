@@ -29,6 +29,7 @@ import type {
 import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
 import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
 import { createScreenContextAction } from './utils/create_screen_context_action';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -86,6 +87,8 @@ export class ObservabilityAIAssistantPlugin
     };
 
     const isEnabled = service.isEnabled();
+
+    pluginsStart.triggersActionsUi.actionTypeRegistry.register(getObsAIAssistantConnectorType());
 
     return {
       service,
