@@ -2753,9 +2753,7 @@ Making prebuilt rules customizable, plus the changes introduced to the `/upgrade
 
 However, since we still want to give the users the ability to update all of their rules that have updates with no conflicts in an easy and fast way, we need to introduce a distinct UI that allows for this behaviour.
 
-The current UI of the **Rule Updates** page has an button with the label "Update all" which currently simply updates all rules to their `target` version:
-
-![](2024-02-23-14-09-16.png)
+The current UI of the **Rule Updates** page has an button with the label "Update all" which currently simply updates all rules to their `target` version.
 
 We can replace this button for an **Update rules with no conflicts** button. Clicking this button would make a request to `/upgrade/_perform` with a payload that includes only rules that don't have non-solvable conflicts. That payload can be built out of the response of the `/upgrade/_review` endpoint, including ids of such rules and specifying that all rules should be updated to their `MERGED` version.
 
