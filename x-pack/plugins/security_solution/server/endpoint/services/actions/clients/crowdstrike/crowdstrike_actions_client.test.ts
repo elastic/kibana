@@ -13,10 +13,8 @@ import { ResponseActionsNotSupportedError } from '../errors';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CrowdstrikeActionsClientOptionsMock } from './mocks';
 import { CrowdstrikeMock } from './mocks';
-import {
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-  ENDPOINT_ACTIONS_INDEX,
-} from '../../../../../../common/endpoint/constants';
+
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 
 jest.mock('../../action_details_by_id', () => {
@@ -94,7 +92,8 @@ describe('CrowdstrikeActionsClient class', () => {
     it('should write action request and response to endpoint indexes', async () => {
       await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
 
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      // we do not write response to es yet
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
       expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
         1,
         {
@@ -124,22 +123,6 @@ describe('CrowdstrikeActionsClient class', () => {
         },
         { meta: true }
       );
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'isolate' },
-            input_type: 'crowdstrike',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
     });
 
     it('should return action details', async () => {
@@ -178,7 +161,8 @@ describe('CrowdstrikeActionsClient class', () => {
     it('should write action request and response to endpoint indexes', async () => {
       await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
 
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      // we do not write response to es yet
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
       expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
         1,
         {
@@ -208,22 +192,6 @@ describe('CrowdstrikeActionsClient class', () => {
         },
         { meta: true }
       );
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'unisolate' },
-            input_type: 'crowdstrike',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
     });
 
     it('should return action details', async () => {
