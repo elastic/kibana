@@ -29,7 +29,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AssistantFeatures,
   ExecuteConnectorRequestBody,
-  Replacement,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
@@ -204,8 +204,8 @@ export interface AssistantToolParams {
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;
-  onNewReplacements?: (newReplacements: Replacement[]) => void;
-  replacements?: Replacement[];
+  onNewReplacements?: (newReplacements: Replacements) => void;
+  replacements?: Replacements;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
 }
