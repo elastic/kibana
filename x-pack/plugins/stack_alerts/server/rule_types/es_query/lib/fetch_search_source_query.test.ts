@@ -426,7 +426,7 @@ describe('fetchSearchSourceQuery', () => {
       );
     });
 
-    it('should skip refreshing fields', async () => {
+    it('should skip fetching fields', async () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
