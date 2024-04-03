@@ -154,11 +154,9 @@ export type ActionsLogPopupFilters = Extract<
 >;
 
 interface GetTypesFilterInitialStateArguments {
-  isSentinelOneV1Enabled: boolean;
   isFlyout: boolean;
   agentTypes?: string[];
   types?: string[];
-  isCrowdstrikeEnabled: boolean;
 }
 
 /**
@@ -171,13 +169,18 @@ interface GetTypesFilterInitialStateArguments {
  * @description
  * sets the initial state of the types filter options
  */
-const getTypesFilterInitialState = ({
-  isSentinelOneV1Enabled,
-  isCrowdstrikeEnabled,
+const useTypesFilterInitialState = ({
   isFlyout,
   agentTypes,
   types,
 }: GetTypesFilterInitialStateArguments): FilterItems => {
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+
   const getFilterOptions = ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
     key,
     label,
@@ -255,13 +258,6 @@ export const useActionsLogFilter = ({
   // TODO: remove this when `responseActionsSentinelOneV1Enabled` is enabled and removed
   setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
-
   const {
     agentTypes = [],
     commands,
@@ -293,16 +289,15 @@ export const useActionsLogFilter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const typesFilterInitialState = useTypesFilterInitialState({
+    isFlyout,
+    agentTypes,
+    types,
+  });
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isTypesFilter
-      ? getTypesFilterInitialState({
-          isCrowdstrikeEnabled,
-          isSentinelOneV1Enabled,
-          isFlyout,
-          agentTypes,
-          types,
-        })
+      ? typesFilterInitialState
       : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
