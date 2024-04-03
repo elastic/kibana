@@ -78,6 +78,7 @@ export interface AssistantProviderProps {
     refetchCurrentConversation: () => void;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
+    setIsStreaming: (isStreaming: boolean) => void;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
@@ -118,6 +119,7 @@ export interface UseAssistantContext {
     refetchCurrentConversation: () => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
+    setIsStreaming: (isStreaming: boolean) => void;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;

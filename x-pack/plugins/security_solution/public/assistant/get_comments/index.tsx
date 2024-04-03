@@ -50,6 +50,7 @@ export const getComments = ({
   refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
+  setIsStreaming,
 }: {
   abortStream: () => void;
   currentConversation: Conversation;
@@ -58,6 +59,7 @@ export const getComments = ({
   refetchCurrentConversation: () => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
+  setIsStreaming: (isStreaming: boolean) => void;
 }): EuiCommentProps[] => {
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
@@ -79,6 +81,7 @@ export const getComments = ({
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
               isEnabledLangChain={isEnabledLangChain}
+              setIsStreaming={setIsStreaming}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
@@ -135,6 +138,7 @@ export const getComments = ({
               reader={message.reader}
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
+              setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
             />
           ),
@@ -159,6 +163,7 @@ export const getComments = ({
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}
             refetchCurrentConversation={refetchCurrentConversation}
+            setIsStreaming={setIsStreaming}
             transformMessage={transformMessage}
           />
         ),
