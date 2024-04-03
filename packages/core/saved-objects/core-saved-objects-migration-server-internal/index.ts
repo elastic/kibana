@@ -61,4 +61,3 @@ export {
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
 } from './src/core';
-export { MIGRATION_CLIENT_OPTIONS } from './src/run_resilient_migrator';

@@ -26,7 +26,7 @@ import {
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
+import { InitialRule, getRuleReducer } from './rule_reducer';
 import { createRule } from '../../lib/rule_api/create';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
@@ -91,7 +91,8 @@ const RuleAdd = <
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
-  const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: initialRule,
   });
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
@@ -234,9 +235,10 @@ const RuleAdd = <
             : {}),
         } as Rule,
         ruleType,
-        config
+        config,
+        actionTypeRegistry
       ),
-    [rule, selectedConsumer, selectableConsumer, ruleType, config]
+    [rule, selectableConsumer, selectedConsumer, ruleType, config, actionTypeRegistry]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule

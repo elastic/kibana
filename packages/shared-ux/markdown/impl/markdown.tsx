@@ -87,6 +87,7 @@ export const Markdown = ({
     }
     return (
       <EuiMarkdownFormat
+        textSize={'relative'}
         className={className}
         aria-label={ariaLabelContent ?? 'markdown component'}
         parsingPluginList={_parsingPlugins}
