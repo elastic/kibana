@@ -17,7 +17,6 @@ describe('useManagementLink Hook', () => {
   const mockGetUrl = jest.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         share: {
@@ -31,6 +30,10 @@ describe('useManagementLink Hook', () => {
         },
       },
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('generates the management link successfully', async () => {
@@ -60,8 +63,7 @@ describe('useManagementLink Hook', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useManagementLink());
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useManagementLink());
 
     expect(result.current).toBe('');
   });
