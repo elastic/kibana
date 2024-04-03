@@ -64,19 +64,17 @@ function MarkdownVisualization(props) {
     markdown = (
       <div className="tvbMarkdown" data-test-subj="tsvbMarkdown">
         {markdownError && <ErrorComponent error={markdownError} />}
-        <ClassNames>
-          {({ css, cx }) => (
-            <div
-              className={cx(
-                contentClasses,
-                // wrapping select for markdown body to make sure selector specificity wins over base styles
-                css(`.kbnMarkdown__body {
-                  ${model.markdown_css}
-                }`)
-              )}
-            >
-              <div>
-                {!markdownError && (
+        {!markdownError && (
+          <ClassNames>
+            {({ css, cx }) => (
+              <div className={cx(contentClasses)}>
+                <div
+                  css={css`
+                    > * {
+                      ${model.markdown_css}
+                    }
+                  `}
+                >
                   <Markdown
                     onRender={initialRender}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
@@ -84,11 +82,11 @@ function MarkdownVisualization(props) {
                   >
                     {markdownSource}
                   </Markdown>
-                )}
+                </div>
               </div>
-            </div>
-          )}
-        </ClassNames>
+            )}
+          </ClassNames>
+        )}
       </div>
     );
   }
