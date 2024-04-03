@@ -99,7 +99,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/cases-components",
     "@kbn/aiops-log-rate-analysis",
-    "@kbn/infra-plugin"
   ],
   "exclude": [
     "target/**/*"
