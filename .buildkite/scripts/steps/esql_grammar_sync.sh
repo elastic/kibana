@@ -86,7 +86,7 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update grammars + test-avoid-match'
+  PR_TITLE='[ES|QL] Update grammars'
   PR_BODY='This PR updates the ES|QL grammars (lexer and parser) to match the latest version in Elasticsearch.'
 
   # Check if a PR already exists
