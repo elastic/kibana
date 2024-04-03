@@ -40,7 +40,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
@@ -141,7 +141,6 @@ export class DashboardContainer
 
   // performance monitoring
   private dashboardCreationStartTime?: number;
-  private savedObjectLoadTime?: number;
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
@@ -268,8 +267,6 @@ export class DashboardContainer
         value2: panelCount,
         key3: 'total_load_time',
         value3: totalDuration,
-        key4: 'saved_object_load_time',
-        value4: this.savedObjectLoadTime,
       });
     }
   }
@@ -600,10 +597,8 @@ export class DashboardContainer
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      if (this.controlGroup && loadDashboardReturn?.dashboardInput.controlGroupInput) {
-        this.controlGroup.dispatch.setLastSavedInput(
-          loadDashboardReturn?.dashboardInput.controlGroupInput
-        );
+      if (this.controlGroup) {
+        this.controlGroup.setSavedState(loadDashboardReturn.dashboardInput?.controlGroupInput);
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);

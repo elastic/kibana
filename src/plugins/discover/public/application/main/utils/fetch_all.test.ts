@@ -7,7 +7,7 @@
  */
 import { FetchStatus } from '../../types';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { reduce } from 'rxjs/operators';
+import { reduce } from 'rxjs';
 import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
