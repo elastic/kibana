@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
@@ -16,30 +15,20 @@ import {
 } from '../image_embeddable/constants';
 import { uiActionsService } from '../services/kibana_services';
 
-const parentApiIsCompatible = async (
-  parentApi: unknown
-): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
-  // we cannot have an async type check, so return the casted parentApi rather than a boolean
-  return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
-};
-
 export const registerCreateImageAction = () => {
   uiActionsService.registerAction<EmbeddableApiContext>({
     id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
     getIconType: () => 'image',
     isCompatible: async ({ embeddable: parentApi }) => {
-      return Boolean(await parentApiIsCompatible(parentApi));
+      return apiCanAddNewPanel(parentApi);
     },
     execute: async ({ embeddable: parentApi }) => {
-      const presentationContainerParent = await parentApiIsCompatible(parentApi);
-      if (!presentationContainerParent) throw new IncompatibleActionError();
-
+      if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
       const { openImageEditor } = await import('../components/image_editor/open_image_editor');
       try {
-        const imageConfig = await openImageEditor({ parentApi: presentationContainerParent });
+        const imageConfig = await openImageEditor({ parentApi });
 
-        presentationContainerParent.addNewPanel({
+        parentApi.addNewPanel({
           panelType: IMAGE_EMBEDDABLE_TYPE,
           initialState: { imageConfig },
         });
@@ -54,4 +43,9 @@ export const registerCreateImageAction = () => {
   });
 
   uiActionsService.attachAction('ADD_PANEL_TRIGGER', ADD_IMAGE_EMBEDDABLE_ACTION_ID);
+  if (uiActionsService.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+    // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+    // the create action if the Canvas-specific trigger does indeed exist.
+    uiActionsService.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_IMAGE_EMBEDDABLE_ACTION_ID);
+  }
 };
