@@ -7,10 +7,10 @@
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
-import { SLODefinition, SLOWithSummary } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';
-import { SummaryResult, Sort, SummarySearchClient } from './summary_search_client';
+import { Sort, SummaryResult, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
@@ -36,21 +36,20 @@ export class FindSLO {
         .map((summaryResult) => summaryResult.sloId)
     );
 
-    const sloListWithSummary = mergeSloWithSummary(localSloDefinitions, summaryResults.results);
-
     return findSLOResponseSchema.encode({
       page: summaryResults.page,
       perPage: summaryResults.perPage,
       total: summaryResults.total,
-      results: sloListWithSummary,
+      results: mergeSloWithSummary(localSloDefinitions, summaryResults.results),
     });
   }
 }
 
+// TODO Kevin: Infered type is not working on this function. Refactor/introduced type needed.
 function mergeSloWithSummary(
   localSloDefinitions: SLODefinition[],
   summaryResults: SummaryResult[]
-): SLOWithSummary[] {
+) {
   const localSloDefinitionsMap = keyBy(localSloDefinitions, (sloDefinition) => sloDefinition.id);
 
   const localSummaryList = summaryResults
@@ -69,8 +68,10 @@ function mergeSloWithSummary(
       instanceId: summaryResult.instanceId,
       summary: summaryResult.summary,
       groupings: summaryResult.groupings,
-      remoteName: summaryResult.remote!.remoteName,
-      kibanaUrl: summaryResult.remote!.kibanaUrl,
+      remote: {
+        remoteName: summaryResult.remote!.remoteName,
+        kibanaUrl: summaryResult.remote!.kibanaUrl,
+      },
     }));
 
   return [...localSummaryList, ...remoteSummaryList];

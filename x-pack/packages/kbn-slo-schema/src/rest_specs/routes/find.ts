@@ -5,7 +5,13 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { allOrAnyString, groupingsSchema, sloDefinitionSchema, summarySchema } from '../../schema';
+import {
+  allOrAnyString,
+  groupingsSchema,
+  remoteMetaSchema,
+  sloDefinitionSchema,
+  summarySchema,
+} from '../../schema';
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.union([
@@ -28,12 +34,11 @@ const findSLOParamsSchema = t.partial({
 
 const sloWithDataResponseSchema = t.intersection([
   sloDefinitionSchema,
-  t.partial({
-    instanceId: allOrAnyString,
-    remoteName: t.string,
-    kibanaUrl: t.string,
-  }),
   t.type({ summary: summarySchema, groupings: groupingsSchema }),
+  t.partial({
+    instanceId: allOrAnyString, // TODO Kevin: can be moved to t.type() since we always backfill it with '*'
+    remote: remoteMetaSchema,
+  }),
 ]);
 
 const findSLOResponseSchema = t.type({
@@ -45,7 +50,6 @@ const findSLOResponseSchema = t.type({
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
-type SLOWithDataResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { findSLOParamsSchema, findSLOResponseSchema };
-export type { FindSLOParams, FindSLOResponse, SLOWithDataResponse };
+export type { FindSLOParams, FindSLOResponse };

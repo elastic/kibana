@@ -59,6 +59,11 @@ const metaSchema = t.partial({
   }),
 });
 
+const remoteMetaSchema = t.type({
+  remoteName: t.string,
+  kibanaUrl: t.string,
+});
+
 const groupSummarySchema = t.type({
   total: t.number,
   worst: t.type({
@@ -90,4 +95,5 @@ export {
   summarySchema,
   metaSchema,
   groupSummarySchema,
+  remoteMetaSchema,
 };
