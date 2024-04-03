@@ -53,7 +53,12 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
     <>
       {/* Name field with optional version field */}
       <FormRow
-        title={<FormattedMessage id="xpack.ingestPipelines.form.versionNumber" defaultMessage="Version" />}
+        title={
+          <FormattedMessage
+            id="xpack.ingestPipelines.form.versionNumber"
+            defaultMessage="Version"
+          />
+        }
         description={
           <>
             <EuiSwitch

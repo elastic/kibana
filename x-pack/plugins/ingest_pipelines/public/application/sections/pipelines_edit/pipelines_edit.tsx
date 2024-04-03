@@ -8,11 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiSpacer,
-  EuiButton,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';

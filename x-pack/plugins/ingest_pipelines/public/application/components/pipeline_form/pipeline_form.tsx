@@ -9,14 +9,29 @@ import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiPageSection, EuiPageHeader, EuiInlineEditTitle, EuiInlineEditText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiPageSection,
+  EuiPageHeader,
+  EuiInlineEditTitle,
+  EuiInlineEditText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { useForm, Form, FormConfig, UseField } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
-import { DeprecatedPipelineBadge, DeprecatedPipelineCallout, ManagedPipelineCallout, ManagedPipelineBadge } from '../pipeline_elements';
+import {
+  DeprecatedPipelineBadge,
+  DeprecatedPipelineCallout,
+  ManagedPipelineCallout,
+  ManagedPipelineBadge,
+} from '../pipeline_elements';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
@@ -46,9 +61,12 @@ const i18nStrings = {
   placeholderPipelineName: i18n.translate('xpack.ingestPipelines.create.placeholderPipelineName', {
     defaultMessage: 'My pipeline name',
   }),
-  placeholderPipelineDescription: i18n.translate('xpack.ingestPipelines.create.placeholderPipelineDescription', {
-    defaultMessage: 'Add a description',
-  }),
+  placeholderPipelineDescription: i18n.translate(
+    'xpack.ingestPipelines.create.placeholderPipelineDescription',
+    {
+      defaultMessage: 'Add a description',
+    }
+  ),
 };
 
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
@@ -153,7 +171,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <UseField<string> path="name">
-                {({ value, setValue } ) => {
+                {({ value, setValue }) => {
                   return (
                     <EuiInlineEditTitle
                       heading="h1"
@@ -189,7 +207,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
               )}
 
               <UseField<string> path="description">
-                {({ value, setValue } ) => {
+                {({ value, setValue }) => {
                   return (
                     <EuiInlineEditText
                       size="m"
@@ -221,7 +239,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                   <EuiButton
                     data-test-subj="showRequestLink"
                     iconType="console"
-                    onClick={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
+                    onClick={() =>
+                      setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)
+                    }
                   >
                     <FormattedMessage
                       id="xpack.ingestPipelines.form.showRequestButtonLabel"
@@ -265,7 +285,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
             )}
           </>
         )}
-
 
         {/* Request error */}
         {saveError && <PipelineFormError error={saveError} />}

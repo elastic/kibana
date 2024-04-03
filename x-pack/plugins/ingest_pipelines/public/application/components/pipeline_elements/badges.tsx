@@ -11,12 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 export const DeprecatedPipelineBadge = () => (
-  <EuiToolTip content={
-    i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeTooltip', {
+  <EuiToolTip
+    content={i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeTooltip', {
       defaultMessage:
-      'This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one.',
-    })
-  }>
+        'This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one.',
+    })}
+  >
     <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
       <FormattedMessage
         id="xpack.ingestPipelines.list.table.deprecatedBadgeLabel"

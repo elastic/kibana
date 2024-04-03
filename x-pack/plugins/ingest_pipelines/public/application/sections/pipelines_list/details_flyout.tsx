@@ -29,7 +29,6 @@ import {
 
 import { Pipeline } from '../../../../common/types';
 
-
 import { DeprecatedPipelineBadge, ManagedPipelineBadge } from '../../components/pipeline_elements';
 import { PipelineDetailsJsonBlock } from './details_json_block';
 import { stringifyJson } from '../../lib/utils';
