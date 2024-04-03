@@ -16,8 +16,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, isArray, last } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { cloneDeep, isArray, last, once } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -219,7 +219,7 @@ export function Insight({
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
 
-  const updateInitialMessages = useCallback(() => {
+  const updateInitialMessages = useCallback(async () => {
     if (isArray(initialMessagesOrCallback)) {
       setMessages({
         messages: initialMessagesOrCallback,
@@ -233,29 +233,33 @@ export function Insight({
       status: FETCH_STATUS.LOADING,
     });
 
-    initialMessagesOrCallback()
-      .then((data) => {
-        setMessages({
-          messages: data ?? [],
-          status: FETCH_STATUS.SUCCESS,
-        });
-      })
-      .catch((e) => {
-        setMessages({
-          messages: [],
-          status: FETCH_STATUS.FAILURE,
-        });
-
-        // eslint-disable-next-line no-console
-        console.log('Could not load insight messages', e);
+    try {
+      const data = await initialMessagesOrCallback();
+      setMessages({
+        messages: data ?? [],
+        status: FETCH_STATUS.SUCCESS,
       });
+    } catch (e) {
+      setMessages({
+        messages: [],
+        status: FETCH_STATUS.FAILURE,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log('could not load insight messages', e);
+    }
   }, [initialMessagesOrCallback]);
+
+  const updateInitialMessagesOnce = useMemo(
+    () => once(updateInitialMessages),
+    [updateInitialMessages]
+  );
 
   useEffect(() => {
     if (isInsightOpen) {
-      updateInitialMessages();
+      updateInitialMessagesOnce();
     }
-  }, [updateInitialMessages, isInsightOpen]);
+  }, [updateInitialMessagesOnce, isInsightOpen]);
 
   const connectors = useGenAIConnectors();
 
