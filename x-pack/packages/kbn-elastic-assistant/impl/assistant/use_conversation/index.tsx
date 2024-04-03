@@ -126,7 +126,6 @@ export const useConversation = (): UseConversation => {
               id: '',
               title: cTitle,
               messages: messages != null ? messages : [],
-              excludeFromLastConversationStorage: true,
             };
       return newConversation;
     },
@@ -158,7 +157,7 @@ export const useConversation = (): UseConversation => {
    */
   const setApiConfig = useCallback(
     async ({ conversation, apiConfig }: SetApiConfigProps) => {
-      if (conversation.id === '' && !conversation.isDefault) {
+      if (conversation.id === '') {
         return createConversationApi({
           http,
           conversation: {

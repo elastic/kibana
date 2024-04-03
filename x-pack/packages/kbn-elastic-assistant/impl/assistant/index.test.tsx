@@ -199,6 +199,11 @@ describe('Assistant', () => {
   });
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation title to local storage', async () => {
+      const getConversation = jest.fn().mockResolvedValue(mockData['electric sheep']);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
       renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
@@ -216,13 +221,19 @@ describe('Assistant', () => {
     });
 
     it('should not persist the conversation id to local storage when excludeFromLastConversationStorage flag is indicated', async () => {
+      const conversation = {
+        ...mockData['electric sheep'],
+        excludeFromLastConversationStorage: true,
+      };
+      const getConversation = jest.fn().mockResolvedValue(conversation);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: {
           ...mockData,
-          'electric sheep': {
-            ...mockData['electric sheep'],
-            excludeFromLastConversationStorage: true,
-          },
+          'electric sheep': conversation,
         },
         isLoading: false,
         refetch: jest.fn(),
@@ -244,6 +255,11 @@ describe('Assistant', () => {
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
     });
     it('should call the setConversationTitle callback if it is defined and the conversation id changes', async () => {
+      const getConversation = jest.fn().mockResolvedValue(mockData['electric sheep']);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
       const setConversationTitle = jest.fn();
 
       renderAssistant({ setConversationTitle });
