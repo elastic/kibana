@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../monaco_imports';
+import { monaco } from '../../..';
 import { globals } from '../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
 
-export const languageConfiguration: monaco.languages.LanguageConfiguration = {
+export const consoleSharedLanguageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [
     ['{', '}'],
     ['[', ']'],
@@ -38,7 +38,7 @@ const addNextStateToAction = (tokens: string[], nextState?: string) => {
 /*
  if regex is matched, tokenize as "token" and move to the state "nextState" if defined
  */
-const matchToken = (token: string, regex: string | RegExp, nextState?: string) => {
+export const matchToken = (token: string, regex: string | RegExp, nextState?: string) => {
   if (nextState) {
     return { regex, action: { token, next: nextState } };
   }
@@ -49,7 +49,7 @@ const matchToken = (token: string, regex: string | RegExp, nextState?: string) =
  if regex is matched, tokenize as "tokens" consecutively and move to the state "nextState"
  regex needs to have the same number of capturing group as the number of tokens
  */
-const matchTokens = (tokens: string[], regex: string | RegExp, nextState?: string) => {
+export const matchTokens = (tokens: string[], regex: string | RegExp, nextState?: string) => {
   const action = addNextStateToAction(tokens, nextState);
   return {
     regex,
@@ -57,7 +57,7 @@ const matchTokens = (tokens: string[], regex: string | RegExp, nextState?: strin
   };
 };
 
-const matchTokensWithEOL = (
+export const matchTokensWithEOL = (
   tokens: string | string[],
   regex: string | RegExp,
   nextIfEOL: string,
@@ -87,7 +87,7 @@ const matchTokensWithEOL = (
   };
 };
 
-const xjsonRules = { ...buildXjsonRules('json_root') };
+export const xjsonRules = { ...buildXjsonRules('json_root') };
 // @ts-expect-error include comments into json
 xjsonRules.json_root = [{ include: '@comments' }, ...xjsonRules.json_root];
 xjsonRules.json_root = [
@@ -96,9 +96,11 @@ xjsonRules.json_root = [
   ...xjsonRules.json_root,
 ];
 
-export const lexerRules: monaco.languages.IMonarchLanguage = {
+/*
+ Lexer rules that are shared between the Console editor and the Console output panel.
+ */
+export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
   ...(globals as any),
-
   defaultToken: 'invalid',
   tokenizer: {
     root: [
@@ -108,72 +110,6 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       { include: '@comments' },
       // start of json
       matchToken('paren.lparen', '{', 'json_root'),
-      // method
-      matchTokensWithEOL('method', /([a-zA-Z]+)/, 'root', 'method_sep'),
-      // whitespace
-      matchToken('whitespace', '\\s+'),
-      // text
-      matchToken('text', '.+?'),
-    ],
-    method_sep: [
-      // protocol host with slash
-      matchTokensWithEOL(
-        ['whitespace', 'url.protocol_host', 'url.slash'],
-        /(\s+)(https?:\/\/[^?\/,]+)(\/)/,
-        'root',
-        'url'
-      ),
-      // variable template
-      matchTokensWithEOL(['whitespace', 'variable.template'], /(\s+)(\${\w+})/, 'root', 'url'),
-      // protocol host
-      matchTokensWithEOL(
-        ['whitespace', 'url.protocol_host'],
-        /(\s+)(https?:\/\/[^?\/,]+)/,
-        'root',
-        'url'
-      ),
-      // slash
-      matchTokensWithEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'root', 'url'),
-      // whitespace
-      matchTokensWithEOL('whitespace', /(\s+)/, 'root', 'url'),
-    ],
-    url: [
-      // variable template
-      matchTokensWithEOL('variable.template', /(\${\w+})/, 'root'),
-      // pathname
-      matchTokensWithEOL('url.part', /([^?\/,\s]+)\s*/, 'root'),
-      // comma
-      matchTokensWithEOL('url.comma', /(,)/, 'root'),
-      // slash
-      matchTokensWithEOL('url.slash', /(\/)/, 'root'),
-      // question mark
-      matchTokensWithEOL('url.questionmark', /(\?)/, 'root', 'urlParams'),
-      // comment
-      matchTokensWithEOL(
-        ['whitespace', 'comment.punctuation', 'comment.line'],
-        /(\s+)(\/\/)(.*$)/,
-        'root'
-      ),
-    ],
-    urlParams: [
-      // param with variable template
-      matchTokensWithEOL(
-        ['url.param', 'url.equal', 'variable.template'],
-        /([^&=]+)(=)(\${\w+})/,
-        'root'
-      ),
-      // param with value
-      matchTokensWithEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'root'),
-      // param
-      matchTokensWithEOL('url.param', /([^&=]+)/, 'root'),
-      // ampersand
-      matchTokensWithEOL('url.amp', /(&)/, 'root'),
-      // comment
-      matchTokensWithEOL(
-        ['whitespace', 'comment.punctuation', 'comment.line'],
-        /(\s+)(\/\/)(.*$)/,
-        'root'
-      ),
     ],
     comments: [
       // line comment indicated by #

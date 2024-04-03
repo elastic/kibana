@@ -19,7 +19,6 @@ import {
   consoleOutputLexerRules,
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
-import { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
 
 export {
   CONSOLE_LANG_ID,
