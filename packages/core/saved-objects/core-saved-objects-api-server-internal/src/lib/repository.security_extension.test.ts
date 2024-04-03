@@ -64,7 +64,7 @@ import {
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -426,17 +426,14 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds created_by to the saved object when the current user is available`, async () => {
-      const userId = 'userId';
-      mockSecurityExt.getCurrentUser.mockImplementationOnce(
-        () =>
-          ({
-            profile_uid: userId,
-          } as AuthenticatedUser)
+      const profileUid = 'profileUid';
+      mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
+        mockAuthenticatedUser({ profile_uid: profileUid })
       );
       const response = await repository.create(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE, attributes, {
         namespace,
       });
-      expect(response.created_by).toBe(userId);
+      expect(response.created_by).toBe(profileUid);
     });
 
     test(`keeps created_by empty if the current user is not available`, async () => {
@@ -1349,16 +1346,13 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`adds created_by to the saved object when the current user is available`, async () => {
-      const userId = 'userId';
-      mockSecurityExt.getCurrentUser.mockImplementationOnce(
-        () =>
-          ({
-            profile_uid: userId,
-          } as AuthenticatedUser)
+      const profileUid = 'profileUid';
+      mockSecurityExt.getCurrentUser.mockImplementationOnce(() =>
+        mockAuthenticatedUser({ profile_uid: profileUid })
       );
       const response = await bulkCreateSuccess(client, repository, [obj1, obj2], { namespace });
-      expect(response.saved_objects[0].created_by).toBe(userId);
-      expect(response.saved_objects[1].created_by).toBe(userId);
+      expect(response.saved_objects[0].created_by).toBe(profileUid);
+      expect(response.saved_objects[1].created_by).toBe(profileUid);
     });
 
     test(`keeps created_by empty if the current user is not available`, async () => {
