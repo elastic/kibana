@@ -683,7 +683,6 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertCalloutText(testSubj: string, text: string) {
       const allOfTestSubj = await testSubjects.getVisibleTextAll(testSubj);
-      console.log(`\nλjs allOfTestSubj: \n${JSON.stringify(allOfTestSubj, null, 2)}`);
 
       const oneOfVisibleTextMatches = allOfTestSubj.some((visibleText) => visibleText === text);
       expect(oneOfVisibleTextMatches).to.eql(

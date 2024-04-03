@@ -449,9 +449,11 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.setModelMemoryLimit(tooLarge);
 
       await ml.jobWizardCommon.clickNextButton();
-      await ml.jobWizardCommon.assertValidationCallouts([
-        'mlValidationCallout-warning-Job will not be able to run in',
-      ]);
+      await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout warning']);
+      await ml.jobWizardCommon.assertCalloutText(
+        'mlValidationCallout warning',
+        'Job will not be able to run in the current cluster because model memory limit is higher than 9790MB.'
+      );
     });
   });
 }
