@@ -108,11 +108,7 @@ import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
-import type {
-  IndexMappingsIncomplete,
-  RootFieldsChanged,
-  TypesChanged,
-} from './check_target_mappings';
+import type { IndexMappingsIncomplete, MappingsChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -187,8 +183,7 @@ export interface ActionErrorTypeMap {
   es_response_too_large: EsResponseTooLargeError;
   synchronization_failed: SynchronizationFailed;
   index_mappings_incomplete: IndexMappingsIncomplete;
-  root_fields_changed: RootFieldsChanged;
-  types_changed: TypesChanged;
+  mappings_changed: MappingsChanged;
   operation_not_supported: OperationNotSupported;
 }
 

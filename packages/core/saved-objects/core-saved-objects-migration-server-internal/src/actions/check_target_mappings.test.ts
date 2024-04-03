@@ -149,8 +149,10 @@ describe('checkTargetMappings', () => {
         const result = await task();
         expect(result).toEqual(
           Either.left({
-            type: 'root_fields_changed' as const,
+            type: 'mappings_changed' as const,
             updatedFields: ['references'],
+            // types are flagged as changed cause we have not provided a hashToVersionMap
+            updatedTypes: ['type1', 'type2'],
           })
         );
       });
@@ -197,7 +199,8 @@ describe('checkTargetMappings', () => {
             const result = await task();
             expect(result).toEqual(
               Either.left({
-                type: 'types_changed' as const,
+                type: 'mappings_changed' as const,
+                updatedFields: [],
                 updatedTypes: ['type2'],
               })
             );
@@ -252,7 +255,8 @@ describe('checkTargetMappings', () => {
             const result = await task();
             expect(result).toEqual(
               Either.left({
-                type: 'types_changed' as const,
+                type: 'mappings_changed' as const,
+                updatedFields: [],
                 updatedTypes: ['type3'],
               })
             );

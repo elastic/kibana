@@ -29,13 +29,9 @@ export interface IndexMappingsIncomplete {
   type: 'index_mappings_incomplete';
 }
 
-export interface RootFieldsChanged {
-  type: 'root_fields_changed';
+export interface MappingsChanged {
+  type: 'mappings_changed';
   updatedFields: string[];
-}
-
-export interface TypesChanged {
-  type: 'types_changed';
   updatedTypes: string[];
 }
 
@@ -47,7 +43,7 @@ export const checkTargetMappings =
     latestMappingsVersions,
     hashToVersionMap = {},
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
-    IndexMappingsIncomplete | RootFieldsChanged | TypesChanged,
+    IndexMappingsIncomplete | MappingsChanged,
     ComparedMappingsMatch
   > =>
   async () => {
@@ -60,14 +56,6 @@ export const checkTargetMappings =
     }
 
     const updatedFields = getUpdatedRootFields(indexMappings);
-
-    if (updatedFields.length) {
-      return Either.left({
-        type: 'root_fields_changed',
-        updatedFields,
-      });
-    }
-
     const updatedTypes = getUpdatedTypes({
       indexTypes,
       indexMeta: indexMappings?._meta,
@@ -75,9 +63,10 @@ export const checkTargetMappings =
       hashToVersionMap,
     });
 
-    if (updatedTypes.length) {
+    if (updatedFields.length || updatedTypes.length) {
       return Either.left({
-        type: 'types_changed' as const,
+        type: 'mappings_changed' as const,
+        updatedFields,
         updatedTypes,
       });
     } else {

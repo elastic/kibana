@@ -2623,24 +2623,10 @@ describe('migrations v2 model', () => {
       });
 
       describe('compatible migration', () => {
-        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if SO types have changed', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'root_fields_changed' as const,
-            updatedFields: ['references'],
-          });
-          const newState = model(
-            checkTargetMappingsState,
-            res
-          ) as UpdateTargetMappingsPropertiesState;
-          expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
-          // since a core field has been updated, we must pickup ALL SOs.
-          // Thus, we must NOT define a filter query.
-          expect(Option.isNone(newState.updatedTypesQuery)).toEqual(true);
-        });
-
-        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if only SO types have changed', () => {
-          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'types_changed' as const,
+            type: 'mappings_changed' as const,
+            updatedFields: [],
             updatedTypes: ['dashboard', 'lens'],
           });
           const newState = model(
@@ -2666,6 +2652,19 @@ describe('migrations v2 model', () => {
               ],
             },
           });
+        });
+
+        it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if only core fields have been updated', () => {
+          const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
+            type: 'mappings_changed' as const,
+            updatedFields: ['references'],
+            updatedTypes: [],
+          });
+          const newState = model(
+            checkTargetMappingsState,
+            res
+          ) as UpdateTargetMappingsPropertiesState;
+          expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
         });
 
         it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
