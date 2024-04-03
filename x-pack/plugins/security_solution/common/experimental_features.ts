@@ -207,6 +207,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Feb 20, 2024
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+  /*
+   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineEnabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
 
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
@@ -220,14 +235,9 @@ export const allowedExperimentalValues = Object.freeze({
   perFieldPrebuiltRulesDiffingEnabled: true,
 
   /**
-   * Disables discover esql tab within timeline
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  timelineEsqlTabDisabled: false,
-
-  /**
-   * Disables date pickers and sourcerer in analyzer if needed.
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
+  malwareOnWriteScanOptionAvailable: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
