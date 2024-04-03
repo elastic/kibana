@@ -142,7 +142,7 @@ describe('jira action params validation', () => {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
         'subActionParams.incident.otherFields': [
-          `A maximum of ${MAX_OTHER_FIELDS_LENGTH} additional Fields can be defined at a time.`,
+          `A maximum of ${MAX_OTHER_FIELDS_LENGTH} additional fields can be defined at a time.`,
         ],
       },
     });
