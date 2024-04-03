@@ -191,7 +191,6 @@ export async function getDashboardUnsavedChanges(
   lastInput: DashboardContainerInput,
   input: DashboardContainerInput
 ): Promise<Partial<DashboardContainerInput>> {
-  console.log({ lastSavedInput: lastInput, currentInput: input });
   const allKeys = [...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
     keyof DashboardContainerInput
   >;
