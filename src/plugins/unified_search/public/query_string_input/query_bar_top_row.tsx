@@ -20,7 +20,7 @@ import {
 } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { throttle } from 'lodash';
 import {
   EuiFlexGroup,
@@ -59,6 +59,9 @@ import type {
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
 import './query_bar.scss';
+
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -152,7 +155,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
@@ -545,9 +547,12 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
+      const textBasedRunShortcut = `${COMMAND_KEY} + Enter`;
       const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
-      const buttonLabelRefresh = strings.getRefreshQueryLabel();
-      const buttonLabelRun = strings.getRunQueryLabel();
+      const buttonLabelRefresh = Boolean(isQueryLangSelected)
+        ? textBasedRunShortcut
+        : strings.getRefreshQueryLabel();
+      const buttonLabelRun = textBasedRunShortcut;
 
       const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
@@ -724,8 +729,9 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            hideRunQueryText={props.hideTextBasedRunQueryLabel}
+            hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
+            isLoading={props.isLoading}
           />
         )
       );

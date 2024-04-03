@@ -11,8 +11,8 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
-  RuleAction,
   Rule,
+  RuleAction,
   RuleType,
   RuleTypeIndex,
   RuleTypeModel,

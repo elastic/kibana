@@ -21,9 +21,9 @@ import {
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 import { announce } from './announcements';
 
-const initialState = {
+const defaultState = {
   dragging: undefined,
-  activeDropTarget: undefined,
+  hoveredDropTarget: undefined,
   keyboardMode: false,
   dropTargetsByOrder: {},
   dataTestSubjPrefix: DEFAULT_DATA_TEST_SUBJ,
@@ -33,7 +33,7 @@ const initialState = {
  *
  * const [ state, dispatch ] = useDragDropContext();
  */
-const DragContext = React.createContext<DragContextValue>([initialState, () => {}]);
+const DragContext = React.createContext<DragContextValue>([defaultState, () => {}]);
 
 export function useDragDropContext() {
   const context = React.useContext(DragContext);
@@ -127,7 +127,7 @@ const dragDropReducer = (state: DragContextState, action: DragDropAction) => {
         dropTargetsByOrder: undefined,
         dragging: undefined,
         keyboardMode: false,
-        activeDropTarget: undefined,
+        hoveredDropTarget: undefined,
       };
     case 'registerDropTargets':
       return {
@@ -143,17 +143,17 @@ const dragDropReducer = (state: DragContextState, action: DragDropAction) => {
         dropTargetsByOrder: undefined,
         dragging: undefined,
         keyboardMode: false,
-        activeDropTarget: undefined,
+        hoveredDropTarget: undefined,
       };
     case 'leaveDropTarget':
       return {
         ...state,
-        activeDropTarget: undefined,
+        hoveredDropTarget: undefined,
       };
     case 'selectDropTarget':
       return {
         ...state,
-        activeDropTarget: action.payload.dropTarget,
+        hoveredDropTarget: action.payload.dropTarget,
       };
     case 'startDragging':
       return {
@@ -222,23 +222,25 @@ const useA11yMiddleware = () => {
 
 export function RootDragDropProvider({
   children,
-  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   customMiddleware,
+  initialState = {},
 }: {
   children: React.ReactNode;
-  dataTestSubj?: string;
   customMiddleware?: CustomMiddleware;
+  initialState?: Partial<DragContextState>;
 }) {
   const { a11yMessage, a11yMiddleware } = useA11yMiddleware();
   const middlewareFns = React.useMemo(() => {
     return customMiddleware ? [customMiddleware, a11yMiddleware] : [a11yMiddleware];
   }, [customMiddleware, a11yMiddleware]);
 
+  const dataTestSubj = initialState.dataTestSubjPrefix || DEFAULT_DATA_TEST_SUBJ;
+
   const [state, dispatch] = useReducerWithMiddleware(
     dragDropReducer,
     {
+      ...defaultState,
       ...initialState,
-      dataTestSubjPrefix: dataTestSubj,
     },
     middlewareFns
   );
@@ -269,7 +271,7 @@ export function RootDragDropProvider({
 
 export function nextValidDropTarget(
   dropTargetsByOrder: RegisteredDropTargets,
-  activeDropTarget: DropIdentifier | undefined,
+  hoveredDropTarget: DropIdentifier | undefined,
   draggingOrder: [string],
   filterElements: (el: DragDropIdentifier) => boolean = () => true,
   reverse = false
@@ -278,18 +280,13 @@ export function nextValidDropTarget(
     return;
   }
 
-  const filteredTargets: Array<[string, DropIdentifier | undefined]> = Object.entries(
-    dropTargetsByOrder
-  ).filter(([, dropTarget]) => {
-    return dropTarget && filterElements(dropTarget);
+  const filteredTargets = Object.entries(dropTargetsByOrder).filter(([order, dropTarget]) => {
+    return dropTarget && order !== draggingOrder[0] && filterElements(dropTarget);
   });
 
-  // filter out secondary targets
-  const uniqueIdTargets = filteredTargets.reduce(
-    (
-      acc: Array<[string, DropIdentifier | undefined]>,
-      current: [string, DropIdentifier | undefined]
-    ) => {
+  // filter out secondary targets and targets with the same id as the dragging element
+  const uniqueIdTargets = filteredTargets.reduce<Array<[string, DropIdentifier]>>(
+    (acc, current) => {
       const [, currentDropTarget] = current;
       if (!currentDropTarget) {
         return acc;
@@ -311,7 +308,7 @@ export function nextValidDropTarget(
   });
 
   let currentActiveDropIndex = nextDropTargets.findIndex(
-    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.id
+    ([, dropTarget]) => typeof dropTarget === 'object' && dropTarget?.id === hoveredDropTarget?.id
   );
 
   if (currentActiveDropIndex === -1) {

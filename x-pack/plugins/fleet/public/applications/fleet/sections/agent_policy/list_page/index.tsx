@@ -43,7 +43,7 @@ import { CreateAgentPolicyFlyout } from './components';
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
 
   const {
     agents: { enabled: isFleetEnabled },
@@ -181,7 +181,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasFleetAllPrivileges}
+        isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="createAgentPolicyButton"
       >
@@ -191,7 +191,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetAllAgentPoliciesPrivileges, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyStateCreateAgentPolicyButton = useMemo(
@@ -199,7 +199,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasFleetAllPrivileges}
+        isDisabled={!hasFleetAllAgentPoliciesPrivileges}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
         data-test-subj="emptyPromptCreateAgentPolicyButton"
       >
@@ -209,7 +209,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasFleetAllPrivileges, setIsCreateAgentPolicyFlyoutOpen]
+    [hasFleetAllAgentPoliciesPrivileges, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(

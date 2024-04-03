@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, pickBy, mapValues, omit, assign, chain } from 'lodash';
+import { each, pickBy, mapValues, pick, assign, chain } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 import { DataViewField } from '../fields';
@@ -40,7 +40,7 @@ interface DataViewDeps {
 interface GetFieldsParams {
   indexFilter?: QueryDslQueryContainer;
   unmapped?: boolean;
-  fieldName?: string[]; // supports wildcard
+  fieldName: string[]; // supports wildcard
   mapped?: boolean;
   scripted?: boolean;
   runtime?: boolean;
@@ -70,12 +70,12 @@ export class DataViewLazy extends AbstractDataView {
     mapped = true,
     scripted = true,
     runtime = true,
-    fieldName = ['*'],
+    fieldName,
     forceRefresh = false,
     unmapped,
     indexFilter,
     metaFields = true,
-  }: GetFieldsParams = {}) {
+  }: GetFieldsParams) {
     let mappedResult: DataViewFieldMap = {};
     let scriptedResult: DataViewFieldMap = {};
     let runtimeResult: DataViewFieldMap = {};
@@ -118,21 +118,26 @@ export class DataViewLazy extends AbstractDataView {
     };
   }
 
-  private getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
+  public getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
     // getRuntimeFieldSpecMap flattens composites into a list of fields
     Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce<DataViewFieldMap>(
       (col, field) => {
+        if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
+          return col;
+        }
         let cachedField = this.fieldCache.get(field.name);
         // if mapped field, can't be runtime field
         if (cachedField?.isMapped) {
           return col;
         }
-        if (cachedField) {
-          cachedField.runtimeField = field.runtimeField;
-          cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
-          cachedField.spec.esTypes = [field.type];
-        } else {
-          cachedField = new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable });
+        if (!cachedField) {
+          cachedField = new DataViewField({
+            ...field,
+            count: this.fieldAttrs?.[field.name]?.count,
+            customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+            customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+            shortDotsEnable: this.shortDotsEnable,
+          });
           this.fieldCache.set(field.name, cachedField);
         }
         col[field.name] = cachedField;
@@ -370,7 +375,7 @@ export class DataViewLazy extends AbstractDataView {
     return spec;
   };
 
-  private getScriptedFields({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
+  public getScriptedFields({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
     const dataViewFields: Record<string, DataViewField> = {};
 
     Object.values(this.scriptedFieldsMap).forEach((field) => {
@@ -379,7 +384,8 @@ export class DataViewLazy extends AbstractDataView {
       }
       let fld = this.fieldCache.get(field.name);
 
-      if (fld) {
+      // scripted field overrides mapped field
+      if (fld && !fld.scripted && fld.isMapped) {
         this.fieldCache.delete(field.name);
       }
       fld = new DataViewField({
@@ -458,12 +464,11 @@ export class DataViewLazy extends AbstractDataView {
     );
   }
 
-  async getComputedFields({ fieldNames = ['*'] }: { fieldNames: string[] }) {
+  async getComputedFields({ fieldName = ['*'] }: { fieldName: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
-
     const fieldMap = (
       await this.getFields({
-        fieldName: fieldNames,
+        fieldName,
         fieldTypes: ['date', 'date_nanos'],
         scripted: false,
         runtime: false,
@@ -480,10 +485,10 @@ export class DataViewLazy extends AbstractDataView {
       };
     });
 
-    each(this.getScriptedFields({ fieldName: fieldNames }), function (field) {
+    each(this.getScriptedFields({ fieldName }), function (field) {
       scriptFields[field.name] = {
         script: {
-          source: field.script as string,
+          source: field.script!,
           lang: field.lang,
         },
       };
@@ -526,17 +531,24 @@ export class DataViewLazy extends AbstractDataView {
   /**
    * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
    */
-  public toMinimalSpec(): Omit<DataViewSpec, 'fields'> {
+  // todo make shared
+  public toMinimalSpec(params?: {
+    keepFieldAttrs?: Array<'customLabel' | 'customDescription'>;
+  }): Omit<DataViewSpec, 'fields'> {
+    const fieldAttrsToKeep = params?.keepFieldAttrs ?? ['customLabel', 'customDescription'];
     // removes `fields`
     const spec = this.toSpecShared(false);
 
     if (spec.fieldAttrs) {
       // removes `count` props (popularity scores) from `fieldAttrs`
       spec.fieldAttrs = pickBy(
-        mapValues(spec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        // removes unnecessary attributes
+        mapValues(spec.fieldAttrs, (fieldAttrs) => pick(fieldAttrs, fieldAttrsToKeep)),
+        // removes empty objects if all attributes have been removed
         (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
       );
 
+      // removes `fieldAttrs` if it's empty
       if (Object.keys(spec.fieldAttrs).length === 0) {
         delete spec.fieldAttrs;
       }
@@ -549,7 +561,7 @@ export class DataViewLazy extends AbstractDataView {
    * returns true if dataview contains TSDB fields
    */
   async isTSDBMode() {
-    const fieldMap = (await this.getFields()).getFieldMap();
+    const fieldMap = (await this.getFields({ fieldName: ['*'] })).getFieldMap();
 
     return Object.values(fieldMap).some(
       (field) => field.timeSeriesDimension || field.timeSeriesMetric

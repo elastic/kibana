@@ -20,6 +20,7 @@ describe('get runtime field', () => {
         ({
           getFields: jest.fn().mockReturnValueOnce({ getFieldMap: () => ({}) }),
           getRuntimeField: jest.fn().mockReturnValueOnce({}),
+          getRuntimeFields: jest.fn().mockReturnValueOnce({}),
           getFieldsByRuntimeFieldName: jest.fn().mockReturnValueOnce({}),
         } as unknown as DataViewLazy)
     );

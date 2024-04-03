@@ -7,7 +7,6 @@
 import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { toExpression } from '@kbn/interpreter';
-import faker from 'faker';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(
@@ -25,13 +24,13 @@ export function createMockVisualization(
       {
         icon: 'empty',
         id,
-        label: faker.lorem.word(),
+        label: id,
         groupLabel: `${id}Group`,
       },
     ],
     appendLayer: jest.fn(),
     getVisualizationTypeId: jest.fn((_state) => id),
-    getDescription: jest.fn((_state) => ({ label: '' })),
+    getDescription: jest.fn((_state) => ({ label: id, icon: 'empty' })),
     switchVisualizationType: jest.fn((_, x) => x),
     getSuggestions: jest.fn((_options) => []),
     getRenderEventCounters: jest.fn((_state) => []),

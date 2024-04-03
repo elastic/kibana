@@ -796,7 +796,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('severity filtering', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/179016
+    describe.skip('severity filtering', () => {
       before(async () => {
         await cases.navigation.navigateToApp();
         await cases.api.createCase({ severity: CaseSeverity.LOW });

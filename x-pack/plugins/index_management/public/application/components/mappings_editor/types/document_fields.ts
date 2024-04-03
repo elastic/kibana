@@ -87,7 +87,8 @@ export type NumericType =
   | 'double'
   | 'float'
   | 'half_float'
-  | 'scaled_float';
+  | 'scaled_float'
+  | 'unsigned_long';
 
 export type RangeType =
   | 'integer_range'

@@ -29,7 +29,7 @@ import {
 } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { triggersActionsUiHealth } from '../../../common/lib/health_api';
@@ -127,9 +127,9 @@ describe.skip('rule_add', () => {
         defaultScheduleInterval,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -196,7 +196,7 @@ describe.skip('rule_add', () => {
     wrapper = mountWithIntl(
       <QueryClientProvider client={new QueryClient()}>
         <RuleAdd
-          consumer={ALERTS_FEATURE_ID}
+          consumer={ALERTING_FEATURE_ID}
           onClose={onClose}
           initialValues={initialValues}
           onSave={() => {
@@ -407,7 +407,7 @@ describe.skip('rule_add', () => {
           defaultActionGroupId: 'threshold.fired',
           minimumLicenseRequired: 'basic',
           recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           authorizedConsumers: {
             logs: { read: true, all: true },
           },
