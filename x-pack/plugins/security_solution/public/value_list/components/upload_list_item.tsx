@@ -12,6 +12,14 @@ import { useImportList, useInvalidateListItemQuery } from '@kbn/securitysolution
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../common/lib/kibana';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import {
+  UPLOAD_LIST_ITEM,
+  UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT,
+  UPLOAD_TOOLTIP,
+  FAILED_TO_UPLOAD_LIST_ITEM_TITLE,
+  FAILED_TO_UPLOAD_LIST_ITEM,
+  SUCCESFULY_UPLOAD_LIST_ITEMS,
+} from '../translations';
 
 const validFileTypes = ['text/csv', 'text/plain'];
 
@@ -52,10 +60,10 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
 
   useEffect(() => {
     if (!importState.loading && importState.result) {
-      addSuccess('Succesfully upload list items', toastOptions);
+      addSuccess(SUCCESFULY_UPLOAD_LIST_ITEMS, toastOptions);
     } else if (!importState.loading && importState.error) {
-      addError('Failed to upload list item', {
-        title: 'error',
+      addError(FAILED_TO_UPLOAD_LIST_ITEM, {
+        title: FAILED_TO_UPLOAD_LIST_ITEM_TITLE,
         ...toastOptions,
       });
     }
@@ -71,12 +79,12 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
 
   return (
     <>
-      <EuiToolTip position="bottom" content="All items from file will be added as new items">
+      <EuiToolTip position="bottom" content={UPLOAD_TOOLTIP}>
         <EuiFilePicker
           className={uploadStyle}
           accept={validFileTypes.join()}
           id="value-list-item-upload"
-          initialPromptText="Select or drag and drop multiple files"
+          initialPromptText={UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT}
           onChange={handleFileChange}
           display="default"
           isLoading={importState.loading}
@@ -87,7 +95,7 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
         onClick={handleImport}
         disabled={file == null || !fileIsValid || importState.loading}
       >
-        Upload
+        {UPLOAD_LIST_ITEM}
       </EuiButton>
     </>
   );

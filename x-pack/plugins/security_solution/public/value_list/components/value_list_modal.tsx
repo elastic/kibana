@@ -26,6 +26,13 @@ import { UploadListItem } from './upload_list_item';
 import { ListItemTable } from './list_item_table';
 import { Info } from './info';
 import type { SortFields, ValueListModalProps, OnTableChange, Sorting } from '../types';
+import {
+  INFO_UPDATED_AT,
+  INFO_TYPE,
+  INFO_UPDATED_BY,
+  INFO_TOTAL_ITEMS,
+  getInfoTotalItems,
+} from '../translations';
 
 const modalWindow = css`
   min-height: 90vh;
@@ -122,13 +129,13 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
                   </>
                 )}
                 <EuiFlexGroup justifyContent="flexStart">
-                  <Info label="Type:" value={list.type} />
+                  <Info label={INFO_TYPE} value={list.type} />
                   <Info
-                    label="Update at:"
+                    label={INFO_UPDATED_AT}
                     value={<FormattedDate value={list.updated_at} fieldName="updated_at" />}
                   />
-                  <Info label="Updated by:" value={list.updated_by} />
-                  {listItems && <Info label="Total items:" value={listItems?.total ?? '-'} />}
+                  <Info label={INFO_UPDATED_BY} value={list.updated_by} />
+                  {listItems && <Info label={INFO_TOTAL_ITEMS} value={listItems?.total ?? '-'} />}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
@@ -152,7 +159,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
               showDatePicker={false}
               displayStyle={'inPage'}
               submitButtonStyle={'iconOnly'}
-              placeholder={`Filter your data using KQL syntax - ${list?.type}:*`}
+              placeholder={getInfoTotalItems(list?.type ?? '')}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true} className={tableStyle}>

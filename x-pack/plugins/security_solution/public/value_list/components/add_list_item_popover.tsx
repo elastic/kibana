@@ -18,6 +18,15 @@ import { useFormik } from 'formik';
 import { useCreateListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import {
+  ADD_LIST_ITEM,
+  SUCCESFULLY_ADDED_ITEM,
+  VALUE_REQUIRED,
+  VALUE_LABEL,
+  ADD_VALUE_LIST_PLACEHOLDER,
+  ADDING_LIST_ITEM_BUTTON,
+  ADD_LIST_ITEM_BUTTON,
+} from '../translations';
 
 export const AddListItemPopover = ({ listId }: { listId: string }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -25,7 +34,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
   const http = useKibana().services.http;
   const createListItemMutation = useCreateListItemMutation({
     onSuccess: () => {
-      addSuccess('Succesfully added list item');
+      addSuccess(SUCCESFULLY_ADDED_ITEM);
     },
     onError: (error) => {
       addError(error, {
@@ -40,7 +49,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
     },
     validate: (values) => {
       if (values.value.trim() === '') {
-        return { value: 'Value is required' };
+        return { value: VALUE_REQUIRED };
       }
     },
     onSubmit: async (values) => {
@@ -60,7 +69,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
           iconType="arrowDown"
           onClick={() => setIsPopoverOpen(true)}
         >
-          Add list item
+          {ADD_LIST_ITEM}
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -71,7 +80,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
-                label="Value"
+                label={VALUE_LABEL}
                 id="value-list-item-value"
                 isInvalid={!!formik.errors.value}
                 error={[formik.errors.value]}
@@ -82,7 +91,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
                   value={formik.values.value}
                   name="value"
                   icon="listAdd"
-                  placeholder="Add list item.."
+                  placeholder={ADD_VALUE_LIST_PLACEHOLDER}
                   isInvalid={!!formik.errors.value}
                 />
               </EuiFormRow>
@@ -90,7 +99,9 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButton isLoading={createListItemMutation.isLoading} type="submit">
-                  {createListItemMutation.isLoading ? 'Adding...' : 'Add'}
+                  {createListItemMutation.isLoading
+                    ? ADDING_LIST_ITEM_BUTTON
+                    : ADD_LIST_ITEM_BUTTON}
                 </EuiButton>
               </EuiFormRow>
             </EuiFlexItem>

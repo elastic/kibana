@@ -11,6 +11,7 @@ import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { usePatchListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { EDIT_TEXT_INLINE_LABEL, SUCCESFULLY_UPDATED_LIST_ITEM } from '../translations';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -22,7 +23,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
   const http = useKibana().services.http;
   const patchListItemMutation = usePatchListItemMutation({
     onSuccess: () => {
-      addSuccess('Succesfully updated list item', toastOptions);
+      addSuccess(SUCCESFULLY_UPDATED_LIST_ITEM, toastOptions);
     },
     onError: (error) => {
       addError(error, {
@@ -54,7 +55,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
   return (
     <EuiInlineEditText
       size={'s'}
-      inputAriaLabel="Edit text inline"
+      inputAriaLabel={EDIT_TEXT_INLINE_LABEL}
       value={value}
       onChange={onChange}
       onSave={onSave}

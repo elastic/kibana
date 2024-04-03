@@ -11,6 +11,15 @@ import { InlineEditListItemValue } from './inline_edit_list_item_value';
 import { DeleteListItem } from './delete_list_item';
 import { FormattedDate } from '../../common/components/formatted_date';
 import type { ListItemTableProps, ListItemTableColumns } from '../types';
+import {
+  COLUMN_VALUE,
+  COLUMN_UPDATED_AT,
+  COLUMN_UPDATED_BY,
+  COLUMN_ACTIONS,
+  FAILED_TO_FETCH_LIST_ITEM,
+  DELETE_LIST_ITEM,
+  DELETE_LIST_ITEM_DESCRIPTION,
+} from '../translations';
 
 export const ListItemTable = ({
   canWriteIndex,
@@ -25,14 +34,14 @@ export const ListItemTable = ({
   const columns: ListItemTableColumns = [
     {
       field: 'value',
-      name: 'Value',
+      name: COLUMN_VALUE,
       render: (value, item) =>
         canWriteIndex ? <InlineEditListItemValue listItem={item} key={value} /> : value,
       sortable: list.type !== 'text',
     },
     {
       field: 'updated_at',
-      name: 'Updated At',
+      name: COLUMN_UPDATED_AT,
       render: (value: ListItemSchema['updated_at']) => (
         <FormattedDate value={value} fieldName="updated_at" />
       ),
@@ -41,17 +50,17 @@ export const ListItemTable = ({
     },
     {
       field: 'updated_by',
-      name: 'Updated By',
+      name: COLUMN_UPDATED_BY,
       width: '15%',
     },
   ];
   if (canWriteIndex) {
     columns.push({
-      name: 'Actions',
+      name: COLUMN_ACTIONS,
       actions: [
         {
-          name: 'Delete',
-          description: 'Delete this item',
+          name: DELETE_LIST_ITEM,
+          description: DELETE_LIST_ITEM_DESCRIPTION,
           isPrimary: true,
           render: (item: ListItemSchema) => <DeleteListItem id={item.id} />,
         },
@@ -62,16 +71,11 @@ export const ListItemTable = ({
 
   return (
     <EuiBasicTable
-      tableCaption="Demo of EuiBasicTable"
       items={items}
       columns={columns}
       pagination={pagination}
       sorting={sorting}
-      error={
-        isError
-          ? 'Failed to load list items. You can change the search query or contact your administartor'
-          : undefined
-      }
+      error={isError ? FAILED_TO_FETCH_LIST_ITEM : undefined}
       loading={loading}
       onChange={onChange}
     />
