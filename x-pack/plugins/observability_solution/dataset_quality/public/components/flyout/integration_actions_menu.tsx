@@ -20,6 +20,11 @@ import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+
+const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
+  defaultMessage: 'Integration actions',
+});
+
 const seeIntegrationText = i18n.translate('xpack.datasetQuality.flyoutSeeIntegrationActionText', {
   defaultMessage: 'See integration',
 });
@@ -46,6 +51,8 @@ export function IntegrationActionsMenu({ integration }: { integration: Integrati
 
   const actionButton = (
     <EuiButtonIcon
+      title={integrationActionsText}
+      aria-label={integrationActionsText}
       iconType="boxesHorizontal"
       onClick={handleToggleMenu}
       data-test-subj="datasetQualityFlyoutIntegrationActionsButton"
