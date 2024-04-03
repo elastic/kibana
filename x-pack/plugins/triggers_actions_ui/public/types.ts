@@ -255,6 +255,7 @@ export interface ActionParamsProps<TParams> {
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;
+  producerId?: string;
 }
 
 export interface Pagination {
