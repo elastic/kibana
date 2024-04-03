@@ -76,7 +76,7 @@ export function createEditSingleMetricViewerPanelAction(
     async isCompatible(context: EmbeddableApiContext) {
       return (
         isSingleMetricViewerEmbeddableContext(context) &&
-        context.embeddable.viewMode?.getValue() === 'edit'
+        context.embeddable.parentApi?.viewMode?.getValue() === 'edit'
       );
     },
   };

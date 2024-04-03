@@ -14,15 +14,8 @@ import { throttle } from 'lodash';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useToastNotificationService } from '../../application/services/toast_notification_service';
-import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useSingleMetricViewerInputResolver } from './use_single_metric_viewer_input_resolver';
-import type { ISingleMetricViewerEmbeddable } from './single_metric_viewer_embeddable';
-import type {
-  SingleMetricViewerEmbeddableInput,
-  AnomalyChartsEmbeddableOutput,
-  SingleMetricViewerEmbeddableServices,
-} from '..';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerEmbeddableApi } from '..';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import { useTimeSeriesExplorerService } from '../../application/util/time_series_explorer_service';
@@ -36,13 +29,10 @@ interface AppStateZoom {
 }
 
 export interface EmbeddableSingleMetricViewerContainerProps {
+  api: SingleMetricViewerEmbeddableApi;
   id: string;
-  embeddableContext: InstanceType<ISingleMetricViewerEmbeddable>;
-  embeddableInput$: Observable<SingleMetricViewerEmbeddableInput>;
   services: SingleMetricViewerEmbeddableServices;
   refresh: Observable<void>;
-  onInputChange: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
-  onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
   onRenderComplete: () => void;
   onLoading: () => void;
   onError: (error: Error) => void;
@@ -50,13 +40,7 @@ export interface EmbeddableSingleMetricViewerContainerProps {
 
 export const EmbeddableSingleMetricViewerContainer: FC<
   EmbeddableSingleMetricViewerContainerProps
-> = ({ id, embeddableContext, embeddableInput$, services, refresh, onRenderComplete }) => {
-  useEmbeddableExecutionContext<SingleMetricViewerEmbeddableInput>(
-    services[0].executionContext,
-    embeddableInput$,
-    ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-    id
-  );
+> = ({ api, id, services, refresh, onRenderComplete, onLoading, onError }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [zoom, setZoom] = useState<AppStateZoom | undefined>();
   const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
@@ -66,7 +50,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
 
   const { mlApiServices, mlJobService } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
-    embeddableInput$,
+    api,
     refresh,
     services[1].data.query.timefilter.timefilter,
     onRenderComplete
@@ -170,7 +154,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
             overflowX: 'hidden',
             padding: '8px',
           }}
-          data-test-subj={`mlSingleMetricViewer_${embeddableContext.id}`}
+          data-test-subj={`mlSingleMetricViewer_${id}`}
           ref={resizeRef}
           className="ml-time-series-explorer"
         >

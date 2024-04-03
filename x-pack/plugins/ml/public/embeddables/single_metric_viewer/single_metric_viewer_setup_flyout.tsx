@@ -45,7 +45,7 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
             }}
           >
             <SingleMetricViewerInitializer
-              bounds={timefilter.getActiveBounds()!}
+              bounds={timefilter.getBounds()!}
               defaultTitle={title}
               initialInput={input}
               job={jobs[0]}

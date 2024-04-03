@@ -15,11 +15,13 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasType,
-  PublishesUnifiedSearch,
-  PublishesViewMode,
-  PublishesWritablePanelTitle,
+  PublishesDataViews,
   PublishingSubject,
+  PublishesWritablePanelTitle,
+  PublishesUnifiedSearch,
+  SerializedTitles,
 } from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -35,14 +37,22 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type {
   AnomalyExplorerChartsEmbeddableType,
-  AnomalySingleMetricViewerEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
 
-export type MlEmbeddableBaseApi = Partial<
-  HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
->;
+/**
+ * Common API for all ML embeddables
+ */
+export interface MlEmbeddableBaseApi<StateType extends object = object>
+  extends DefaultEmbeddableApi<StateType>,
+    PublishesDataViews,
+    PublishesUnifiedSearch {
+  /**
+   * Result time range based on the parent and panel time range APIs
+   */
+  appliedTimeRange$: PublishingSubject<TimeRange>;
+}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -123,9 +133,7 @@ export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbedd
 
 export interface SingleMetricViewerEmbeddableCustomInput {
   jobIds: JobId[];
-  title: string;
   functionDescription?: string;
-  panelTitle: string;
   selectedDetectorIndex: number;
   selectedEntities?: MlEntity;
   // Embeddable inputs which are not included in the default interface
@@ -138,20 +146,26 @@ export interface SingleMetricViewerEmbeddableCustomInput {
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
 
+/**
+ * Persisted state for the Single Metric Embeddable.
+ */
+export interface SingleMetricViewerEmbeddableState
+  extends SerializedTitles,
+    SingleMetricViewerEmbeddableCustomInput {}
+
+export type SingleMetricViewerEmbeddableApi =
+  MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
+    PublishesWritablePanelTitle &
+    SingleMetricViewerComponentApi;
+
 export interface SingleMetricViewerComponentApi {
-  functionDescription?: PublishingSubject<string>;
+  functionDescription?: PublishingSubject<string | undefined>;
   jobIds: PublishingSubject<JobId[]>;
-  selectedDetectorIndex: PublishingSubject<number>;
-  selectedEntities?: PublishingSubject<MlEntity>;
+  selectedDetectorIndex: PublishingSubject<number | undefined>;
+  selectedEntities?: PublishingSubject<MlEntity | undefined>;
 
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }
-
-export interface SingleMetricViewerEmbeddableApi
-  extends HasType<AnomalySingleMetricViewerEmbeddableType>,
-    PublishesWritablePanelTitle,
-    MlEmbeddableBaseApi,
-    SingleMetricViewerComponentApi {}
 
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
