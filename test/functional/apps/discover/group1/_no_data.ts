@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'settings']);
 
   describe('discover no data', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/discover';
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await PageObjects.common.navigateToApp('discover');
       const dataViewToCreate = 'logstash';
-      await PageObjects.discover.createDataView(dataViewToCreate);
+      await PageObjects.settings.createNewDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',

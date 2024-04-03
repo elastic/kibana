@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['visualize', 'header', 'common', 'discover']);
+  const PageObjects = getPageObjects(['visualize', 'header', 'common', 'settings']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const dataViewToCreate = 'logstash';
-      await PageObjects.discover.createDataView(dataViewToCreate);
+      await PageObjects.settings.createNewDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitForWithTimeout(
