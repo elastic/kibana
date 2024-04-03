@@ -33,4 +33,6 @@ export interface ICspConfig {
    * in a `Content-Security-Policy` header.
    */
   readonly header: string;
+
+  readonly reportOnlyHeader: string;
 }

@@ -20,7 +20,15 @@ export type CspDirectiveName =
   | 'frame-src'
   | 'img-src'
   | 'report-uri'
-  | 'report-to';
+  | 'report-to'
+  | 'form-action';
+
+/**
+ * The default report only directives rules
+ */
+export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
+  'form-action': [`'self'`],
+};
 
 /**
  * The default directives rules that are always applied
@@ -56,6 +64,19 @@ export class CspDirectives {
 
   clearDirectiveValues(directiveName: CspDirectiveName) {
     this.directives.delete(directiveName);
+  }
+
+  getCspHeadersByDisposition() {
+    const reportOnlyHeader = Object.entries(defaultReportOnlyRules)
+      .reduce<string[]>((acc, [name, values]) => {
+        return [...acc, [name, ...values].join(' ')];
+      }, [])
+      .join('; ');
+
+    return {
+      enforceHeader: this.getCspHeader(),
+      reportOnlyHeader,
+    };
   }
 
   getCspHeader() {
