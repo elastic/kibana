@@ -118,7 +118,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         memory,
-        verbose: true,
+        verbose: false,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'chat-conversational-react-description',
