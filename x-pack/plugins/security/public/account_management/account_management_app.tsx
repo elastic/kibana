@@ -20,11 +20,8 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';

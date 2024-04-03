@@ -18,6 +18,7 @@
     "@kbn/core",
     "@kbn/core-theme-browser",
     "@kbn/core-mount-utils-browser",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",
