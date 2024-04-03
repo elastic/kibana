@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -50,11 +50,11 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
   }, [groups, locators, prepend, serviceName, timeRange]);
 
   return (
-    <>
+    <EuiFlexGroup justifyContent="spaceEvenly" alignItems="flexStart">
       {groups &&
         groups.map((group) => {
           return (
-            <span key={group.field}>
+            <EuiFlexItem grow={false} key={group.field}>
               {group.field}:{' '}
               {sourceLinks[group.field] ? (
                 <EuiLink
@@ -68,9 +68,9 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
                 <strong>{group.value}</strong>
               )}
               <br />
-            </span>
+            </EuiFlexItem>
           );
         })}
-    </>
+    </EuiFlexGroup>
   );
 }
