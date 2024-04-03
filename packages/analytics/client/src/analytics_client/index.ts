@@ -19,6 +19,7 @@ export type {
   ShipperName,
   // Types for the registerContextProvider API
   ContextProviderOpts,
+  ContextProviderName,
   // Types for the registerEventType API
   EventTypeOpts,
 } from './types';

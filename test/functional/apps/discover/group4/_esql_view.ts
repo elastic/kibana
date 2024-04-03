@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const retry = getService('retry');
   const find = getService('find');
+  const esql = getService('esql');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -236,6 +237,91 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('unifiedSearch_switch_modal');
         });
+      });
+    });
+
+    describe('query history', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+      });
+
+      it('should see my current query in the history', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await testSubjects.click('TextBasedLangEditor-expand');
+        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        const historyItems = await esql.getHistoryItems();
+        log.debug(historyItems);
+        const queryAdded = historyItems.some((item) => {
+          return item[1] === 'from logstash-* | limit 10';
+        });
+
+        expect(queryAdded).to.be(true);
+      });
+
+      it('updating the query should add this to the history', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await testSubjects.click('TextBasedLangEditor-expand');
+        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        const historyItems = await esql.getHistoryItems();
+        log.debug(historyItems);
+        const queryAdded = historyItems.some((item) => {
+          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
+        });
+
+        expect(queryAdded).to.be(true);
+      });
+
+      it('should select a query from the history and submit it', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await testSubjects.click('TextBasedLangEditor-expand');
+        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        // click a history item
+        await esql.clickHistoryItem(1);
+
+        const historyItems = await esql.getHistoryItems();
+        log.debug(historyItems);
+        const queryAdded = historyItems.some((item) => {
+          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
+        });
+
+        expect(queryAdded).to.be(true);
+      });
+
+      it('should add a failed query to the history', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = 'from logstash-* | limit 100 | woof and meow';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await testSubjects.click('TextBasedLangEditor-expand');
+        await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
+        const historyItem = await esql.getHistoryItem(0);
+        await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
       });
     });
   });
