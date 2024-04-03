@@ -75,19 +75,17 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     loadBufferFromRemote(url);
   }, 200);
 
+  window.addEventListener('hashchange', onHashChange);
+
+  const loadFromParam = readLoadFromParam();
+
+  if (loadFromParam) {
+    loadBufferFromRemote(loadFromParam);
+  } else {
+    setValue(initialTextValue || DEFAULT_INPUT_VALUE);
+  }
+
   return () => {
-    window.addEventListener('hashchange', onHashChange);
-
-    const loadFromParam = readLoadFromParam();
-
-    if (loadFromParam) {
-      loadBufferFromRemote(loadFromParam);
-    } else {
-      setValue(initialTextValue || DEFAULT_INPUT_VALUE);
-    }
-
-    return () => {
-      window.removeEventListener('hashchange', onHashChange);
-    };
+    window.removeEventListener('hashchange', onHashChange);
   };
 };
