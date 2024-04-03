@@ -15,6 +15,7 @@ import {
   Observable,
   of,
   ReplaySubject,
+  shareReplay,
   skipWhile,
   switchMap,
   take,
@@ -133,9 +134,11 @@ export class NavigationPublicPlugin
     this.isSolutionNavEnabled$ = of(false);
 
     if (cloudExperiments) {
-      isFeatureEnabled$ = from(
+      const loadFeatureFlag$ = from(
         cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-      ).pipe(
+      ).pipe(shareReplay(1));
+
+      isFeatureEnabled$ = loadFeatureFlag$.pipe(
         map((isFeatureFlagEnabled) => {
           const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
           const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -296,7 +299,6 @@ export class NavigationPublicPlugin
         sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'analyticsSideNav' }),
       },
     };
-
     chrome.project.updateSolutionNavigations(solutionNavs, true);
   }
 
