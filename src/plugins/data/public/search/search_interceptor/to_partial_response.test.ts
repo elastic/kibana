@@ -7,6 +7,7 @@
  */
 
 import { toPartialResponse } from './to_partial_response';
+import { IEsSearchResponse } from '../../../common';
 
 describe('toPartialResponse', () => {
   it('should transform a non-CCS response', () => {
@@ -79,7 +80,7 @@ describe('toPartialResponse', () => {
   });
 
   it('should transform a CCS response', () => {
-    const response = {
+    const response: IEsSearchResponse = {
       id: 'FmZBc2NuYlhsU1JxSk5LZXNRczVxdEEed3l6LUVycTVTVGl1LWtDSVdta2VkQToxODUzODUx',
       rawResponse: {
         took: 4414,
