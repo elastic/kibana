@@ -17,14 +17,14 @@ interface Props {
   value?: string;
 }
 
-export const JumpToDate: React.FunctionComponent<Props> = (props) => {
+export const GoToDate: React.FunctionComponent<Props> = (props) => {
   return (
     <EuiDatePicker
-      data-test-subj="agentActivityFlyout.jumpToButton"
+      data-test-subj="agentActivityFlyout.goToDateButton"
       selected={props.selectedDate}
       onChange={props.onChangeSelectedDate}
       maxDate={moment()}
-      customInput={<JumpToButton {...props} />}
+      customInput={<GoToDateButton {...props} />}
     />
   );
 };
@@ -34,12 +34,12 @@ interface CustomInputProps {
   value?: string;
 }
 
-const JumpToButton = forwardRef(({ onClick, value }: CustomInputProps, ref) => {
+const GoToDateButton = forwardRef(({ onClick, value }: CustomInputProps, ref) => {
   return (
     <EuiButtonEmpty size="m" flush="left" onClick={onClick}>
       <FormattedMessage
-        id="xpack.fleet.agentActivityFlyout.jumpToButton"
-        defaultMessage="Jump to..."
+        id="xpack.fleet.agentActivityFlyout.goToDateButton"
+        defaultMessage="Go to date"
       />
     </EuiButtonEmpty>
   );

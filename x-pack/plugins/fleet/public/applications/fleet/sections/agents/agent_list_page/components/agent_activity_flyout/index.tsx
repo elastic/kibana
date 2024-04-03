@@ -41,7 +41,7 @@ import { AGENT_STATUSES } from '../../../services/agent_status';
 import { getTodayActions, getOtherDaysActions } from '../agent_activity_helper';
 
 import { ActivitySection } from './activity_section';
-import { JumpToDate } from './jump_to_date';
+import { GoToDate } from './go_to_date';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -262,7 +262,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <JumpToDate selectedDate={dateFilter} onChangeSelectedDate={onChangeDateFilter} />
+                <GoToDate selectedDate={dateFilter} onChangeSelectedDate={onChangeDateFilter} />
               </EuiFlexItem>
               {dateFilter && (
                 <EuiFlexItem grow={false}>
@@ -270,11 +270,11 @@ export const AgentActivityFlyout: React.FunctionComponent<{
                     size="m"
                     onClick={() => onChangeDateFilter(null)}
                     flush="left"
-                    data-test-subj="agentActivityFlyout.clearDateFilterButton"
+                    data-test-subj="agentActivityFlyout.clearSelectedDateButton"
                   >
                     <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.clearDateFilterButton"
-                      defaultMessage="Clear date filter"
+                      id="xpack.fleet.agentActivityFlyout.clearSelectedDateutton"
+                      defaultMessage="Clear selected date"
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
