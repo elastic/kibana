@@ -6,7 +6,7 @@
  */
 import { GET_INDEX_STATS } from '../../common/constants';
 
-import { fetchAvailableIndices, fetchStats } from '../lib';
+import { fetchAvailableIndices, fetchMeteringStats, fetchStats } from '../lib';
 
 import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
@@ -14,9 +14,13 @@ import { requestContextMock } from '../__mocks__/request_context';
 import { getIndexStatsRoute } from './get_index_stats';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { mockStatsGreenIndex } from '../__mocks__/mock_stats_green_index';
+import { mockStatsYellowIndex } from '../__mocks__/mock_stats_yellow_index';
+import { mockMeteringStatsIndex } from '../__mocks__/mock_metering_stats_index';
 
 jest.mock('../lib', () => ({
   fetchStats: jest.fn(),
+  fetchMeteringStats: jest.fn(),
   fetchAvailableIndices: jest.fn(),
 }));
 
@@ -49,10 +53,41 @@ describe('getIndexStatsRoute route', () => {
     getIndexStatsRoute(server.router, logger);
   });
 
-  test('Returns index stats', async () => {
-    const mockIndices = { 'auditbeat-7.15.1-2022.12.06-000001': {} };
+  test('Returns index stats when index health is green', async () => {
+    const mockIndices = {
+      'auditbeat-custom-index-1': {
+        name: 'auditbeat-custom-index-1',
+        num_docs: 4,
+        size_in_bytes: 28425,
+        uuid: 'jRlr6H_jSAysOLZ6KynoCQ',
+      },
+    };
     (fetchStats as jest.Mock).mockResolvedValue({
-      indices: mockIndices,
+      indices: mockStatsGreenIndex,
+    });
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual(mockIndices);
+  });
+
+  test('Returns index stats when index health is yellow', async () => {
+    const mockIndices = {
+      '.ds-packetbeat-8.6.1-2023.02.04-000001': {
+        name: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+        num_docs: 1628343,
+        size_in_bytes: 731583142,
+        uuid: 'x5Uuw4j4QM2YidHLNixCwg',
+      },
+      '.ds-packetbeat-8.5.3-2023.02.04-000001': {
+        name: '.ds-packetbeat-8.5.3-2023.02.04-000001',
+        num_docs: 1630289,
+        size_in_bytes: 733175040,
+        uuid: 'we0vNWm2Q6iz6uHubyHS6Q',
+      },
+    };
+    (fetchStats as jest.Mock).mockResolvedValue({
+      indices: mockStatsYellowIndex,
     });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
@@ -81,9 +116,8 @@ describe('getIndexStatsRoute route', () => {
       },
     });
 
-    const mockIndices = { 'auditbeat-7.15.1-2022.12.06-000001': {} };
     (fetchStats as jest.Mock).mockResolvedValue({
-      indices: mockIndices,
+      indices: mockMeteringStatsIndex,
     });
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -107,18 +141,19 @@ describe('getIndexStatsRoute route', () => {
     });
 
     const mockIndices = {
-      'auditbeat-7.15.1-2022.12.06-000001': {},
-      'auditbeat-7.15.1-2022.11.06-000001': {},
+      'my-index-000001': {
+        name: 'my-index-000001',
+        num_docs: 2,
+        size_in_bytes: 11462,
+      },
     };
-    (fetchStats as jest.Mock).mockResolvedValue({
-      indices: mockIndices,
-    });
+    (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);
     (fetchAvailableIndices as jest.Mock).mockResolvedValue({
       aggregations: {
         index: {
           buckets: [
             {
-              key: 'auditbeat-7.15.1-2022.12.06-000001',
+              key: 'my-index-000001',
             },
           ],
         },
@@ -127,7 +162,7 @@ describe('getIndexStatsRoute route', () => {
 
     const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({ 'auditbeat-7.15.1-2022.12.06-000001': {} });
+    expect(response.body).toEqual(mockIndices);
   });
 });
 
