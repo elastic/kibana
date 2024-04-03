@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { getAliasActionsMock } from './create_target_index.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import {
   createContextMock,
@@ -24,12 +23,12 @@ describe('Stage: createTargetIndex', () => {
     ...createPostInitState(),
     controlState: 'CREATE_TARGET_INDEX',
     indexMappings: { properties: { foo: { type: 'text' } }, _meta: {} },
+    creationAliases: [],
     ...parts,
   });
 
   beforeEach(() => {
     context = createContextMock();
-    getAliasActionsMock.mockReset().mockReturnValue([]);
   });
 
   describe('In case of left return', () => {
@@ -68,49 +67,10 @@ describe('Stage: createTargetIndex', () => {
   });
 
   describe('In case of right return', () => {
-    it('calls getAliasActions with the correct parameters', () => {
-      const state = createState();
+    it('CREATE_TARGET_INDEX -> INDEX_STATE_UPDATE_DONE when successful', () => {
+      const state = createState({});
       const res: StateActionResponse<'CREATE_TARGET_INDEX'> =
         Either.right('create_index_succeeded');
-
-      createTargetIndex(state, res, context);
-
-      expect(getAliasActionsMock).toHaveBeenCalledTimes(1);
-      expect(getAliasActionsMock).toHaveBeenCalledWith({
-        currentIndex: state.currentIndex,
-        existingAliases: [],
-        indexPrefix: context.indexPrefix,
-        kibanaVersion: context.kibanaVersion,
-      });
-    });
-
-    it('CREATE_TARGET_INDEX -> UPDATE_ALIASES when successful and alias actions are not empty', () => {
-      const state = createState();
-      const res: StateActionResponse<'CREATE_TARGET_INDEX'> =
-        Either.right('create_index_succeeded');
-
-      const aliasActions = [{ add: { index: '.kibana_1', alias: '.kibana' } }];
-      getAliasActionsMock.mockReturnValue(aliasActions);
-
-      const newState = createTargetIndex(state, res, context);
-
-      expect(newState).toEqual({
-        ...state,
-        controlState: 'UPDATE_ALIASES',
-        previousMappings: state.indexMappings,
-        currentIndexMeta: state.indexMappings._meta,
-        aliases: [],
-        aliasActions,
-        skipDocumentMigration: true,
-      });
-    });
-
-    it('CREATE_TARGET_INDEX -> INDEX_STATE_UPDATE_DONE when successful and alias actions are empty', () => {
-      const state = createState();
-      const res: StateActionResponse<'CREATE_TARGET_INDEX'> =
-        Either.right('create_index_succeeded');
-
-      getAliasActionsMock.mockReturnValue([]);
 
       const newState = createTargetIndex(state, res, context);
 

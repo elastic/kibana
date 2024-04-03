@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import {
   ConversationResponse,
-  Replacement,
+  Replacements,
   replaceOriginalValuesWithUuidValues,
 } from '@kbn/elastic-assistant-common';
 import { EsConversationSchema } from './types';
@@ -50,10 +50,18 @@ export const transformESSearchToConversations = (
           conversationSchema.messages?.map((message: Record<string, any>) => ({
             timestamp: message['@timestamp'],
             // always return anonymized data from the client
-            content: replaceOriginalValuesWithUuidValues({
-              messageContent: message.content,
-              replacements: conversationSchema.replacements ?? [],
-            }),
+            content: conversationSchema.replacements
+              ? replaceOriginalValuesWithUuidValues({
+                  messageContent: message.content,
+                  replacements: conversationSchema.replacements?.reduce(
+                    (acc: Record<string, string>, r) => {
+                      acc[r.uuid] = r.value;
+                      return acc;
+                    },
+                    {}
+                  ),
+                })
+              : message.content,
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
             role: message.role,
@@ -67,7 +75,10 @@ export const transformESSearchToConversations = (
               : {}),
           })) ?? [],
         updatedAt: conversationSchema.updated_at,
-        replacements: conversationSchema.replacements as Replacement[],
+        replacements: conversationSchema.replacements?.reduce((acc: Record<string, string>, r) => {
+          acc[r.uuid] = r.value;
+          return acc;
+        }, {}),
         namespace: conversationSchema.namespace,
         id: hit._id,
       };
@@ -80,6 +91,13 @@ export const transformESToConversations = (
   response: EsConversationSchema[]
 ): ConversationResponse[] => {
   return response.map((conversationSchema) => {
+    const replacements = conversationSchema.replacements?.reduce(
+      (acc: Record<string, string>, r) => {
+        acc[r.uuid] = r.value;
+        return acc;
+      },
+      {}
+    ) as Replacements;
     const conversation: ConversationResponse = {
       timestamp: conversationSchema['@timestamp'],
       createdAt: conversationSchema.created_at,
@@ -110,7 +128,7 @@ export const transformESToConversations = (
           // always return anonymized data from the client
           content: replaceOriginalValuesWithUuidValues({
             messageContent: message.content,
-            replacements: conversationSchema.replacements ?? [],
+            replacements,
           }),
           ...(message.is_error ? { isError: message.is_error } : {}),
           ...(message.reader ? { reader: message.reader } : {}),
@@ -125,7 +143,7 @@ export const transformESToConversations = (
             : {}),
         })) ?? [],
       updatedAt: conversationSchema.updated_at,
-      replacements: conversationSchema.replacements as Replacement[],
+      replacements,
       namespace: conversationSchema.namespace,
       id: conversationSchema.id,
     };
