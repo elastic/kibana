@@ -96,7 +96,11 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
       if (type === 'match_any' && Array.isArray(value)) {
         return value.map((currentValue) => <EuiBadge color="hollow">{currentValue}</EuiBadge>);
       } else if (type === 'list' && value) {
-        return <ShowValueListModal listId={value.toString()}>{value}</ShowValueListModal>;
+        return (
+          <ShowValueListModal shouldShowChildrenIfNoPermissions listId={value.toString()}>
+            {value}
+          </ShowValueListModal>
+        );
       }
       return value ?? '';
     };

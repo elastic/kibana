@@ -125,7 +125,9 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     return (
       <>
         {selectedValue && (
-          <ShowValueListModal listId={selectedValue}>Show value list</ShowValueListModal>
+          <ShowValueListModal shouldShowChildrenIfNoPermissions={false} listId={selectedValue}>
+            Show value list
+          </ShowValueListModal>
         )}
         {!allowLargeValueLists && (
           <EuiText size="xs">

@@ -25,7 +25,11 @@ const getEntryValue = (
       </EuiBadge>
     ));
   } else if (type === 'list' && value) {
-    return <ShowValueListModal listId={value.toString()}>{value}</ShowValueListModal>;
+    return (
+      <ShowValueListModal shouldShowChildrenIfNoPermissions listId={value.toString()}>
+        {value}
+      </ShowValueListModal>
+    );
   }
   return value ?? '';
 };

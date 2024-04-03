@@ -50,8 +50,10 @@ const Info = ({ label, value }: { value: React.ReactNode; label: string }) => (
 export const ValueListModal = ({
   listId,
   onCloseModal,
+  canWriteIndex,
 }: {
   listId: string;
+  canWriteIndex: boolean;
   onCloseModal: () => void;
 }) => {
   const [filter, setFilter] = useState('');
@@ -91,7 +93,8 @@ export const ValueListModal = ({
     {
       field: 'value',
       name: 'Value',
-      render: (value, item) => <InlineEditListItemValue listItem={item} key={value} />,
+      render: (value, item) =>
+        canWriteIndex ? <InlineEditListItemValue listItem={item} key={value} /> : value,
       sortable: list?.type && list.type !== 'text',
     },
     {
@@ -108,7 +111,9 @@ export const ValueListModal = ({
       name: 'Updated By',
       width: '15%',
     },
-    {
+  ];
+  if (canWriteIndex) {
+    columns.push({
       name: 'Actions',
       actions: [
         {
@@ -119,8 +124,8 @@ export const ValueListModal = ({
         },
       ],
       width: '10%',
-    },
-  ];
+    });
+  }
 
   const sorting: EuiTableSortingType<Pick<ListItemSchema, SortFields>> = {
     sort: {
@@ -174,10 +179,12 @@ export const ValueListModal = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <AddListItemPopover listId={listId} />
-                  <UploadListItem listId={listId} type={list.type} />
-                </EuiFlexGroup>
+                {canWriteIndex && (
+                  <EuiFlexGroup justifyContent="flexEnd">
+                    <AddListItemPopover listId={listId} />
+                    <UploadListItem listId={listId} type={list.type} />
+                  </EuiFlexGroup>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalHeader>
