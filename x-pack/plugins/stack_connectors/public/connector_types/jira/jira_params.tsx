@@ -394,7 +394,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           <JsonEditorWithMessageVariables
             messageVariables={messageVariables}
             paramsProperty={'otherFields'}
-            inputTargetValue={actionParams.subActionParams?.incident.otherFields || undefined}
+            inputTargetValue={actionParams.subActionParams?.incident.otherFields}
             errors={errors.otherFields as string[]}
             label={
               <>

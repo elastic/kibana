@@ -105,7 +105,7 @@ export const INVALID_JSON_FORMAT = i18n.translate(
 );
 
 export const OTHER_FIELDS_LENGTH_ERROR = (length: number) =>
-  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsLengthError', {
+  i18n.translate('xpack.stackConnectors.jira.schema.additionalFieldsLengthError', {
     values: { length },
-    defaultMessage: 'A maximum of {length} additional Fields can be defined at a time.',
+    defaultMessage: 'A maximum of {length} additional fields can be defined at a time.',
   });
