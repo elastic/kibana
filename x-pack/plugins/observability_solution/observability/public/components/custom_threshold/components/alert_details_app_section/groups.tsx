@@ -50,12 +50,12 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
   }, [groups, locators, prepend, serviceName, timeRange]);
 
   return (
-    <EuiFlexGroup justifyContent="spaceEvenly" alignItems="flexStart">
+    <EuiFlexGroup justifyContent="flexStart" alignItems="flexStart">
       {groups &&
         groups.map((group) => {
           return (
             <EuiFlexItem grow={false} key={group.field}>
-              {group.field}:{' '}
+              <span style={{ wordBreak: 'normal' }}>{group.field}: </span>
               {sourceLinks[group.field] ? (
                 <EuiLink
                   data-test-subj="o11yCustomThresholdAlertSourceLink"
