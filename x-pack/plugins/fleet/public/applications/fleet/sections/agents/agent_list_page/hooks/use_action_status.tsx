@@ -26,7 +26,7 @@ export function useActionStatus(
     try {
       const res = await sendGetActionStatus({
         perPage: nActions,
-        date: dateFilter?.toISOString(),
+        date: dateFilter?.format(),
       });
       setIsFirstLoading(false);
       if (res.error) {
