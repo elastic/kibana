@@ -107,7 +107,7 @@ export const getNotebook = async (
   } catch (err) {
     logger.error(`Error reading search notebook ${notebookId}`, err);
     throw new Error(
-      i18n.translate('xpack.searchNotebooks.notebooksCatalog.errors.unknownId', {
+      i18n.translate('xpack.searchNotebooks.notebooksCatalog.errors.notebookImportFailure', {
         defaultMessage: 'Failed to fetch notebook.',
       })
     );
