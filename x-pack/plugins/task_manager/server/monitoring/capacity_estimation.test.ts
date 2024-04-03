@@ -688,7 +688,7 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'error',
+      status: 'warn',
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
@@ -825,7 +825,7 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'error',
+      status: 'warn',
       timestamp: expect.any(String),
       value: {
         observed: {
