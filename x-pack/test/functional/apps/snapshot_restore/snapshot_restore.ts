@@ -23,12 +23,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Create a repository
       await es.snapshot.createRepository({
         name: 'my-repository',
-        type: 'fs',
-        settings: {
-          location: '/tmp/es-backups/',
-          compress: true,
-        },
         verify: true,
+        repository: {
+          type: 'fs',
+          settings: {
+            location: '/tmp/es-backups/',
+            compress: true,
+          },
+        },
       });
 
       // Create a snapshot

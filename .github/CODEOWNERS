@@ -800,8 +800,9 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/es @elastic/appex-sharedux
-packages/solution-nav/oblt @elastic/appex-sharedux
+packages/solution-nav/analytics @elastic/appex-sharedux @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+packages/solution-nav/es @elastic/appex-sharedux @elastic/enterprise-search-frontend
+packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
