@@ -244,6 +244,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
           selectAllRules();
           clickAddTagsMenuItem();
           waitForMixedRulesBulkEditModal(rows.length);
+
           checkPrebuiltRulesCannotBeModified(PREBUILT_RULES.length);
 
           // user cancels action and modal disappears

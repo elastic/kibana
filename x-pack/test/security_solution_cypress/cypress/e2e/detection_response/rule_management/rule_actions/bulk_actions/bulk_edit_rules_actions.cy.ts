@@ -72,209 +72,216 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-describe('Detection rules, bulk edit of rule actions', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    deleteAlertsAndRules();
-    deleteConnectors();
+// https://github.com/elastic/kibana/issues/179958
+describe(
+  'Detection rules, bulk edit of rule actions',
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  () => {
+    beforeEach(() => {
+      login();
+      deleteAlertsAndRules();
+      deleteConnectors();
 
-    createSlackConnector().then(({ body }) => {
-      const actions: RuleActionArray = [
-        {
-          id: body.id,
-          action_type_id: '.slack',
-          group: 'default',
-          params: {
-            message: expectedExistingSlackMessage,
+      createSlackConnector().then(({ body }) => {
+        const actions: RuleActionArray = [
+          {
+            id: body.id,
+            action_type_id: '.slack',
+            group: 'default',
+            params: {
+              message: expectedExistingSlackMessage,
+            },
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+            },
           },
-          frequency: {
-            summary: true,
-            throttle: null,
-            notifyWhen: 'onActiveAlert',
-          },
-        },
-      ];
+        ];
 
+        createRule(
+          getNewRule({
+            rule_id: '1',
+            name: ruleNameToAssert,
+            max_signals: 500,
+            actions,
+            enabled: false,
+          })
+        );
+      });
+
+      createRule(getEqlRule({ rule_id: '2', name: 'New EQL Rule', enabled: false }));
       createRule(
-        getNewRule({
-          rule_id: '1',
-          name: ruleNameToAssert,
-          max_signals: 500,
-          actions,
+        getMachineLearningRule({ rule_id: '3', name: 'New ML Rule Test', enabled: false })
+      );
+      createRule(
+        getNewThreatIndicatorRule({
+          rule_id: '4',
+          name: 'Threat Indicator Rule Test',
           enabled: false,
         })
       );
+      createRule(getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule', enabled: false }));
+      createRule(getNewTermsRule({ rule_id: '6', name: 'New Terms Rule', enabled: false }));
+      createRule(
+        getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test', enabled: false })
+      );
+
+      createSlackConnector();
+
+      // Prevent prebuilt rules package installation and mock two prebuilt rules
+      preventPrebuiltRulesPackageInstallation();
+
+      const RULE_1 = createRuleAssetSavedObject({
+        name: 'Test rule 1',
+        rule_id: 'rule_1',
+      });
+      const RULE_2 = createRuleAssetSavedObject({
+        name: 'Test rule 2',
+        rule_id: 'rule_2',
+      });
+
+      createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
     });
 
-    createRule(getEqlRule({ rule_id: '2', name: 'New EQL Rule', enabled: false }));
-    createRule(getMachineLearningRule({ rule_id: '3', name: 'New ML Rule Test', enabled: false }));
-    createRule(
-      getNewThreatIndicatorRule({
-        rule_id: '4',
-        name: 'Threat Indicator Rule Test',
-        enabled: false,
-      })
-    );
-    createRule(getNewThresholdRule({ rule_id: '5', name: 'Threshold Rule', enabled: false }));
-    createRule(getNewTermsRule({ rule_id: '6', name: 'New Terms Rule', enabled: false }));
-    createRule(
-      getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test', enabled: false })
-    );
+    context('Restricted action privileges', () => {
+      it("User with no privileges can't add rule actions", () => {
+        login(ROLES.t1_analyst);
+        visitRulesManagementTable();
 
-    createSlackConnector();
+        expectManagementTableRules([
+          ruleNameToAssert,
+          'New EQL Rule',
+          'New ML Rule Test',
+          'Threat Indicator Rule Test',
+          'Threshold Rule',
+          'New Terms Rule',
+          'New Rule Test',
+          'Test rule 1',
+          'Test rule 2',
+        ]);
+        waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-    // Prevent prebuilt rules package installation and mock two prebuilt rules
-    preventPrebuiltRulesPackageInstallation();
-
-    const RULE_1 = createRuleAssetSavedObject({
-      name: 'Test rule 1',
-      rule_id: 'rule_1',
-    });
-    const RULE_2 = createRuleAssetSavedObject({
-      name: 'Test rule 2',
-      rule_id: 'rule_2',
+        cy.get(BULK_ACTIONS_BTN).should('not.exist');
+      });
     });
 
-    createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
-  });
+    context('All actions privileges', () => {
+      beforeEach(() => {
+        login();
+        visitRulesManagementTable();
+        disableAutoRefresh();
 
-  context('Restricted action privileges', () => {
-    it("User with no privileges can't add rule actions", () => {
-      login(ROLES.t1_analyst);
-      visitRulesManagementTable();
+        expectManagementTableRules([
+          ruleNameToAssert,
+          'New EQL Rule',
+          'New ML Rule Test',
+          'Threat Indicator Rule Test',
+          'Threshold Rule',
+          'New Terms Rule',
+          'New Rule Test',
+          'Test rule 1',
+          'Test rule 2',
+        ]);
+      });
 
-      expectManagementTableRules([
-        ruleNameToAssert,
-        'New EQL Rule',
-        'New ML Rule Test',
-        'Threat Indicator Rule Test',
-        'Threshold Rule',
-        'New Terms Rule',
-        'New Rule Test',
-        'Test rule 1',
-        'Test rule 2',
-      ]);
-      waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
+      it('Add a rule action to rules (existing connector)', () => {
+        const expectedActionFrequency: RuleActionCustomFrequency = {
+          throttle: 1,
+          throttleUnit: 'd',
+        };
 
-      cy.get(BULK_ACTIONS_BTN).should('not.exist');
-    });
-  });
+        getRulesManagementTableRows().then((rows) => {
+          // select both custom and prebuilt rules
+          selectAllRules();
+          openBulkEditRuleActionsForm();
 
-  context('All actions privileges', () => {
-    beforeEach(() => {
-      login();
-      visitRulesManagementTable();
-      disableAutoRefresh();
+          // ensure rule actions info callout displayed on the form
+          cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
-      expectManagementTableRules([
-        ruleNameToAssert,
-        'New EQL Rule',
-        'New ML Rule Test',
-        'Threat Indicator Rule Test',
-        'Threshold Rule',
-        'New Terms Rule',
-        'New Rule Test',
-        'Test rule 1',
-        'Test rule 2',
-      ]);
-    });
+          addSlackRuleAction(expectedSlackMessage);
+          pickSummaryOfAlertsOption();
+          pickCustomFrequencyOption(expectedActionFrequency);
 
-    it('Add a rule action to rules (existing connector)', () => {
-      const expectedActionFrequency: RuleActionCustomFrequency = {
-        throttle: 1,
-        throttleUnit: 'd',
-      };
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-      getRulesManagementTableRows().then((rows) => {
-        // select both custom and prebuilt rules
-        selectAllRules();
+          // check if rule has been updated
+          goToEditRuleActionsSettingsOf(ruleNameToAssert);
+
+          assertSelectedSummaryOfAlertsOption();
+          assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
+          assertSlackRuleAction(expectedExistingSlackMessage, 0);
+          assertSlackRuleAction(expectedSlackMessage, 1);
+          // ensure there is no third action
+          cy.get(actionFormSelector(2)).should('not.exist');
+        });
+      });
+
+      it('Overwrite rule actions in rules', () => {
+        getRulesManagementTableRows().then((rows) => {
+          // select both custom and prebuilt rules
+          selectAllRules();
+          openBulkEditRuleActionsForm();
+
+          addSlackRuleAction(expectedSlackMessage);
+          pickSummaryOfAlertsOption();
+          pickPerRuleRunFrequencyOption();
+
+          // check overwrite box, ensure warning is displayed
+          checkOverwriteRuleActionsCheckbox();
+          cy.get(RULES_BULK_EDIT_ACTIONS_WARNING).contains(
+            `You're about to overwrite rule actions for ${rows.length} selected rules`
+          );
+
+          submitBulkEditForm();
+          waitForBulkEditActionToFinish({ updatedCount: rows.length });
+
+          // check if rule has been updated
+          goToEditRuleActionsSettingsOf(ruleNameToAssert);
+
+          assertSelectedSummaryOfAlertsOption();
+          assertSelectedPerRuleRunFrequencyOption();
+          assertSlackRuleAction(expectedSlackMessage);
+          // ensure existing action was overwritten
+          cy.get(actionFormSelector(1)).should('not.exist');
+        });
+      });
+
+      it('Add a rule action to rules (new connector)', () => {
+        const rulesToSelect = [
+          ruleNameToAssert,
+          'New EQL Rule',
+          'New ML Rule Test',
+          'Threat Indicator Rule Test',
+          'Threshold Rule',
+          'New Terms Rule',
+          'New Rule Test',
+        ] as const;
+        const expectedActionFrequency: RuleActionCustomFrequency = {
+          throttle: 2,
+          throttleUnit: 'h',
+        };
+        const expectedEmail = 'test@example.com';
+        const expectedSubject = 'Subject';
+
+        selectRulesByName(rulesToSelect);
         openBulkEditRuleActionsForm();
 
-        // ensure rule actions info callout displayed on the form
-        cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
-
-        addSlackRuleAction(expectedSlackMessage);
+        addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
         pickSummaryOfAlertsOption();
         pickCustomFrequencyOption(expectedActionFrequency);
 
         submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: rows.length });
+        waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
         // check if rule has been updated
         goToEditRuleActionsSettingsOf(ruleNameToAssert);
 
         assertSelectedSummaryOfAlertsOption();
         assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-        assertSlackRuleAction(expectedExistingSlackMessage, 0);
-        assertSlackRuleAction(expectedSlackMessage, 1);
-        // ensure there is no third action
-        cy.get(actionFormSelector(2)).should('not.exist');
+        assertEmailRuleAction(expectedEmail, expectedSubject);
       });
     });
-
-    it('Overwrite rule actions in rules', () => {
-      getRulesManagementTableRows().then((rows) => {
-        // select both custom and prebuilt rules
-        selectAllRules();
-        openBulkEditRuleActionsForm();
-
-        addSlackRuleAction(expectedSlackMessage);
-        pickSummaryOfAlertsOption();
-        pickPerRuleRunFrequencyOption();
-
-        // check overwrite box, ensure warning is displayed
-        checkOverwriteRuleActionsCheckbox();
-        cy.get(RULES_BULK_EDIT_ACTIONS_WARNING).contains(
-          `You're about to overwrite rule actions for ${rows.length} selected rules`
-        );
-
-        submitBulkEditForm();
-        waitForBulkEditActionToFinish({ updatedCount: rows.length });
-
-        // check if rule has been updated
-        goToEditRuleActionsSettingsOf(ruleNameToAssert);
-
-        assertSelectedSummaryOfAlertsOption();
-        assertSelectedPerRuleRunFrequencyOption();
-        assertSlackRuleAction(expectedSlackMessage);
-        // ensure existing action was overwritten
-        cy.get(actionFormSelector(1)).should('not.exist');
-      });
-    });
-
-    it('Add a rule action to rules (new connector)', () => {
-      const rulesToSelect = [
-        ruleNameToAssert,
-        'New EQL Rule',
-        'New ML Rule Test',
-        'Threat Indicator Rule Test',
-        'Threshold Rule',
-        'New Terms Rule',
-        'New Rule Test',
-      ] as const;
-      const expectedActionFrequency: RuleActionCustomFrequency = {
-        throttle: 2,
-        throttleUnit: 'h',
-      };
-      const expectedEmail = 'test@example.com';
-      const expectedSubject = 'Subject';
-
-      selectRulesByName(rulesToSelect);
-      openBulkEditRuleActionsForm();
-
-      addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
-      pickSummaryOfAlertsOption();
-      pickCustomFrequencyOption(expectedActionFrequency);
-
-      submitBulkEditForm();
-      waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
-
-      // check if rule has been updated
-      goToEditRuleActionsSettingsOf(ruleNameToAssert);
-
-      assertSelectedSummaryOfAlertsOption();
-      assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-      assertEmailRuleAction(expectedEmail, expectedSubject);
-    });
-  });
-});
+  }
+);
