@@ -526,6 +526,7 @@ describe('fetchSearchSourceQuery', () => {
                 },
                 test3: {
                   count: 30,
+                  customDescription: 'test3',
                 },
               },
             },

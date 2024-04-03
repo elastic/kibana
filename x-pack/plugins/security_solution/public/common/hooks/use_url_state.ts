@@ -29,7 +29,9 @@ export const useUrlState = () => {
 
 export const URL_PARAM_KEY = {
   appQuery: 'query',
-  eventFlyout: 'eventFlyout',
+  /** @deprecated */
+  eventFlyout: 'eventFlyout', // TODO remove when we assume it's been long enough that all users should use the newer `flyout` key
+  flyout: 'flyout',
   timelineFlyout: 'timelineFlyout',
   filters: 'filters',
   savedQuery: 'savedQuery',
