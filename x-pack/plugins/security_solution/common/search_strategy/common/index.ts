@@ -61,8 +61,6 @@ export interface GenericBuckets {
 export type StringOrNumber = string | number;
 
 export type Fields<T = unknown[]> = Record<string, T | Array<Fields<T>>>;
-  [x: string]: T | Array<Fields<T>>;
-}
 
 export interface EventHit extends SearchHit {
   sort: string[];
