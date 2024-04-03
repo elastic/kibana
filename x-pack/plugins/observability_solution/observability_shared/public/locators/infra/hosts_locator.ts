@@ -8,11 +8,8 @@ import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { InfraLocatorDependencies } from '.';
 
 export type HostsLocator = LocatorPublic<HostsLocatorParams>;
-
-export type HostsLocatorDependencies = InfraLocatorDependencies;
 
 export interface HostsLocatorParams extends SerializableRecord {
   query?: {
@@ -33,8 +30,6 @@ const DEFAULT_HOST_LIMIT = 100;
 
 export class HostsLocatorDefinition implements LocatorDefinition<HostsLocatorParams> {
   public readonly id = HOSTS_LOCATOR_ID;
-
-  constructor(protected readonly deps: HostsLocatorDependencies) {}
 
   public readonly getLocation = async (params: HostsLocatorParams) => {
     const paramsWithDefaults = {

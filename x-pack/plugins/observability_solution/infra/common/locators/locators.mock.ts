@@ -11,7 +11,4 @@ import type { InfraLocators } from '.';
 export const createLocatorMock = (): jest.Mocked<InfraLocators> => ({
   logsLocator: sharePluginMock.createLocator(),
   nodeLogsLocator: sharePluginMock.createLocator(),
-  assetDetailsLocator: sharePluginMock.createLocator(),
-  assetDetailsFlyoutLocator: sharePluginMock.createLocator(),
-  hostsLocator: sharePluginMock.createLocator(),
 });

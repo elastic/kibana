@@ -7,11 +7,11 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import { InfraLocatorDependencies } from '.';
+// import { InfraLocatorDependencies } from '@kbn/infra-plugin/common/locators';
 
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
-export type AssetDetailsLocatorDependencies = InfraLocatorDependencies;
+// export type AssetDetailsLocatorDependencies = InfraLocatorDependencies;
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
   assetType: string;
@@ -38,7 +38,7 @@ export const ASSET_DETAILS_LOCATOR_ID = 'ASSET_DETAILS_LOCATOR';
 export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDetailsLocatorParams> {
   public readonly id = ASSET_DETAILS_LOCATOR_ID;
 
-  constructor(protected readonly deps: AssetDetailsLocatorDependencies) {}
+  // constructor(protected readonly deps: AssetDetailsLocatorDependencies) {}
 
   public readonly getLocation = async (params: AssetDetailsLocatorParams) => {
     const searchPath = rison.encodeUnknown(params._a);

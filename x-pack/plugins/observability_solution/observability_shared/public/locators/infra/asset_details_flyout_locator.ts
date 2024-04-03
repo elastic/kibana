@@ -7,11 +7,8 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import { InfraLocatorDependencies } from '.';
 
 export type AssetDetailsFlyoutLocator = LocatorPublic<AssetDetailsFlyoutLocatorParams>;
-
-export type AssetDetailsFlyoutLocatorDependencies = InfraLocatorDependencies;
 
 export interface AssetDetailsFlyoutLocatorParams extends SerializableRecord {
   tableProperties: {
@@ -41,8 +38,6 @@ export class AssetDetailsFlyoutLocatorDefinition
   implements LocatorDefinition<AssetDetailsFlyoutLocatorParams>
 {
   public readonly id = ASSET_DETAILS_FLYOUT_LOCATOR_ID;
-
-  constructor(protected readonly deps: AssetDetailsFlyoutLocatorDependencies) {}
 
   public readonly getLocation = async (params: AssetDetailsFlyoutLocatorParams) => {
     const tableProperties = rison.encodeUnknown(params.tableProperties);
