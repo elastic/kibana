@@ -7,8 +7,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
@@ -92,44 +90,13 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
   }, [services]);
 
   return (
-    <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.create.pageTitle"
-              defaultMessage="Create pipeline"
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={services.documentation.getCreatePipelineUrl()}
-            target="_blank"
-            iconType="help"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.create.docsButtonLabel"
-              defaultMessage="Create pipeline docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
-      />
-
-      <EuiSpacer size="l" />
-
-      <PipelineForm
-        defaultValue={formDefaultValue}
-        canEditName={canEditName}
-        onSave={onSave}
-        onCancel={onCancel}
-        isSaving={isSaving}
-        saveError={saveError}
-      />
-    </>
+    <PipelineForm
+      defaultValue={formDefaultValue}
+      canEditName={canEditName}
+      onSave={onSave}
+      onCancel={onCancel}
+      isSaving={isSaving}
+      saveError={saveError}
+    />
   );
 };
