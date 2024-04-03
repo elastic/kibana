@@ -41,11 +41,26 @@ const readLoadFromParam = () => {
  *
  * @param params The {@link SetInitialValueParams} to use.
  */
-export const useSetInitialValue = (params: SetInitialValueParams) => {
+export const useSetInitialValue = async (params: SetInitialValueParams) => {
   const { initialTextValue, setValue, toasts } = params;
 
-  const loadBufferFromRemote = (url: string) => {
-    // TODO: Add support for fetching from HTTP
+  const loadBufferFromRemote = async (url: string) => {
+    // Normalize and encode the URL to avoid issues with spaces and other special characters.
+    const encodedUrl = new URL(url).toString();
+    if (/^https?:\/\//.test(encodedUrl)) {
+      if (/^https?:\/\/www.elastic.co\//.test(encodedUrl)) {
+        const resp = await fetch(url);
+        const data = await resp.text();
+        setValue(`${initialTextValue}\n${data}`);
+      } else {
+        toasts.addWarning(
+          i18n.translate('console.loadFromDataUnrecognizedUrlErrorMessage', {
+            defaultMessage:
+              'Only URLs with the Elastic domain (elastic.co) can be loaded in Console.',
+          })
+        );
+      }
+    }
 
     // If we have a data URI instead of HTTP, LZ-decode it. This enables
     // opening requests in Console from anywhere in Kibana.
@@ -67,12 +82,12 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   };
 
   // Support for loading a console snippet from a remote source, like support docs.
-  const onHashChange = debounce(() => {
+  const onHashChange = debounce(async () => {
     const url = readLoadFromParam();
     if (!url) {
       return;
     }
-    loadBufferFromRemote(url);
+    await loadBufferFromRemote(url);
   }, 200);
 
   window.addEventListener('hashchange', onHashChange);
@@ -80,7 +95,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const loadFromParam = readLoadFromParam();
 
   if (loadFromParam) {
-    loadBufferFromRemote(loadFromParam);
+    await loadBufferFromRemote(loadFromParam);
   } else {
     setValue(initialTextValue || DEFAULT_INPUT_VALUE);
   }
