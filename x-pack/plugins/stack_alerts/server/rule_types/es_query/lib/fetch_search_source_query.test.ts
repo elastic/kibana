@@ -425,6 +425,54 @@ describe('fetchSearchSourceQuery', () => {
         })
       );
     });
+
+    it('should skip refreshing fields', async () => {
+      const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
+
+      const { dateStart, dateEnd } = getTimeRange();
+
+      const locatorMock = {
+        getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+      } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
+
+      const dataViews = {
+        ...dataViewPluginMocks.createStartContract(),
+        create: jest
+          .fn()
+          .mockImplementation(
+            (spec: DataViewSpec) => new DataView({ spec, fieldFormats: fieldFormatsMock })
+          ),
+      };
+
+      await generateLink(
+        searchSourceInstance,
+        locatorMock,
+        dataViews,
+        dataViewMock,
+        dateStart,
+        dateEnd,
+        'test1',
+        null
+      );
+
+      expect(dataViews.create).toHaveBeenCalledWith(
+        {
+          allowHidden: false,
+          allowNoIndex: false,
+          fieldAttrs: {},
+          fieldFormats: {},
+          id: undefined,
+          name: '',
+          runtimeFieldMap: {},
+          sourceFilters: [],
+          timeFieldName: 'time',
+          title: 'title',
+          type: 'index-pattern',
+          version: undefined,
+        },
+        true // skipFetchFields flag
+      );
+    });
   });
 
   describe('getSmallerDataViewSpec', () => {
