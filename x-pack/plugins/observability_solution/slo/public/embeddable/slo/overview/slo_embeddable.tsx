@@ -38,7 +38,7 @@ import type { SloEmbeddableInput } from './types';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
-interface SloEmbeddableDeps {
+export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
@@ -86,7 +86,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
       this.getInput();
     const queryClient = new QueryClient();
     const { observabilityRuleTypeRegistry } = this.deps.observability;
-
+    // const observabilityRuleTypeRegistry = this.deps.observabilityRuleTypeRegistry;
     const I18nContext = this.deps.i18n.Context;
 
     const renderOverview = () => {
@@ -98,6 +98,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
               {groups &&
                 groups.map((group) => (
                   <GroupListView
+                    key={group.group}
                     groupBy={groupFilters!.groupBy}
                     group={group.group}
                     sloView="cardView"
