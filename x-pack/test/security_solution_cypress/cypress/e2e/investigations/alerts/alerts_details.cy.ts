@@ -44,9 +44,9 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
-      createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -138,11 +138,12 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('Url state management', () => {
     before(() => {
-      deleteAlertsAndRules();
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {
+      deleteAlertsAndRules();
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
       visitWithTimeRange(ALERTS_URL);
@@ -150,15 +151,13 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
     });
 
-    it('should store the flyout state in the url when it is opened', () => {
+    it('should store the flyout state in the url when it is opened and remove it when closed', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.url().should('include', 'eventFlyout=');
-    });
+      cy.url().should('include', 'flyout=');
 
-    it('should remove the flyout state from the url when it is closed', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
       closeAlertFlyout();
-      cy.url().should('not.include', 'eventFlyout=');
+
+      cy.url().should('not.include', 'flyout=');
     });
 
     it.skip('should open the alert flyout when the page is refreshed', () => {
@@ -192,7 +191,12 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'query_alert' });
+    });
+
     beforeEach(() => {
+      createRule(getNewRule());
       login();
       disableExpandableFlyout();
       visitWithTimeRange(ALERTS_URL);

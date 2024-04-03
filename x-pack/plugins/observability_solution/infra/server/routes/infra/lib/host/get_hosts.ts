@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
+import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
 import { getFilteredHosts } from './get_filtered_hosts';
-import { mapToApiResponse } from '../mapper';
 import { hasFilters } from '../utils';
-import { GetHostsArgs } from '../types';
+import type { GetHostsArgs } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
 
@@ -29,7 +28,7 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     limit,
   } = args.params;
 
-  const [result, alertsCountResponse] = await Promise.all([
+  const [hostMetrics, alertsCountResponse] = await Promise.all([
     getAllHosts(args, hostNamesShortList),
     getHostsAlertsCount({
       alertsClient: args.alertsClient,
@@ -40,12 +39,25 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     }),
   ]);
 
-  return mapToApiResponse(args.params, result?.nodes.buckets, alertsCountResponse);
+  const alertsByHostName = alertsCountResponse.reduce((acc, { name, alertsCount }) => {
+    acc[name] = { alertsCount };
+    return acc;
+  }, {} as Record<string, { alertsCount: number }>);
+
+  const hosts = hostMetrics.map(({ name, metrics, metadata }) => {
+    const { alertsCount } = alertsByHostName[name] ?? {};
+    return { name, metrics, metadata, alertsCount };
+  });
+
+  return {
+    type: args.params.type,
+    nodes: hosts,
+  };
 };
 
 const getFilteredHostNames = async (args: GetHostsArgs) => {
   const filteredHosts = await getFilteredHosts(args);
 
-  const { nodes } = filteredHosts ?? {};
-  return nodes?.buckets.map((p) => p.key) ?? [];
+  const { nodes } = filteredHosts.aggregations ?? {};
+  return nodes?.buckets.map((p) => p.key as string) ?? [];
 };

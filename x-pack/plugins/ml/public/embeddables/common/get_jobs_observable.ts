@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { catchError, distinctUntilChanged, map, pluck, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map, pluck, switchMap } from 'rxjs';
 import { isEqual } from 'lodash';
 import type { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from '../types';
 import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';

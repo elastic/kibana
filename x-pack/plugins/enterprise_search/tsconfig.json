@@ -71,6 +71,8 @@
     "@kbn/es-errors",
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/index-management-plugin",
+    "@kbn/deeplinks-search"
   ]
 }

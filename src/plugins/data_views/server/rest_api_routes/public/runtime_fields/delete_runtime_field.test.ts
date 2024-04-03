@@ -9,18 +9,18 @@
 import { deleteRuntimeField } from './delete_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { DataView } from '../../../../common';
+import { DataViewLazy } from '../../../../common';
 
 describe('delete runtime field', () => {
   it('call usageCollection', () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDataViewLazy.mockImplementation(
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
           getRuntimeField: jest.fn().mockReturnValueOnce({}),
-        } as unknown as DataView)
+        } as unknown as DataViewLazy)
     );
 
     deleteRuntimeField({
