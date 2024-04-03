@@ -9,15 +9,11 @@
 import { ConsoleWorker } from './worker';
 import { WorkerProxyService } from '../ace_migration/worker_proxy';
 import { monaco } from '../monaco_imports';
-import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
+import { CONSOLE_LANG_ID } from './constants';
 import { setupWorker } from '../ace_migration/setup_worker';
 
 const OWNER = 'CONSOLE_GRAMMAR_CHECKER';
 const wps = new WorkerProxyService<ConsoleWorker>();
 monaco.languages.onLanguage(CONSOLE_LANG_ID, async () => {
   setupWorker(CONSOLE_LANG_ID, OWNER, wps);
-});
-
-monaco.languages.onLanguage(CONSOLE_OUTPUT_LANG_ID, async () => {
-  setupWorker(CONSOLE_OUTPUT_LANG_ID, OWNER, wps);
 });

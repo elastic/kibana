@@ -18,8 +18,6 @@ const buildRuleGroup = themeRuleGroupBuilderFactory();
 const background = euiThemeVars.euiColorLightestShade;
 const methodTextColor = '#DD0A73';
 const urlTextColor = '#00A69B';
-const stringTextColor = '#009926';
-const booleanTextColor = '#585CF6';
 export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
   const sharedTheme = buildConsoleSharedTheme();
   return {
@@ -28,14 +26,6 @@ export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
       ...sharedTheme.rules,
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
-      ...buildRuleGroup(
-        ['string', 'string-literal', 'multi-string', 'punctuation.end-triple-quote'],
-        makeHighContrastColor(stringTextColor)(background)
-      ),
-      ...buildRuleGroup(
-        ['constant.language.boolean'],
-        makeHighContrastColor(booleanTextColor)(background)
-      ),
     ],
   };
 };

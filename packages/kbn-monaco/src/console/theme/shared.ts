@@ -15,16 +15,26 @@ import { monaco } from '../../monaco_imports';
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
 const background = euiThemeVars.euiColorLightestShade;
+const stringTextColor = '#009926';
 const commentTextColor = '#4C886B';
 const variableTextColor = '#0079A5';
+const booleanTextColor = '#585CF6';
 const numericTextColor = variableTextColor;
 export const buildConsoleSharedTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
     base: darkMode ? 'vs-dark' : 'vs',
     inherit: true,
     rules: [
+      ...buildRuleGroup(
+        ['string', 'string-literal', 'multi-string', 'punctuation.end-triple-quote'],
+        makeHighContrastColor(stringTextColor)(background)
+      ),
       ...buildRuleGroup(['comment'], makeHighContrastColor(commentTextColor)(background)),
       ...buildRuleGroup(['variable'], makeHighContrastColor(variableTextColor)(background)),
+      ...buildRuleGroup(
+        ['constant.language.boolean'],
+        makeHighContrastColor(booleanTextColor)(background)
+      ),
       ...buildRuleGroup(['constant.numeric'], makeHighContrastColor(numericTextColor)(background)),
     ],
     colors: {
