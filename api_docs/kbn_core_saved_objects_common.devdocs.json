@@ -1548,10 +1548,6 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           }
@@ -2351,54 +2347,6 @@
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
           },
@@ -2497,6 +2445,54 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
           },
           {
             "plugin": "canvas",

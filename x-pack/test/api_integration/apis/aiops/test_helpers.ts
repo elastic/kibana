@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 export const getAddSignificationItemsActions = (data: any[], apiVersion: ApiVersion) =>
   data.filter(

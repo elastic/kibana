@@ -968,10 +968,19 @@ export interface VisualizationType {
    */
   groupLabel: string;
   /**
-   * The priority of the visualization in the list (global priority)
-   * Higher number means higher priority. When omitted defaults to 0
+   * Adds to the priority of the group, accumulated from all visualizations within the same group
+   * Total priority is used to sort groups. Higher number means higher priority (aka top of list).
+   *
+   * @default 0
    */
   sortPriority?: number;
+  /**
+   * The sort order of the visualization in the grouping
+   * Items arranged from highest on top to lowest on bottom.
+   *
+   * @default 0
+   */
+  sortOrder?: number;
   /**
    * Indicates if visualization is in the experimental stage.
    */
@@ -1076,9 +1085,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /**
    * If the visualization has subtypes, update the subtype in state.
    */
-  switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
+  switchVisualizationType?: (visualizationTypeId: string, state: T, layerId?: string) => T;
   /** Description is displayed as the clickable text in the chart switcher */
-  getDescription: (state: T) => { icon?: IconType; label: string };
+  getDescription: (state: T, layerId?: string) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
   getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Frame needs to know which layers the visualization is currently using */
@@ -1154,13 +1163,15 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     groups: VisualizationDimensionGroupConfig[];
   };
 
+  isSubtypeCompatible?: (subtype1?: string, subtype2?: string) => boolean;
+
   /**
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
    */
-  LayerHeaderComponent?: (
+  getCustomLayerHeader?: (
     props: VisualizationLayerWidgetProps<T>
-  ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
+  ) => undefined | ReactElement<VisualizationLayerWidgetProps<T>>;
 
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,

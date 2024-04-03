@@ -90,6 +90,12 @@ const randomAgentPolicyName = (() => {
   };
 })();
 
+/**
+ * Check if the given version string is a valid artifact version
+ * @param version Version string
+ */
+const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
+
 export const checkInFleetAgent = async (
   esClient: Client,
   agentId: string,
@@ -396,7 +402,12 @@ export const getAgentVersionMatchingCurrentStack = async (
   const kbnStatus = await fetchKibanaStatus(kbnClient);
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+    .then((response) =>
+      map(
+        response.data.versions.filter(isValidArtifactVersion),
+        (version) => version.split('-SNAPSHOT')[0]
+      )
+    );
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
@@ -506,7 +517,7 @@ export const getLatestAgentDownloadVersion = async (
   log?: ToolingLog
 ): Promise<string> => {
   const artifactsUrl = 'https://artifacts-api.elastic.co/v1/versions';
-  const semverMatch = `<=${version}`;
+  const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await nodeFetch(artifactsUrl).then(
     (response) => {
       if (!response.ok) {
@@ -519,8 +530,9 @@ export const getLatestAgentDownloadVersion = async (
     }
   );
 
-  const stackVersionToArtifactVersion: Record<string, string> =
-    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+  const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
+    .filter(isValidArtifactVersion)
+    .reduce((acc, artifactVersion) => {
       const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
       acc[stackVersion] = artifactVersion;
       return acc;
@@ -538,6 +550,8 @@ export const getLatestAgentDownloadVersion = async (
     Object.keys(stackVersionToArtifactVersion),
     semverMatch
   );
+
+  log?.verbose(`Matched [${matchedVersion}] for .maxStatisfying(${semverMatch})`);
 
   if (!matchedVersion) {
     throw new Error(`Unable to find a semver version that meets ${semverMatch}`);
