@@ -393,21 +393,6 @@ describe('Fleet - getNotUpgradeableMessage', () => {
       )
     ).toBeUndefined();
   });
-
-  it('if the agent reports upgradeable but is in watching state', () => {
-    expect(
-      getNotUpgradeableMessage(
-        getAgent({
-          version: '8.12.0',
-          upgradeable: true,
-          minutesSinceUpgrade: 11,
-          upgradeDetails: { state: 'UPG_WATCHING' } as any,
-        })
-      )
-    ).toContain(
-      'agent was recently ugraded and is being monitored. Please wait until the monitoring state is cleared.'
-    );
-  });
 });
 
 describe('hasAgentBeenUpgradedRecently', () => {

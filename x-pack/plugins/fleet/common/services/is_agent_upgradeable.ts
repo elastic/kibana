@@ -30,7 +30,6 @@ export const DOWNGRADE_NOT_ALLOWED_ERROR = `agent does not support downgrades.`;
 export const LATEST_VERSION_NOT_VALID_ERROR = 'latest version is not valid.';
 export const AGENT_ALREADY_ON_LATEST_ERROR = `agent is already running on the latest available version.`;
 export const AGENT_ON_GREATER_VERSION_ERROR = `agent is running on a version greater than the latest available version.`;
-export const WATCHING_STATE_ERROR = `agent was recently ugraded and is being monitored. Please wait until the monitoring state is cleared.`;
 
 export function isAgentUpgradeAvailable(agent: Agent, latestAgentVersion?: string): boolean {
   return (
@@ -108,9 +107,6 @@ export const getNotUpgradeableMessage = (
   }
   if (!agent.local_metadata.elastic.agent.upgradeable) {
     return NOT_UPGRADEABLE_ERROR;
-  }
-  if (isAgentInWatchingState(agent)) {
-    return WATCHING_STATE_ERROR;
   }
   if (isAgentUpgrading(agent)) {
     return ALREADY_UPGRADED_ERROR;
