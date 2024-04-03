@@ -417,7 +417,6 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/synthetics/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
