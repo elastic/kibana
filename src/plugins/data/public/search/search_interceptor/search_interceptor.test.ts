@@ -400,62 +400,10 @@ describe('SearchInterceptor', () => {
       // Long enough to reach the timeout but not long enough to reach the next response
       await timeTravel(1000);
 
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
-    });
-
-    test('should return the last response on async timeout', async () => {
-      const responses = [
-        {
-          time: 10,
-          value: {
-            isPartial: true,
-            isRunning: true,
-            rawResponse: {},
-            id: 1,
-          },
-        },
-        {
-          time: 2000,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            rawResponse: {},
-            id: 1,
-          },
-        },
-      ];
-      mockFetchImplementation(responses);
-
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
-      response.subscribe({ next, error });
-
-      await timeTravel(10);
-
-      expect(next).toHaveBeenCalled();
-      expect(error).not.toHaveBeenCalled();
-      expect(fetchMock).toHaveBeenCalled();
-      expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
-
-      // Long enough to reach the timeout but not long enough to reach the next response
-      await timeTravel(1000);
-
-      expect(next).toHaveBeenCalledTimes(2);
-      expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": 1,
-            "isPartial": true,
-            "isRunning": false,
-            "meta": Object {
-              "size": 10,
-            },
-            "rawResponse": Object {
-              "timed_out": true,
-            },
-          },
-        ]
-      `);
     });
 
     test('should DELETE a running async search on async timeout on error from fetch', async () => {

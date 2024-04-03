@@ -75,7 +75,6 @@ export function ClustersTable({ clusters }: Props) {
         return (
           <>
             <EuiButtonIcon
-              data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
               onClick={() => toggleDetails(name)}
               aria-label={
                 name in expandedRows

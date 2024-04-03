@@ -26,7 +26,7 @@ export function ClusterView({ clusterDetails }: Props) {
   });
 
   return (
-    <EuiText style={{ width: '100%' }} size="xs" data-test-subj="inspectorRequestClustersDetails">
+    <EuiText style={{ width: '100%' }} size="xs">
       {clusterDetails.timed_out ? (
         <EuiCallOut
           size="s"

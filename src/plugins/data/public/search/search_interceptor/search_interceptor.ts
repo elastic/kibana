@@ -66,7 +66,6 @@ import {
 import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
-import { toPartialResponse } from './to_partial_response';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
@@ -480,8 +479,6 @@ export class SearchInterceptor {
    * @returns `Observable` emitting the search response or an error.
    */
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    let lastResponse: IKibanaSearchResponse | null = null;
-
     const searchOptions = {
       ...options,
     };
@@ -510,16 +507,8 @@ export class SearchInterceptor {
         );
 
         return response$.pipe(
-          tap((response) => {
-            lastResponse = response;
-          }),
           takeUntil(aborted$),
           catchError((e) => {
-            // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
-            if (searchAbortController.isTimeout() && lastResponse) {
-              this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true);
-              return of(toPartialResponse(lastResponse));
-            }
             return throwError(
               this.handleSearchError(
                 e,
