@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type * as z from 'zod';
+import * as z from 'zod';
 import {
   BaseCreateProps,
   ResponseFields,
   RuleSignatureId,
   TypeSpecificCreateProps,
-  RuleVersion,
 } from '../../model/rule_schema';
 
 /**

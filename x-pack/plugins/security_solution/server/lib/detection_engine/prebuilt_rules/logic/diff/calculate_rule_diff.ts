@@ -33,7 +33,7 @@ export interface CalculateRuleDiffResult {
       base?: DiffableRule;
       target: DiffableRule;
     };
-      };
+  };
 }
 
 /**
@@ -95,7 +95,6 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
         base: diffableBaseVersion,
         target: diffableTargetVersion,
       },
-      mergedVersion: mergedVersion as RuleResponse,
     },
   };
 };
