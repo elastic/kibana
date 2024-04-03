@@ -169,6 +169,12 @@ export const configSchema = schema.object({
     riskEngine: schema.object({
       alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
     }),
+    assetCriticality: schema.object({
+      csvUpload: schema.object({
+        sizeLimitMb: schema.number({ defaultValue: 100 }),
+        batchSize: schema.number({ defaultValue: 250 }),
+      }),
+    }),
   }),
 });
 
