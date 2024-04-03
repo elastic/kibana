@@ -151,7 +151,7 @@ export class RulesClientFactory {
         // privileges
         const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
           request,
-          { name, role_descriptors: {} }
+          { name, role_descriptors: {}, metadata: { managed: true } }
         );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };

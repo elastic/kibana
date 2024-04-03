@@ -300,7 +300,7 @@ function extractQuotedText(rawText: string, error: EditorError) {
 }
 
 function inferCodeFromError(error: EditorError & { owner?: string }, rawText: string) {
-  if (error.message.endsWith('expecting STRING')) {
+  if (error.message.endsWith('expecting QUOTED_STRING')) {
     const value = extractQuotedText(rawText, error);
     return /^'(.)*'$/.test(value) ? 'wrongQuotes' : undefined;
   }
