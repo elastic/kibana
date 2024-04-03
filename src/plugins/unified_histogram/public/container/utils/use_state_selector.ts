@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { useEffect, useState } from 'react';
 
 export const useStateSelector = <S, R>(
