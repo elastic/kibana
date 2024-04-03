@@ -126,14 +126,17 @@ export function RelatedIntegrationField({
               value={field.value.version}
               onChange={handleVersionChange}
               isInvalid={Boolean(versionErrorMessage)}
+              data-test-subj="related-integration-version-dependency"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               color="danger"
               onClick={onRemove}
+              isDisabled={!integrations}
               iconType="minusInCircle"
               aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
+              data-test-subj="related-integration-remove"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

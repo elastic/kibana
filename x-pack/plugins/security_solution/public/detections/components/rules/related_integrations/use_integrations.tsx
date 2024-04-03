@@ -24,11 +24,11 @@ export const useIntegrations = ({ skip = false }: UseIntegrationsArgs = {}) => {
   return useQuery<Integration[]>(
     ['integrations'],
     async ({ signal }) => {
-      const integrations = await fleetIntegrationsApi.fetchAllIntegrations({
+      const response = await fleetIntegrationsApi.fetchAllIntegrations({
         signal,
       });
 
-      return integrations.integrations ?? [];
+      return response.integrations ?? [];
     },
     {
       keepPreviousData: true,

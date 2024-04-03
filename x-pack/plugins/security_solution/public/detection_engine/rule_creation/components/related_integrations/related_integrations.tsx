@@ -29,11 +29,11 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
     <UseArray path={path} initialNumberOfItems={0}>
       {({ items, addItem, removeItem, form }) => {
         return (
-          <EuiFormRow label={label} fullWidth data-test-subj={dataTestSubj}>
-            <>
+          <EuiFormRow label={label} fullWidth data-test-subj={dataTestSubj} hasChildLabel={false}>
+            <fieldset>
               <EuiFlexGroup direction="column" gutterSize="s">
                 {items.map((item) => (
-                  <EuiFlexItem key={item.id}>
+                  <EuiFlexItem key={item.id} data-test-subj="related-integration-row">
                     <RelatedIntegrationFieldRow
                       item={item}
                       relatedIntegrations={form.getFormData()[path] ?? []}
@@ -46,7 +46,7 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
               <EuiButton size="s" fullWidth iconType="plusInCircle" onClick={addItem}>
                 {i18n.ADD_INTEGRATION}
               </EuiButton>
-            </>
+            </fieldset>
           </EuiFormRow>
         );
       }}

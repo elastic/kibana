@@ -16,7 +16,7 @@ export const RELATED_INTEGRATIONS_LABEL = i18n.translate(
 export const RELATED_INTEGRATION_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.relatedIntegrationAriaLabel',
   {
-    defaultMessage: 'Related integration',
+    defaultMessage: 'Integrations selector',
   }
 );
 
@@ -73,6 +73,6 @@ export const VERSION_DEPENDENCY_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.versionInvalid',
   {
     defaultMessage:
-      'Version dependency is not valid semver. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
+      'Version dependency is invalid semver. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
   }
 );
