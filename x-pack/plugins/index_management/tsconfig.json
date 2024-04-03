@@ -24,7 +24,6 @@
     "@kbn/runtime-fields-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
-    "@kbn/ml-plugin",
     "@kbn/ml-trained-models-utils",
     "@kbn/analytics",
     "@kbn/utility-types",

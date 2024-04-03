@@ -9,7 +9,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
 import { getFieldConfig } from '../../../lib';
 import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
