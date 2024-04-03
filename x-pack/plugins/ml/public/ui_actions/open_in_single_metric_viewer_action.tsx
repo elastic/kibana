@@ -44,8 +44,9 @@ export function createOpenInSingleMetricViewerAction(
   return {
     id: 'open-in-single-metric-viewer',
     type: OPEN_IN_SINGLE_METRIC_VIEWER_ACTION,
+    order: 100,
     getIconType(): string {
-      return 'visTable';
+      return 'visLine';
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.openInSingleMetricViewerTitle', {
