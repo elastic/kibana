@@ -15,11 +15,13 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
+  SolutionNavigationDefinitions,
+  ChromeStyle,
+  CloudLinks,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
   BehaviorSubject,
-  Observable,
   combineLatest,
   map,
   takeUntil,
@@ -28,8 +30,13 @@ import {
   distinctUntilChanged,
   skipWhile,
   filter,
+  of,
+  type Observable,
+  type Subscription,
+  take,
+  debounceTime,
 } from 'rxjs';
-import type { Location } from 'history';
+import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
 
 import {
@@ -37,7 +44,7 @@ import {
   ChromeNavLink,
   CloudURLs,
   NavigationTreeDefinitionUI,
-} from '@kbn/core-chrome-browser/src';
+} from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
@@ -50,6 +57,7 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
+  setChromeStyle: (style: ChromeStyle) => void;
 }
 
 export class ProjectNavigationService {
@@ -58,9 +66,7 @@ export class ProjectNavigationService {
     current: SideNavComponent | null;
   }>({ current: null });
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -75,17 +81,246 @@ export class ProjectNavigationService {
     params: ChromeSetProjectBreadcrumbsParams;
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
+  private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
+  private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
+  private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
+  private navLinksService?: ChromeNavLinks;
   private http?: InternalHttpStart;
+  private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
+  private setChromeStyle: StartDeps['setChromeStyle'] = () => {};
 
-  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
+  public start({
+    application,
+    navLinksService,
+    http,
+    chromeBreadcrumbs$,
+    logger,
+    setChromeStyle,
+  }: StartDeps) {
     this.application = application;
+    this.navLinksService = navLinksService;
     this.http = http;
     this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
+    this.setChromeStyle = setChromeStyle;
 
+    this.handleActiveNodesChange();
+    this.handleEmptyActiveNodes();
+
+    this.deepLinksMap$ = navLinksService.getNavLinks$().pipe(
+      map((navLinks) => {
+        return navLinks.reduce((acc, navLink) => {
+          acc[navLink.id] = navLink;
+          return acc;
+        }, {} as Record<string, ChromeNavLink>);
+      })
+    );
+
+    return {
+      setProjectHome: (homeHref: string) => {
+        this.projectHome$.next(homeHref);
+      },
+      getProjectHome$: () => {
+        return this.projectHome$.asObservable();
+      },
+      setCloudUrls: (cloudUrls: CloudURLs) => {
+        // Cloud links never change, so we only need to parse them once
+        if (Object.keys(this.cloudLinks$.getValue()).length > 0) return;
+
+        this.cloudLinks$.next(getCloudLinks(cloudUrls));
+      },
+      setProjectName: (projectName: string) => {
+        this.projectName$.next(projectName);
+      },
+      getProjectName$: () => {
+        return this.projectName$.asObservable();
+      },
+      initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
+        id: string,
+        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
+      ) => {
+        this.initNavigation(id, navTreeDefinition$);
+      },
+      getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
+      getActiveNodes$: () => {
+        return this.activeNodes$.pipe(takeUntil(this.stop$));
+      },
+      setSideNavComponent: this.setSideNavComponent.bind(this),
+      getProjectSideNavComponent$: () => {
+        return this.customProjectSideNavComponent$.asObservable();
+      },
+      setProjectBreadcrumbs: (
+        breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
+        params?: Partial<ChromeSetProjectBreadcrumbsParams>
+      ) => {
+        this.projectBreadcrumbs$.next({
+          breadcrumbs: Array.isArray(breadcrumbs) ? breadcrumbs : [breadcrumbs],
+          params: { absolute: false, ...params },
+        });
+      },
+      getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
+        return combineLatest([
+          this.projectBreadcrumbs$,
+          this.activeNodes$,
+          chromeBreadcrumbs$,
+          this.projectName$,
+          this.solutionNavDefinitions$,
+          this.activeSolutionNavDefinitionId$,
+          this.cloudLinks$,
+        ]).pipe(
+          map(
+            ([
+              projectBreadcrumbs,
+              activeNodes,
+              chromeBreadcrumbs,
+              projectName,
+              solutionNavDefinitions,
+              activeSolutionNavDefinitionId,
+              cloudLinks,
+            ]) => {
+              const solutionNavigations =
+                Object.keys(solutionNavDefinitions).length > 0 &&
+                activeSolutionNavDefinitionId !== null
+                  ? {
+                      definitions: solutionNavDefinitions,
+                      activeId: activeSolutionNavDefinitionId,
+                      onChange: this.changeActiveSolutionNavigation.bind(this),
+                    }
+                  : undefined;
+
+              return buildBreadcrumbs({
+                projectName,
+                projectBreadcrumbs,
+                activeNodes,
+                chromeBreadcrumbs,
+                solutionNavigations,
+                cloudLinks,
+              });
+            }
+          )
+        );
+      },
+      /** In stateful Kibana, get the registered solution navigations */
+      getSolutionsNavDefinitions$: this.getSolutionsNavDefinitions$.bind(this),
+      /** In stateful Kibana, update the registered solution navigations */
+      updateSolutionNavigations: this.updateSolutionNavigations.bind(this),
+      /** In stateful Kibana, change the active solution navigation */
+      changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
+      /** In stateful Kibana, get the active solution navigation definition */
+      getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
+    };
+  }
+
+  /**
+   * Initialize a "serverless style" navigation. For stateful deployments (not serverless), this
+   * handler initialize one of the solution navigations registered.
+   *
+   * @param id Id for the navigation tree definition
+   * @param navTreeDefinition$ The navigation tree definition
+   */
+  private initNavigation(id: string, navTreeDefinition$: Observable<NavigationTreeDefinition>) {
+    if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
+
+    this.activeSolutionNavDefinitionId$.next(id);
+
+    if (this.navigationChangeSubscription) {
+      this.navigationChangeSubscription.unsubscribe();
+    }
+
+    let initialised = false;
+    this.projectNavigationNavTreeFlattened = {};
+    this.navigationChangeSubscription = combineLatest([
+      navTreeDefinition$,
+      this.deepLinksMap$,
+      this.cloudLinks$,
+    ])
+      .pipe(
+        takeUntil(this.stop$),
+        map(([def, deepLinksMap, cloudLinks]) => {
+          return parseNavigationTree(def, {
+            deepLinks: deepLinksMap,
+            cloudLinks,
+          });
+        })
+      )
+      .subscribe({
+        next: ({ navigationTree, navigationTreeUI }) => {
+          this.navigationTree$.next(navigationTree);
+          this.navigationTreeUi$.next(navigationTreeUI);
+
+          this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
+
+          // At initialization, we want to force the update of the active nodes, so 2 empty arrays []
+          // are not considered equal and we update the Observable value.
+          this.updateActiveProjectNavigationNodes({ forceUpdate: !initialised });
+          initialised = true;
+        },
+        error: (err) => {
+          this.logger?.error(err);
+        },
+      });
+  }
+
+  private getNavigationTreeUi$(): Observable<NavigationTreeDefinitionUI> {
+    return this.navigationTreeUi$
+      .asObservable()
+      .pipe(filter((v): v is NavigationTreeDefinitionUI => v !== null));
+  }
+
+  private findActiveNodes({
+    location: _location,
+    flattendTree = this.projectNavigationNavTreeFlattened,
+  }: {
+    location?: Location;
+    flattendTree?: Record<string, ChromeProjectNavigationNode>;
+  } = {}): ChromeProjectNavigationNode[][] {
+    if (!this.application) return [];
+    if (!Object.keys(this.projectNavigationNavTreeFlattened).length) return [];
+
+    const location = _location ?? this.application.history.location;
+    let currentPathname = this.http?.basePath.prepend(location.pathname) ?? location.pathname;
+
+    // We add possible hash to the current pathname
+    // e.g. /app/kibana#/management
+    currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
+
+    return findActiveNodes(currentPathname, flattendTree, location, this.http?.basePath.prepend);
+  }
+
+  /**
+   * Find the active nodes in the navigation tree based on the current location (or a location passed in params)
+   * and update the activeNodes$ Observable.
+   *
+   * @param location Optional location to use to detect the active node in the new navigation tree, if not set the current location is used
+   * @param forceUpdate Optional flag to force the update of the active nodes even if the active nodes are the same
+   */
+  private updateActiveProjectNavigationNodes({
+    location,
+    forceUpdate = false,
+  }: { location?: Location; forceUpdate?: boolean } = {}) {
+    const activeNodes = this.findActiveNodes({ location });
+    // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
+    // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
+    // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
+    // has actually changed.
+    const requiresUpdate = forceUpdate ? true : !deepEqual(activeNodes, this.activeNodes$.value);
+
+    if (!requiresUpdate) return;
+
+    this.activeNodes$.next(activeNodes);
+  }
+
+  private onHistoryLocationChange(location: Location) {
+    this.location$.next(location);
+    this.updateActiveProjectNavigationNodes({ location });
+  }
+
+  private handleActiveNodesChange() {
     this.activeNodes$
       .pipe(
         takeUntil(this.stop$),
@@ -105,166 +340,151 @@ export class ProjectNavigationService {
         // reset the breadcrumbs when the active nodes change
         this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
       });
-
-    return {
-      setProjectHome: (homeHref: string) => {
-        this.projectHome$.next(homeHref);
-      },
-      getProjectHome$: () => {
-        return this.projectHome$.asObservable();
-      },
-      setProjectsUrl: (projectsUrl: string) => {
-        this.projectsUrl$.next(projectsUrl);
-      },
-      getProjectsUrl$: () => {
-        return this.projectsUrl$.asObservable();
-      },
-      setProjectName: (projectName: string) => {
-        this.projectName$.next(projectName);
-      },
-      getProjectName$: () => {
-        return this.projectName$.asObservable();
-      },
-      setProjectUrl: (projectUrl: string) => {
-        this.projectUrl$.next(projectUrl);
-      },
-      initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
-        navTreeDefinition: Observable<NavigationTreeDefinition<LinkId>>,
-        { cloudUrls }: { cloudUrls: CloudURLs }
-      ) => {
-        this.initNavigation(navTreeDefinition, { navLinksService, cloudUrls });
-      },
-      getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
-      getActiveNodes$: () => {
-        return this.activeNodes$.pipe(takeUntil(this.stop$));
-      },
-      setSideNavComponent: (component: SideNavComponent | null) => {
-        this.customProjectSideNavComponent$.next({ current: component });
-      },
-      getProjectSideNavComponent$: () => {
-        return this.customProjectSideNavComponent$.asObservable();
-      },
-      setProjectBreadcrumbs: (
-        breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
-        params?: Partial<ChromeSetProjectBreadcrumbsParams>
-      ) => {
-        this.projectBreadcrumbs$.next({
-          breadcrumbs: Array.isArray(breadcrumbs) ? breadcrumbs : [breadcrumbs],
-          params: { absolute: false, ...params },
-        });
-      },
-      getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
-        return combineLatest([
-          this.projectBreadcrumbs$,
-          this.activeNodes$,
-          chromeBreadcrumbs$,
-          this.projectsUrl$,
-          this.projectUrl$,
-          this.projectName$,
-        ]).pipe(
-          map(
-            ([
-              projectBreadcrumbs,
-              activeNodes,
-              chromeBreadcrumbs,
-              projectsUrl,
-              projectUrl,
-              projectName,
-            ]) => {
-              return buildBreadcrumbs({
-                projectUrl,
-                projectName,
-                projectsUrl,
-                projectBreadcrumbs,
-                activeNodes,
-                chromeBreadcrumbs,
-              });
-            }
-          )
-        );
-      },
-    };
   }
 
-  private initNavigation(
-    navTreeDefinition: Observable<NavigationTreeDefinition>,
-    { navLinksService, cloudUrls }: { navLinksService: ChromeNavLinks; cloudUrls: CloudURLs }
-  ) {
-    if (this.navigationTree$.getValue() !== undefined) {
-      throw new Error('Project navigation has already been initiated.');
-    }
+  /**
+   * When we are in stateful Kibana with multiple solution navigations, it is possible that a user
+   * lands on a page that does not belong to the current active solution navigation. In this case,
+   * we need to find the correct solution navigation based on the current location and switch to it.
+   */
+  private handleEmptyActiveNodes() {
+    combineLatest([
+      this.activeNodes$,
+      this.solutionNavDefinitions$,
+      this.activeSolutionNavDefinitionId$.pipe(distinctUntilChanged()),
+      this.location$,
+    ])
+      .pipe(takeUntil(this.stop$), debounceTime(20))
+      .subscribe(([activeNodes, definitions, activeSolution, location]) => {
+        if (
+          activeNodes.length > 0 ||
+          activeSolution === null ||
+          Object.keys(definitions).length === 0 ||
+          Object.keys(this.projectNavigationNavTreeFlattened).length === 0
+        ) {
+          return;
+        }
 
-    const deepLinksMap$ = navLinksService.getNavLinks$().pipe(
-      map((navLinks) => {
-        return navLinks.reduce((acc, navLink) => {
-          acc[navLink.id] = navLink;
-          return acc;
-        }, {} as Record<string, ChromeNavLink>);
-      })
-    );
+        // We have an active solution navigation but no active nodes, this means that
+        // the current location is not part of the current solution navigation.
+        // We need to find the correct solution navigation based on the current location.
+        let found = false;
 
-    const cloudLinks = getCloudLinks(cloudUrls);
+        Object.entries(definitions).forEach(([id, definition]) => {
+          combineLatest([definition.navigationTree$, this.deepLinksMap$, this.cloudLinks$])
+            .pipe(
+              take(1),
+              map(([def, deepLinksMap, cloudLinks]) =>
+                parseNavigationTree(def, {
+                  deepLinks: deepLinksMap,
+                  cloudLinks,
+                })
+              )
+            )
+            .subscribe(({ navigationTree }) => {
+              if (found) return;
 
-    combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$])
-      .pipe(
-        map(([def, deepLinksMap]) => {
-          return parseNavigationTree(def, {
-            deepLinks: deepLinksMap,
-            cloudLinks,
-          });
-        })
-      )
-      .subscribe({
-        next: ({ navigationTree, navigationTreeUI }) => {
-          this.navigationTree$.next(navigationTree);
-          this.navigationTreeUi$.next(navigationTreeUI);
+              const maybeActiveNodes = this.findActiveNodes({
+                location,
+                flattendTree: flattenNav(navigationTree),
+              });
 
-          this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
-          this.setActiveProjectNavigationNodes();
-        },
-        error: (err) => {
-          this.logger?.error(err);
-        },
+              if (maybeActiveNodes.length > 0) {
+                found = true;
+                this.changeActiveSolutionNavigation(id);
+              }
+            });
+        });
       });
   }
 
-  private getNavigationTreeUi$(): Observable<NavigationTreeDefinitionUI> {
-    return this.navigationTreeUi$
-      .asObservable()
-      .pipe(filter((v): v is NavigationTreeDefinitionUI => v !== null));
+  private setSideNavComponent(component: SideNavComponent | null) {
+    this.customProjectSideNavComponent$.next({ current: component });
   }
 
-  private setActiveProjectNavigationNodes(_location?: Location) {
-    if (!this.application) return;
-    if (!Object.keys(this.projectNavigationNavTreeFlattened).length) return;
+  private changeActiveSolutionNavigation(
+    id: string | null,
+    { onlyIfNotSet = false, redirect = false } = {}
+  ) {
+    if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
+    if (onlyIfNotSet && this.activeSolutionNavDefinitionId$.getValue() !== null) {
+      return;
+    }
 
-    const location = _location ?? this.application.history.location;
-    let currentPathname = this.http?.basePath.prepend(location.pathname) ?? location.pathname;
+    const definitions = this.solutionNavDefinitions$.getValue();
+    this.activeSolutionNavDefinitionId$.next(null);
+    // We don't want to change to "classic" if `id` is `null` when we haven't received
+    // any definitions yet. Serverless Kibana could be impacted by this.
+    // When we **do** have definitions, then passing `null` does mean we should change to "classic".
+    if (Object.keys(definitions).length > 0) {
+      if (id === null) {
+        this.setChromeStyle('classic');
+        this.navigationTree$.next(undefined);
+        this.activeSolutionNavDefinitionId$.next(null);
+      } else {
+        const definition = definitions[id];
+        if (!definition) {
+          throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
+        }
 
-    // We add possible hash to the current pathname
-    // e.g. /app/kibana#/management
-    currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
+        this.setChromeStyle('project');
 
-    const activeNodes = findActiveNodes(
-      currentPathname,
-      this.projectNavigationNavTreeFlattened,
-      location,
-      this.http?.basePath.prepend
+        const { sideNavComponent } = definition;
+        if (sideNavComponent) {
+          this.setSideNavComponent(sideNavComponent);
+        }
+
+        let location: Location | undefined;
+        if (redirect) {
+          // Navigate to the new home page if it's defined, otherwise navigate to the default home page
+          const link = this.navLinksService?.get(definition.homePage ?? 'home');
+          if (link) {
+            const linkUrl = this.http?.basePath.remove(link.url) ?? link.url;
+            location = createLocation(linkUrl);
+            this.location$.next(location);
+            this.application?.navigateToUrl(link.href);
+          }
+        }
+
+        this.initNavigation(id, definition.navigationTree$);
+      }
+    } else if (id !== null) {
+      this.activeSolutionNavDefinitionId$.next(id);
+    }
+  }
+
+  private getSolutionsNavDefinitions$() {
+    return this.solutionNavDefinitions$.asObservable();
+  }
+
+  private getActiveSolutionNavDefinition$() {
+    return combineLatest([this.solutionNavDefinitions$, this.activeSolutionNavDefinitionId$]).pipe(
+      takeUntil(this.stop$),
+      map(([definitions, id]) => {
+        if (id === null) return null;
+        if (Object.keys(definitions).length === 0) return null;
+        if (!definitions[id]) {
+          throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
+        }
+        // We strip out the sideNavComponent from the definition as it should only be used internally
+        const { sideNavComponent, ...definition } = definitions[id];
+        return definition;
+      })
     );
-
-    // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
-    // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
-    // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
-    // has actually changed.
-    const requiresUpdate = !deepEqual(activeNodes, this.activeNodes$.value);
-
-    if (!requiresUpdate) return;
-
-    this.activeNodes$.next(activeNodes);
   }
 
-  private onHistoryLocationChange(location: Location) {
-    this.setActiveProjectNavigationNodes(location);
+  private updateSolutionNavigations(
+    solutionNavs: SolutionNavigationDefinitions,
+    replace: boolean = false
+  ) {
+    if (replace) {
+      this.solutionNavDefinitions$.next(solutionNavs);
+    } else {
+      this.solutionNavDefinitions$.next({
+        ...this.solutionNavDefinitions$.getValue(),
+        ...solutionNavs,
+      });
+    }
   }
 
   public stop() {

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
 
@@ -133,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(15000, async () => {
           const resp2 = await supertest
             .post(`/internal/search/ese/${id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -384,7 +385,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
-            indexType: 'rollup',
+            indexType: DataViewType.ROLLUP,
             params: {
               body: {
                 query: {
@@ -403,7 +404,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
-            indexType: 'rollup',
+            indexType: DataViewType.ROLLUP,
             params: {
               index: 'banana',
               body: {
@@ -424,7 +425,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'foo')
           .send({
-            indexType: 'rollup',
+            indexType: DataViewType.ROLLUP,
             params: {
               index: 'rollup_logstash',
               size: 0,

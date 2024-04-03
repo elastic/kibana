@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
@@ -30,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Custom Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -42,7 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
       dataForgeConfig = {
@@ -69,12 +68,15 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: DATA_VIEW,
         docCountTarget: 75,
+        retryService,
+        logger,
       });
       await createDataView({
         supertest,
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
+        logger,
       });
     });
 
@@ -92,22 +94,25 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/175360
-    describe.skip('Rule creation', () => {
+    describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await createIndexConnector({
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -167,6 +172,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -176,13 +183,14 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -230,20 +238,21 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Custom equation is 1, above the threshold of 0.9. (duration: 1 min, data view: ${DATA_VIEW})`
+          `Custom equation is 1 B, above the threshold of 0.9 B. (duration: 1 min, data view: ${DATA_VIEW})`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('1');
+        expect(resp.hits.hits[0]._source?.value).eql('1 B');
       });
     });
   });

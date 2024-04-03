@@ -19,6 +19,7 @@ export type { ActionVariable } from '@kbn/alerting-types';
 
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
+export type RuleTypeMetaData = Record<string, unknown>;
 
 // rule type defined alert fields to persist in alerts index
 export type RuleAlertData = Record<string, unknown>;
@@ -121,6 +122,16 @@ export interface RuleAction {
   useAlertDataForTemplate?: boolean;
 }
 
+export interface RuleSystemAction {
+  uuid?: string;
+  id: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+}
+
+export type RuleActionKey = keyof RuleAction;
+export type RuleSystemActionKey = keyof RuleSystemAction;
+
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;
@@ -154,6 +165,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   consumer: string;
   schedule: IntervalSchedule;
   actions: RuleAction[];
+  systemActions?: RuleSystemAction[];
   params: Params;
   mapped_params?: MappedParams;
   scheduledTaskId?: string | null;

@@ -11,7 +11,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-serve
 import type { UserActionFindRequestTypes } from '../../../../common/types/api';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import { decodeOrThrow } from '../../../../common/api';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,

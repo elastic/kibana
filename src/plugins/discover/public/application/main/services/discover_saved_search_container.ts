@@ -8,6 +8,7 @@
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -110,6 +111,15 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
+  /**
+   * Updates the current state of the saved search with new time range and refresh interval
+   */
+  updateTimeRange: () => void;
+  /**
+   * Passes filter manager filters to saved search filters
+   * @param params
+   */
+  updateWithFilterManagerFilters: () => SavedSearch;
 }
 
 export function getSavedSearchContainer({
@@ -169,6 +179,26 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
+
+  const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
+    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+    hasChanged$.next(hasChanged);
+    savedSearchCurrent$.next(nextSavedSearch);
+  };
+
+  const updateWithFilterManagerFilters = () => {
+    const nextSavedSearch: SavedSearch = {
+      ...getState(),
+    };
+
+    nextSavedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithFilterManagerFilters done', nextSavedSearch);
+    return nextSavedSearch;
+  };
+
   const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
@@ -186,12 +216,27 @@ export function getSavedSearchContainer({
       useFilterAndQueryServices,
     });
 
-    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-    hasChanged$.next(hasChanged);
-    savedSearchCurrent$.next(nextSavedSearch);
+    assignNextSavedSearch({ nextSavedSearch });
 
     addLog('[savedSearch] update done', nextSavedSearch);
     return nextSavedSearch;
+  };
+
+  const updateTimeRange = () => {
+    const previousSavedSearch = getState();
+    if (!previousSavedSearch.timeRestore) {
+      return;
+    }
+    const refreshInterval = services.timefilter.getRefreshInterval();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      timeRange: services.timefilter.getTime(),
+      refreshInterval: { value: refreshInterval.value, pause: refreshInterval.pause },
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
   };
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
@@ -221,6 +266,8 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
+    updateTimeRange,
+    updateWithFilterManagerFilters,
   };
 }
 

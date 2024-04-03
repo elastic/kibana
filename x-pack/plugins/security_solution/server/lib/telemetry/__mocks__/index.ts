@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { URL } from 'url';
 import moment from 'moment';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { type UsageCounters } from '@kbn/usage-collection-plugin/common/types';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 import { stubEndpointMetricsResponse } from './metrics';
 import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
@@ -30,6 +35,7 @@ export const createMockTelemetryEventsSender = (
     getTelemetryUsageCluster: jest.fn(),
     fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
+    sendAsync: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
     isTelemetryServicesReachable: jest.fn().mockReturnValue(canConnect ?? jest.fn()),
@@ -69,6 +75,34 @@ export const stubLicenseInfo: ESLicense = {
   start_date_in_millis: -1,
 };
 
+export const createMockTelemetryPluginSetup = (): jest.Mocked<TelemetryPluginSetup> => {
+  return {
+    getTelemetryUrl: jest.fn(() => Promise.resolve(new URL('http://localhost/v3/send'))),
+  } as unknown as jest.Mocked<TelemetryPluginSetup>;
+};
+
+export const createMockTelemetryPluginStart = (): jest.Mocked<TelemetryPluginStart> => {
+  return {
+    getIsOptedIn: jest.fn(() => Promise.resolve(true)),
+  } as unknown as jest.Mocked<TelemetryPluginStart>;
+};
+
+export const createMockUsageCounter = (): jest.Mocked<IUsageCounter> => {
+  return {
+    incrementCounter: jest.fn((_: UsageCounters.v1.IncrementCounterParams) => {}),
+  } as unknown as jest.Mocked<IUsageCounter>;
+};
+
+export const createMockTaskMetrics = (): jest.Mocked<ITaskMetricsService> => {
+  return {
+    incrementCounter: jest.fn((_: UsageCounters.v1.IncrementCounterParams) => {}),
+    start: jest.fn(() => {
+      return { name: 'test-trace', startedAt: 0 };
+    }),
+    end: jest.fn(),
+  } as unknown as jest.Mocked<ITaskMetricsService>;
+};
+
 export const createMockTelemetryReceiver = (
   diagnosticsAlert?: unknown,
   emptyTimelineTree?: boolean
@@ -80,6 +114,7 @@ export const createMockTelemetryReceiver = (
   return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
+    getClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
     fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn().mockReturnValue(stubFleetAgentResponse),

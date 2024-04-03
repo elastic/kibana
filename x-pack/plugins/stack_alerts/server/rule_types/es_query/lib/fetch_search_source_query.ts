@@ -60,7 +60,7 @@ export async function fetchSearchSourceQuery({
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
-  const searchSource = updateSearchSource(
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
     initialSearchSource,
     index,
     params,
@@ -85,7 +85,8 @@ export async function fetchSearchSourceQuery({
     index,
     dateStart,
     dateEnd,
-    spacePrefix
+    spacePrefix,
+    filterToExcludeHitsFromPreviousRun
   );
   return {
     link,
@@ -109,7 +110,7 @@ export function updateSearchSource(
   dateStart: string,
   dateEnd: string,
   alertLimit?: number
-) {
+): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
   const isGroupAgg = isGroupAggregation(params.termField);
   const timeFieldName = params.timeField || index.timeFieldName;
 
@@ -128,20 +129,24 @@ export function updateSearchSource(
     ),
   ];
 
+  let filterToExcludeHitsFromPreviousRun = null;
   if (params.excludeHitsFromPreviousRun) {
     if (latestTimestamp && latestTimestamp > dateStart) {
-      // add additional filter for documents with a timestamp greater then
+      // add additional filter for documents with a timestamp greater than
       // the timestamp of the previous run, so that those documents are not counted twice
-      const addTimeRangeField = buildRangeFilter(
+      filterToExcludeHitsFromPreviousRun = buildRangeFilter(
         field!,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
         index
       );
-      filters.push(addTimeRangeField);
+      filters.push(filterToExcludeHitsFromPreviousRun);
     }
   }
 
   const searchSourceChild = searchSource.createChild();
+  if (!isGroupAgg) {
+    searchSourceChild.setField('trackTotalHits', true);
+  }
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [
     {
@@ -170,19 +175,31 @@ export function updateSearchSource(
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
     })
   );
-  return searchSourceChild;
+  return {
+    searchSource: searchSourceChild,
+    filterToExcludeHitsFromPreviousRun,
+  };
 }
 
-async function generateLink(
+export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
   dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
-  spacePrefix: string
+  spacePrefix: string,
+  filterToExcludeHitsFromPreviousRun: Filter | null
 ) {
-  const prevFilters = searchSource.getField('filter') as Filter[];
+  const prevFilters = [...((searchSource.getField('filter') as Filter[]) || [])];
+
+  if (filterToExcludeHitsFromPreviousRun) {
+    // Using the same additional filter as in the alert check above.
+    // We cannot simply pass `latestTimestamp` to `timeRange.from` Discover locator params
+    // as that would include `latestTimestamp` itself in the Discover results which would be wrong.
+    // Results should be after `latestTimestamp` and within `dateStart` and `dateEnd`.
+    prevFilters.push(filterToExcludeHitsFromPreviousRun);
+  }
 
   // make new adhoc data view
   const newDataView = await dataViews.create({
@@ -208,7 +225,11 @@ async function generateLink(
   return start + spacePrefix + '/app' + end;
 }
 
-function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
+export function updateFilterReferences(
+  filters: Filter[],
+  fromDataView: string,
+  toDataView: string | undefined
+) {
   return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
@@ -227,5 +248,5 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  return dataView.toMinimalSpec();
+  return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }

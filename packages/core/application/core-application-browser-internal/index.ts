@@ -20,4 +20,6 @@ export {
   parseAppUrl,
   relativeToAbsolute,
   removeSlashes,
+  DEFAULT_APP_VISIBILITY,
+  DEFAULT_LINK_VISIBILITY,
 } from './src/utils';

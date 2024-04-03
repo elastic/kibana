@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import type { DataViewBase, Query } from '@kbn/es-query';
+import { DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -710,5 +710,40 @@ storiesOf('SearchBar', module)
       },
       submitButtonStyle: 'full',
       renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
+    })
+  )
+  .add('with additional query bar menu items', () =>
+    wrapSearchBarInContext({
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Observability rule types',
+            icon: 'logoObservability',
+          },
+          {
+            name: 'Security rule types',
+            icon: 'logoSecurity',
+          },
+          {
+            name: 'Status',
+            panel: 'status-panel',
+          },
+        ],
+        panels: [
+          {
+            id: 'status-panel',
+            title: 'Status',
+            items: [
+              {
+                name: 'Active',
+              },
+              {
+                name: 'Inactive',
+              },
+            ],
+          },
+        ],
+      },
     })
   );

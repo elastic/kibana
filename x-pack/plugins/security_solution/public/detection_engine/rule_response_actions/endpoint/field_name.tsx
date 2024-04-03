@@ -33,6 +33,13 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
 const SINGLE_SELECTION = Object.freeze({ asPlainText: true });
 
 const FIELD_LABEL: string = 'Custom field name';
+const REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.responseActions.endpoint.validations.fieldNameIsRequiredErrorMessage',
+  {
+    defaultMessage: '{field} selection is required when the process.pid toggle is disabled.',
+    values: { field: FIELD_LABEL },
+  }
+);
 const FieldNameFieldComponent = ({
   path,
   disabled,
@@ -50,19 +57,30 @@ const FieldNameFieldComponent = ({
     if (currentFieldNameField && !isRequired) {
       currentFieldNameField?.clearErrors();
     }
+
+    // if the field is required and the value is empty, set an error, but don't do that before first validation (thus isValidated check)
+    if (currentFieldNameField?.isValidated && !currentFieldNameField?.value && isRequired) {
+      currentFieldNameField?.setErrors([{ message: REQUIRED_ERROR }]);
+    }
   }, [currentFieldNameField, isRequired]);
 
   const renderEntityIdNote = useMemo(() => {
     const contains = fieldValue?.includes('entity_id');
+
     if (contains) {
       return (
         <FormattedMessage
-          id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
+          id="xpack.securitySolution.responseActions.endpoint.entityIdDescription"
           defaultMessage="Entity_id is an Elastic Defend agent specific field, if the alert does not come from Elastic Defend agent we will not be able to send the action."
         />
       );
     }
-    return null;
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
+        defaultMessage="Choose a different alert field to identify the process to terminate."
+      />
+    );
   }, [fieldValue]);
 
   const CONFIG = useMemo(() => {
@@ -76,14 +94,7 @@ const FieldNameFieldComponent = ({
               return {
                 code: 'ERR_FIELD_MISSING',
                 path,
-                message: i18n.translate(
-                  'xpack.securitySolution.responseActions.endpoint.validations.fieldNameIsRequiredErrorMessage',
-                  {
-                    defaultMessage:
-                      '{field} is a required field when process.pid toggle is turned off',
-                    values: { field: FIELD_LABEL },
-                  }
-                ),
+                message: REQUIRED_ERROR,
               };
             }
           },
@@ -125,10 +136,10 @@ const FieldNameFieldComponent = ({
                 selectedOptions={value && valueInList ? [{ value, label: value }] : undefined}
                 onChange={(newValue) => {
                   if (newValue.length === 0) {
-                    // Don't allow clearing the type. One must always be selected
-                    return;
+                    setValue('');
+                  } else {
+                    setValue(newValue[0].label);
                   }
-                  setValue(newValue[0].label);
                 }}
                 data-test-subj="config-custom-field-name"
               />

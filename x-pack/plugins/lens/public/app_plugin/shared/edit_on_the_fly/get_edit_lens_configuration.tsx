@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
+import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
@@ -99,6 +99,7 @@ export async function getEditLensConfiguration(
     startDependencies,
     getLensAttributeService(coreStart, startDependencies)
   );
+  const theme = coreStart.theme.getTheme();
 
   return ({
     attributes,
@@ -120,6 +121,7 @@ export async function getEditLensConfiguration(
     hidesSuggestions,
     onApplyCb,
     onCancelCb,
+    hideTimeFilterInfo,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -217,17 +219,20 @@ export async function getEditLensConfiguration(
       deletePanel,
       onApplyCb,
       onCancelCb,
+      hideTimeFilterInfo,
     };
 
     return getWrapper(
       <Provider store={lensStore}>
-        <I18nProvider>
-          <KibanaContextProvider services={lensServices}>
-            <RootDragDropProvider>
-              <LensEditConfigurationFlyout {...configPanelProps} />
-            </RootDragDropProvider>
-          </KibanaContextProvider>
-        </I18nProvider>
+        <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+          <I18nProvider>
+            <KibanaContextProvider services={lensServices}>
+              <RootDragDropProvider>
+                <LensEditConfigurationFlyout {...configPanelProps} />
+              </RootDragDropProvider>
+            </KibanaContextProvider>
+          </I18nProvider>
+        </EuiThemeProvider>
       </Provider>
     );
   };

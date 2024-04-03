@@ -56,8 +56,8 @@ export const ActionsLogFilterPopover = memo(
         >
           {filterName === 'types'
             ? isSentinelOneV1Enabled
-              ? FILTER_NAMES.types('s')
-              : FILTER_NAMES.types('')
+              ? FILTER_NAMES.types(2)
+              : FILTER_NAMES.types(1)
             : FILTER_NAMES[filterName]}
         </EuiFilterButton>
       ),

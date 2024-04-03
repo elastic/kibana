@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -37,7 +38,7 @@ import {
   dictionaryValidator,
   requiredValidator,
 } from '../../../common/util/validators';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 
 interface DeploymentSetupProps {
   config: ThreadingParams;

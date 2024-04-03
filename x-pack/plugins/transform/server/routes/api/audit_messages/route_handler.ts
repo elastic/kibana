@@ -12,7 +12,7 @@ import {
   TRANSFORM_NOTIFICATIONS_INDEX,
 } from '../../../../common/constants';
 import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
-import { AuditMessage } from '../../../../common/types/messages';
+import type { AuditMessage } from '../../../../common/types/messages';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

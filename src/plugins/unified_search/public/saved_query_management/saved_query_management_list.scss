@@ -4,10 +4,6 @@
   overflow-y: hidden;
 }
 
-.kbnSavedQueryManagement__text {
-  padding: $euiSizeM $euiSizeM calc($euiSizeM / 2) $euiSizeM;
-}
-
 .kbnSavedQueryManagement__list {
   @include euiYScrollWithShadows;
   max-height: inherit; // Fixes overflow for applied max-height

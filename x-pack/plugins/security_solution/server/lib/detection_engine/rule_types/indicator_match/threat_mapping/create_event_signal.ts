@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
@@ -56,7 +54,8 @@ export const createEventSignal = async ({
   inputIndexFields,
   threatIndexFields,
   completeRule,
-  licensing,
+  sortOrder = 'desc',
+  isAlertSuppressionActive,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
@@ -64,9 +63,6 @@ export const createEventSignal = async ({
     entryKey: 'field',
     allowedFieldsForTermsQuery,
   });
-
-  const license = await firstValueFrom(licensing.license$);
-  const hasPlatinumLicense = license.hasAtLeast('platinum');
 
   if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
@@ -134,10 +130,6 @@ export const createEventSignal = async ({
       threatSearchParams,
     });
 
-    const isAlertSuppressionEnabled = Boolean(
-      completeRule.ruleParams.alertSuppression?.groupBy?.length
-    );
-
     let createResult: SearchAfterAndBulkCreateReturnType;
     const searchAfterBulkCreateParams = {
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
@@ -151,7 +143,7 @@ export const createEventSignal = async ({
       pageSize: searchAfterSize,
       ruleExecutionLogger,
       services,
-      sortOrder: 'desc' as const,
+      sortOrder,
       trackTotalHits: false,
       tuple,
       wrapHits,
@@ -160,11 +152,7 @@ export const createEventSignal = async ({
       secondaryTimestamp,
     };
 
-    if (
-      isAlertSuppressionEnabled &&
-      runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled &&
-      hasPlatinumLicense
-    ) {
+    if (isAlertSuppressionActive) {
       createResult = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,

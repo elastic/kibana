@@ -32,7 +32,7 @@
       "features",
       "home",
       "spaces",
-      "serverless",
+      "serverless"
     ],
     "requiredBundles": [
       "alerting",

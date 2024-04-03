@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickCopyAsCurlButton();
 
-      const resultToast = await toasts.getToastElement(1);
+      const resultToast = await toasts.getElementByIndex(1);
       const toastText = await resultToast.getVisibleText();
 
       if (toastText.includes('Write permission denied')) {

@@ -25,8 +25,8 @@ import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  createRule,
   getOpenAlerts,
   getPreviewAlerts,
   getThreatMatchRuleForAlertTesting,
@@ -1126,6 +1126,133 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        // large number of documents gets processed in batches of 9,000
+        // rule should correctly go through them and suppress
+        // that can be an issue when search results returning in desc order
+        // this test is added to verify suppression works fine for this cases
+        it('should suppress alerts on large number of documents, more than 9,000', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+          await eventsFiller({
+            id,
+            count: 10000 * eventsCount,
+            timestamp: [firstTimestamp, secondTimestamp],
+          });
+          await threatsFiller({ id, count: 10000 * threatsCount, timestamp: firstTimestamp });
+
+          await indexGeneratedSourceDocuments({
+            docsCount: 60000,
+            interval: [firstTimestamp, '2020-10-28T05:35:50.000Z'],
+            seed: (index, _, timestamp) => ({
+              id,
+              '@timestamp': timestamp,
+              host: {
+                name: `host-${index}`,
+              },
+              agent: { name: 'agent-a' },
+            }),
+          });
+
+          await indexGeneratedSourceDocuments({
+            docsCount: 60000,
+            interval: [secondTimestamp, '2020-10-28T06:20:50.000Z'],
+            seed: (index, _, timestamp) => ({
+              id,
+              '@timestamp': timestamp,
+              host: {
+                name: `host-${index}`,
+              },
+              agent: { name: 'agent-a' },
+            }),
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-80',
+              },
+            },
+            count: 1,
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-14000',
+              },
+            },
+            count: 1,
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-36000',
+              },
+            },
+            count: 1,
+          });
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-5700',
+              },
+            },
+            count: 1,
+          });
+
+          const rule: ThreatMatchRuleCreateProps = {
+            ...indicatorMatchRule(id),
+            alert_suppression: {
+              group_by: ['agent.name'],
+              missing_fields_strategy: 'suppress',
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: ['agent-a'],
+              },
+            ],
+            // There 4 documents in threats index, each matches one document in source index on each of 2 rule executions
+            // In total it gives 8 potential alerts. With suppression enabled 1 is created, the rest 7 are suppressed
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 7,
+          });
+        });
+
         describe('rule execution only', () => {
           it('should suppress alerts during rule execution only', async () => {
             const id = uuidv4();
@@ -2064,6 +2191,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+              [ALERT_SUPPRESSION_START]: '2020-10-28T06:50:00.000Z',
             });
           });
 

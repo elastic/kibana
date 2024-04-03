@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';
@@ -28,6 +28,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
+import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
@@ -44,12 +45,19 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
-export class ESQLSource extends AbstractVectorSource implements IVectorSource {
+export class ESQLSource
+  extends AbstractVectorSource
+  implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
+{
   readonly _descriptor: ESQLSourceDescriptor;
 
   static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
     if (!isValidStringConfig(descriptor.esql)) {
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
+    }
+
+    if (!isValidStringConfig(descriptor.dataViewId)) {
+      throw new Error('Cannot create ESQLSourceDescriptor when dataViewId is not provided');
     }
 
     return {
@@ -58,6 +66,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
       columns: descriptor.columns ? descriptor.columns : [],
+      dataViewId: descriptor.dataViewId!,
       narrowByGlobalSearch:
         typeof descriptor.narrowByGlobalSearch !== 'undefined'
           ? descriptor.narrowByGlobalSearch
@@ -315,5 +324,13 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       narrowByMapBounds: this._descriptor.narrowByMapBounds,
       narrowByGlobalTime: this._descriptor.narrowByGlobalTime,
     };
+  }
+
+  getIndexPatternId() {
+    return this._descriptor.dataViewId;
+  }
+
+  getGeoFieldName() {
+    return this._descriptor.geoField;
   }
 }

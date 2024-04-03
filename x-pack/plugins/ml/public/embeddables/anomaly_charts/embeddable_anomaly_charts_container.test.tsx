@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  EmbeddableAnomalyChartsContainer,
-  EmbeddableAnomalyChartsContainerProps,
-} from './embeddable_anomaly_charts_container';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import type { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';
+import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
-import { CoreStart } from '@kbn/core/public';
+import type { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
+import type { CoreStart } from '@kbn/core/public';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
-import { MlDependencies } from '../../application/app';
-import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
+import type { MlDependencies } from '../../application/app';
+import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { createMlResultsServiceMock } from '../../application/services/ml_results_service';
 import { createCoreStartMock } from '../../__mocks__/core_start';

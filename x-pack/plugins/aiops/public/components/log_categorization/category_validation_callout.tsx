@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import {
-  FieldValidationResults,
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
-} from '@kbn/ml-category-validator';
+import type { FC } from 'react';
+import React from 'react';
+import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

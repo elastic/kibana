@@ -8,8 +8,6 @@
 import { riskScoreCalculationRoute } from './calculation';
 
 import { loggerMock } from '@kbn/logging-mocks';
-
-import type { ExperimentalFeatures } from '../../../../../common';
 import { RISK_SCORE_CALCULATION_URL } from '../../../../../common/constants';
 import {
   serverMock,
@@ -45,7 +43,7 @@ describe('risk score calculation route', () => {
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
-    riskScoreCalculationRoute(server.router, logger, {} as ExperimentalFeatures);
+    riskScoreCalculationRoute(server.router, logger);
   });
 
   const buildRequest = (overrides: object = {}) => {

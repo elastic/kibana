@@ -13,15 +13,10 @@ import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
-import { RANDOM_SAMPLER_SEED } from '../../common/constants';
-
-import {
-  DocumentCountStats,
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-  DocumentStatsSearchStrategyParams,
-} from '../get_document_stats';
+import type { DocumentCountStats, DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
@@ -119,7 +114,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           {
             params: getDocumentCountStatsRequest(
               { ...searchParams, trackTotalHits: false },
-              randomSamplerWrapper
+              randomSamplerWrapper,
+              false,
+              searchParamsCompare === undefined
             ),
           },
           { abortSignal: abortCtrl.current.signal }

@@ -17,7 +17,9 @@ export const APP_STATE_ACTION = {
   SET_ZOOM: 'SET_ZOOM',
   UNSET_ZOOM: 'UNSET_ZOOM',
   SET_FUNCTION_DESCRIPTION: 'SET_FUNCTION_DESCRIPTION',
-};
+} as const;
+
+export type TimeseriesexplorerActionType = typeof APP_STATE_ACTION[keyof typeof APP_STATE_ACTION];
 
 export const CHARTS_POINT_TARGET = 500;
 

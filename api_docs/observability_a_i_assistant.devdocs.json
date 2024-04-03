@@ -2,7 +2,613 @@
   "id": "observabilityAIAssistant",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.AssistantAvatar",
+        "type": "Function",
+        "tags": [],
+        "label": "AssistantAvatar",
+        "description": [],
+        "signature": [
+          "({ size = 's', css }: ",
+          "AssistantAvatarProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.AssistantAvatar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ size = 's', css }",
+            "description": [],
+            "signature": [
+              "AssistantAvatarProps"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ChatItemControls",
+        "type": "Function",
+        "tags": [],
+        "label": "ChatItemControls",
+        "description": [],
+        "signature": [
+          "({\n  error,\n  loading,\n  canRegenerate,\n  canGiveFeedback,\n  onFeedbackClick,\n  onRegenerateClick,\n  onStopGeneratingClick,\n}: { error: any; loading: boolean; canRegenerate: boolean; canGiveFeedback: boolean; onFeedbackClick: (feedback: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.Feedback",
+            "text": "Feedback"
+          },
+          ") => void; onRegenerateClick: () => void; onStopGeneratingClick: () => void; }) => JSX.Element | null"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ChatItemControls.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  error,\n  loading,\n  canRegenerate,\n  canGiveFeedback,\n  onFeedbackClick,\n  onRegenerateClick,\n  onStopGeneratingClick,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.error",
+                "type": "Any",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.loading",
+                "type": "boolean",
+                "tags": [],
+                "label": "loading",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.canRegenerate",
+                "type": "boolean",
+                "tags": [],
+                "label": "canRegenerate",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.canGiveFeedback",
+                "type": "boolean",
+                "tags": [],
+                "label": "canGiveFeedback",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.onFeedbackClick",
+                "type": "Function",
+                "tags": [],
+                "label": "onFeedbackClick",
+                "description": [],
+                "signature": [
+                  "(feedback: ",
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "public",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-public.Feedback",
+                    "text": "Feedback"
+                  },
+                  ") => void"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ChatItemControls.$1.onFeedbackClick.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "feedback",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "public",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-public.Feedback",
+                        "text": "Feedback"
+                      }
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.onRegenerateClick",
+                "type": "Function",
+                "tags": [],
+                "label": "onRegenerateClick",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ChatItemControls.$1.onStopGeneratingClick",
+                "type": "Function",
+                "tags": [],
+                "label": "onStopGeneratingClick",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ConnectorSelectorBase",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorSelectorBase",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "UseGenAIConnectorsResult",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ConnectorSelectorBase.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "UseGenAIConnectorsResult"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.createScreenContextAction",
+        "type": "Function",
+        "tags": [],
+        "label": "createScreenContextAction",
+        "description": [],
+        "signature": [
+          "(definition: TActionDefinition, respond: ",
+          "ScreenContextActionRespondFunction",
+          "<TResponse>) => ",
+          "ScreenContextActionDefinition",
+          "<TResponse>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.createScreenContextAction.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "definition",
+            "description": [],
+            "signature": [
+              "TActionDefinition"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.createScreenContextAction.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "respond",
+            "description": [],
+            "signature": [
+              "ScreenContextActionRespondFunction",
+              "<TResponse>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.createStorybookChatService",
+        "type": "Function",
+        "tags": [],
+        "label": "createStorybookChatService",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantChatService",
+            "text": "ObservabilityAIAssistantChatService"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/storybook_mock.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.createStorybookService",
+        "type": "Function",
+        "tags": [],
+        "label": "createStorybookService",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantService",
+            "text": "ObservabilityAIAssistantService"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/storybook_mock.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.FailedToLoadResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "FailedToLoadResponse",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/failed_to_load_response.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.FeedbackButtons",
+        "type": "Function",
+        "tags": [],
+        "label": "FeedbackButtons",
+        "description": [],
+        "signature": [
+          "({ onClickFeedback }: FeedbackButtonsProps) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.FeedbackButtons.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onClickFeedback }",
+            "description": [],
+            "signature": [
+              "FeedbackButtonsProps"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.getAssistantSystemMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getAssistantSystemMessage",
+        "description": [],
+        "signature": [
+          "({\n  contexts,\n}: { contexts: ",
+          "ContextDefinition",
+          "[]; }) => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/get_assistant_system_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.getAssistantSystemMessage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  contexts,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/get_assistant_system_message.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.getAssistantSystemMessage.$1.contexts",
+                "type": "Array",
+                "tags": [],
+                "label": "contexts",
+                "description": [],
+                "signature": [
+                  "ContextDefinition",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/get_assistant_system_message.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.isSupportedConnectorType",
+        "type": "Function",
+        "tags": [],
+        "label": "isSupportedConnectorType",
+        "description": [],
+        "signature": [
+          "(type: string) => boolean"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.isSupportedConnectorType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.MessageText",
+        "type": "Function",
+        "tags": [],
+        "label": "MessageText",
+        "description": [],
+        "signature": [
+          "({ loading, content, onActionClick }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/message_text.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.MessageText.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ loading, content, onActionClick }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/message_text.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useAbortableAsync",
+        "type": "Function",
+        "tags": [],
+        "label": "useAbortableAsync",
+        "description": [],
+        "signature": [
+          "(fn: ({}: { signal: AbortSignal; }) => T | Promise<T>, deps: any[], options: { clearValueOnNext?: boolean | undefined; defaultValue?: (() => T) | undefined; } | undefined) => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.AbortableAsyncState",
+            "text": "AbortableAsyncState"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useAbortableAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "({}: { signal: AbortSignal; }) => T | Promise<T>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useAbortableAsync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useAbortableAsync.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.useAbortableAsync.$3.clearValueOnNext",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "clearValueOnNext",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.useAbortableAsync.$3.defaultValue",
+                "type": "Function",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "(() => T) | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "observabilityAIAssistant",
@@ -11,7 +617,7 @@
         "tags": [],
         "label": "Conversation",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +628,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -36,7 +642,7 @@
             "signature": [
               "{ id?: string | undefined; name: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,9 +654,11 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; }"
+              "{ id: string; title: string; last_updated: string; token_count?: ",
+              "TokenCount",
+              " | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +679,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,7 +693,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,7 +707,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +718,7 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +729,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -135,7 +743,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntry",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +754,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -157,7 +765,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -168,7 +776,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,7 +787,7 @@
             "tags": [],
             "label": "doc_id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,7 +801,7 @@
             "signature": [
               "\"medium\" | \"high\" | \"low\""
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -204,7 +812,7 @@
             "tags": [],
             "label": "is_correction",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -215,7 +823,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -229,7 +837,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -249,7 +857,7 @@
                 "text": "KnowledgeBaseEntryRole"
               }
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,7 +871,7 @@
         "tags": [],
         "label": "Message",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,7 +882,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -320,9 +928,607 @@
               },
               ".Elastic; } | undefined; data?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ObservabilityAIAssistantChatService",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityAIAssistantChatService",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.sendAnalyticsEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "sendAnalyticsEvent",
+            "description": [],
+            "signature": [
+              "(event: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.TelemetryEventTypeWithPayload",
+                "text": "TelemetryEventTypeWithPayload"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.sendAnalyticsEvent.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "public",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-public.TelemetryEventTypeWithPayload",
+                    "text": "TelemetryEventTypeWithPayload"
+                  }
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.chat",
+            "type": "Function",
+            "tags": [],
+            "label": "chat",
+            "description": [],
+            "signature": [
+              "(name: string, options: { messages: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; connectorId: string; function?: \"none\" | \"auto\" | undefined; signal: AbortSignal; }) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.StreamingChatResponseEventWithoutError",
+                "text": "StreamingChatResponseEventWithoutError"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.chat.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.chat.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.chat.$2.messages",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "messages",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "common",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-common.Message",
+                        "text": "Message"
+                      },
+                      "[]"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.chat.$2.connectorId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "connectorId",
+                    "description": [],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.chat.$2.function",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "function",
+                    "description": [],
+                    "signature": [
+                      "\"none\" | \"auto\" | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.chat.$2.signal",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "signal",
+                    "description": [],
+                    "signature": [
+                      "AbortSignal"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.complete",
+            "type": "Function",
+            "tags": [],
+            "label": "complete",
+            "description": [],
+            "signature": [
+              "(options: { getScreenContexts: () => ",
+              "ObservabilityAIAssistantScreenContext",
+              "[]; conversationId?: string | undefined; connectorId: string; messages: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; persist: boolean; signal: AbortSignal; responseLanguage: string; }) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.StreamingChatResponseEventWithoutError",
+                "text": "StreamingChatResponseEventWithoutError"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.complete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.getScreenContexts",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "getScreenContexts",
+                    "description": [],
+                    "signature": [
+                      "() => ",
+                      "ObservabilityAIAssistantScreenContext",
+                      "[]"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [],
+                    "returnComment": []
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.conversationId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.connectorId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "connectorId",
+                    "description": [],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.messages",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "messages",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "common",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-common.Message",
+                        "text": "Message"
+                      },
+                      "[]"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.persist",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "persist",
+                    "description": [],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.signal",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "signal",
+                    "description": [],
+                    "signature": [
+                      "AbortSignal"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.responseLanguage",
+                    "type": "string",
+                    "tags": [],
+                    "label": "responseLanguage",
+                    "description": [],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.getContexts",
+            "type": "Function",
+            "tags": [],
+            "label": "getContexts",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ContextDefinition",
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.getFunctions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFunctions",
+            "description": [],
+            "signature": [
+              "(options?: { contexts?: string[] | undefined; filter?: string | undefined; } | undefined) => ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.FunctionDefinition",
+                "text": "FunctionDefinition"
+              },
+              "<any>[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.getFunctions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.getFunctions.$1.contexts",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "contexts",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.getFunctions.$1.filter",
+                    "type": "string",
+                    "tags": [],
+                    "label": "filter",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.hasFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "hasFunction",
+            "description": [],
+            "signature": [
+              "(name: string) => boolean"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.hasFunction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.hasRenderFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "hasRenderFunction",
+            "description": [],
+            "signature": [
+              "(name: string) => boolean"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.hasRenderFunction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantChatService.renderFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "renderFunction",
+            "description": [],
+            "signature": [
+              "(name: string, args: string | undefined, response: { data?: string | undefined; content?: string | undefined; }, onActionClick: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ChatActionClickHandler",
+                "text": "ChatActionClickHandler"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$2",
+                "type": "string",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$3.data",
+                    "type": "string",
+                    "tags": [],
+                    "label": "data",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$3.content",
+                    "type": "string",
+                    "tags": [],
+                    "label": "content",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantChatService.renderFunction.$4",
+                "type": "Function",
+                "tags": [],
+                "label": "onActionClick",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "public",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-public.ChatActionClickHandler",
+                    "text": "ChatActionClickHandler"
+                  }
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -334,26 +1540,10 @@
         "tags": [],
         "label": "ObservabilityAIAssistantService",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantService.isEnabled",
-            "type": "Function",
-            "tags": [],
-            "label": "isEnabled",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
           {
             "parentPluginId": "observabilityAIAssistant",
             "id": "def-public.ObservabilityAIAssistantService.callApi",
@@ -611,10 +1801,14 @@
               "; \"GET /internal/observability_ai_assistant/functions\": { endpoint: \"GET /internal/observability_ai_assistant/functions\"; params?: undefined; handler: ({}: ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ") => Promise<{ functionDefinitions: ",
-              "FunctionDefinition",
-              "<",
-              "CompatibleJSONSchema",
-              ">[]; contextDefinitions: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.FunctionDefinition",
+                "text": "FunctionDefinition"
+              },
+              "<any>[]; contextDefinitions: ",
               "ContextDefinition",
               "[]; }>; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -776,6 +1970,14 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
+              ", unknown>>; screenContexts: ",
+              "ArrayC",
+              "<",
+              "Type",
+              "<",
+              "ObservabilityAIAssistantScreenContextRequest",
+              ", ",
+              "ObservabilityAIAssistantScreenContextRequest",
               ", unknown>>; connectorId: ",
               "StringC",
               "; persist: ",
@@ -785,6 +1987,8 @@
               "<{ conversationId: ",
               "StringC",
               "; title: ",
+              "StringC",
+              "; responseLanguage: ",
               "StringC",
               "; }>]>; }> | undefined; handler: ({}: ",
               "ObservabilityAIAssistantRouteHandlerResources",
@@ -796,10 +2000,10 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
+              "[]; screenContexts: ",
+              "ObservabilityAIAssistantScreenContextRequest",
+              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
               "Readable",
-              " | ",
-              "ChatCompletion",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
               "; \"POST /internal/observability_ai_assistant/chat\": { endpoint: \"POST /internal/observability_ai_assistant/chat\"; params?: ",
@@ -835,14 +2039,18 @@
               "; functions: ",
               "ArrayC",
               "<",
+              "IntersectionC",
+              "<[",
               "TypeC",
               "<{ name: ",
               "StringC",
               "; description: ",
               "StringC",
-              "; parameters: ",
+              "; }>, ",
+              "PartialC",
+              "<{ parameters: ",
               "AnyC",
-              "; }>>; }>, ",
+              "; }>]>>; }>, ",
               "PartialC",
               "<{ functionCall: ",
               "StringC",
@@ -856,7 +2064,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+              "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -1109,10 +2317,14 @@
               "; \"GET /internal/observability_ai_assistant/functions\": { endpoint: \"GET /internal/observability_ai_assistant/functions\"; params?: undefined; handler: ({}: ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ") => Promise<{ functionDefinitions: ",
-              "FunctionDefinition",
-              "<",
-              "CompatibleJSONSchema",
-              ">[]; contextDefinitions: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.FunctionDefinition",
+                "text": "FunctionDefinition"
+              },
+              "<any>[]; contextDefinitions: ",
               "ContextDefinition",
               "[]; }>; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -1274,6 +2486,14 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
+              ", unknown>>; screenContexts: ",
+              "ArrayC",
+              "<",
+              "Type",
+              "<",
+              "ObservabilityAIAssistantScreenContextRequest",
+              ", ",
+              "ObservabilityAIAssistantScreenContextRequest",
               ", unknown>>; connectorId: ",
               "StringC",
               "; persist: ",
@@ -1283,6 +2503,8 @@
               "<{ conversationId: ",
               "StringC",
               "; title: ",
+              "StringC",
+              "; responseLanguage: ",
               "StringC",
               "; }>]>; }> | undefined; handler: ({}: ",
               "ObservabilityAIAssistantRouteHandlerResources",
@@ -1294,10 +2516,10 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
+              "[]; screenContexts: ",
+              "ObservabilityAIAssistantScreenContextRequest",
+              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
               "Readable",
-              " | ",
-              "ChatCompletion",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
               "; \"POST /internal/observability_ai_assistant/chat\": { endpoint: \"POST /internal/observability_ai_assistant/chat\"; params?: ",
@@ -1333,14 +2555,18 @@
               "; functions: ",
               "ArrayC",
               "<",
+              "IntersectionC",
+              "<[",
               "TypeC",
               "<{ name: ",
               "StringC",
               "; description: ",
               "StringC",
-              "; parameters: ",
+              "; }>, ",
+              "PartialC",
+              "<{ parameters: ",
               "AnyC",
-              "; }>>; }>, ",
+              "; }>]>>; }>, ",
               "PartialC",
               "<{ functionCall: ",
               "StringC",
@@ -1354,13 +2580,13 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+              "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
               "; }, TEndpoint>>"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1422,66 +2648,15 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantService.getCurrentUser",
+            "id": "def-public.ObservabilityAIAssistantService.isEnabled",
             "type": "Function",
             "tags": [],
-            "label": "getCurrentUser",
+            "label": "isEnabled",
             "description": [],
             "signature": [
-              "() => Promise<",
-              {
-                "pluginId": "@kbn/security-plugin-types-common",
-                "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
-              ">"
+              "() => boolean"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantService.getLicense",
-            "type": "Function",
-            "tags": [],
-            "label": "getLicense",
-            "description": [],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<",
-              "ILicense",
-              ">"
-            ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.ObservabilityAIAssistantService.getLicenseManagementLocator",
-            "type": "Function",
-            "tags": [],
-            "label": "getLicenseManagementLocator",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.SharePublicStart",
-                "text": "SharePublicStart"
-              }
-            ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1496,10 +2671,16 @@
             "description": [],
             "signature": [
               "({}: { signal: AbortSignal; }) => Promise<",
-              "ObservabilityAIAssistantChatService",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantChatService",
+                "text": "ObservabilityAIAssistantChatService"
+              },
               ">"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1510,7 +2691,7 @@
                 "tags": [],
                 "label": "{}",
                 "description": [],
-                "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1524,7 +2705,7 @@
                     "signature": [
                       "AbortSignal"
                     ],
-                    "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1545,7 +2726,7 @@
               "ChatRegistrationRenderFunction",
               ") => void"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1559,7 +2740,115 @@
                 "signature": [
                   "ChatRegistrationRenderFunction"
                 ],
-                "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.setScreenContext",
+            "type": "Function",
+            "tags": [],
+            "label": "setScreenContext",
+            "description": [],
+            "signature": [
+              "(screenContext: ",
+              "ObservabilityAIAssistantScreenContext",
+              ") => () => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantService.setScreenContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "screenContext",
+                "description": [],
+                "signature": [
+                  "ObservabilityAIAssistantScreenContext"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.getScreenContexts",
+            "type": "Function",
+            "tags": [],
+            "label": "getScreenContexts",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ObservabilityAIAssistantScreenContext",
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.conversations",
+            "type": "Object",
+            "tags": [],
+            "label": "conversations",
+            "description": [],
+            "signature": [
+              "ObservabilityAIAssistantConversationService"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.navigate",
+            "type": "Function",
+            "tags": [],
+            "label": "navigate",
+            "description": [],
+            "signature": [
+              "(callback: () => void) => Promise<",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.MessageAddEvent",
+                "text": "MessageAddEvent"
+              },
+              ">>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantService.navigate.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1569,9 +2858,210 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.UseChatResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseChatResult",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseChatResult.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseChatResult.setMessages",
+            "type": "Function",
+            "tags": [],
+            "label": "setMessages",
+            "description": [],
+            "signature": [
+              "(messages: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]) => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.UseChatResult.setMessages.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseChatResult.state",
+            "type": "Enum",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ChatState",
+                "text": "ChatState"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseChatResult.next",
+            "type": "Function",
+            "tags": [],
+            "label": "next",
+            "description": [],
+            "signature": [
+              "(messages: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]) => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.UseChatResult.next.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "common",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseChatResult.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ChatActionClickType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ChatActionClickType",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ChatState",
+        "type": "Enum",
+        "tags": [],
+        "label": "ChatState",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.FunctionVisibility",
+        "type": "Enum",
+        "tags": [],
+        "label": "FunctionVisibility",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/function_visibility.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.KnowledgeBaseEntryRole",
@@ -1579,7 +3069,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntryRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1591,13 +3081,82 @@
         "tags": [],
         "label": "MessageRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ObservabilityAIAssistantTelemetryEventType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ObservabilityAIAssistantTelemetryEventType",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/telemetry_event_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.VisualizeESQLUserIntention",
+        "type": "Enum",
+        "tags": [],
+        "label": "VisualizeESQLUserIntention",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/visualize_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.AbortableAsyncState",
+        "type": "Type",
+        "tags": [],
+        "label": "AbortableAsyncState",
+        "description": [],
+        "signature": [
+          "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantLogsIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantLogsIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantResponseLanguage",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantResponseLanguage",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.APIReturnType",
@@ -1847,10 +3406,14 @@
           "; \"GET /internal/observability_ai_assistant/functions\": { endpoint: \"GET /internal/observability_ai_assistant/functions\"; params?: undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ") => Promise<{ functionDefinitions: ",
-          "FunctionDefinition",
-          "<",
-          "CompatibleJSONSchema",
-          ">[]; contextDefinitions: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.FunctionDefinition",
+            "text": "FunctionDefinition"
+          },
+          "<any>[]; contextDefinitions: ",
           "ContextDefinition",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -2012,6 +3575,14 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          ", unknown>>; screenContexts: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          "ObservabilityAIAssistantScreenContextRequest",
+          ", ",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -2021,6 +3592,8 @@
           "<{ conversationId: ",
           "StringC",
           "; title: ",
+          "StringC",
+          "; responseLanguage: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -2032,10 +3605,10 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
+          "[]; screenContexts: ",
+          "ObservabilityAIAssistantScreenContextRequest",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
           "Readable",
-          " | ",
-          "ChatCompletion",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
           "; \"POST /internal/observability_ai_assistant/chat\": { endpoint: \"POST /internal/observability_ai_assistant/chat\"; params?: ",
@@ -2071,14 +3644,18 @@
           "; functions: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
           "; description: ",
           "StringC",
-          "; parameters: ",
+          "; }>, ",
+          "PartialC",
+          "<{ parameters: ",
           "AnyC",
-          "; }>>; }>, ",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ functionCall: ",
           "StringC",
@@ -2092,7 +3669,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+          "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -2100,7 +3677,116 @@
           "ServerRouteCreateOptions",
           " ? TReturnType : never"
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ChatActionClickHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatActionClickHandler",
+        "description": [],
+        "signature": [
+          "(payload: ChatActionClickPayloadExecuteEsql) => void"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ChatActionClickHandler.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ChatActionClickType",
+                "text": "ChatActionClickType"
+              },
+              "; } & { query: string; userOverrides?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TypedLensByValueInput",
+                "text": "TypedLensByValueInput"
+              },
+              " | undefined; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ChatActionClickPayload",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatActionClickPayload",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ChatActionClickType",
+            "text": "ChatActionClickType"
+          },
+          "; } & { query: string; userOverrides?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TypedLensByValueInput",
+            "text": "TypedLensByValueInput"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.Feedback",
+        "type": "Type",
+        "tags": [],
+        "label": "Feedback",
+        "description": [],
+        "signature": [
+          "\"negative\" | \"positive\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.LANGUAGE_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "LANGUAGE_OPTIONS",
+        "description": [],
+        "signature": [
+          "{ value: string; label: string; }[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_user_preferred_language.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2354,10 +4040,14 @@
           "; \"GET /internal/observability_ai_assistant/functions\": { endpoint: \"GET /internal/observability_ai_assistant/functions\"; params?: undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ") => Promise<{ functionDefinitions: ",
-          "FunctionDefinition",
-          "<",
-          "CompatibleJSONSchema",
-          ">[]; contextDefinitions: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.FunctionDefinition",
+            "text": "FunctionDefinition"
+          },
+          "<any>[]; contextDefinitions: ",
           "ContextDefinition",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -2519,6 +4209,14 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          ", unknown>>; screenContexts: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          "ObservabilityAIAssistantScreenContextRequest",
+          ", ",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -2528,6 +4226,8 @@
           "<{ conversationId: ",
           "StringC",
           "; title: ",
+          "StringC",
+          "; responseLanguage: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -2539,10 +4239,10 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
+          "[]; screenContexts: ",
+          "ObservabilityAIAssistantScreenContextRequest",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
           "Readable",
-          " | ",
-          "ChatCompletion",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
           "; \"POST /internal/observability_ai_assistant/chat\": { endpoint: \"POST /internal/observability_ai_assistant/chat\"; params?: ",
@@ -2578,14 +4278,18 @@
           "; functions: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
           "; description: ",
           "StringC",
-          "; parameters: ",
+          "; }>, ",
+          "PartialC",
+          "<{ parameters: ",
           "AnyC",
-          "; }>>; }>, ",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ functionCall: ",
           "StringC",
@@ -2599,7 +4303,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+          "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -2623,7 +4327,7 @@
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2638,21 +4342,242 @@
         "signature": [
           "\"POST /internal/observability_ai_assistant/chat\" | \"POST /internal/observability_ai_assistant/chat/complete\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"GET /internal/observability_ai_assistant/functions\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarize\" | \"POST /internal/observability_ai_assistant/kb/setup\" | \"GET /internal/observability_ai_assistant/kb/status\" | \"GET /internal/observability_ai_assistant/kb/entries\" | \"POST /internal/observability_ai_assistant/kb/entries/import\" | \"POST /internal/observability_ai_assistant/kb/entries/save\" | \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\""
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/api/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.RegisterRenderFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "RegisterRenderFunctionDefinition",
+        "description": [],
+        "signature": [
+          "(name: string, render: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.RenderFunction",
+            "text": "RenderFunction"
+          },
+          "<TFunctionArguments, TFunctionResponse>) => void"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.RegisterRenderFunctionDefinition.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.RegisterRenderFunctionDefinition.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "(options: { arguments: TFunctionArguments; response: TFunctionResponse; onActionClick: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ChatActionClickHandler",
+                "text": "ChatActionClickHandler"
+              },
+              "; }) => React.ReactNode"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.RegisterRenderFunctionDefinition.$2.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ arguments: TArguments; response: TResponse; onActionClick: ",
+                  {
+                    "pluginId": "observabilityAIAssistant",
+                    "scope": "public",
+                    "docId": "kibObservabilityAIAssistantPluginApi",
+                    "section": "def-public.ChatActionClickHandler",
+                    "text": "ChatActionClickHandler"
+                  },
+                  "; }"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.RenderFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "RenderFunction",
+        "description": [],
+        "signature": [
+          "(options: { arguments: TArguments; response: TResponse; onActionClick: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ChatActionClickHandler",
+            "text": "ChatActionClickHandler"
+          },
+          "; }) => React.ReactNode"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.RenderFunction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ arguments: TArguments; response: TResponse; onActionClick: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ChatActionClickHandler",
+                "text": "ChatActionClickHandler"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.TelemetryEventTypeWithPayload",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryEventTypeWithPayload",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantTelemetryEventType",
+            "text": "ObservabilityAIAssistantTelemetryEventType"
+          },
+          ".ChatFeedback; payload: ",
+          "ChatFeedback",
+          "; } | { type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantTelemetryEventType",
+            "text": "ObservabilityAIAssistantTelemetryEventType"
+          },
+          ".InsightFeedback; payload: ",
+          "InsightFeedback",
+          "; } | { type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantTelemetryEventType",
+            "text": "ObservabilityAIAssistantTelemetryEventType"
+          },
+          ".UserSentPromptInChat; payload: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.VISUALIZE_ESQL_USER_INTENTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "VISUALIZE_ESQL_USER_INTENTIONS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.VisualizeESQLUserIntention",
+            "text": "VisualizeESQLUserIntention"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/visualize_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.DEFAULT_LANGUAGE_OPTION",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_LANGUAGE_OPTION",
+        "description": [],
+        "signature": [
+          "{ value: string; label: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_user_preferred_language.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "observabilityAIAssistant",
-      "id": "def-public.ObservabilityAIAssistantPluginSetup",
+      "id": "def-public.ObservabilityAIAssistantPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ObservabilityAIAssistantPluginSetup",
+      "label": "ObservabilityAIAssistantPublicSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -2661,18 +4586,18 @@
     },
     "start": {
       "parentPluginId": "observabilityAIAssistant",
-      "id": "def-public.ObservabilityAIAssistantPluginStart",
+      "id": "def-public.ObservabilityAIAssistantPublicStart",
       "type": "Interface",
       "tags": [],
-      "label": "ObservabilityAIAssistantPluginStart",
+      "label": "ObservabilityAIAssistantPublicStart",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-public.ObservabilityAIAssistantPluginStart.service",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.service",
           "type": "Object",
           "tags": [],
           "label": "service",
@@ -2686,13 +4611,13 @@
               "text": "ObservabilityAIAssistantService"
             }
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-public.ObservabilityAIAssistantPluginStart.ObservabilityAIAssistantContextualInsight",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantContextualInsight",
           "type": "CompoundType",
           "tags": [],
           "label": "ObservabilityAIAssistantContextualInsight",
@@ -2702,35 +4627,74 @@
             "InsightProps",
             "> | null"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-public.ObservabilityAIAssistantPluginStart.ObservabilityAIAssistantActionMenuItem",
-          "type": "CompoundType",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantMultipaneFlyoutContext",
+          "type": "Object",
           "tags": [],
-          "label": "ObservabilityAIAssistantActionMenuItem",
+          "label": "ObservabilityAIAssistantMultipaneFlyoutContext",
           "description": [],
           "signature": [
-            "React.ForwardRefExoticComponent<Pick<React.RefAttributes<{}> & ",
-            {
-              "pluginId": "@kbn/shared-ux-utility",
-              "scope": "common",
-              "docId": "kibKbnSharedUxUtilityPluginApi",
-              "section": "def-common.WithSuspenseExtendedDeps",
-              "text": "WithSuspenseExtendedDeps"
-            },
-            ", \"key\" | \"css\" | \"analytics\"> & React.RefAttributes<{}>> | null"
+            "React.Context<",
+            "ChatFlyoutSecondSlotHandler",
+            " | undefined>"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-public.ObservabilityAIAssistantPluginStart.useGenAIConnectors",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.ObservabilityAIAssistantChatServiceContext",
+          "type": "Object",
+          "tags": [],
+          "label": "ObservabilityAIAssistantChatServiceContext",
+          "description": [],
+          "signature": [
+            "React.Context<",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.ObservabilityAIAssistantChatService",
+              "text": "ObservabilityAIAssistantChatService"
+            },
+            " | undefined>"
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useObservabilityAIAssistantChatService",
+          "type": "Function",
+          "tags": [],
+          "label": "useObservabilityAIAssistantChatService",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.ObservabilityAIAssistantChatService",
+              "text": "ObservabilityAIAssistantChatService"
+            }
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useGenAIConnectors",
           "type": "Function",
           "tags": [],
           "label": "useGenAIConnectors",
@@ -2739,11 +4703,277 @@
             "() => ",
             "UseGenAIConnectorsResult"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useChat",
+          "type": "Function",
+          "tags": [],
+          "label": "useChat",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "UseChatProps",
+            ") => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "public",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-public.UseChatResult",
+              "text": "UseChatResult"
+            }
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.useChat.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "{ connectorId?: string | undefined; service: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "public",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-public.ObservabilityAIAssistantService",
+                  "text": "ObservabilityAIAssistantService"
+                },
+                "; initialMessages: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
+                },
+                "[]; initialConversationId?: string | undefined; chatService: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "public",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-public.ObservabilityAIAssistantChatService",
+                  "text": "ObservabilityAIAssistantChatService"
+                },
+                "; persist: boolean; onConversationUpdate?: ((event: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.ConversationCreateEvent",
+                  "text": "ConversationCreateEvent"
+                },
+                " | ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.ConversationUpdateEvent",
+                  "text": "ConversationUpdateEvent"
+                },
+                ") => void) | undefined; onChatComplete?: ((messages: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
+                },
+                "[]) => void) | undefined; }"
+              ],
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.useUserPreferredLanguage",
+          "type": "Function",
+          "tags": [],
+          "label": "useUserPreferredLanguage",
+          "description": [],
+          "signature": [
+            "() => { selectedLanguage: string; getPreferredLanguage: () => string; }"
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages",
+          "type": "Function",
+          "tags": [],
+          "label": "getContextualInsightMessages",
+          "description": [],
+          "signature": [
+            "({}: { message: string; instructions: string; }) => ",
+            {
+              "pluginId": "observabilityAIAssistant",
+              "scope": "common",
+              "docId": "kibObservabilityAIAssistantPluginApi",
+              "section": "def-common.Message",
+              "text": "Message"
+            },
+            "[]"
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "{}",
+              "description": [],
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1.message",
+                  "type": "string",
+                  "tags": [],
+                  "label": "message",
+                  "description": [],
+                  "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                },
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages.$1.instructions",
+                  "type": "string",
+                  "tags": [],
+                  "label": "instructions",
+                  "description": [],
+                  "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction",
+          "type": "Function",
+          "tags": [],
+          "label": "createScreenContextAction",
+          "description": [],
+          "signature": [
+            "<TActionDefinition extends Omit<",
+            "ScreenContextActionDefinition",
+            "<undefined>, \"respond\">, TResponse = ReturnOf<TActionDefinition>>(definition: TActionDefinition, respond: ",
+            "ScreenContextActionRespondFunction",
+            "<TResponse>) => ",
+            "ScreenContextActionDefinition",
+            "<TResponse>"
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "definition",
+              "description": [],
+              "signature": [
+                "TActionDefinition"
+              ],
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "respond",
+              "description": [],
+              "signature": [
+                "({}: { args: TResponse; signal: AbortSignal; connectorId: string; client: Pick<",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "public",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-public.ObservabilityAIAssistantChatService",
+                  "text": "ObservabilityAIAssistantChatService"
+                },
+                ", \"complete\" | \"chat\">; messages: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
+                },
+                "[]; }) => Promise<",
+                "FunctionResponse",
+                ">"
+              ],
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2.$1",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "__0",
+                  "description": [],
+                  "signature": [
+                    "{ args: TArguments; signal: AbortSignal; connectorId: string; client: Pick<",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "public",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-public.ObservabilityAIAssistantChatService",
+                      "text": "ObservabilityAIAssistantChatService"
+                    },
+                    ", \"complete\" | \"chat\">; messages: ",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "common",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-common.Message",
+                      "text": "Message"
+                    },
+                    "[]; }"
+                  ],
+                  "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -2756,6 +4986,36 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantLogsIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantLogsIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantResponseLanguage",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantResponseLanguage",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-server.ObservabilityAIAssistantServerRouteRepository",
@@ -3005,10 +5265,14 @@
           "; \"GET /internal/observability_ai_assistant/functions\": { endpoint: \"GET /internal/observability_ai_assistant/functions\"; params?: undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ") => Promise<{ functionDefinitions: ",
-          "FunctionDefinition",
-          "<",
-          "CompatibleJSONSchema",
-          ">[]; contextDefinitions: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.FunctionDefinition",
+            "text": "FunctionDefinition"
+          },
+          "<any>[]; contextDefinitions: ",
           "ContextDefinition",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -3170,6 +5434,14 @@
             "section": "def-common.Message",
             "text": "Message"
           },
+          ", unknown>>; screenContexts: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          "ObservabilityAIAssistantScreenContextRequest",
+          ", ",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -3179,6 +5451,8 @@
           "<{ conversationId: ",
           "StringC",
           "; title: ",
+          "StringC",
+          "; responseLanguage: ",
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -3190,10 +5464,10 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; }; }; }) => Promise<",
+          "[]; screenContexts: ",
+          "ObservabilityAIAssistantScreenContextRequest",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
           "Readable",
-          " | ",
-          "ChatCompletion",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
           "; \"POST /internal/observability_ai_assistant/chat\": { endpoint: \"POST /internal/observability_ai_assistant/chat\"; params?: ",
@@ -3229,14 +5503,18 @@
           "; functions: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
           "; description: ",
           "StringC",
-          "; parameters: ",
+          "; }>, ",
+          "PartialC",
+          "<{ parameters: ",
           "AnyC",
-          "; }>>; }>, ",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ functionCall: ",
           "StringC",
@@ -3250,33 +5528,77 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+          "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
           "; }"
         ],
-        "path": "x-pack/plugins/observability_ai_assistant/server/routes/get_global_observability_ai_assistant_route_repository.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/routes/get_global_observability_ai_assistant_route_repository.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.RegistrationCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "RegistrationCallback",
+        "description": [],
+        "signature": [
+          "({}: { signal: AbortSignal; resources: ",
+          "RespondFunctionResources",
+          "; client: ",
+          "ObservabilityAIAssistantClient",
+          "; functions: ",
+          "ChatFunctionClient",
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-server.RegistrationCallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ signal: AbortSignal; resources: ",
+              "RespondFunctionResources",
+              "; client: ",
+              "ObservabilityAIAssistantClient",
+              "; functions: ",
+              "ChatFunctionClient",
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "start": {
       "parentPluginId": "observabilityAIAssistant",
-      "id": "def-server.ObservabilityAIAssistantPluginStart",
+      "id": "def-server.ObservabilityAIAssistantServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "ObservabilityAIAssistantPluginStart",
+      "label": "ObservabilityAIAssistantServerStart",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-server.ObservabilityAIAssistantPluginStart.service",
+          "id": "def-server.ObservabilityAIAssistantServerStart.service",
           "type": "Object",
           "tags": [],
           "label": "service",
@@ -3286,7 +5608,7 @@
           "signature": [
             "ObservabilityAIAssistantService"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3296,18 +5618,18 @@
     },
     "setup": {
       "parentPluginId": "observabilityAIAssistant",
-      "id": "def-server.ObservabilityAIAssistantPluginSetup",
+      "id": "def-server.ObservabilityAIAssistantServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ObservabilityAIAssistantPluginSetup",
+      "label": "ObservabilityAIAssistantServerSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-server.ObservabilityAIAssistantPluginSetup.service",
+          "id": "def-server.ObservabilityAIAssistantServerSetup.service",
           "type": "Object",
           "tags": [],
           "label": "service",
@@ -3317,7 +5639,7 @@
           "signature": [
             "ObservabilityAIAssistantService"
           ],
-          "path": "x-pack/plugins/observability_ai_assistant/server/types.ts",
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3327,8 +5649,341 @@
     }
   },
   "common": {
-    "classes": [],
-    "functions": [],
+    "classes": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ChatCompletionError",
+        "type": "Class",
+        "tags": [],
+        "label": "ChatCompletionError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionError",
+            "text": "ChatCompletionError"
+          },
+          "<T> extends Error"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.ChatCompletionError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-common.ChatCompletionError.Unnamed.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "code",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-common.ChatCompletionError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-common.ChatCompletionError.Unnamed.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "ErrorMetaAttributes[T] | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.createConversationNotFoundError",
+        "type": "Function",
+        "tags": [],
+        "label": "createConversationNotFoundError",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionError",
+            "text": "ChatCompletionError"
+          },
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionErrorCode",
+            "text": "ChatCompletionErrorCode"
+          },
+          ".NotFoundError>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.createInternalServerError",
+        "type": "Function",
+        "tags": [],
+        "label": "createInternalServerError",
+        "description": [],
+        "signature": [
+          "(originalErrorMessage: string) => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionError",
+            "text": "ChatCompletionError"
+          },
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionErrorCode",
+            "text": "ChatCompletionErrorCode"
+          },
+          ".InternalError>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.createInternalServerError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "originalErrorMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.createTokenLimitReachedError",
+        "type": "Function",
+        "tags": [],
+        "label": "createTokenLimitReachedError",
+        "description": [],
+        "signature": [
+          "(tokenLimit: number | undefined, tokenCount: number | undefined) => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionError",
+            "text": "ChatCompletionError"
+          },
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionErrorCode",
+            "text": "ChatCompletionErrorCode"
+          },
+          ".TokenLimitReachedError>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.createTokenLimitReachedError.$1",
+            "type": "number",
+            "tags": [],
+            "label": "tokenLimit",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.createTokenLimitReachedError.$2",
+            "type": "number",
+            "tags": [],
+            "label": "tokenCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.isChatCompletionError",
+        "type": "Function",
+        "tags": [],
+        "label": "isChatCompletionError",
+        "description": [],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.isChatCompletionError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.isSupportedConnectorType",
+        "type": "Function",
+        "tags": [],
+        "label": "isSupportedConnectorType",
+        "description": [],
+        "signature": [
+          "(type: string) => boolean"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.isSupportedConnectorType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.isTokenLimitReachedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isTokenLimitReachedError",
+        "description": [],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.isTokenLimitReachedError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "observabilityAIAssistant",
@@ -3337,7 +5992,7 @@
         "tags": [],
         "label": "Conversation",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3348,7 +6003,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3362,7 +6017,7 @@
             "signature": [
               "{ id?: string | undefined; name: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3374,9 +6029,11 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; }"
+              "{ id: string; title: string; last_updated: string; token_count?: ",
+              "TokenCount",
+              " | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3397,7 +6054,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3411,7 +6068,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3425,7 +6082,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3436,7 +6093,7 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3447,7 +6104,116 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.FunctionDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "FunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.FunctionDefinition",
+            "text": "FunctionDefinition"
+          },
+          "<TParameters>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.FunctionDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.FunctionDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.FunctionDefinition.visibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visibility",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.FunctionVisibility",
+                "text": "FunctionVisibility"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.FunctionDefinition.descriptionForUser",
+            "type": "string",
+            "tags": [],
+            "label": "descriptionForUser",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.FunctionDefinition.parameters",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "parameters",
+            "description": [],
+            "signature": [
+              "TParameters | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.FunctionDefinition.contexts",
+            "type": "Array",
+            "tags": [],
+            "label": "contexts",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3461,7 +6227,7 @@
         "tags": [],
         "label": "KnowledgeBaseEntry",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3472,7 +6238,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3483,7 +6249,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3494,7 +6260,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3505,7 +6271,7 @@
             "tags": [],
             "label": "doc_id",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3519,7 +6285,7 @@
             "signature": [
               "\"medium\" | \"high\" | \"low\""
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3530,7 +6296,7 @@
             "tags": [],
             "label": "is_correction",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3541,7 +6307,7 @@
             "tags": [],
             "label": "public",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3555,7 +6321,7 @@
             "signature": [
               "Record<string, string> | undefined"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3575,7 +6341,7 @@
                 "text": "KnowledgeBaseEntryRole"
               }
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3589,7 +6355,7 @@
         "tags": [],
         "label": "Message",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3600,7 +6366,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3646,7 +6412,7 @@
               },
               ".Elastic; } | undefined; data?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3657,12 +6423,36 @@
     "enums": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ChatCompletionErrorCode",
+        "type": "Enum",
+        "tags": [],
+        "label": "ChatCompletionErrorCode",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.FunctionVisibility",
+        "type": "Enum",
+        "tags": [],
+        "label": "FunctionVisibility",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/function_visibility.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.KnowledgeBaseEntryRole",
         "type": "Enum",
         "tags": [],
         "label": "KnowledgeBaseEntryRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3674,13 +6464,341 @@
         "tags": [],
         "label": "MessageRole",
         "description": [],
-        "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.StreamingChatResponseEventType",
+        "type": "Enum",
+        "tags": [],
+        "label": "StreamingChatResponseEventType",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.VisualizeESQLUserIntention",
+        "type": "Enum",
+        "tags": [],
+        "label": "VisualizeESQLUserIntention",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/visualize_esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.BufferFlushEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "BufferFlushEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".BufferFlush; } & { data?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ChatCompletionChunkEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompletionChunkEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".ChatCompletionChunk; } & { id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ChatCompletionErrorEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompletionErrorEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".ChatCompletionError; } & { error: { message: string; stack?: string | undefined; code?: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionErrorCode",
+            "text": "ChatCompletionErrorCode"
+          },
+          " | undefined; meta?: Record<string, any> | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ConversationCreateEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationCreateEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ConversationCreateRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationCreateRequest",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ConversationUpdateEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ConversationUpdateEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.MessageAddEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "MessageAddEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".MessageAdd; } & { message: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; id: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.StreamingChatResponseEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamingChatResponseEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ConversationCreateEvent",
+            "text": "ConversationCreateEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ConversationUpdateEvent",
+            "text": "ConversationUpdateEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionErrorEvent",
+            "text": "ChatCompletionErrorEvent"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.StreamingChatResponseEventWithoutError",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamingChatResponseEventWithoutError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ConversationCreateEvent",
+            "text": "ConversationCreateEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ConversationUpdateEvent",
+            "text": "ConversationUpdateEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.VISUALIZE_ESQL_USER_INTENTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "VISUALIZE_ESQL_USER_INTENTIONS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.VisualizeESQLUserIntention",
+            "text": "VisualizeESQLUserIntention"
+          },
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/visualize_esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

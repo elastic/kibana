@@ -8,12 +8,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
 
-import { KibanaThemeProvider, MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import {
@@ -129,7 +130,7 @@ export const useVisualizeAppState = (
               }),
               text: toMountPoint(
                 <KibanaThemeProvider theme$={services.theme.theme$}>
-                  <MarkdownSimple>{error.message}</MarkdownSimple>
+                  <Markdown readOnly>{error.message}</Markdown>
                 </KibanaThemeProvider>
               ),
             });

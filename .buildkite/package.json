@@ -6,6 +6,9 @@
     "test": "mocha",
     "test:watch": "mocha --watch"
   },
+  "overrides": {
+    "serialize-javascript": "^6.0.2"
+  },
   "dependencies": {
     "@octokit/rest": "^18.10.0",
     "axios": "^1.6.3",
@@ -21,7 +24,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^15.12.2",
     "chai": "^4.3.10",
-    "mocha": "^10.2.0",
+    "mocha": "^10.3.0",
     "nock": "^12.0.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"

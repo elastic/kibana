@@ -30,7 +30,7 @@ import { auditLoggingService } from '../audit_logging';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
-import { getLatestAvailableVersion } from './versions';
+import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
@@ -332,7 +332,7 @@ export async function getAgentsByKuery(
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
-    const latestAgentVersion = await getLatestAvailableVersion();
+    const latestAgentVersion = await getLatestAvailableAgentVersion();
     // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
     // query all agents, then filter upgradeable, and return the requested page and correct total
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
@@ -350,9 +350,19 @@ export async function getAgentsByKuery(
   }
 
   if (getStatusSummary) {
-    res.aggregations?.status.buckets.forEach((bucket) => {
-      statusSummary[bucket.key] = bucket.doc_count;
-    });
+    if (showUpgradeable) {
+      // when showUpgradeable is selected, calculate the summary status manually from the upgradeable agents above
+      // the bucket count doesn't take in account the upgradeable agents
+      agents.forEach((agent) => {
+        if (!agent?.status) return;
+        if (!statusSummary[agent.status]) statusSummary[agent.status] = 0;
+        statusSummary[agent.status]++;
+      });
+    } else {
+      res.aggregations?.status.buckets.forEach((bucket) => {
+        statusSummary[bucket.key] = bucket.doc_count;
+      });
+    }
   }
 
   return {

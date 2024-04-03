@@ -43,6 +43,7 @@ export interface BootDependencies {
   theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
+  isMonacoEnabled: boolean;
 }
 
 export async function renderApp({
@@ -55,6 +56,7 @@ export async function renderApp({
   theme$,
   docLinks,
   autocompleteInfo,
+  isMonacoEnabled,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -92,6 +94,9 @@ export async function renderApp({
               autocompleteInfo,
             },
             theme$,
+            config: {
+              isMonacoEnabled,
+            },
           }}
         >
           <RequestContextProvider>

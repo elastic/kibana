@@ -7,8 +7,9 @@
 
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridSorting } from '@elastic/eui';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { EuiDataGridColumnSortingConfig } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { DefaultSort } from './constants';
 
 const formatGridColumns = (cols: SortCombinations[]): EuiDataGridSorting['columns'] => {
@@ -31,17 +32,30 @@ export type UseSorting = (
 
 export function useSorting(
   onSortChange: (sort: EuiDataGridSorting['columns']) => void,
+  visibleColumns: string[],
   defaultSort: SortCombinations[] = DefaultSort
 ) {
+  const [visibleColumnsSort, invisibleColumnsSort] = useMemo(() => {
+    const visibleSort: SortCombinations[] = [];
+    const invisibleSort: EuiDataGridColumnSortingConfig[] = [];
+    defaultSort.forEach((sortCombinations) => {
+      if (visibleColumns.includes(Object.keys(sortCombinations)[0])) {
+        visibleSort.push(sortCombinations);
+      } else {
+        invisibleSort.push(...formatGridColumns([sortCombinations]));
+      }
+    });
+    return [visibleSort, invisibleSort];
+  }, [defaultSort, visibleColumns]);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>(
-    formatGridColumns(defaultSort)
+    formatGridColumns(visibleColumnsSort)
   );
-  const onSort = useCallback(
-    (_state) => {
-      onSortChange(_state);
-      setSortingColumns(_state);
+  const onSort = useCallback<EuiDataGridSorting['onSort']>(
+    (sortingConfig) => {
+      onSortChange([...sortingConfig, ...invisibleColumnsSort]);
+      setSortingColumns(sortingConfig);
     },
-    [setSortingColumns, onSortChange]
+    [onSortChange, invisibleColumnsSort]
   );
   return { sortingColumns, onSort };
 }

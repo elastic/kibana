@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -24,6 +24,7 @@ export function fetchFieldsFromESQL(
   query: Query | AggregateQuery,
   expressions: ExpressionsStart,
   time?: TimeRange,
+  abortController?: AbortController,
   dataView?: DataView
 ) {
   return textBasedQueryStateToAstWithValidation({
@@ -33,7 +34,15 @@ export function fetchFieldsFromESQL(
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const executionContract = expressions.execute(ast, null);
+
+        if (abortController) {
+          abortController.signal.onabort = () => {
+            executionContract.cancel();
+          };
+        }
+
+        const execution = executionContract.getData();
         let finalData: Datatable;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {

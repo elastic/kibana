@@ -36,6 +36,7 @@ export const useCloudSecurityGrouping = ({
   groupingLevel,
   groupingLocalStorageKey,
   maxGroupingLevels = DEFAULT_MAX_GROUPING_LEVELS,
+  groupsUnit,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -47,6 +48,7 @@ export const useCloudSecurityGrouping = ({
   groupingLevel?: number;
   groupingLocalStorageKey: string;
   maxGroupingLevels?: number;
+  groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -63,6 +65,7 @@ export const useCloudSecurityGrouping = ({
       unit,
       groupPanelRenderer,
       groupStatsRenderer,
+      groupsUnit,
     },
     defaultGroupingOptions,
     fields: dataView.fields,

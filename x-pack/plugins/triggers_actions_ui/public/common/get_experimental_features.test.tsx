@@ -16,14 +16,15 @@ describe('getIsExperimentalFeatureEnabled', () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
-        internalAlertsTable: true,
         rulesDetailLogs: true,
+        globalAlertsPage: false,
         ruleTagFilter: true,
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
         ruleKqlBar: true,
         isMustacheAutocompleteOn: false,
         showMustacheAutocompleteSwitch: false,
+        ruleFormV2: false,
       },
     });
 
@@ -35,9 +36,9 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    result = getIsExperimentalFeatureEnabled('internalAlertsTable');
+    result = getIsExperimentalFeatureEnabled('globalAlertsPage');
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(false);
 
     result = getIsExperimentalFeatureEnabled('ruleTagFilter');
 
@@ -60,6 +61,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
     expect(result).toEqual(false);
 
     result = getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch');
+
+    expect(result).toEqual(false);
+
+    result = getIsExperimentalFeatureEnabled('ruleFormV2');
 
     expect(result).toEqual(false);
 

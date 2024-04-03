@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { DataView } from '@kbn/data-plugin/common';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
@@ -49,10 +50,14 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
 }
 
 export async function getESQLMeta(esql: string) {
-  const fields = await getFields(esql);
+  const adhocDataView = await getESQLAdHocDataview(
+    getIndexPatternFromESQLQuery(esql),
+    getIndexPatternService()
+  );
   return {
     columns: await getColumns(esql),
-    ...fields,
+    adhocDataViewId: adhocDataView.id!,
+    ...getFields(adhocDataView),
   };
 }
 
@@ -105,33 +110,19 @@ async function getColumns(esql: string) {
   }
 }
 
-export async function getFields(esql: string) {
+export function getFields(dataView: DataView) {
   const dateFields: string[] = [];
   const geoFields: string[] = [];
-  const pattern: string = getIndexPatternFromESQLQuery(esql);
-  try {
-    // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported
-    (await getIndexPatternService().getFieldsForWildcard({ pattern })).forEach((field) => {
-      if (field.type === 'date') {
-        dateFields.push(field.name);
-      } else if (
-        field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
-        field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-      ) {
-        geoFields.push(field.name);
-      }
-    });
-  } catch (error) {
-    throw new Error(
-      i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
-        defaultMessage: `Unable to load fields from index pattern: {pattern}. {errorMessage}`,
-        values: {
-          errorMessage: error.message,
-          pattern,
-        },
-      })
-    );
-  }
+  dataView.fields.forEach((field) => {
+    if (field.type === 'date') {
+      dateFields.push(field.name);
+    } else if (
+      field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
+      field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+    ) {
+      geoFields.push(field.name);
+    }
+  });
 
   return {
     dateFields,

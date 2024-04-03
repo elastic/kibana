@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EcsEvent } from '@kbn/ecs';
+import { EcsEvent } from '@elastic/ecs';
 import { AuditEvent } from '@kbn/security-plugin/server';
 
 export type AuditAction = 'create' | 'delete';

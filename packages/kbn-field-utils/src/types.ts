@@ -17,6 +17,7 @@ export interface FieldBase {
   name: DataViewField['name'];
   type?: DataViewField['type'];
   displayName?: DataViewField['displayName'];
+  customDescription?: DataViewField['customDescription'];
   count?: DataViewField['count'];
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
   esTypes?: DataViewField['esTypes'];

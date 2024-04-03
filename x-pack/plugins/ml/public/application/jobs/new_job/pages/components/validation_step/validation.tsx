@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { WizardNav } from '../wizard_nav';
-import { WIZARD_STEPS, StepProps } from '../step_types';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { ml } from '../../../../../services/ml_api_service';
 import { ValidateJob } from '../../../../../components/validate_job';

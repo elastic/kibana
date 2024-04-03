@@ -17,17 +17,16 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
-  let history: () => History;
+  let history: History;
 
   beforeEach(() => {
     spaces = spacesPluginMock.createStartContract();
     spaces.ui.components.getLegacyUrlConflict = jest.fn().mockReturnValue('callout');
-    history = () =>
-      ({
-        location: {
-          search: '?_g=foo',
-        },
-      } as History);
+    history = {
+      location: {
+        search: '?_g=foo',
+      },
+    } as History;
   });
 
   test("should render URLConflictCallout in case of id's conflicts", () => {

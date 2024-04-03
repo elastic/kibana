@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { uniq, chunk } from 'lodash/fp';
@@ -216,6 +218,19 @@ export const createThreatSignals = async ({
     }
   };
 
+  const license = await firstValueFrom(licensing.license$);
+  const hasPlatinumLicense = license.hasAtLeast('platinum');
+  const isAlertSuppressionConfigured = Boolean(
+    completeRule.ruleParams.alertSuppression?.groupBy?.length
+  );
+
+  const isAlertSuppressionActive = isAlertSuppressionConfigured && hasPlatinumLicense;
+
+  // alert suppression needs to be performed on results searched in ascending order, so alert's suppression boundaries would be set correctly
+  // at the same time, there are concerns on performance of IM rule when sorting is set to asc, as it may lead to longer rule runs, since it will
+  // first go through alerts that might ve been processed in earlier executions, when look back interval set to large values (it can't be larger than 24h)
+  const sortOrder = isAlertSuppressionConfigured ? 'asc' : 'desc';
+
   if (eventCount < threatListCount) {
     await createSignals({
       totalDocumentCount: eventCount,
@@ -236,6 +251,7 @@ export const createThreatSignals = async ({
           exceptionFilter,
           eventListConfig,
           indexFields: inputIndexFields,
+          sortOrder,
         }),
 
       createSignal: (slicedChunk) =>
@@ -278,7 +294,8 @@ export const createThreatSignals = async ({
           inputIndexFields,
           threatIndexFields,
           runOpts,
-          licensing,
+          sortOrder,
+          isAlertSuppressionActive,
         }),
     });
   } else {
@@ -342,7 +359,8 @@ export const createThreatSignals = async ({
           inputIndexFields,
           threatIndexFields,
           runOpts,
-          licensing,
+          sortOrder,
+          isAlertSuppressionActive,
         }),
     });
   }

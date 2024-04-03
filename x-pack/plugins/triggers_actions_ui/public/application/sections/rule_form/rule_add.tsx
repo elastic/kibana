@@ -15,6 +15,7 @@ import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common
 import {
   Rule,
   RuleTypeParams,
+  RuleTypeMetaData,
   RuleUpdates,
   RuleFlyoutCloseReason,
   IErrorObject,
@@ -25,7 +26,7 @@ import {
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
+import { InitialRule, getRuleReducer } from './rule_reducer';
 import { createRule } from '../../lib/rule_api/create';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
@@ -49,7 +50,12 @@ const defaultCreateRuleErrorMessage = i18n.translate(
   }
 );
 
-const RuleAdd = ({
+export type RuleAddComponent = typeof RuleAdd;
+
+const RuleAdd = <
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+>({
   consumer,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -67,7 +73,7 @@ const RuleAdd = ({
   useRuleProducer,
   initialSelectedConsumer,
   ...props
-}: RuleAddProps) => {
+}: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
   const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
@@ -85,7 +91,8 @@ const RuleAdd = ({
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
-  const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: initialRule,
   });
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
@@ -228,9 +235,10 @@ const RuleAdd = ({
             : {}),
         } as Rule,
         ruleType,
-        config
+        config,
+        actionTypeRegistry
       ),
-    [rule, selectedConsumer, selectableConsumer, ruleType, config]
+    [rule, selectableConsumer, selectedConsumer, ruleType, config, actionTypeRegistry]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule

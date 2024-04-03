@@ -7,18 +7,18 @@
 
 import React, { type FC, useCallback, useMemo } from 'react';
 import { omit, pick } from 'lodash';
+import type { EuiDescriptionListProps, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCodeBlock,
   EuiDescriptionList,
-  EuiDescriptionListProps,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiTitle,
   useEuiPaddingSize,
 } from '@elastic/eui';
@@ -27,6 +27,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { InferenceApi } from './inference_api_tab';
 import { JobMap } from '../data_frame_analytics/pages/job_map';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
@@ -408,20 +409,51 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               id: 'pipelines',
               'data-test-subj': 'mlTrainedModelPipelines',
               name: (
-                <>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
-                    defaultMessage="Pipelines"
-                  />
+                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
+                      defaultMessage="Pipelines"
+                    />
+                  </EuiFlexItem>
                   {isPopulatedObject(pipelines) ? (
-                    <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
+                    <EuiFlexItem grow={false}>
+                      <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
+                    </EuiFlexItem>
                   ) : null}
-                </>
+                </EuiFlexGroup>
               ),
               content: (
                 <div data-test-subj={'mlTrainedModelPipelinesContent'}>
                   <EuiSpacer size={'s'} />
                   <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
+                </div>
+              ),
+            },
+          ]
+        : []),
+      ...(Array.isArray(item.inference_apis) && item.inference_apis.length > 0
+        ? [
+            {
+              id: 'inferenceApi',
+              'data-test-subj': 'inferenceAPIs',
+              name: (
+                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceAPIsTabLabel"
+                      defaultMessage="Inference services"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge>{item.inference_apis.length}</EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              content: (
+                <div data-test-subj={'mlTrainedModelInferenceAPIContent'}>
+                  <EuiSpacer size={'s'} />
+                  <InferenceApi inferenceApis={item.inference_apis} />
                 </div>
               ),
             },
@@ -462,6 +494,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     restMetaData,
     stats,
     item.model_id,
+    item.inference_apis,
     hideColumns,
   ]);
 

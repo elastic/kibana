@@ -8,8 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
-import { renderEmbeddableConsole } from './application/containers/embeddable';
+import { EmbeddableConsole } from './application/containers/embeddable';
 import {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
@@ -18,12 +19,15 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddableConsoleProps,
-  EmbeddableConsoleDependencies,
 } from './types';
-import { AutocompleteInfo, setAutocompleteInfo } from './services';
+import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
 
-export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+export class ConsoleUIPlugin
+  implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
+{
   private readonly autocompleteInfo = new AutocompleteInfo();
+  private _embeddableConsole: EmbeddableConsoleInfo = new EmbeddableConsoleInfo();
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -32,6 +36,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     this.autocompleteInfo.setup(http);
@@ -81,6 +86,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             element,
             theme$,
             autocompleteInfo: this.autocompleteInfo,
+            isMonacoEnabled,
           });
         },
       });
@@ -108,19 +114,30 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     } = this.ctx.config.get<ClientConfigType>();
 
     const consoleStart: ConsolePluginStart = {};
+    const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
+      ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID
+    );
     const embeddedConsoleAvailable =
       isConsoleUiEnabled &&
       isEmbeddedConsoleEnabled &&
-      core.application.capabilities?.dev_tools?.show === true;
+      core.application.capabilities?.dev_tools?.show === true &&
+      embeddedConsoleUiSetting;
 
     if (embeddedConsoleAvailable) {
-      consoleStart.renderEmbeddableConsole = (props?: EmbeddableConsoleProps) => {
-        const consoleDeps: EmbeddableConsoleDependencies = {
+      consoleStart.EmbeddableConsole = (props: EmbeddableConsoleProps) => {
+        return EmbeddableConsole({
+          ...props,
           core,
           usageCollection: deps.usageCollection,
-        };
-        return renderEmbeddableConsole(props, consoleDeps);
+          setDispatch: (d) => {
+            this._embeddableConsole.setDispatch(d);
+          },
+        });
       };
+      consoleStart.isEmbeddedConsoleAvailable = () =>
+        this._embeddableConsole.isEmbeddedConsoleAvailable();
+      consoleStart.openEmbeddedConsole = (content?: string) =>
+        this._embeddableConsole.openEmbeddedConsole(content);
     }
 
     return consoleStart;

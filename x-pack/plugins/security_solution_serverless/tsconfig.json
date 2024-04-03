@@ -44,6 +44,8 @@
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
-    "@kbn/management-cards-navigation"
+    "@kbn/management-cards-navigation",
+    "@kbn/core-application-browser",
+    "@kbn/discover-plugin",
   ]
 }

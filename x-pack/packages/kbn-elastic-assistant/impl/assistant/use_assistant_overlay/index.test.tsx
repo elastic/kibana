@@ -96,7 +96,7 @@ describe('useAssistantOverlay', () => {
     expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
       showOverlay: true,
       promptContextId: 'id',
-      conversationId: 'conversation-id',
+      conversationTitle: 'conversation-id',
     });
   });
 });

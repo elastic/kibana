@@ -229,6 +229,13 @@ export class Config {
   }
 
   /**
+   * Get the first 12 digits of the git sha for this build
+   */
+  getBuildShaShort() {
+    return this.versionInfo.buildShaShort;
+  }
+
+  /**
    * Get the ISO 8601 date for this build
    */
   getBuildDate() {

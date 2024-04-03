@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } f
 
 import { MLModelTypeBadge } from '../ml_model_type_badge';
 
-import { MLInferencePipelineOption } from './ml_inference_logic';
+import { MLInferencePipelineOption } from './pipeline_select_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS, MODEL_REDACTED_VALUE } from './utils';
 
 export interface PipelineSelectOptionProps {
@@ -52,7 +52,9 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={pipeline.modelType.length === 0}>
-            <EuiText size="s">{modelIdDisplay}</EuiText>
+            <EuiText size="s" color="subdued">
+              {modelIdDisplay}
+            </EuiText>
           </EuiFlexItem>
           {pipeline.modelType.length > 0 && (
             <EuiFlexItem>

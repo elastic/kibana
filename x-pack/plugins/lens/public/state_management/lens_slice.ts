@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
+import { createAction, createReducer, current } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import { Filter, Query } from '@kbn/es-query';
@@ -320,986 +320,813 @@ export const lensActions = {
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;
-  return createReducer<LensAppState>(initialState, {
-    [setState.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
-      return {
-        ...state,
-        ...payload,
-      };
-    },
-    [setExecutionContext.type]: (state, { payload }: PayloadAction<SetExecutionContextPayload>) => {
-      return {
-        ...state,
-        ...payload,
-      };
-    },
-    [initExisting.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
-      return {
-        ...state,
-        ...payload,
-      };
-    },
-    [onActiveDataChange.type]: (
-      state,
-      { payload: { activeData } }: PayloadAction<{ activeData: TableInspectorAdapter }>
-    ) => {
-      return {
-        ...state,
-        activeData,
-      };
-    },
-    [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {
-      return {
-        ...state,
-        isSaveable: payload,
-      };
-    },
-    [enableAutoApply.type]: (state) => {
-      state.autoApplyDisabled = false;
-    },
-    [disableAutoApply.type]: (state) => {
-      state.autoApplyDisabled = true;
-      state.changesApplied = true;
-    },
-    [applyChanges.type]: (state) => {
-      if (typeof state.applyChangesCounter === 'undefined') {
-        state.applyChangesCounter = 0;
-      }
-      state.applyChangesCounter!++;
-    },
-    [setChangesApplied.type]: (state, { payload: applied }) => {
-      state.changesApplied = applied;
-    },
-    [cloneLayer.type]: (
-      state,
-      {
-        payload: { layerId, newLayerId },
-      }: {
-        payload: {
-          layerId: string;
-          newLayerId: string;
+  return createReducer<LensAppState>(initialState, (builder) => {
+    builder
+      .addCase(setState, (state, { payload }) => {
+        return {
+          ...state,
+          ...payload,
         };
-      }
-    ) => {
-      const clonedIDsMap = new Map<string, string>();
-
-      const getNewId = (prevId: string) => {
-        const inMapValue = clonedIDsMap.get(prevId);
-        if (!inMapValue) {
-          const newId = generateId();
-          clonedIDsMap.set(prevId, newId);
-          return newId;
-        }
-        return inMapValue;
-      };
-
-      if (!state.activeDatasourceId || !state.visualization.activeId) {
-        return state;
-      }
-
-      state.datasourceStates = mapValues(state.datasourceStates, (datasourceState, datasourceId) =>
-        datasourceId
-          ? {
-              ...datasourceState,
-              state: datasourceMap[datasourceId].cloneLayer(
-                datasourceState.state,
-                layerId,
-                newLayerId,
-                getNewId
-              ),
-            }
-          : datasourceState
-      );
-      state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
-        state.visualization.state,
-        layerId,
-        newLayerId,
-        clonedIDsMap
-      );
-    },
-    [removeOrClearLayer.type]: (
-      state,
-      {
-        payload: { visualizationId, layerId, layerIds },
-      }: {
-        payload: {
-          visualizationId: string;
-          layerId: string;
-          layerIds: string[];
+      })
+      .addCase(setExecutionContext, (state, { payload }) => {
+        return {
+          ...state,
+          ...payload,
         };
-      }
-    ) => {
-      const activeVisualization = visualizationMap[visualizationId];
-      const activeDataSource = datasourceMap[state.activeDatasourceId!];
-      const isOnlyLayer =
-        getRemoveOperation(
-          activeVisualization,
-          state.visualization.state,
-          layerId,
-          layerIds.length
-        ) === 'clear';
-
-      let removedLayerIds: string[] = [];
-
-      state.datasourceStates = mapValues(
-        state.datasourceStates,
-        (datasourceState, datasourceId) => {
-          const datasource = datasourceMap[datasourceId!];
-
-          const { newState, removedLayerIds: removedLayerIdsForThisDatasource } = isOnlyLayer
-            ? datasource.clearLayer(datasourceState.state, layerId)
-            : datasource.removeLayer(datasourceState.state, layerId);
-
-          removedLayerIds = [...removedLayerIds, ...removedLayerIdsForThisDatasource];
-
-          return {
-            ...datasourceState,
-            ...(datasourceId === state.activeDatasourceId && {
-              state: newState,
-            }),
-          };
+      })
+      .addCase(initExisting, (state, { payload }) => {
+        return {
+          ...state,
+          ...payload,
+        };
+      })
+      .addCase(onActiveDataChange, (state, { payload: { activeData } }) => {
+        return {
+          ...state,
+          activeData,
+        };
+      })
+      .addCase(setSaveable, (state, { payload }) => {
+        return {
+          ...state,
+          isSaveable: payload,
+        };
+      })
+      .addCase(enableAutoApply, (state) => {
+        state.autoApplyDisabled = false;
+      })
+      .addCase(disableAutoApply, (state) => {
+        state.autoApplyDisabled = true;
+        state.changesApplied = true;
+      })
+      .addCase(applyChanges, (state) => {
+        if (typeof state.applyChangesCounter === 'undefined') {
+          state.applyChangesCounter = 0;
         }
-      );
-      state.stagedPreview = undefined;
-      // reuse the activeDatasource current dataView id for the moment
-      const currentDataViewsId = activeDataSource.getUsedDataView(
-        state.datasourceStates[state.activeDatasourceId!].state
-      );
+        state.applyChangesCounter++;
+      })
+      .addCase(setChangesApplied, (state, { payload: applied }) => {
+        state.changesApplied = applied;
+      })
+      .addCase(cloneLayer, (state, { payload: { layerId, newLayerId } }) => {
+        const clonedIDsMap = new Map<string, string>();
 
-      if (isOnlyLayer || !activeVisualization.removeLayer) {
-        state.visualization.state = activeVisualization.clearLayer(
-          state.visualization.state,
-          layerId,
-          currentDataViewsId
+        const getNewId = (prevId: string) => {
+          const inMapValue = clonedIDsMap.get(prevId);
+          if (!inMapValue) {
+            const newId = generateId();
+            clonedIDsMap.set(prevId, newId);
+            return newId;
+          }
+          return inMapValue;
+        };
+
+        if (!state.activeDatasourceId || !state.visualization.activeId) {
+          return state;
+        }
+
+        state.datasourceStates = mapValues(
+          state.datasourceStates,
+          (datasourceState, datasourceId) =>
+            datasourceId
+              ? {
+                  ...datasourceState,
+                  state: datasourceMap[datasourceId].cloneLayer(
+                    datasourceState.state,
+                    layerId,
+                    newLayerId,
+                    getNewId
+                  ),
+                }
+              : datasourceState
         );
-      }
-
-      uniq(removedLayerIds).forEach(
-        (removedId) =>
-          (state.visualization.state = activeVisualization.removeLayer?.(
+        state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
+          state.visualization.state,
+          layerId,
+          newLayerId,
+          clonedIDsMap
+        );
+      })
+      .addCase(removeOrClearLayer, (state, { payload: { visualizationId, layerId, layerIds } }) => {
+        const activeVisualization = visualizationMap[visualizationId];
+        const activeDataSource = datasourceMap[state.activeDatasourceId!];
+        const isOnlyLayer =
+          getRemoveOperation(
+            activeVisualization,
             state.visualization.state,
-            removedId
-          ))
-      );
-    },
-    [changeIndexPattern.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          visualizationIds?: string;
-          datasourceIds?: string;
-          layerId?: string;
-          indexPatternId: string;
-          dataViews: Pick<DataViewsState, 'indexPatterns'>;
-        };
-      }
-    ) => {
-      const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
-      const newIndexPatternRefs = [...state.dataViews.indexPatternRefs];
-      const availableRefs = new Set(newIndexPatternRefs.map((ref) => ref.id));
-      // check for missing refs
-      Object.values(dataViews.indexPatterns || {}).forEach((indexPattern) => {
-        if (!availableRefs.has(indexPattern.id)) {
-          newIndexPatternRefs.push({
-            id: indexPattern.id!,
-            name: indexPattern.name,
-            title: indexPattern.title,
-          });
-        }
-      });
-      const newState: Partial<LensAppState> = {
-        dataViews: {
-          ...state.dataViews,
-          indexPatterns: dataViews.indexPatterns,
-          indexPatternRefs: newIndexPatternRefs,
-        },
-      };
-      if (visualizationIds?.length) {
-        for (const visualizationId of visualizationIds) {
-          const activeVisualization =
-            visualizationId &&
-            state.visualization.activeId === visualizationId &&
-            visualizationMap[visualizationId];
-          if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
-            newState.visualization = {
-              ...state.visualization,
-              state: activeVisualization.onIndexPatternChange(
-                state.visualization.state,
-                indexPatternId,
-                layerId
-              ),
+            layerId,
+            layerIds.length
+          ) === 'clear';
+
+        let removedLayerIds: string[] = [];
+
+        state.datasourceStates = mapValues(
+          state.datasourceStates,
+          (datasourceState, datasourceId) => {
+            const datasource = datasourceMap[datasourceId!];
+
+            const { newState, removedLayerIds: removedLayerIdsForThisDatasource } = isOnlyLayer
+              ? datasource.clearLayer(datasourceState.state, layerId)
+              : datasource.removeLayer(datasourceState.state, layerId);
+
+            removedLayerIds = [...removedLayerIds, ...removedLayerIdsForThisDatasource];
+
+            return {
+              ...datasourceState,
+              ...(datasourceId === state.activeDatasourceId && {
+                state: newState,
+              }),
             };
           }
-        }
-      }
-      if (datasourceIds?.length) {
-        newState.datasourceStates = { ...state.datasourceStates };
-        const frame = selectFramePublicAPI(
-          { lens: { ...current(state), dataViews: newState.dataViews! } },
-          datasourceMap
         );
-        const datasourceLayers = frame.datasourceLayers;
+        state.stagedPreview = undefined;
+        // reuse the activeDatasource current dataView id for the moment
+        const currentDataViewsId = activeDataSource.getUsedDataView(
+          state.datasourceStates[state.activeDatasourceId!].state
+        );
 
-        for (const datasourceId of datasourceIds) {
-          const activeDatasource = datasourceId && datasourceMap[datasourceId];
-          if (activeDatasource && activeDatasource?.onIndexPatternChange) {
-            newState.datasourceStates = {
-              ...newState.datasourceStates,
-              [datasourceId]: {
-                isLoading: false,
-                state: activeDatasource.onIndexPatternChange(
-                  newState.datasourceStates[datasourceId].state,
-                  dataViews.indexPatterns,
+        if (isOnlyLayer || !activeVisualization.removeLayer) {
+          state.visualization.state = activeVisualization.clearLayer(
+            state.visualization.state,
+            layerId,
+            currentDataViewsId
+          );
+        }
+
+        uniq(removedLayerIds).forEach(
+          (removedId) =>
+            (state.visualization.state = activeVisualization.removeLayer?.(
+              state.visualization.state,
+              removedId
+            ))
+        );
+      })
+      .addCase(changeIndexPattern, (state, { payload }) => {
+        const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
+        if (!dataViews.indexPatterns) {
+          throw new Error('Invariant: indexPatterns should be defined');
+        }
+        const newIndexPatternRefs = [...state.dataViews.indexPatternRefs];
+        const availableRefs = new Set(newIndexPatternRefs.map((ref) => ref.id));
+        // check for missing refs
+        Object.values(dataViews.indexPatterns || {}).forEach((indexPattern) => {
+          if (!availableRefs.has(indexPattern.id)) {
+            newIndexPatternRefs.push({
+              id: indexPattern.id!,
+              name: indexPattern.name,
+              title: indexPattern.title,
+            });
+          }
+        });
+        const newState: Partial<LensAppState> = {
+          dataViews: {
+            ...state.dataViews,
+            indexPatterns: dataViews.indexPatterns,
+            indexPatternRefs: newIndexPatternRefs,
+          },
+        };
+        if (visualizationIds?.length) {
+          for (const visualizationId of visualizationIds) {
+            const activeVisualization =
+              visualizationId &&
+              state.visualization.activeId === visualizationId &&
+              visualizationMap[visualizationId];
+            if (activeVisualization && layerId && activeVisualization?.onIndexPatternChange) {
+              newState.visualization = {
+                ...state.visualization,
+                state: activeVisualization.onIndexPatternChange(
+                  state.visualization.state,
                   indexPatternId,
                   layerId
                 ),
-              },
-            };
-            // Update the visualization columns
-            if (layerId && state.visualization.activeId) {
-              const nextPublicAPI = activeDatasource.getPublicAPI({
-                state: newState.datasourceStates[datasourceId].state,
-                layerId,
-                indexPatterns: dataViews.indexPatterns,
-              });
-              const nextTable = new Set(
-                nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
-              );
-              const datasourcePublicAPI = datasourceLayers[layerId];
-              if (datasourcePublicAPI) {
-                const removed = datasourcePublicAPI
-                  .getTableSpec()
-                  .map(({ columnId }) => columnId)
-                  .filter((columnId) => !nextTable.has(columnId));
-                const activeVisualization = visualizationMap[state.visualization.activeId];
-                let nextVisState = (newState.visualization || state.visualization).state;
-                removed.forEach((columnId) => {
-                  nextVisState = activeVisualization.removeDimension({
-                    layerId,
-                    columnId,
-                    prevState: nextVisState,
-                    frame,
-                  });
+              };
+            }
+          }
+        }
+        if (datasourceIds?.length) {
+          newState.datasourceStates = { ...state.datasourceStates };
+          const frame = selectFramePublicAPI(
+            { lens: { ...current(state), dataViews: newState.dataViews! } },
+            datasourceMap
+          );
+          const datasourceLayers = frame.datasourceLayers;
+
+          for (const datasourceId of datasourceIds) {
+            const activeDatasource = datasourceId && datasourceMap[datasourceId];
+            if (activeDatasource && activeDatasource?.onIndexPatternChange) {
+              newState.datasourceStates = {
+                ...newState.datasourceStates,
+                [datasourceId]: {
+                  isLoading: false,
+                  state: activeDatasource.onIndexPatternChange(
+                    newState.datasourceStates[datasourceId].state,
+                    dataViews.indexPatterns,
+                    indexPatternId,
+                    layerId
+                  ),
+                },
+              };
+              // Update the visualization columns
+              if (layerId && state.visualization.activeId) {
+                const nextPublicAPI = activeDatasource.getPublicAPI({
+                  state: newState.datasourceStates[datasourceId].state,
+                  layerId,
+                  indexPatterns: dataViews.indexPatterns,
                 });
-                newState.visualization = {
-                  ...state.visualization,
-                  state: nextVisState,
-                };
+                const nextTable = new Set(
+                  nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                );
+                const datasourcePublicAPI = datasourceLayers[layerId];
+                if (datasourcePublicAPI) {
+                  const removed = datasourcePublicAPI
+                    .getTableSpec()
+                    .map(({ columnId }) => columnId)
+                    .filter((columnId) => !nextTable.has(columnId));
+                  const activeVisualization = visualizationMap[state.visualization.activeId];
+                  let nextVisState = (newState.visualization || state.visualization).state;
+                  removed.forEach((columnId) => {
+                    nextVisState = activeVisualization.removeDimension({
+                      layerId,
+                      columnId,
+                      prevState: nextVisState,
+                      frame,
+                    });
+                  });
+                  newState.visualization = {
+                    ...state.visualization,
+                    state: nextVisState,
+                  };
+                }
               }
             }
           }
         }
-      }
 
-      return { ...state, ...newState };
-    },
-    [updateIndexPatterns.type]: (state, { payload }: { payload: Partial<DataViewsState> }) => {
-      return {
-        ...state,
-        dataViews: { ...state.dataViews, ...payload },
-      };
-    },
-    [replaceIndexpattern.type]: (
-      state,
-      { payload }: { payload: { newIndexPattern: IndexPattern; oldId: string } }
-    ) => {
-      state.dataViews.indexPatterns[payload.newIndexPattern.id] = payload.newIndexPattern;
-      delete state.dataViews.indexPatterns[payload.oldId];
-      state.dataViews.indexPatternRefs = state.dataViews.indexPatternRefs.filter(
-        (r) => r.id !== payload.oldId
-      );
-      state.dataViews.indexPatternRefs.push({
-        id: payload.newIndexPattern.id,
-        title: payload.newIndexPattern.title,
-        name: payload.newIndexPattern.name,
-      });
-      const visualization = visualizationMap[state.visualization.activeId!];
-      state.visualization.state =
-        visualization.onIndexPatternRename?.(
-          state.visualization.state,
-          payload.oldId,
-          payload.newIndexPattern.id
-        ) ?? state.visualization.state;
-
-      Object.entries(state.datasourceStates).forEach(([datasourceId, datasourceState]) => {
-        const datasource = datasourceMap[datasourceId];
-        state.datasourceStates[datasourceId].state =
-          datasource?.onIndexPatternRename?.(
-            datasourceState.state,
-            payload.oldId,
-            payload.newIndexPattern.id!
-          ) ?? datasourceState.state;
-      });
-    },
-    [updateDatasourceState.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newDatasourceState: unknown;
-          datasourceId: string;
-          clearStagedPreview?: boolean;
-          dontSyncLinkedDimensions: boolean;
-        };
-      }
-    ) => {
-      if (payload.clearStagedPreview) {
-        state.stagedPreview = undefined;
-      }
-
-      state.datasourceStates[payload.datasourceId] = {
-        state: payload.newDatasourceState,
-        isLoading: false,
-      };
-
-      if (payload.dontSyncLinkedDimensions) {
-        return;
-      }
-
-      const currentState = current(state);
-
-      const {
-        datasourceState: syncedDatasourceState,
-        visualizationState: syncedVisualizationState,
-      } = syncLinkedDimensions(currentState, visualizationMap, datasourceMap, payload.datasourceId);
-
-      state.visualization.state = syncedVisualizationState;
-      state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
-    },
-    [updateVisualizationState.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          visualizationId: string;
-          newState: unknown;
-          dontSyncLinkedDimensions?: boolean;
-        };
-      }
-    ) => {
-      if (!state.visualization.activeId) {
-        throw new Error('Invariant: visualization state got updated without active visualization');
-      }
-      // This is a safeguard that prevents us from accidentally updating the
-      // wrong visualization. This occurs in some cases due to the uncoordinated
-      // way we manage state across plugins.
-      if (state.visualization.activeId !== payload.visualizationId) {
-        return state;
-      }
-
-      state.visualization.state = payload.newState;
-
-      if (!state.activeDatasourceId) {
-        return;
-      }
-
-      if (payload.dontSyncLinkedDimensions) {
-        return;
-      }
-
-      // TODO - consolidate into applySyncLinkedDimensions
-      const {
-        datasourceState: syncedDatasourceState,
-        visualizationState: syncedVisualizationState,
-      } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
-
-      state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
-      state.visualization.state = syncedVisualizationState;
-    },
-
-    [switchVisualization.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          suggestion: {
-            newVisualizationId: string;
-            visualizationState: unknown;
-            datasourceState?: unknown;
-            datasourceId?: string;
-          };
-          clearStagedPreview?: boolean;
-        };
-      }
-    ) => {
-      const { newVisualizationId, visualizationState, datasourceState, datasourceId } =
-        payload.suggestion;
-      return {
-        ...state,
-        datasourceStates: datasourceId
-          ? {
-              ...state.datasourceStates,
-              [datasourceId]: {
-                ...state.datasourceStates[datasourceId],
-                state: datasourceState,
-              },
-            }
-          : state.datasourceStates,
-        visualization: {
-          ...state.visualization,
-          activeId: newVisualizationId,
-          state: visualizationState,
-        },
-        stagedPreview: payload.clearStagedPreview
-          ? undefined
-          : state.stagedPreview || {
-              datasourceStates: state.datasourceStates,
-              visualization: state.visualization,
-              activeData: state.activeData,
-            },
-      };
-    },
-    [rollbackSuggestion.type]: (state) => {
-      return {
-        ...state,
-        ...(state.stagedPreview || {}),
-        stagedPreview: undefined,
-      };
-    },
-    [setToggleFullscreen.type]: (state) => {
-      return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
-    },
-    [submitSuggestion.type]: (state) => {
-      return {
-        ...state,
-        stagedPreview: undefined,
-      };
-    },
-    [switchDatasource.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newDatasourceId: string;
-        };
-      }
-    ) => {
-      return {
-        ...state,
-        datasourceStates: {
-          ...state.datasourceStates,
-          [payload.newDatasourceId]: state.datasourceStates[payload.newDatasourceId] || {
-            state: null,
-            isLoading: true,
-          },
-        },
-        activeDatasourceId: payload.newDatasourceId,
-      };
-    },
-    [switchAndCleanDatasource.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newDatasourceId: string;
-          visualizationId?: string;
-          currentIndexPatternId?: string;
-        };
-      }
-    ) => {
-      const activeVisualization =
-        payload.visualizationId && visualizationMap[payload.visualizationId];
-      const visualization = state.visualization;
-      let newVizState = visualization.state;
-      const ids: string[] = [];
-      if (activeVisualization && activeVisualization.getLayerIds) {
-        const layerIds = activeVisualization.getLayerIds(visualization.state);
-        ids.push(...Object.values(layerIds));
-        newVizState = activeVisualization.initialize(() => ids[0]);
-      }
-      const currentVizId = ids[0];
-
-      const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
-        ? current(state).datasourceStates[payload.newDatasourceId]?.state
-        : datasourceMap[payload.newDatasourceId].createEmptyLayer(
-            payload.currentIndexPatternId ?? ''
-          );
-      const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
-        datasourceState,
-        currentVizId
-      );
-
-      return {
-        ...state,
-        datasourceStates: {
-          [payload.newDatasourceId]: {
-            state: updatedState,
-            isLoading: false,
-          },
-        },
-        activeDatasourceId: payload.newDatasourceId,
-        visualization: {
-          ...visualization,
-          state: newVizState,
-        },
-      };
-    },
-    [navigateAway.type]: (state) => state,
-    [loadInitial.type]: (
-      state,
-      payload: PayloadAction<{
-        initialInput?: LensEmbeddableInput;
-        redirectCallback?: (savedObjectId?: string) => void;
-        history?: History<unknown>;
-        inlineEditing?: boolean;
-      }>
-    ) => state,
-    [initEmpty.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          newState: Partial<LensAppState>;
-          initialContext: VisualizeFieldContext | VisualizeEditorContext | undefined;
-          layerId: string;
-        };
-      }
-    ) => {
-      const newState = {
-        ...state,
-        ...payload.newState,
-      };
-      const suggestion: Suggestion | undefined = getVisualizeFieldSuggestions({
-        datasourceMap,
-        datasourceStates: newState.datasourceStates,
-        visualizationMap,
-        visualizeTriggerFieldContext: payload.initialContext,
-        dataViews: newState.dataViews,
-      });
-      if (suggestion) {
+        return { ...state, ...newState };
+      })
+      .addCase(updateIndexPatterns, (state, { payload }) => {
         return {
-          ...newState,
-          datasourceStates: {
-            ...newState.datasourceStates,
-            [suggestion.datasourceId!]: {
-              ...newState.datasourceStates[suggestion.datasourceId!],
-              state: suggestion.datasourceState,
-            },
-          },
-          visualization: {
-            ...newState.visualization,
-            activeId: suggestion.visualizationId,
-            state: suggestion.visualizationState,
-          },
-          stagedPreview: undefined,
+          ...state,
+          dataViews: { ...state.dataViews, ...payload },
         };
-      }
-
-      const visualization = newState.visualization;
-
-      if (!visualization.activeId) {
-        throw new Error('Invariant: visualization state got updated without active visualization');
-      }
-
-      const activeVisualization = visualizationMap[visualization.activeId];
-      if (visualization.state === null && activeVisualization) {
-        const activeDatasourceId = getInitialDatasourceId(datasourceMap)!;
-        const newVisState = activeVisualization.initialize(() => payload.layerId);
-        const activeDatasource = datasourceMap[activeDatasourceId];
-        return {
-          ...newState,
-          activeDatasourceId,
-          datasourceStates: {
-            ...newState.datasourceStates,
-            [activeDatasourceId]: {
-              ...newState.datasourceStates[activeDatasourceId],
-              state: activeDatasource.insertLayer(
-                newState.datasourceStates[activeDatasourceId]?.state,
-                payload.layerId
-              ),
-            },
-          },
-          visualization: {
-            ...visualization,
-            state: newVisState,
-          },
-        };
-      }
-      return newState;
-    },
-    [editVisualizationAction.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          visualizationId: string;
-          event: LensEditEvent<keyof LensEditContextMapping>;
-        };
-      }
-    ) => {
-      if (!state.visualization.activeId) {
-        throw new Error('Invariant: visualization state got updated without active visualization');
-      }
-      // This is a safeguard that prevents us from accidentally updating the
-      // wrong visualization. This occurs in some cases due to the uncoordinated
-      // way we manage state across plugins.
-      if (state.visualization.activeId !== payload.visualizationId) {
-        return state;
-      }
-      const activeVisualization = visualizationMap[payload.visualizationId];
-      if (activeVisualization?.onEditAction) {
-        state.visualization.state = activeVisualization.onEditAction(
-          state.visualization.state,
-          payload.event
+      })
+      .addCase(replaceIndexpattern, (state, { payload }) => {
+        state.dataViews.indexPatterns[payload.newIndexPattern.id] = payload.newIndexPattern;
+        delete state.dataViews.indexPatterns[payload.oldId];
+        state.dataViews.indexPatternRefs = state.dataViews.indexPatternRefs.filter(
+          (r) => r.id !== payload.oldId
         );
-      }
-    },
-    [insertLayer.type]: (
-      state,
-      {
-        payload,
-      }: {
-        payload: {
-          layerId: string;
-          datasourceId: string;
-        };
-      }
-    ) => {
-      const updater = datasourceMap[payload.datasourceId].insertLayer;
-      return {
-        ...state,
-        datasourceStates: {
-          ...state.datasourceStates,
-          [payload.datasourceId]: {
-            ...state.datasourceStates[payload.datasourceId],
-            state: updater(
-              current(state).datasourceStates[payload.datasourceId].state,
-              payload.layerId
-            ),
-          },
-        },
-      };
-    },
-    [removeLayers.type]: (
-      state,
-      {
-        payload: { visualizationId, layerIds },
-      }: {
-        payload: {
-          visualizationId: VisualizationState['activeId'];
-          layerIds: string[];
-        };
-      }
-    ) => {
-      if (!state.visualization.activeId) {
-        throw new Error('Invariant: visualization state got updated without active visualization');
-      }
-
-      const activeVisualization = visualizationId && visualizationMap[visualizationId];
-
-      // This is a safeguard that prevents us from accidentally updating the
-      // wrong visualization. This occurs in some cases due to the uncoordinated
-      // way we manage state across plugins.
-      if (
-        state.visualization.activeId === visualizationId &&
-        activeVisualization &&
-        activeVisualization.removeLayer &&
-        state.visualization.state
-      ) {
-        const updater = layerIds.reduce(
-          (acc, layerId) =>
-            activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
-          state.visualization.state
-        );
-
-        state.visualization.state =
-          typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
-      }
-
-      layerIds.forEach((layerId) => {
-        const [layerDatasourceId] =
-          Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
-            return (
-              state.datasourceStates[datasourceId] &&
-              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-            );
-          }) ?? [];
-        if (layerDatasourceId) {
-          const { newState } = datasourceMap[layerDatasourceId].removeLayer(
-            current(state).datasourceStates[layerDatasourceId].state,
-            layerId
-          );
-          state.datasourceStates[layerDatasourceId].state = newState;
-          // TODO - call removeLayer for any extra (linked) layers removed by the datasource
-        }
-      });
-    },
-
-    [addLayer.type]: (
-      state,
-      {
-        payload: { layerId, layerType, extraArg, ignoreInitialValues },
-      }: {
-        payload: {
-          layerId: string;
-          layerType: LayerType;
-          extraArg: unknown;
-          ignoreInitialValues: boolean;
-        };
-      }
-    ) => {
-      if (!state.activeDatasourceId || !state.visualization.activeId) {
-        return state;
-      }
-
-      const activeVisualization = visualizationMap[state.visualization.activeId];
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
-      // reuse the active datasource dataView id for the new layer
-      const currentDataViewsId = activeDatasource.getUsedDataView(
-        state.datasourceStates[state.activeDatasourceId!].state
-      );
-      const visualizationState = activeVisualization.appendLayer!(
-        state.visualization.state,
-        layerId,
-        layerType,
-        currentDataViewsId,
-        extraArg
-      );
-
-      const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
-
-      const { noDatasource } =
-        activeVisualization
-          .getSupportedLayers(visualizationState, framePublicAPI)
-          .find(({ type }) => type === layerType) || {};
-
-      const layersToLinkTo =
-        activeVisualization.getLayersToLinkTo?.(visualizationState, layerId) ?? [];
-
-      const datasourceState =
-        !noDatasource && activeDatasource
-          ? activeDatasource.insertLayer(
-              state.datasourceStates[state.activeDatasourceId].state,
-              layerId,
-              layersToLinkTo
-            )
-          : state.datasourceStates[state.activeDatasourceId].state;
-
-      const { activeDatasourceState, activeVisualizationState } = ignoreInitialValues
-        ? { activeDatasourceState: datasourceState, activeVisualizationState: visualizationState }
-        : addInitialValueIfAvailable({
-            datasourceState,
-            visualizationState,
-            framePublicAPI,
-            activeVisualization,
-            activeDatasource,
-            layerId,
-            layerType,
-          });
-
-      state.visualization.state = activeVisualizationState;
-      state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
-      state.stagedPreview = undefined;
-
-      const {
-        datasourceState: syncedDatasourceState,
-        visualizationState: syncedVisualizationState,
-      } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
-
-      state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
-      state.visualization.state = syncedVisualizationState;
-    },
-    [onDropToDimension.type]: (
-      state,
-      {
-        payload: { source, target, dropType },
-      }: {
-        payload: {
-          source: DragDropIdentifier;
-          target: DragDropOperation;
-          dropType: DropType;
-        };
-      }
-    ) => {
-      if (!state.visualization.activeId) {
-        return state;
-      }
-
-      const activeVisualization = visualizationMap[state.visualization.activeId];
-      const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
-
-      const { groups } = activeVisualization.getConfiguration({
-        layerId: target.layerId,
-        frame: framePublicAPI,
-        state: state.visualization.state,
-      });
-
-      const [layerDatasourceId, layerDatasource] =
-        Object.entries(datasourceMap).find(
-          ([datasourceId, datasource]) =>
-            state.datasourceStates[datasourceId] &&
-            datasource
-              .getLayers(state.datasourceStates[datasourceId].state)
-              .includes(target.layerId)
-        ) || [];
-
-      let newDatasourceState;
-
-      if (layerDatasource && layerDatasourceId) {
-        newDatasourceState = layerDatasource?.onDrop({
-          state: state.datasourceStates[layerDatasourceId].state,
-          source,
-          target: {
-            ...(target as unknown as DragDropOperation),
-            filterOperations:
-              groups.find(({ groupId: gId }) => gId === target.groupId)?.filterOperations ||
-              Boolean,
-          },
-          targetLayerDimensionGroups: groups,
-          dropType,
-          indexPatterns: framePublicAPI.dataViews.indexPatterns,
+        state.dataViews.indexPatternRefs.push({
+          id: payload.newIndexPattern.id,
+          title: payload.newIndexPattern.title,
+          name: payload.newIndexPattern.name,
         });
-        if (!newDatasourceState) {
+        const visualization = visualizationMap[state.visualization.activeId!];
+        state.visualization.state =
+          visualization.onIndexPatternRename?.(
+            state.visualization.state,
+            payload.oldId,
+            payload.newIndexPattern.id
+          ) ?? state.visualization.state;
+
+        Object.entries(state.datasourceStates).forEach(([datasourceId, datasourceState]) => {
+          const datasource = datasourceMap[datasourceId];
+          state.datasourceStates[datasourceId].state =
+            datasource?.onIndexPatternRename?.(
+              datasourceState.state,
+              payload.oldId,
+              payload.newIndexPattern.id!
+            ) ?? datasourceState.state;
+        });
+      })
+      .addCase(updateDatasourceState, (state, { payload }) => {
+        if (payload.clearStagedPreview) {
+          state.stagedPreview = undefined;
+        }
+
+        state.datasourceStates[payload.datasourceId] = {
+          state: payload.newDatasourceState,
+          isLoading: false,
+        };
+
+        if (payload.dontSyncLinkedDimensions) {
           return;
         }
-        state.datasourceStates[layerDatasourceId].state = newDatasourceState;
-      }
 
-      activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
-      const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
-        {
-          prevState: state.visualization.state,
-          frame: framePublicAPI,
-          target,
-          source,
-          dropType,
-          group: groups.find(({ groupId: gId }) => gId === target.groupId),
-        },
-        activeVisualization
-      );
-      state.visualization.state = newVisualizationState;
+        const currentState = current(state);
 
-      if (layerDatasourceId) {
+        const {
+          datasourceState: syncedDatasourceState,
+          visualizationState: syncedVisualizationState,
+        } = syncLinkedDimensions(
+          currentState,
+          visualizationMap,
+          datasourceMap,
+          payload.datasourceId
+        );
+
+        state.visualization.state = syncedVisualizationState;
+        state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
+      })
+      .addCase(updateVisualizationState, (state, { payload }) => {
+        if (!state.visualization.activeId) {
+          throw new Error(
+            'Invariant: visualization state got updated without active visualization'
+          );
+        }
+        // This is a safeguard that prevents us from accidentally updating the
+        // wrong visualization. This occurs in some cases due to the uncoordinated
+        // way we manage state across plugins.
+        if (state.visualization.activeId !== payload.visualizationId) {
+          return state;
+        }
+
+        state.visualization.state = payload.newState;
+
+        if (!state.activeDatasourceId) {
+          return;
+        }
+
+        if (payload.dontSyncLinkedDimensions) {
+          return;
+        }
+
+        // TODO - consolidate into applySyncLinkedDimensions
         const {
           datasourceState: syncedDatasourceState,
           visualizationState: syncedVisualizationState,
         } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
 
-        state.datasourceStates[layerDatasourceId].state = syncedDatasourceState;
+        state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
         state.visualization.state = syncedVisualizationState;
-      }
-      state.stagedPreview = undefined;
-    },
-    [setLayerDefaultDimension.type]: (
-      state,
-      {
-        payload: { layerId, columnId, groupId },
-      }: {
-        payload: {
-          layerId: string;
-          columnId: string;
-          groupId: string;
+      })
+
+      .addCase(switchVisualization, (state, { payload }) => {
+        const { newVisualizationId, visualizationState, datasourceState, datasourceId } =
+          payload.suggestion;
+        return {
+          ...state,
+          datasourceStates: datasourceId
+            ? {
+                ...state.datasourceStates,
+                [datasourceId]: {
+                  ...state.datasourceStates[datasourceId],
+                  state: datasourceState,
+                },
+              }
+            : state.datasourceStates,
+          visualization: {
+            ...state.visualization,
+            activeId: newVisualizationId,
+            state: visualizationState,
+          },
+          stagedPreview: payload.clearStagedPreview
+            ? undefined
+            : state.stagedPreview || {
+                datasourceStates: state.datasourceStates,
+                visualization: state.visualization,
+                activeData: state.activeData,
+              },
         };
-      }
-    ) => {
-      if (!state.activeDatasourceId || !state.visualization.activeId) {
-        return state;
-      }
-
-      const activeDatasource = datasourceMap[state.activeDatasourceId];
-      const activeVisualization = visualizationMap[state.visualization.activeId];
-      const layerType =
-        activeVisualization.getLayerType(layerId, state.visualization.state) || LayerTypes.DATA;
-      const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
-        datasourceState: state.datasourceStates[state.activeDatasourceId].state,
-        visualizationState: state.visualization.state,
-        framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
-        activeVisualization,
-        activeDatasource,
-        layerId,
-        layerType,
-        columnId,
-        groupId,
-      });
-
-      state.visualization.state = activeVisualizationState;
-      state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
-    },
-    [removeDimension.type]: (
-      state,
-      {
-        payload: { layerId, columnId, datasourceId },
-      }: {
-        payload: {
-          layerId: string;
-          columnId: string;
-          datasourceId?: string;
+      })
+      .addCase(rollbackSuggestion, (state) => {
+        return {
+          ...state,
+          ...(state.stagedPreview || {}),
+          stagedPreview: undefined,
         };
-      }
-    ) => {
-      if (!state.visualization.activeId) {
-        return state;
-      }
+      })
+      .addCase(setToggleFullscreen, (state) => {
+        return { ...state, isFullscreenDatasource: !state.isFullscreenDatasource };
+      })
+      .addCase(submitSuggestion, (state) => {
+        return {
+          ...state,
+          stagedPreview: undefined,
+        };
+      })
+      .addCase(switchDatasource, (state, { payload }) => {
+        return {
+          ...state,
+          datasourceStates: {
+            ...state.datasourceStates,
+            [payload.newDatasourceId]: state.datasourceStates[payload.newDatasourceId] || {
+              state: null,
+              isLoading: true,
+            },
+          },
+          activeDatasourceId: payload.newDatasourceId,
+        };
+      })
+      .addCase(switchAndCleanDatasource, (state, { payload }) => {
+        const activeVisualization =
+          payload.visualizationId && visualizationMap[payload.visualizationId];
+        const visualization = state.visualization;
+        let newVizState = visualization.state;
+        const ids: string[] = [];
+        if (activeVisualization && activeVisualization.getLayerIds) {
+          const layerIds = activeVisualization.getLayerIds(visualization.state);
+          ids.push(...Object.values(layerIds));
+          newVizState = activeVisualization.initialize(() => ids[0]);
+        }
+        const currentVizId = ids[0];
 
-      const activeVisualization = visualizationMap[state.visualization.activeId];
+        const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
+          ? current(state).datasourceStates[payload.newDatasourceId]?.state
+          : datasourceMap[payload.newDatasourceId].createEmptyLayer(
+              payload.currentIndexPatternId ?? ''
+            );
+        const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
+          datasourceState,
+          currentVizId
+        );
 
-      const links = activeVisualization.getLinkedDimensions?.(state.visualization.state);
+        return {
+          ...state,
+          datasourceStates: {
+            [payload.newDatasourceId]: {
+              state: updatedState,
+              isLoading: false,
+            },
+          },
+          activeDatasourceId: payload.newDatasourceId,
+          visualization: {
+            ...visualization,
+            state: newVizState,
+          },
+        };
+      })
+      .addCase(navigateAway, (state) => state)
+      .addCase(loadInitial, (state, payload) => state)
+      .addCase(initEmpty, (state, { payload }) => {
+        const newState = {
+          ...state,
+          ...payload.newState,
+        };
+        const suggestion: Suggestion | undefined = getVisualizeFieldSuggestions({
+          datasourceMap,
+          datasourceStates: newState.datasourceStates,
+          visualizationMap,
+          visualizeTriggerFieldContext: payload.initialContext,
+          dataViews: newState.dataViews,
+        });
+        if (suggestion) {
+          return {
+            ...newState,
+            datasourceStates: {
+              ...newState.datasourceStates,
+              [suggestion.datasourceId!]: {
+                ...newState.datasourceStates[suggestion.datasourceId!],
+                state: suggestion.datasourceState,
+              },
+            },
+            visualization: {
+              ...newState.visualization,
+              activeId: suggestion.visualizationId,
+              state: suggestion.visualizationState,
+            },
+            stagedPreview: undefined,
+          };
+        }
 
-      const linkedDimensions = links
-        ?.filter(({ from: { columnId: fromId } }) => columnId === fromId)
-        ?.map(({ to }) => to);
+        const visualization = newState.visualization;
 
-      const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
+        if (!visualization.activeId) {
+          throw new Error(
+            'Invariant: visualization state got updated without active visualization'
+          );
+        }
 
-      const frame = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+        const activeVisualization = visualizationMap[visualization.activeId];
+        if (visualization.state === null && activeVisualization) {
+          const activeDatasourceId = getInitialDatasourceId(datasourceMap)!;
+          const newVisState = activeVisualization.initialize(() => payload.layerId);
+          const activeDatasource = datasourceMap[activeDatasourceId];
+          return {
+            ...newState,
+            activeDatasourceId,
+            datasourceStates: {
+              ...newState.datasourceStates,
+              [activeDatasourceId]: {
+                ...newState.datasourceStates[activeDatasourceId],
+                state: activeDatasource.insertLayer(
+                  newState.datasourceStates[activeDatasourceId]?.state,
+                  payload.layerId
+                ),
+              },
+            },
+            visualization: {
+              ...visualization,
+              state: newVisState,
+            },
+          };
+        }
+        return newState;
+      })
+      .addCase(editVisualizationAction, (state, { payload }) => {
+        if (!state.visualization.activeId) {
+          throw new Error(
+            'Invariant: visualization state got updated without active visualization'
+          );
+        }
+        // This is a safeguard that prevents us from accidentally updating the
+        // wrong visualization. This occurs in some cases due to the uncoordinated
+        // way we manage state across plugins.
+        if (state.visualization.activeId !== payload.visualizationId) {
+          return state;
+        }
+        const activeVisualization = visualizationMap[payload.visualizationId];
+        if (activeVisualization?.onEditAction) {
+          state.visualization.state = activeVisualization.onEditAction(
+            state.visualization.state,
+            payload.event
+          );
+        }
+      })
+      .addCase(insertLayer, (state, { payload }) => {
+        const updater = datasourceMap[payload.datasourceId].insertLayer;
+        return {
+          ...state,
+          datasourceStates: {
+            ...state.datasourceStates,
+            [payload.datasourceId]: {
+              ...state.datasourceStates[payload.datasourceId],
+              state: updater(
+                current(state).datasourceStates[payload.datasourceId].state,
+                payload.layerId
+              ),
+            },
+          },
+        };
+      })
+      .addCase(removeLayers, (state, { payload: { visualizationId, layerIds } }) => {
+        if (!state.visualization.activeId) {
+          throw new Error(
+            'Invariant: visualization state got updated without active visualization'
+          );
+        }
 
-      const remove = (dimensionProps: { layerId: string; columnId: string }) => {
-        if (datasource && datasourceId) {
-          let datasourceState;
-          try {
-            datasourceState = current(state.datasourceStates[datasourceId].state);
-          } catch {
-            datasourceState = state.datasourceStates[datasourceId].state;
+        const activeVisualization = visualizationId && visualizationMap[visualizationId];
+
+        // This is a safeguard that prevents us from accidentally updating the
+        // wrong visualization. This occurs in some cases due to the uncoordinated
+        // way we manage state across plugins.
+        if (
+          state.visualization.activeId === visualizationId &&
+          activeVisualization &&
+          activeVisualization.removeLayer &&
+          state.visualization.state
+        ) {
+          const updater = layerIds.reduce<unknown>(
+            (acc, layerId) =>
+              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
+            state.visualization.state
+          );
+
+          state.visualization.state =
+            typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
+        }
+
+        layerIds.forEach((layerId) => {
+          const [layerDatasourceId] =
+            Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
+              return (
+                state.datasourceStates[datasourceId] &&
+                datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+              );
+            }) ?? [];
+          if (layerDatasourceId) {
+            const { newState } = datasourceMap[layerDatasourceId].removeLayer(
+              current(state).datasourceStates[layerDatasourceId].state,
+              layerId
+            );
+            state.datasourceStates[layerDatasourceId].state = newState;
+            // TODO - call removeLayer for any extra (linked) layers removed by the datasource
           }
-          state.datasourceStates[datasourceId].state = datasource?.removeColumn({
+        });
+      })
+
+      .addCase(
+        addLayer,
+        (state, { payload: { layerId, layerType, extraArg, ignoreInitialValues } }) => {
+          if (!state.activeDatasourceId || !state.visualization.activeId) {
+            return state;
+          }
+
+          const activeVisualization = visualizationMap[state.visualization.activeId];
+          const activeDatasource = datasourceMap[state.activeDatasourceId];
+          // reuse the active datasource dataView id for the new layer
+          const currentDataViewsId = activeDatasource.getUsedDataView(
+            state.datasourceStates[state.activeDatasourceId!].state
+          );
+          const visualizationState = activeVisualization.appendLayer!(
+            state.visualization.state,
+            layerId,
+            layerType,
+            currentDataViewsId,
+            extraArg
+          );
+
+          const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+
+          const { noDatasource } =
+            activeVisualization
+              .getSupportedLayers(visualizationState, framePublicAPI)
+              .find(({ type }) => type === layerType) || {};
+
+          const layersToLinkTo =
+            activeVisualization.getLayersToLinkTo?.(visualizationState, layerId) ?? [];
+
+          const datasourceState =
+            !noDatasource && activeDatasource
+              ? activeDatasource.insertLayer(
+                  state.datasourceStates[state.activeDatasourceId].state,
+                  layerId,
+                  layersToLinkTo
+                )
+              : state.datasourceStates[state.activeDatasourceId].state;
+
+          const { activeDatasourceState, activeVisualizationState } = ignoreInitialValues
+            ? {
+                activeDatasourceState: datasourceState,
+                activeVisualizationState: visualizationState,
+              }
+            : addInitialValueIfAvailable({
+                datasourceState,
+                visualizationState,
+                framePublicAPI,
+                activeVisualization,
+                activeDatasource,
+                layerId,
+                layerType,
+              });
+
+          state.visualization.state = activeVisualizationState;
+          state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+          state.stagedPreview = undefined;
+
+          const {
+            datasourceState: syncedDatasourceState,
+            visualizationState: syncedVisualizationState,
+          } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
+
+          state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
+          state.visualization.state = syncedVisualizationState;
+        }
+      )
+      .addCase(onDropToDimension, (state, { payload: { source, target, dropType } }) => {
+        if (!state.visualization.activeId) {
+          return state;
+        }
+
+        const activeVisualization = visualizationMap[state.visualization.activeId];
+        const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+
+        const { groups } = activeVisualization.getConfiguration({
+          layerId: target.layerId,
+          frame: framePublicAPI,
+          state: state.visualization.state,
+        });
+
+        const [layerDatasourceId, layerDatasource] =
+          Object.entries(datasourceMap).find(
+            ([datasourceId, datasource]) =>
+              state.datasourceStates[datasourceId] &&
+              datasource
+                .getLayers(state.datasourceStates[datasourceId].state)
+                .includes(target.layerId)
+          ) || [];
+
+        let newDatasourceState;
+
+        if (layerDatasource && layerDatasourceId) {
+          newDatasourceState = layerDatasource?.onDrop({
+            state: state.datasourceStates[layerDatasourceId].state,
+            source,
+            target: {
+              ...(target as unknown as DragDropOperation),
+              filterOperations:
+                groups.find(({ groupId: gId }) => gId === target.groupId)?.filterOperations ||
+                Boolean,
+            },
+            targetLayerDimensionGroups: groups,
+            dropType,
+            indexPatterns: framePublicAPI.dataViews.indexPatterns,
+          });
+          if (!newDatasourceState) {
+            return;
+          }
+          state.datasourceStates[layerDatasourceId].state = newDatasourceState;
+        }
+
+        activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
+        const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+          {
+            prevState: state.visualization.state,
+            frame: framePublicAPI,
+            target,
+            source,
+            dropType,
+            group: groups.find(({ groupId: gId }) => gId === target.groupId),
+          },
+          activeVisualization
+        );
+        state.visualization.state = newVisualizationState;
+
+        if (layerDatasourceId) {
+          const {
+            datasourceState: syncedDatasourceState,
+            visualizationState: syncedVisualizationState,
+          } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
+
+          state.datasourceStates[layerDatasourceId].state = syncedDatasourceState;
+          state.visualization.state = syncedVisualizationState;
+        }
+        state.stagedPreview = undefined;
+      })
+      .addCase(setLayerDefaultDimension, (state, { payload: { layerId, columnId, groupId } }) => {
+        if (!state.activeDatasourceId || !state.visualization.activeId) {
+          return state;
+        }
+
+        const activeDatasource = datasourceMap[state.activeDatasourceId];
+        const activeVisualization = visualizationMap[state.visualization.activeId];
+        const layerType =
+          activeVisualization.getLayerType(layerId, state.visualization.state) || LayerTypes.DATA;
+        const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
+          datasourceState: state.datasourceStates[state.activeDatasourceId].state,
+          visualizationState: state.visualization.state,
+          framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
+          activeVisualization,
+          activeDatasource,
+          layerId,
+          layerType,
+          columnId,
+          groupId,
+        });
+
+        state.visualization.state = activeVisualizationState;
+        state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+      })
+      .addCase(removeDimension, (state, { payload: { layerId, columnId, datasourceId } }) => {
+        if (!state.visualization.activeId) {
+          return state;
+        }
+
+        const activeVisualization = visualizationMap[state.visualization.activeId];
+
+        const links = activeVisualization.getLinkedDimensions?.(state.visualization.state);
+
+        const linkedDimensions = links
+          ?.filter(({ from: { columnId: fromId } }) => columnId === fromId)
+          ?.map(({ to }) => to);
+
+        const datasource = datasourceId ? datasourceMap[datasourceId] : undefined;
+
+        const frame = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+
+        const remove = (dimensionProps: { layerId: string; columnId: string }) => {
+          if (datasource && datasourceId) {
+            let datasourceState;
+            try {
+              datasourceState = current(state.datasourceStates[datasourceId].state);
+            } catch {
+              datasourceState = state.datasourceStates[datasourceId].state;
+            }
+            state.datasourceStates[datasourceId].state = datasource?.removeColumn({
+              layerId: dimensionProps.layerId,
+              columnId: dimensionProps.columnId,
+              prevState: datasourceState,
+              indexPatterns: frame.dataViews.indexPatterns,
+            });
+          }
+
+          let visualizationState;
+          try {
+            visualizationState = current(state.visualization.state);
+          } catch {
+            visualizationState = state.visualization.state;
+          }
+          state.visualization.state = activeVisualization.removeDimension({
             layerId: dimensionProps.layerId,
             columnId: dimensionProps.columnId,
-            prevState: datasourceState,
-            indexPatterns: frame.dataViews.indexPatterns,
+            prevState: visualizationState,
+            frame,
           });
-        }
+        };
 
-        let visualizationState;
-        try {
-          visualizationState = current(state.visualization.state);
-        } catch {
-          visualizationState = state.visualization.state;
-        }
-        state.visualization.state = activeVisualization.removeDimension({
-          layerId: dimensionProps.layerId,
-          columnId: dimensionProps.columnId,
-          prevState: visualizationState,
-          frame,
-        });
-      };
+        remove({ layerId, columnId });
 
-      remove({ layerId, columnId });
-
-      linkedDimensions?.forEach(
-        (linkedDimension) =>
-          linkedDimension.columnId && // if there's no columnId, there's no dimension to remove
-          remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
-      );
-    },
-    [registerLibraryAnnotationGroup.type]: (
-      state,
-      {
-        payload: { group, id },
-      }: {
-        payload: { group: EventAnnotationGroupConfig; id: string };
-      }
-    ) => {
-      state.annotationGroups[id] = group;
-    },
+        linkedDimensions?.forEach(
+          (linkedDimension) =>
+            linkedDimension.columnId && // if there's no columnId, there's no dimension to remove
+            remove({ columnId: linkedDimension.columnId, layerId: linkedDimension.layerId })
+        );
+      })
+      .addCase(registerLibraryAnnotationGroup, (state, { payload: { group, id } }) => {
+        state.annotationGroups[id] = group;
+      })
+      .addDefaultCase((state) => state);
   });
 };
 

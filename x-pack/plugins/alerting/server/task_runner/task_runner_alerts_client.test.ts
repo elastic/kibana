@@ -17,7 +17,7 @@ import {
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -96,7 +96,9 @@ import {
   SPACE_IDS,
   TAGS,
   VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -170,6 +172,7 @@ describe('Task Runner', () => {
     const mockLegacyAlertsClient = legacyAlertsClientMock.create();
     const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
     const maintenanceWindowClient = maintenanceWindowClientMock.create();
+    const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
     type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
       actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -210,6 +213,7 @@ describe('Task Runner', () => {
         .fn()
         .mockReturnValue(rulesSettingsClientMock.create()),
       getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      connectorAdapterRegistry,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -462,7 +466,7 @@ describe('Task Runner', () => {
         );
         expect(logger.debug).nthCalledWith(
           debugCall++,
-          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
         expect(
           taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -554,6 +558,7 @@ describe('Task Runner', () => {
               [EVENT_ACTION]: 'open',
               [EVENT_KIND]: 'signal',
               [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
               [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
@@ -808,6 +813,7 @@ describe('Task Runner', () => {
           statusChangeThreshold: 4,
         },
         maintenanceWindowIds: [],
+        ruleRunMetricsStore,
       });
 
       expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({

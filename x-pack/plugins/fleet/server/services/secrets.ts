@@ -457,7 +457,7 @@ export async function extractAndUpdateOutputSecrets(opts: {
 }> {
   const { oldOutput, outputUpdate, esClient, secretHashes } = opts;
   const outputType = outputUpdate.type || oldOutput.type;
-  const oldSecretPaths = getOutputSecretPaths(outputType, oldOutput);
+  const oldSecretPaths = getOutputSecretPaths(oldOutput.type, oldOutput);
   const updatedSecretPaths = getOutputSecretPaths(outputType, outputUpdate);
 
   if (!oldSecretPaths.length && !updatedSecretPaths.length) {

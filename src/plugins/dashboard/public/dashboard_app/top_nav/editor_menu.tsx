@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './editor_menu.scss';
+
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
@@ -255,6 +257,7 @@ export const EditorMenu = ({
   const getEditorMenuPanels = (closePopover: () => void) => {
     const initialPanelItems = [
       ...visTypeAliases.map(getVisTypeAliasMenuItem),
+      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
       ...toolVisTypes.map(getVisTypeMenuItem),
       ...ungroupedFactories.map((factory) => {
         return getEmbeddableFactoryMenuItem(factory, closePopover);
@@ -265,9 +268,7 @@ export const EditorMenu = ({
         panel: panelId,
         'data-test-subj': `dashboardEditorMenu-${id}Group`,
       })),
-
       ...promotedVisTypes.map(getVisTypeMenuItem),
-      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
     ];
     if (aggsBasedVisTypes.length > 0) {
       initialPanelItems.push({

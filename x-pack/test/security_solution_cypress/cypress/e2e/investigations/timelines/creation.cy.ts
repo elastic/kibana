@@ -23,9 +23,8 @@ import {
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
-import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
+import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';

@@ -51,6 +51,7 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
   tlog,
+  setClusterInfo,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -242,6 +243,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
+
+    setClusterInfo(this.clusterInfo);
   }
 
   public getClusterInfo(): ESClusterInfo | undefined {
@@ -450,7 +453,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       pit: { id: pitId },
       search_after: searchAfter,
       size: telemetryConfiguration.telemetry_max_buffer_size,
-      expand_wildcards: ['open' as const, 'hidden' as const],
     };
 
     let response = null;
@@ -461,7 +463,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         if (numOfHits > 0) {
           const lastHit = response?.hits.hits[numOfHits - 1];
-          searchAfter = lastHit?.sort;
+          query.search_after = lastHit?.sort;
         } else {
           fetchMore = false;
         }
@@ -807,6 +809,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       await this.esClient.openPointInTime({
         index: `${indexPattern}*`,
         keep_alive: keepAlive,
+        expand_wildcards: ['open' as const, 'hidden' as const],
       })
     ).id;
 

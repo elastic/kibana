@@ -5635,6 +5635,137 @@
             }
           }
         },
+        "slo": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "security_account": {
           "properties": {
             "appId": {
@@ -9487,6 +9618,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableAssetCriticality": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "securitySolution:excludeColdAndFrozenTiersInAnalyzer": {
           "type": "boolean",
           "_meta": {
@@ -10006,6 +10143,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:apmEnableServiceInventoryTableSearchBar": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:apmAWSLambdaPriceFactor": {
           "type": "text",
           "_meta": {
@@ -10016,6 +10159,15 @@
           "type": "integer",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "observability:logsExplorer:allowedDataViews": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Non-default value of setting."
+            }
           }
         },
         "banners:placement": {
@@ -10067,12 +10219,6 @@
           }
         },
         "labs:dashboard:deferBelowFold": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "labs:dashboard:linksPanel": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -10168,6 +10314,18 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:apmEnableTransactionProfiling": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:profilingShowErrorFrames": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:profilingPerVCPUWattX86": {
           "type": "integer",
           "_meta": {
@@ -10210,7 +10368,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInfrastructureHostsCustomDashboards": {
+        "observability:enableInfrastructureAssetCustomDashboards": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -10252,8 +10410,20 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:profilingAzureCostDiscountRate": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "data_views:fields_excluded_data_tiers": {
           "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "devTools:enablePersistentConsole": {
+          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }

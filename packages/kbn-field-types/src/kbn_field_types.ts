@@ -52,8 +52,6 @@ export const getFilterableKbnTypeNames = (): string[] =>
 export function esFieldTypeToKibanaFieldType(type: string) {
   switch (type) {
     case ES_FIELD_TYPES._INDEX:
-    case ES_FIELD_TYPES.GEO_POINT:
-    case ES_FIELD_TYPES.IP:
       return KBN_FIELD_TYPES.STRING;
     case '_version':
       return KBN_FIELD_TYPES.NUMBER;

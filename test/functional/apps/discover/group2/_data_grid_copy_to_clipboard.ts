@@ -57,8 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(true);
       }
 
-      expect(await toasts.getToastCount()).to.be(1);
-      await toasts.dismissAllToasts();
+      expect(await toasts.getCount()).to.be(1);
+      await toasts.dismissAll();
 
       await dataGrid.clickCopyColumnValues('_source');
 
@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(copiedSourceData.endsWith('}')).to.be(true);
       }
 
-      expect(await toasts.getToastCount()).to.be(1);
-      await toasts.dismissAllToasts();
+      expect(await toasts.getCount()).to.be(1);
+      await toasts.dismissAll();
     });
 
     it('should be able to copy a column name to clipboard', async () => {
@@ -82,8 +82,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(copiedTimestampName).to.be('@timestamp');
       }
 
-      expect(await toasts.getToastCount()).to.be(1);
-      await toasts.dismissAllToasts();
+      expect(await toasts.getCount()).to.be(1);
+      await toasts.dismissAll();
 
       await dataGrid.clickCopyColumnName('_source');
 
@@ -92,8 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(copiedSourceName).to.be('Document');
       }
 
-      expect(await toasts.getToastCount()).to.be(1);
-      await toasts.dismissAllToasts();
+      expect(await toasts.getCount()).to.be(1);
+      await toasts.dismissAll();
     });
   });
 }

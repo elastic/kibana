@@ -48,7 +48,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'threat_indicator');
+        cy.task('esArchiverUnload', { archiveName: 'threat_indicator' });
       });
 
       it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {

@@ -6,9 +6,9 @@
  */
 
 import type { HasType } from '@kbn/presentation-publishing';
-import type { HasLensConfig } from '@kbn/lens-plugin/public';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
 export type SynchronizeMovementActionApi =
   | HasType<'map' | 'visualization' | 'lens'>
-  | Partial<HasLensConfig | HasVisualizeConfig>;
+  | Partial<LensApi | HasVisualizeConfig>;

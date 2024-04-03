@@ -16,6 +16,7 @@
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

@@ -14,7 +14,6 @@ import {
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
-  VisualizationDimensionGroupConfig,
   DatasourceMap,
   VisualizationMap,
   UserMessagesGetter,
@@ -22,6 +21,7 @@ import {
   RegisterLibraryAnnotationGroupFunction,
   StateSetter,
   DragDropOperation,
+  VisualizationDimensionGroupConfig,
 } from '../../../types';
 
 export interface ConfigPanelWrapperProps {
@@ -35,11 +35,13 @@ export interface ConfigPanelWrapperProps {
   getUserMessages?: UserMessagesGetter;
   hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
+  onlyAllowSwitchToSubtypes?: boolean;
 }
 
 export interface LayerPanelProps {
   visualizationState: unknown;
   datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   framePublicAPI: FramePublicAPI;
   core: DatasourceDimensionEditorProps['core'];
   activeVisualization: Visualization;
@@ -82,15 +84,10 @@ export interface LayerPanelProps {
   getUserMessages?: UserMessagesGetter;
   displayLayerSettings: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
+  onlyAllowSwitchToSubtypes?: boolean;
 }
 
 export interface LayerDatasourceDropProps {
   state: unknown;
   setState: (newState: unknown) => void;
-}
-
-export interface ActiveDimensionState {
-  isNew: boolean;
-  activeId?: string;
-  activeGroup?: VisualizationDimensionGroupConfig;
 }
