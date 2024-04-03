@@ -28,6 +28,7 @@
     "@kbn/config-schema",
     "@kbn/react-kibana-mount",
     "@kbn/code-editor",
+    "@kbn/react-to-string",
   ],
   "exclude": [
     "target/**/*",

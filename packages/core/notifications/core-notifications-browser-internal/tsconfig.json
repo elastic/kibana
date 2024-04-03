@@ -32,6 +32,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/analytics-client",
+    "@kbn/react-to-string",
   ],
   "exclude": [
     "target/**/*",

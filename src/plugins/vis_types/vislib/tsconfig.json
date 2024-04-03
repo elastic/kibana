@@ -37,6 +37,7 @@
     "@kbn/std",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/react-to-string",
   ],
   "exclude": [
     "target/**/*",

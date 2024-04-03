@@ -17,6 +17,7 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/react-to-string",
   ],
   "exclude": [
     "target/**/*",

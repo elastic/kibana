@@ -28,7 +28,8 @@
     "@kbn/data-views-plugin",
     "@kbn/panel-loader",
     "@kbn/search-errors",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-to-string"
   ],
   "exclude": ["target/**/*"]
 }
