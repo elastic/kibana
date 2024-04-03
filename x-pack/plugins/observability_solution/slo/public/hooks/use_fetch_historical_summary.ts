@@ -21,7 +21,7 @@ export interface UseFetchHistoricalSummaryResponse {
 }
 
 export interface Params {
-  sloList: SLOWithSummaryResponse[];
+  sloList: SLOWithSummaryResponse[]; // TODO Kevin: NOT THE CORRECT TYPE
   shouldRefetch?: boolean;
 }
 

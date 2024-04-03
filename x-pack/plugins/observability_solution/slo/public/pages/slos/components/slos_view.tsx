@@ -16,7 +16,7 @@ import { SloListView } from './slo_list_view/slo_list_view';
 import { SLOView } from './toggle_slo_view';
 
 export interface Props {
-  sloList: SLOWithSummaryResponse[];
+  sloList: SLOWithSummaryResponse[]; // TODO Kevin: wrong type
   loading: boolean;
   error: boolean;
   sloView: SLOView;

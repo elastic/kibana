@@ -45,7 +45,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { SLOGroupings } from '../common/slo_groupings';
 
 export interface Props {
-  sloList: SLOWithSummaryResponse[];
+  sloList: SLOWithSummaryResponse[]; // TODO Kevin: wrong type
   loading: boolean;
   error: boolean;
 }
@@ -382,7 +382,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
 
   return (
     <>
-      <EuiBasicTable<SLOWithSummaryResponse>
+      <EuiBasicTable<SLOWithSummaryResponse> // TODO Kevin: wrong type
         items={sloList}
         columns={columns}
         loading={loading}

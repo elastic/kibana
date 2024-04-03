@@ -21,7 +21,7 @@ import { BurnRateRuleParams } from '../../../typings';
 import { SLOGroupings } from './common/slo_groupings';
 
 export interface SloListItemProps {
-  slo: SLOWithSummaryResponse;
+  slo: SLOWithSummaryResponse; // TODO Kevin: wrong type
   rules?: Array<Rule<BurnRateRuleParams>>;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
