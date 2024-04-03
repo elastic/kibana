@@ -8,13 +8,20 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+} from '../../../common/helpers/parse_duration';
+import { useRuleFormSelector } from '../../hooks';
 
 const initialState: {
   id: string;
   params: Record<string, unknown>;
+  interval: string;
 } = {
   id: '',
   params: {},
+  interval: '1m',
 };
 
 export const ruleDefinitionSlice = createSlice({
@@ -27,8 +34,20 @@ export const ruleDefinitionSlice = createSlice({
     replaceParams(state, { payload }: PayloadAction<Record<string, unknown>>) {
       state.params = payload;
     },
+    setIntervalNumber(state, { payload }: PayloadAction<string>) {
+      state.interval = `${payload}${getDurationUnitValue(state.interval)}`;
+    },
+    setIntervalUnit(state, { payload }: PayloadAction<string>) {
+      state.interval = `${getDurationNumberInItsUnit(state.interval)}${payload}`;
+    },
   },
 });
 
 export const ruleDefinitionReducer = ruleDefinitionSlice.reducer;
-export const { setParam, replaceParams } = ruleDefinitionSlice.actions;
+export const { setParam, replaceParams, setIntervalNumber, setIntervalUnit } =
+  ruleDefinitionSlice.actions;
+
+export const useSelectIntervalNumber = () =>
+  useRuleFormSelector((state) => getDurationNumberInItsUnit(state.ruleDefinition.interval));
+export const useSelectIntervalUnit = () =>
+  useRuleFormSelector((state) => getDurationUnitValue(state.ruleDefinition.interval));

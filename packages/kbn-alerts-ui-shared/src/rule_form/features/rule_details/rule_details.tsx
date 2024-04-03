@@ -25,7 +25,7 @@ export const RuleDetails: React.FC = () => {
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => dispatch(setRuleName(value)),
     [dispatch]
   );
-
+  //
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -41,11 +41,13 @@ export const RuleDetails: React.FC = () => {
       })}
     >
       <EuiFormRow
+        fullWidth
         label={i18n.translate('alertsUIShared.ruleForm.ruleNameFieldLabel', {
           defaultMessage: 'Rule name',
         })}
       >
         <EuiFieldText
+          fullWidth
           isInvalid={!ruleName}
           value={ruleName}
           onChange={onChangeNameField}
@@ -55,11 +57,13 @@ export const RuleDetails: React.FC = () => {
         />
       </EuiFormRow>
       <EuiFormRow
+        fullWidth
         label={i18n.translate('alertsUIShared.ruleForm.ruleTagsFieldLabel', {
           defaultMessage: 'Tags',
         })}
       >
         <EuiComboBox
+          fullWidth
           noSuggestions
           data-test-subj="tagsComboBox"
           selectedOptions={tagsOptions}

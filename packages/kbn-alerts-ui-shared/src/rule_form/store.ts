@@ -15,7 +15,7 @@ const rootReducer = combineReducers({
   ruleDetails: ruleDetailsReducer,
 });
 
-export const initializeStore = (preloadedState) =>
+export const initializeStore = (preloadedState: RuleFormRootState) =>
   configureStore({
     reducer: rootReducer,
     preloadedState,
