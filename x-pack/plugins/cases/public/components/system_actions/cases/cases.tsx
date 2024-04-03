@@ -14,7 +14,7 @@ import type {
 import {
   CASES_CONNECTOR_ID,
   CASES_CONNECTOR_TITLE,
-  TIME_WINDOW_REGEX,
+  CASES_CONNECTOR_TIME_WINDOW_REGEX,
 } from '../../../../common/constants';
 import type { CasesActionParams } from './types';
 import * as i18n from './translations';
@@ -40,7 +40,7 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
       const validationResult = {
         errors,
       };
-      const timeWindowRegex = new RegExp(TIME_WINDOW_REGEX, 'g');
+      const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
 
       if (
         actionParams.subActionParams &&

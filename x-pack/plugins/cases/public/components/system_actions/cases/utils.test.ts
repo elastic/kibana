@@ -9,7 +9,7 @@ import { getTimeUnitOptions } from './utils';
 
 describe('getTimeUnitOptions', () => {
   test('return single unit time options', () => {
-    const timeUnitValue = getTimeUnitOptions(1);
+    const timeUnitValue = getTimeUnitOptions('1');
     expect(timeUnitValue).toMatchObject([
       { text: 'day', value: 'd' },
       { text: 'week', value: 'w' },
@@ -19,7 +19,7 @@ describe('getTimeUnitOptions', () => {
   });
 
   test('return multiple unit time options', () => {
-    const timeUnitValue = getTimeUnitOptions(10);
+    const timeUnitValue = getTimeUnitOptions('10');
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
@@ -29,7 +29,7 @@ describe('getTimeUnitOptions', () => {
   });
 
   test('return correct unit time options for 0', () => {
-    const timeUnitValue = getTimeUnitOptions(0);
+    const timeUnitValue = getTimeUnitOptions('0');
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },
@@ -39,7 +39,17 @@ describe('getTimeUnitOptions', () => {
   });
 
   test('return correct unit time options for negative size', () => {
-    const timeUnitValue = getTimeUnitOptions(-5);
+    const timeUnitValue = getTimeUnitOptions('-5');
+    expect(timeUnitValue).toMatchObject([
+      { text: 'days', value: 'd' },
+      { text: 'weeks', value: 'w' },
+      { text: 'months', value: 'M' },
+      { text: 'years', value: 'y' },
+    ]);
+  });
+
+  test('return correct unit time options for empty string', () => {
+    const timeUnitValue = getTimeUnitOptions('');
     expect(timeUnitValue).toMatchObject([
       { text: 'days', value: 'd' },
       { text: 'weeks', value: 'w' },

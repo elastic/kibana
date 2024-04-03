@@ -8,10 +8,10 @@
 import { TIME_UNITS } from './constants';
 import * as i18n from './translations';
 
-export const getTimeUnitOptions = (unitSize: number) => {
+export const getTimeUnitOptions = (unitSize: string) => {
   return Object.entries(TIME_UNITS).map(([_key, value]) => {
     return {
-      text: getTimeUnitLabels(value, unitSize.toString()),
+      text: getTimeUnitLabels(value, unitSize == '' ? '0' : unitSize),
       value,
     };
   });

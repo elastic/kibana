@@ -40,7 +40,7 @@ describe('action params validation', () => {
     const actionParams = { subActionParams: { timeWindow: '17w' } };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Invalid time window.'] },
+      errors: { timeWindow: [] },
     });
   });
 

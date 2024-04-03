@@ -32,14 +32,12 @@ const actionParams = {
 };
 
 const connector: ActionConnector = {
-  secrets: {},
-  config: {},
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
   isDeprecated: false,
-  isSystemAction: false as const,
+  isSystemAction: true as const,
 };
 const editAction = jest.fn();
 const defaultProps = {
@@ -54,7 +52,7 @@ const defaultProps = {
 describe('CasesParamsFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useApplicationMock.mockReturnValue({ appId: 'management' });
+    useApplicationMock.mockReturnValueOnce({ appId: 'management' });
     useAlertDataViewsMock.mockReturnValue({
       loading: false,
       dataViews: [
@@ -106,6 +104,7 @@ describe('CasesParamsFields renders', () => {
       actionParams: {},
     };
     render(<CasesParamsFields {...newProps} />);
+
     expect(editAction.mock.calls[0][1]).toEqual('run');
   });
 
@@ -125,8 +124,9 @@ describe('CasesParamsFields renders', () => {
     });
   });
 
-  it('sets owner default if appId not matched', () => {
+  it('sets owner to default if appId not matched', async () => {
     useApplicationMock.mockReturnValue({ appId: 'testAppId' });
+
     const newProps = {
       ...defaultProps,
       actionParams: {
@@ -134,6 +134,7 @@ describe('CasesParamsFields renders', () => {
       },
     };
     render(<CasesParamsFields {...newProps} />);
+
     expect(editAction.mock.calls[0][1].owner).toEqual('cases');
   });
 
@@ -146,6 +147,25 @@ describe('CasesParamsFields renders', () => {
     render(<CasesParamsFields {...newProps} />);
 
     expect(await screen.findByText('error')).toBeInTheDocument();
+  });
+
+  it('updates owner correctly', async () => {
+    useApplicationMock.mockReturnValueOnce({ appId: 'securitySolutionUI' });
+
+    const newProps = {
+      ...defaultProps,
+      actionParams: {
+        subAction: 'run',
+      },
+    };
+
+    const { rerender } = render(<CasesParamsFields {...newProps} />);
+
+    expect(editAction.mock.calls[0][1].owner).toEqual('cases');
+
+    rerender(<CasesParamsFields {...defaultProps} />);
+
+    expect(editAction.mock.calls[1][1].owner).toEqual('securitySolution');
   });
 
   describe('UI updates', () => {

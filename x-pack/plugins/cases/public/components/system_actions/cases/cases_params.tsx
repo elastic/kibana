@@ -33,7 +33,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
 > = ({ actionParams, editAction, errors, index, producerId }) => {
   const { appId } = useApplication();
-  const owner = getCaseOwnerByAppId(appId) ?? OWNER_INFO.cases.id;
+  const owner = getCaseOwnerByAppId(appId);
 
   const { dataViews, loading: loadingAlertDataViews } = useAlertDataViews(
     producerId ? [producerId as ValidFeatureId] : []
@@ -63,20 +63,32 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       editAction('subAction', CASES_CONNECTOR_SUB_ACTION.RUN, index);
     }
 
-    if (!actionParams.subActionParams || !actionParams.subActionParams?.owner) {
+    if (!actionParams.subActionParams) {
       editAction(
         'subActionParams',
         {
           timeWindow: `${DEFAULT_TIME_WINDOW}`,
           reopenClosedCases: false,
           groupingBy: [],
+          owner: OWNER_INFO.cases.id,
+        },
+        index
+      );
+    }
+
+    if (actionParams.subActionParams && actionParams.subActionParams?.owner !== owner) {
+      editAction(
+        'subActionParams',
+        {
+          ...actionParams.subActionParams,
           owner,
         },
         index
       );
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams, owner]);
+  }, [actionParams, owner, appId]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: unknown) => {
@@ -181,7 +193,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowUnit', e.target.value);
               }}
-              options={getTimeUnitOptions(timeWindowSize ? parseInt(timeWindowSize, 10) : 1)}
+              options={getTimeUnitOptions(timeWindowSize)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
