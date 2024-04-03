@@ -35,7 +35,7 @@ export class SearchNotebooksPlugin
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router);
+    defineRoutes(router, this.logger);
 
     return {};
   }
