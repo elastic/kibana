@@ -24,7 +24,14 @@ import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, HistoricalSummary, SLO, SLOId, TimeWindow } from '../domain/models';
+import {
+  DateRange,
+  GroupBy,
+  HistoricalSummary,
+  Objective,
+  SLOId,
+  TimeWindow,
+} from '../domain/models';
 import { computeSLI, computeSummaryStatus, toDateRange, toErrorBudget } from '../domain/services';
 
 interface DailyAggBucket {
@@ -141,7 +148,7 @@ export class DefaultHistoricalSummaryClient implements HistoricalSummaryClient {
 }
 
 function handleResultForCalendarAlignedAndOccurrences(
-  objective: SLO['objective'],
+  objective: Objective,
   buckets: DailyAggBucket[]
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
@@ -163,7 +170,7 @@ function handleResultForCalendarAlignedAndOccurrences(
 }
 
 function handleResultForCalendarAlignedAndTimeslices(
-  objective: SLO['objective'],
+  objective: Objective,
   buckets: DailyAggBucket[],
   dateRange: DateRange
 ): HistoricalSummary[] {
@@ -187,8 +194,8 @@ function handleResultForCalendarAlignedAndTimeslices(
 }
 
 function handleResultForRolling(
-  objective: SLO['objective'],
-  timeWindow: SLO['timeWindow'],
+  objective: Objective,
+  timeWindow: TimeWindow,
   buckets: DailyAggBucket[]
 ): HistoricalSummary[] {
   const initialErrorBudget = 1 - objective.target;
@@ -227,8 +234,8 @@ function generateSearchQuery({
 }: {
   instanceId: string;
   sloId: string;
-  groupBy: SLO['groupBy'];
-  revision: SLO['revision'];
+  groupBy: GroupBy;
+  revision: number;
   dateRange: DateRange;
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;

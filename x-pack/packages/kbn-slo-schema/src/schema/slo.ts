@@ -37,6 +37,8 @@ const settingsSchema = t.type({
   frequency: durationType,
 });
 
+const groupBySchema = allOrAnyStringOrArray;
+
 const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
 const tagsSchema = t.array(t.string);
 const sloIdSchema = t.string;
@@ -55,7 +57,7 @@ const sloDefinitionSchema = t.type({
   tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
-  groupBy: allOrAnyStringOrArray,
+  groupBy: groupBySchema,
   version: t.number,
 });
 
@@ -74,7 +76,7 @@ const sloSchema = t.intersection([
     tags: tagsSchema,
     createdAt: dateType,
     updatedAt: dateType,
-    groupBy: allOrAnyStringOrArray,
+    groupBy: groupBySchema,
     version: t.number,
   }),
   t.partial({
@@ -91,6 +93,7 @@ const sloWithSummarySchema = t.intersection([
 export {
   budgetingMethodSchema,
   objectiveSchema,
+  groupBySchema,
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,
   settingsSchema,

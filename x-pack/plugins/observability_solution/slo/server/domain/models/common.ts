@@ -16,6 +16,7 @@ import {
   metaSchema,
   sloSettingsSchema,
   objectiveSchema,
+  groupBySchema,
 } from '@kbn/slo-schema';
 
 type Objective = t.TypeOf<typeof objectiveSchema>;
@@ -26,6 +27,7 @@ type Summary = t.TypeOf<typeof summarySchema>;
 type Groupings = t.TypeOf<typeof groupingsSchema>;
 type Meta = t.TypeOf<typeof metaSchema>;
 type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
+type GroupBy = t.TypeOf<typeof groupBySchema>;
 type SloSettings = t.TypeOf<typeof sloSettingsSchema>;
 
 export type {
@@ -36,6 +38,7 @@ export type {
   Meta,
   Status,
   Summary,
+  GroupBy,
   GroupSummary,
   SloSettings,
 };
