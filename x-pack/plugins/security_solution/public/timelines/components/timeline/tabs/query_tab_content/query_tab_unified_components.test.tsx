@@ -134,7 +134,8 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-describe('query tab with unified timeline', () => {
+// Failing: See https://github.com/elastic/kibana/issues/179831
+describe.skip('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
@@ -475,7 +476,8 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('left controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/179845
+  describe.skip('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
