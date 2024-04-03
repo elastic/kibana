@@ -41,7 +41,7 @@ export interface ControlGroupSettings {
 }
 
 export type ControlGroupComponentState = ControlGroupSettings & {
-  lastSavedInput: PersistableControlGroupInput;
+  lastSavedInput?: PersistableControlGroupInput;
 };
 
 export {
