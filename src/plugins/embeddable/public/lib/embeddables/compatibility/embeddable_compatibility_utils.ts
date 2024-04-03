@@ -18,11 +18,7 @@ import {
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../..';
 import { Container } from '../../containers';
 import { ViewMode as LegacyViewMode } from '../../types';
-import {
-  CommonLegacyEmbeddable,
-  CommonLegacyInput,
-  CommonLegacyOutput,
-} from './legacy_embeddable_to_api';
+import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 
 export const embeddableInputToSubject = <
   ValueType extends unknown = unknown,
@@ -33,7 +29,9 @@ export const embeddableInputToSubject = <
   key: keyof LegacyInput,
   useExplicitInput = false
 ) => {
-  const subject = new BehaviorSubject<ValueType | undefined>(embeddable.getExplicitInput()?.[key] as ValueType);
+  const subject = new BehaviorSubject<ValueType | undefined>(
+    embeddable.getExplicitInput()?.[key] as ValueType
+  );
   if (useExplicitInput && embeddable.parent) {
     subscription.add(
       embeddable.parent
@@ -68,7 +66,9 @@ export const embeddableOutputToSubject = <
   embeddable: IEmbeddable<EmbeddableInput, LegacyOutput>,
   key: keyof LegacyOutput
 ) => {
-  const subject = new BehaviorSubject<ValueType | undefined>(embeddable.getOutput()[key] as ValueType);
+  const subject = new BehaviorSubject<ValueType | undefined>(
+    embeddable.getOutput()[key] as ValueType
+  );
   subscription.add(
     embeddable
       .getOutput$()

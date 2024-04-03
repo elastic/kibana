@@ -69,12 +69,12 @@ export {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
+} from './interfaces/fetch/publishes_unified_search';
+export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
 export {
   type FetchContext,
   onFetchContextChanged,
-} from './interfaces/unified_search/on_fetch_context_changed';
+} from './interfaces/fetch/on_fetch_context_changed';
 export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,

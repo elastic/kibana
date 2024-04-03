@@ -72,7 +72,13 @@ export const legacyEmbeddableToApi = (
   const inputKeyToSubject = <ValueType extends unknown = unknown>(
     key: keyof CommonLegacyInput,
     useExplicitInput?: boolean
-  ) => embeddableInputToSubject<ValueType, CommonLegacyInput>(subscriptions, embeddable, key, useExplicitInput);
+  ) =>
+    embeddableInputToSubject<ValueType, CommonLegacyInput>(
+      subscriptions,
+      embeddable,
+      key,
+      useExplicitInput
+    );
   const outputKeyToSubject = <ValueType extends unknown = unknown>(key: keyof CommonLegacyOutput) =>
     embeddableOutputToSubject<ValueType, CommonLegacyOutput>(subscriptions, embeddable, key);
 

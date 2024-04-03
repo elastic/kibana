@@ -244,11 +244,10 @@ export class DashboardContainer
       })
     );
     this.startAuditingReactEmbeddableChildren();
-    this.timeslice$ = embeddableInputToSubject<[number, number] | undefined, DashboardContainerInput>(
-      this.publishingSubscription,
-      this,
-      'timeslice'
-    );
+    this.timeslice$ = embeddableInputToSubject<
+      [number, number] | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'timeslice');
   }
 
   public getAppContext() {
