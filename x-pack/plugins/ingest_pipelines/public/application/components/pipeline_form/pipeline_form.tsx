@@ -8,8 +8,10 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
+  EuiTextTruncate,
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
@@ -180,7 +182,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                       onSave={setValue}
                       defaultValue={value}
                       placeholder={i18nStrings.placeholderPipelineName}
-                      isReadOnly={isSaving || canEditName === false}
+                      isLoading={isSaving}
+                      isReadOnly={canEditName === false || Boolean(isEditing)}
                     />
                   );
                 }}
@@ -215,7 +218,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                       onSave={setValue}
                       defaultValue={value}
                       placeholder={i18nStrings.placeholderPipelineDescription}
-                      isReadOnly={isSaving}
+                      isLoading={isSaving}
                     />
                   );
                 }}
