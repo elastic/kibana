@@ -681,6 +681,21 @@ export function MachineLearningJobWizardCommonProvider(
         });
     },
 
+    async assertCalloutText(testSubj: string, text: string) {
+      const allOfTestSubj = await testSubjects.getVisibleTextAll(testSubj);
+      console.log(`\nλjs allOfTestSubj: \n${JSON.stringify(allOfTestSubj, null, 2)}`);
+
+      const oneOfVisibleTextMatches = allOfTestSubj.some((visibleText) => visibleText === text);
+      expect(oneOfVisibleTextMatches).to.eql(
+        true,
+        `Expect one of the visible text entries to match [${text}], instead found ${JSON.stringify(
+          allOfTestSubj,
+          null,
+          2
+        )}`
+      );
+    },
+
     async cloneJob() {
       await testSubjects.click('euiCollapsedItemActionsButton');
       await testSubjects.click('mlActionButtonCloneJob');

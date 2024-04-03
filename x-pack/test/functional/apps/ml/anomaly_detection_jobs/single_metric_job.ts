@@ -418,6 +418,10 @@ export default function ({ getService }: FtrProviderContext) {
         'mlValidationCallout warning',
         'mlValidationCallout error',
       ]);
+      await ml.jobWizardCommon.assertCalloutText(
+        'mlValidationCallout warning',
+        'Time range\nThe selected or available time range might be too short. The recommended minimum time range should be at least 2 hours and 25 times the bucket span.'
+      );
 
       await ml.jobWizardCommon.goToTimeRangeStep();
       await ml.jobWizardCommon.clickUseFullDataButton(
@@ -425,9 +429,11 @@ export default function ({ getService }: FtrProviderContext) {
         'Feb 11, 2016 @ 23:59:54.000'
       );
       await ml.jobWizardCommon.advanceToValidationSection();
-      await ml.jobWizardCommon.assertValidationCallouts([
+      await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout success']);
+      await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout success',
-      ]);
+        'Time range\nValid and long enough to model patterns in the data.'
+      );
     });
 
     it('job creation and toggling model change annotation triggers enable annotation recommendation callout', async () => {
