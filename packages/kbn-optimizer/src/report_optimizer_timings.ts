@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { concatMap } from 'rxjs/operators';
+import { concatMap } from 'rxjs';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ToolingLog } from '@kbn/tooling-log';
 
