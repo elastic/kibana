@@ -24,6 +24,7 @@ import { PluginContext } from './context/plugin_context';
 
 import { SloPublicPluginsStart } from './types';
 import { routes } from './routes/routes';
+import { ExperimentalFeatures } from '../common/config';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ export const renderApp = ({
   kibanaVersion,
   isServerless,
   observabilityRuleTypeRegistry,
+  experimentalFeatures,
 }: {
   core: CoreStart;
   plugins: SloPublicPluginsStart;
@@ -62,6 +64,7 @@ export const renderApp = ({
   isDev?: boolean;
   kibanaVersion: string;
   isServerless?: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -100,6 +103,7 @@ export const renderApp = ({
                     appMountParameters,
                     ObservabilityPageTemplate,
                     observabilityRuleTypeRegistry,
+                    experimentalFeatures,
                   }}
                 >
                   <Router history={history}>

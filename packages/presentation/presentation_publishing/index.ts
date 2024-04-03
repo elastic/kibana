@@ -28,6 +28,11 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export {
+  apiCanAddNewPanel,
+  type CanAddNewPanel,
+  type PanelPackage,
+} from './interfaces/can_add_new_panel';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
@@ -44,22 +49,15 @@ export {
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
-  useBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';
 export {
   apiPublishesDataLoading,
-  useDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
-export {
-  apiPublishesDataViews,
-  useDataViews,
-  type PublishesDataViews,
-} from './interfaces/publishes_data_views';
+export { apiPublishesDataViews, type PublishesDataViews } from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
-  useDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
@@ -76,21 +74,19 @@ export {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
-} from './interfaces/publishes_unified_search';
+} from './interfaces/unified_search/publishes_unified_search';
+export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
 export {
   apiPublishesSavedObjectId,
-  useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export {
   apiPublishesUnsavedChanges,
-  useUnsavedChanges,
   type PublishesUnsavedChanges,
 } from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
-  useViewMode,
   type PublishesViewMode,
   type PublishesWritableViewMode,
   type ViewMode,
@@ -98,8 +94,6 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
-  useDefaultPanelDescription,
-  usePanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';
@@ -111,6 +105,12 @@ export {
   type PublishesWritablePanelTitle,
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
+export {
+  type HasLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  apiHasLegacyLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export {
   useBatchedPublishingSubjects,
   usePublishingSubject,

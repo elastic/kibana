@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '../common/constants';
+import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
 
 export function registerCasesPersistableState(cases: CasesServerSetup | undefined, logger: Logger) {
   if (cases) {

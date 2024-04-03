@@ -367,6 +367,12 @@ export interface UnifiedDataTableProps {
    * Optional row line height override. Default is 1.6em.
    */
   rowLineHeightOverride?: string;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -430,11 +436,13 @@ export const UnifiedDataTable = ({
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
+  cellActionsMetadata,
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
+
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -671,14 +679,17 @@ export const UnifiedDataTable = ({
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
-  const cellActionsMetadata = useMemo(() => ({ dataViewId: dataView.id }), [dataView]);
+  const allCellActionsMetadata = useMemo(
+    () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
+    [dataView, cellActionsMetadata]
+  );
 
   const columnsCellActions = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
-    metadata: cellActionsMetadata,
+    metadata: allCellActionsMetadata,
   });
 
   const {
@@ -730,6 +741,7 @@ export const UnifiedDataTable = ({
         customGridColumnsConfiguration,
       }),
     [
+      showColumnTokens,
       columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
@@ -743,7 +755,6 @@ export const UnifiedDataTable = ({
       isSortEnabled,
       onFilter,
       settings,
-      showColumnTokens,
       toastNotifications,
       uiSettings,
       valueToStringConverter,
