@@ -18,6 +18,7 @@ import {
   Container,
   DefaultEmbeddableApi,
   EmbeddableFactoryNotFoundError,
+  embeddableInputToSubject,
   isExplicitInputWithAttributes,
   PanelNotFoundError,
   reactEmbeddableRegistryHasKey,
@@ -135,6 +136,7 @@ export class DashboardContainer
   public searchSessionId?: string;
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public reload$ = new Subject<void>();
+  public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
@@ -242,6 +244,11 @@ export class DashboardContainer
       })
     );
     this.startAuditingReactEmbeddableChildren();
+    this.timeslice$ = embeddableInputToSubject<[number, number] | undefined, DashboardContainerInput>(
+      this.publishingSubscription,
+      this,
+      'timeslice'
+    );
   }
 
   public getAppContext() {

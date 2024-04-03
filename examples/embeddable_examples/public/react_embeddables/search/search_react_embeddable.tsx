@@ -9,8 +9,12 @@
 import { EuiCallOut } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { FetchContext, initializeTimeRange, onFetchContextChanged, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { T } from 'lodash/fp';
+import {
+  FetchContext,
+  initializeTimeRange,
+  onFetchContextChanged,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
@@ -59,7 +63,22 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           return;
         }
         dataLoading$.next(true);
-        getCount(defaultDataView, services.data, fetchContext.filters ?? [], fetchContext.query, fetchContext.timeRange)
+        getCount(
+          defaultDataView,
+          services.data,
+          fetchContext.filters ?? [],
+          fetchContext.query,
+          // timeRange and timeslice provided seperatly so consumers can decide
+          // whether to refetch data for just mask current data.
+          // In this example, we must refetch because we need a count within the time range.
+          fetchContext.timeslice
+            ? {
+                from: new Date(fetchContext.timeslice[0]).toISOString(),
+                to: new Date(fetchContext.timeslice[1]).toISOString(),
+                mode: 'absolute' as 'absolute',
+              }
+            : fetchContext.timeRange
+        )
           .then((nextCount: number) => {
             if (isUnmounted || isCanceled()) {
               return;
@@ -74,7 +93,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             dataLoading$.next(false);
             error$.next(err);
           });
-      }
+      };
       const unsubscribeFromFetch = onFetchContextChanged({
         api,
         onFetch,
