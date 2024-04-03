@@ -17,8 +17,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-http-browser",
-    "@kbn/doc-links",
     "@kbn/i18n",
+    "@kbn/logging",
   ]
 }
