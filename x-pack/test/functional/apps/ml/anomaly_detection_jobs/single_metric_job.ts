@@ -415,7 +415,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
       await ml.jobWizardCommon.clickNextButton();
       await ml.jobWizardCommon.assertValidationCallouts([
-        'mlValidationCallout-warning-The selected or available time',
+        'mlValidationCallout warning',
+        'mlValidationCallout error',
       ]);
 
       await ml.jobWizardCommon.goToTimeRangeStep();
@@ -425,7 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobWizardCommon.advanceToValidationSection();
       await ml.jobWizardCommon.assertValidationCallouts([
-        'mlValidationCallout-success-Valid and long enough to model',
+        'mlValidationCallout success',
       ]);
     });
 
