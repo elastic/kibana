@@ -18,6 +18,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
+import {
+  MetricExpressionParams,
+  NonCountMetricExpressionParams,
+  CustomMetricExpressionParams as MetricCustomMetric,
+} from '@kbn/infra-plugin/common/alerting/metrics';
 import { asDuration, asPercent } from '../../../../../common';
 import { createFormatter } from '../../../../../common/custom_threshold_rule/formatters';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
@@ -29,7 +34,6 @@ import {
 } from '../../../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../../../typings/alerts';
 import { isFieldsSameType } from './is_fields_same_type';
-
 export interface FlyoutThresholdData {
   observedValue: string;
   threshold: string[];
@@ -89,10 +93,13 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case METRIC_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
-          metric: string;
-        };
-        const fields = [criteria.metric];
+        const criteria = ruleCriteria[metricIndex] as MetricExpressionParams;
+        let fields: string[] = [];
+        const nonCountMetric = (criteria as NonCountMetricExpressionParams).metric;
+        const customMetric = (criteria as MetricCustomMetric).customMetrics;
+        if (nonCountMetric) fields = [nonCountMetric];
+        if (customMetric && customMetric.length)
+          fields = customMetric.map((metric) => metric.field as string);
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
         const isSameFieldsType = isFieldsSameType(fields);
