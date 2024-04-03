@@ -16,13 +16,8 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 
-const ConfigSchemaProps = {
-  connector: schema.maybe(schema.string()),
-};
-
-const ConfigSchema = schema.object(ConfigSchemaProps);
-
 const ParamsSchema = schema.object({
+  connector: schema.string(),
   message: schema.string({ minLength: 1 }),
 });
 
@@ -48,14 +43,14 @@ export function getObsAIAssistantConnectorType(): ObsAIAssistantConnectorType {
     supportedFeatureIds: [AlertingConnectorFeatureId],
     validate: {
       config: {
-        schema: ConfigSchema,
+        schema: schema.object({}),
         customValidator: () => {},
       },
       params: {
         schema: ParamsSchema,
       },
       secrets: {
-        schema: schema.object({ api_key: schema.maybe(schema.string()) }),
+        schema: schema.object({}),
       },
     },
     renderParameterTemplates,
@@ -71,6 +66,7 @@ function renderParameterTemplates(
   variables: Record<string, unknown>
 ): ActionParamsType {
   return {
+    connector: params.connector,
     message: renderMustacheString(logger, params.message, variables, 'slack'),
   };
 }

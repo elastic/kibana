@@ -36,7 +36,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, {}, ObsAIAssista
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
       return { errors: { message: [] } };
     },
-    actionConnectorFields: lazy(() => import('./ai_assistant_connectors')),
     actionParamsFields: lazy(() => import('./ai_assistant_params')),
+    actionConnectorFields: null,
   };
 }
