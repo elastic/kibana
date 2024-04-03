@@ -17,6 +17,7 @@ const buildRuleGroup = themeRuleGroupBuilderFactory();
 
 const background = euiThemeVars.euiColorLightestShade;
 const stringTextColor = '#007C1E';
+const booleanTextColor = '#990000';
 export const buildConsoleOutputTheme = (): monaco.editor.IStandaloneThemeData => {
   const sharedTheme = buildConsoleSharedTheme();
   return {
@@ -26,6 +27,10 @@ export const buildConsoleOutputTheme = (): monaco.editor.IStandaloneThemeData =>
       ...buildRuleGroup(
         ['string', 'string-literal', 'multi-string', 'punctuation.end-triple-quote'],
         makeHighContrastColor(stringTextColor)(background)
+      ),
+      ...buildRuleGroup(
+        ['constant.language.boolean'],
+        makeHighContrastColor(booleanTextColor)(background)
       ),
     ],
   };
