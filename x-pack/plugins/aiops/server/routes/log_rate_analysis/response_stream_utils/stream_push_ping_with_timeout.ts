@@ -10,8 +10,8 @@ import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import {
   pingAction,
   type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import type { LogDebugMessage } from './log_debug_message';
 import type { StateHandler } from './state_handler';

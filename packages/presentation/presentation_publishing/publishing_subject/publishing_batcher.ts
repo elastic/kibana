@@ -7,8 +7,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { combineLatest, debounceTime, skip } from 'rxjs';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
@@ -27,10 +26,13 @@ const hasSubjectsArrayChanged = (
 /**
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
  * You should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay.
+ * @param subjects Publishing subjects array.
+ *   When 'subjects' is expected to change, 'subjects' must be part of component react state.
  */
 export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublishingSubject[]]>(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
+  const isFirstRender = useRef(true);
   /**
    * memoize and deep diff subjects to avoid rebuilding the subscription when the subjects are the same.
    */
@@ -46,17 +48,20 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
   /**
    * Set up latest published values state, initialized with the current values of the subjects.
    */
-  const initialSubjectValues = useMemo(
-    () => unwrapPublishingSubjectArray(subjectsToUse),
-    [subjectsToUse]
-  );
-  const [latestPublishedValues, setLatestPublishedValues] =
-    useState<UnwrapPublishingSubjectTuple<SubjectsType>>(initialSubjectValues);
+  const [latestPublishedValues, setLatestPublishedValues] = useState<
+    UnwrapPublishingSubjectTuple<SubjectsType>
+  >(() => unwrapPublishingSubjectArray(subjectsToUse));
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
    */
   useEffect(() => {
+    if (!isFirstRender.current) {
+      setLatestPublishedValues(unwrapPublishingSubjectArray(subjectsToUse));
+    } else {
+      isFirstRender.current = false;
+    }
+
     const definedSubjects: Array<PublishingSubject<unknown>> = [];
     const definedSubjectIndices: number[] = [];
 
@@ -67,7 +72,11 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
     }
     if (definedSubjects.length === 0) return;
     const subscription = combineLatest(definedSubjects)
-      .pipe(debounceTime(0))
+      .pipe(
+        debounceTime(0),
+        // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
+        skip(1)
+      )
       .subscribe((values) => {
         setLatestPublishedValues((lastPublishedValues) => {
           const newLatestPublishedValues: UnwrapPublishingSubjectTuple<SubjectsType> = [

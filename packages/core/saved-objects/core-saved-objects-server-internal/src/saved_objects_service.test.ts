@@ -19,7 +19,7 @@ import {
   applyTypeDefaultsMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
