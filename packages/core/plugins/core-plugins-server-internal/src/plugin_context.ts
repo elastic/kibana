@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
