@@ -191,7 +191,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${opsgenieActionId}. Connector name: Opsgenie. Connector type: .opsgenie`,
           });
         });
@@ -210,7 +210,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message:
               'Request validation failed (Error: [message]: expected value of type [string] but got [undefined])',
           });
@@ -230,7 +230,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message:
               'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
           });
@@ -263,7 +263,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.type]: types that failed validation:\n - [responders.0.type.0]: expected value to equal [team]\n - [responders.0.type.1]: expected value to equal [user]\n - [responders.0.type.2]: expected value to equal [escalation]\n - [responders.0.type.3]: expected value to equal [schedule]\n- [responders.0.1.id]: expected value of type [string] but got [undefined]\n- [responders.0.2.username]: expected value of type [string] but got [undefined])',
               });
@@ -293,7 +293,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.name]: expected value of type [string] but got [undefined]\n- [responders.0.1.id]: expected value of type [string] but got [undefined]\n- [responders.0.2.username]: expected value of type [string] but got [undefined])',
               });
@@ -396,7 +396,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   'Request validation failed (Error: [visibleTo.0]: types that failed validation:\n- [visibleTo.0.0.type]: expected value to equal [team]\n- [visibleTo.0.1.id]: expected value of type [string] but got [undefined]\n- [visibleTo.0.2.id]: expected value of type [string] but got [undefined]\n- [visibleTo.0.3.username]: expected value of type [string] but got [undefined])',
               });
@@ -461,7 +461,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
                   'Request validation failed (Error: [details.bananas]: expected value of type [string] but got [number])',
               });
@@ -697,7 +697,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
@@ -721,7 +721,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });

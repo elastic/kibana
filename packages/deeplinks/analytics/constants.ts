@@ -19,3 +19,7 @@ export const CANVAS_APP_ID = 'canvas';
 export const GRAPH_APP_ID = 'graph';
 
 export const DISCOVER_ESQL_LOCATOR = 'DISCOVER_ESQL_LOCATOR';
+
+export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
+
+export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
