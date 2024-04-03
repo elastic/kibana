@@ -235,7 +235,6 @@ const ChartPanelsComponent: React.FC<Props> = ({
               filters={alertsDefaultFilters}
               inspectTitle={isAlertsPageChartsEnabled ? i18n.COUNTS : i18n.TABLE}
               panelHeight={CHART_PANEL_HEIGHT}
-              query={query}
               runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}

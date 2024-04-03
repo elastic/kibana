@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
@@ -143,26 +143,6 @@ describe('AlertsCountPanel', () => {
       expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
         false
       );
-    });
-  });
-
-  describe('Query', () => {
-    it('it render with a illegal KQL', async () => {
-      jest.mock('@kbn/es-query', () => ({
-        buildEsQuery: jest.fn().mockImplementation(() => {
-          throw new Error('Something went wrong');
-        }),
-      }));
-      const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...props} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="alertsCountPanel"]').exists()).toBeTruthy();
-      });
     });
   });
 

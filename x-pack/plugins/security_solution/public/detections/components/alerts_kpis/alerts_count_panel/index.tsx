@@ -11,7 +11,7 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import React, { memo, useMemo, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -35,7 +35,6 @@ interface AlertsCountPanelProps {
   filters?: Filter[];
   inspectTitle: string;
   panelHeight?: number;
-  query?: Query;
   runtimeMappings?: MappingRuntimeFields;
   setStackByField0: (stackBy: string) => void;
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
@@ -61,7 +60,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     filters,
     inspectTitle,
     panelHeight,
-    query,
     setStackByField0,
     setStackByField0ComboboxInputRef,
     setStackByField1,
@@ -132,7 +130,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             toggleQuery={toggleQuery}
           >
             <FieldSelection
-              chartOptionsContextMenu={undefined}
               setStackByField0={setStackByField0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={setStackByField1}
