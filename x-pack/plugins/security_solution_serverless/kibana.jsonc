@@ -26,8 +26,5 @@
     "optionalPlugins": [
       "securitySolutionEss"
     ],
-    "requiredBundles": [
-      "usageCollection"
-    ]
   }
 }

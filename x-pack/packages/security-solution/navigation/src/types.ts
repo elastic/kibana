@@ -21,6 +21,7 @@ export interface NavigationLink<T extends string = string> {
   sideNavIcon?: IconType;
   skipUrlState?: boolean;
   unauthorized?: boolean;
+  isFooterLink?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;

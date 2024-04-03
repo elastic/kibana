@@ -6,40 +6,32 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { RouteProps } from 'react-router-dom';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { CoreStart } from '@kbn/core/public';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
 import type { AppLinksSwitcher } from './common/links';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { navLinks$ } from './common/links/nav_links';
+import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import { getSolutionNavigation } from './app/solution_navigation';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public onboardingPageService: OnboardingPageService;
-  public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
+  public isSolutionNavigationEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
-    this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
     this.onboardingPageService = new OnboardingPageService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
-  }
-
-  public getStartServices(): ContractStartServices {
-    return {
-      extraRoutes$: this.extraRoutes$.asObservable(),
-      getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
-      upselling: this.upsellingService,
-      onboarding: this.onboardingPageService,
-    };
+    this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false);
   }
 
   public getSetupContract(): PluginSetup {
@@ -55,21 +47,30 @@ export class PluginContract {
     };
   }
 
-  public getStartContract(): PluginStart {
+  public getStartContract(core: CoreStart): PluginStart {
     return {
       setOnboardingPageSettings: this.onboardingPageService,
       getNavLinks$: () => navLinks$,
-      setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setComponents: (components) => {
         this.componentsService.setComponents(components);
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
       getUpselling: () => this.upsellingService,
+      // TODO: remove the following APIs after rollout https://github.com/elastic/kibana/issues/179572
+      setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled) => {
+        this.isSolutionNavigationEnabled$.next(isSolutionNavigationEnabled);
+        updateNavLinks(isSolutionNavigationEnabled, core);
+      },
+      getSolutionNavigation: () => getSolutionNavigation(core),
     };
   }
 
-  public getStopContract() {
-    return {};
+  public getStartServices(): ContractStartServices {
+    return {
+      getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
+      upselling: this.upsellingService,
+      onboarding: this.onboardingPageService,
+    };
   }
 }
 

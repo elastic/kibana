@@ -5,25 +5,32 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
+import type { NavigationLink as GenericNavigationLink } from '@kbn/security-solution-navigation';
 import { appLinks$ } from './links';
 import type { SecurityPageName } from '../../app/types';
 import type { AppLinkItems, NavigationLink } from './types';
+import { createSolutionNavLinks$ } from '../../app/solution_navigation/links/nav_links';
 
-export const formatNavigationLinks = (appLinks: AppLinkItems): NavigationLink[] =>
-  appLinks.map<NavigationLink>((link) => ({
+type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
+
+export const formatNavigationLinks = (appLinks: AppLinkItems): SecurityNavLink[] =>
+  appLinks.map<SecurityNavLink>((link) => ({
     id: link.id,
     title: link.title,
-    ...(link.categories != null ? { categories: link.categories } : {}),
-    ...(link.description != null ? { description: link.description } : {}),
-    ...(link.sideNavDisabled === true ? { disabled: true } : {}),
-    ...(link.landingIcon != null ? { landingIcon: link.landingIcon } : {}),
-    ...(link.landingImage != null ? { landingImage: link.landingImage } : {}),
-    ...(link.sideNavIcon != null ? { sideNavIcon: link.sideNavIcon } : {}),
-    ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
-    ...(link.isBeta != null ? { isBeta: link.isBeta } : {}),
-    ...(link.betaOptions != null ? { betaOptions: link.betaOptions } : {}),
+    ...(link.categories != null && { categories: link.categories }),
+    ...(link.description != null && { description: link.description }),
+    ...(link.sideNavDisabled === true && { disabled: true }),
+    ...(link.landingIcon != null && { landingIcon: link.landingIcon }),
+    ...(link.landingImage != null && { landingImage: link.landingImage }),
+    ...(link.sideNavIcon != null && { sideNavIcon: link.sideNavIcon }),
+    ...(link.sideNavFooter != null && { isFooterLink: link.sideNavFooter }),
+    ...(link.skipUrlState != null && { skipUrlState: link.skipUrlState }),
+    ...(link.isBeta != null && { isBeta: link.isBeta }),
+    ...(link.betaOptions != null && { betaOptions: link.betaOptions }),
     ...(link.links?.length && {
       links: formatNavigationLinks(link.links),
     }),
@@ -33,7 +40,26 @@ export const formatNavigationLinks = (appLinks: AppLinkItems): NavigationLink[] 
  * Navigation links observable based on Security AppLinks,
  * It is used to generate the side navigation items
  */
-export const navLinks$ = appLinks$.pipe(map(formatNavigationLinks));
+export const internalNavLinks$ = appLinks$.pipe(map(formatNavigationLinks));
+
+export const navLinksUpdater$ = new BehaviorSubject<NavigationLink[]>([]);
+export const navLinks$ = navLinksUpdater$.asObservable();
+
+let currentSubscription: Subscription;
+export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) => {
+  if (currentSubscription) {
+    currentSubscription.unsubscribe();
+  }
+  if (isSolutionNavEnabled) {
+    currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
+      navLinksUpdater$.next(links);
+    });
+  } else {
+    currentSubscription = internalNavLinks$.subscribe((links) => {
+      navLinksUpdater$.next(links);
+    });
+  }
+};
 
 export const useNavLinks = (): NavigationLink[] => {
   return useObservable(navLinks$, []);

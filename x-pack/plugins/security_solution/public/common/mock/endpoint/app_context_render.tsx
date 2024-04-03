@@ -38,7 +38,7 @@ import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
-import { links } from '../../links/app_links';
+import { appLinks } from '../../../app_links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
@@ -229,9 +229,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     // hide react-query output in console
     logger: {
       error: () => {},
-      // eslint-disable-next-line no-console
+
       log: console.log,
-      // eslint-disable-next-line no-console
+
       warn: console.warn,
     },
   });
@@ -343,7 +343,7 @@ const createCoreStartMock = (
 ): ReturnType<typeof coreMock.createStart> => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
 
-  const linkPaths = getLinksPaths(links);
+  const linkPaths = getLinksPaths(appLinks);
 
   // Mock the certain APP Ids returned by `application.getUrlForApp()`
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
@@ -376,8 +376,8 @@ const createCoreStartMock = (
   return coreStart;
 };
 
-const getLinksPaths = (appLinks: AppLinkItems): Record<string, string> => {
-  return appLinks.reduce((result: Record<string, string>, link) => {
+const getLinksPaths = (links: AppLinkItems): Record<string, string> => {
+  return links.reduce((result: Record<string, string>, link) => {
     if (link.path) {
       result[link.id] = link.path;
     }

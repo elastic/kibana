@@ -51,7 +51,6 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
-import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -74,6 +73,9 @@ import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrappe
 import type { Explore } from './explore';
 import type { AppLinksSwitcher, NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
+import type { Assets } from './assets';
+import type { Investigations } from './investigations';
+import type { MachineLearning } from './machine_learning';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
@@ -84,6 +86,7 @@ import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import type { GetSolutionNavigation } from './app/solution_navigation/solution_navigation';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -148,7 +151,6 @@ export interface StartPluginsDependencies extends StartPlugins {
 }
 
 export interface ContractStartServices {
-  extraRoutes$: Observable<RouteProps[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
   onboarding: OnboardingPageService;
@@ -188,11 +190,12 @@ export interface PluginSetup {
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
-  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
   setOnboardingPageSettings: OnboardingPageService;
+  setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
+  getSolutionNavigation: () => GetSolutionNavigation;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
@@ -214,6 +217,9 @@ export interface SubPlugins {
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
+  assets: Assets;
+  investigations: Investigations;
+  machineLearning: MachineLearning;
 }
 
 // TODO: find a better way to defined these types
@@ -232,4 +238,7 @@ export interface StartedSubPlugins {
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
+  assets: ReturnType<Assets['start']>;
+  investigations: ReturnType<Investigations['start']>;
+  machineLearning: ReturnType<MachineLearning['start']>;
 }
