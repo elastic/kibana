@@ -27,6 +27,7 @@ import {
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
+import { RiskInputsUtilityBar } from '../../components/utility_bar';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
@@ -64,8 +65,6 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
 
   const alerts = useRiskContributingAlerts({ riskScore, entityType });
-
-  console.log('riskScore', { riskScore, alerts });
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -119,7 +118,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         truncateText: true,
         mobileOptions: { show: true },
         sortable: true,
-        render: (alert: any) => get(ALERT_RULE_NAME, alert),
+        render: (alert: InputAlert['alert']) => get(ALERT_RULE_NAME, alert),
       },
       {
         field: 'input.contribution_score',
@@ -174,14 +173,13 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         </h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      {/* <RiskInputsUtilityBar riskInputs={selectedItems.map((item) => item.input)} /> */}
+      <RiskInputsUtilityBar riskInputs={selectedItems} />
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
         compressed={true}
         loading={loadingRiskScore || alerts.loading}
         items={alerts.data || []}
         columns={inputColumns}
-        pagination
         sorting
         selection={euiTableSelectionProps}
         isSelectable

@@ -8,12 +8,12 @@
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EntityRiskInput } from '../../../../../common/entity_analytics/risk_engine';
+import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface ActionColumnProps {
-  input: EntityRiskInput;
+  input: InputAlert;
 }
 
 export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {

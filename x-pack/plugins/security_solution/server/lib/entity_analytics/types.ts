@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AfterKey,
   AfterKeys,
@@ -114,8 +114,8 @@ export interface CalculateRiskScoreAggregations {
 }
 
 export interface SearchHitRiskInput {
-  id: string[];
-  index: string[];
+  id: string;
+  index: string;
   rule_name?: string;
   time?: string;
   score?: number;
@@ -137,7 +137,6 @@ export interface RiskScoreBucket {
         risk_inputs: SearchHitRiskInput[];
       };
     };
-    inputs: SearchResponse;
   };
 }
 

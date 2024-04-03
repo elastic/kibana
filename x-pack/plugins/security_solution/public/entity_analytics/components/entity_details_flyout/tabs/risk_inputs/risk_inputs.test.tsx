@@ -10,7 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
 import { times } from 'lodash/fp';
 import { RiskInputsTab } from './risk_inputs_tab';
-import { alertDataMock } from '../../mocks';
+import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 
@@ -58,7 +58,7 @@ describe('RiskInputsTab', () => {
     mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
       error: false,
-      data: [alertDataMock],
+      data: [alertInputDataMock],
     });
     mockUseRiskScore.mockReturnValue({
       loading: false,
@@ -122,7 +122,7 @@ describe('RiskInputsTab', () => {
   it('paginates', () => {
     const alerts = times(
       (number) => ({
-        ...alertDataMock,
+        ...alertInputDataMock,
         _id: number.toString(),
       }),
       11

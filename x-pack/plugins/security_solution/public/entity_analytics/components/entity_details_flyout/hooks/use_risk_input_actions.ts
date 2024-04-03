@@ -11,17 +11,17 @@ import { get, noop } from 'lodash/fp';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-
-import { EntityRiskInput } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine/types';
+import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 /**
  * The returned actions only support alerts risk inputs.
  */
-export const useRiskInputActions = (inputs: EntityRiskInput[], closePopover: () => void) => {
+export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => void) => {
   const { from, to } = useGlobalTime();
   const timelineAction = useAddBulkToTimelineAction({
     localFilters: [],
@@ -37,13 +37,13 @@ export const useRiskInputActions = (inputs: EntityRiskInput[], closePopover: () 
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(
     () =>
-      inputs.map((input: EntityRiskInput) => ({
+      inputs.map(({ input, alert }: InputAlert) => ({
         alertId: input.id,
         index: input.index,
         type: AttachmentType.alert,
         rule: {
-          id: get(ALERT_RULE_UUID, input.id), // TODO:QUESTION: Add the rule UUID to the input data?
-          name: get(ALERT_RULE_NAME, input.description),
+          id: get(ALERT_RULE_UUID, alert),
+          name: get(ALERT_RULE_NAME, alert),
         },
       })),
     [inputs]
@@ -67,7 +67,7 @@ export const useRiskInputActions = (inputs: EntityRiskInput[], closePopover: () 
 
         closePopover();
         timelineAction.onClick(
-          inputs.map((input: EntityRiskInput) => {
+          inputs.map(({ input }: InputAlert) => {
             return {
               _id: input.id,
               _index: input.index,

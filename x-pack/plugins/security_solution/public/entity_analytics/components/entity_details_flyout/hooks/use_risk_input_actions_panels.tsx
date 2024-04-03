@@ -14,10 +14,10 @@ import type { CasesService } from '@kbn/triggers-actions-ui-plugin/public/applic
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { EntityRiskInput } from '../../../../../common/entity_analytics/risk_engine/types';
 import { useRiskInputActions } from './use_risk_input_actions';
+import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
-export const useRiskInputActionsPanels = (inputs: EntityRiskInput[], closePopover: () => void) => {
+export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
   const { addToExistingCase, addToNewCaseClick, addToNewTimeline } = useRiskInputActions(
     inputs,

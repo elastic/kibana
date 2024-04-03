@@ -22,12 +22,21 @@ interface UseRiskContributingAlerts {
   entityType: RiskScoreEntity;
 }
 
+interface AlertData {
+  'kibana.alert.rule.uuid': string;
+  'kibana.alert.rule.name': string;
+}
+
+interface AlertHit {
+  _id: string;
+  _index: string;
+  _source: AlertData;
+}
 export interface InputAlert {
-  alert: Record<string, any>;
+  alert: AlertData;
   input: EntityRiskInput;
 }
 
-type Hit = Record<string, any>;
 interface UseRiskContributingAlertsResult {
   loading: boolean;
   error: boolean;
@@ -41,7 +50,7 @@ export const useRiskContributingAlerts = ({
   riskScore,
   entityType,
 }: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
-  const { loading, data, setQuery } = useQueryAlerts<Hit, unknown>({
+  const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
     // is empty query, to skip fetching alert, until we have risk engine settings
     query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
@@ -67,7 +76,7 @@ export const useRiskContributingAlerts = ({
 
   const alerts = inputs?.map((input) => ({
     input,
-    alert: data?.hits.hits.find((alert) => alert._id === input.id)?._source || {},
+    alert: (data?.hits.hits.find((alert) => alert._id === input.id)?._source || {}) as AlertData,
   }));
 
   return {

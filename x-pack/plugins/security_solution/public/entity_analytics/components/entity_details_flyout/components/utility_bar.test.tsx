@@ -8,7 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { alertDataMock } from '../mocks';
+import { alertInputDataMock } from '../mocks';
 import { RiskInputsUtilityBar } from './utility_bar';
 
 describe('RiskInputsUtilityBar', () => {
@@ -84,7 +84,7 @@ describe('RiskInputsUtilityBar', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskInputsUtilityBar
-          selectedAlerts={[alertDataMock, alertDataMock, alertDataMock]}
+          selectedAlerts={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
           pagination={{
             pageIndex: 0,
             totalItemCount: 0,
@@ -100,7 +100,7 @@ describe('RiskInputsUtilityBar', () => {
     const { getByRole } = render(
       <TestProviders>
         <RiskInputsUtilityBar
-          selectedAlerts={[alertDataMock, alertDataMock, alertDataMock]}
+          selectedAlerts={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
           pagination={{
             pageIndex: 0,
             totalItemCount: 0,
