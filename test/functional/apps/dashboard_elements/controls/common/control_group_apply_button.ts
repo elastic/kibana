@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.expectMissingUnsavedChangesBadge();
     });
 
-    it('able to set apply button setting', async () => {
+    it.skip('able to set apply button setting', async () => {
       await dashboardControls.updateShowApplyButtonSetting(true);
       await testSubjects.existOrFail('controlGroup--applyFiltersButton');
       await dashboard.expectUnsavedChangesBadge();

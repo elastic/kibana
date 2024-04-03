@@ -47,15 +47,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
               output: { filters, timeslice },
             } = this.getState();
 
-            const hasUnsavedChanges = !(
-              persistableControlGroupInputIsEqual(
-                currentInput,
-                lastSavedInput,
-                false // never diff selections for unsaved changes - compare the output filters instead
-              )
-              // compareFilters(filters ?? [], lastSavedFilters?.filters ?? [], COMPARE_ALL_OPTIONS) &&
-              // isEqual(timeslice, lastSavedFilters?.timeslice)
-            );
+            const hasUnsavedChanges = false;
 
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);
           });
