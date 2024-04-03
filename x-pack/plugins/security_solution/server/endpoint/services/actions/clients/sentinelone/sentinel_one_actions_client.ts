@@ -24,7 +24,13 @@ import type {
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
-import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  KillOrSuspendProcessRequestBody,
+  KillProcessActionOutputContent,
+  LogsEndpointAction,
+  ResponseActionParametersWithPidOrEntityId,
+} from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -260,6 +266,58 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         },
       });
     }
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async killProcess(
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  > {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'kill-process',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.KILL_PROCESS, {
+            uuid: actionRequest.endpoint_ids[0],
+            processName: actionRequest.parameters.process_name,
+          });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
