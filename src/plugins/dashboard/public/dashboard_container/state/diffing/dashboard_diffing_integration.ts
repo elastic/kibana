@@ -10,7 +10,7 @@ import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
