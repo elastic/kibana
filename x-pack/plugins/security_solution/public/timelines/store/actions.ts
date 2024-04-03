@@ -41,7 +41,6 @@ export const addNoteToEvent = actionCreator<{
   id: string;
   noteId: string;
   eventId: string;
-  pinEvent?: boolean;
 }>('ADD_NOTE_TO_EVENT');
 
 export const deleteNoteFromEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(

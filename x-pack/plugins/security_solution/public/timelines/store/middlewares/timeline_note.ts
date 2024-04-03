@@ -89,11 +89,12 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           })
         );
 
+        const currentTimeline = selectTimelineById(store.getState(), localTimelineId);
+
         // In case a note was added to an unsaved timeline, we need to make sure to update the timeline
         // locally and then remotely again in order not to lose the SO associations.
         // This also involves setting the status and the default title.
         if (!timeline.savedObjectId && response.note.timelineId && response.note.timelineVersion) {
-          const currentTimeline = selectTimelineById(store.getState(), localTimelineId);
           await store.dispatch(
             updateTimeline({
               id: localTimelineId,
@@ -109,14 +110,17 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           await store.dispatch(saveTimeline({ id: localTimelineId, saveAsNew: false }));
         }
 
-        // Events can be automatically pinned
-        if (isAddNoteToEventAction(action) && action.payload.pinEvent) {
-          await store.dispatch(
-            pinEvent({
-              id: localTimelineId,
-              eventId: action.payload.eventId,
-            })
-          );
+        // Automatically pin an associated event if it's not pinned yet
+        if (isAddNoteToEventAction(action)) {
+          const isEventPinned = currentTimeline.pinnedEventIds[action.payload.eventId] === true;
+          if (!isEventPinned) {
+            await store.dispatch(
+              pinEvent({
+                id: localTimelineId,
+                eventId: action.payload.eventId,
+              })
+            );
+          }
         }
       } catch (error) {
         kibana.notifications.toasts.addDanger({

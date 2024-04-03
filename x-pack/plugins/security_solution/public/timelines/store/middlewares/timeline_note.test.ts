@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createMockStore, kibanaMock } from '../../../common/mock';
+import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
 import { persistNote } from '../../containers/notes/api';
@@ -155,7 +155,7 @@ describe('Timeline note middleware', () => {
     expect(saveTimelineMock).toHaveBeenCalled();
   });
 
-  it('should pin the event when the `pinEvent` flag is passed', async () => {
+  it('should pin the event when the event is not pinned yet', async () => {
     const testTimelineId = 'testTimelineId';
     const testTimelineVersion = 'testVersion';
     (persistNote as jest.Mock).mockResolvedValue({
@@ -178,7 +178,6 @@ describe('Timeline note middleware', () => {
         eventId: testEventId,
         id: TimelineId.test,
         noteId: testNote.id,
-        pinEvent: true,
       })
     );
 
@@ -186,6 +185,53 @@ describe('Timeline note middleware', () => {
       eventId: testEventId,
       id: TimelineId.test,
     });
+  });
+
+  it('should not pin the event when the event is already pinned', async () => {
+    store = createMockStore(
+      {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              pinnedEventIds: {
+                [testEventId]: true,
+              },
+            },
+          },
+        },
+      },
+      undefined,
+      kibanaMock
+    );
+    const testTimelineId = 'testTimelineId';
+    const testTimelineVersion = 'testVersion';
+    (persistNote as jest.Mock).mockResolvedValue({
+      data: {
+        persistNote: {
+          code: 200,
+          message: 'success',
+          note: {
+            noteId: testNote.id,
+            timelineId: testTimelineId,
+            timelineVersion: testTimelineVersion,
+          },
+        },
+      },
+    });
+
+    await store.dispatch(updateNote({ note: testNote }));
+    await store.dispatch(
+      addNoteToEvent({
+        eventId: testEventId,
+        id: TimelineId.test,
+        noteId: testNote.id,
+      })
+    );
+
+    expect(pinEventMock).not.toHaveBeenCalled();
   });
 
   it('should show an error message when the call is unauthorized', async () => {

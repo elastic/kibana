@@ -358,7 +358,6 @@ describe('Body', () => {
             eventId: '1',
             id: 'timeline-test',
             noteId: expect.anything(),
-            pinEvent: true,
           },
           type: timelineActions.addNoteToEvent({
             eventId: '1',
@@ -401,7 +400,6 @@ describe('Body', () => {
             eventId: '1',
             id: 'timeline-test',
             noteId: expect.anything(),
-            pinEvent: false,
           },
           type: timelineActions.addNoteToEvent({
             eventId: '1',
