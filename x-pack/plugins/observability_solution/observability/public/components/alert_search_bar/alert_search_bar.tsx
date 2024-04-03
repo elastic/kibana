@@ -99,6 +99,7 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
+          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
           filters,
         })
       );
@@ -108,7 +109,17 @@ export function ObservabilityAlertSearchBar({
       });
       onKueryChange(DEFAULT_QUERY_STRING);
     }
-  }, [filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
+  }, [
+    defaultSearchQueries,
+    filters,
+    kuery,
+    onEsQueryChange,
+    onKueryChange,
+    rangeFrom,
+    rangeTo,
+    status,
+    toasts,
+  ]);
 
   const onSearchBarParamsChange = useCallback<
     (query: {
