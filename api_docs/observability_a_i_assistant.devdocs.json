@@ -3129,6 +3129,36 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantLogsIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantLogsIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantResponseLanguage",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantResponseLanguage",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.APIReturnType",
         "type": "Type",
         "tags": [],
@@ -3742,6 +3772,21 @@
           "\"negative\" | \"positive\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.LANGUAGE_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "LANGUAGE_OPTIONS",
+        "description": [],
+        "signature": [
+          "{ value: string; label: string; }[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_user_preferred_language.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4508,7 +4553,23 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.DEFAULT_LANGUAGE_OPTION",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_LANGUAGE_OPTION",
+        "description": [],
+        "signature": [
+          "{ value: string; label: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_user_preferred_language.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "observabilityAIAssistant",
       "id": "def-public.ObservabilityAIAssistantPublicSetup",
@@ -4744,7 +4805,7 @@
           "label": "useUserPreferredLanguage",
           "description": [],
           "signature": [
-            "() => { selectedLanguage: string | undefined; setSelectedLanguage: React.Dispatch<React.SetStateAction<string | undefined>>; LANGUAGE_OPTIONS: { label: string; }[]; getPreferredLanguage: () => string; }"
+            "() => { selectedLanguage: string; getPreferredLanguage: () => string; }"
           ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
@@ -4925,6 +4986,36 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantLogsIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantLogsIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantResponseLanguage",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantResponseLanguage",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-server.ObservabilityAIAssistantServerRouteRepository",

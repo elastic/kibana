@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,11 +20,12 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { ChatForm, ChatFormFields, MessageRole, SummarizationModelName } from '../types';
+import { ChatForm, ChatFormFields, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -31,6 +33,17 @@ import { StartNewChat } from './start_new_chat';
 
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
+
+const buildFormData = (formData: ChatForm) => ({
+  prompt: formData[ChatFormFields.prompt],
+  indices: formData[ChatFormFields.indices].join(),
+  api_key: formData[ChatFormFields.openAIKey],
+  citations: formData[ChatFormFields.citations],
+  elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
+  summarization_model: formData[ChatFormFields.summarizationModel],
+  source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
+  docSize: formData[ChatFormFields.docSize],
+});
 
 export const Chat = () => {
   const [showStartPage, setShowStartPage] = useState(true);
@@ -41,8 +54,9 @@ export const Chat = () => {
     formState: { isValid, isSubmitting },
     resetField,
     handleSubmit,
+    getValues,
   } = useFormContext<ChatForm>();
-  const { messages, append, stop: stopRequest } = useChat();
+  const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const selectedIndicesCount = watch(ChatFormFields.indices, []).length;
   const messagesRef = useAutoBottomScroll([showStartPage]);
 
@@ -50,17 +64,7 @@ export const Chat = () => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
       {
-        data: {
-          prompt: data[ChatFormFields.prompt],
-          indices: data[ChatFormFields.indices].join(),
-          api_key: data[ChatFormFields.openAIKey],
-          citations: data[ChatFormFields.citations],
-          elasticsearchQuery: JSON.stringify(data[ChatFormFields.elasticsearchQuery]),
-          summarization_model:
-            data[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
-          source_fields: JSON.stringify(data[ChatFormFields.sourceFields]),
-          size: data[ChatFormFields.size] ?? 3,
-        },
+        data: buildFormData(data),
       }
     );
 
@@ -77,6 +81,13 @@ export const Chat = () => {
     ],
     [messages]
   );
+
+  const regenerateMessages = () => {
+    const formData = getValues();
+    reload({
+      data: buildFormData(formData),
+    });
+  };
 
   if (showStartPage) {
     return <StartNewChat onStartClick={() => setShowStartPage(false)} />;
@@ -114,6 +125,37 @@ export const Chat = () => {
               css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
             >
               <EuiHorizontalRule margin="none" />
+
+              <EuiSpacer size="m" />
+
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="sparkles"
+                    disabled={chatMessages.length <= 1}
+                    onClick={regenerateMessages}
+                  >
+                    <FormattedMessage
+                      id="xpack.searchPlayground.chat.regenerateBtn"
+                      defaultMessage="Regenerate"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="refresh"
+                    disabled={chatMessages.length <= 1}
+                    onClick={() => {
+                      setMessages([]);
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.searchPlayground.chat.clearChatBtn"
+                      defaultMessage="Clear chat"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
               <EuiSpacer size="m" />
 

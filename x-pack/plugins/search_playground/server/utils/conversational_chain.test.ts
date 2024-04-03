@@ -102,8 +102,8 @@ describe('conversational chain', () => {
     expect(JSON.parse(docValue)).toEqual([
       {
         documents: [
-          { metadata: { id: '1' }, pageContent: 'value' },
-          { metadata: { id: '1' }, pageContent: 'value2' },
+          { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
+          { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
         ],
         type: 'retrieved_docs',
       },

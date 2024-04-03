@@ -40,20 +40,19 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
   const { fields } = useIndicesFields(selectedIndices || []);
   const defaultFields = useMemo(() => getDefaultSourceFields(fields), [fields]);
   const [sourceFields, setSourceFields] = useState(defaultFields);
-  const [docSize, setDocSize] = useState(3);
 
   const {
-    field: { onChange: onChangeSize },
+    field: { onChange: onChangeSize, value: docSizeInitialValue },
   } = useController({
-    name: ChatFormFields.size,
-    defaultValue: 3,
+    name: ChatFormFields.docSize,
   });
+
+  const [docSize, setDocSize] = useState(docSizeInitialValue);
 
   const {
     field: { onChange: onChangeSourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
-    defaultValue: [],
   });
 
   useEffect(() => {

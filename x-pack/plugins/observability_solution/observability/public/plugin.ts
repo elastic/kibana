@@ -45,7 +45,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs';
 
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -104,6 +104,9 @@ export interface ConfigSchema {
       };
     };
     thresholdRule?: {
+      enabled: boolean;
+    };
+    ruleFormV2?: {
       enabled: boolean;
     };
   };

@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   FetchDataParams,
@@ -47,6 +47,7 @@ import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -75,6 +76,7 @@ export interface ApmPluginStartDeps {
   exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
+  spaces?: SpacesPluginStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {
@@ -201,12 +203,17 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           core.getStartServices(),
         ]);
 
+        const activeSpace = await (
+          corePlugins as ApmPluginStartDeps
+        ).spaces?.getActiveSpace();
+
         return renderApp({
           isDev,
           core: coreStart,
           deps: pluginSetupDeps,
           appMountParameters,
           corePlugins: corePlugins as ApmPluginStartDeps,
+          spaceId: activeSpace?.id || 'default',
         });
       },
     });

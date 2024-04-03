@@ -11,9 +11,9 @@
         "label": "ChartSwitchTrigger",
         "description": [],
         "signature": [
-          "({ label, icon, onClick, dataTestSubj, size, }: { label: string; icon?: ",
+          "({ label, icon, onClick, dataTestSubj, }: { label: string; icon?: ",
           "IconType",
-          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; size?: \"m\" | \"s\" | undefined; }) => JSX.Element"
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
         "deprecated": false,
@@ -30,7 +30,7 @@
             "signature": [
               "{ label: string; icon?: ",
               "IconType",
-              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; size?: \"m\" | \"s\" | undefined; }"
+              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }"
             ],
             "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
             "deprecated": false,
@@ -350,7 +350,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
@@ -405,7 +405,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],

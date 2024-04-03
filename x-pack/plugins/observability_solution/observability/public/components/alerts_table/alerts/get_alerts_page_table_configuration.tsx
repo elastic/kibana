@@ -55,4 +55,5 @@ export const getAlertsPageTableConfiguration = (
     return { header, body, footer };
   },
   ruleTypeIds: observabilityRuleTypeRegistry.list(),
+  showInspectButton: true,
 });
