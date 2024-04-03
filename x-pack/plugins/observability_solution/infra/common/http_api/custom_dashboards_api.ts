@@ -34,9 +34,6 @@ export const InfraGetCustomDashboardsRequestPathParamsRT = AssetTypeRT;
 export const InfraGetCustomDashboardsResponseBodyRT = rt.array(
   rt.intersection([InfraCustomDashboardRT, existingIdRT])
 );
-export type InfraGetCustomDashboardsRequestParams = rt.TypeOf<
-  typeof InfraGetCustomDashboardsRequestPathParamsRT
->;
 export type InfraGetCustomDashboardsResponseBody = rt.TypeOf<
   typeof InfraGetCustomDashboardsResponseBodyRT
 >;
