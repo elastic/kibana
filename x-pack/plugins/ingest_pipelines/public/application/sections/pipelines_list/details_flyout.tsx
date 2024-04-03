@@ -24,14 +24,13 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiButton,
-  EuiBadge,
   EuiCodeBlock,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
-import { deprecatedPipelineBadge } from './table';
+
+import { DeprecatedPipelineBadge, ManagedPipelineBadge } from '../../components/pipeline_elements';
 import { PipelineDetailsJsonBlock } from './details_json_block';
 import { stringifyJson } from '../../lib/utils';
 
@@ -125,22 +124,13 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           {pipeline.deprecated ? (
             <EuiFlexItem grow={false}>
               {' '}
-              <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
-                  {deprecatedPipelineBadge.badge}
-                </EuiBadge>
-              </EuiToolTip>
+              <DeprecatedPipelineBadge />
             </EuiFlexItem>
           ) : null}
           {pipeline.isManaged ? (
             <EuiFlexItem grow={false}>
               {' '}
-              <EuiBadge color="hollow">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel"
-                  defaultMessage="Managed"
-                />
-              </EuiBadge>
+              <ManagedPipelineBadge />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

@@ -8,6 +8,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiPageSection, EuiPageHeader, EuiInlineEditTitle, EuiInlineEditText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useForm, Form, FormConfig, UseField } from '../../../shared_imports';
@@ -135,7 +136,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
             data-test-subj="pipelineFormBackButton"
             color="text"
             iconType="arrowLeft"
-            onClick={() => null}
+            {...reactRouterNavigate(services.history, {
+              pathname: '/',
+            })}
           >
             <FormattedMessage
               id="xpack.ingestPipelines.form.backButtonLabel"

@@ -83,8 +83,6 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
     redirectToPathOrRedirectPath(getListPath({ inspectedPipelineName: pipeline.name }));
   };
 
-  const onCancel = () => redirectToPathOrRedirectPath(getListPath());
-
   useEffect(() => {
     services.breadcrumbs.setBreadcrumbs('create');
   }, [services]);
@@ -94,7 +92,6 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       defaultValue={formDefaultValue}
       canEditName={canEditName}
       onSave={onSave}
-      onCancel={onCancel}
       isSaving={isSaving}
       saveError={saveError}
     />
