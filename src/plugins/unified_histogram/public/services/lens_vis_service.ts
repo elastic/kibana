@@ -265,10 +265,7 @@ export class LensVisService {
       }
     }
 
-    if (
-      externalVisContext &&
-      externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion
-    ) {
+    if (externalVisContext) {
       // externalVisContext can be based on an unfamiliar suggestion, but it was saved somehow, so try to restore it too
       const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext,

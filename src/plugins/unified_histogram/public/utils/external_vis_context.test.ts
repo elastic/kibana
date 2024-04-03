@@ -9,14 +9,14 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import {
-  exportVisContext,
   canImportVisContext,
+  exportVisContext,
   isSuggestionShapeAndVisContextCompatible,
 } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { tableMock, tableQueryMock } from '../__mocks__/table';
-import type { UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 
 describe('external_vis_context', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
@@ -63,6 +63,7 @@ describe('external_vis_context', () => {
         isSuggestionShapeAndVisContextCompatible(
           { visualizationId: 'lnsPie', visualizationState: { shape: 'donut' } } as Suggestion,
           {
+            suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
             attributes: {
               visualizationType: 'lnsPie',
               state: { visualization: { shape: 'donut' } },
@@ -75,6 +76,7 @@ describe('external_vis_context', () => {
         isSuggestionShapeAndVisContextCompatible(
           { visualizationId: 'lnsPie', visualizationState: { shape: 'donut' } } as Suggestion,
           {
+            suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
             attributes: {
               visualizationType: 'lnsPie',
               state: { visualization: { shape: 'waffle' } },
@@ -87,12 +89,76 @@ describe('external_vis_context', () => {
         isSuggestionShapeAndVisContextCompatible(
           { visualizationId: 'lnsPie', visualizationState: { shape: 'donut' } } as Suggestion,
           {
+            suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
             attributes: {
               visualizationType: 'lnsXY',
             },
           } as UnifiedHistogramVisContext
         )
       ).toBe(false);
+
+      expect(
+        isSuggestionShapeAndVisContextCompatible(
+          {
+            visualizationId: 'lnsXY',
+            visualizationState: { preferredSeriesType: 'bar_stacked' },
+          } as Suggestion,
+          {
+            attributes: {
+              visualizationType: 'lnsXY',
+              state: { visualization: { preferredSeriesType: 'bar_stacked' } },
+            },
+          } as UnifiedHistogramVisContext
+        )
+      ).toBe(true);
+
+      expect(
+        isSuggestionShapeAndVisContextCompatible(
+          {
+            visualizationId: 'lnsXY',
+            visualizationState: { preferredSeriesType: 'bar_stacked' },
+          } as Suggestion,
+          {
+            suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+            attributes: {
+              visualizationType: 'lnsXY',
+              state: { visualization: { preferredSeriesType: 'line' } },
+            },
+          } as UnifiedHistogramVisContext
+        )
+      ).toBe(true);
+
+      expect(
+        isSuggestionShapeAndVisContextCompatible(
+          {
+            visualizationId: 'lnsXY',
+            visualizationState: { preferredSeriesType: 'bar_stacked' },
+          } as Suggestion,
+          {
+            suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+            attributes: {
+              visualizationType: 'lnsXY',
+              state: { visualization: { preferredSeriesType: 'line' } },
+            },
+          } as UnifiedHistogramVisContext
+        )
+      ).toBe(false);
+
+      expect(
+        isSuggestionShapeAndVisContextCompatible(
+          {
+            visualizationId: 'lnsXY',
+            visualizationState: { preferredSeriesType: 'bar_stacked' },
+          } as Suggestion,
+          {
+            suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
+            attributes: {
+              visualizationType: 'lnsXY',
+              state: { visualization: { preferredSeriesType: 'bar_stacked' } },
+            },
+          } as UnifiedHistogramVisContext
+        )
+      ).toBe(true);
     });
   });
 });

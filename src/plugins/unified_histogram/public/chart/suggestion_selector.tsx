@@ -90,7 +90,7 @@ export const SuggestionSelector = ({
     >
       <EuiComboBox
         data-test-subj="unifiedHistogramSuggestionSelector"
-        prepend={<EuiIcon type={activeSuggestion?.previewIcon ?? 'empty'} />}
+        prepend={<EuiIcon type={activeSuggestion?.previewIcon ?? 'lensApp'} />}
         placeholder={i18n.translate('unifiedHistogram.suggestionSelectorPlaceholder', {
           defaultMessage: 'Select visualization',
         })}
@@ -110,7 +110,7 @@ export const SuggestionSelector = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={null}>
-                <EuiIcon type={suggestion?.previewIcon ?? 'empty'} />
+                <EuiIcon type={suggestion?.previewIcon ?? 'lensApp'} />
               </EuiFlexItem>
               <EuiFlexItem>{option.label}</EuiFlexItem>
             </EuiFlexGroup>

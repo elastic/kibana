@@ -7,7 +7,7 @@
  */
 
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 
 export const exportVisContext = (
@@ -66,11 +66,28 @@ export const isSuggestionShapeAndVisContextCompatible = (
   if (!suggestion && !externalVisContext) {
     return true;
   }
+
+  if (suggestion?.visualizationId !== externalVisContext?.attributes?.visualizationType) {
+    return false;
+  }
+
+  if (externalVisContext?.suggestionType !== UnifiedHistogramSuggestionType.lensSuggestion) {
+    return true;
+  }
+
+  if (suggestion?.visualizationId === 'lnsXY') {
+    return (
+      // @ts-expect-error visualization state has different structure between vis types
+      suggestion?.visualizationState?.preferredSeriesType ===
+      // @ts-expect-error visualization state has different structure between vis types
+      externalVisContext?.attributes?.state?.visualization?.preferredSeriesType
+    );
+  }
+
   return (
-    suggestion?.visualizationId === externalVisContext?.attributes?.visualizationType &&
     // @ts-expect-error visualization state has different structure between vis types
     suggestion?.visualizationState?.shape ===
-      // @ts-expect-error visualization state has different structure between vis types
-      externalVisContext?.attributes?.state?.visualization?.shape
+    // @ts-expect-error visualization state has different structure between vis types
+    externalVisContext?.attributes?.state?.visualization?.shape
   );
 };
