@@ -208,6 +208,23 @@ describe('Fleet - isAgentUpgradeable', () => {
       isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 11 }))
     ).toBe(true);
   });
+  it('returns false if the agent reports upgradeable but is in watching state', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({
+          version: '8.12.0',
+          upgradeable: true,
+          minutesSinceUpgrade: 11,
+          upgradeDetails: { state: 'UPG_WATCHING' } as any,
+        })
+      )
+    ).toBe(false);
+  });
+  it('returns true if agent watching state cleared and it was upgraded less than 10 minutes ago', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '8.12.1', upgradeable: true, minutesSinceUpgrade: 1 }))
+    ).toBe(true);
+  });
 });
 describe('Fleet - isAgentUpgradeableToVersion', () => {
   it('returns true if agent reports upgradeable, with upgrade to agent snapshot version newer than latest agent version', () => {
@@ -376,6 +393,21 @@ describe('Fleet - getNotUpgradeableMessage', () => {
       )
     ).toBeUndefined();
   });
+
+  it('if the agent reports upgradeable but is in watching state', () => {
+    expect(
+      getNotUpgradeableMessage(
+        getAgent({
+          version: '8.12.0',
+          upgradeable: true,
+          minutesSinceUpgrade: 11,
+          upgradeDetails: { state: 'UPG_WATCHING' } as any,
+        })
+      )
+    ).toContain(
+      'agent was recently ugraded and is being monitored. Please wait until the monitoring state is cleared.'
+    );
+  });
 });
 
 describe('hasAgentBeenUpgradedRecently', () => {
@@ -396,6 +428,13 @@ describe('hasAgentBeenUpgradedRecently', () => {
   it('returns false if the agent does not have an upgrade_at field', () => {
     expect(
       getRecentUpgradeInfoForAgent(getAgent({ version: '7.9.0' })).hasBeenUpgradedRecently
+    ).toBe(false);
+  });
+
+  it('returns false if the agent was upgraded more less 10 minutes ago, but supports upgrade details', () => {
+    expect(
+      getRecentUpgradeInfoForAgent(getAgent({ version: '8.12.0', minutesSinceUpgrade: 1 }))
+        .hasBeenUpgradedRecently
     ).toBe(false);
   });
 });

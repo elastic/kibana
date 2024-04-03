@@ -8,12 +8,14 @@
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import semverGt from 'semver/functions/gt';
+import semverGte from 'semver/functions/gte';
 import semverEq from 'semver/functions/eq';
 import moment from 'moment';
 
 import type { Agent } from '../types';
 
 export const AGENT_UPGRADE_COOLDOWN_IN_MIN = 10;
+export const AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION = '8.12.0';
 
 // Error messages for agent not upgradeable
 export const VERSION_MISSING_ERROR = `agent version is missing.`;
@@ -28,6 +30,7 @@ export const DOWNGRADE_NOT_ALLOWED_ERROR = `agent does not support downgrades.`;
 export const LATEST_VERSION_NOT_VALID_ERROR = 'latest version is not valid.';
 export const AGENT_ALREADY_ON_LATEST_ERROR = `agent is already running on the latest available version.`;
 export const AGENT_ON_GREATER_VERSION_ERROR = `agent is running on a version greater than the latest available version.`;
+export const WATCHING_STATE_ERROR = `agent was recently ugraded and is being monitored. Please wait until the monitoring state is cleared.`;
 
 export function isAgentUpgradeAvailable(agent: Agent, latestAgentVersion?: string): boolean {
   return (
@@ -46,6 +49,9 @@ export function isAgentUpgradeable(agent: Agent): boolean {
     return false;
   }
   if (isAgentUpgrading(agent)) {
+    return false;
+  }
+  if (isAgentInWatchingState(agent)) {
     return false;
   }
   if (getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) {
@@ -103,6 +109,9 @@ export const getNotUpgradeableMessage = (
   if (!agent.local_metadata.elastic.agent.upgradeable) {
     return NOT_UPGRADEABLE_ERROR;
   }
+  if (isAgentInWatchingState(agent)) {
+    return WATCHING_STATE_ERROR;
+  }
   if (isAgentUpgrading(agent)) {
     return ALREADY_UPGRADED_ERROR;
   }
@@ -150,7 +159,12 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   elapsedMinsSinceUpgrade: number;
   timeToWaitMins: number;
 } {
-  if (!agent.upgraded_at) {
+  // no need for 10m wait if agent has upgrade details watching state
+  const agentHasUpgradeDetailsSupport = semverGte(
+    agent.local_metadata.elastic.agent.version,
+    AGENT_UPGARDE_DETAILS_SUPPORTED_VERSION
+  );
+  if (!agent.upgraded_at || agentHasUpgradeDetailsSupport) {
     return {
       hasBeenUpgradedRecently: false,
       timeToWaitMs: 0,
@@ -168,6 +182,10 @@ export function getRecentUpgradeInfoForAgent(agent: Agent): {
   const timeToWait = moment.duration(timeToWaitMs, 'milliseconds').asMinutes();
   const timeToWaitMins = Math.ceil(timeToWait);
   return { hasBeenUpgradedRecently, timeToWaitMs, elapsedMinsSinceUpgrade, timeToWaitMins };
+}
+
+export function isAgentInWatchingState(agent: Agent) {
+  return agent.upgrade_details?.state === 'UPG_WATCHING';
 }
 
 export function isAgentUpgrading(agent: Agent) {
