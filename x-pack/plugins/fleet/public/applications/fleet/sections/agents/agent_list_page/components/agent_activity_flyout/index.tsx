@@ -6,18 +6,16 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiTitle,
   EuiText,
   EuiPanel,
-  EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiFlyoutFooter,
 } from '@elastic/eui';
@@ -32,26 +30,11 @@ import {
 } from '../../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../../constants';
 
-import { Loading } from '../../../components';
-
 import { getKuery } from '../../utils/get_kuery';
 
 import { AGENT_STATUSES } from '../../../services/agent_status';
 
-import { getTodayActions, getOtherDaysActions } from '../agent_activity_helper';
-
-import { ActivitySection } from './activity_section';
-import { GoToDate } from './go_to_date';
-
-const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflowContent {
-    height: 100%;
-  }
-`;
-
-const ButtonsFlexGroup = styled(EuiFlexGroup)`
-  padding-left: 24px;
-`;
+import { FlyoutBody } from './flyout_body';
 
 const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
   padding: 16px 24px !important;
@@ -96,13 +79,6 @@ export const AgentActivityFlyout: React.FunctionComponent<{
       })),
     [currentActions, getAgentPolicyName]
   );
-
-  const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'IN_PROGRESS');
-
-  const completedActions = currentActionsEnriched.filter((a) => a.status !== 'IN_PROGRESS');
-
-  const todayActions = getTodayActions(completedActions);
-  const otherDays = getOtherDaysActions(completedActions);
 
   const onClickViewAgents = async (action: ActionStatus) => {
     try {
@@ -168,120 +144,15 @@ export const AgentActivityFlyout: React.FunctionComponent<{
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlyoutHeader>
-        <FullHeightFlyoutBody>
-          {isFirstLoading ? (
-            <EuiFlexGroup
-              direction="row"
-              justifyContent={'center'}
-              alignItems={'center'}
-              className="eui-fullHeight"
-            >
-              <EuiFlexItem>
-                <Loading />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : currentActionsEnriched.length === 0 ? (
-            <EuiFlexGroup
-              direction="column"
-              justifyContent={'center'}
-              alignItems={'center'}
-              className="eui-fullHeight"
-            >
-              <EuiFlexItem>
-                <EuiEmptyPrompt
-                  iconType="clock"
-                  iconColor="default"
-                  title={
-                    <h2>
-                      {' '}
-                      <FormattedMessage
-                        id="xpack.fleet.agentActivityFlyout.noActivityText"
-                        defaultMessage="No activity to display"
-                      />
-                    </h2>
-                  }
-                  titleSize="m"
-                  body={
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.noActivityDescription"
-                      defaultMessage="Activity feed will appear here as agents are reassigned, upgraded, or unenrolled."
-                    />
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          <EuiFlexGroup direction="column" className="eui-fullHeight" css={{ overflowY: 'auto' }}>
-            {inProgressActions.length > 0 ? (
-              <ActivitySection
-                title={
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.inProgressTitle"
-                    defaultMessage="In progress"
-                  />
-                }
-                actions={inProgressActions}
-                abortUpgrade={abortUpgrade}
-                onClickViewAgents={onClickViewAgents}
-              />
-            ) : null}
-            {todayActions.length > 0 ? (
-              <ActivitySection
-                title={
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.todayTitle"
-                    defaultMessage="Today"
-                  />
-                }
-                actions={todayActions}
-                abortUpgrade={abortUpgrade}
-                onClickViewAgents={onClickViewAgents}
-              />
-            ) : null}
-            {Object.keys(otherDays).map((day) => (
-              <ActivitySection
-                key={day}
-                title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
-                actions={otherDays[day]}
-                abortUpgrade={abortUpgrade}
-                onClickViewAgents={onClickViewAgents}
-              />
-            ))}
-            <ButtonsFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="m"
-                  onClick={() => setNActions(nActions + 10)}
-                  flush="left"
-                  data-test-subj="agentActivityFlyout.showMoreButton"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.showMoreButton"
-                    defaultMessage="Show more"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <GoToDate selectedDate={dateFilter} onChangeSelectedDate={onChangeDateFilter} />
-              </EuiFlexItem>
-              {dateFilter && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="m"
-                    onClick={() => onChangeDateFilter(null)}
-                    flush="left"
-                    data-test-subj="agentActivityFlyout.clearSelectedDateButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.clearSelectedDateutton"
-                      defaultMessage="Clear selected date"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-            </ButtonsFlexGroup>
-          </EuiFlexGroup>
-        </FullHeightFlyoutBody>
+        <FlyoutBody
+          isFirstLoading={isFirstLoading}
+          currentActions={currentActionsEnriched}
+          abortUpgrade={abortUpgrade}
+          onClickViewAgents={onClickViewAgents}
+          onClickShowMore={() => setNActions(nActions + 10)}
+          dateFilter={dateFilter}
+          onChangeDateFilter={onChangeDateFilter}
+        />
         <FlyoutFooterWPadding>
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>

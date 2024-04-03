@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionStatus } from '../../../../types';
+import type { ActionStatus } from '../../../../../types';
 
 const today = () => new Date().toISOString().substring(0, 10);
 

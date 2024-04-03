@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionStatus } from '../../../../types';
+import type { ActionStatus } from '../../../../../types';
 
 import { getOtherDaysActions, getTodayActions } from './agent_activity_helper';
 
