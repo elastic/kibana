@@ -565,12 +565,14 @@ export type AggregateOf<
         >;
       };
       categorize_text: {
-        buckets: Array<{
-          doc_count: number;
-          key: string | number;
-          regex?: string;
-          max_matching_length: number;
-        }>;
+        buckets: Array<
+          {
+            doc_count: number;
+            key: string | number;
+            regex?: string;
+            max_matching_length: number;
+          } & SubAggregateOf<TAggregationContainer, TDocument>
+        >;
       };
       top_hits: {
         hits: {
