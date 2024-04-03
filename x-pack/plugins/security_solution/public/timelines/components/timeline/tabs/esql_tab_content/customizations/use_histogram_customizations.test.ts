@@ -42,7 +42,7 @@ const mockUIActions = {
   getTrigger: mockUIActionsGetTrigger,
 } as UiActionsStart;
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/lib/kibana');
 
 const renderHookWithContext = () => {
   return renderHook(() => useHistogramCustomization(), {

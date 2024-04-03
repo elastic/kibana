@@ -21,9 +21,9 @@ import { useSessionView, useSessionViewNavigation } from './use_session_view';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 const mockDispatch = jest.fn();
-jest.mock('../../../../common/hooks/use_selector');
+jest.mock('../../../../../common/hooks/use_selector');
 
-jest.mock('../../../../common/containers/use_full_screen');
+jest.mock('../../../../../common/containers/use_full_screen');
 
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -33,8 +33,8 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -69,7 +69,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 const mockOpenDetailFn = jest.fn();
 
-jest.mock('../../side_panel/hooks/use_detail_panel', () => {
+jest.mock('../../../side_panel/hooks/use_detail_panel', () => {
   return {
     useDetailPanel: () => ({
       openEventDetailsPanel: mockOpenDetailFn,

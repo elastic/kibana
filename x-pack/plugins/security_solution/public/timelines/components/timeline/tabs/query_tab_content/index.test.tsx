@@ -30,31 +30,31 @@ import { Direction } from '../../../../../../common/search_strategy';
 import * as helpers from '../../../../../common/lib/kuery';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../containers', () => ({
+jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details', () => ({
+jest.mock('../../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('../../fields_browser', () => ({
+jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
-jest.mock('../body/events', () => ({
+jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../common/containers/sourcerer');
-jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../common/containers/sourcerer/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
-jest.mock('../../../../common/lib/kuery');
+jest.mock('../../../../../common/lib/kuery');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;

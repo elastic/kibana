@@ -24,21 +24,21 @@ import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
 
-jest.mock('../../../containers', () => ({
+jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details', () => ({
+jest.mock('../../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('../../fields_browser', () => ({
+jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
-jest.mock('../body/events', () => ({
+jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../common/containers/sourcerer');
-jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../common/containers/sourcerer/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
@@ -46,7 +46,7 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 describe('Timeline', () => {
   let props = {} as EqlTabContentComponentProps;

@@ -31,28 +31,28 @@ import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { cloneDeep, flatten } from 'lodash';
 
-jest.mock('../../../containers', () => ({
+jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('../../../containers/details');
+jest.mock('../../../../containers/details');
 
-jest.mock('../../fields_browser', () => ({
+jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../body/events', () => ({
+jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../common/containers/sourcerer');
-jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../common/containers/sourcerer/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
-jest.mock('../../../../common/lib/kuery');
+jest.mock('../../../../../common/lib/kuery');
 
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../../common/hooks/use_experimental_features');
 
 // These tests can take more than standard timeout of 5s
 // that is why we are setting it to 15s
@@ -65,7 +65,7 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
   return allowedExperimentalValues[feature];
 });
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is is reporiting multiple analytics events
 jest.mock(`@kbn/analytics-client`);

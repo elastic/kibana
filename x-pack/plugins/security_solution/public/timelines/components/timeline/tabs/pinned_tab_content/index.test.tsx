@@ -26,20 +26,20 @@ import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
-jest.mock('../../../containers', () => ({
+jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details', () => ({
+jest.mock('../../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('../../fields_browser', () => ({
+jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
-jest.mock('../body/events', () => ({
+jest.mock('../../body/events', () => ({
   Events: () => <></>,
 }));
 
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../../common/containers/sourcerer');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -54,8 +54,8 @@ const useAddToTimeline = () => ({
   startDragToTimeline: jest.fn(),
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({

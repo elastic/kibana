@@ -21,7 +21,7 @@ import { TimelineId } from '../../../../../../../common/types';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../../common/lib/kibana');
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
