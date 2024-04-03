@@ -9,7 +9,6 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
-import { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
 import {
   SQLLang,
   monaco,
@@ -41,6 +40,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import { SerializedEnrichPolicy } from '@kbn/index-management';
 
 import {
   textBasedLanguagedEditorStyles,
@@ -122,15 +122,6 @@ export interface TextBasedLanguagesEditorProps {
 
   /** hide query history **/
   hideQueryHistory?: boolean;
-}
-
-export interface SerializedEnrichPolicy {
-  type: EnrichPolicyType;
-  name: string;
-  sourceIndices: string[];
-  matchField: string;
-  enrichFields: string[];
-  query?: Record<string, any>;
 }
 
 interface TextBasedEditorDeps {
