@@ -54,6 +54,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DASHBOARD_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_APP_LOCATOR\""
+        ],
+        "path": "packages/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
         "id": "def-common.DeepLinkId",
         "type": "Type",
         "tags": [],
