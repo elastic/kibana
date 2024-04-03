@@ -180,6 +180,6 @@ export const definition: SolutionNavigationDefinition = {
   id: 'analytics',
   title,
   icon,
-  homePage: 'discover', // Temp. Wil be updated when all links are registered
+  homePage: 'home',
   navigationTree$: of(navTree),
 };

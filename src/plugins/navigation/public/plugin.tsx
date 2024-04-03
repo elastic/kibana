@@ -279,11 +279,11 @@ export class NavigationPublicPlugin
     const solutionNavs: SolutionNavigationDefinitions = {
       es: {
         ...esDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlSearchSideNav' }),
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'searchSideNav' }),
       },
       oblt: {
         ...obltDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlObservabilitySideNav' }),
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'observabilitySideNav' }),
       },
       analytics: {
         ...analyticsDefinition,
