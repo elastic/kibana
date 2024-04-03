@@ -30,7 +30,6 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
-const OwnerSchema = schema.string();
 const ReopenClosedCasesSchema = schema.boolean({ defaultValue: false });
 const TimeWindowSchema = schema.string({
   defaultValue: '7d',
@@ -68,7 +67,7 @@ export const CasesConnectorSecretsSchema = schema.object({});
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
   groupingBy: GroupingSchema,
-  owner: OwnerSchema,
+  owner: schema.string(),
   rule: RuleSchema,
   timeWindow: TimeWindowSchema,
   reopenClosedCases: ReopenClosedCasesSchema,
@@ -85,7 +84,6 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
-    owner: OwnerSchema,
   }),
 });
 
