@@ -7,7 +7,7 @@
  */
 
 import { InternalOverlayBannersStart, OverlayBannersService } from './banners_service';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 

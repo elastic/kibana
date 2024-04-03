@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleAction } from '@kbn/alerting-plugin/common';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
@@ -22,6 +23,7 @@ import {
   RuleTagBadgeProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
+  RuleUiAction,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -58,8 +60,18 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     actionTypeRegistry,
     ruleTypeRegistry,
     alertsTableConfigurationRegistry,
-    getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
-      return getActionFormLazy({ ...props, actionTypeRegistry, connectorServices });
+    getActionForm: (
+      props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+        setActions: (actions: RuleAction[]) => void;
+      }
+    ) => {
+      const { setActions, ...restProps } = props;
+      return getActionFormLazy({
+        ...restProps,
+        setActions: setActions as (actions: RuleUiAction[]) => void,
+        actionTypeRegistry,
+        connectorServices,
+      });
     },
     getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry, connectorServices });
