@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { filter, first, map, switchMap, tap, timeout } from 'rxjs/operators';
+import { filter, first, map, switchMap, tap, timeout } from 'rxjs';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
