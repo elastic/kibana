@@ -152,6 +152,16 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
+export enum RequestDiagnosticsAdditionalMetrics {
+  'CPU' = 'CPU',
+}
+
+export interface PostRequestDiagnosticsRequest {
+  body: {
+    additional_metrics: RequestDiagnosticsAdditionalMetrics[];
+  };
+}
+
 export type PostRequestDiagnosticsResponse = BulkAgentAction;
 export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
 
@@ -159,6 +169,7 @@ export interface PostRequestBulkDiagnosticsRequest {
   body: {
     agents: string[] | string;
     batchSize?: number;
+    additional_metrics: RequestDiagnosticsAdditionalMetrics[];
   };
 }
 

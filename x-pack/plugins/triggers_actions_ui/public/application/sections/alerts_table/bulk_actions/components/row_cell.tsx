@@ -31,9 +31,12 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
     return <EuiLoadingSpinner size="m" data-test-subj="row-loader" />;
   }
 
+  // NOTE: id is prefixed here to avoid conflicts with labels in other sections in the app.
+  // see https://github.com/elastic/kibana/issues/162837
+
   return (
     <EuiCheckbox
-      id={rowIndex.toString()}
+      id={`bulk-actions-row-cell-${rowIndex}`}
       checked={isChecked}
       onChange={onChange}
       data-test-subj="bulk-actions-row-cell"

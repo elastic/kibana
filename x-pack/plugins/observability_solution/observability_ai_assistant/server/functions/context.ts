@@ -19,6 +19,7 @@ import { FunctionVisibility } from '../../common/functions/types';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
+import { RecallRanking, RecallRankingEventType } from '../analytics/recall_ranking';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 import { ChatFn } from '../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
@@ -67,6 +68,8 @@ export function registerContextFunction({
       } as const,
     },
     async ({ arguments: args, messages, connectorId, screenContexts, chat }, signal) => {
+      const { analytics } = (await resources.context.core).coreStart;
+
       const { queries, categories } = args;
 
       async function getContext() {
@@ -112,7 +115,6 @@ export function registerContextFunction({
         queriesOrUserPrompt.push(screenDescription);
 
         const suggestions = await retrieveSuggestions({
-          userMessage,
           client,
           categories,
           queries: queriesOrUserPrompt,
@@ -124,23 +126,45 @@ export function registerContextFunction({
           };
         }
 
-        const { relevantDocuments, scores } = await scoreSuggestions({
-          suggestions,
-          queries: queriesOrUserPrompt,
-          messages,
-          chat,
-          connectorId,
-          signal,
-          logger: resources.logger,
-        });
-
-        return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
-          data: {
-            scores,
+        try {
+          const { relevantDocuments, scores } = await scoreSuggestions({
             suggestions,
-          },
-        };
+            queries: queriesOrUserPrompt,
+            messages,
+            chat,
+            connectorId,
+            signal,
+            logger: resources.logger,
+          });
+
+          analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
+            prompt: queriesOrUserPrompt.join('|'),
+            scoredDocuments: suggestions.map((suggestion) => {
+              const llmScore = scores.find((score) => score.id === suggestion.id);
+              return {
+                content: suggestion.text,
+                elserScore: suggestion.score ?? -1,
+                llmScore: llmScore ? llmScore.score : -1,
+              };
+            }),
+          });
+
+          return {
+            content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+            data: {
+              scores,
+              suggestions,
+            },
+          };
+        } catch (error) {
+          return {
+            content: { ...content, learnings: suggestions.slice(0, 5) },
+            data: {
+              error,
+              suggestions,
+            },
+          };
+        }
       }
 
       return new Observable<MessageAddEvent>((subscriber) => {
@@ -169,7 +193,6 @@ async function retrieveSuggestions({
   client,
   categories,
 }: {
-  userMessage?: Message;
   queries: string[];
   client: ObservabilityAIAssistantClient;
   categories: Array<'apm' | 'lens'>;
@@ -179,7 +202,7 @@ async function retrieveSuggestions({
     categories,
   });
 
-  return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
+  return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction'));
 }
 
 const scoreFunctionRequestRt = t.type({
@@ -212,7 +235,10 @@ async function scoreSuggestions({
   signal: AbortSignal;
   logger: Logger;
 }) {
-  const indexedSuggestions = suggestions.map((suggestion, index) => ({ ...suggestion, id: index }));
+  const indexedSuggestions = suggestions.map((suggestion, index) => ({
+    ...omit(suggestion, 'score'), // To not bias the LLM
+    id: index,
+  }));
 
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
