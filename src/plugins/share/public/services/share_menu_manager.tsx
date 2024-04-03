@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -58,6 +58,7 @@ export class ShareMenuManager {
           overlays: core.overlays,
           i18n: core.i18n,
           newVersionEnabled,
+          toasts: core.notifications.toasts,
         });
       },
     };
@@ -92,6 +93,7 @@ export class ShareMenuManager {
     i18n,
     isDirty,
     newVersionEnabled,
+    toasts,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -103,6 +105,7 @@ export class ShareMenuManager {
     i18n: CoreStart['i18n'];
     isDirty: boolean;
     newVersionEnabled: boolean;
+    toasts: ToastsSetup;
   }) {
     if (this.isOpen) {
       onClose();
@@ -174,6 +177,7 @@ export class ShareMenuManager {
                 isEmbedded: allowEmbed,
                 shareMenuItems: menuItems,
                 theme,
+                toasts,
                 onClose: () => {
                   onClose();
                   session.close();

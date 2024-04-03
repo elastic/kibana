@@ -40,7 +40,7 @@ type ExportProps = Pick<
   'isDirty' | 'objectId' | 'objectType' | 'onClose' | 'i18n'
 > & {
   reportingAPIClient: ReportingAPIClient;
-  getJobParams: Function;
+  getJobParams: Array<{ id: string; handler: Function }>;
   helpText: FormattedMessage;
   generateReportButton: FormattedMessage;
   jobProviderOptions?: JobParamsProviderOptions;
@@ -48,9 +48,10 @@ type ExportProps = Pick<
   toasts: ToastsSetup;
   theme: ThemeServiceSetup;
   downloadCSVLens: Function;
+  reportType: string[];
 };
 
-type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv';
+type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'csv';
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 type Props = ExportProps & { intl: InjectedIntl };
 
@@ -70,11 +71,15 @@ export const ExportContent = ({
   onClose,
   downloadCSVLens,
   i18n: i18nStart,
+  reportType,
 }: Props) => {
+  const csvReportTypeCheck = reportType[0];
   const isSaved = Boolean(objectId) || !isDirty;
   const [, setIsStale] = useState(false);
   const [isCreatingReport, setIsCreatingReport] = useState(false);
-  const [selectedRadio, setSelectedRadio] = useState<AllowedExports>('printablePdfV2');
+  const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(
+    csvReportTypeCheck as AllowedExports
+  );
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
   const isMounted = useMountedState();
@@ -166,6 +171,7 @@ export const ExportContent = ({
     getAbsoluteReportGenerationUrl();
     markAsStale();
   }, [markAsStale, getAbsoluteReportGenerationUrl]);
+
   const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
     setPrintLayout(evt.target.checked);
   };
@@ -255,8 +261,14 @@ export const ExportContent = ({
     if (selectedRadio === 'csv') {
       return downloadCSVLens();
     }
+    if (csvReportTypeCheck === 'csv_searchsource' || csvReportTypeCheck === 'csv_v2') {
+      setSelectedRadio(csvReportTypeCheck);
+    }
+    // // get the appropriate jobParams for either printablePdfV2 or pngV2
+    // const [{handler}] = getJobParams.filter((val) =>  val.id === selectedRadio)
+
     const decoratedJobParams = reportingAPIClient.getDecoratedJobParams(
-      getJobParams(false) as unknown as AppParams
+      getJobParamsImages(false) as unknown as AppParams
     );
     setIsCreatingReport(true);
     return reportingAPIClient
@@ -291,6 +303,7 @@ export const ExportContent = ({
         });
         if (onClose) {
           onClose();
+          setIsCreatingReport(false);
         }
         if (isMounted()) {
           setIsCreatingReport(false);
@@ -298,7 +311,7 @@ export const ExportContent = ({
       })
       .catch((error) => {
         toasts.addError(error, {
-          title: intl.formatMessage({
+          title: intl!.formatMessage({
             id: 'reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
@@ -359,6 +372,7 @@ export const ExportContent = ({
             options={radioOptions}
             onChange={(id) => {
               setSelectedRadio(id as AllowedExports);
+              getAbsoluteReportGenerationUrl();
             }}
             name="image reporting radio group"
             idSelected={selectedRadio}

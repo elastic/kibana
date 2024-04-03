@@ -29,6 +29,7 @@ function ExportTabContent() {
     objectId,
     onClose,
     i18n: i18nStart,
+    toasts,
   } = useShareTabsContext()!;
 
   return shareMenuItems.map((shareMenuItem, index) => {
@@ -43,9 +44,9 @@ function ExportTabContent() {
       layoutOption,
       reportingAPIClient,
       generateReportButton,
-      toasts,
       theme,
       downloadCSVLens,
+      reportType,
     } = shareMenuItem;
     return (
       // @ts-ignore props show undefined because of v1 share design modal needed the props to be optional for congruency with Canvas
@@ -65,6 +66,7 @@ function ExportTabContent() {
           toasts,
           downloadCSVLens,
           i18nStart,
+          reportType,
         }}
         key={index}
       />

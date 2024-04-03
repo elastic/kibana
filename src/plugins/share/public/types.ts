@@ -82,7 +82,7 @@ export interface ShareMenuItem {
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
   generateReportButton?: ReactElement;
-  getJobParams?: Function;
+  getJobParams?: Array<{ id: string; handler: Function }>;
   reportingAPIClient?: ReportingAPIClient;
   jobProviderOptions?: JobParamsProviderOptions;
   layoutOption?: 'print';

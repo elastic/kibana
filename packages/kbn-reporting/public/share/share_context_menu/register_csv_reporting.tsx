@@ -113,7 +113,7 @@ export const reportingCsvShareProvider = ({
             defaultMessage="Generate CSV"
           />
         ),
-        getJobParams,
+        getJobParams: [{ id: reportType, handler: getJobParams }],
         createReportingJob: generateReportingJobCSV,
         reportingAPIClient: apiClient,
       });

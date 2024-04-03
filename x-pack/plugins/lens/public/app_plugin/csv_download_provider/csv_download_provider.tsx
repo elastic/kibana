@@ -136,6 +136,7 @@ export const downloadCsvShareProvider = ({
               });
               onClose?.();
             },
+            reportType: ['csv'],
           },
         ]
       : [

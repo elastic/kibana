@@ -306,6 +306,7 @@ export const reportingExportModalProvider = ({
       tabType: 'Export',
       jobProviderOptions,
       reportingAPIClient: apiClient,
+      reportType: ['printablePdfV2', 'pngV2'],
       requiresSavedState,
       helpText: (
         <FormattedMessage
@@ -320,7 +321,13 @@ export const reportingExportModalProvider = ({
         />
       ),
       createReportingJob: generateReportingJobPNGPDF,
-      getJobParams,
+      getJobParams: [
+        { id: 'pngV2', handler: getJobParams(apiClient, jobProviderOptions, 'pngV2') },
+        {
+          id: 'printablePdfV2',
+          handler: getJobParams(apiClient, jobProviderOptions, 'printablePdfV2'),
+        },
+      ],
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       toasts,
       theme,
