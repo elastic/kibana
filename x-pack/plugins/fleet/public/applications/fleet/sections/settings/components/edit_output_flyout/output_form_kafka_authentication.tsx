@@ -75,6 +75,10 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    kafkaAuthPassword: false,
+    kafkaSslKey: false,
+  });
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
 
   useEffect(() => {
@@ -85,11 +89,13 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
       if (inputs.kafkaAuthPasswordInput.value && !inputs.kafkaAuthPasswordSecretInput.value) {
         inputs.kafkaAuthPasswordSecretInput.setValue(inputs.kafkaAuthPasswordInput.value);
         inputs.kafkaAuthPasswordInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, kafkaAuthPassword: true });
       }
 
       if (inputs.kafkaSslKeyInput.value && !inputs.kafkaSslKeySecretInput.value) {
         inputs.kafkaSslKeySecretInput.setValue(inputs.kafkaSslKeyInput.value);
         inputs.kafkaSslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, kafkaSslKey: true });
       }
     }
   }, [
@@ -100,6 +106,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
     inputs.kafkaSslKeySecretInput,
     isFirstLoad,
     setIsFirstLoad,
+    isConvertedToSecret,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
@@ -195,6 +202,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaSslKeyInput.formRowProps}
+                initialValue={inputs.kafkaSslKeyInput.value}
                 useSecretsStorage={useSecretsStorage}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
               >
@@ -220,7 +228,9 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaSslKeySecretInput.formRowProps}
+                initialValue={inputs.kafkaSslKeySecretInput.value}
                 useSecretsStorage={useSecretsStorage}
+                isConvertedToSecret={isConvertedToSecret.kafkaSslKey}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
                 cancelEdit={inputs.kafkaSslKeySecretInput.cancelEdit}
               >
@@ -270,6 +280,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaAuthPasswordInput.formRowProps}
+                initialValue={inputs.kafkaAuthPasswordInput.value}
                 useSecretsStorage={useSecretsStorage}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
               >
@@ -290,7 +301,9 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
+                initialValue={inputs.kafkaAuthPasswordSecretInput.value}
                 useSecretsStorage={useSecretsStorage}
+                isConvertedToSecret={isConvertedToSecret.kafkaAuthPassword}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
                 cancelEdit={inputs.kafkaAuthPasswordSecretInput.cancelEdit}
               >
