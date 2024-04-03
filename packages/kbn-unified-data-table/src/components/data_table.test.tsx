@@ -78,6 +78,9 @@ function getProps(): UnifiedDataTableProps {
       data: services.data,
       theme: services.theme,
     },
+    cellActionsMetadata: {
+      someKey: 'someValue',
+    },
   };
 }
 
@@ -258,13 +261,16 @@ describe('UnifiedDataTable', () => {
         columns: ['message'],
         onFieldEdited: jest.fn(),
       });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: undefined,
-          getCellValue: expect.any(Function),
-          fields: undefined,
-        })
-      );
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: undefined,
+        getCellValue: expect.any(Function),
+        fields: undefined,
+        dataGridRef: expect.any(Object),
+        metadata: {
+          dataViewId: 'the-data-view-id',
+          someKey: 'someValue',
+        },
+      });
     });
 
     it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
@@ -274,16 +280,19 @@ describe('UnifiedDataTable', () => {
         onFieldEdited: jest.fn(),
         cellActionsTriggerId: 'test',
       });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: 'test',
-          getCellValue: expect.any(Function),
-          fields: [
-            dataViewMock.getFieldByName('@timestamp')?.toSpec(),
-            dataViewMock.getFieldByName('message')?.toSpec(),
-          ],
-        })
-      );
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: 'test',
+        getCellValue: expect.any(Function),
+        fields: [
+          dataViewMock.getFieldByName('@timestamp')?.toSpec(),
+          dataViewMock.getFieldByName('message')?.toSpec(),
+        ],
+        dataGridRef: expect.any(Object),
+        metadata: {
+          dataViewId: 'the-data-view-id',
+          someKey: 'someValue',
+        },
+      });
     });
   });
 

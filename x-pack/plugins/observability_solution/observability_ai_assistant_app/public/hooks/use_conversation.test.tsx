@@ -27,11 +27,11 @@ import {
   type UseConversationProps,
   type UseConversationResult,
 } from './use_conversation';
-import * as useKibanaModule from './use_kibana';
 import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from '../utils/create_mock_chat_service';
 import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 import type { NotificationsStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 
@@ -61,23 +61,24 @@ const mockChatService = createMockChatService();
 
 const addErrorMock = jest.fn();
 
-jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
-  services: {
-    plugins: {
-      start: {
-        observabilityAIAssistant: {
-          useChat: createUseChat({
-            notifications: {
-              toasts: {
-                addError: addErrorMock,
-              },
-            } as unknown as NotificationsStart,
-          }),
-        },
+const useKibanaMockServices = {
+  uiSettings: {
+    get: jest.fn(),
+  },
+  plugins: {
+    start: {
+      observabilityAIAssistant: {
+        useChat: createUseChat({
+          notifications: {
+            toasts: {
+              addError: addErrorMock,
+            },
+          } as unknown as NotificationsStart,
+        }),
       },
     },
   },
-} as any);
+};
 
 describe('useConversation', () => {
   let wrapper: WrapperComponent<UseConversationProps>;
@@ -85,9 +86,11 @@ describe('useConversation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     wrapper = ({ children }) => (
-      <ObservabilityAIAssistantAppServiceProvider value={mockService}>
-        {children}
-      </ObservabilityAIAssistantAppServiceProvider>
+      <KibanaContextProvider services={useKibanaMockServices}>
+        <ObservabilityAIAssistantAppServiceProvider value={mockService}>
+          {children}
+        </ObservabilityAIAssistantAppServiceProvider>
+      </KibanaContextProvider>
     );
   });
 

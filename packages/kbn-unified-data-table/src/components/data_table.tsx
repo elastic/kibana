@@ -378,6 +378,12 @@ export interface UnifiedDataTableProps {
    * Set to true to allow users to compare selected documents
    */
   enableComparisonMode?: boolean;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -442,6 +448,7 @@ export const UnifiedDataTable = ({
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
+  cellActionsMetadata,
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
   enableComparisonMode,
@@ -686,14 +693,17 @@ export const UnifiedDataTable = ({
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
-  const cellActionsMetadata = useMemo(() => ({ dataViewId: dataView.id }), [dataView]);
+  const allCellActionsMetadata = useMemo(
+    () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
+    [dataView, cellActionsMetadata]
+  );
 
   const columnsCellActions = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
-    metadata: cellActionsMetadata,
+    metadata: allCellActionsMetadata,
   });
 
   const {

@@ -151,7 +151,7 @@ export class DataGridService extends FtrService {
 
   public async getFields(options?: SelectOptions) {
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await this.find.allByCssSelector(selector);
 
@@ -218,7 +218,7 @@ export class DataGridService extends FtrService {
     }
 
     const cellSelector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await table.findAllByCssSelector(cellSelector);
 
