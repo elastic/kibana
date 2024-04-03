@@ -150,15 +150,13 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
     });
 
-    it('should store the flyout state in the url when it is opened', () => {
+    it('should store the flyout state in the url when it is opened and remove it when closed', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.url().should('include', 'eventFlyout=');
-    });
+      cy.url().should('include', 'flyout=');
 
-    it('should remove the flyout state from the url when it is closed', () => {
-      cy.get(OVERVIEW_RULE).should('be.visible');
       closeAlertFlyout();
-      cy.url().should('not.include', 'eventFlyout=');
+
+      cy.url().should('not.include', 'flyout=');
     });
 
     it.skip('should open the alert flyout when the page is refreshed', () => {
