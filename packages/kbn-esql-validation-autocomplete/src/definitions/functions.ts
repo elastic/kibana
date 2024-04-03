@@ -97,7 +97,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
     validate: validateLogFunctions,
   },
-
   {
     name: 'log',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.logDoc', {
@@ -932,7 +931,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'field', type: 'any' },
+          { name: 'field', type: 'any[]' },
           {
             name: 'order',
             type: 'string',
@@ -945,6 +944,18 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           'row a = [4, 2, -3, 2] | eval sorted = mv_sort(a)',
           'row a = ["b", "c", "a"] | sorted = mv_sort(a, "DESC")',
         ],
+      },
+      {
+        params: [
+          { name: 'field', type: 'any' },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+            literalOptions: ['asc', 'desc'],
+          },
+        ],
+        returnType: 'any',
       },
     ],
   },

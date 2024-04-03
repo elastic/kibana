@@ -1371,6 +1371,16 @@
       "warning": []
     },
     {
+      "query": "row var = mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sum(5)",
       "error": [],
       "warning": []
@@ -2332,6 +2342,13 @@
         "Argument of [not_rlike] must be [string], found value [5] type [number]"
       ],
       "warning": []
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "row 1 anno",
@@ -7900,6 +7917,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = mv_sum(numberField)",
       "error": [],
       "warning": []
@@ -9440,6 +9467,13 @@
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}"
       ],
       "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "from a_index | eval 1 anno",
