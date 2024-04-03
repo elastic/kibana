@@ -36,9 +36,10 @@ import {
 } from '../../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
+// https://github.com/elastic/kibana/issues/179970
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
