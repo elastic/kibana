@@ -15,13 +15,7 @@ describe('RiskInputsUtilityBar', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 0,
-          }}
-        />
+        <RiskInputsUtilityBar riskInputs={[]} />
       </TestProviders>
     );
 
@@ -31,13 +25,7 @@ describe('RiskInputsUtilityBar', () => {
   it('renders current page message when totalItemCount is 1', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 1,
-          }}
-        />
+        <RiskInputsUtilityBar riskInputs={[]} />
       </TestProviders>
     );
 
@@ -47,13 +35,7 @@ describe('RiskInputsUtilityBar', () => {
   it('renders current page message when totalItemCount is 20', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 20,
-          }}
-        />
+        <RiskInputsUtilityBar riskInputs={[]} />
       </TestProviders>
     );
 
@@ -65,13 +47,7 @@ describe('RiskInputsUtilityBar', () => {
   it('renders current page message when totalItemCount is 20 and on the second page', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 1,
-            totalItemCount: 20,
-          }}
-        />
+        <RiskInputsUtilityBar riskInputs={[]} />
       </TestProviders>
     );
 
@@ -84,11 +60,7 @@ describe('RiskInputsUtilityBar', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskInputsUtilityBar
-          selectedAlerts={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 0,
-          }}
+          riskInputs={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
         />
       </TestProviders>
     );
@@ -100,11 +72,7 @@ describe('RiskInputsUtilityBar', () => {
     const { getByRole } = render(
       <TestProviders>
         <RiskInputsUtilityBar
-          selectedAlerts={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 0,
-          }}
+          riskInputs={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
         />
       </TestProviders>
     );

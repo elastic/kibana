@@ -10,6 +10,7 @@ import { RiskCategories } from '../../../../../common/entity_analytics/risk_engi
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 export const alertInputDataMock: InputAlert = {
+  _id: 'test-id',
   input: {
     id: 'test-id',
     index: 'test-index',

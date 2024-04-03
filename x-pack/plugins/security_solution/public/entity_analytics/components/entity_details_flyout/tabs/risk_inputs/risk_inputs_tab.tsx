@@ -28,6 +28,7 @@ import {
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
+import { ActionColumn } from '../../components/action_column';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
@@ -68,11 +69,9 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   const euiTableSelectionProps = useMemo(
     () => ({
-      onSelectionChange: (selected: InputAlert[]) => {
-        setSelectedItems(selected);
-      },
       initialSelected: [],
       selectable: () => true,
+      onSelectionChange: setSelectedItems,
     }),
     []
   );
@@ -87,10 +86,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
           />
         ),
         width: '80px',
-        render: (data: InputAlert) => {
-          return 'placeholder';
-          // return <ActionColumn inputAlert={data} />;
-        },
+        render: (data: InputAlert) => <ActionColumn input={data} />,
       },
       {
         field: 'input.timestamp',

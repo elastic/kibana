@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { EntityRiskInput } from '../../../common/entity_analytics/risk_engine';
 import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
@@ -23,8 +24,8 @@ interface UseRiskContributingAlerts {
 }
 
 interface AlertData {
-  'kibana.alert.rule.uuid': string;
-  'kibana.alert.rule.name': string;
+  [ALERT_RULE_UUID]: string;
+  [ALERT_RULE_NAME]: string;
 }
 
 interface AlertHit {
@@ -32,9 +33,11 @@ interface AlertHit {
   _index: string;
   _source: AlertData;
 }
+
 export interface InputAlert {
   alert: AlertData;
   input: EntityRiskInput;
+  _id: string;
 }
 
 interface UseRiskContributingAlertsResult {
@@ -51,7 +54,6 @@ export const useRiskContributingAlerts = ({
   entityType,
 }: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
   const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
-    // is empty query, to skip fetching alert, until we have risk engine settings
     query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
   });
@@ -75,6 +77,7 @@ export const useRiskContributingAlerts = ({
       : (riskScore as HostRiskScore)?.host.risk.inputs;
 
   const alerts = inputs?.map((input) => ({
+    _id: input.id,
     input,
     alert: (data?.hits.hits.find((alert) => alert._id === input.id)?._source || {}) as AlertData,
   }));
