@@ -19,6 +19,7 @@ import React, { ComponentType } from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
@@ -137,7 +138,7 @@ export type JSONValue = null | string | number | boolean | { [x: string]: JSONVa
 
 export interface ChatRequestOptions {
   options?: RequestOptions;
-  data?: Record<string, string | number | boolean>;
+  data?: ChatRequestData;
 }
 
 export type CreateMessage = Omit<Message, 'id'> & {

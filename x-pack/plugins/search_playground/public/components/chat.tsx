@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { ChatForm, ChatFormFields, MessageRole } from '../types';
+import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -34,7 +34,7 @@ import { StartNewChat } from './start_new_chat';
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
 
-const buildFormData = (formData: ChatForm) => ({
+const buildFormData = (formData: ChatForm): ChatRequestData => ({
   connector_id: formData[ChatFormFields.connectorId],
   prompt: formData[ChatFormFields.prompt],
   indices: formData[ChatFormFields.indices].join(),

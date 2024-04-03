@@ -29,3 +29,14 @@ export enum APIRoutes {
 export enum LLMs {
   openai = 'openai',
 }
+
+export interface ChatRequestData {
+  connector_id: string;
+  prompt: string;
+  indices: string;
+  citations: boolean;
+  elasticsearch_query: string;
+  summarization_model: string;
+  source_fields: string;
+  doc_size: number;
+}
