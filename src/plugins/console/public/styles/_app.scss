@@ -125,3 +125,11 @@
 .conApp__tabsExtension {
   border-bottom: $euiBorderThin;
 }
+
+/*
+ * The highlighting for the selected requests in the monaco editor
+ */
+.console__monaco_editor__selectedRequests {
+  /* Make sure to use transparent colors for the selection to work */
+  background: transparentize($euiColorLightShade, .3);
+}

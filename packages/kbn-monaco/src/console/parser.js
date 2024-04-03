@@ -28,26 +28,31 @@ export const createParser = () => {
       annos.push({ type: type, text: text, at: at });
     },
     requestEvents,
+    requestStartOffset,
+    requestEndOffset,
     getLastRequest = function() {
       return requestEvents.length > 0 ? requestEvents.pop() : {};
     },
     addRequestStart = function() {
-      requestEvents.push({startOffset: at});
+      requestStartOffset = at - 1;
+      requestEvents.push({startOffset: requestStartOffset});
     },
     addRequestEnd = function() {
       const lastRequest = getLastRequest();
-      lastRequest.endOffset = at;
+      lastRequest.endOffset = requestEndOffset;
       requestEvents.push(lastRequest);
     },
     addRequestMethod = function(method) {
       const lastRequest = getLastRequest();
       lastRequest.method = method;
       requestEvents.push(lastRequest);
+      requestEndOffset = at - 1;
     },
     addRequestUrl = function(url) {
       const lastRequest = getLastRequest();
       lastRequest.url = url;
       requestEvents.push(lastRequest);
+      requestEndOffset = at - 1;
     },
     addRequestData = function(data) {
       const lastRequest = getLastRequest();
@@ -55,6 +60,7 @@ export const createParser = () => {
       dataArray.push(data);
       lastRequest.data = dataArray;
       requestEvents.push(lastRequest);
+      requestEndOffset = at - 1;
     },
     error = function (m) {
       throw {

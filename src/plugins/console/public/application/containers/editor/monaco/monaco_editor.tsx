@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -33,6 +33,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const { settings } = useEditorReadContext();
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
+  const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const getCurl = useCallback(async (): Promise<string> => {
     return actionsProvider.current
@@ -62,6 +63,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         id="ConAppEditorActions"
         gutterSize="none"
         responsive={false}
+        style={editorActionsCss}
       >
         <EuiFlexItem>
           <EuiToolTip
@@ -104,7 +106,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           theme: CONSOLE_THEME_ID,
         }}
         editorDidMount={(editor) => {
-          actionsProvider.current = new MonacoEditorActionsProvider(editor);
+          actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
         }}
       />
     </div>

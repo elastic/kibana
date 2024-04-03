@@ -14,7 +14,7 @@ import {
 } from '@kbn/monaco';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { Dispatch } from 'react';
+import { CSSProperties, Dispatch } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
@@ -33,44 +33,116 @@ export interface EditorRequest {
   url: string;
   data: string[];
 }
+const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
-  constructor(private editor: monaco.editor.IStandaloneCodeEditor) {
-    this.parsedRequestsProvider = getParsedRequestsProvider(editor.getModel());
+  private decorations: monaco.editor.IEditorDecorationsCollection;
+  constructor(
+    private editor: monaco.editor.IStandaloneCodeEditor,
+    private setEditorActionsCss: (css: CSSProperties) => void
+  ) {
+    this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
+    this.decorations = this.editor.createDecorationsCollection();
+    this.editor.focus();
+    this.highlightCurrentRequests();
+    editor.onDidChangeCursorPosition(async (event) => {
+      await this.highlightCurrentRequests();
+    });
+    // update actions bar on scroll change and size of the editor change
   }
 
-  private async getParsedRequests(): Promise<ParsedRequest[]> {
+  private hideEditorActions() {
+    this.setEditorActionsCss({
+      visibility: 'hidden',
+    });
+  }
+
+  private updateEditorActions(topOffset: number) {
+    this.setEditorActionsCss({
+      visibility: 'visible',
+      top: topOffset,
+    });
+  }
+
+  private async highlightCurrentRequests(): Promise<void> {
+    const { range: selectedRange, parsedRequests } = await this.getSelectedParsedRequestsAndRange();
+    if (parsedRequests.length > 0) {
+      const topLine = selectedRange.startLineNumber;
+      const topOffset = this.editor.getTopForLineNumber(topLine);
+      this.updateEditorActions(topOffset);
+      this.decorations.set([
+        {
+          range: selectedRange,
+          options: {
+            isWholeLine: true,
+            className: selectedRequestsClass,
+          },
+        },
+      ]);
+    } else {
+      this.hideEditorActions();
+      this.decorations.clear();
+    }
+  }
+
+  private async getSelectedParsedRequestsAndRange(): Promise<{
+    parsedRequests: ParsedRequest[];
+    range: monaco.IRange;
+  }> {
     const model = this.editor.getModel();
     const selection = this.editor.getSelection();
     if (!model || !selection) {
-      return Promise.resolve([]);
+      return Promise.resolve({
+        parsedRequests: [],
+        range: selection ?? new monaco.Range(1, 1, 1, 1),
+      });
     }
-    const { startLineNumber, startColumn, endLineNumber, endColumn } = selection;
-    const selectionStartOffset = model.getOffsetAt({
-      lineNumber: startLineNumber,
-      column: startColumn,
-    });
-    const selectionEndOffset = model.getOffsetAt({ lineNumber: endLineNumber, column: endColumn });
+    const { startLineNumber, endLineNumber } = selection;
     const parsedRequests = await this.parsedRequestsProvider.getRequests();
     const selectedRequests = [];
+    let selectionStartLine = startLineNumber;
+    let selectionEndLine = endLineNumber;
     for (const parsedRequest of parsedRequests) {
       const { startOffset: requestStart, endOffset: requestEnd } = parsedRequest;
-      if (requestStart - 1 >= selectionEndOffset) {
+      const { lineNumber: requestStartLine } = model.getPositionAt(requestStart);
+      let { lineNumber: requestEndLine } = model.getPositionAt(requestEnd);
+      const requestEndLineContent = model.getLineContent(requestEndLine);
+
+      if (requestEndLineContent.trim().length < 1) {
+        requestEndLine = requestEndLine - 1;
+      }
+      if (requestStartLine > endLineNumber) {
         // request is past the selection, no need to check further requests
         break;
       }
-      if (requestEnd - 1 < selectionStartOffset) {
+      if (requestEndLine < startLineNumber) {
         // request is before the selection, do nothing
       } else {
         // request is selected
         selectedRequests.push(parsedRequest);
+        // expand the start of the selection to the request start
+        if (selectionStartLine > requestStartLine) {
+          selectionStartLine = requestStartLine;
+        }
+        // expand the end of the selection to the request end
+        if (selectionEndLine < requestEndLine) {
+          selectionEndLine = requestEndLine;
+        }
       }
     }
-    return selectedRequests;
+    return {
+      parsedRequests: selectedRequests,
+      range: new monaco.Range(
+        selectionStartLine,
+        1,
+        selectionEndLine,
+        model.getLineMaxColumn(selectionEndLine)
+      ),
+    };
   }
 
   private async getRequests() {
-    const parsedRequests = await this.getParsedRequests();
+    const { parsedRequests } = await this.getSelectedParsedRequestsAndRange();
     const stringifiedRequests = parsedRequests.map((parsedRequest) =>
       stringifyRequest(parsedRequest)
     );
