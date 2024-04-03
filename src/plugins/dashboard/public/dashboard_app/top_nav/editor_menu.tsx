@@ -32,7 +32,8 @@ import {
   getAddPanelActionMenuItems,
   type GroupedAppPanelActions,
 } from './add_panel_action_menu_items';
-interface FactoryGroup {
+
+export interface FactoryGroup {
   id: string;
   appName: string;
   icon: EuiContextMenuItemIcon;
@@ -47,7 +48,7 @@ interface UnwrappedEmbeddableFactory {
 
 export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
 
-const getEmbeddableFactoryMenuItemProvider =
+export const getEmbeddableFactoryMenuItemProvider =
   (api: PresentationContainer, closePopover: () => void) => (factory: EmbeddableFactory) => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
