@@ -51,7 +51,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/data-plugin",
     "@kbn/esql-validation-autocomplete",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
     "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
