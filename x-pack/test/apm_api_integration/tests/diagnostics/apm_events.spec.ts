@@ -20,6 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177144
   registry.when('Diagnostics: APM Events', { config: 'basic', archives: [] }, () => {
     describe('When there is no data', () => {
       before(async () => {
@@ -28,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns zero data streams`', async () => {
-        const { status, body } = await apmApiClient.adminUser({
+        const { status, body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
         });
         expect(status).to.be(200);
@@ -59,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => synthtraceEsClient.clean());
 
       it('returns zero doc_counts when no time range is specified', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
         });
 
@@ -67,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns non-zero doc_counts when time range is specified', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
           params: {
             query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
@@ -105,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const expectedDocCount = 450;
 
         beforeEach(async () => {
-          const res = await apmApiClient.adminUser({
+          const res = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/diagnostics',
             params: {
               query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
@@ -168,7 +169,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns zero doc_counts when filtering by a non-existing service', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
           params: {
             query: {
@@ -183,7 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns non-zero doc_counts when filtering by an existing service', async () => {
-        const { body } = await apmApiClient.adminUser({
+        const { body } = await apmApiClient.readUser({
           endpoint: 'GET /internal/apm/diagnostics',
           params: {
             query: {

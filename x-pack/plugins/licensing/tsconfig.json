@@ -2,13 +2,9 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "isolatedModules": true,
+    "isolatedModules": true
   },
-  "include": [
-    "public/**/*",
-    "server/**/*",
-    "common/**/*"
-  ],
+  "include": ["public/**/*", "server/**/*", "common/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
@@ -18,8 +14,7 @@
     "@kbn/std",
     "@kbn/i18n",
     "@kbn/analytics-client",
+    "@kbn/logging-mocks"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

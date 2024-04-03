@@ -141,6 +141,45 @@ describe('AlertSummaryView', () => {
       });
     });
   });
+  test('User specified investigation fields appear in summary rows', async () => {
+    const mockData = mockAlertDetailsData.map((item) => {
+      if (item.category === 'event' && item.field === 'event.category') {
+        return {
+          ...item,
+          values: ['network'],
+          originalValue: ['network'],
+        };
+      }
+      return item;
+    });
+    const renderProps = {
+      ...props,
+      investigationFields: ['custom.field'],
+      data: [
+        ...mockData,
+        { category: 'custom', field: 'custom.field', values: ['blob'], originalValue: 'blob' },
+      ] as TimelineEventsDetailsItem[],
+    };
+    await act(async () => {
+      const { getByText } = render(
+        <TestProvidersComponent>
+          <AlertSummaryView {...renderProps} />
+        </TestProvidersComponent>
+      );
+
+      [
+        'custom.field',
+        'host.name',
+        'user.name',
+        'destination.address',
+        'source.address',
+        'source.port',
+        'process.name',
+      ].forEach((fieldId) => {
+        expect(getByText(fieldId));
+      });
+    });
+  });
   test('Network event renders the correct summary rows', async () => {
     const renderProps = {
       ...props,

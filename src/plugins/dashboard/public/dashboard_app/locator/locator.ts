@@ -11,13 +11,12 @@ import { flow } from 'lodash';
 
 import type { Filter } from '@kbn/es-query';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
-import type { DashboardContainerInput } from '../../../common';
-import { SavedDashboardPanel } from '../../../common/content_management';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
+import { DashboardLocatorParams } from '../..';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).
@@ -33,52 +32,7 @@ export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   return stateObj;
 };
 
-export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
-
-export type DashboardAppLocatorParams = Partial<
-  Omit<
-    DashboardContainerInput,
-    'panels' | 'controlGroupInput' | 'executionContext' | 'isEmbeddedExternally'
-  >
-> & {
-  /**
-   * If given, the dashboard saved object with this id will be loaded. If not given,
-   * a new, unsaved dashboard will be loaded up.
-   */
-  dashboardId?: string;
-
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
-
-  /**
-   * When `true` filters from saved filters from destination dashboard as merged with applied filters
-   * When `false` applied filters take precedence and override saved filters
-   *
-   * true is default
-   */
-  preserveSavedFilters?: boolean;
-
-  /**
-   * Search search session ID to restore.
-   * (Background search)
-   */
-  searchSessionId?: string;
-
-  /**
-   * List of dashboard panels
-   */
-  panels?: Array<SavedDashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
-
-  /**
-   * Control group input
-   */
-  controlGroupInput?: SerializableControlGroupInput;
-};
-
-export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
+export type DashboardAppLocator = LocatorPublic<DashboardLocatorParams>;
 
 export interface DashboardAppLocatorDependencies {
   useHashedUrl: boolean;
@@ -86,16 +40,16 @@ export interface DashboardAppLocatorDependencies {
 }
 
 export type ForwardedDashboardState = Omit<
-  DashboardAppLocatorParams,
+  DashboardLocatorParams,
   'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId'
 >;
 
-export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
+export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardLocatorParams> {
   public readonly id = DASHBOARD_APP_LOCATOR;
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
 
-  public readonly getLocation = async (params: DashboardAppLocatorParams) => {
+  public readonly getLocation = async (params: DashboardLocatorParams) => {
     const {
       filters,
       useHash: paramsUseHash,

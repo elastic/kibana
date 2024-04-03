@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   jobCount: number;
 }
 
 export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
-  if (lazyMlNodesAvailable() === false || jobCount === 0) {
+  const { showNodeInfo } = useEnabledFeatures();
+  if (showNodeInfo === false || lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;
   }
 
@@ -35,7 +38,7 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.noMLNodesAvailableDescription"
-            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for machine learning nodes to start."
+            defaultMessage="{jobCount, plural, one {# job} other {# jobs}} will start after autoscaling has increased ML capacity. This may take several minutes."
             values={{
               jobCount,
             }}

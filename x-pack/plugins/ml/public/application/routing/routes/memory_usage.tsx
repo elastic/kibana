@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
-import { NavigateToPath } from '../../contexts/kibana';
-import { createPath, MlRoute, PageLoader } from '../router';
+import type { NavigateToPath } from '../../contexts/kibana';
+import type { MlRoute } from '../router';
+import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { MemoryUsagePage } from '../../memory_usage';
@@ -36,11 +38,7 @@ export const nodesListRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver(
-    'full',
-    ['canGetJobs', 'canGetDataFrameAnalytics', 'canGetTrainedModels'],
-    basicResolvers()
-  );
+  const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (
     <PageLoader context={context}>

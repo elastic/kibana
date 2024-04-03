@@ -17,6 +17,7 @@ interface StubRuleOptions {
   caseCount: number;
   hasLegacyNotification: boolean;
   hasNotification: boolean;
+  hasLegacyInvestigationField: boolean;
 }
 
 const createStubRule = ({
@@ -27,6 +28,7 @@ const createStubRule = ({
   caseCount,
   hasLegacyNotification,
   hasNotification,
+  hasLegacyInvestigationField,
 }: StubRuleOptions): RuleMetric => ({
   rule_name: 'rule-name',
   rule_id: 'id-123',
@@ -40,6 +42,7 @@ const createStubRule = ({
   cases_count_total: caseCount,
   has_legacy_notification: hasLegacyNotification,
   has_notification: hasNotification,
+  has_legacy_investigation_field: hasLegacyInvestigationField,
 });
 
 describe('Detections Usage and Metrics', () => {
@@ -53,6 +56,7 @@ describe('Detections Usage and Metrics', () => {
         caseCount: 1,
         hasLegacyNotification: false,
         hasNotification: false,
+        hasLegacyInvestigationField: false,
       });
       const usage = updateRuleUsage(stubRule, getInitialRulesUsage());
 
@@ -67,6 +71,7 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 0,
         },
         eql: {
           alerts: 1,
@@ -77,6 +82,7 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 0,
         },
       });
     });
@@ -90,6 +96,7 @@ describe('Detections Usage and Metrics', () => {
         caseCount: 1,
         hasLegacyNotification: false,
         hasNotification: false,
+        hasLegacyInvestigationField: false,
       });
       const stubQueryRuleOne = createStubRule({
         ruleType: 'query',
@@ -99,6 +106,7 @@ describe('Detections Usage and Metrics', () => {
         caseCount: 2,
         hasLegacyNotification: false,
         hasNotification: false,
+        hasLegacyInvestigationField: true,
       });
       const stubQueryRuleTwo = createStubRule({
         ruleType: 'query',
@@ -108,6 +116,7 @@ describe('Detections Usage and Metrics', () => {
         caseCount: 2,
         hasLegacyNotification: false,
         hasNotification: false,
+        hasLegacyInvestigationField: false,
       });
       const stubMachineLearningOne = createStubRule({
         ruleType: 'machine_learning',
@@ -117,6 +126,7 @@ describe('Detections Usage and Metrics', () => {
         caseCount: 10,
         hasLegacyNotification: false,
         hasNotification: false,
+        hasLegacyInvestigationField: false,
       });
       const stubMachineLearningTwo = createStubRule({
         ruleType: 'machine_learning',
@@ -126,6 +136,7 @@ describe('Detections Usage and Metrics', () => {
         caseCount: 44,
         hasLegacyNotification: false,
         hasNotification: false,
+        hasLegacyInvestigationField: false,
       });
 
       let usage = updateRuleUsage(stubEqlRule, getInitialRulesUsage());
@@ -145,6 +156,7 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 0,
         },
         elastic_total: {
           alerts: 28,
@@ -155,6 +167,7 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 1,
         },
         eql: {
           alerts: 1,
@@ -165,6 +178,7 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 0,
         },
         machine_learning: {
           alerts: 22,
@@ -175,6 +189,7 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 0,
         },
         query: {
           alerts: 10,
@@ -185,51 +200,65 @@ describe('Detections Usage and Metrics', () => {
           legacy_notifications_disabled: 0,
           notifications_enabled: 0,
           notifications_disabled: 0,
+          legacy_investigation_fields: 1,
         },
       });
     });
 
-    describe('table tests of "ruleType", "enabled", "elasticRule", and "legacyNotification"', () => {
+    describe('table tests of "ruleType", "enabled", "elasticRule", "legacyNotification", and "hasLegacyInvestigationField"', () => {
       test.each`
-        ruleType              | enabled  | hasLegacyNotification | hasNotification | expectedLegacyNotificationsEnabled | expectedLegacyNotificationsDisabled | expectedNotificationsEnabled | expectedNotificationsDisabled
-        ${'eql'}              | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}
-        ${'eql'}              | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'eql'}              | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}
-        ${'eql'}              | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'eql'}              | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}
-        ${'eql'}              | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}
-        ${'query'}            | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}
-        ${'query'}            | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'query'}            | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}
-        ${'query'}            | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'query'}            | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}
-        ${'query'}            | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}
-        ${'threshold'}        | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}
-        ${'threshold'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'threshold'}        | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}
-        ${'threshold'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'threshold'}        | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}
-        ${'threshold'}        | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}
-        ${'machine_learning'} | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}
-        ${'machine_learning'} | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'machine_learning'} | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}
-        ${'machine_learning'} | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'machine_learning'} | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}
-        ${'machine_learning'} | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}
-        ${'threat_match'}     | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}
-        ${'threat_match'}     | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'threat_match'}     | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}
-        ${'threat_match'}     | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'threat_match'}     | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}
-        ${'threat_match'}     | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}
-        ${'new_terms'}        | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}
-        ${'new_terms'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'new_terms'}        | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}
-        ${'new_terms'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}
-        ${'new_terms'}        | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}
-        ${'new_terms'}        | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}
+        ruleType              | enabled  | hasLegacyNotification | hasNotification | expectedLegacyNotificationsEnabled | expectedLegacyNotificationsDisabled | expectedNotificationsEnabled | expectedNotificationsDisabled | hasLegacyInvestigationField
+        ${'eql'}              | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'eql'}              | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'eql'}              | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'eql'}              | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'eql'}              | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'eql'}              | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'eql'}              | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
+        ${'query'}            | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'query'}            | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'query'}            | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'query'}            | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'query'}            | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'query'}            | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'query'}            | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
+        ${'threshold'}        | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'threshold'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'threshold'}        | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'threshold'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'threshold'}        | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'threshold'}        | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'threshold'}        | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
+        ${'machine_learning'} | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'machine_learning'} | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'machine_learning'} | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'machine_learning'} | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'machine_learning'} | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'machine_learning'} | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'machine_learning'} | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
+        ${'threat_match'}     | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'threat_match'}     | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'threat_match'}     | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'threat_match'}     | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'threat_match'}     | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'threat_match'}     | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'threat_match'}     | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
+        ${'new_terms'}        | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'new_terms'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'new_terms'}        | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'new_terms'}        | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'new_terms'}        | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'new_terms'}        | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'new_terms'}        | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
+        ${'esql'}             | ${true}  | ${true}               | ${false}        | ${1}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'esql'}             | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'esql'}             | ${false} | ${false}              | ${true}         | ${0}                               | ${0}                                | ${0}                         | ${1}                          | ${0}
+        ${'esql'}             | ${true}  | ${false}              | ${true}         | ${0}                               | ${0}                                | ${1}                         | ${0}                          | ${0}
+        ${'esql'}             | ${false} | ${true}               | ${false}        | ${0}                               | ${1}                                | ${0}                         | ${0}                          | ${0}
+        ${'esql'}             | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${0}
+        ${'esql'}             | ${false} | ${false}              | ${false}        | ${0}                               | ${0}                                | ${0}                         | ${0}                          | ${1}
       `(
-        'expect { "ruleType": $ruleType, "enabled": $enabled, "hasLegacyNotification": $hasLegacyNotification, "hasNotification": $hasNotification } to equal { legacy_notifications_enabled: $expectedLegacyNotificationsEnabled, legacy_notifications_disabled: $expectedLegacyNotificationsDisabled, notifications_enabled: $expectedNotificationsEnabled, notifications_disabled, $expectedNotificationsDisabled }',
+        'expect { "ruleType": $ruleType, "enabled": $enabled, "hasLegacyNotification": $hasLegacyNotification, "hasNotification": $hasNotification, hasLegacyInvestigationField: $hasLegacyInvestigationField } to equal { legacy_notifications_enabled: $expectedLegacyNotificationsEnabled, legacy_notifications_disabled: $expectedLegacyNotificationsDisabled, notifications_enabled: $expectedNotificationsEnabled, notifications_disabled, $expectedNotificationsDisabled, hasLegacyInvestigationField: $hasLegacyInvestigationField }',
         ({
           ruleType,
           enabled,
@@ -239,6 +268,7 @@ describe('Detections Usage and Metrics', () => {
           expectedLegacyNotificationsDisabled,
           expectedNotificationsEnabled,
           expectedNotificationsDisabled,
+          hasLegacyInvestigationField,
         }) => {
           const rule1 = createStubRule({
             ruleType,
@@ -248,6 +278,7 @@ describe('Detections Usage and Metrics', () => {
             hasNotification,
             alertCount: 0,
             caseCount: 0,
+            hasLegacyInvestigationField,
           });
           const usage = updateRuleUsage(rule1, getInitialRulesUsage()) as ReturnType<
             typeof updateRuleUsage
@@ -258,6 +289,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: expectedLegacyNotificationsDisabled,
               notifications_enabled: expectedNotificationsEnabled,
               notifications_disabled: expectedNotificationsDisabled,
+              legacy_investigation_fields: hasLegacyInvestigationField ? 1 : 0,
             })
           );
 
@@ -270,6 +302,7 @@ describe('Detections Usage and Metrics', () => {
             hasNotification,
             alertCount: 0,
             caseCount: 0,
+            hasLegacyInvestigationField,
           });
           const usageAddedByOne = updateRuleUsage(rule2, usage) as ReturnType<
             typeof updateRuleUsage
@@ -289,6 +322,9 @@ describe('Detections Usage and Metrics', () => {
                 expectedNotificationsEnabled !== 0 ? expectedNotificationsEnabled + 1 : 0,
               notifications_disabled:
                 expectedNotificationsDisabled !== 0 ? expectedNotificationsDisabled + 1 : 0,
+              legacy_investigation_fields: hasLegacyInvestigationField
+                ? hasLegacyInvestigationField + 1
+                : 0,
             })
           );
         }

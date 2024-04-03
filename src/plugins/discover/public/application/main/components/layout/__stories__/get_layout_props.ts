@@ -13,6 +13,8 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { createHashHistory } from 'history';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
@@ -21,14 +23,13 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../../services/discover_data_state_container';
-import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
-import { esHits } from '../../../../../__mocks__/es_hits';
 import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
   getDiscoverStateContainer,
 } from '../../../services/discover_state';
 import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
+import { mockCustomizationContext } from '../../../../../customizations/__mocks__/customization_context';
 
 const documentObservables = {
   main$: new BehaviorSubject({
@@ -38,7 +39,7 @@ const documentObservables = {
 
   documents$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: buildDataTableRecordList(esHits),
+    result: buildDataTableRecordList(esHitsMock),
   }) as DataDocuments$,
 
   availableFields$: new BehaviorSubject({
@@ -48,7 +49,7 @@ const documentObservables = {
 
   totalHits$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$,
   fetch$: new Observable(),
 };
@@ -62,7 +63,7 @@ const plainRecordObservables = {
 
   documents$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: buildDataTableRecordList(esHits),
+    result: buildDataTableRecordList(esHitsMock),
     recordRawType: RecordRawType.PLAIN,
   }) as DataDocuments$,
 
@@ -86,7 +87,6 @@ const getCommonProps = () => {
     inspectorAdapters: { requests: new RequestAdapter() },
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
-    resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
@@ -130,6 +130,7 @@ export function getDocumentsLayoutProps(dataView: DataView) {
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
+    customizationContext: mockCustomizationContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
@@ -154,12 +155,13 @@ export const getPlainRecordLayoutProps = (dataView: DataView) => {
     history: createHashHistory(),
     savedSearch: getSavedSearch(dataView),
     services,
+    customizationContext: mockCustomizationContext,
   });
   stateContainer.appState.set({
     columns: ['name', 'message', 'bytes'],
     sort: [['date', 'desc']],
     query: {
-      sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+      esql: 'FROM "kibana_sample_data_ecommerce"',
     },
     filters: [],
   });

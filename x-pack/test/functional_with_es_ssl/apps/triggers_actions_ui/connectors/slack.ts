@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const actions = getService('actions');
   const rules = getService('rules');
+  const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
   describe('Slack', () => {
@@ -52,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           url: 'https://test.com',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -68,14 +69,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         objectRemover.add(connector.id, 'action', 'actions');
       });
 
-      it('should create the web api connector', async () => {
+      /* FUTURE ENGINEER
+      /* With this https://github.com/elastic/kibana/pull/167150, we added an allowed list of channel IDs
+      /* we can not have this test running anymore because this allowed list is required
+      /* we will have to figure out how to simulate the slack API through functional/API integration testing
+      */
+      it.skip('should create the web api connector', async () => {
         const connectorName = generateUniqueKey();
         await actions.slack.createNewWebAPI({
           name: connectorName,
           token: 'supersecrettoken',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -161,11 +167,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
 
-      it('should save webapi type slack connectors', async () => {
+      /* FUTURE ENGINEER
+      /* With this https://github.com/elastic/kibana/pull/167150, we added an allowed list of channel IDs
+      /* we can not have this test running anymore because this allowed list is required
+      /* we will have to figure out how to simulate the slack API through functional/API integration testing
+      */
+      it.skip('should save webapi type slack connectors', async () => {
         await setupRule();
         await selectSlackConnectorInRuleAction({
           connectorId: webApiAction.id,
@@ -173,7 +184,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.click('saveRuleButton');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Failed to retrieve Slack channels list');
 
         // We are not saving the rule yet as we currently have no way
@@ -200,7 +211,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         //     tags: '',
         //   },
         // ]);
-        // const toastTitle = await pageObjects.common.closeToast();
+        // const toastTitle = await toasts.getTitleAndDismiss();
         // expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
     });

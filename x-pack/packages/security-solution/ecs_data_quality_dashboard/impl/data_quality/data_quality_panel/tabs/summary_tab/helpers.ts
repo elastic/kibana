@@ -13,6 +13,7 @@ import {
   ECS_COMPLIANT_TAB_ID,
   CUSTOM_TAB_ID,
   INCOMPATIBLE_TAB_ID,
+  SAME_FAMILY_TAB_ID,
 } from '../../index_properties/helpers';
 import {
   getAllIncompatibleMarkdownComments,
@@ -21,7 +22,7 @@ import {
 import * as i18n from '../../index_properties/translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
-export type CategoryId = 'incompatible' | 'custom' | 'ecs-compliant';
+export type CategoryId = 'incompatible' | 'custom' | 'ecs-compliant' | 'same-family';
 
 interface SummaryData {
   categoryId: CategoryId;
@@ -34,12 +35,15 @@ export const getSummaryData = (
   { categoryId: 'incompatible', mappings: partitionedFieldMetadata.incompatible.length },
   { categoryId: 'custom', mappings: partitionedFieldMetadata.custom.length },
   { categoryId: 'ecs-compliant', mappings: partitionedFieldMetadata.ecsCompliant.length },
+  { categoryId: 'same-family', mappings: partitionedFieldMetadata.sameFamily.length },
 ];
 
 export const getFillColor = (categoryId: CategoryId | string): string => {
   switch (categoryId) {
     case 'incompatible':
       return euiThemeVars.euiColorDanger;
+    case 'same-family':
+      return euiThemeVars.euiColorLightShade;
     case 'custom':
       return euiThemeVars.euiColorLightShade;
     case 'ecs-compliant':
@@ -53,6 +57,8 @@ export const getNodeLabel = (categoryId: CategoryId): string => {
   switch (categoryId) {
     case 'incompatible':
       return i18n.INCOMPATIBLE_FIELDS;
+    case 'same-family':
+      return i18n.SAME_FAMILY;
     case 'custom':
       return i18n.CUSTOM_FIELDS;
     case 'ecs-compliant':
@@ -66,6 +72,8 @@ export const getTabId = (groupByField: string): string => {
   switch (groupByField) {
     case 'incompatible':
       return INCOMPATIBLE_TAB_ID;
+    case 'same-family':
+      return SAME_FAMILY_TAB_ID;
     case 'custom':
       return CUSTOM_TAB_ID;
     case 'ecs-compliant':
@@ -83,6 +91,7 @@ export const getMarkdownComments = ({
   formatNumber,
   ilmPhase,
   indexName,
+  isILMAvailable,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
@@ -92,6 +101,7 @@ export const getMarkdownComments = ({
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isILMAvailable: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
   patternDocsCount: number;
@@ -104,6 +114,7 @@ export const getMarkdownComments = ({
         formatNumber,
         ilmPhase,
         indexName,
+        isILMAvailable,
         partitionedFieldMetadata,
         patternDocsCount,
         sizeInBytes,

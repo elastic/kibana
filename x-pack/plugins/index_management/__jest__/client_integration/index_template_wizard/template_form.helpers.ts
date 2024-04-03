@@ -145,8 +145,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     order,
     priority,
     version,
-    dataStream,
-  }: Partial<TemplateDeserialized> = {}) => {
+    enableDataStream,
+    lifecycle,
+    allowAutoCreate,
+  }: Partial<TemplateDeserialized> & { enableDataStream?: boolean } = {}) => {
     const { component, form, find } = testBed;
 
     if (name) {
@@ -172,7 +174,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         form.setInputValue('orderField.input', JSON.stringify(order));
       }
 
-      if (dataStream) {
+      // Deal with toggling the data stream switch
+      const isDataStreamEnabled = find('dataStreamField.input').props().checked;
+
+      if (enableDataStream && !isDataStreamEnabled) {
+        form.toggleEuiSwitch('dataStreamField.input');
+      } else if (!enableDataStream && isDataStreamEnabled) {
         form.toggleEuiSwitch('dataStreamField.input');
       }
 
@@ -184,6 +191,32 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         form.setInputValue('versionField.input', JSON.stringify(version));
       }
 
+      if (allowAutoCreate) {
+        let optionIndex = 0;
+        if (allowAutoCreate === 'TRUE') {
+          optionIndex = 1;
+        }
+        if (allowAutoCreate === 'FALSE') {
+          optionIndex = 2;
+        }
+        const radioGroup = find('allowAutoCreateField.input');
+        const radioOption = radioGroup.childAt(optionIndex).find('input');
+        radioOption.simulate('change', { target: { checked: true } });
+        component.update();
+      }
+    });
+    component.update();
+
+    if (lifecycle && lifecycle.enabled) {
+      await act(async () => {
+        form.toggleEuiSwitch('dataRetentionToggle.input');
+      });
+      component.update();
+
+      form.setInputValue('valueDataRetentionField', String(lifecycle.value));
+    }
+
+    await act(async () => {
       clickNextButton();
     });
 
@@ -210,7 +243,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -332,6 +364,8 @@ export type TestSubjects =
   | 'orderField.input'
   | 'priorityField.input'
   | 'dataStreamField.input'
+  | 'dataRetentionToggle.input'
+  | 'allowAutoCreateField.input'
   | 'pageTitle'
   | 'previewTab'
   | 'removeFieldButton'
@@ -355,6 +389,9 @@ export type TestSubjects =
   | 'aliasesEditor'
   | 'settingsEditor'
   | 'versionField.input'
+  | 'valueDataRetentionField'
+  | 'formWizardStep-5'
+  | 'lifecycleValue'
   | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
   | 'previewIndexTemplate';

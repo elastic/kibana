@@ -5,39 +5,45 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AppUpdater, CoreSetup } from '@kbn/core/public';
+import { AppUpdater, CoreSetup, ScopedHistory } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { createGetterSetter, createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+import { filter, map } from 'rxjs';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { getScopedHistory } from '../kibana_services';
+import { isFilterPinned } from '@kbn/es-query';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
 import type { DiscoverSetupPlugins } from '../plugin';
 
 /**
- * Store the setting of enabling / disabling url
- * it's should be disabled for ad-hoc data views to omit error messages
- * - When you've added an ad hoc data view in Discover
- * - Continued your work in different parts of Kibana
- * - You've closed the Kibana tab
- */
-export const [getUrlTracking, setUrlTracking] = createGetterSetter<{
-  enabled: boolean;
-}>('urlTrackingEnabled');
-/**
  * It creates the kbn url tracker for Discover to listens to history changes and optionally to global state
  * changes and updates the nav link url of to point to the last visited page
  */
-export function initializeKbnUrlTracking(
-  baseUrl: string,
-  core: CoreSetup,
-  navLinkUpdater$: BehaviorSubject<AppUpdater>,
-  plugins: DiscoverSetupPlugins
-) {
-  setUrlTracking({ enabled: true });
+export function initializeKbnUrlTracking({
+  baseUrl,
+  core,
+  navLinkUpdater$,
+  plugins,
+  getScopedHistory,
+}: {
+  baseUrl: string;
+  core: CoreSetup;
+  navLinkUpdater$: BehaviorSubject<AppUpdater>;
+  plugins: DiscoverSetupPlugins;
+  getScopedHistory: () => ScopedHistory<unknown>;
+}) {
+  /**
+   * Store the setting of enabling / disabling url
+   * it's should be disabled for ad-hoc data views to omit error messages
+   * - When you've added an ad hoc data view in Discover
+   * - Continued your work in different parts of Kibana
+   * - You've closed the Kibana tab
+   */
+  let urlTrackingEnabled = true;
+
   const setTrackingEnabled = (value: boolean) => {
-    setUrlTracking({ enabled: value });
+    urlTrackingEnabled = value;
   };
+
   const {
     appMounted,
     appUnMounted,
@@ -61,18 +67,15 @@ export function initializeKbnUrlTracking(
           filter(
             ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
           ),
-          map(async ({ state }) => {
-            const { isFilterPinned } = await import('@kbn/es-query');
-            return {
-              ...state,
-              filters: state.filters?.filter(isFilterPinned),
-            };
-          })
+          map(({ state }) => ({
+            ...state,
+            filters: state.filters?.filter(isFilterPinned),
+          }))
         ),
       },
     ],
     shouldTrackUrlUpdate: () => {
-      return getUrlTracking().enabled;
+      return urlTrackingEnabled;
     },
     onBeforeNavLinkSaved: (newNavLink: string) => {
       // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
@@ -88,6 +91,7 @@ export function initializeKbnUrlTracking(
       return newNavLink;
     },
   });
+
   return {
     appMounted,
     appUnMounted,

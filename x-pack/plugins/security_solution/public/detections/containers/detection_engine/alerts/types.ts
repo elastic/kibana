@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 
 export interface BasicSignals {
   signal: AbortSignal;
@@ -68,39 +68,24 @@ export interface Privilege {
   has_all_requested: boolean;
   cluster: {
     monitor_ml: boolean;
-    manage_ccr: boolean;
     manage_index_templates: boolean;
-    monitor_watcher: boolean;
     monitor_transform: boolean;
-    read_ilm: boolean;
     manage_api_key: boolean;
     manage_security: boolean;
     manage_own_api_key: boolean;
-    manage_saml: boolean;
     all: boolean;
-    manage_ilm: boolean;
-    manage_ingest_pipelines: boolean;
-    read_ccr: boolean;
-    manage_rollup: boolean;
     monitor: boolean;
-    manage_watcher: boolean;
     manage: boolean;
     manage_transform: boolean;
-    manage_token: boolean;
     manage_ml: boolean;
     manage_pipeline: boolean;
-    monitor_rollup: boolean;
-    transport_client: boolean;
-    create_snapshot: boolean;
   };
   index: {
     [indexName: string]: {
       all: boolean;
       maintenance: boolean;
-      manage_ilm: boolean;
       read: boolean;
       create_index: boolean;
-      read_cross_cluster: boolean;
       index: boolean;
       monitor: boolean;
       delete: boolean;
@@ -109,8 +94,6 @@ export interface Privilege {
       create_doc: boolean;
       view_index_metadata: boolean;
       create: boolean;
-      manage_follow_index: boolean;
-      manage_leader_index: boolean;
       write: boolean;
     };
   };

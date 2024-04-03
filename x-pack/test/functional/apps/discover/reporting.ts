@@ -18,10 +18,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
+  const PageObjects = getPageObjects([
+    'reporting',
+    'common',
+    'discover',
+    'timePicker',
+    'share',
+    'header',
+  ]);
+  const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -29,6 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const getReport = async () => {
+    // close any open notification toasts
+    await toasts.dismissAll();
+
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -69,6 +81,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
+        /**
+         *  Important: `esArchiver.emptyKibanaIndex()` above also resets the
+         * Kibana time zone setting, so we're re-applying it here.
+         * The serverless version of the test uses
+         * `kibanaServer.savedObjects.cleanStandardList` instead,
+         * which does not reset the time zone setting,
+         * so we don't need to re-apply it in these tests.
+         */
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       after(async () => {
@@ -166,6 +187,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(csvFile.length).to.be(4826973);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
+      });
+
+      it('generate a report using ES|QL', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
       });
     });
 

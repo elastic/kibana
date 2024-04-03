@@ -23,12 +23,15 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useLink, useKibanaVersion, useAuthz } from '../../../../hooks';
+import { useAgentVersion } from '../../../../hooks';
+import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+
+import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
 
@@ -49,7 +52,7 @@ interface Props {
   sortField: keyof Agent;
   sortOrder: 'asc' | 'desc';
   onSelectionChange: (agents: Agent[]) => void;
-  tableRef?: React.Ref<any>;
+  selected: Agent[];
   showUpgradeable: boolean;
   totalAgents?: number;
   pagination: Pagination;
@@ -74,9 +77,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     renderActions,
     sortField,
     sortOrder,
-    tableRef,
     onTableChange,
     onSelectionChange,
+    selected,
     totalAgents = 0,
     showUpgradeable,
     pagination,
@@ -87,11 +90,11 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     isCurrentRequestIncremented,
   } = props;
 
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
 
   const isAgentSelectable = (agent: Agent) => {
     if (!agent.active) return false;
@@ -125,7 +128,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       />
     ) : (
       <EmptyPrompt
-        hasFleetAllPrivileges={hasFleetAllPrivileges}
+        hasFleetAddAgentsPrivileges={authz.fleet.addAgents}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
       />
     );
@@ -174,15 +177,17 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
-      width: '260px',
+      width: '185px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
         const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
+          <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
             {agentPolicy && (
-              <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+              <EuiFlexItem grow={false}>
+                <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+              </EuiFlexItem>
             )}
             {showWarning && (
               <EuiFlexItem grow={false}>
@@ -191,7 +196,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Out-of-date"
+                    defaultMessage="Outdated policy"
                   />
                 </EuiText>
               </EuiFlexItem>
@@ -210,7 +215,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                 content={
                   <FormattedMessage
                     id="xpack.fleet.agentList.cpuTooltip"
-                    defaultMessage="Average CPU usage in the last 5 minutes"
+                    defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
                   />
                 }
               >
@@ -273,27 +278,28 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: VERSION_FIELD,
       sortable: true,
-      width: '70px',
+      width: '180px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-          <EuiFlexItem grow={false} className="eui-textNoWrap">
-            {safeMetadata(version)}
-          </EuiFlexItem>
-          {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="warning" color="warning" />
-                &nbsp;
-                <FormattedMessage
-                  id="xpack.fleet.agentList.agentUpgradeLabel"
-                  defaultMessage="Upgrade available"
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" className="eui-textNoWrap">
+                  {safeMetadata(version)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AgentUpgradeStatus
+                  isAgentUpgradable={!!(isAgentSelectable(agent) && isAgentUpgradeable(agent))}
+                  agent={agent}
+                  latestAgentVersion={latestAgentVersion}
                 />
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
@@ -312,7 +318,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   return (
     <EuiBasicTable<Agent>
-      ref={tableRef}
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
@@ -321,9 +326,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       items={
         totalAgents
           ? showUpgradeable
-            ? agents.filter(
-                (agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion)
-              )
+            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
             : agents
           : []
       }
@@ -336,20 +339,25 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         pageSizeOptions,
       }}
       isSelectable={true}
-      selection={{
-        onSelectionChange,
-        selectable: isAgentSelectable,
-        selectableMessage: (selectable, agent) => {
-          if (selectable) return '';
-          if (!agent.active) {
-            return 'This agent is not active';
-          }
-          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-            return 'This action is not available for agents enrolled in an externally managed agent policy';
-          }
-          return '';
-        },
-      }}
+      selection={
+        !authz.fleet.allAgents
+          ? undefined
+          : {
+              selected,
+              onSelectionChange,
+              selectable: isAgentSelectable,
+              selectableMessage: (selectable, agent) => {
+                if (selectable) return '';
+                if (!agent.active) {
+                  return 'This agent is not active';
+                }
+                if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+                  return 'This action is not available for agents enrolled in an externally managed agent policy';
+                }
+                return '';
+              },
+            }
+      }
       onChange={onTableChange}
       sorting={sorting}
     />

@@ -16,35 +16,28 @@ import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 describe('Knowledge base', () => {
   let autocompleteInfo;
   beforeEach(() => {
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = new AutocompleteInfo();
     setAutocompleteInfo(autocompleteInfo);
     autocompleteInfo.mapping.clearMappings();
   });
   afterEach(() => {
-    kb.setActiveApi(kb._test.loadApisFromJson({}));
+    kb._test.setActiveApi(kb._test.loadApisFromJson({}));
     autocompleteInfo = null;
     setAutocompleteInfo(null);
   });
 
   const MAPPING = {
     index1: {
-      'type1.1': {
-        properties: {
-          'field1.1.1': { type: 'string' },
-          'field1.1.2': { type: 'long' },
-        },
-      },
-      'type1.2': {
-        properties: {},
+      properties: {
+        'field1.1.1': { type: 'string' },
+        'field1.1.2': { type: 'long' },
       },
     },
     index2: {
-      'type2.1': {
-        properties: {
-          'field2.1.1': { type: 'string' },
-          'field2.1.2': { type: 'string' },
-        },
+      properties: {
+        'field2.1.1': { type: 'string' },
+        'field2.1.2': { type: 'string' },
       },
     },
   };
@@ -95,10 +88,6 @@ describe('Knowledge base', () => {
     expect(context).toEqual(expectedContext);
   }
 
-  function t(term) {
-    return { name: term, meta: 'type' };
-  }
-
   function i(term) {
     return { name: term, meta: 'index' };
   }
@@ -111,7 +100,7 @@ describe('Knowledge base', () => {
           indexTest: {
             endpoints: {
               _multi_indices: {
-                patterns: ['{indices}/_multi_indices'],
+                patterns: ['{index}/_multi_indices'],
               },
               _single_index: { patterns: ['{index}/_single_index'] },
               _no_index: {
@@ -124,7 +113,7 @@ describe('Knowledge base', () => {
         kb._test.globalUrlComponentFactories
       );
 
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
 
       autocompleteInfo.mapping.loadMappings(MAPPING);
       testUrlContext(tokenPath, otherTokenValues, expectedContext);
@@ -144,71 +133,12 @@ describe('Knowledge base', () => {
   );
 
   indexTest('Index integration 2', ['index1'], [], {
-    indices: ['index1'],
+    index: ['index1'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
 
   indexTest('Index integration 2', [['index1', 'index2']], [], {
-    indices: ['index1', 'index2'],
-    autoCompleteSet: ['_multi_indices'],
+    index: ['index1', 'index2'],
+    autoCompleteSet: ['_multi_indices', '_single_index'],
   });
-
-  function typeTest(name, tokenPath, otherTokenValues, expectedContext) {
-    test(name, function () {
-      const testApi = kb._test.loadApisFromJson(
-        {
-          typeTest: {
-            endpoints: {
-              _multi_types: { patterns: ['{indices}/{types}/_multi_types'] },
-              _single_type: { patterns: ['{indices}/{type}/_single_type'] },
-              _no_types: { patterns: ['{indices}/_no_types'] },
-            },
-          },
-        },
-        kb._test.globalUrlComponentFactories
-      );
-      kb.setActiveApi(testApi);
-
-      autocompleteInfo.mapping.loadMappings(MAPPING);
-
-      testUrlContext(tokenPath, otherTokenValues, expectedContext);
-    });
-  }
-
-  typeTest('Type integration 1', ['index1'], [], {
-    indices: ['index1'],
-    autoCompleteSet: ['_no_types', t('type1.1'), t('type1.2')],
-  });
-  typeTest(
-    'Type integration 2',
-    ['index1'],
-    ['type1.2'],
-    // we are not yet comitted to type1.2, so _no_types is returned
-    { indices: ['index1'], autoCompleteSet: ['_no_types', t('type1.1')] }
-  );
-
-  typeTest('Type integration 3', ['index2'], [], {
-    indices: ['index2'],
-    autoCompleteSet: ['_no_types', t('type2.1')],
-  });
-
-  typeTest('Type integration 4', ['index1', 'type1.2'], [], {
-    indices: ['index1'],
-    types: ['type1.2'],
-    autoCompleteSet: ['_multi_types', '_single_type'],
-  });
-
-  typeTest(
-    'Type integration 5',
-    [
-      ['index1', 'index2'],
-      ['type1.2', 'type1.1'],
-    ],
-    [],
-    {
-      indices: ['index1', 'index2'],
-      types: ['type1.2', 'type1.1'],
-      autoCompleteSet: ['_multi_types'],
-    }
-  );
 });

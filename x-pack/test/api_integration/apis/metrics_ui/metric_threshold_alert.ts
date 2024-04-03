@@ -56,9 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
     inventoryDefaultView: 'default',
     metricsExplorerDefaultView: 'default',
     anomalyThreshold: 70,
-    fields: {
-      message: ['message'],
-    },
     logColumns: [
       {
         timestampColumn: {
@@ -153,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
                   { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
                   { name: 'B', aggType: 'count' },
                 ],
-                equation: '(A / B) * 100',
+                equation: '((A + A) / (B + B)) * 100',
                 label: 'apache2 error ratio',
               } as CustomMetricExpressionParams,
             ],
@@ -187,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
                   { name: 'A', aggType: 'count', filter: 'event.dataset: "apache2.error"' },
                   { name: 'B', aggType: 'count' },
                 ],
-                equation: '(A / B) * 100',
+                equation: '((A + A) / (B + B)) * 100',
                 currentValue: 36.195262024407754,
                 timestamp: '2021-10-19T00:53:59.997Z',
                 shouldFire: true,

@@ -18,13 +18,13 @@ export const deleteIndices =
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      notificationService.showDangerToast(error.body.message);
       return dispatch(clearRowStatus({ indexNames }));
     }
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
-        defaultMessage: 'Successfully deleted: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully deleted {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
     dispatch(deleteIndicesSuccess({ indexNames }));

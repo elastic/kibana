@@ -13,7 +13,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
 
-export type { UiActionsSetup, UiActionsStart } from './plugin';
+export type {
+  UiActionsPublicSetup as UiActionsSetup,
+  UiActionsPublicStart as UiActionsStart,
+} from './plugin';
 export type { UiActionsServiceParams } from './service';
 export { UiActionsService } from './service';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
@@ -31,14 +34,16 @@ export {
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
-  CATEGORIZE_FIELD_TRIGGER,
-  categorizeFieldTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
-export type { VisualizeFieldContext, CategorizeFieldContext } from './types';
+export type { VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
-  ACTION_CATEGORIZE_FIELD,
 } from './types';
-export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';
+export type {
+  ActionExecutionContext,
+  ActionExecutionMeta,
+  ActionMenuItemProps,
+  FrequentCompatibilityChangeAction,
+} from './actions';

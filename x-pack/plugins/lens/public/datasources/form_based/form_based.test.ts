@@ -26,7 +26,6 @@ import {
   Datasource,
   FramePublicAPI,
   OperationDescriptor,
-  FrameDatasourceAPI,
   UserMessage,
 } from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -49,8 +48,9 @@ import {
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { createMockFramePublicAPI } from '../../mocks';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { createMockFramePublicAPI } from '../../mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -2291,7 +2291,7 @@ describe('IndexPattern Data Source', () => {
           disabled: { kuery: [], lucene: [] },
         });
       });
-      it('shuold collect top values fields as kuery existence filters if no data is provided', () => {
+      it('should collect top values fields as kuery existence filters if no data is provided', () => {
         publicAPI = FormBasedDatasource.getPublicAPI({
           state: {
             ...baseState,
@@ -2335,10 +2335,10 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getFilters()).toEqual({
           enabled: {
             kuery: [
-              [{ language: 'kuery', query: 'geo.src: *' }],
+              [{ language: 'kuery', query: '"geo.src": *' }],
               [
-                { language: 'kuery', query: 'geo.dest: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.dest": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [],
@@ -2903,8 +2903,8 @@ describe('IndexPattern Data Source', () => {
                 { language: 'kuery', query: 'memory > 500000' },
               ],
               [
-                { language: 'kuery', query: 'geo.src: *' },
-                { language: 'kuery', query: 'myField: *' },
+                { language: 'kuery', query: '"geo.src": *' },
+                { language: 'kuery', query: '"myField": *' },
               ],
             ],
             lucene: [
@@ -3062,22 +3062,6 @@ describe('IndexPattern Data Source', () => {
   });
 
   describe('#getUserMessages', () => {
-    function createMockFrameDatasourceAPI({
-      activeData,
-      dataViews,
-    }: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
-      dataViews?: Partial<FramePublicAPI['dataViews']>;
-    }): FrameDatasourceAPI {
-      return {
-        ...createMockFramePublicAPI({
-          activeData,
-          dataViews,
-        }),
-        query: { query: '', language: 'kuery' },
-        filters: [],
-      };
-    }
-
     describe('error messages', () => {
       it('should generate error messages for a single layer', () => {
         (getErrorMessages as jest.Mock).mockClear();
@@ -3094,7 +3078,9 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3146,7 +3132,9 @@ describe('IndexPattern Data Source', () => {
         };
         expect(
           FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           })
         ).toMatchInlineSnapshot(`
@@ -3235,7 +3223,9 @@ describe('IndexPattern Data Source', () => {
           (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           });
 
@@ -3273,7 +3263,9 @@ describe('IndexPattern Data Source', () => {
           ] as ReturnType<typeof getErrorMessages>);
 
           const messages = FormBasedDatasource.getUserMessages(state, {
-            frame: createMockFrameDatasourceAPI({ dataViews: { indexPatterns } }),
+            frame: createMockFramePublicAPI({
+              dataViews: createMockDataViewsState({ indexPatterns }),
+            }),
             setState: () => {},
           });
 
@@ -3303,7 +3295,7 @@ describe('IndexPattern Data Source', () => {
 
     describe('warning messages', () => {
       let state: FormBasedPrivateState;
-      let framePublicAPI: FrameDatasourceAPI;
+      let framePublicAPI: FramePublicAPI;
 
       beforeEach(() => {
         (getErrorMessages as jest.Mock).mockReturnValueOnce([]);
@@ -3385,7 +3377,7 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         };
 
-        framePublicAPI = createMockFrameDatasourceAPI({
+        framePublicAPI = createMockFramePublicAPI({
           activeData: {
             first: {
               type: 'datatable',
@@ -3419,9 +3411,9 @@ describe('IndexPattern Data Source', () => {
               ],
             },
           },
-          dataViews: {
+          dataViews: createMockDataViewsState({
             indexPatterns: expectedIndexPatterns,
-          },
+          }),
         });
       });
 
@@ -3549,13 +3541,13 @@ describe('IndexPattern Data Source', () => {
               currentIndexPatternId: '1',
             },
             {
-              frame: createMockFrameDatasourceAPI({
+              frame: createMockFramePublicAPI({
                 activeData: {
                   first: createDatatableForLayer(0),
                 },
-                dataViews: {
+                dataViews: createMockDataViewsState({
                   indexPatterns: expectedIndexPatterns,
-                },
+                }),
               }),
               setState: () => {},
               visualizationInfo: { layers: [] },
@@ -3574,14 +3566,14 @@ describe('IndexPattern Data Source', () => {
           currentIndexPatternId: '1',
         };
         const messages = FormBasedDatasource.getUserMessages!(state, {
-          frame: createMockFrameDatasourceAPI({
+          frame: createMockFramePublicAPI({
             activeData: {
               first: createDatatableForLayer(0),
               second: createDatatableForLayer(1),
             },
-            dataViews: {
+            dataViews: createMockDataViewsState({
               indexPatterns: expectedIndexPatterns,
-            },
+            }),
           }),
           setState: () => {},
           visualizationInfo: { layers: [] },

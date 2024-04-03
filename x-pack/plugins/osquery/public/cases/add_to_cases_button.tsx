@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -50,7 +50,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
                 ecs: ecsData,
                 data: [],
               }),
-              type: CommentType.alert as const,
+              type: AttachmentType.alert as const,
             },
           ]
         : [],
@@ -66,7 +66,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     const attachments: CaseAttachmentsWithoutOwner = [
       ...alertAttachments,
       {
-        type: CommentType.externalReference,
+        type: AttachmentType.externalReference,
         externalReferenceId: actionId,
         externalReferenceStorage: {
           type: ExternalReferenceStorageType.elasticSearchDoc,

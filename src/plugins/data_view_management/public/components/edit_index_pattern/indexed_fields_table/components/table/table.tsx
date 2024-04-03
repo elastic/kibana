@@ -8,7 +8,7 @@
 
 import React, { PureComponent } from 'react';
 import { OverlayModalStart, ThemeServiceStart } from '@kbn/core/public';
-
+import { FieldDescription } from '@kbn/field-utils';
 import {
   EuiIcon,
   EuiInMemoryTable,
@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiBasicTable,
   EuiCode,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -265,6 +266,12 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
         </EuiToolTip>
       </div>
     ) : null}
+    {field.customDescription ? (
+      <div>
+        <EuiSpacer size="xs" />
+        <FieldDescription field={field} color="subdued" />
+      </div>
+    ) : null}
   </span>
 );
 
@@ -355,6 +362,7 @@ const getConflictBtn = (
 
   return (
     <span>
+      {' '}
       <EuiBadge
         color="warning"
         iconType="warning"

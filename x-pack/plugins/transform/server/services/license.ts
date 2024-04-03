@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   CoreStart,
   IKibanaResponse,
   KibanaRequest,
@@ -15,7 +15,7 @@ import {
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
 
-import { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
@@ -36,7 +36,7 @@ interface SetupSettings {
   coreStart: CoreStart;
 }
 
-type TransformRequestHandlerContext = CustomRequestHandlerContext<{
+export type TransformRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
 }>;
 

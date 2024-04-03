@@ -4,4 +4,5 @@ properties:
     type: array
     items:
       type: string
-    example: ["tag-1"]
+    examples:
+      - ["tag-1"]

@@ -10,6 +10,8 @@ Consistently writing functional tests that aren't flaky is impossible. There are
 
 When you watch tests execute locally it can be tempting to think "after I click this button I can click this other button" but this assumes that the first button click will always execute its click handler immediately, or that the render of the second button will be done immediately. The reality is that user interfaces are super complex and these types of assumptions are by far the most common cause of flakiness in tests.
 
+We also have to remember that we can't assume a test passing locally will mean it will pass in CI. The two environments are different. There is a lot we could mention, but at a high level, most functional tests are run on 4 core 16 GB machines, and these machines are virtualized, which means neighbors can cause modest but variable levels of performance. Additionally, end-to-end tests in CI are run against Kibana distributions, using default memory configurations, while we run the tests under the `--dev` flag locally with, most likely, a different memory configuration.
+
 There are all sorts of things that can happen to delay a click handler, or react render, and we need to be prepared for those in our tests. We can do this using appropriate timeouts for specific actions, retry logic, and validating our assumptions with code.
 
 ## Become familiar with the retry/timing logic of each common service method

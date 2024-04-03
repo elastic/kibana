@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -159,6 +158,8 @@ export const callEnterpriseSearchConfigAPI = async ({
         organization: {
           name: data?.current_user?.workplace_search?.organization?.name,
           defaultOrgName: data?.current_user?.workplace_search?.organization?.default_org_name,
+          kibanaUIsEnabled:
+            data?.current_user?.workplace_search?.organization?.kibana_uis_enabled || false,
         },
         account: {
           id: data?.current_user?.workplace_search?.account?.id,

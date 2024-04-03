@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -14,11 +14,11 @@ import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type {
   GetSpaceHealthRequest,
   GetSpaceHealthResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   GET_SPACE_HEALTH_URL,
   GetSpaceHealthRequestBody,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { IDetectionEngineHealthClient } from '../../../logic/detection_engine_health';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetSpaceHealthRequest } from './get_space_health_request';
@@ -26,55 +26,67 @@ import { validateGetSpaceHealthRequest } from './get_space_health_request';
 /**
  * Get health overview of the current Kibana space. Scope: all detection rules in the space.
  * Returns:
- * - health stats at the moment of the API call
+ * - health state at the moment of the API call
  * - health stats over a specified period of time ("health interval")
  * - health stats history within the same interval in the form of a histogram
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)
  */
 export const getSpaceHealthRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_SPACE_HEALTH_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      return handleSpaceHealthRequest({
-        response,
-        resolveParameters: () => validateGetSpaceHealthRequest({}),
-        resolveDependencies: async () => {
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-          return { healthClient };
-        },
-      });
-    }
-  );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {},
+      },
+      async (context, request, response): Promise<IKibanaResponse<GetSpaceHealthResponse>> => {
+        return handleSpaceHealthRequest({
+          response,
+          resolveParameters: () => validateGetSpaceHealthRequest({}),
+          resolveDependencies: async () => {
+            const ctx = await context.resolve(['securitySolution']);
+            const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+            return { healthClient };
+          },
+        });
+      }
+    );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: GET_SPACE_HEALTH_URL,
-      validate: {
-        body: buildRouteValidation(GetSpaceHealthRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      return handleSpaceHealthRequest({
-        response,
-        resolveParameters: () => validateGetSpaceHealthRequest(request.body),
-        resolveDependencies: async () => {
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
-          return { healthClient };
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidation(GetSpaceHealthRequestBody),
+          },
         },
-      });
-    }
-  );
+      },
+      async (context, request, response) => {
+        return handleSpaceHealthRequest({
+          response,
+          resolveParameters: () => validateGetSpaceHealthRequest(request.body),
+          resolveDependencies: async () => {
+            const ctx = await context.resolve(['securitySolution']);
+            const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+            return { healthClient };
+          },
+        });
+      }
+    );
 };
 
 interface SpaceHealthRouteDependencies {

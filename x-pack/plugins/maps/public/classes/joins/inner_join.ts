@@ -56,13 +56,13 @@ export function createJoinSource(
 export class InnerJoin {
   private readonly _descriptor: Partial<JoinDescriptor>;
   private readonly _rightSource?: IJoinSource;
-  private readonly _leftField?: IField;
+  private readonly _leftField?: IField | null;
 
   constructor(joinDescriptor: Partial<JoinDescriptor>, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
     this._rightSource = createJoinSource(this._descriptor.right);
     this._leftField = joinDescriptor.leftField
-      ? leftSource.createField({ fieldName: joinDescriptor.leftField })
+      ? leftSource.getFieldByName(joinDescriptor.leftField)
       : undefined;
   }
 
@@ -151,14 +151,6 @@ export class InnerJoin {
     executionContext: KibanaExecutionContext
   ) {
     return await this.getRightJoinSource().getTooltipProperties(properties, executionContext);
-  }
-
-  getIndexPatternIds() {
-    return this.getRightJoinSource().getIndexPatternIds();
-  }
-
-  getQueryableIndexPatternIds() {
-    return this.getRightJoinSource().getQueryableIndexPatternIds();
   }
 
   getWhereQuery(): Query | undefined {

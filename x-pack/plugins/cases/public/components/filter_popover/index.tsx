@@ -7,28 +7,27 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiCallOut,
   EuiFilterButton,
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 interface FilterPopoverProps {
   buttonLabel: string;
   onSelectedOptionsChanged: (value: string[]) => void;
   options: string[];
   optionsEmptyLabel?: string;
+  limit?: number;
+  limitReachedMessage?: string;
   selectedOptions: string[];
 }
-
-const ScrollableDiv = styled.div`
-  max-height: 250px;
-  overflow: auto;
-`;
 
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
@@ -56,6 +55,8 @@ export const FilterPopoverComponent = ({
   options,
   optionsEmptyLabel,
   selectedOptions,
+  limit,
+  limitReachedMessage,
 }: FilterPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -87,10 +88,30 @@ export const FilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
     >
-      <ScrollableDiv>
+      {limit && limitReachedMessage && selectedOptions.length >= limit ? (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiCallOut
+            title={limitReachedMessage}
+            color="warning"
+            size="s"
+            data-test-subj="maximum-length-warning"
+          />
+          <EuiHorizontalRule margin="none" />
+        </>
+      ) : null}
+      <div
+        css={css`
+          max-height: 250px;
+          overflow: auto;
+        `}
+      >
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
+            disabled={Boolean(
+              limit && selectedOptions.length >= limit && !selectedOptions.includes(option)
+            )}
             data-test-subj={`options-filter-popover-item-${option}`}
             key={`${index}-${option}`}
             onClick={toggleSelectedGroupCb.bind(null, option)}
@@ -98,7 +119,7 @@ export const FilterPopoverComponent = ({
             {option}
           </EuiFilterSelectItem>
         ))}
-      </ScrollableDiv>
+      </div>
       {options.length === 0 && optionsEmptyLabel != null && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>

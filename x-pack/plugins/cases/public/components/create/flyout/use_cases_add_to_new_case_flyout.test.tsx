@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
@@ -35,8 +33,6 @@ describe('use cases add to new case flyout hook', () => {
             persistableStateAttachmentTypeRegistry,
             owner: ['test'],
             permissions: allCasesPermissions(),
-            appId: 'test',
-            appTitle: 'jest',
             basePath: '/jest',
             dispatch,
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },

@@ -13,26 +13,18 @@ import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, HTTPRequest, Page, Viewport } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, Page, Viewport, PageEvents } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  ignoreElements,
-  mergeMap,
-  map,
-  reduce,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+import { catchError, concatMap, ignoreElements, mergeMap, map, reduce, takeUntil, tap } from 'rxjs';
+import { PerformanceMetrics } from '../../../../common/types';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
 import { ConfigType } from '../../../config';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { getMetrics, PerformanceMetrics } from './metrics';
+import { getMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
@@ -166,7 +158,8 @@ export class HeadlessChromiumDriverFactory {
             env: {
               TZ: browserTimezone,
             },
-            headless: 'new',
+            headless: true,
+            protocolTimeout: 0,
           });
         } catch (err) {
           observer.error(
@@ -309,8 +302,18 @@ export class HeadlessChromiumDriverFactory {
     }
   }
 
+  private getPageEventAsObservable<E extends keyof PageEvents>(
+    page: Page,
+    pageEvent: E
+  ): Rx.Observable<PageEvents[E]> {
+    return Rx.fromEventPattern<PageEvents[E]>(
+      (handler) => page.on(pageEvent, handler),
+      (handler) => page.off(pageEvent, handler)
+    );
+  }
+
   getBrowserLogger(page: Page, logger: Logger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
+    const consoleMessages$ = this.getPageEventAsObservable(page, 'console').pipe(
       concatMap(async (line) => {
         if (line.type() === 'error') {
           logger
@@ -333,7 +336,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+    const uncaughtExceptionPageError$ = this.getPageEventAsObservable(page, 'pageerror').pipe(
       map((err) => {
         logger.warn(
           `Reporting encountered an uncaught error on the page that will be ignored: ${err.message}`
@@ -341,7 +344,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<HTTPRequest>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = this.getPageEventAsObservable(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -376,7 +379,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page): Rx.Observable<Error> {
-    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
+    const pageError$ = this.getPageEventAsObservable(page, 'error').pipe(
       map((err) => new Error(`Reporting encountered an error: ${err.toString()}`))
     );
 
@@ -454,5 +457,3 @@ export class HeadlessChromiumDriverFactory {
     );
   }
 }
-
-export type { PerformanceMetrics };

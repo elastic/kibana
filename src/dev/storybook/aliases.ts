@@ -6,31 +6,30 @@
  * Side Public License, v 1.
  */
 
-// Please also add new aliases to test/scripts/jenkins_storybook.sh
+// Please also add new aliases to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 //
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
-  apm: 'x-pack/plugins/apm/.storybook',
+  apm: 'x-pack/plugins/observability_solution/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
-  ci_composite: '.ci/.storybook',
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
-  content_management: 'packages/content-management/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   controls: 'src/plugins/controls/storybook',
+  custom_icons: 'packages/kbn-custom-icons/.storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   dashboard: 'src/plugins/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
-  discover_log_explorer: 'x-pack/plugins/discover_log_explorer/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
+  expandable_flyout: 'packages/kbn-expandable-flyout/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
   expression_image: 'src/plugins/expression_image/.storybook',
   expression_metric_vis: 'src/plugins/chart_expressions/expression_legacy_metric/.storybook',
@@ -43,11 +42,14 @@ export const storybookAliases = {
   fleet: 'x-pack/plugins/fleet/.storybook',
   grouping: 'packages/kbn-securitysolution-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
-  infra: 'x-pack/plugins/infra/.storybook',
+  infra: 'x-pack/plugins/observability_solution/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
+  logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',
   management: 'packages/kbn-management/storybook/config',
-  observability: 'x-pack/plugins/observability/.storybook',
+  observability: 'x-pack/plugins/observability_solution/observability/.storybook',
+  observability_ai_assistant:
+    'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   text_based_editor: 'packages/kbn-text-based-editor/.storybook',
@@ -55,9 +57,10 @@ export const storybookAliases = {
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',
+  slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
-  profiling: 'x-pack/plugins/profiling/.storybook',
+  profiling: 'x-pack/plugins/observability_solution/profiling/.storybook',
 };

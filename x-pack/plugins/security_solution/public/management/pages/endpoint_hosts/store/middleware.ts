@@ -353,7 +353,12 @@ async function endpointListMiddleware({
 }) {
   const { getState, dispatch } = store;
 
-  const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+  const {
+    page_index: pageIndex,
+    page_size: pageSize,
+    sort_field: sortField,
+    sort_direction: sortDirection,
+  } = uiQueryParams(getState());
   let endpointResponse: MetadataListResponse | undefined;
 
   try {
@@ -365,6 +370,8 @@ async function endpointListMiddleware({
         page: pageIndex,
         pageSize,
         kuery: decodedQuery.query as string,
+        sortField,
+        sortDirection,
       },
     });
 
@@ -409,6 +416,10 @@ async function endpointListMiddleware({
     // so we check first if endpoints actually do exist before pulling in data for the onboarding
     // messages.
     if (await doEndpointsExist(http)) {
+      dispatch({
+        type: 'serverFinishedInitialization',
+        payload: true,
+      });
       return;
     }
 
@@ -448,6 +459,11 @@ async function endpointListMiddleware({
       payload: true,
     });
   }
+
+  dispatch({
+    type: 'serverFinishedInitialization',
+    payload: true,
+  });
 }
 
 export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {

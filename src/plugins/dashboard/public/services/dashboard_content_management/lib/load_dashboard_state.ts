@@ -20,8 +20,11 @@ import {
   type DashboardOptions,
   convertSavedPanelsToPanelMap,
 } from '../../../../common';
+import { migrateDashboardInput } from './migrate_dashboard_input';
+import { convertNumberToDashboardVersion } from './dashboard_versioning';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
@@ -53,31 +56,60 @@ export const loadDashboardState = async ({
   /**
    * This is a newly created dashboard, so there is no saved object state to load.
    */
-  if (!savedObjectId) return { dashboardInput: newDashboardState, dashboardFound: true };
+  if (!savedObjectId) {
+    return {
+      dashboardInput: newDashboardState,
+      dashboardFound: true,
+      newDashboardCreated: true,
+      references: [],
+    };
+  }
 
   /**
    * Load the saved object from Content Management
    */
-  const { item: rawDashboardContent, meta: resolveMeta } = await contentManagement.client
-    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    })
-    .catch((e) => {
-      throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
-    });
+  let rawDashboardContent: DashboardCrudTypes['GetOut']['item'];
+  let resolveMeta: DashboardCrudTypes['GetOut']['meta'];
+
+  const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+  if (cachedDashboard) {
+    /** If the dashboard exists in the cache, use the cached version to load the dashboard */
+    ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
+  } else {
+    /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
+    const result = await contentManagement.client
+      .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+        contentTypeId: DASHBOARD_CONTENT_ID,
+        id,
+      })
+      .catch((e) => {
+        throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+      });
+
+    ({ item: rawDashboardContent, meta: resolveMeta } = result);
+    const { outcome: loadOutcome } = resolveMeta;
+    if (loadOutcome !== 'aliasMatch') {
+      /**
+       * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
+       * alias info gets cached and prevents the dashboard contents from being updated
+       */
+      dashboardContentManagementCache.addDashboard(result);
+    }
+  }
+
   if (!rawDashboardContent || !rawDashboardContent.version) {
     return {
       dashboardInput: newDashboardState,
       dashboardFound: false,
       dashboardId: savedObjectId,
+      references: [],
     };
   }
 
   /**
    * Inject saved object references back into the saved object attributes
    */
-  const { references, attributes: rawAttributes } = rawDashboardContent;
+  const { references, attributes: rawAttributes, managed } = rawDashboardContent;
   const attributes = (() => {
     if (!references || references.length === 0) return rawAttributes;
     return injectReferences(
@@ -118,6 +150,7 @@ export const loadDashboardState = async ({
     optionsJSON,
     panelsJSON,
     timeFrom,
+    version,
     timeTo,
     title,
   } = attributes;
@@ -136,11 +169,8 @@ export const loadDashboardState = async ({
   const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
-  return {
-    resolveMeta,
-    dashboardFound: true,
-    dashboardId: savedObjectId,
-    dashboardInput: {
+  const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
+    {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
 
@@ -160,6 +190,19 @@ export const loadDashboardState = async ({
       controlGroupInput:
         attributes.controlGroupInput &&
         rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+
+      version: convertNumberToDashboardVersion(version),
     },
+    embeddable
+  );
+
+  return {
+    managed,
+    references,
+    resolveMeta,
+    dashboardInput,
+    anyMigrationRun,
+    dashboardFound: true,
+    dashboardId: savedObjectId,
   };
 };

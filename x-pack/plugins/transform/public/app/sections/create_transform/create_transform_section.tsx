@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, FC } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
-
-import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
+import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
-import { PrivilegesWrapper } from '../../lib/authorization';
+import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from './components/wizard';
 
@@ -54,8 +46,15 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
   );
 
   return (
-    <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <EuiPageHeader
+    <CapabilitiesWrapper
+      requiredCapabilities={[
+        'canGetTransform',
+        'canPreviewTransform',
+        'canCreateTransform',
+        'canStartStopTransform',
+      ]}
+    >
+      <EuiPageTemplate.Header
         pageTitle={
           <FormattedMessage
             id="xpack.transform.transformsWizard.createTransformTitle"
@@ -64,11 +63,12 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         }
         rightSideItems={[docsLink]}
         bottomBorder
+        paddingSize={'none'}
       />
 
       <EuiSpacer size="l" />
 
-      <EuiPageContentBody data-test-subj="transformPageCreateTransform">
+      <EuiPageTemplate.Section data-test-subj="transformPageCreateTransform" paddingSize={'none'}>
         {searchItemsError !== undefined && (
           <>
             <EuiCallOut title={searchItemsError} color="danger" iconType="warning" />
@@ -76,7 +76,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
           </>
         )}
         {searchItems !== undefined && <Wizard searchItems={searchItems} />}
-      </EuiPageContentBody>
-    </PrivilegesWrapper>
+      </EuiPageTemplate.Section>
+    </CapabilitiesWrapper>
   );
 };

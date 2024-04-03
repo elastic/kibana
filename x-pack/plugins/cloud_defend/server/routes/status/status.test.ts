@@ -53,7 +53,7 @@ const mockLatestCloudDefendPackageInfo: RegistryPackage = {
   download: '/epr/cloud_defend/cloud_defend-1.0.0.zip',
   path: '/package/cloud_defend/1.0.0',
   policy_templates: [],
-  owner: { github: 'elastic/sec-cloudnative-integrations' },
+  owner: { github: 'elastic/kibana-cloud-security-posture' },
   categories: ['containers', 'kubernetes'],
 };
 

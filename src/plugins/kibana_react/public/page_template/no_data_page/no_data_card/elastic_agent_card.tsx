@@ -9,10 +9,10 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
-import { RedirectAppLinks } from '../../../app_links';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;
@@ -91,7 +91,11 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     );
 
   return (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiCard
         paddingSize="l"
         image={image}

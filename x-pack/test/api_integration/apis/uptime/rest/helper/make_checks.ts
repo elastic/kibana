@@ -139,6 +139,7 @@ export const makeChecksWithStatus = async (
       if (d.summary) {
         d.summary[status] += d.summary[oppositeStatus];
         d.summary[oppositeStatus] = 0;
+        d.summary.final_attempt = true;
       }
 
       return mogrify(d);

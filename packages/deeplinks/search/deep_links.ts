@@ -6,9 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { SERVERLESS_ES_APP_ID, SERVERLESS_ES_INDEXING_API_ID } from './constants';
+import {
+  SERVERLESS_ES_APP_ID,
+  SERVERLESS_ES_CONNECTORS_ID,
+  ENTERPRISE_SEARCH_APP_ID,
+  ENTERPRISE_SEARCH_CONTENT_APP_ID,
+  ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
+  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
+  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
+} from './constants';
 
-export type AppId = typeof SERVERLESS_ES_APP_ID;
-export type IndexingApiId = typeof SERVERLESS_ES_INDEXING_API_ID;
+export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
+export type EnterpriseSearchContentApp = typeof ENTERPRISE_SEARCH_CONTENT_APP_ID;
+export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATIONS_APP_ID;
+export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
+export type EnterpriseSearchAppsearchApp = typeof ENTERPRISE_SEARCH_APPSEARCH_APP_ID;
+export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID;
+export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
+export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 
-export type DeepLinkId = AppId | IndexingApiId;
+export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers' | 'playground';
+
+export type ApplicationsLinkId = 'searchApplications';
+
+export type AppsearchLinkId = 'engines';
+
+export type DeepLinkId =
+  | EnterpriseSearchApp
+  | EnterpriseSearchContentApp
+  | EnterpriseSearchApplicationsApp
+  | EnterpriseSearchAnalyticsApp
+  | EnterpriseSearchAppsearchApp
+  | EnterpriseSearchWorkplaceSearchApp
+  | ServerlessSearchApp
+  | ConnectorsId
+  | `${EnterpriseSearchContentApp}:${ContentLinkId}`
+  | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
+  | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`;

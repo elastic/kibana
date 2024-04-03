@@ -119,4 +119,35 @@ describe('decodeRequestParams', () => {
 
     expect(decode()).toEqual({});
   });
+
+  it('allows excess keys in an any type', () => {
+    const decode = () => {
+      return decodeRequestParams(
+        {
+          params: {},
+          query: {},
+          body: {
+            body: {
+              query: 'foo',
+            },
+          },
+        },
+        t.type({
+          body: t.type({
+            body: t.any,
+          }),
+        })
+      );
+    };
+
+    expect(decode).not.toThrow();
+
+    expect(decode()).toEqual({
+      body: {
+        body: {
+          query: 'foo',
+        },
+      },
+    });
+  });
 });

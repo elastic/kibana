@@ -10,31 +10,47 @@ import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 import { VisualizeEditorContext } from '../types';
+import { redirectToDashboard } from './save_modal_container_helpers';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
 
 export type SaveModalContainerProps = {
   originatingApp?: string;
+  getOriginatingPath?: (dashboardId: string) => string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (saveProps: SaveProps) => void;
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
-  lensServices: LensAppServices;
+  lensServices: Pick<
+    LensAppServices,
+    | 'attributeService'
+    | 'savedObjectsTagging'
+    | 'application'
+    | 'notifications'
+    | 'http'
+    | 'chrome'
+    | 'overlays'
+    | 'stateTransfer'
+    | 'savedObjectStore'
+  >;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  // is this visualization managed by the system?
+  managed?: boolean;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -44,6 +60,7 @@ export function SaveModalContainer({
   runSave,
   persistedDoc,
   originatingApp,
+  getOriginatingPath,
   initialInput,
   redirectTo,
   redirectToOrigin,
@@ -52,10 +69,12 @@ export function SaveModalContainer({
   lastKnownDoc: initLastKnownDoc,
   lensServices,
   initialContext,
+  managed,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
   let savedObjectId;
+  const [initializing, setInitializing] = useState(true);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnownDoc);
   if (lastKnownDoc) {
     title = lastKnownDoc.title;
@@ -77,7 +96,7 @@ export function SaveModalContainer({
     });
   }
 
-  const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
+  const { attributeService, savedObjectsTagging, application } = lensServices;
 
   useEffect(() => {
     setLastKnownDoc(initLastKnownDoc);
@@ -90,9 +109,15 @@ export function SaveModalContainer({
       getPersisted({
         initialInput,
         lensServices,
-      }).then((persisted) => {
-        if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
-      });
+      })
+        .then((persisted) => {
+          if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
+        })
+        .finally(() => {
+          setInitializing(false);
+        });
+    } else {
+      setInitializing(false);
     }
 
     return () => {
@@ -119,6 +144,7 @@ export function SaveModalContainer({
           redirectTo,
           redirectToOrigin,
           originatingApp,
+          getOriginatingPath,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
           savedObjectStore: lensServices.savedObjectStore,
@@ -126,19 +152,23 @@ export function SaveModalContainer({
         saveProps,
         options
       ).then(() => {
-        onSave?.();
+        onSave?.(saveProps);
         onClose();
       });
     }
   };
+
+  if (initializing) {
+    return <EuiLoadingSpinner />;
+  }
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
   return (
     <SaveModal
       originatingApp={originatingApp}
+      getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
-      allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
       onSave={(saveProps, options) => {
@@ -150,36 +180,11 @@ export function SaveModalContainer({
       description={description}
       savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
+      returnToOrigin={redirectToOrigin != null}
+      managed={Boolean(managed)}
     />
   );
 }
-
-const redirectToDashboard = ({
-  embeddableInput,
-  dashboardFeatureFlag,
-  dashboardId,
-  stateTransfer,
-}: {
-  embeddableInput: LensEmbeddableInput;
-  dashboardId: string;
-  dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
-  stateTransfer: LensAppServices['stateTransfer'];
-}) => {
-  if (!dashboardFeatureFlag.allowByValueEmbeddables) {
-    throw new Error('redirectToDashboard called with by-value embeddables disabled');
-  }
-
-  const state = {
-    input: embeddableInput,
-    type: LENS_EMBEDDABLE_TYPE,
-  };
-
-  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
-  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-    state,
-    path,
-  });
-};
 
 const getDocToSave = (
   lastKnownDoc: Document,
@@ -208,11 +213,21 @@ export const runSaveLensVisualization = async (
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
     originatingApp?: string;
+    getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
     savedObjectStore: SavedObjectIndexStore;
   } & ExtraProps &
-    LensAppServices,
+    Pick<
+      LensAppServices,
+      | 'application'
+      | 'chrome'
+      | 'overlays'
+      | 'notifications'
+      | 'stateTransfer'
+      | 'attributeService'
+      | 'savedObjectsTagging'
+    >,
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {
@@ -230,7 +245,6 @@ export const runSaveLensVisualization = async (
     redirectToOrigin,
     onAppLeave,
     redirectTo,
-    dashboardFeatureFlag,
     textBasedLanguageSave,
     switchDatasource,
     application,
@@ -248,7 +262,6 @@ export const runSaveLensVisualization = async (
       persistedDoc && savedObjectsTagging
         ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
         : [];
-
     references = savedObjectsTagging.ui.updateTagsReferences(
       references,
       saveProps.newTags || tagsIds
@@ -305,7 +318,6 @@ export const runSaveLensVisualization = async (
         timeRange: saveProps.panelTimeRange,
       };
     }
-
     if (saveProps.returnToOrigin && redirectToOrigin) {
       // disabling the validation on app leave because the document has been saved.
       onAppLeave?.((actions) => {
@@ -322,7 +334,8 @@ export const runSaveLensVisualization = async (
         embeddableInput: newInput,
         dashboardId: saveProps.dashboardId,
         stateTransfer,
-        dashboardFeatureFlag,
+        originatingApp: props.originatingApp,
+        getOriginatingPath: props.getOriginatingPath,
       });
       return;
     }

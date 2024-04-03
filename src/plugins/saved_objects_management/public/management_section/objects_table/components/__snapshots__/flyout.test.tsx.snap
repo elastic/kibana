@@ -115,6 +115,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
+      searchFormat="eql"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -142,7 +143,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
           isLoading={false}
@@ -174,6 +174,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "register": [MockFunction],
           },
           "basePath": BasePath {
+            "assetsHrefBase": "",
             "basePath": "",
             "get": [Function],
             "prepend": [Function],
@@ -195,6 +196,9 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "patch": [MockFunction],
           "post": [MockFunction],
           "put": [MockFunction],
+          "staticAssets": Object {
+            "getPluginAssetHref": [MockFunction],
+          },
         },
         "state": Object {
           "conflictingRecord": undefined,
@@ -377,7 +381,6 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
           isDisabled={true}
@@ -402,6 +405,7 @@ exports[`Flyout summary should display summary when import is complete 1`] = `
   allowedTypes={Array []}
   basePath={
     BasePath {
+      "assetsHrefBase": "",
       "basePath": "",
       "get": [Function],
       "prepend": [Function],

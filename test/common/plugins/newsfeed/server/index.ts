@@ -9,6 +9,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { NewsFeedSimulatorPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
   return new NewsFeedSimulatorPlugin(initializerContext);
 }

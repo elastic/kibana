@@ -27,19 +27,19 @@ export const IsoDateString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 export type IsoDateStringC = typeof IsoDateString;
-export const schemaDate = IsoDateString;
-export const schemaDateArray = rt.array(IsoDateString);
-export const schemaDateRange = rt.partial({
-  gte: schemaDate,
-  lte: schemaDate,
-});
-export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaUnknown = rt.unknown;
 export const schemaUnknownArray = rt.array(rt.unknown);
 export const schemaString = rt.string;
 export const schemaStringArray = rt.array(schemaString);
 export const schemaNumber = rt.number;
 export const schemaNumberArray = rt.array(schemaNumber);
+export const schemaDate = rt.union([IsoDateString, schemaNumber]);
+export const schemaDateArray = rt.array(schemaDate);
+export const schemaDateRange = rt.partial({
+  gte: schemaDate,
+  lte: schemaDate,
+});
+export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaStringOrNumber = rt.union([schemaString, schemaNumber]);
 export const schemaStringOrNumberArray = rt.array(schemaStringOrNumber);
 export const schemaBoolean = rt.boolean;
@@ -70,16 +70,18 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityMetricsAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityMetricsAlertOptional = rt.partial({
-  kibana: rt.partial({
-    alert: rt.partial({
-      evaluation: rt.partial({
-        threshold: schemaStringOrNumber,
-        value: schemaStringOrNumber,
-        values: schemaStringOrNumberArray,
-      }),
-    }),
-  }),
+  'kibana.alert.context': schemaUnknown,
+  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.value': schemaStringOrNumber,
+  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
+  'kibana.alert.group': rt.array(
+    rt.partial({
+      field: schemaStringArray,
+      value: schemaStringArray,
+    })
+  ),
 });
 
 // prettier-ignore

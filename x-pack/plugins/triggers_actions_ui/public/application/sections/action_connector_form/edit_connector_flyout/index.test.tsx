@@ -9,8 +9,7 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
-import { act } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 import { betaBadgeProps } from '../beta_badge_props';
@@ -65,7 +64,7 @@ describe('EditConnectorFlyout', () => {
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
-      actions: { save: true, show: true },
+      actions: { save: true, show: true, execute: true },
     };
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
@@ -312,7 +311,7 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('preconfiguredBadge')).toBeInTheDocument();
     });
 
-    it('does not show beta badge when isExperimental is false', async () => {
+    it('does not show `tech preview` badge when isExperimental is false', async () => {
       const { queryByText } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -325,7 +324,35 @@ describe('EditConnectorFlyout', () => {
       expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
     });
 
-    it('shows beta badge when isExperimental is true', async () => {
+    it('shows `tech preview` badge when isExperimental is true', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
+      const { getByText } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, isPreconfigured: true }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
+    });
+
+    it('does not show `Technical Preview` badge when `isExperimental` is `false`', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
+      const { queryByText } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, isPreconfigured: true }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+    });
+
+    it('shows `Technical Preview` badge when `isExperimental` is `true`', async () => {
       actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
       const { getByText } = appMockRenderer.render(
         <EditConnectorFlyout
@@ -409,19 +436,16 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.clear(getByTestId('nameInput'));
-        await userEvent.type(getByTestId('nameInput'), 'My new name', {
-          delay: 100,
-        });
-        await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password', {
-          delay: 100,
-        });
+      userEvent.clear(getByTestId('nameInput'));
+      userEvent.type(getByTestId('nameInput'), 'My new name');
+      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+
+      await waitFor(() => {
+        expect(getByTestId('nameInput')).toHaveValue('My new name');
+        expect(getByTestId('test-connector-secret-text-field')).toHaveValue('password');
       });
 
-      act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
-      });
+      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
@@ -460,16 +484,19 @@ describe('EditConnectorFlyout', () => {
       });
 
       userEvent.clear(getByTestId('test-connector-text-field'));
-      await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field', {
-        delay: 100,
+      userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field');
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
       });
 
       userEvent.clear(getByTestId('nameInput'));
-      await userEvent.type(getByTestId('nameInput'), 'My test', {
-        delay: 100,
-      });
-      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password', {
-        delay: 100,
+      userEvent.type(getByTestId('nameInput'), 'My test');
+      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+
+      await waitFor(() => {
+        expect(getByTestId('nameInput')).toHaveValue('My test');
+        expect(getByTestId('test-connector-secret-text-field')).toHaveValue('password');
       });
 
       userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
@@ -493,19 +520,16 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.clear(getByTestId('nameInput'));
-        await userEvent.type(getByTestId('nameInput'), 'My new name', {
-          delay: 100,
-        });
-        await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password', {
-          delay: 100,
-        });
+      userEvent.clear(getByTestId('nameInput'));
+      userEvent.type(getByTestId('nameInput'), 'My new name');
+      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+
+      await waitFor(() => {
+        expect(getByTestId('nameInput')).toHaveValue('My new name');
+        expect(getByTestId('test-connector-secret-text-field')).toHaveValue('password');
       });
 
-      act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
-      });
+      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.put).toHaveBeenCalledWith(
@@ -518,9 +542,7 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByText('Changes Saved')).toBeInTheDocument();
 
-      act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
-      });
+      userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
 
       expect(onClose).toHaveBeenCalled();
       expect(onConnectorUpdated).toHaveBeenCalledWith({
@@ -554,16 +576,14 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-error-text-field')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.clear(getByTestId('nameInput'));
-        await userEvent.type(getByTestId('nameInput'), 'My new name', {
-          delay: 100,
-        });
+      userEvent.clear(getByTestId('nameInput'));
+      userEvent.type(getByTestId('nameInput'), 'My new name');
+
+      await waitFor(() => {
+        expect(getByTestId('nameInput')).toHaveValue('My new name');
       });
 
-      act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
-      });
+      userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
       await waitFor(() => {
         expect(getByText('Error on pre submit validator')).toBeInTheDocument();

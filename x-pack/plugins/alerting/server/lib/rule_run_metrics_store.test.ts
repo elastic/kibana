@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleRunMetricsStore } from './rule_run_metrics_store';
-import { ActionsCompletion } from '../types';
 
 describe('RuleRunMetricsStore', () => {
   const ruleRunMetricsStore = new RuleRunMetricsStore();
@@ -23,8 +23,10 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toBe(0);
+    expect(ruleRunMetricsStore.getNumberOfDelayedAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getStatusByConnectorType('any')).toBe(undefined);
     expect(ruleRunMetricsStore.getHasReachedAlertLimit()).toBe(false);
+    expect(ruleRunMetricsStore.getHasReachedQueuedActionsLimit()).toBe(false);
   });
 
   test('sets and returns numSearches', () => {
@@ -67,6 +69,11 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toBe(12);
   });
 
+  test('sets and returns getNumberOfDelayedAlerts', () => {
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(7);
+    expect(ruleRunMetricsStore.getNumberOfDelayedAlerts()).toBe(7);
+  });
+
   test('sets and returns triggeredActionsStatusByConnectorType', () => {
     ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
       actionTypeId: testConnectorId,
@@ -95,6 +102,11 @@ describe('RuleRunMetricsStore', () => {
     expect(metricsStore.getEsSearchDurationMs()).toEqual(555);
   });
 
+  test('sets and returns hasReachedQueuedActionsLimit', () => {
+    ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+    expect(ruleRunMetricsStore.getHasReachedQueuedActionsLimit()).toBe(true);
+  });
+
   test('gets metrics', () => {
     expect(ruleRunMetricsStore.getMetrics()).toEqual({
       triggeredActionsStatus: 'partial',
@@ -105,8 +117,10 @@ describe('RuleRunMetricsStore', () => {
       numberOfNewAlerts: 12,
       numberOfRecoveredAlerts: 11,
       numberOfTriggeredActions: 5,
+      numberOfDelayedAlerts: 7,
       totalSearchDurationMs: 2,
       hasReachedAlertLimit: true,
+      hasReachedQueuedActionsLimit: true,
     });
   });
 
@@ -148,6 +162,19 @@ describe('RuleRunMetricsStore', () => {
     expect(
       ruleRunMetricsStore.getStatusByConnectorType(testConnectorId).numberOfGeneratedActions
     ).toBe(1);
+  });
+
+  // decrement
+  test('decrements numberOfTriggeredActions by 1', () => {
+    ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(5);
+  });
+
+  test('decrements numberOfTriggeredActionsByConnectorType by 1', () => {
+    ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(testConnectorId);
+    expect(
+      ruleRunMetricsStore.getStatusByConnectorType(testConnectorId).numberOfTriggeredActions
+    ).toBe(0);
   });
 
   // Checker

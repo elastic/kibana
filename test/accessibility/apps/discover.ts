@@ -109,23 +109,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.click('saved-query-management-load-button');
       await savedQueryManagementComponent.deleteSavedQuery('test');
-      await a11y.testAppSnapshot();
+      await a11y.testAppSnapshot({
+        // The saved query selectable search input has invalid aria attrs after
+        // the query is deleted and the `emptyMessage` is displayed, and it fails
+        // with this error, likely because the list is replaced by `emptyMessage`:
+        // [aria-valid-attr-value]: Ensures all ARIA attributes have valid values
+        excludeTestSubj: ['saved-query-management-search-input'],
+      });
     });
 
     // adding a11y tests for the new data grid
     it('a11y test on single document view', async () => {
       await testSubjects.click('docTableExpandToggleColumn');
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on JSON view of the document', async () => {
-      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.clickDocViewerTab('doc_view_source');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for actions on a field', async () => {
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
         await testSubjects.click('openFieldActionsButton-Cancelled');
       } else {
@@ -148,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
 
       await a11y.testAppSnapshot();
@@ -159,34 +165,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for chart options panel', async () => {
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await a11y.testAppSnapshot();
-    });
-
     it('a11y test for data grid with hidden chart', async () => {
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.closeHistogramPanel();
       await a11y.testAppSnapshot();
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.openHistogramPanel();
     });
 
     it('a11y test for time interval panel', async () => {
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramTimeIntervalPanel');
+      await testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
       await a11y.testAppSnapshot();
-      await testSubjects.click('contextMenuPanelTitleButton');
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
-    // https://github.com/elastic/kibana/issues/148567
-    it.skip('a11y test for data grid sort panel', async () => {
+    it('a11y test for data grid sort panel', async () => {
       await testSubjects.click('dataGridColumnSortingButton');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
     });
-    // https://github.com/elastic/kibana/issues/148567
-    it.skip('a11y test for setting row height for display panel', async () => {
+
+    it('a11y test for setting row height for display panel', async () => {
       await testSubjects.click('dataGridDisplaySelectorPopover');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -206,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid with collapsed side bar', async () => {
       await PageObjects.discover.closeSidebar();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.toggleSidebarCollapse();
+      await PageObjects.discover.openSidebar();
     });
 
     it('a11y test for adding a field from side bar', async () => {

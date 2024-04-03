@@ -8,4 +8,16 @@
 
 export { run } from './src/cli';
 export { Cluster } from './src/cluster';
-export { SYSTEM_INDICES_SUPERUSER } from './src/utils';
+export {
+  SYSTEM_INDICES_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+  SERVERLESS_NODES,
+  getDockerFileMountPath,
+  verifyDockerInstalled,
+  maybeCreateDockerNetwork,
+  type ServerlessProjectType,
+  readRolesFromResource,
+} from './src/utils';
+export type { ArtifactLicense } from './src/artifact';
+export { SERVERLESS_ROLES_ROOT_PATH } from './src/paths';

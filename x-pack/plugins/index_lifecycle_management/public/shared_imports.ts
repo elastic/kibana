@@ -47,9 +47,10 @@ export { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
 export {
   KibanaContextProvider,
   KibanaThemeProvider,
-  RedirectAppLinks,
   useExecutionContext,
 } from '@kbn/kibana-react-plugin/public';
+
+export { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 

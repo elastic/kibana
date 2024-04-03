@@ -23,6 +23,7 @@ const initialValue: FormProps = {
     frequency: 'CUSTOM',
     ends: EndsOptions.NEVER,
   },
+  categoryIds: [],
 };
 
 describe('CustomRecurringSchedule', () => {

@@ -14,14 +14,15 @@ export function plugin() {
 }
 
 export type { AiopsAppDependencies } from './hooks/use_aiops_app_context';
-export type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
+export type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
+export type { LogRateAnalysisContentWrapperProps } from './components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper';
 export type { LogCategorizationAppStateProps } from './components/log_categorization';
 export type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
-export type { ExplainLogRateSpikesAnalysisResults } from './components/explain_log_rate_spikes/explain_log_rate_spikes_analysis';
+export type { LogRateAnalysisResultsData } from './components/log_rate_analysis/log_rate_analysis_results';
 
 export {
-  ExplainLogRateSpikes,
-  ExplainLogRateSpikesContent,
+  LogRateAnalysis,
+  LogRateAnalysisContent,
   LogCategorization,
   ChangePointDetection,
 } from './shared_lazy_components';

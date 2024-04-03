@@ -71,18 +71,17 @@ const dataServiceMock = {
     ...data.query,
     savedQueries: {
       ...data.query.savedQueries,
-      getAllSavedQueries: jest.fn(() =>
-        Promise.resolve({
-          id: '123',
-          attributes: {
-            total: 123,
-          },
-        })
-      ),
       findSavedQueries: jest.fn(() =>
         Promise.resolve({
           total: 123,
-          queries: [],
+          queries: [
+            {
+              id: '123',
+              attributes: {
+                total: 123,
+              },
+            },
+          ],
         })
       ),
     },
@@ -127,7 +126,10 @@ export const mockedServices = {
   securityLayout: {
     getPluginWrapper:
       () =>
-      ({ children }: any) => {
+      ({ children, isEmptyState, emptyPageBody }: any) => {
+        if (isEmptyState && emptyPageBody) {
+          return <>{emptyPageBody}</>;
+        }
         return <>{children}</>;
       },
   },

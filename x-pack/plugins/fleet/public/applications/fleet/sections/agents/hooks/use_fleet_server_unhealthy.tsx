@@ -13,9 +13,15 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../constants';
-import { sendGetAgentStatus, sendGetPackagePolicies, useStartServices } from '../../../hooks';
+import {
+  sendGetAgentStatus,
+  sendGetPackagePolicies,
+  useAuthz,
+  useStartServices,
+} from '../../../hooks';
 
 export function useFleetServerUnhealthy() {
+  const authz = useAuthz();
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(true);
   const [isUnhealthy, setIsUnhealthy] = useState(false);
@@ -37,7 +43,7 @@ export function useFleetServerUnhealthy() {
 
       if (agentPolicyIds.length > 0) {
         const agentStatusesRes = await sendGetAgentStatus({
-          kuery: agentPolicyIds.map((policyId) => `policy_id:"${policyId}"`).join(' or '),
+          kuery: agentPolicyIds.map((policyId) => `policy_id:${policyId}`).join(' or '),
         });
 
         if (agentStatusesRes.error) {
@@ -64,8 +70,12 @@ export function useFleetServerUnhealthy() {
   }, [notifications.toasts]);
 
   useEffect(() => {
+    if (!authz.fleet.allAgents || !authz.integrations.readIntegrationPolicies) {
+      setIsLoading(false);
+      return;
+    }
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, authz.fleet.allAgents, authz.integrations.readIntegrationPolicies]);
 
   return {
     isLoading,

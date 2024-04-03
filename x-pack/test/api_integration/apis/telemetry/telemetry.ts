@@ -21,6 +21,10 @@ import type {
   CacheDetails,
 } from '@kbn/telemetry-collection-manager-plugin/server/types';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
 import type { SecurityService } from '../../../../../test/common/services/security/security';
@@ -97,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esSupertest = getService('esSupertest');
   const security = getService('security');
 
-  describe('/api/telemetry/v2/clusters/_stats', () => {
+  describe('/internal/telemetry/clusters/_stats', () => {
     const timestamp = new Date().toISOString();
     describe('monitoring/multicluster', () => {
       let localXPack: Record<string, unknown>;
@@ -108,12 +112,19 @@ export default function ({ getService }: FtrProviderContext) {
       const toTimestamp = '2017-08-16T00:00:00.000Z';
 
       before(async () => {
-        await esArchiver.load(archive);
+        await esArchiver.load(archive, {
+          performance: {
+            batchSize: 300,
+            concurrency: 1,
+          },
+        });
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
 
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
+          .post('/internal/telemetry/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
 
@@ -167,8 +178,10 @@ export default function ({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload(archive));
       it('should load non-expiring basic cluster', async () => {
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
+          .post('/internal/telemetry/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
 
@@ -193,8 +206,10 @@ export default function ({ getService }: FtrProviderContext) {
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
         // hit the endpoint to cache results
         await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
+          .post('/internal/telemetry/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
       });
@@ -204,8 +219,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns non-cached results when unencrypted', async () => {
       const now = Date.now();
       const { body }: { body: UnencryptedTelemetryPayload } = await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ unencrypted: true })
         .expect(200);
 
@@ -224,8 +241,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('grabs a fresh copy on refresh', async () => {
       const now = Date.now();
       const { body }: { body: UnencryptedTelemetryPayload } = await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
+        .post('/internal/telemetry/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send({ unencrypted: true, refreshCache: true })
         .expect(200);
 
@@ -243,16 +262,20 @@ export default function ({ getService }: FtrProviderContext) {
       describe('superadmin user', () => {
         it('should return unencrypted telemetry for the admin user', async () => {
           await supertest
-            .post('/api/telemetry/v2/clusters/_stats')
+            .post('/internal/telemetry/clusters/_stats')
             .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ unencrypted: true })
             .expect(200);
         });
 
         it('should return encrypted telemetry for the admin user', async () => {
           await supertest
-            .post('/api/telemetry/v2/clusters/_stats')
+            .post('/internal/telemetry/clusters/_stats')
             .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ unencrypted: false })
             .expect(200);
         });
@@ -281,18 +304,22 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should return encrypted telemetry for the global-read user', async () => {
           await supertestWithoutAuth
-            .post('/api/telemetry/v2/clusters/_stats')
+            .post('/internal/telemetry/clusters/_stats')
             .auth(globalReadOnlyUser, password(globalReadOnlyUser))
             .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ unencrypted: false })
             .expect(200);
         });
 
         it('should return unencrypted telemetry for the global-read user', async () => {
           await supertestWithoutAuth
-            .post('/api/telemetry/v2/clusters/_stats')
+            .post('/internal/telemetry/clusters/_stats')
             .auth(globalReadOnlyUser, password(globalReadOnlyUser))
             .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ unencrypted: true })
             .expect(200);
         });
@@ -330,18 +357,22 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should return encrypted telemetry for the read-only user', async () => {
           await supertestWithoutAuth
-            .post('/api/telemetry/v2/clusters/_stats')
+            .post('/internal/telemetry/clusters/_stats')
             .auth(noGlobalUser, password(noGlobalUser))
             .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ unencrypted: false })
             .expect(200);
         });
 
         it('should return 403 when the read-only user requests unencrypted telemetry', async () => {
           await supertestWithoutAuth
-            .post('/api/telemetry/v2/clusters/_stats')
+            .post('/internal/telemetry/clusters/_stats')
             .auth(noGlobalUser, password(noGlobalUser))
             .set('kbn-xsrf', 'xxx')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ unencrypted: true })
             .expect(403);
         });

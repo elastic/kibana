@@ -150,12 +150,12 @@ export default function (providerContext: FtrProviderContext) {
       expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
     });
 
-    it('should return a 400 with an empty namespace', async function () {
+    it('should allow to pass an empty namespace', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest-5',
           description: '',
           namespace: '',
           policy_id: agentPolicyId,
@@ -167,7 +167,7 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         })
-        .expect(400);
+        .expect(200);
     });
 
     it('should return a 400 with an invalid namespace', async function () {
@@ -175,7 +175,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-1',
+          name: 'filetest-2',
           description: '',
           namespace: 'InvalidNamespace',
           policy_id: agentPolicyId,
@@ -222,7 +222,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '1.4.1',
+            version: '8.4.0',
           },
           force: true,
         })
@@ -240,7 +240,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '1.5.0',
+            version: '8.5.0',
           },
         })
         .expect(400);

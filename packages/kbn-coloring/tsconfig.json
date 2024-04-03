@@ -10,7 +10,6 @@
     ]
   },
   "include": [
-    "**/*.scss",
     "**/*.ts",
     "**/*.tsx"
   ],
@@ -21,6 +20,9 @@
     "@kbn/utility-types",
     "@kbn/shared-ux-utility",
     "@kbn/test-jest-helpers",
+    "@kbn/data-plugin",
+    "@kbn/ui-theme",
+    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",

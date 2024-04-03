@@ -6,7 +6,7 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser, Role } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -40,6 +40,8 @@ export class SecurityPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly es = this.ctx.getService('es');
+
+  delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   public loginPage = Object.freeze({
     login: async (username?: string, password?: string, options: LoginOptions = {}) => {
@@ -168,7 +170,7 @@ export class SecurityPageObject extends FtrService {
     );
   }
 
-  private async isLoginFormVisible() {
+  public async isLoginFormVisible() {
     return await this.testSubjects.exists('loginForm');
   }
 
@@ -295,18 +297,53 @@ export class SecurityPageObject extends FtrService {
     return user as AuthenticatedUser;
   }
 
-  async forceLogout() {
+  async forceLogout(
+    { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
+  ) {
     this.log.debug('SecurityPage.forceLogout');
     if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }
 
-    this.log.debug('Redirecting to /logout to force the logout');
+    this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
     const url = this.deployment.getHostPort() + '/logout';
     await this.browser.get(url);
-    this.log.debug('Waiting on the login form to appear');
-    await this.waitForLoginPage();
+
+    // After logging out, the user can be redirected to various locations depending on the context. By default, we
+    // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+    // we should simply wait until the user is redirected *elsewhere*.
+    if (waitForLoginPage) {
+      this.log.debug('Waiting on the login form to appear');
+      await this.waitForLoginPage();
+    } else {
+      this.log.debug('Waiting for logout to complete');
+      await this.retry.waitFor('logout to complete', async () => {
+        // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
+        // current page and lose the state (e.g. unsaved changes) via native alert dialog.
+        const alert = await this.browser.getAlert();
+        if (alert?.accept) {
+          await alert.accept();
+        }
+
+        // Timeout has been doubled here in attempt to quiet the flakiness
+        await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
+          const urlBefore = await this.browser.getCurrentUrl();
+          await this.delay(1000);
+          const urlAfter = await this.browser.getCurrentUrl();
+          this.log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
+          return urlAfter === urlBefore;
+        });
+
+        const currentUrl = await this.browser.getCurrentUrl();
+        if (this.config.get('serverless')) {
+          // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+          return currentUrl.includes('/login') || currentUrl.includes('/projects');
+        } else {
+          return !currentUrl.includes('/logout');
+        }
+      });
+    }
   }
 
   async clickRolesSection() {
@@ -581,7 +618,11 @@ export class SecurityPageObject extends FtrService {
 
     if (roleObj.elasticsearch.indices[0].query) {
       await this.testSubjects.click('restrictDocumentsQuery0');
-      await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
+
+      await this.monacoEditor.typeCodeEditorValue(
+        roleObj.elasticsearch.indices[0].query,
+        'kibanaCodeEditor'
+      );
     }
 
     await this.testSubjects.click('addSpacePrivilegeButton');
@@ -635,10 +676,6 @@ export class SecurityPageObject extends FtrService {
   }
 
   async selectRole(role: string) {
-    const dropdown = await this.testSubjects.find('rolesDropdown');
-    const input = await dropdown.findByCssSelector('input');
-    await input.type(role);
-    await this.find.clickByCssSelector(`[role=option][title="${role}"]`);
-    await this.testSubjects.click('comboBoxToggleListButton');
+    await this.comboBox.set('rolesDropdown', role);
   }
 }

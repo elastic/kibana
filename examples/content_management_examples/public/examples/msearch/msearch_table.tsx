@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { useContentClient } from '@kbn/content-management-plugin/public';
-import React from 'react';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import React from 'react';
 
 const LISTING_LIMIT = 1000;
 
@@ -26,14 +27,20 @@ export const MSearchTable = () => {
     const { hits, pagination } = await contentClient.mSearch<UserContentCommonSchema>({
       query: {
         text: searchQuery,
-        limit: LISTING_LIMIT,
-        cursor: '1',
         tags: {
           included: refs?.references?.map((ref) => ref.id),
           excluded: refs?.referencesToExclude?.map((ref) => ref.id),
         },
       },
-      contentTypes: [{ contentTypeId: 'map' }], // TODO: improve types to not require objects here?
+      contentTypes: [
+        { contentTypeId: 'map' },
+        { contentTypeId: 'dashboard' },
+        { contentTypeId: 'visualization' },
+        { contentTypeId: 'lens' },
+        { contentTypeId: 'search' },
+        { contentTypeId: 'index-pattern' },
+        { contentTypeId: 'event-annotation-group' },
+      ], // TODO: improve types to not require objects here?
     });
 
     // TODO: needs to have logic of extracting common schema from an unknown mSearch hit: hits.map(hit => cm.convertToCommonSchema(hit))
@@ -54,7 +61,7 @@ export const MSearchTable = () => {
       title={`MSearch Demo`}
       urlStateEnabled={false}
       emptyPrompt={<>No data found. Try to install some sample data first.</>}
-      onClickTitle={(item) => {
+      getOnClickTitle={(item) => () => {
         alert(`Clicked item ${item.attributes.title} (${item.id})`);
       }}
     />

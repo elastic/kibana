@@ -11,7 +11,11 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { EndpointPendingActions, Immutable } from '../../../../../common/endpoint/types';
+import type {
+  EndpointPendingActions,
+  EndpointSortableField,
+  Immutable,
+} from '../../../../../common/endpoint/types';
 import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -35,6 +39,12 @@ export const pageIndex = (state: Immutable<EndpointState>): number => state.page
 
 export const pageSize = (state: Immutable<EndpointState>): number => state.pageSize;
 
+export const sortField = (state: Immutable<EndpointState>): EndpointSortableField =>
+  state.sortField;
+
+export const sortDirection = (state: Immutable<EndpointState>): 'asc' | 'desc' =>
+  state.sortDirection;
+
 export const totalHits = (state: Immutable<EndpointState>): number => state.total;
 
 export const listLoading = (state: Immutable<EndpointState>): boolean => state.loading;
@@ -44,6 +54,8 @@ export const listError = (state: Immutable<EndpointState>) => state.error;
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
 export const policyItemsLoading = (state: Immutable<EndpointState>) => state.policyItemsLoading;
+
+export const isInitialized = (state: Immutable<EndpointState>) => state.isInitialized;
 
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
@@ -94,6 +106,8 @@ export const uiQueryParams: (
         'selected_endpoint',
         'show',
         'admin_query',
+        'sort_field',
+        'sort_direction',
       ];
 
       const allowedShowValues: Array<EndpointIndexUIQueryParams['show']> = [
@@ -117,6 +131,12 @@ export const uiQueryParams: (
             if (allowedShowValues.includes(value as EndpointIndexUIQueryParams['show'])) {
               data[key] = value as EndpointIndexUIQueryParams['show'];
             }
+          } else if (key === 'sort_direction') {
+            if (['asc', 'desc'].includes(value)) {
+              data[key] = value as EndpointIndexUIQueryParams['sort_direction'];
+            }
+          } else if (key === 'sort_field') {
+            data[key] = value as EndpointSortableField;
           } else {
             data[key] = value;
           }

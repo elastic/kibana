@@ -21,9 +21,9 @@ export {
 } from './axis/extent';
 export * from './coloring';
 export * from './helpers';
-export { LegendActionPopover } from './legend/action/legend_action_popover';
 export { ValueLabelsSettings } from './value_labels_settings';
 export { AxisTitleSettings } from './axis/title/axis_title_settings';
 export { AxisTicksSettings } from './axis/ticks/axis_ticks_settings';
 export * from './static_header';
 export * from './vis_label';
+export { ExperimentalBadge } from './experimental_badge';

@@ -16,8 +16,9 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
 } from '@kbn/core-http-server';
-import { HttpServerSetup } from './http_server';
-import { ExternalUrlConfig } from './external_url';
+import type { HttpServerSetup } from './http_server';
+import type { ExternalUrlConfig } from './external_url';
+import type { InternalStaticAssets } from './static_assets';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -25,6 +26,7 @@ export interface InternalHttpServicePreboot
     InternalHttpServiceSetup,
     | 'auth'
     | 'csp'
+    | 'staticAssets'
     | 'basePath'
     | 'externalUrl'
     | 'registerStaticDir'
@@ -42,9 +44,10 @@ export interface InternalHttpServicePreboot
 
 /** @internal */
 export interface InternalHttpServiceSetup
-  extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext'> {
+  extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext' | 'staticAssets'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
+  staticAssets: InternalStaticAssets;
   externalUrl: ExternalUrlConfig;
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
@@ -64,7 +67,8 @@ export interface InternalHttpServiceSetup
 }
 
 /** @internal */
-export interface InternalHttpServiceStart extends HttpServiceStart {
+export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'staticAssets'> {
+  staticAssets: InternalStaticAssets;
   /** Indicates if the http server is listening on the configured port */
   isListening: () => boolean;
 }

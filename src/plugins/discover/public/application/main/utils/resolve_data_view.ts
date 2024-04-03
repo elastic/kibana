@@ -70,7 +70,7 @@ export async function loadDataView({
   let fetchedDataView: DataView | null = null;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId, false, true) : null;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId) : null;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],

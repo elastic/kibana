@@ -40,3 +40,24 @@ export const EDIT_DASHBOARD_BUTTON_TITLE = i18n.translate(
     defaultMessage: `Edit`,
   }
 );
+
+export const EDIT_DASHBOARD_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.editDashboardTitle',
+  {
+    defaultMessage: `Editing new dashboard`,
+  }
+);
+
+export const VIEW_DASHBOARD_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.viewDashboardButtonTitle',
+  {
+    defaultMessage: `Switch to view mode`,
+  }
+);
+
+export const SAVE_DASHBOARD_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.saveDashboardButtonTitle',
+  {
+    defaultMessage: `Save`,
+  }
+);

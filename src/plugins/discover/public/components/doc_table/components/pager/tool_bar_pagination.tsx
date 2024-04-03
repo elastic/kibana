@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import { getRowsPerPageOptions } from '../../../../utils/rows_per_page';
+import { getRowsPerPageOptions } from '@kbn/unified-data-table';
 
 export const MAX_ROWS_PER_PAGE_OPTION = 100;
 

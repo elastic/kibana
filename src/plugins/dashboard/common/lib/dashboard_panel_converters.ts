@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 } from 'uuid';
 import { omit } from 'lodash';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
@@ -17,7 +18,6 @@ export function convertSavedDashboardPanelToPanelState<
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,
-    version: savedDashboardPanel.version,
     gridData: savedDashboardPanel.gridData,
     panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
@@ -26,16 +26,29 @@ export function convertSavedDashboardPanelToPanelState<
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
     } as TEmbeddableInput,
+
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved
+     * to live inside the explicit Embeddable Input. If version information is given here, we'd like to keep it.
+     * It will be removed on Dashboard save
+     */
+    version: savedDashboardPanel.version,
   };
 }
 
 export function convertPanelStateToSavedDashboardPanel(
   panelState: DashboardPanelState,
-  version?: string
+  removeLegacyVersion?: boolean
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
   return {
-    version: version ?? (panelState.version as string), // temporary cast. Version will be mandatory at a later date.
+    /**
+     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
+     * explicit Embeddable Input. If removeLegacyVersion is not passed, we'd like to keep this information for
+     * the time being.
+     */
+    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
+
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
@@ -56,9 +69,26 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Da
 
 export const convertPanelMapToSavedPanels = (
   panels: DashboardPanelMap,
-  versionOverride?: string
+  removeLegacyVersion?: boolean
 ) => {
   return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, versionOverride)
+    convertPanelStateToSavedDashboardPanel(panel, removeLegacyVersion)
   );
+};
+
+/**
+ * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
+ * properly refreshed when navigating between Dashboards
+ */
+export const generateNewPanelIds = (panels: DashboardPanelMap) => {
+  const newPanelsMap: DashboardPanelMap = {};
+  for (const panel of Object.values(panels)) {
+    const newId = v4();
+    newPanelsMap[newId] = {
+      ...panel,
+      gridData: { ...panel.gridData, i: newId },
+      explicitInput: { ...panel.explicitInput, id: newId },
+    };
+  }
+  return newPanelsMap;
 };

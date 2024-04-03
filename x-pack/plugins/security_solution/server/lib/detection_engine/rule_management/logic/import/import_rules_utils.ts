@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
@@ -13,14 +13,13 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
-import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
+import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { createRules } from '../crud/create_rules';
 import { readRules } from '../crud/read_rules';
-import { patchRules } from '../crud/patch_rules';
+import { updateRules } from '../crud/update_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
@@ -42,9 +41,6 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param rulesClient {object}
- * @param savedObjectsClient {object}
- * @param exceptionsClient {object}
- * @param spaceId {string} - space being used during import
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -55,9 +51,6 @@ export const importRules = async ({
   mlAuthz,
   overwriteRules,
   rulesClient,
-  savedObjectsClient,
-  exceptionsClient,
-  spaceId,
   existingLists,
   allowMissingConnectorSecrets,
 }: {
@@ -66,9 +59,6 @@ export const importRules = async ({
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  exceptionsClient: ExceptionListClient | undefined;
-  spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
@@ -78,96 +68,94 @@ export const importRules = async ({
   // otherwise we would output we are success importing 0 rules.
   if (ruleChunks.length === 0) {
     return importRuleResponse;
-  } else {
-    while (ruleChunks.length) {
-      const batchParseObjects = ruleChunks.shift() ?? [];
-      const newImportRuleResponse = await Promise.all(
-        batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
-          const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
+  }
+
+  while (ruleChunks.length) {
+    const batchParseObjects = ruleChunks.shift() ?? [];
+    const newImportRuleResponse = await Promise.all(
+      batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
+        const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {
+          try {
+            if (parsedRule instanceof Error) {
+              // If the JSON object had a validation or parse error then we return
+              // early with the error and an (unknown) for the ruleId
+              resolve(
+                createBulkErrorObject({
+                  statusCode: 400,
+                  message: parsedRule.message,
+                })
+              );
+              return null;
+            }
+
             try {
-              if (parsedRule instanceof Error) {
-                // If the JSON object had a validation or parse error then we return
-                // early with the error and an (unknown) for the ruleId
-                resolve(
-                  createBulkErrorObject({
-                    statusCode: 400,
-                    message: parsedRule.message,
-                  })
-                );
-                return null;
-              }
+              const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
+                rule: parsedRule,
+                existingLists,
+              });
 
-              try {
-                const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
-                  rule: parsedRule,
-                  existingLists,
-                });
+              importRuleResponse = [...importRuleResponse, ...exceptionErrors];
 
-                importRuleResponse = [...importRuleResponse, ...exceptionErrors];
+              throwAuthzError(await mlAuthz.validateRuleType(parsedRule.type));
+              const rule = await readRules({
+                rulesClient,
+                ruleId: parsedRule.rule_id,
+                id: undefined,
+              });
 
-                throwAuthzError(await mlAuthz.validateRuleType(parsedRule.type));
-                const rule = await readRules({
+              if (rule == null) {
+                await createRules({
                   rulesClient,
-                  ruleId: parsedRule.rule_id,
-                  id: undefined,
+                  params: {
+                    ...parsedRule,
+                    exceptions_list: [...exceptions],
+                  },
+                  allowMissingConnectorSecrets,
                 });
-
-                if (rule == null) {
-                  await createRules({
-                    rulesClient,
-                    params: {
-                      ...parsedRule,
-                      exceptions_list: [...exceptions],
-                    },
-                    allowMissingConnectorSecrets,
-                  });
-                  resolve({
-                    rule_id: parsedRule.rule_id,
-                    status_code: 200,
-                  });
-                } else if (rule != null && overwriteRules) {
-                  await patchRules({
-                    rulesClient,
-                    existingRule: rule,
-                    nextParams: {
-                      ...parsedRule,
-                      exceptions_list: [...exceptions],
-                    },
-                    allowMissingConnectorSecrets,
-                    shouldIncrementRevision: false,
-                  });
-                  resolve({
-                    rule_id: parsedRule.rule_id,
-                    status_code: 200,
-                  });
-                } else if (rule != null) {
-                  resolve(
-                    createBulkErrorObject({
-                      ruleId: parsedRule.rule_id,
-                      statusCode: 409,
-                      message: `rule_id: "${parsedRule.rule_id}" already exists`,
-                    })
-                  );
-                }
-              } catch (err) {
+                resolve({
+                  rule_id: parsedRule.rule_id,
+                  status_code: 200,
+                });
+              } else if (rule != null && overwriteRules) {
+                await updateRules({
+                  rulesClient,
+                  existingRule: rule,
+                  ruleUpdate: {
+                    ...parsedRule,
+                    exceptions_list: [...exceptions],
+                  },
+                });
+                resolve({
+                  rule_id: parsedRule.rule_id,
+                  status_code: 200,
+                });
+              } else if (rule != null) {
                 resolve(
                   createBulkErrorObject({
                     ruleId: parsedRule.rule_id,
-                    statusCode: err.statusCode ?? 400,
-                    message: err.message,
+                    statusCode: 409,
+                    message: `rule_id: "${parsedRule.rule_id}" already exists`,
                   })
                 );
               }
-            } catch (error) {
-              reject(error);
+            } catch (err) {
+              resolve(
+                createBulkErrorObject({
+                  ruleId: parsedRule.rule_id,
+                  statusCode: err.statusCode ?? 400,
+                  message: err.message,
+                })
+              );
             }
-          });
-          return [...accum, importsWorkerPromise];
-        }, [])
-      );
-      importRuleResponse = [...importRuleResponse, ...newImportRuleResponse];
-    }
-
-    return importRuleResponse;
+          } catch (error) {
+            reject(error);
+          }
+        });
+        return [...accum, importsWorkerPromise];
+      }, [])
+    );
+    importRuleResponse = [...importRuleResponse, ...newImportRuleResponse];
   }
+
+  return importRuleResponse;
 };

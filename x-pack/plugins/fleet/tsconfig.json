@@ -39,7 +39,6 @@
     "@kbn/home-plugin",
 
     // requiredBundles from ./kibana.json
-    "@kbn/cloud-chat-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/logs-shared-plugin",
@@ -97,7 +96,14 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-file-types",
-    "@kbn/core-http-router-server-mocks",
     "@kbn/core-application-browser",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-http-common",
+    "@kbn/dashboard-plugin",
+    "@kbn/cloud",
+    "@kbn/config",
+    "@kbn/core-http-server-mocks",
+    "@kbn/code-editor",
+    "@kbn/core-test-helpers-model-versions",
   ]
 }

@@ -207,7 +207,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -248,7 +248,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -324,7 +324,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -365,7 +365,7 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('mouseEnter');
 
     await waitForWrapperUpdate(wrapper);
 
@@ -539,53 +539,6 @@ describe('DatatableComponent', () => {
       // set via args
       a: 'center',
       // default for date
-      b: 'left',
-      // default for number
-      c: 'right',
-    });
-  });
-
-  test('it detect last_value filtered metric type', () => {
-    const { data, args } = sampleArgs();
-
-    const column = data.columns[1];
-
-    column.meta = {
-      ...column.meta,
-      field: undefined,
-      type: 'number',
-      sourceParams: { ...column.meta.sourceParams, type: 'filtered_metric' },
-    };
-    data.rows[0].b = 'Hello';
-
-    const wrapper = shallow(
-      <DatatableComponent
-        data={data}
-        args={{
-          ...args,
-          columns: [
-            { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
-            { columnId: 'b', type: 'lens_datatable_column' },
-            { columnId: 'c', type: 'lens_datatable_column' },
-          ],
-          sortingColumnId: 'b',
-          sortingDirection: 'desc',
-        }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
-        dispatchEvent={onDispatchEvent}
-        getType={jest.fn()}
-        renderMode="view"
-        paletteService={chartPluginMock.createPaletteRegistry()}
-        theme={setUpMockTheme}
-        interactive
-        renderComplete={renderComplete}
-      />
-    );
-
-    expect(wrapper.find(DataContext.Provider).prop('value').alignments).toEqual({
-      // set via args
-      a: 'center',
-      // default for string
       b: 'left',
       // default for number
       c: 'right',

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -48,7 +48,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       // validate title
-      const title = await find.byCssSelector('[data-test-subj="header-page-title"]');
+      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
       expect(await title.getVisibleText()).equal(caseTitle);
 
       // validate description
@@ -124,6 +124,112 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
         await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
+      });
+    });
+
+    describe('customFields', () => {
+      it('creates a case with custom fields', async () => {
+        const customFields = [
+          {
+            key: 'valid_key_1',
+            label: 'Summary',
+            type: CustomFieldTypes.TEXT as const,
+            required: false,
+          },
+          {
+            key: 'valid_key_2',
+            label: 'Sync',
+            type: CustomFieldTypes.TOGGLE as const,
+            required: false,
+          },
+        ];
+
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
+
+        const caseTitle = 'test-' + uuidv4();
+        await cases.create.openCreateCasePage();
+
+        // verify custom fields on create case page
+        await testSubjects.existOrFail('create-case-custom-fields');
+
+        await cases.create.setTitle(caseTitle);
+        await cases.create.setDescription('this is a test description');
+
+        // set custom field values
+        const textCustomField = await testSubjects.find(
+          `${customFields[0].key}-text-create-custom-field`
+        );
+        await textCustomField.type('This is a sample text!');
+
+        const toggleCustomField = await testSubjects.find(
+          `${customFields[1].key}-toggle-create-custom-field`
+        );
+        await toggleCustomField.click();
+
+        await cases.create.submitCase();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('case-view-title');
+
+        // validate custom fields
+        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+
+        expect(await summary.getVisibleText()).equal('This is a sample text!');
+
+        const sync = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await sync.getAttribute('aria-checked')).equal('true');
+      });
+
+      it('creates a case with custom fields that have default values', async () => {
+        const customFields = [
+          {
+            key: 'valid_key_3',
+            label: 'Summary required',
+            type: CustomFieldTypes.TEXT as const,
+            defaultValue: 'Default value',
+            required: true,
+          },
+          {
+            key: 'valid_key_4',
+            label: 'Sync required',
+            type: CustomFieldTypes.TOGGLE as const,
+            defaultValue: true,
+            required: true,
+          },
+        ];
+
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
+
+        const caseTitle = 'test-' + uuidv4();
+        await cases.create.openCreateCasePage();
+
+        // verify custom fields on create case page
+        await testSubjects.existOrFail('create-case-custom-fields');
+
+        await cases.create.setTitle(caseTitle);
+        await cases.create.setDescription('this is a test description');
+
+        // submit without touching the custom fields
+        await cases.create.submitCase();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('case-view-title');
+
+        // validate custom fields
+        const textCustomField = await testSubjects.find(
+          `case-text-custom-field-${customFields[0].key}`
+        );
+
+        expect(await textCustomField.getVisibleText()).equal(customFields[0].defaultValue);
+
+        const toggleCustomField = await testSubjects.find(
+          `case-toggle-custom-field-form-field-${customFields[1].key}`
+        );
+        expect(await toggleCustomField.getAttribute('aria-checked')).equal('true');
       });
     });
   });

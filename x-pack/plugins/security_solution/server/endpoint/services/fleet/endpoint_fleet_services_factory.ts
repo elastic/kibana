@@ -13,6 +13,8 @@ import type {
   PackagePolicyClient,
   PackageClient,
 } from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { createInternalSoClient } from '../../utils/create_internal_so_client';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 export interface EndpointFleetServicesFactoryInterface {
@@ -42,7 +44,10 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packages: packageService.asInternalUser,
       packagePolicy,
 
+      endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
+
       internalReadonlySoClient: createInternalReadonlySoClient(this.savedObjectsStart),
+      internalSoClient: createInternalSoClient(this.savedObjectsStart),
     };
   }
 }
@@ -55,6 +60,8 @@ export interface EndpointFleetServicesInterface {
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
   packagePolicy: PackagePolicyClient;
+  /** The `kuery` that can be used to filter for Endpoint integration policies */
+  endpointPolicyKuery: string;
 }
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
@@ -62,4 +69,7 @@ export interface EndpointInternalFleetServicesInterface extends EndpointFleetSer
    * An internal SO client (readonly) that can be used with the Fleet services that require it
    */
   internalReadonlySoClient: SavedObjectsClientContract;
+
+  /** Internal SO client. USE ONLY WHEN ABSOLUTELY NEEDED. Else, use the `internalReadonlySoClient` */
+  internalSoClient: SavedObjectsClientContract;
 }

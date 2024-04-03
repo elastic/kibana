@@ -22,13 +22,25 @@ import { partition } from 'lodash';
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
-import { getAsset, getPathParts } from '../../archive';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type { AssetType, AssetReference, AssetParts, Installation } from '../../../../types';
+import type {
+  AssetType,
+  AssetReference,
+  AssetParts,
+  Installation,
+  PackageSpecTags,
+} from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
+import type { PackageInstallContext } from '../../../../../common/types';
+import {
+  indexPatternTypes,
+  getIndexPatternSavedObjects,
+  makeManagedIndexPatternsGlobal,
+} from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import { KibanaSOReferenceError } from '../../../../errors';
 
 import { withPackageSpan } from '../../packages/utils';
 
@@ -45,7 +57,12 @@ type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof Archive
 };
 export type ArchiveAsset = Pick<
   SavedObject,
-  'id' | 'attributes' | 'migrationVersion' | 'references'
+  | 'id'
+  | 'attributes'
+  | 'migrationVersion' // deprecated
+  | 'references'
+  | 'coreMigrationVersion'
+  | 'typeMigrationVersion'
 > & {
   type: KibanaSavedObjectType;
 };
@@ -72,31 +89,37 @@ const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsse
   [KibanaAssetType.indexPattern]: removeReservedIndexPatterns,
 };
 
-export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
-  const buffer = getAsset(key);
-
-  // cache values are buffers. convert to string / JSON
-  return JSON.parse(buffer.toString('utf8'));
-}
-
 export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
   // convert that to an object
-  return {
+  const so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
-    migrationVersion: asset.migrationVersion || {},
   };
+
+  // migrating deprecated migrationVersion to typeMigrationVersion
+  if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
+    so.typeMigrationVersion = asset.migrationVersion[asset.type];
+  }
+  if (asset.coreMigrationVersion) {
+    so.coreMigrationVersion = asset.coreMigrationVersion;
+  }
+  if (asset.typeMigrationVersion) {
+    so.typeMigrationVersion = asset.typeMigrationVersion;
+  }
+  return so as SavedObjectToBe;
 }
 
 export async function installKibanaAssets(options: {
+  savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
+
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
       return [];
@@ -118,15 +141,23 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  // As we use `import` to create our saved objects, we have to install
-  // their references (the index patterns) at the same time
-  // to prevent a reference error
+  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields.
+  // These don't get retried on conflict, because we expect that they exist once an integration has been installed.
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+  await savedObjectsImporter.import({
+    overwrite: false,
+    readStream: createListStream(indexPatternSavedObjects),
+    createNewCopies: false,
+    refresh: false,
+    managed: true,
+  });
+
+  await makeManagedIndexPatternsGlobal(savedObjectsClient);
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
+    kibanaAssets: assetsToInstall,
   });
 
   return installedAssets;
@@ -140,9 +171,11 @@ export async function installKibanaAssetsAndReferences({
   logger,
   pkgName,
   pkgTitle,
+  packageInstallContext,
   paths,
   installedPkg,
   spaceId,
+  assetTags,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -151,11 +184,13 @@ export async function installKibanaAssetsAndReferences({
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
+  packageInstallContext: PackageInstallContext;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
+  assetTags?: PackageSpecTags[];
 }) {
-  const kibanaAssets = await getKibanaAssets(paths);
+  const kibanaAssets = await getKibanaAssets(packageInstallContext);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
   // save new kibana refs before installing the assets
   const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
@@ -165,6 +200,7 @@ export async function installKibanaAssetsAndReferences({
   );
 
   const importedAssets = await installKibanaAssets({
+    savedObjectsClient,
     logger,
     savedObjectsImporter,
     pkgName,
@@ -179,6 +215,7 @@ export async function installKibanaAssetsAndReferences({
       pkgName,
       spaceId,
       importedAssets,
+      assetTags,
     })
   );
 
@@ -200,7 +237,7 @@ export const deleteKibanaInstalledRefs = async (
   });
 };
 export async function getKibanaAssets(
-  paths: string[]
+  packageInstallContext: PackageInstallContext
 ): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const isKibanaAssetType = (path: string) => {
@@ -209,7 +246,7 @@ export async function getKibanaAssets(
     return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
   };
 
-  const filteredPaths = paths
+  const filteredPaths = packageInstallContext.paths
     .filter(isKibanaAssetType)
     .map<[string, AssetParts]>((path) => [path, getPathParts(path)]);
 
@@ -217,7 +254,16 @@ export async function getKibanaAssets(
   for (const assetType of kibanaAssetTypes) {
     const matching = filteredPaths.filter(([path, parts]) => parts.type === assetType);
 
-    assetArrays.push(Promise.all(matching.map(([path]) => path).map(getKibanaAsset)));
+    assetArrays.push(
+      Promise.all(
+        matching.map(([path]) => {
+          const buffer = getAssetFromAssetsMap(packageInstallContext.assetsMap, path);
+
+          // cache values are buffers. convert to string / JSON
+          return JSON.parse(buffer.toString('utf8'));
+        })
+      )
+    );
   }
 
   const resolvedAssets = await Promise.all(assetArrays);
@@ -295,6 +341,7 @@ export async function installKibanaSavedObjects({
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
         refresh: false,
+        managed: true,
       })
     );
 
@@ -308,7 +355,7 @@ export async function installKibanaSavedObjects({
     );
 
     if (otherErrors?.length) {
-      throw new Error(
+      throw new KibanaSOReferenceError(
         `Encountered ${
           otherErrors.length
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
@@ -346,11 +393,12 @@ export async function installKibanaSavedObjects({
         await savedObjectsImporter.resolveImportErrors({
           readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
+          managed: true,
           retries,
         });
 
       if (resolveErrors?.length) {
-        throw new Error(
+        throw new KibanaSOReferenceError(
           `Encountered ${
             resolveErrors.length
           } errors resolving reference errors: ${formatImportErrorsForLog(resolveErrors)}`

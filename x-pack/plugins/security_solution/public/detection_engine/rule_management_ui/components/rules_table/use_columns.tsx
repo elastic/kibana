@@ -10,16 +10,14 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../common/constants';
-import type {
-  DurationMetric,
-  RuleExecutionSummary,
-} from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
@@ -35,9 +33,9 @@ import {
 import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
 import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';
@@ -46,6 +44,7 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
+import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -58,6 +57,7 @@ interface ColumnsProps {
 
 interface ActionColumnsProps {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }
 
 const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
@@ -90,13 +90,14 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
-            startMlJobsIfNeeded={() => startMlJobs(rule.machine_learning_job_id)}
+            startMlJobsIfNeeded={() => startMlJobs(getMachineLearningJobId(rule))}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||
               (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
+            ruleName={rule.name}
           />
         </EuiToolTip>
       ),
@@ -188,7 +189,7 @@ const useRuleExecutionStatusColumn = ({
 
 const TAGS_COLUMN: TableColumn = {
   field: 'tags',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_TAGS} />,
   align: 'center',
   render: (tags: Rule['tags']) => {
     if (tags == null || tags.length === 0) {
@@ -217,7 +218,7 @@ const TAGS_COLUMN: TableColumn = {
 
 const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_INTEGRATIONS} />,
   align: 'center',
   render: (integrations: Rule['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
@@ -232,8 +233,12 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
-  const actions = useRulesTableActions({ showExceptionsDuplicateConfirmation });
+  const actions = useRulesTableActions({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
 
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
@@ -246,8 +251,12 @@ export const useRulesColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
-  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
+  const actionsColumn = useActionsColumn({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
@@ -354,9 +363,13 @@ export const useMonitoringColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
-  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
+  const actionsColumn = useActionsColumn({
+    showExceptionsDuplicateConfirmation,
+    confirmDeletion,
+  });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const enabledColumn = useEnabledColumn({
@@ -388,7 +401,7 @@ export const useMonitoringColumns = ({
             tooltipContent={i18n.COLUMN_INDEXING_TIMES_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="total_indexing_duration_ms" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -405,7 +418,7 @@ export const useMonitoringColumns = ({
             tooltipContent={i18n.COLUMN_QUERY_TIMES_TOOLTIP}
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="total_search_duration_ms" size="s">
             {value != null ? value.toFixed() : getEmptyTagValue()}
           </EuiText>
@@ -421,31 +434,26 @@ export const useMonitoringColumns = ({
             title={i18n.COLUMN_GAP}
             customTooltip={
               <div style={{ maxWidth: '20px' }}>
-                <PopoverTooltip columnName={i18n.COLUMN_GAP}>
+                <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
                   <EuiText style={{ width: 300 }}>
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
-                        id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
-                        values={{
-                          seeDocs: (
-                            <EuiLink
-                              href={`${docLinks.links.siem.troubleshootGaps}`}
-                              target="_blank"
-                            >
-                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
+                    <FormattedMessage
+                      defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
+                      id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
+                      values={{
+                        seeDocs: (
+                          <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                            {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </EuiText>
                 </PopoverTooltip>
               </div>
             }
           />
         ),
-        render: (value: DurationMetric | undefined) => (
+        render: (value: number | undefined) => (
           <EuiText data-test-subj="gap" size="s">
             {value != null ? moment.duration(value, 'seconds').humanize() : getEmptyTagValue()}
           </EuiText>

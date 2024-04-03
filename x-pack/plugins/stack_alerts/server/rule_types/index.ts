@@ -10,8 +10,12 @@ import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
 
-export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams) {
+export * from './constants';
+
+export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams, isServerless: boolean) {
   registerIndexThreshold(params);
-  registerGeoContainment(params);
+  if (!isServerless) {
+    registerGeoContainment(params);
+  }
   registerEsQuery(params);
 }

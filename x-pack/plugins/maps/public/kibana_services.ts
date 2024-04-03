@@ -33,6 +33,12 @@ export function setIsCloudEnabled(enabled: boolean) {
 }
 export const getIsCloud = () => isCloudEnabled;
 
+let spaceId = 'default';
+export const getSpaceId = () => spaceId;
+export const setSpaceId = (_spaceId: string) => {
+  spaceId = _spaceId;
+};
+
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.dataViews;
@@ -76,6 +82,7 @@ export const getContentManagement = () => pluginsStart.contentManagement;
 export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };
+export const getServerless = () => pluginsStart.serverless;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

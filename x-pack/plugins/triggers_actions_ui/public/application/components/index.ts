@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 export { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 export { TextAreaWithMessageVariables } from './text_area_with_message_variables';

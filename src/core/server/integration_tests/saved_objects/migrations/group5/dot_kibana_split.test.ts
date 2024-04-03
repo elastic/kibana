@@ -134,7 +134,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -149,7 +149,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -164,7 +164,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -181,6 +181,7 @@ describe('split .kibana index into multiple system indices', () => {
             "action_task_params",
             "alert",
             "api_key_pending_invalidation",
+            "apm-custom-dashboards",
             "apm-indices",
             "apm-server-schema",
             "apm-service-group",
@@ -196,6 +197,7 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-connector-mappings",
             "cases-telemetry",
             "cases-user-actions",
+            "cloud-security-posture-settings",
             "config",
             "config-global",
             "connector_token",
@@ -221,6 +223,7 @@ describe('split .kibana index into multiple system indices', () => {
             "guided-onboarding-guide-state",
             "guided-onboarding-plugin-state",
             "index-pattern",
+            "infra-custom-dashboards",
             "infrastructure-monitoring-log-view",
             "infrastructure-ui-source",
             "ingest-agent-policies",
@@ -233,8 +236,10 @@ describe('split .kibana index into multiple system indices', () => {
             "legacy-url-alias",
             "lens",
             "lens-ui-telemetry",
+            "links",
             "maintenance-window",
             "map",
+            "metrics-data-source",
             "metrics-explorer-view",
             "ml-job",
             "ml-module",
@@ -245,7 +250,9 @@ describe('split .kibana index into multiple system indices', () => {
             "osquery-pack",
             "osquery-pack-asset",
             "osquery-saved-query",
+            "policy-settings-protection-updates-note",
             "query",
+            "risk-engine-configuration",
             "rules-settings",
             "sample-data-telemetry",
             "search-session",

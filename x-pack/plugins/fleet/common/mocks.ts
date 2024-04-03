@@ -6,10 +6,10 @@
  */
 
 import type {
-  PostDeletePackagePoliciesResponse,
+  AgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
-  AgentPolicy,
+  PostDeletePackagePoliciesResponse,
 } from './types';
 import type { FleetAuthz } from './authz';
 import { dataTypes, ENDPOINT_PRIVILEGES } from './constants';
@@ -80,8 +80,15 @@ export const createFleetAuthzMock = (): FleetAuthz => {
     fleet: {
       all: true,
       setup: true,
+      readAgents: true,
       readEnrollmentTokens: true,
       readAgentPolicies: true,
+      allAgentPolicies: true,
+      allAgents: true,
+      allSettings: true,
+      readSettings: true,
+      addAgents: true,
+      addFleetServers: true,
     },
     integrations: {
       readPackageInfo: true,
@@ -106,6 +113,12 @@ export const createFleetAuthzMock = (): FleetAuthz => {
           canGetTransform: { executePackageAction: true },
           canStartStopTransform: { executePackageAction: true },
         },
+      },
+    },
+    endpointExceptionsPrivileges: {
+      actions: {
+        showEndpointExceptions: true,
+        crudEndpointExceptions: true,
       },
     },
   };

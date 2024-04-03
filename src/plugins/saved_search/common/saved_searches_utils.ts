@@ -9,10 +9,11 @@
 import { SavedSearch, SavedSearchAttributes } from '.';
 
 export const fromSavedSearchAttributes = (
-  id: string,
+  id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
-  searchSource: SavedSearch['searchSource']
+  searchSource: SavedSearch['searchSource'],
+  managed: boolean
 ): SavedSearch => ({
   id,
   searchSource,
@@ -26,11 +27,14 @@ export const fromSavedSearchAttributes = (
   viewMode: attributes.viewMode,
   hideAggregatedPreview: attributes.hideAggregatedPreview,
   rowHeight: attributes.rowHeight,
+  headerRowHeight: attributes.headerRowHeight,
   isTextBasedQuery: attributes.isTextBasedQuery,
   usesAdHocDataView: attributes.usesAdHocDataView,
   timeRestore: attributes.timeRestore,
   timeRange: attributes.timeRange,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
+  sampleSize: attributes.sampleSize,
   breakdownField: attributes.breakdownField,
+  managed,
 });

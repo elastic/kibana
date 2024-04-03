@@ -5,15 +5,12 @@
  * 2.0.
  */
 
+import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import rison from '@kbn/rison';
-import {
-  API_GET_ILM_POLICY_STATUS,
-  API_MIGRATE_ILM_POLICY_URL,
-} from '@kbn/reporting-plugin/common/constants';
-import { JobParamsCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource/types';
-import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNGDeprecated } from '@kbn/reporting-plugin/server/export_types/png/types';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/export_types/printable_pdf/types';
+import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -53,8 +50,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     );
   };
 
-  const initEcommerce = async () => {
-    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+  const initEcommerce = async (
+    performance: LoadActionPerfOptions = {
+      batchSize: 300,
+      concurrency: 1,
+    }
+  ) => {
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce', {
+      performance,
+    });
     await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
@@ -135,13 +139,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const downloadCsv = async (username: string, password: string, job: JobParamsDownloadCSV) => {
-    return await supertestWithoutAuth
-      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'xxx')
-      .send(job);
-  };
   const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
@@ -150,10 +147,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNGDeprecated) => {
+  const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/png`)
+      .post(`/api/reporting/generate/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -200,7 +197,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     const {
       body: [job],
     } = await supertestWithoutAuth
-      .get(`/api/reporting/jobs/list?page=0&ids=${id}`)
+      .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send()
@@ -223,7 +220,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const checkIlmMigrationStatus = async (username: string, password: string) => {
     log.debug('ReportingAPI.checkIlmMigrationStatus');
     const { body } = await supertestWithoutAuth
-      .get(API_GET_ILM_POLICY_STATUS)
+      .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
@@ -234,7 +231,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     log.debug('ReportingAPI.migrateReportingIndices');
     try {
       await supertestWithoutAuth
-        .put(API_MIGRATE_ILM_POLICY_URL)
+        .put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
         .auth(username, password)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
@@ -269,15 +266,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
     REPORTING_ROLE,
-    routes: {
-      API_GET_ILM_POLICY_STATUS,
-      API_MIGRATE_ILM_POLICY_URL,
-    },
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
     createTestReportingUser,
-    downloadCsv,
     generatePdf,
     generatePng,
     generateCsv,

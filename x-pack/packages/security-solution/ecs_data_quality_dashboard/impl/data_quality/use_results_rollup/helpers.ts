@@ -12,6 +12,7 @@ import {
   getSizeInBytes,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
+  getTotalPatternSameFamily,
 } from '../helpers';
 import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../types';
 
@@ -65,6 +66,18 @@ export const getTotalIncompatible = (
     : undefined;
 };
 
+export const getTotalSameFamily = (
+  patternRollups: Record<string, PatternRollup>
+): number | undefined => {
+  const allRollups = Object.values(patternRollups);
+  const anyRollupsHaveResults = allRollups.some(({ results }) => results != null);
+
+  // only return the total when at least one `PatternRollup` has results:
+  return anyRollupsHaveResults
+    ? allRollups.reduce((acc, { results }) => acc + (getTotalPatternSameFamily(results) ?? 0), 0)
+    : undefined;
+};
+
 export const getTotalIndicesChecked = (patternRollups: Record<string, PatternRollup>): number => {
   const allRollups = Object.values(patternRollups);
 
@@ -74,22 +87,12 @@ export const getTotalIndicesChecked = (patternRollups: Record<string, PatternRol
   );
 };
 
-export const onPatternRollupUpdated = ({
-  patternRollup,
-  patternRollups,
-}: {
-  patternRollup: PatternRollup;
-  patternRollups: Record<string, PatternRollup>;
-}): Record<string, PatternRollup> => ({
-  ...patternRollups,
-  [patternRollup.pattern]: patternRollup,
-});
-
 export const updateResultOnCheckCompleted = ({
   error,
   formatBytes,
   formatNumber,
   indexName,
+  isILMAvailable,
   partitionedFieldMetadata,
   pattern,
   patternRollups,
@@ -98,6 +101,7 @@ export const updateResultOnCheckCompleted = ({
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
+  isILMAvailable: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
   patternRollups: Record<string, PatternRollup>;
@@ -108,7 +112,7 @@ export const updateResultOnCheckCompleted = ({
     const ilmExplain = patternRollup.ilmExplain;
 
     const ilmPhase: IlmPhase | undefined =
-      ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined;
+      ilmExplain != null ? getIlmPhase(ilmExplain[indexName], isILMAvailable) : undefined;
 
     const docsCount = getIndexDocsCountFromRollup({
       indexName,
@@ -127,6 +131,7 @@ export const updateResultOnCheckCompleted = ({
             formatNumber,
             ilmPhase,
             indexName,
+            isILMAvailable,
             partitionedFieldMetadata,
             patternDocsCount,
             sizeInBytes,
@@ -134,6 +139,8 @@ export const updateResultOnCheckCompleted = ({
         : [];
 
     const incompatible = partitionedFieldMetadata?.incompatible.length;
+    const sameFamily = partitionedFieldMetadata?.sameFamily.length;
+    const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
 
     return {
       ...patternRollups,
@@ -149,6 +156,8 @@ export const updateResultOnCheckCompleted = ({
             indexName,
             markdownComments,
             pattern,
+            sameFamily,
+            checkedAt,
           },
         },
       },

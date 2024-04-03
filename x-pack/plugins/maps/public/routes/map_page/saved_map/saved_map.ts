@@ -45,6 +45,7 @@ import {
   getSavedObjectsTagging,
   getTimeFilter,
   getUsageCollection,
+  getServerless,
 } from '../../../kibana_services';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -84,6 +85,7 @@ export class SavedMap {
   private readonly _store: MapStore;
   private _tags: string[] = [];
   private _defaultLayerWizard: string;
+  private _managed: boolean;
 
   constructor({
     defaultLayers = [],
@@ -113,6 +115,7 @@ export class SavedMap {
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
     this._defaultLayerWizard = defaultLayerWizard || '';
+    this._managed = false;
   }
 
   public getStore() {
@@ -136,6 +139,7 @@ export class SavedMap {
       if (metaInfo?.sharingSavedObjectProps) {
         this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
       }
+      this._managed = Boolean(metaInfo?.managed);
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
@@ -331,15 +335,23 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
-    const breadcrumbs = getBreadcrumbs({
-      pageTitle: this._getPageTitle(),
-      isByValue: this.isByValue(),
-      getHasUnsavedChanges: this.hasUnsavedChanges,
-      originatingApp: this._originatingApp,
-      getAppNameFromId: this._getStateTransfer().getAppNameFromId,
-      history,
-    });
-    getCoreChrome().setBreadcrumbs(breadcrumbs);
+    if (getServerless()) {
+      // TODO: https://github.com/elastic/kibana/issues/163488
+      // for now, serverless breadcrumbs only set the title,
+      // the rest of the breadcrumbs are handled by the serverless navigation
+      // the serverless navigation is not yet aware of the byValue/originatingApp context
+      getServerless()!.setBreadcrumbs({ text: this._getPageTitle() });
+    } else {
+      const breadcrumbs = getBreadcrumbs({
+        pageTitle: this._getPageTitle(),
+        isByValue: this.isByValue(),
+        getHasUnsavedChanges: this.hasUnsavedChanges,
+        originatingApp: this._originatingApp,
+        getAppNameFromId: this._getStateTransfer().getAppNameFromId,
+        history,
+      });
+      getCoreChrome().setBreadcrumbs(breadcrumbs);
+    }
   }
 
   public getSavedObjectId(): string | undefined {
@@ -419,6 +431,10 @@ export class SavedMap {
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
     return this._sharingSavedObjectProps;
+  }
+
+  public isManaged(): boolean {
+    return this._managed;
   }
 
   public isByValue(): boolean {

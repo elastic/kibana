@@ -5,40 +5,65 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import {
   FONTS_API_PATH,
   MVT_GETTILE_API_PATH,
   MVT_GETGRIDTILE_API_PATH,
 } from '../../../common/constants';
-import { getHttp } from '../../kibana_services';
 
-const FONTS = getHttp().basePath.prepend(FONTS_API_PATH);
-const GETTILE = getHttp().basePath.prepend(MVT_GETTILE_API_PATH);
-const GETGRIDTILE = getHttp().basePath.prepend(MVT_GETGRIDTILE_API_PATH);
+/**
+ * This URL could be used from inside a Worker which may have a different base
+ * URL. This function takes a string that may be a path and converts it to an
+ * absolute URL.
+ */
+function prepareAbsoluteUrl(pathOrUrl: string): string {
+  pathOrUrl = pathOrUrl.trim();
+  if (pathOrUrl.startsWith('/')) {
+    return new URL(pathOrUrl, window.location.origin).toString();
+  }
+  return pathOrUrl;
+}
 
-export function transformRequest(url: string, resourceType: string | undefined) {
-  if (resourceType === 'Glyphs' && url.startsWith(FONTS)) {
+/**
+ * @param pathOrUrl - Assumed to be a full URL or a path starting with "/"
+ * @param resourceType - Indicator of what type of resource is being requested
+ */
+export function transformRequest(pathOrUrl: string, resourceType: string | undefined) {
+  const url = prepareAbsoluteUrl(pathOrUrl);
+  if (resourceType === 'Glyphs' && url.includes(FONTS_API_PATH)) {
     return {
       url,
       method: 'GET' as 'GET',
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
     };
   }
 
-  if (resourceType === 'Tile' && url.startsWith(GETTILE)) {
+  if (resourceType === 'Tile' && url.includes(MVT_GETTILE_API_PATH)) {
     return {
       url,
       method: 'GET' as 'GET',
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
     };
   }
 
-  if (resourceType === 'Tile' && url.startsWith(GETGRIDTILE)) {
+  if (resourceType === 'Tile' && url.includes(MVT_GETGRIDTILE_API_PATH)) {
     return {
       url,
       method: 'GET' as 'GET',
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
     };
   }
 

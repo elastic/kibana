@@ -7,25 +7,39 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RuleComponent, alertToListItem } from './rule';
+import { RuleComponent, alertToListItem, RuleComponentProps } from './rule';
 import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
 import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
-import { mockRule } from './test_helpers';
+import { mockRule, mockLogResponse } from './test_helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
 
-jest.mock('../../../../common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 jest.mock('../../alerts_table/hooks/use_bulk_get_maintenance_windows');
+jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
+  loadExecutionLogAggregations: jest.fn(),
+}));
+
+const { loadExecutionLogAggregations } = jest.requireMock(
+  '../../../lib/rule_api/load_execution_log_aggregations'
+);
 
 const mocks = coreMock.createSetup();
 
@@ -47,6 +61,7 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { waitFor } from '@testing-library/react';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -85,7 +100,29 @@ beforeEach(() => {
     data: maintenanceWindowsMap,
     isFetching: false,
   });
+  loadExecutionLogAggregations.mockResolvedValue(mockLogResponse);
 });
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+
+const RuleComponentWithProvider = (props: RuleComponentProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleComponent {...props} />
+    </QueryClientProvider>
+  );
+};
 
 describe('rules', () => {
   it('render a list of rules', async () => {
@@ -98,12 +135,14 @@ describe('rules', () => {
           muted: false,
           actionGroupId: 'default',
           flapping: false,
+          tracked: true,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
           flapping: false,
+          tracked: true,
         },
       },
     });
@@ -116,7 +155,7 @@ describe('rules', () => {
     ];
 
     const wrapper = mountWithIntl(
-      <RuleComponent
+      <RuleComponentWithProvider
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -162,16 +201,18 @@ describe('rules', () => {
         status: 'OK',
         muted: false,
         flapping: false,
+        tracked: true,
       },
       ['us-east']: {
         status: 'OK',
         muted: false,
         flapping: false,
+        tracked: true,
       },
     };
 
     const wrapper = mountWithIntl(
-      <RuleComponent
+      <RuleComponentWithProvider
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -198,11 +239,11 @@ describe('rules', () => {
       mutedInstanceIds: ['us-west', 'us-east'],
     });
     const ruleType = mockRuleType();
-    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false };
-    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false };
+    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false, tracked: true };
+    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false, tracked: true };
 
     const wrapper = mountWithIntl(
-      <RuleComponent
+      <RuleComponentWithProvider
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -213,11 +254,13 @@ describe('rules', () => {
               status: 'OK',
               muted: false,
               flapping: false,
+              tracked: true,
             },
             'us-east': {
               status: 'OK',
               muted: false,
               flapping: false,
+              tracked: true,
             },
           },
         })}
@@ -245,6 +288,7 @@ describe('alertToListItem', () => {
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -255,6 +299,7 @@ describe('alertToListItem', () => {
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: false,
+      tracked: true,
     });
   });
 
@@ -265,6 +310,7 @@ describe('alertToListItem', () => {
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -275,6 +321,7 @@ describe('alertToListItem', () => {
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: false,
+      tracked: true,
     });
   });
 
@@ -286,6 +333,7 @@ describe('alertToListItem', () => {
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -296,6 +344,7 @@ describe('alertToListItem', () => {
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: true,
+      tracked: true,
     });
   });
 
@@ -305,6 +354,7 @@ describe('alertToListItem', () => {
       muted: false,
       actionGroupId: 'default',
       flapping: false,
+      tracked: true,
     };
 
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
@@ -315,6 +365,7 @@ describe('alertToListItem', () => {
       duration: 0,
       sortPriority: 0,
       isMuted: false,
+      tracked: true,
     });
   });
 
@@ -324,6 +375,7 @@ describe('alertToListItem', () => {
       muted: true,
       actionGroupId: 'default',
       flapping: false,
+      tracked: true,
     };
     expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
@@ -333,6 +385,7 @@ describe('alertToListItem', () => {
       duration: 0,
       sortPriority: 1,
       isMuted: true,
+      tracked: true,
     });
   });
 });
@@ -348,7 +401,7 @@ describe('execution duration overview', () => {
     const ruleSummary = mockRuleSummary();
 
     const wrapper = mountWithIntl(
-      <RuleComponent
+      <RuleComponentWithProvider
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -375,7 +428,7 @@ describe('disable/enable functionality', () => {
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
     const wrapper = mountWithIntl(
-      <RuleComponent
+      <RuleComponentWithProvider
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -397,7 +450,7 @@ describe('disable/enable functionality', () => {
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
     const wrapper = mountWithIntl(
-      <RuleComponent
+      <RuleComponentWithProvider
         {...mockAPIs}
         rule={rule}
         ruleType={ruleType}
@@ -427,12 +480,14 @@ describe('tabbed content', () => {
           muted: false,
           actionGroupId: 'default',
           flapping: false,
+          tracked: true,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
           flapping: false,
+          tracked: true,
         },
       },
     });
@@ -514,6 +569,7 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
         muted: false,
         actionGroupId: 'testActionGroup',
         flapping: false,
+        tracked: true,
       },
     },
     executionDuration: {

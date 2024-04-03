@@ -7,13 +7,29 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import {
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import { stringify } from '../../utils/stringify';
+import { getResponseActionsClient } from '../../services';
+import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type {
   NoParametersRequestSchema,
-  KillOrSuspendProcessRequestSchema,
-  EndpointActionGetFileSchema,
+  ResponseActionsRequestBody,
+  ExecuteActionRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
+import {
   ExecuteActionRequestSchema,
-  type ResponseActionBodySchema,
-} from '../../../../common/endpoint/schema/actions';
+  EndpointActionGetFileSchema,
+  IsolateRouteRequestSchema,
+  KillProcessRouteRequestSchema,
+  SuspendProcessRouteRequestSchema,
+  UnisolateRouteRequestSchema,
+  GetProcessesRouteRequestSchema,
+  UploadActionRequestSchema,
+} from '../../../../common/api/endpoint';
+
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
@@ -24,13 +40,14 @@ import {
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
   EXECUTE_ROUTE,
+  UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointActionDataParameterTypes,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
   ActionDetails,
-  HostMetadata,
+  KillOrSuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -39,8 +56,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { registerActionFileUploadRoute } from './file_upload_handler';
-import { updateCases } from '../../services/actions/create/update_cases';
+import { errorHandler } from '../error_handler';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -61,7 +77,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: IsolateRouteRequestSchema,
         },
       },
       withEndpointAuthz({ all: ['canIsolateHost'] }, logger, redirectHandler(ISOLATE_HOST_ROUTE_V2))
@@ -80,7 +96,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: UnisolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -100,7 +116,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: IsolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -120,7 +136,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: UnisolateRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -140,7 +156,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: KillOrSuspendProcessRequestSchema,
+          request: KillProcessRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -163,7 +179,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: KillOrSuspendProcessRequestSchema,
+          request: SuspendProcessRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -186,7 +202,7 @@ export function registerResponseActionRoutes(
       {
         version: '2023-10-31',
         validate: {
-          request: NoParametersRequestSchema,
+          request: GetProcessesRouteRequestSchema,
         },
       },
       withEndpointAuthz(
@@ -236,7 +252,33 @@ export function registerResponseActionRoutes(
       )
     );
 
-  registerActionFileUploadRoute(router, endpointContext);
+  router.versioned
+    .post({
+      access: 'public',
+      path: UPLOAD_ROUTE,
+      options: {
+        authRequired: true,
+        tags: ['access:securitySolution'],
+        body: {
+          accepts: ['multipart/form-data'],
+          output: 'stream',
+          maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: UploadActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'upload')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -245,43 +287,110 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof ResponseActionBodySchema>,
+  ResponseActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
+  const logger = endpointContext.logFactory.get('responseActionsHandler');
+
   return async (context, req, res) => {
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
 
-    let action: ActionDetails;
-
-    try {
-      const createActionPayload = { ...req.body, command, user };
-      const endpointData = await endpointContext.service
-        .getEndpointMetadataService()
-        .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
-      const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
-
-      action = await endpointContext.service
-        .getActionCreateService()
-        .createAction(createActionPayload, agentIds);
-
-      // update cases
-      const casesClient = await endpointContext.service.getCasesClient(req);
-      await updateCases({ casesClient, createActionPayload, endpointData });
-    } catch (err) {
-      return res.customError({
-        statusCode: 500,
-        body: err,
-      });
+    // Note:  because our API schemas are defined as module static variables (as opposed to a
+    //        `getter` function), we need to include this additional validation here, since
+    //        `agent_type` is included in the schema independent of the feature flag
+    if (
+      req.body.agent_type === 'sentinel_one' &&
+      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+    ) {
+      return errorHandler(
+        logger,
+        res,
+        new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
+      );
     }
 
-    const { action: actionId, ...data } = action;
-    return res.ok({
-      body: {
-        action: actionId,
-        data,
-      },
-    });
+    const user = endpointContext.service.security?.authc.getCurrentUser(req);
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const casesClient = await endpointContext.service.getCasesClient(req);
+    const connectorActions = (await context.actions).getActionsClient();
+    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+      req.body.agent_type || 'endpoint',
+      {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions,
+      }
+    );
+
+    try {
+      let action: ActionDetails;
+
+      switch (command) {
+        case 'isolate':
+          action = await responseActionsClient.isolate(req.body);
+          break;
+
+        case 'unisolate':
+          action = await responseActionsClient.release(req.body);
+          break;
+
+        case 'running-processes':
+          action = await responseActionsClient.runningProcesses(req.body);
+          break;
+
+        case 'execute':
+          action = await responseActionsClient.execute(req.body as ExecuteActionRequestBody);
+          break;
+
+        case 'suspend-process':
+          action = await responseActionsClient.suspendProcess(
+            req.body as KillOrSuspendProcessRequestBody
+          );
+          break;
+
+        case 'kill-process':
+          action = await responseActionsClient.killProcess(
+            req.body as KillOrSuspendProcessRequestBody
+          );
+          break;
+
+        case 'get-file':
+          action = await responseActionsClient.getFile(
+            req.body as ResponseActionGetFileRequestBody
+          );
+          break;
+
+        case 'upload':
+          action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
+          break;
+
+        default:
+          throw new CustomHttpRequestError(
+            `No handler found for response action command: [${command}]`,
+            501
+          );
+      }
+
+      const { action: actionId, ...data } = action;
+
+      // `action` is deprecated, but still returned in order to ensure backwards compatibility
+      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+        ? {
+            action: actionId ?? data.id ?? '',
+          }
+        : {};
+
+      return res.ok({
+        body: {
+          ...legacyResponseData,
+          data,
+        },
+      });
+    } catch (err) {
+      return errorHandler(logger, res, err);
+    }
   };
 }
 

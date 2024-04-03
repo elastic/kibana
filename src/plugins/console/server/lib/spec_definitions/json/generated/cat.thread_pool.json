@@ -1,22 +1,32 @@
 {
   "cat.thread_pool": {
     "url_params": {
-      "format": "",
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
+      "format": [
+        "text"
       ],
-      "local": "__flag__",
-      "master_timeout": "",
       "h": [],
       "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "s": [],
-      "v": "__flag__"
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
     },
     "methods": [
       "GET"
@@ -25,6 +35,10 @@
       "_cat/thread_pool",
       "_cat/thread_pool/{thread_pool_patterns}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-thread-pool.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-thread-pool.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -11,7 +11,8 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HealthTruncateText } from '../../../../common/components/health_truncate_text';
 import { getCapitalizedStatusText, getStatusColor } from './utils';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 interface RuleStatusBadgeProps {
   status: RuleExecutionStatus | null | undefined;
@@ -29,7 +30,8 @@ const RuleStatusBadgeComponent = ({
   showTooltip = true,
 }: RuleStatusBadgeProps) => {
   const isFailedStatus =
-    status === RuleExecutionStatus.failed || status === RuleExecutionStatus['partial failure'];
+    status === RuleExecutionStatusEnum.failed ||
+    status === RuleExecutionStatusEnum['partial failure'];
   const statusText = getCapitalizedStatusText(status);
 
   const statusTooltip = isFailedStatus && message ? message : statusText;

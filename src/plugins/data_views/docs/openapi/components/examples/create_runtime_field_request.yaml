@@ -1,0 +1,11 @@
+summary: Create a runtime field.
+value:
+  {
+  "name": "runtimeFoo",
+  "runtimeField": {
+     "type": "long",
+     "script": {
+        "source": 'emit(doc["foo"].value)'
+      }
+    }
+  }

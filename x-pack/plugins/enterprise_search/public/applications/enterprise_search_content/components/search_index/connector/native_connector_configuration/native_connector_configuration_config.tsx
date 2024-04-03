@@ -7,27 +7,53 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorStatus } from '../../../../../../../common/types/connectors';
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components/configuration/connector_configuration';
+
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
+
+import { Status } from '../../../../../../../common/types/api';
 
 import { docLinks } from '../../../../../shared/doc_links';
+import { HttpLogic } from '../../../../../shared/http';
+import { LicensingLogic } from '../../../../../shared/licensing';
 
-import { ConnectorConfigurationConfig } from '../connector_configuration_config';
-import { ConnectorDefinition } from '../types';
+import { ConnectorConfigurationApiLogic } from '../../../../api/connector/update_connector_configuration_api_logic';
 
 interface NativeConnectorConfigurationConfigProps {
+  connector: Connector;
   nativeConnector: ConnectorDefinition;
   status: ConnectorStatus;
 }
 
 export const NativeConnectorConfigurationConfig: React.FC<
   NativeConnectorConfigurationConfigProps
-> = ({ nativeConnector, status }) => {
+> = ({ connector, nativeConnector, status }) => {
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
+  const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
+  const { http } = useValues(HttpLogic);
   return (
-    <ConnectorConfigurationConfig>
+    <ConnectorConfigurationComponent
+      connector={connector}
+      hasPlatinumLicense={hasPlatinumLicense}
+      isLoading={updateStatus === Status.LOADING}
+      saveConfig={(configuration) =>
+        makeRequest({
+          configuration,
+          connectorId: connector.id,
+        })
+      }
+      subscriptionLink={docLinks.licenseManagement}
+      stackManagementLink={http.basePath.prepend('/app/management/stack/license_management')}
+    >
       <EuiText size="s">
         {i18n.translate(
           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
@@ -75,14 +101,13 @@ export const NativeConnectorConfigurationConfig: React.FC<
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
               {
-                defaultMessage:
-                  'Your connector {name} has connected to Enterprise Search successfully.',
+                defaultMessage: 'Your connector {name} has connected to Search successfully.',
                 values: { name: nativeConnector.name },
               }
             )}
           />
         </>
       )}
-    </ConnectorConfigurationConfig>
+    </ConnectorConfigurationComponent>
   );
 };

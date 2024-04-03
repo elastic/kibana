@@ -9,6 +9,7 @@
 import { chain } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_INDEX_TYPES_MAP,
@@ -114,7 +115,16 @@ describe('migrations v2 model', () => {
         ],
       },
     },
+    indexTypes: ['config'],
     knownTypes: ['dashboard', 'config'],
+    latestMappingsVersions: {
+      config: '10.3.0',
+      dashboard: '10.3.0',
+    },
+    hashToVersionMap: {
+      'config|someHash': '10.1.0',
+      'dashboard|anotherHash': '10.2.0',
+    },
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
       resolveMigrationFailures: 'https://someurl.co/',
@@ -125,6 +135,7 @@ describe('migrations v2 model', () => {
     waitForMigrationCompletion: false,
     mustRelocateDocuments: false,
     indexTypesMap: DEFAULT_INDEX_TYPES_MAP,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
   const postInitState = {
     ...baseState,
@@ -2600,7 +2611,7 @@ describe('migrations v2 model', () => {
       describe('reindex migration', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if origin mappings did not exist', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'actual_mappings_incomplete' as const,
+            type: 'index_mappings_incomplete' as const,
           });
           const newState = model(
             checkTargetMappingsState,
@@ -2614,8 +2625,8 @@ describe('migrations v2 model', () => {
       describe('compatible migration', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'compared_mappings_changed' as const,
-            updatedHashes: ['dashboard', 'lens', 'namespaces'],
+            type: 'root_fields_changed' as const,
+            updatedFields: ['references'],
           });
           const newState = model(
             checkTargetMappingsState,
@@ -2629,8 +2640,8 @@ describe('migrations v2 model', () => {
 
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if only SO types have changed', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
-            type: 'compared_mappings_changed' as const,
-            updatedHashes: ['dashboard', 'lens'],
+            type: 'types_changed' as const,
+            updatedTypes: ['dashboard', 'lens'],
           });
           const newState = model(
             checkTargetMappingsState,

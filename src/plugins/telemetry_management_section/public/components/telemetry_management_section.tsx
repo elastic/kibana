@@ -21,34 +21,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import { UiSettingMetadata } from '@kbn/management-settings-types';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
-const SEARCH_TERMS: string[] = [
-  'telemetry',
-  'usage data', // Keeping this term for BWC
-  'usage collection',
-  i18n.translate('telemetry.telemetryConstant', {
-    defaultMessage: 'telemetry',
-  }),
-  i18n.translate('telemetry.usageCollectionConstant', {
-    defaultMessage: 'usage collection',
-  }),
-].flatMap((term) => {
-  // Automatically lower-case and split by space the terms from above
-  const lowerCased = term.toLowerCase();
-  return [lowerCased, ...lowerCased.split(' ')];
-});
-
 interface Props {
   telemetryService: TelemetryService;
-  onQueryMatchChange: (searchTermMatches: boolean) => void;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: { text: string };
   toasts: ToastsStart;
   docLinks: DocLinksStart['links'];
 }
@@ -57,9 +43,14 @@ interface State {
   processing: boolean;
   showExample: boolean;
   showSecurityExample: boolean;
-  queryMatches: boolean | null;
   enabled: boolean;
 }
+
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
 
 export class TelemetryManagementSection extends Component<Props, State> {
   constructor(props: Props) {
@@ -69,46 +60,35 @@ export class TelemetryManagementSection extends Component<Props, State> {
       processing: false,
       showExample: false,
       showSecurityExample: false,
-      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
       enabled: this.props.telemetryService.getIsOptedIn() || false,
     };
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: Props) {
-    const { query } = nextProps;
-    const queryMatches = this.checkQueryMatch(query);
-
-    if (queryMatches !== this.state.queryMatches) {
-      this.setState(
-        {
-          queryMatches,
-        },
-        () => {
-          this.props.onQueryMatchChange(queryMatches);
-        }
-      );
-    }
-  }
-
-  checkQueryMatch(query?: { text: string }): boolean {
-    const searchTerm = (query?.text ?? '').toLowerCase();
-    return (
-      this.props.telemetryService.getCanChangeOptInStatus() &&
-      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
-    );
-  }
-
   render() {
     const { telemetryService } = this.props;
-    const { showExample, queryMatches, enabled, processing } = this.state;
+    const { showExample, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
     }
 
-    if (queryMatches !== null && !queryMatches) {
-      return null;
-    }
+    const usageCollectionSetting: UiSettingMetadata = {
+      type: 'boolean',
+      value: true,
+      userValue: enabled,
+      name: i18n.translate('telemetry.provideUsageDataTitle', {
+        defaultMessage: 'Share usage with Elastic',
+      }),
+      // @ts-expect-error
+      description: this.renderDescription(),
+      requiresPageReload: false,
+    };
+
+    // We don't validate the user input on these settings
+    const settingsValidationResponse: ValueValidation = {
+      successfulValidation: true,
+      valid: true,
+    };
 
     return (
       <Fragment>
@@ -138,30 +118,23 @@ export class TelemetryManagementSection extends Component<Props, State> {
             <EuiSplitPanel.Inner>
               {this.maybeGetAppliesSettingMessage()}
               <EuiSpacer size="s" />
-              <LazyField
-                setting={{
-                  type: 'boolean',
-                  name: 'Usage collection',
-                  displayName: i18n.translate('telemetry.provideUsageDataTitle', {
-                    defaultMessage: 'Share usage with Elastic',
-                  }),
-                  value: enabled,
-                  description: this.renderDescription(),
-                  defVal: true,
-                  ariaName: i18n.translate('telemetry.provideUsageDataAriaName', {
-                    defaultMessage: 'Share usage with Elastic',
-                  }),
-                  requiresPageReload: false,
-                  category: [],
-                  isOverridden: false,
-                  isCustom: true,
+              <FieldRowProvider
+                {...{
+                  links: this.props.docLinks.management,
+                  showDanger: (message: string) => this.props.toasts.addDanger(message),
+                  validateChange: async () => settingsValidationResponse,
                 }}
-                loading={processing}
-                docLinks={this.props.docLinks}
-                toasts={this.props.toasts}
-                handleChange={this.toggleOptIn}
-                enableSaving={this.props.enableSaving}
-              />
+              >
+                <FieldRow
+                  field={getFieldDefinition({
+                    id: 'Usage collection',
+                    setting: usageCollectionSetting,
+                    params: { isOverridden: false, isCustom: true },
+                  })}
+                  isSavingEnabled={this.props.enableSaving && !processing}
+                  onFieldChange={this.toggleOptIn}
+                />
+              </FieldRowProvider>
             </EuiSplitPanel.Inner>
           </EuiForm>
         </EuiSplitPanel.Outer>

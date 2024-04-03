@@ -24,8 +24,12 @@ import {
   getFormRow,
   Field,
   Forms,
+  NumericField,
   JsonEditorField,
+  useFormData,
 } from '../../../shared_imports';
+import { DataRetention } from '../../../../../../../common';
+import { UnitField, timeUnits } from '../../../../shared';
 import { useComponentTemplatesContext } from '../../../component_templates_context';
 import { logisticsFormSchema } from './step_logistics_schema';
 
@@ -47,6 +51,13 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     });
 
     const { isValid: isFormValid, submit, getFormData, subscribe } = form;
+
+    const [{ lifecycle }] = useFormData<{
+      lifecycle: DataRetention;
+    }>({
+      form,
+      watch: ['lifecycle.enabled', 'lifecycle.infiniteDataRetention'],
+    });
 
     const { documentation } = useComponentTemplatesContext();
 
@@ -132,6 +143,64 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               euiFieldProps: { disabled: isEditing },
             }}
           />
+        </FormRow>
+
+        {/* Data retention field */}
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.dataRetentionTitle"
+              defaultMessage="Data retention"
+            />
+          }
+          description={
+            <>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.dataRetentionDescription"
+                defaultMessage="Data will be kept at least this long before being automatically deleted."
+              />
+              <EuiSpacer size="m" />
+              <UseField
+                path="lifecycle.enabled"
+                componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
+              />
+            </>
+          }
+        >
+          {lifecycle?.enabled && (
+            <UseField
+              path="lifecycle.value"
+              component={NumericField}
+              labelAppend={
+                <UseField
+                  path="lifecycle.infiniteDataRetention"
+                  data-test-subj="infiniteDataRetentionToggle"
+                  componentProps={{
+                    euiFieldProps: {
+                      compressed: true,
+                    },
+                  }}
+                />
+              }
+              componentProps={{
+                euiFieldProps: {
+                  disabled: lifecycle?.infiniteDataRetention,
+                  'data-test-subj': 'valueDataRetentionField',
+                  min: 1,
+                  append: (
+                    <UnitField
+                      path="lifecycle.unit"
+                      options={timeUnits}
+                      disabled={lifecycle?.infiniteDataRetention}
+                      euiFieldProps={{
+                        'data-test-subj': 'unitDataRetentionField',
+                      }}
+                    />
+                  ),
+                },
+              }}
+            />
+          )}
         </FormRow>
 
         {/* version field */}

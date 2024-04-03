@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -52,6 +52,11 @@ import { jobsApiProvider } from './jobs';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
+
+export interface MlHasPrivilegesResponse {
+  hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
+  upgradeInProgress: boolean;
+}
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -112,8 +117,6 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     }
   },
 });
-
-export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
@@ -408,7 +411,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     hasPrivileges(obj: any) {
       const body = JSON.stringify(obj);
-      return httpService.http<any>({
+      return httpService.http<MlHasPrivilegesResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
         method: 'POST',
         body,
@@ -449,27 +452,36 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    recognizeIndex({ indexPatternTitle }: { indexPatternTitle: string }) {
+    recognizeIndex({
+      indexPatternTitle,
+      filter,
+    }: {
+      indexPatternTitle: string;
+      filter?: string[];
+    }) {
       return httpService.http<RecognizeResult[]>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/${indexPatternTitle}`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
-    listDataRecognizerModules() {
+    listDataRecognizerModules(filter?: string[]) {
       return httpService.http<any>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
-    getDataRecognizerModule({ moduleId }: { moduleId: string }) {
+    getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] }) {
       return httpService.http<Module>({
         path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/${moduleId}`,
         method: 'GET',
         version: '1',
+        query: { filter: filter?.join(',') },
       });
     },
 
@@ -778,6 +790,23 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    reindexWithPipeline(pipelineName: string, sourceIndex: string, destinationIndex: string) {
+      return httpService.http<estypes.ReindexResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({
+          source: {
+            index: sourceIndex,
+          },
+          dest: {
+            index: destinationIndex,
+            pipeline: pipelineName,
+          },
+        }),
+        version: '1',
+      });
+    },
+
     annotations: annotationsApiProvider(httpService),
     dataFrameAnalytics: dataFrameAnalyticsApiProvider(httpService),
     filters: filtersApiProvider(httpService),
@@ -789,3 +818,5 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jsonSchema: jsonSchemaProvider(httpService),
   };
 }
+
+export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;

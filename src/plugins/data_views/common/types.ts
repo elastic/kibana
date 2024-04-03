@@ -80,6 +80,10 @@ export interface FieldConfiguration {
    */
   customLabel?: string;
   /**
+   * Custom description
+   */
+  customDescription?: string;
+  /**
    * Popularity - used for discover
    */
   popularity?: number;
@@ -157,6 +161,10 @@ export interface DataViewAttributes {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 }
 
 /**
@@ -179,6 +187,10 @@ export type FieldAttrSet = {
    * Custom field label
    */
   customLabel?: string;
+  /**
+   * Custom field description
+   */
+  customDescription?: string;
   /**
    * Popularity count - used for discover
    */
@@ -302,22 +314,31 @@ export interface PersistenceAPI {
 export interface GetFieldsOptions {
   pattern: string;
   type?: string;
-  lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
+  allowHidden?: boolean;
+  forceRefresh?: boolean;
+  fieldTypes?: string[];
+  includeEmptyFields?: boolean;
 }
 
 /**
  * FieldsForWildcard response
  */
 export interface FieldsForWildcardResponse {
-  fields: FieldSpec[];
+  fields: FieldsForWildcardSpec[];
   indices: string[];
+  etag?: string;
 }
+
+/**
+ * Existing Indices response
+ */
+export type ExistingIndicesResponse = string[];
 
 export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
@@ -366,6 +387,12 @@ export enum DataViewType {
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
+// omit items saved DataView
+type FieldsForWildcardSpec = Omit<
+  FieldSpec,
+  'format' | 'customLabel' | 'runtimeField' | 'count' | 'customDescription'
+>;
+
 /**
  * Serialized version of DataViewField
  * @public
@@ -396,6 +423,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
@@ -407,6 +438,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Custom label for field, used for display in kibana
    */
   customLabel?: string;
+  /**
+   * Custom description for field, used for display in kibana
+   */
+  customDescription?: string;
   /**
    * Runtime field definition
    */
@@ -446,6 +481,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -512,15 +549,26 @@ export type DataViewSpec = {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
+}
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
+  fieldListCachingEnabled?: boolean;
 }

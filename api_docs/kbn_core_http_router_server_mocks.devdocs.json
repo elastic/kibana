@@ -80,7 +80,7 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<any>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+              "<any>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
             ],
             "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
             "deprecated": false,
@@ -210,7 +210,7 @@
             "section": "def-common.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>>]>; } & ",
+          "<any>>], unknown>; } & ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -265,7 +265,7 @@
             "section": "def-common.VersionedRouteConfig",
             "text": "VersionedRouteConfig"
           },
-          "<\"get\">]>; put: jest.MockInstance<",
+          "<\"get\">], unknown>; put: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -281,7 +281,7 @@
             "section": "def-common.VersionedRouteConfig",
             "text": "VersionedRouteConfig"
           },
-          "<\"put\">]>; post: jest.MockInstance<",
+          "<\"put\">], unknown>; post: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -297,7 +297,7 @@
             "section": "def-common.VersionedRouteConfig",
             "text": "VersionedRouteConfig"
           },
-          "<\"post\">]>; patch: jest.MockInstance<",
+          "<\"post\">], unknown>; patch: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -313,7 +313,7 @@
             "section": "def-common.VersionedRouteConfig",
             "text": "VersionedRouteConfig"
           },
-          "<\"patch\">]>; delete: jest.MockInstance<",
+          "<\"patch\">], unknown>; delete: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -329,7 +329,7 @@
             "section": "def-common.VersionedRouteConfig",
             "text": "VersionedRouteConfig"
           },
-          "<\"delete\">]>; } & ",
+          "<\"delete\">], unknown>; } & ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -400,7 +400,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; post: jest.MockInstance<void, [route: ",
+          ">], unknown>; post: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -424,7 +424,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; put: jest.MockInstance<void, [route: ",
+          ">], unknown>; put: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -448,7 +448,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; patch: jest.MockInstance<void, [route: ",
+          ">], unknown>; patch: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -472,7 +472,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; delete: jest.MockInstance<void, [route: ",
+          ">], unknown>; delete: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -496,7 +496,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; handleLegacyErrors: jest.MockInstance<",
+          ">], unknown>; handleLegacyErrors: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -560,7 +560,7 @@
             "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
-          ">]>; getRoutes: jest.MockInstance<",
+          ">], unknown>; getRoutes: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -568,7 +568,7 @@
             "section": "def-common.RouterRoute",
             "text": "RouterRoute"
           },
-          "[], []>; versioned: ",
+          "[], [], unknown>; versioned: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",

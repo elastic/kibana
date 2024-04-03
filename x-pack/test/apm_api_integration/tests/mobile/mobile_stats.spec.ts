@@ -10,7 +10,7 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { sumBy } from 'lodash';
+import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type MobileStats = APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/stats'>;
@@ -101,9 +101,10 @@ async function generateData({
         galaxy10.startNewSession();
         huaweiP2.startNewSession();
         return [
+          galaxy10.appMetrics({ 'application.launch.time': 100 }).timestamp(timestamp),
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
-            .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
+            .errors(galaxy10.crash({ message: 'error  C' }).timestamp(timestamp))
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -120,7 +121,11 @@ async function generateData({
             ),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
-            .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
+            .errors(
+              huaweiP2.crash({ message: 'error A' }).timestamp(timestamp),
+              huaweiP2.crash({ message: 'error B' }).timestamp(timestamp),
+              huaweiP2.crash({ message: 'error D' }).timestamp(timestamp)
+            )
             .timestamp(timestamp)
             .duration(20)
             .success(),
@@ -179,6 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177392
   registry.when('Mobile stats', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
@@ -211,6 +217,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const timeseriesTotal = sumBy(timeseries, 'y');
         expect(value).to.be(timeseriesTotal);
       });
+
+      it('returns same crashes', () => {
+        const { value, timeseries } = response.currentPeriod.crashRate;
+        const timeseriesMean = meanBy(
+          timeseries.filter((bucket) => bucket.y !== 0),
+          'y'
+        );
+        expect(value).to.be(timeseriesMean);
+      });
+      it('returns same launch times', () => {
+        const { value, timeseries } = response.currentPeriod.launchTimes;
+        const timeseriesMean = meanBy(
+          timeseries.filter((bucket) => bucket.y !== null),
+          'y'
+        );
+        expect(value).to.be(timeseriesMean);
+      });
     });
 
     describe('when filters are applied', () => {
@@ -223,6 +246,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(0);
         expect(response.currentPeriod.requests.value).to.eql(0);
+        expect(response.currentPeriod.crashRate.value).to.eql(0);
+        expect(response.currentPeriod.launchTimes.value).to.eql(null);
 
         expect(response.currentPeriod.sessions.timeseries.every((item) => item.y === 0)).to.eql(
           true
@@ -230,6 +255,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.requests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
+        expect(response.currentPeriod.crashRate.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(
+          response.currentPeriod.launchTimes.timeseries.every((item) => item.y === null)
+        ).to.eql(true);
       });
 
       it('returns the correct values when single filter is applied', async () => {
@@ -241,6 +272,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(0);
+        expect(response.currentPeriod.crashRate.value).to.eql(3);
+        expect(response.currentPeriod.launchTimes.value).to.eql(null);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -248,9 +281,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'synth-android',
           kuery: `service.version:"1.2" and service.environment: "production"`,
         });
-
         expect(response.currentPeriod.sessions.value).to.eql(3);
         expect(response.currentPeriod.requests.value).to.eql(3);
+        expect(response.currentPeriod.crashRate.value).to.eql(1);
+        expect(response.currentPeriod.launchTimes.value).to.eql(100);
       });
     });
   });

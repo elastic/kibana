@@ -1,0 +1,1223 @@
+{
+  "id": "links",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "links",
+        "id": "def-public.LinksEmbeddable",
+        "type": "Class",
+        "tags": [],
+        "label": "LinksEmbeddable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "links",
+            "scope": "public",
+            "docId": "kibLinksPluginApi",
+            "section": "def-public.LinksEmbeddable",
+            "text": "LinksEmbeddable"
+          },
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Embeddable",
+            "text": "Embeddable"
+          },
+          "<",
+          "LinksInput",
+          ", ",
+          "LinksOutput",
+          ", any> implements ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReferenceOrValueEmbeddable",
+            "text": "ReferenceOrValueEmbeddable"
+          },
+          "<",
+          "LinksByValueInput",
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.SavedObjectEmbeddableInput",
+            "text": "SavedObjectEmbeddableInput"
+          },
+          ">"
+        ],
+        "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"links\""
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.deferEmbeddableLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "deferEmbeddableLoad",
+            "description": [],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "LinksAttributes",
+              " | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.attributes$",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes$",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<",
+              "LinksAttributes",
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "LinksConfig"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "LinksInput"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "attributeService",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.AttributeService",
+                    "text": "AttributeService"
+                  },
+                  "<",
+                  "LinksAttributes",
+                  ", ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.EmbeddableInput",
+                    "text": "EmbeddableInput"
+                  },
+                  " & { attributes: ",
+                  "LinksAttributes",
+                  "; }, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.SavedObjectEmbeddableInput",
+                    "text": "SavedObjectEmbeddableInput"
+                  },
+                  ", unknown>"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  "DashboardContainer",
+                  " | undefined"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.onRender",
+            "type": "Function",
+            "tags": [],
+            "label": "onRender",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.onLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "onLoading",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.inputIsRefType",
+            "type": "Function",
+            "tags": [],
+            "label": "inputIsRefType",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.SavedObjectEmbeddableInput",
+                "text": "SavedObjectEmbeddableInput"
+              },
+              " | ",
+              "LinksByValueInput",
+              ") => input is ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.SavedObjectEmbeddableInput",
+                "text": "SavedObjectEmbeddableInput"
+              }
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.inputIsRefType.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "common",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-common.SavedObjectEmbeddableInput",
+                    "text": "SavedObjectEmbeddableInput"
+                  },
+                  " | ",
+                  "LinksByValueInput"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.getInputAsRefType",
+            "type": "Function",
+            "tags": [],
+            "label": "getInputAsRefType",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.SavedObjectEmbeddableInput",
+                "text": "SavedObjectEmbeddableInput"
+              },
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.getInputAsValueType",
+            "type": "Function",
+            "tags": [],
+            "label": "getInputAsValueType",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "LinksByValueInput",
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.reload",
+            "type": "Function",
+            "tags": [],
+            "label": "reload",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [],
+            "signature": [
+              "(domNode: HTMLElement) => JSX.Element | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.render.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-public.LinksFactoryDefinition",
+        "type": "Class",
+        "tags": [],
+        "label": "LinksFactoryDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "links",
+            "scope": "public",
+            "docId": "kibLinksPluginApi",
+            "section": "def-public.LinksFactoryDefinition",
+            "text": "LinksFactoryDefinition"
+          },
+          " implements ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableFactoryDefinition",
+            "text": "EmbeddableFactoryDefinition"
+          },
+          "<",
+          "LinksInput",
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          "LinksInput",
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">,",
+          "IProvidesPanelPlacementSettings",
+          "<",
+          "LinksInput",
+          ", unknown>"
+        ],
+        "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.latestVersion",
+            "type": "string",
+            "tags": [],
+            "label": "latestVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.telemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ", stats: Record<string, any>) => Record<string, any>) | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.migrations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.MigrateFunctionsObject",
+                "text": "MigrateFunctionsObject"
+              },
+              " | ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.GetMigrationFunctionObjectFn",
+                "text": "GetMigrationFunctionObjectFn"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.grouping",
+            "type": "Array",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGrouping",
+                "text": "PresentableGrouping"
+              },
+              "<unknown> | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"links\""
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.isContainerType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isContainerType",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.savedObjectMetaData",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectMetaData",
+            "description": [],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.savedObjectMetaData.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.savedObjectMetaData.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.savedObjectMetaData.getIconForSavedObject",
+                "type": "Function",
+                "tags": [],
+                "label": "getIconForSavedObject",
+                "description": [],
+                "signature": [
+                  "() => string"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getPanelPlacementSettings",
+            "description": [],
+            "signature": [
+              "(input: ",
+              "LinksInput",
+              ", attributes: unknown) => { width?: undefined; height?: undefined; strategy?: undefined; } | { width: number; height: number; strategy: \"placeAtTop\"; }"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "LinksInput"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "attributes",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.isEditable",
+            "type": "Function",
+            "tags": [],
+            "label": "isEditable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.canCreateNew",
+            "type": "Function",
+            "tags": [],
+            "label": "canCreateNew",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.getDefaultInput",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultInput",
+            "description": [],
+            "signature": [
+              "() => Partial<",
+              "LinksInput",
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.createFromSavedObject",
+            "type": "Function",
+            "tags": [],
+            "label": "createFromSavedObject",
+            "description": [],
+            "signature": [
+              "(savedObjectId: string, input: ",
+              "LinksInput",
+              ", parent: ",
+              "DashboardContainer",
+              ") => Promise<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ErrorEmbeddable",
+                "text": "ErrorEmbeddable"
+              },
+              " | ",
+              {
+                "pluginId": "links",
+                "scope": "public",
+                "docId": "kibLinksPluginApi",
+                "section": "def-public.LinksEmbeddable",
+                "text": "LinksEmbeddable"
+              },
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.createFromSavedObject.$1",
+                "type": "string",
+                "tags": [],
+                "label": "savedObjectId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.createFromSavedObject.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "LinksInput"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.createFromSavedObject.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  "DashboardContainer"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(initialInput: ",
+              "LinksInput",
+              ", parent: ",
+              "DashboardContainer",
+              ") => Promise<",
+              {
+                "pluginId": "links",
+                "scope": "public",
+                "docId": "kibLinksPluginApi",
+                "section": "def-public.LinksEmbeddable",
+                "text": "LinksEmbeddable"
+              },
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "LinksInput"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  "DashboardContainer"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.getExplicitInput",
+            "type": "Function",
+            "tags": [],
+            "label": "getExplicitInput",
+            "description": [],
+            "signature": [
+              "(initialInput: ",
+              "LinksInput",
+              ", parent?: ",
+              "DashboardContainer",
+              " | undefined) => Promise<",
+              "LinksEditorFlyoutReturn",
+              ">"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.getExplicitInput.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  "LinksInput"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksFactoryDefinition.getExplicitInput.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  "DashboardContainer",
+                  " | undefined"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.getDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescription",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ", references: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[]) => ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ") | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksFactoryDefinition.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableStateWithType",
+                "text": "EmbeddableStateWithType"
+              },
+              "; references: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[]; }) | undefined"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "links",
+        "id": "def-public.LinksFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "LinksFactory",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableFactory",
+            "text": "EmbeddableFactory"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
+          ", ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">"
+        ],
+        "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "links",
+        "id": "def-common.APP_ICON",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ICON",
+        "description": [],
+        "signature": [
+          "\"link\""
+        ],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.APP_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "APP_NAME",
+        "description": [],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.CONTENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTENT_ID",
+        "description": [],
+        "signature": [
+          "\"links\""
+        ],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-common.LATEST_VERSION",
+        "type": "number",
+        "tags": [],
+        "label": "LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "src/plugins/links/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

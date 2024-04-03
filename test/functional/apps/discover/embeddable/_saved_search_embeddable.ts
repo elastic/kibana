@@ -32,21 +32,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await PageObjects.common.setTime({
+        from: 'Sep 22, 2015 @ 00:00:00.000',
+        to: 'Sep 23, 2015 @ 00:00:00.000',
+      });
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Sep 22, 2015 @ 00:00:00.000',
-        'Sep 23, 2015 @ 00:00:00.000'
-      );
     });
 
     const addSearchEmbeddableToDashboard = async () => {
@@ -124,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
       expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
+        'Expected AND, OR, end of input, whitespace but "n" found.\nthis < is not : a valid > query\n----------^'
       );
     });
 
@@ -143,6 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show the full screen button', async () => {
       await addSearchEmbeddableToDashboard();
       await testSubjects.missingOrFail('dataGridFullScreenButton');
+    });
+
+    it('should show the the grid toolbar', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.existOrFail('dscGridToolbar');
     });
   });
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import type { Note } from '../../../../../common/types/timeline/note/api';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { Note } from '../../../../../common/api/timeline';
 
 import { pickSavedNote } from './saved_object';
 

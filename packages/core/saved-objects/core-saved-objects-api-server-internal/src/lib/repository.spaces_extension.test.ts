@@ -222,27 +222,26 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             id,
             {},
             { upsert: true },
-            { mockGetResponseValue: { found: false } as estypes.GetResponse }
+            { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse },
+            [currentSpace.expectedNamespace ?? 'default']
           );
           expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
-          expect(client.update).toHaveBeenCalledTimes(1);
-          expect(client.update).toHaveBeenCalledWith(
+          expect(client.create).toHaveBeenCalledTimes(1);
+          expect(client.create).toHaveBeenCalledWith(
             expect.objectContaining({
               id: `${
                 currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
               }${type}:${id}`,
-              body: expect.objectContaining({
-                upsert: expect.objectContaining(
-                  currentSpace.expectedNamespace
-                    ? {
-                        namespace: currentSpace.expectedNamespace,
-                      }
-                    : {}
-                ),
-              }),
+              body: expect.objectContaining(
+                currentSpace.expectedNamespace
+                  ? {
+                      namespace: currentSpace.expectedNamespace,
+                    }
+                  : {}
+              ),
             }),
-            { maxRetries: 0 }
+            expect.any(Object)
           );
         });
       });
@@ -519,7 +518,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                   ? currentSpace.expectedNamespace
                   : undefined,
               },
-            })
+            }),
+            expect.any(Object)
           );
         });
       });
@@ -697,26 +697,23 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             expect.objectContaining({
               body: expect.arrayContaining([
                 expect.objectContaining({
-                  update: expect.objectContaining({
+                  index: expect.objectContaining({
                     _id: `${
                       currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
                     }${obj1.type}:${obj1.id}`,
                   }),
                 }),
                 expect.objectContaining({
-                  doc: expect.objectContaining({
-                    config: obj1.attributes,
-                  }),
+                  config: obj1.attributes,
                 }),
+
                 expect.objectContaining({
-                  update: expect.objectContaining({
+                  index: expect.objectContaining({
                     _id: `${obj2.type}:${obj2.id}`,
                   }),
                 }),
                 expect.objectContaining({
-                  doc: expect.objectContaining({
-                    multiNamespaceType: obj2.attributes,
-                  }),
+                  multiNamespaceType: obj2.attributes,
                 }),
               ]),
             }),
@@ -768,7 +765,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                   ? `${currentSpace.expectedNamespace}`
                   : undefined,
               },
-            })
+            }),
+            expect.any(Object)
           );
         });
       });
@@ -1078,7 +1076,8 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           id,
           {},
           { upsert: true },
-          { mockGetResponseValue: { found: false } as estypes.GetResponse }
+          { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse },
+          [currentSpace]
         );
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -1354,11 +1353,12 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           {
             // no namespace provided
             references: encryptedSO.references,
-          }
+          },
+          {}
         );
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
-        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);

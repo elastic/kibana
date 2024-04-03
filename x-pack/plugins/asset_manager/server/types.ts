@@ -6,7 +6,20 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
+import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 
 export interface ElasticsearchAccessorOptions {
-  esClient: ElasticsearchClient;
+  elasticsearchClient: ElasticsearchClient;
+}
+
+export interface AssetManagerPluginSetupDependencies {
+  apmDataAccess: ApmDataAccessPluginSetup;
+  metricsDataAccess: MetricsDataPluginSetup;
+}
+export interface AssetManagerPluginStartDependencies {
+  apmDataAccess: ApmDataAccessPluginStart;
 }

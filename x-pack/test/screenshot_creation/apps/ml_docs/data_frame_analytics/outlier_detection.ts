@@ -49,19 +49,19 @@ export default function ({ getService }: FtrProviderContext) {
   describe('outlier detection job', function () {
     before(async () => {
       await transform.api.createAndRunTransform(transformConfig.id, transformConfig);
-      await ml.testResources.createIndexPatternIfNeeded(transformConfig.dest.index);
+      await ml.testResources.createDataViewIfNeeded(transformConfig.dest.index);
 
       await ml.api.createAndRunDFAJob(outlierJobConfig as DataFrameAnalyticsConfig);
-      await ml.testResources.createIndexPatternIfNeeded(outlierJobConfig.dest!.index!);
+      await ml.testResources.createDataViewIfNeeded(outlierJobConfig.dest!.index!);
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle(transformConfig.dest.index);
+      await ml.testResources.deleteDataViewByTitle(transformConfig.dest.index);
       await transform.api.deleteIndices(transformConfig.dest.index);
       await transform.api.cleanTransformIndices();
 
       await ml.api.deleteDataFrameAnalyticsJobES(outlierJobConfig.id as string);
-      await ml.testResources.deleteIndexPatternByTitle(outlierJobConfig.dest!.index!);
+      await ml.testResources.deleteDataViewByTitle(outlierJobConfig.dest!.index!);
       await ml.api.deleteIndices(outlierJobConfig.dest!.index!);
       await ml.api.cleanMlIndices();
     });

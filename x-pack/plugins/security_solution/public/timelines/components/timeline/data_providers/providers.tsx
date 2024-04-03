@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import type { DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -18,7 +18,7 @@ import {
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
 import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
@@ -66,8 +66,10 @@ const getItemStyle = (
 const DroppableContainer = styled.div`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   height: auto !important;
+  display: none;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
+    display: flex;
     background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
   }
 `;

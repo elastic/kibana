@@ -15,11 +15,13 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/analytics",
     "@kbn/config-schema",
+    "@kbn/screenshot-mode-plugin",
     "@kbn/std",
     "@kbn/analytics-client",
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/core-http-server-mocks",
+    "@kbn/analytics-collection-utils",
   ],
   "exclude": [
     "target/**/*",

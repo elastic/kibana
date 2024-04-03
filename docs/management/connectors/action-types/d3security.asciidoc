@@ -3,21 +3,14 @@
 ++++
 <titleabbrev>D3 Security</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can send requests to D3 Security.
+:frontmatter-tags-products: [alerting]
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [configure]
 
 The D3 Security connector uses https://github.com/axios/axios[axios] to send a POST request to a D3 Security endpoint. The connector uses the <<execute-connector-api,run connector API>> to send the request. You can use the connector for rule actions.
 
-[float]
-[[d3security-connector-prerequisites]]
-=== Prerequisites
-
-To use a D3 Security connector, you must first configure a webhook key in your D3 SOAR environment. To generate an API URL and a token in D3 Security:
-1. Log in to your D3 SOAR environment.
-2. Navigate to Configuration.
-3. Navigate to Integration > Search for “Kibana”. Click “Fetch Event”.
-4. Select the "Enable Webhook" checkbox.
-5. Click Set up Webhook Keys.
-6. Under Event Ingestion, Click +. Select the site for the webhook integration, then click Generate.
-7. Copy the Request URL and Request Header Value to configure the Kibana connector
+To create this connector, you must first configure a webhook key in your D3 SOAR environment. For configuration tips, refer to <<configure-d3security>>.
 
 [float]
 [[define-d3security-ui]]
@@ -36,35 +29,7 @@ D3 Security connectors have the following configuration properties:
 
 Name::      The name of the connector.
 URL::   The D3 Security API request URL.
-Token::   The D3 Security token
-
-[float]
-[[preconfigured-d3security-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-d3security:
-    name: preconfigured-d3security-connector-type
-    actionTypeId: .d3security
-    config:
-      url: https://testurl.com/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents
-    secrets:
-      token: superlongtoken
---
-
-Config defines information for the connector type.
-
-`url`:: A URL string that corresponds to the *D3 Security API URL*.
-
-Secrets defines sensitive information for the connector type.
-
-`token`:: A string that corresponds to *D3 Security API Token*.
+Token::   The D3 Security token.
 
 [float]
 [[d3security-action-configuration]]
@@ -89,3 +54,17 @@ this can be any type, it is not validated
 === Connector networking configuration
 
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[configure-d3security]]
+=== Configure D3 Security
+
+To generate an API URL and a token in D3 Security:
+
+1. Log in to your D3 SOAR environment.
+2. Navigate to *Configuration*.
+3. Navigate to *Integration*. Search for {kib}. Click *Fetch Event*.
+4. Select the *Enable Webhook* checkbox.
+5. Click *Set up Webhook Keys*.
+6. Under *Event Ingestion*, click the plus sign(+). Select the site for the webhook integration, then click *Generate*.
+7. Copy the request URL and request header value to configure the connector.

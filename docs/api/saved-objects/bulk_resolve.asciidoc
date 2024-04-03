@@ -12,6 +12,12 @@ Under certain circumstances, when Kibana is upgraded, saved object migrations ma
 features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that
 object can be retrieved via the Bulk Resolve API using either its new ID or its old ID.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-bulk-resolve-request]]
 ==== Request
 

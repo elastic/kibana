@@ -6,8 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { SearchProfilerServerPlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => {
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { SearchProfilerServerPlugin } = await import('./plugin');
   return new SearchProfilerServerPlugin(ctx);
 };

@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
@@ -42,6 +43,8 @@ export type UnifiedHistogramContainerProps = {
     | Promise<UnifiedHistogramCreationOptions>;
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  isChartLoading?: boolean;
+  table?: Datatable;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -52,9 +55,14 @@ export type UnifiedHistogramContainerProps = {
   | 'timeRange'
   | 'relativeTimeRange'
   | 'columns'
-  | 'resizeRef'
-  | 'appendHitsCounter'
+  | 'container'
+  | 'renderCustomChartToggleActions'
   | 'children'
+  | 'onBrushEnd'
+  | 'onFilter'
+  | 'withDefaultActions'
+  | 'disabledActions'
+  | 'abortController'
 >;
 
 /**
@@ -120,8 +128,7 @@ export const UnifiedHistogramContainer = forwardRef<
       ),
     });
   }, [input$, stateService]);
-
-  const { dataView, query, searchSessionId, requestAdapter } = containerProps;
+  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
@@ -143,6 +150,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestion={currentSuggestion}
+      isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}
       lensSuggestionsApi={lensSuggestionsApi}

@@ -9,12 +9,14 @@ import type { Capabilities } from '@kbn/core/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
 import type {
-  LinkCategory as BaseLinkCategory,
-  LinkCategories as BaseLinkCategories,
-} from '@kbn/security-solution-side-nav';
+  SecurityPageName,
+  NavigationLink as GenericNavigationLink,
+  LinkCategory as GenericLinkCategory,
+  LinkCategories as GenericLinkCategories,
+} from '@kbn/security-solution-navigation';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { SecurityPageName } from '../../../common/constants';
-import type { UpsellingService } from '../lib/upsellings';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
 /**
@@ -26,9 +28,6 @@ export interface LinksPermissions {
   upselling: UpsellingService;
   license?: ILicense;
 }
-
-export type LinkCategory = BaseLinkCategory<SecurityPageName>;
-export type LinkCategories = BaseLinkCategories<SecurityPageName>;
 
 export interface LinkItem {
   /**
@@ -135,28 +134,19 @@ export interface LinkItem {
    * Reserved for links management, this property is set automatically
    * */
   unauthorized?: boolean;
+  /**
+   * Locations where the link is visible in the UI
+   */
+  visibleIn?: AppDeepLinkLocations[];
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
+export type AppLinksSwitcher = (appLinks: AppLinkItems) => AppLinkItems;
 
 export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
 export type NormalizedLinks = Partial<Record<SecurityPageName, NormalizedLink>>;
 
-export interface NavigationLink {
-  categories?: LinkCategories;
-  description?: string;
-  disabled?: boolean;
-  id: SecurityPageName;
-  landingIcon?: IconType;
-  landingImage?: string;
-  links?: NavigationLink[];
-  title: string;
-  sideNavIcon?: IconType;
-  skipUrlState?: boolean;
-  unauthorized?: boolean;
-  isBeta?: boolean;
-  betaOptions?: {
-    text: string;
-  };
-}
+export type NavigationLink = GenericNavigationLink<SecurityPageName>;
+export type LinkCategory = GenericLinkCategory<SecurityPageName>;
+export type LinkCategories = GenericLinkCategories<SecurityPageName>;

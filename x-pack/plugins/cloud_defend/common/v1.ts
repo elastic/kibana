@@ -52,3 +52,68 @@ export interface CloudDefendPolicy {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
 }
+
+/**
+ * cloud_defend/control types
+ */
+
+// Currently we support file and process selectors (which match on their respective set of hook points)
+export type SelectorType = 'file' | 'process';
+
+export type SelectorCondition =
+  | 'containerImageFullName'
+  | 'containerImageName'
+  | 'containerImageTag'
+  | 'kubernetesClusterId'
+  | 'kubernetesClusterName'
+  | 'kubernetesNamespace'
+  | 'kubernetesPodLabel'
+  | 'kubernetesPodName'
+  | 'targetFilePath'
+  | 'ignoreVolumeFiles'
+  | 'ignoreVolumeMounts'
+  | 'operation'
+  | 'processExecutable'
+  | 'processName'
+  | 'sessionLeaderInteractive';
+
+export type ResponseAction = 'log' | 'alert' | 'block';
+
+export interface Selector {
+  name: string;
+  operation?: string[];
+  containerImageFullName?: string[];
+  containerImageName?: string[];
+  containerImageTag?: string[];
+  kubernetesClusterId?: string[];
+  kubernetesClusterName?: string[];
+  kubernetesNamespace?: string[];
+  kubernetesPodLabel?: string[];
+  kubernetesPodName?: string[];
+
+  // selector properties
+  targetFilePath?: string[];
+  ignoreVolumeFiles?: boolean;
+  ignoreVolumeMounts?: boolean;
+
+  // process selector properties
+  processExecutable?: string[];
+  processName?: string[];
+  sessionLeaderInteractive?: boolean;
+
+  // non yaml fields
+  type: SelectorType;
+  // used to track selector error state in UI
+  hasErrors?: boolean;
+}
+
+export interface Response {
+  match: string[];
+  exclude?: string[];
+  actions?: ResponseAction[];
+
+  // non yaml fields
+  type: SelectorType;
+  // used to track response error state in UI
+  hasErrors?: boolean;
+}

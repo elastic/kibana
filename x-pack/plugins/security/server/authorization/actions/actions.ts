@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Actions as ActionsType } from '@kbn/security-plugin-types-server';
+
 import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
@@ -17,7 +19,7 @@ import { UIActions } from './ui';
  * application privileges, and are used to perform the authorization checks implemented
  * by the various `checkPrivilegesWithRequest` derivatives.
  */
-export class Actions {
+export class Actions implements ActionsType {
   public readonly api: ApiActions;
   public readonly app: AppActions;
   public readonly cases: CasesActions;

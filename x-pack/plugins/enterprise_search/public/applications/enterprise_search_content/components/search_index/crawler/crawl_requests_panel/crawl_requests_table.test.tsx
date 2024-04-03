@@ -83,14 +83,12 @@ describe('CrawlRequestsTable', () => {
       const table = wrapper.find(EuiBasicTable);
       const columns = table.prop('columns');
 
-      // @ts-expect-error 4.3.5 upgrade
       const crawlID = shallow(columns[0].render('618d0e66abe97bc688328900', { stage: 'crawl' }));
       expect(crawlID.text()).toContain('618d0e66abe97bc688328900');
 
       crawlID.simulate('click');
       expect(actions.fetchCrawlRequest).toHaveBeenCalledWith('618d0e66abe97bc688328900');
 
-      // @ts-expect-error 4.3.5 upgrade
       const processCrawlID = shallow(columns[0].render('54325423aef7890543', { stage: 'process' }));
       expect(processCrawlID.text()).toContain('54325423aef7890543');
     });

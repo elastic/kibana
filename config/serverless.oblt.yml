@@ -3,16 +3,26 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
+xpack.infra.enabled: true
+xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
 
+## Enable the slo plugin
+xpack.slo.enabled: true
+
+## Cloud settings
+xpack.cloud.serverless.project_type: observability
+
 ## Enable the Serverless Observability plugin
-xpack.serverless.observability.enabled: true
+xpack.serverless.observability.enabled: true 
 
 ## Configure plugins
-xpack.infra.logs.app_target: discover
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/observability/landing
+
+# Customize empty page state for analytics apps
+no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
 ## Set the dev project switch current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
@@ -20,21 +30,64 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
+## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
+## The value need to be a featureId observability Or stackAlerts Or siem
+xpack.alerting.rules.overwriteProducer: 'observability'
+xpack.observability.createO11yGenericFeatureId: true
+
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 
-## Required for force installation of APM Package
+# Synthetics mTLS cert locations
+xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
+xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+
+# Fleet specific configuration
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.spec.max: '3.0'
+# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
+xpack.fleet.internal.registry.spec.min: '1.0'
+xpack.fleet.internal.registry.excludePackages: [
+    # Security integrations
+    'endpoint',
+    'beaconing',
+    'osquery_manager',
+
+    # Removed in 8.11 integrations
+    'cisco',
+    'microsoft',
+    'symantec',
+    'cyberark',
+
+    # ML integrations
+    'dga',
+
+    # Profiling integrations
+    'profiler_agent',
+  ]
+
+## Required for force installation of integration packages
 xpack.fleet.packages:
-  - name: apm
+  # fleet_server package installed to publish agent metrics
+  - name: fleet_server
     version: latest
 ## Disable APM UI components and API calls
 xpack.apm.featureFlags.agentConfigurationAvailable: false
 xpack.apm.featureFlags.configurableIndicesAvailable: false
-xpack.apm.featureFlags.infrastructureTabAvailable: false
-xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: true
+xpack.apm.featureFlags.infraUiAvailable: true
 xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: false
+xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'observability'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

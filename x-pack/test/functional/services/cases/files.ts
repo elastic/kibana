@@ -39,10 +39,23 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       await searchField.pressKeys(browser.keys.ENTER);
     },
 
-    async deleteFile(index: number = 0) {
-      const row = await this.getFileByIndex(index);
+    async openActionsPopover(index: number = 0) {
+      const popoverButtons = await find.allByCssSelector(
+        '[data-test-subj*="cases-files-actions-popover-button-"',
+        100
+      );
 
-      (await row.findByCssSelector('[data-test-subj="cases-files-delete-button"]')).click();
+      assertFileExists(index, popoverButtons.length);
+
+      popoverButtons[index].click();
+
+      await testSubjects.existOrFail('contextMenuPanelTitle');
+    },
+
+    async deleteFile(index: number = 0) {
+      await this.openActionsPopover(index);
+
+      (await testSubjects.find('cases-files-delete-button', 1000)).click();
 
       await testSubjects.click('confirmModalConfirmButton');
     },

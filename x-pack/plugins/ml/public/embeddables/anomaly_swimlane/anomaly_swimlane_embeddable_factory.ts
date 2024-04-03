@@ -10,15 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
 
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/app';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableServices,
-} from '..';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableServices } from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput>
@@ -54,11 +52,16 @@ export class AnomalySwimlaneEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    const [coreStart] = await this.getServices();
+    const [coreStart, deps] = await this.getServices();
 
     try {
       const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
-      return await resolveAnomalySwimlaneUserInput(coreStart);
+      const userInput = await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
+
+      return {
+        ...userInput,
+        title: userInput.panelTitle,
+      };
     } catch (e) {
       return Promise.reject();
     }
@@ -94,7 +97,7 @@ export class AnomalySwimlaneEmbeddableFactory
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
-  ): Promise<any> {
+  ): Promise<InstanceType<IAnomalySwimlaneEmbeddable>> {
     const services = await this.getServices();
     const { AnomalySwimlaneEmbeddable } = await import('./anomaly_swimlane_embeddable');
     return new AnomalySwimlaneEmbeddable(initialInput, services, parent);

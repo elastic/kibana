@@ -7,19 +7,19 @@
 
 export {
   ruleParamsSchema,
-  rRuleSchema,
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
   ruleSchema,
   ruleDomainSchema,
+  alertDelaySchema,
 } from './rule_schemas';
 
 export {
   actionParamsSchema,
-  actionDomainSchema,
-  actionSchema,
+  defaultActionDomainSchema,
+  systemActionDomainSchema,
   actionAlertsFilterSchema,
 } from './action_schemas';
 

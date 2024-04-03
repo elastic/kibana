@@ -299,6 +299,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.payloadTimeout",
+            "type": "number",
+            "tags": [],
+            "label": "payloadTimeout",
+            "description": [],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.HttpConfig.port",
             "type": "number",
             "tags": [],
@@ -405,6 +416,20 @@
             "tags": [],
             "label": "rewriteBasePath",
             "description": [],
+            "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.HttpConfig.cdn",
+            "type": "Object",
+            "tags": [],
+            "label": "cdn",
+            "description": [],
+            "signature": [
+              "CdnConfig"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -519,7 +544,9 @@
             "label": "versioned",
             "description": [],
             "signature": [
-              "{ versionResolution: \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }"
+              "{ versionResolution: ",
+              "HandlerResolutionStrategy",
+              "; strictClientVersionCheck: boolean; useVersionResolutionStrategyForInternalPaths: string[]; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
@@ -603,16 +630,10 @@
                 "id": "def-common.HttpServer.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "logger",
+                "label": "coreContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/logging",
-                    "scope": "common",
-                    "docId": "kibKbnLoggingPluginApi",
-                    "section": "def-common.LoggerFactory",
-                    "text": "LoggerFactory"
-                  }
+                  "CoreContext"
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
@@ -677,17 +698,9 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(config: ",
-              {
-                "pluginId": "@kbn/core-http-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerInternalPluginApi",
-                "section": "def-common.HttpConfig",
-                "text": "HttpConfig"
-              },
-              ", executionContext?: ",
-              "IExecutionContext",
-              " | undefined) => Promise<",
+              "({ config$, executionContext, }: ",
+              "HttpServerSetupOptions",
+              ") => Promise<",
               "HttpServerSetup",
               ">"
             ],
@@ -700,37 +713,15 @@
                 "id": "def-common.HttpServer.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "config",
+                "label": "{\n    config$,\n    executionContext,\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerInternalPluginApi",
-                    "section": "def-common.HttpConfig",
-                    "text": "HttpConfig"
-                  }
+                  "HttpServerSetupOptions"
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-http-server-internal",
-                "id": "def-common.HttpServer.setup.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "executionContext",
-                "description": [],
-                "signature": [
-                  "IExecutionContext",
-                  " | undefined"
-                ],
-                "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -765,6 +756,247 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-internal",
+        "id": "def-common.StaticAssets",
+        "type": "Class",
+        "tags": [],
+        "label": "StaticAssets",
+        "description": [
+          "\nConvention is for trailing slashes in pathnames are stripped."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerInternalPluginApi",
+            "section": "def-common.StaticAssets",
+            "text": "StaticAssets"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/core-http-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerInternalPluginApi",
+            "section": "def-common.InternalStaticAssets",
+            "text": "InternalStaticAssets"
+          }
+        ],
+        "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ basePath, cdnConfig, shaDigest }",
+                "description": [],
+                "signature": [
+                  "StaticAssetsParams"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.getHrefBase",
+            "type": "Function",
+            "tags": [],
+            "label": "getHrefBase",
+            "description": [
+              "\nReturns a href (hypertext reference) intended to be used as the base for constructing\nother hrefs to static assets."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.getPluginAssetHref.$2",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.prependServerPath",
+            "type": "Function",
+            "tags": [],
+            "label": "prependServerPath",
+            "description": [],
+            "signature": [
+              "(path: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.prependServerPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.prependPublicUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "prependPublicUrl",
+            "description": [],
+            "signature": [
+              "(pathname: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.prependPublicUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pathname",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.StaticAssets.getPluginServerPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginServerPath",
+            "description": [],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.getPluginServerPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.StaticAssets.getPluginServerPath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -896,7 +1128,206 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-http-server-internal",
+        "id": "def-common.InternalStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalStaticAssets",
+        "description": [],
+        "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.getHrefBase",
+            "type": "Function",
+            "tags": [],
+            "label": "getHrefBase",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nIntended for use by server code rendering UI or generating links to static assets\nthat will ultimately be called from the browser and must respect settings like\nserverBasePath"
+            ],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.InternalStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.InternalStaticAssets.getPluginAssetHref.$2",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.getPluginServerPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginServerPath",
+            "description": [
+              "\nIntended for use by server code wanting to register static assets against Kibana\nas server paths"
+            ],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.InternalStaticAssets.getPluginServerPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.InternalStaticAssets.getPluginServerPath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.prependServerPath",
+            "type": "Function",
+            "tags": [],
+            "label": "prependServerPath",
+            "description": [
+              "\nSimilar to getPluginServerPath, but not plugin-scoped"
+            ],
+            "signature": [
+              "(pathname: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.InternalStaticAssets.prependServerPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pathname",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.InternalStaticAssets.prependPublicUrl",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "prependPublicUrl",
+            "description": [
+              "\nWill append the given path segment to the configured public path.\n"
+            ],
+            "signature": [
+              "(pathname: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-internal",
+                "id": "def-common.InternalStaticAssets.prependPublicUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pathname",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -907,7 +1338,7 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; readonly host: string; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly port: number; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly versioned: Readonly<{} & { versionResolution: \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; readonly host: string; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly port: number; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; useVersionResolutionStrategyForInternalPaths: string[]; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly cdn: Readonly<{ url?: string | undefined; } & {}>; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -915,7 +1346,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
+          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly payloadTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
         ],
         "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
         "deprecated": false,

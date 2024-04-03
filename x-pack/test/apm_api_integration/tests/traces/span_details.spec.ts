@@ -30,7 +30,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       endpoint: `GET /internal/apm/traces/{traceId}/spans/{spanId}`,
       params: {
         path: { traceId, spanId },
-        query: { parentTransactionId },
+        query: {
+          parentTransactionId,
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
       },
     });
   }
@@ -47,6 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177544
   registry.when('Span details', { config: 'basic', archives: [] }, () => {
     let traceId: string;
     let spanId: string;

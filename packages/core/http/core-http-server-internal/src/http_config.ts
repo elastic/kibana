@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 
-import { hostname } from 'os';
-import url from 'url';
+import { hostname, EOL } from 'node:os';
+import url, { URL } from 'node:url';
 
 import type { Duration } from 'moment';
-import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
@@ -24,6 +24,9 @@ import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
+import { CdnConfig } from './cdn_config';
+
+const SECOND = 1000;
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
@@ -38,6 +41,24 @@ const validHostName = () => {
   // see https://github.com/elastic/kibana/issues/139730
   return hostname().replace(/[^\x00-\x7F]/g, '');
 };
+
+/**
+ * We assume the URL does not contain anything after the pathname so that
+ * we can safely append values to the pathname at runtime.
+ */
+function validateCdnURL(urlString: string): undefined | string {
+  const cdnURL = new URL(urlString);
+  const errors: string[] = [];
+  if (cdnURL.hash.length) {
+    errors.push(`URL fragment not allowed, but found "${cdnURL.hash}"`);
+  }
+  if (cdnURL.search.length) {
+    errors.push(`URL query string not allowed, but found "${cdnURL.search}"`);
+  }
+  if (errors.length) {
+    return `CDN URL "${cdnURL.href}" is invalid:${EOL}${errors.join(EOL)}`;
+  }
+}
 
 const configSchema = schema.object(
   {
@@ -57,6 +78,9 @@ const configSchema = schema.object(
           return 'the value should be between 1 second and 2 minutes';
         }
       },
+    }),
+    cdn: schema.object({
+      url: schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL })),
     }),
     cors: schema.object(
       {
@@ -107,10 +131,13 @@ const configSchema = schema.object(
     rewriteBasePath: schema.boolean({ defaultValue: false }),
     ssl: sslSchema,
     keepaliveTimeout: schema.number({
-      defaultValue: 120000,
+      defaultValue: 120 * SECOND,
     }),
     socketTimeout: schema.number({
-      defaultValue: 120000,
+      defaultValue: 120 * SECOND,
+    }),
+    payloadTimeout: schema.number({
+      defaultValue: 20 * SECOND,
     }),
     compression: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -167,12 +194,17 @@ const configSchema = schema.object(
         },
       }
     ),
-    restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
+    // allow access to internal routes by default to prevent breaking changes in current offerings
+    restrictInternalApis: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+    }),
+
     versioned: schema.object({
       /**
-       * Which handler resolution algo to use: "newest" or "oldest".
+       * Which handler resolution algo to use for public routes: "newest" or "oldest".
        *
-       * @note in development we have an additional option "none" which is also the default.
+       * @note Internal routes always require a version to be specified.
+       * @note in development we have an additional option "none" which is also the default in dev.
        *       This prevents any fallbacks and requires that a version specified.
        *       Useful for ensuring that a given client always specifies a version.
        */
@@ -194,6 +226,12 @@ const configSchema = schema.object(
        * same-build browsers can access the Kibana server.
        */
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+
+      /** This should not be configurable in serverless */
+      useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        serverless: schema.never(),
+      }),
     }),
   },
   {
@@ -245,6 +283,7 @@ export class HttpConfig implements IHttpConfig {
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
+  public payloadTimeout: number;
   public port: number;
   public cors: {
     enabled: boolean;
@@ -257,6 +296,7 @@ export class HttpConfig implements IHttpConfig {
   public basePath?: string;
   public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
+  public cdn: CdnConfig;
   public ssl: SslConfig;
   public compression: {
     enabled: boolean;
@@ -270,6 +310,7 @@ export class HttpConfig implements IHttpConfig {
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
     strictClientVersionCheck: boolean;
+    useVersionResolutionStrategyForInternalPaths: string[];
   };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
@@ -307,16 +348,19 @@ export class HttpConfig implements IHttpConfig {
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
+    this.payloadTimeout = rawHttpConfig.payloadTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding });
+    this.cdn = CdnConfig.from(rawHttpConfig.cdn);
+    this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
 
-    this.restrictInternalApis = rawHttpConfig.restrictInternalApis;
+    // default to `false` to prevent breaking changes in current offerings
+    this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
   }

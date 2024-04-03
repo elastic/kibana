@@ -1,0 +1,26 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint GET
+  version: '2023-10-31'
+paths:
+  /api/some_api:
+    get:
+      operationId: TestEndpointGet
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                x-modify: partial
+                type: object
+                properties:
+                  field1:
+                    type: string
+                    enum: [value1]
+                  field2:
+                    type: integer
+                    minimum: 1
+                required:
+                  - field1
+                  - field2

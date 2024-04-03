@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   ElasticsearchServiceStart,
+  HttpServiceSetup,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsServiceStart,
-  HttpServiceSetup,
-  KibanaRequest,
-  ServiceStatus,
-  ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+  ServiceStatus,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   AuditLogger,
@@ -56,61 +56,55 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-
 import {
-  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
-  getRouteRequiredAuthz,
-  makeRouterWithFleetAuthz,
   calculateRouteAuthz,
   getAuthzFromRequest,
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
   MessageSigningService,
 } from './services/security';
 
 import {
-  PLUGIN_ID,
-  OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PLUGIN_ID,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from './constants';
-import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
+import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
-import type {
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
-  PackageService,
-} from './services';
-import { FleetUsageSender } from './services';
+import type { AgentPolicyServiceInterface, AgentService, PackageService } from './services';
 import {
-  appContextService,
-  licenseService,
-  ESIndexPatternSavedObjectService,
   agentPolicyService,
-  packagePolicyService,
   AgentServiceImpl,
+  appContextService,
+  FleetUsageSender,
+  licenseService,
+  packagePolicyService,
   PackageServiceImpl,
 } from './services';
 import {
-  registerFleetUsageCollector,
   fetchAgentsUsage,
   fetchFleetUsage,
+  registerFleetUsageCollector,
 } from './collectors/register';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -128,6 +122,9 @@ import {
 import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
+import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
+import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -165,6 +162,7 @@ export interface FleetAppContext {
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
+  kibanaInstanceId: PluginInitializerContext['env']['instanceUuid'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -186,6 +184,7 @@ const allSavedObjectTypes = [
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -201,7 +200,6 @@ export interface FleetStartContract {
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
   };
-  esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
   /**
@@ -232,6 +230,10 @@ export interface FleetStartContract {
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
   createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
+  /*
+  Function exported to allow creating unique ids for saved object tags
+   */
+  getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
 }
 
 export class FleetPlugin
@@ -245,6 +247,7 @@ export class FleetPlugin
   private isProductionMode: FleetAppContext['isProductionMode'];
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
@@ -253,6 +256,7 @@ export class FleetPlugin
   private bulkActionsResolver?: BulkActionsResolver;
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
+  private fleetMetricsTask?: FleetMetricsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -264,6 +268,7 @@ export class FleetPlugin
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
+    this.kibanaInstanceId = this.initializerContext.env.instanceUuid;
     this.logger = this.initializerContext.logger.get();
     this.configInitialValue = this.initializerContext.config.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
@@ -286,6 +291,7 @@ export class FleetPlugin
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -315,6 +321,115 @@ export class FleetPlugin
             },
           ],
         },
+        subFeatures: experimentalFeatures.subfeaturePrivileges
+          ? [
+              {
+                name: 'Agents',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `agents_all`,
+                        api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
+                        name: 'All',
+                        ui: ['agents_read', 'agents_all'],
+                        savedObject: {
+                          all: allSavedObjectTypes,
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `agents_read`,
+                        api: [`${PLUGIN_ID}-agents-read`],
+                        name: 'Read',
+                        ui: ['agents_read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Agent policies',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `agent_policies_all`,
+                        api: [
+                          `${PLUGIN_ID}-agent-policies-read`,
+                          `${PLUGIN_ID}-agent-policies-all`,
+                        ],
+                        name: 'All',
+                        ui: ['agent_policies_read', 'agent_policies_all'],
+                        savedObject: {
+                          all: allSavedObjectTypes,
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `agent_policies_read`,
+                        api: [`${PLUGIN_ID}-agent-policies-read`],
+                        name: 'Read',
+                        ui: ['agent_policies_read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Settings',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `settings_all`,
+                        api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
+                        name: 'All',
+                        ui: ['settings_read', 'settings_all'],
+                        savedObject: {
+                          all: allSavedObjectTypes,
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `settings_read`,
+                        api: [`${PLUGIN_ID}-settings-read`],
+                        name: 'Read',
+                        ui: ['settings_read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+            ]
+          : [],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
@@ -337,7 +452,6 @@ export class FleetPlugin
               read: allSavedObjectTypes,
             },
             ui: ['read'],
-            disabled: true,
           },
         },
       });
@@ -434,6 +548,10 @@ export class FleetPlugin
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
+    const fetchAgents = async (abortController: AbortController) =>
+      await fetchAgentMetrics(core, abortController);
+    this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
+
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
@@ -457,6 +575,7 @@ export class FleetPlugin
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     const messageSigningService = new MessageSigningService(
+      this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
@@ -484,6 +603,7 @@ export class FleetPlugin
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
+      kibanaInstanceId: this.kibanaInstanceId,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
@@ -498,12 +618,16 @@ export class FleetPlugin
     this.fleetUsageSender?.start(plugins.taskManager);
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
     startFleetUsageLogger(plugins.taskManager);
+    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
 
     this.policyWatcher.start(licenseService);
+
+    // We only retry when this feature flag is enabled (Serverless)
+    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
       try {
@@ -527,18 +651,51 @@ export class FleetPlugin
           )
           .toPromise();
 
-        await setupFleet(
-          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-          core.elasticsearch.client.asInternalUser
+        // Retry Fleet setup w/ backoff
+        await backOff(
+          async () => {
+            await setupFleet(
+              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.elasticsearch.client.asInternalUser
+            );
+          },
+          {
+            numOfAttempts: setupAttempts,
+            // 1s initial backoff
+            startingDelay: 1000,
+            // 5m max backoff
+            maxDelay: 60000 * 5,
+            timeMultiple: 2,
+            // avoid HA contention with other Kibana instances
+            jitter: 'full',
+            retry: (error: any, attemptCount: number) => {
+              const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
+              logger.warn(summary, { error: { message: error } });
+
+              this.fleetStatus$.next({
+                level: ServiceStatusLevels.available,
+                summary,
+                meta: {
+                  attemptCount,
+                  error,
+                },
+              });
+              return true;
+            },
+          }
         );
+
+        // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
+        this.initializeUninstallTokens();
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn('Fleet setup failed');
-        logger.warn(error);
+        logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
+          error: { message: error },
+        });
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
@@ -558,7 +715,6 @@ export class FleetPlugin
         fromRequest: getAuthzFromRequest,
       },
       fleetSetupCompleted: () => fleetSetupPromise,
-      esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
         internalSoClient
@@ -572,6 +728,10 @@ export class FleetPlugin
         list: agentPolicyService.list,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
         getByIds: agentPolicyService.getByIDs,
+        turnOffAgentTamperProtections:
+          agentPolicyService.turnOffAgentTamperProtections.bind(agentPolicyService),
+        fetchAllAgentPolicies: agentPolicyService.fetchAllAgentPolicies,
+        fetchAllAgentPolicyIds: agentPolicyService.fetchAllAgentPolicyIds,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
@@ -591,10 +751,11 @@ export class FleetPlugin
       createFleetActionsClient(packageName: string) {
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      getPackageSpecTagId,
     };
   }
 
-  public async stop() {
+  public stop() {
     appContextService.stop();
     this.policyWatcher?.stop();
     licenseService.stop();
@@ -644,5 +805,55 @@ export class FleetPlugin
     }
 
     return this.logger;
+  }
+
+  private async initializeUninstallTokens() {
+    try {
+      await this.generateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token generation.', { error: { message: error } });
+    }
+
+    try {
+      await this.validateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token validation.', { error: { message: error } });
+    }
+  }
+
+  private async generateUninstallTokens() {
+    const logger = appContextService.getLogger();
+
+    logger.debug('Generating Agent uninstall tokens');
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.warn(
+        'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+      );
+    }
+    await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+    if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.debug('Checking for and encrypting plain text uninstall tokens');
+      await appContextService.getUninstallTokenService()?.encryptTokens();
+    }
+  }
+
+  private async validateUninstallTokens() {
+    const logger = appContextService.getLogger();
+    logger.debug('Validating uninstall tokens');
+
+    const unintallTokenValidationError = await appContextService
+      .getUninstallTokenService()
+      ?.checkTokenValidityForAllPolicies();
+
+    if (unintallTokenValidationError) {
+      logger.warn(unintallTokenValidationError.error.message);
+    } else {
+      logger.debug('Uninstall tokens validation successful.');
+    }
   }
 }

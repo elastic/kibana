@@ -18,8 +18,9 @@ import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
+import type { IndexPatternSelectProps, QueryStringInputProps, StatefulSearchBarProps } from '.';
 import type { FiltersBuilderProps } from './filters_builder/filters_builder';
+import { StatefulSearchBarDeps } from './search_bar/create_search_bar';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -39,16 +40,20 @@ export interface UnifiedSearchStartDependencies {
   screenshotMode?: ScreenshotModePluginStart;
 }
 
+type AggQuerySearchBarComp = <QT extends Query | AggregateQuery = Query>(
+  props: StatefulSearchBarProps<QT>
+) => React.ReactElement;
+
 /**
  * Unified search plugin prewired UI components
  */
 export interface UnifiedSearchPublicPluginStartUi {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  getCustomSearchBar: (customDataService?: StatefulSearchBarDeps['data']) => AggQuerySearchBarComp;
   SearchBar: (props: StatefulSearchBarProps<Query>) => React.ReactElement;
-  AggregateQuerySearchBar: <QT extends Query | AggregateQuery = Query>(
-    props: StatefulSearchBarProps<QT>
-  ) => React.ReactElement;
+  AggregateQuerySearchBar: AggQuerySearchBarComp;
   FiltersBuilderLazy: React.ComponentType<FiltersBuilderProps>;
+  QueryStringInput: React.ComponentType<Omit<QueryStringInputProps, 'deps'>>;
 }
 
 /**
@@ -87,6 +92,9 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];
   http: CoreStart['http'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   storage: IStorageWrapper;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;

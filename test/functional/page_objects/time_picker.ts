@@ -7,8 +7,8 @@
  */
 
 import moment from 'moment';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export type CommonlyUsed =
   | 'Today'
@@ -57,6 +57,7 @@ export class TimePickerPageObject extends FtrService {
     });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
+      await this.testSubjects.waitForDeleted('noDataPopoverDismissButton');
     }
   }
 
@@ -92,7 +93,9 @@ export class TimePickerPageObject extends FtrService {
    * @param option 'Today' | 'This_week' | 'Last_15 minutes' | 'Last_24 hours' ...
    */
   async setCommonlyUsedTime(option: CommonlyUsed | string) {
+    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
+    await this.testSubjects.exists(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
     await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
   }
 
@@ -104,6 +107,8 @@ export class TimePickerPageObject extends FtrService {
     } else {
       await this.testSubjects.setValue(dataTestSubj, value);
     }
+
+    await this.testSubjects.pressEnter(dataTestSubj);
   }
 
   private async showStartEndTimes() {

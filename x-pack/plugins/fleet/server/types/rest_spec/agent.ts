@@ -9,16 +9,29 @@ import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import semverIsValid from 'semver/functions/valid';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
+import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+
+import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
+
+import { validateKuery } from '../../routes/utils/filter_utils';
 
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
       page: schema.number({ defaultValue: 1 }),
       perPage: schema.number({ defaultValue: 20 }),
-      kuery: schema.maybe(schema.string()),
+      kuery: schema.maybe(
+        schema.string({
+          validate: (value: string) => {
+            const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+            if (validationObj?.error) {
+              return validationObj?.error;
+            }
+          },
+        })
+      ),
       showInactive: schema.boolean({ defaultValue: false }),
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
@@ -84,6 +97,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
     force: schema.maybe(schema.boolean()),
     revoke: schema.maybe(schema.boolean()),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -103,6 +117,7 @@ export const PostAgentUpgradeRequestSchema = {
       validate: validateVersion,
     }),
     force: schema.maybe(schema.boolean()),
+    skipRateLimitCheck: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -112,6 +127,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
+    skipRateLimitCheck: schema.maybe(schema.boolean()),
     rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
     start_time: schema.maybe(
       schema.string({
@@ -123,6 +139,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
       })
     ),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -148,12 +165,22 @@ export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      additional_metrics: schema.maybe(
+        schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+      ),
+    })
+  ),
 };
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    additional_metrics: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
+    ),
   }),
 };
 
@@ -175,6 +202,7 @@ export const PostBulkAgentReassignRequestSchema = {
     policy_id: schema.string(),
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -200,13 +228,23 @@ export const PostBulkUpdateAgentTagsRequestSchema = {
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),
-    kuery: schema.maybe(schema.string()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
   }),
 };
 
@@ -221,7 +259,6 @@ export const GetActionStatusRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
     errorSize: schema.number({ defaultValue: 5 }),
   }),
 };

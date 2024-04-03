@@ -11,13 +11,18 @@
 }
 
 .filter-group__wrapper {
-  .euiFlexGroup.controlGroup {
+  .euiPanel.controlsWrapper {
     min-height: 34px;
   }
+
   .euiFormControlLayout.euiFormControlLayout--group.controlFrame__formControlLayout {
     height: 34px;
     & .euiFormLabel.controlFrame__formControlLayoutLabel {
-      padding: 8px;
+      padding: 8px  !important;
+    }
+
+    .euiButtonEmpty.euiFilterButton {
+      height: 32px;
     }
   }
   .euiText.errorEmbeddableCompact__button {

@@ -3,5 +3,6 @@
   "version": "1.0.0",
   "description": "security solution elastic search utilities to use across plugins such lists, security_solution, cases, etc...",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true
+  "private": true,
+  "sideEffects": false
 }

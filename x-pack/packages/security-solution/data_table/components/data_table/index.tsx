@@ -92,7 +92,7 @@ interface BaseDataTableProps {
   rowRenderers: DeprecatedRowRenderer[];
   hasCrudPermissions?: boolean;
   unitCountText: string;
-  pagination: EuiDataGridPaginationProps;
+  pagination: EuiDataGridPaginationProps & { pageSize: number };
   totalItems: number;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   isEventRenderedView?: boolean;
@@ -118,13 +118,18 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
       ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
     }
   }
-  div .euiDataGridRowCell__contentByHeight {
-    height: auto;
-    align-self: center;
+  div .euiDataGridRowCell {
+    display: flex;
+    align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
-    flex-grow: 0;
+  div .euiDataGridRowCell > [data-focus-lock-disabled] {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
     width: 100%;
+  }
+  div .euiDataGridRowCell__content {
+    flex-grow: 1;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;
@@ -137,6 +142,7 @@ const memoizedGetColumnHeaders: (
   isEventRenderedView: boolean
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,
@@ -164,8 +170,15 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const dataTable = useShallowEqualSelector<DataTableModel, DataTableState>(
       (state) => getDataTable(state, id) ?? tableDefaults
     );
-    const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
-      dataTable;
+    const {
+      columns,
+      selectedEventIds,
+      showCheckboxes,
+      sort,
+      isLoading,
+      defaultColumns,
+      dataViewId,
+    } = dataTable;
 
     const columnHeaders = memoizedGetColumnHeaders(columns, browserFields, isEventRenderedView);
 
@@ -333,7 +346,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
+    const cellActionsMetadata = useMemo(() => ({ scopeId: id, dataViewId }), [dataViewId, id]);
     const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
       () =>
         cellActionsTriggerId
@@ -404,10 +417,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
         const ecs = pageRowIndex < data.length ? data[pageRowIndex].ecs : null;
 
         useEffect(() => {
-          const defaultStyles = { overflow: 'hidden' };
-          setCellProps({ style: { ...defaultStyles } });
           if (ecs && rowData) {
-            addBuildingBlockStyle(ecs, theme, setCellProps, defaultStyles);
+            addBuildingBlockStyle(ecs, theme, setCellProps);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });

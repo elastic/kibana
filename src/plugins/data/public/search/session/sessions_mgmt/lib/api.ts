@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, NotificationsStart, SavedObject } from '@kbn/core/public';
+import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
-import { mapTo, tap } from 'rxjs/operators';
+import { mapTo, tap } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 import { ACTION } from '../components/actions';
@@ -25,6 +25,11 @@ import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../
 import { SearchSessionsConfigSchema } from '../../../../../config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];
+
+interface SearchSessionSavedObject {
+  id: string;
+  attributes: PersistedSearchSessionSavedObjectAttributes;
+}
 
 function getActions(status: UISearchSessionState) {
   const actions: ACTION[] = [];
@@ -65,9 +70,7 @@ const mapToUISession =
     config: SearchSessionsConfigSchema,
     sessionStatuses: SearchSessionsFindResponse['statuses']
   ) =>
-  async (
-    savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
-  ): Promise<UISession> => {
+  async (savedObject: SearchSessionSavedObject): Promise<UISession> => {
     const {
       name,
       appId,
@@ -152,9 +155,7 @@ export class SearchSessionsMgmtAPI {
     try {
       const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
-        const savedObjects = result.saved_objects as Array<
-          SavedObject<PersistedSearchSessionSavedObjectAttributes>
-        >;
+        const savedObjects = result.saved_objects as SearchSessionSavedObject[];
         return await Promise.all(
           savedObjects.map(mapToUISession(this.deps.locators, this.config, result.statuses))
         );

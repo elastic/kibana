@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiText,
+  EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -84,14 +85,18 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
         <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
           <EuiFlexItem
             grow={true}
-            className="eui-textTruncate"
             data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
+            css={css`
+              overflow-wrap: anywhere;
+            `}
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedFieldValue} delay="long">
-                <EuiText size="xs" className="eui-textTruncate" color={'subdued'} {...textProps}>
-                  {formattedFieldValue}
-                </EuiText>
+                <EuiTextBlockTruncate lines={3}>
+                  <EuiText size="xs" color={'subdued'} {...textProps}>
+                    {formattedFieldValue}
+                  </EuiText>
+                </EuiTextBlockTruncate>
               </EuiToolTip>
             ) : (
               <EuiText size="xs">
@@ -107,6 +112,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               </EuiText>
             )}
           </EuiFlexItem>
+
           <EuiFlexItem
             grow={false}
             data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}

@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedSearchServerPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export { getSavedSearch } from './services/saved_searches';
 
-export const plugin = () => new SavedSearchServerPlugin();
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { SavedSearchServerPlugin } = await import('./plugin');
+  return new SavedSearchServerPlugin(initContext);
+};

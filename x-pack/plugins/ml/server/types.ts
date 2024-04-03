@@ -22,14 +22,15 @@ import type {
 } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { RouteGuard } from './lib/route_guard';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { MlLicense } from '../common/license';
+import type { MlFeatures } from '../common/constants/app';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -64,7 +65,7 @@ export interface PluginsSetup {
   actions?: ActionsPlugin['setup'];
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
-  cases?: CasesSetup;
+  cases?: CasesServerSetup;
 }
 
 export interface PluginsStart {
@@ -80,7 +81,5 @@ export interface RouteInitialization {
   router: IRouter;
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
-  enabledFeatures: MlFeatures;
+  getEnabledFeatures: () => MlFeatures;
 }
-
-export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;

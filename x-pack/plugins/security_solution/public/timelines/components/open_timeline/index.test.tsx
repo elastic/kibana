@@ -14,16 +14,21 @@ import { useHistory, useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
 import '../../../common/mock/formatted_relative';
 import { SecurityPageName } from '../../../app/types';
-import { TimelineType } from '../../../../common/types/timeline/api';
-
-import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
+import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types';
+import {
+  TestProviders,
+  mockOpenTimelineQueryResults,
+  createMockStore,
+  mockGlobalState,
+} from '../../../common/mock';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
 import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
-import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
 import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
@@ -45,11 +50,13 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockQueryTimelineById = jest.fn();
+
 jest.mock('./helpers', () => {
   const originalModule = jest.requireActual('./helpers');
   return {
     ...originalModule,
-    queryTimelineById: jest.fn(),
+    useQueryTimelineById: () => mockQueryTimelineById,
   };
 });
 
@@ -389,8 +396,11 @@ describe('StatefulOpenTimeline', () => {
           />
         </TestProviders>
       );
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="delete-timeline"]').first().simulate('click');
+      wrapper
+        .find('button[data-test-subj="euiCollapsedItemActionsButton"]')
+        .first()
+        .simulate('click');
+      wrapper.find('button[data-test-subj="delete-timeline"]').first().simulate('click');
       wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
       await waitFor(() => {
@@ -472,7 +482,7 @@ describe('StatefulOpenTimeline', () => {
         false
       );
 
-      wrapper.find('[data-test-subj="only-favorites-toggle"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="only-favorites-toggle"]').first().simulate('click');
 
       expect(wrapper.find('[data-test-subj="open-timeline"]').last().prop('onlyFavorites')).toEqual(
         true
@@ -482,8 +492,22 @@ describe('StatefulOpenTimeline', () => {
 
   describe('#onToggleShowNotes', () => {
     test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
+      const mockStateWithTimeline = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              noteIds: ['noteId1'],
+              createdBy: 'thisisclearlyagapinourtypes',
+            },
+          },
+        },
+      };
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={createMockStore(mockStateWithTimeline)}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
             isModal={false}
@@ -518,6 +542,7 @@ describe('StatefulOpenTimeline', () => {
                     }))
                   : []
               }
+              timelineId={TimelineId.active}
             />
           ),
         });
@@ -525,8 +550,22 @@ describe('StatefulOpenTimeline', () => {
     });
 
     test('it renders the expanded notes when the expand button is clicked', async () => {
+      const mockStateWithTimeline = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              noteIds: ['noteId1'],
+              createdBy: 'thisisclearlyagapinourtypes',
+            },
+          },
+        },
+      };
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={createMockStore(mockStateWithTimeline)}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
             isModal={false}
@@ -642,14 +681,16 @@ describe('StatefulOpenTimeline', () => {
 
     await waitFor(() => {
       wrapper
-        .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
+        .find(
+          `[data-test-subj="timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`
+        )
         .last()
         .simulate('click');
 
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
         mockOpenTimelineQueryResults.timeline[0].savedObjectId
       );
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
+      expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(false);
     });
   });
 
@@ -664,16 +705,16 @@ describe('StatefulOpenTimeline', () => {
         />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
-    await waitFor(() => {
-      wrapper.update();
+    wrapper
+      .find('button[data-test-subj="euiCollapsedItemActionsButton"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="open-duplicate"]').first().simulate('click');
 
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
-        mockOpenTimelineQueryResults.timeline[0].savedObjectId
-      );
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
-    });
+    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+      mockOpenTimelineQueryResults.timeline[0].savedObjectId
+    );
+    expect((mockQueryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
   });
 
   describe('Create rule from timeline', () => {

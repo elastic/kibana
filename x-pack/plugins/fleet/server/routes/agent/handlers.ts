@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { readFile } from 'fs/promises';
-import Path from 'path';
-
-import { REPO_ROOT } from '@kbn/repo-info';
 import { uniq } from 'lodash';
-import semverGte from 'semver/functions/gte';
-import semverGt from 'semver/functions/gt';
-import semverCoerce from 'semver/functions/coerce';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-
-import { appContextService } from '../../services';
-
-const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
@@ -155,7 +144,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
-    : { kuery: request.body.agents };
+    : { kuery: request.body.agents, showInactive: request.body.includeInactive };
 
   try {
     const results = await AgentService.updateAgentTags(
@@ -284,7 +273,7 @@ export const postAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const postBulkAgentsReassignHandler: RequestHandler<
+export const postBulkAgentReassignHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
@@ -294,7 +283,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
-    : { kuery: request.body.agents };
+    : { kuery: request.body.agents, showInactive: request.body.includeInactive };
 
   try {
     const results = await AgentService.reassignAgents(
@@ -363,33 +352,11 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-// Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
-  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
-  let versionsToDisplay: string[] = [];
-
-  const kibanaVersion = appContextService.getKibanaVersion();
-  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
-
   try {
-    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
+    const availableVersions = await AgentService.getAvailableVersions();
+    const body: GetAvailableVersionsResponse = { items: availableVersions };
 
-    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-    // De-dup and sort in descending order
-    const data: string[] = JSON.parse(file);
-
-    const versions = data
-      .map((item: any) => semverCoerce(item)?.version || '')
-      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-    const parsedVersions = uniq(versions) as string[];
-
-    // Add current version if not already present
-    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
-    versionsToDisplay = !hasCurrentVersion
-      ? [kibanaVersionCoerced].concat(parsedVersions)
-      : parsedVersions;
-    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

@@ -7,9 +7,12 @@
  */
 
 import { Subject } from 'rxjs';
-import { materialize, take, toArray } from 'rxjs/operators';
+import { materialize, take, toArray } from 'rxjs';
 
 import { UiSettingsClient } from './ui_settings_client';
+import { ValidationApiResponse } from './ui_settings_api';
+
+const TEST_VALIDATION_ERROR_MESSAGE = 'Test validation message.';
 
 let done$: Subject<unknown>;
 
@@ -22,6 +25,12 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   const batchSetGlobal = jest.fn(() => ({
     settings: {},
   }));
+  const validate = jest.fn(
+    (): ValidationApiResponse => ({
+      valid: false,
+      errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
+    })
+  );
   done$ = new Subject();
   const client = new UiSettingsClient({
     defaults,
@@ -29,11 +38,12 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     api: {
       batchSet,
       batchSetGlobal,
+      validate,
     } as any,
     done$,
   });
 
-  return { client, batchSet, batchSetGlobal };
+  return { client, batchSet, batchSetGlobal, validate };
 }
 
 afterEach(() => {
@@ -281,5 +291,29 @@ describe('#getUpdate$', () => {
     expect(onComplete).not.toHaveBeenCalled();
     done$.complete();
     expect(onComplete).toHaveBeenCalled();
+  });
+});
+
+describe('#validateValue', () => {
+  it('resolves to a ValueValidation', async () => {
+    const { client } = setup();
+
+    await expect(client.validateValue('foo', 'bar')).resolves.toMatchObject({
+      successfulValidation: true,
+      valid: false,
+      errorMessage: TEST_VALIDATION_ERROR_MESSAGE,
+    });
+  });
+
+  it('resolves to a ValueValidation on failure', async () => {
+    const { client, validate } = setup();
+
+    validate.mockImplementation(() => {
+      throw new Error('Error in request');
+    });
+
+    await expect(client.validateValue('foo', 'bar')).resolves.toMatchObject({
+      successfulValidation: false,
+    });
   });
 });

@@ -8,6 +8,9 @@ Object {
   "event.kind": Array [
     "signal",
   ],
+  "kibana.alert.consecutive_matches": Array [
+    1,
+  ],
   "kibana.alert.duration.us": Array [
     0,
   ],
@@ -24,6 +27,9 @@ Object {
     "opbeans-go_ENVIRONMENT_NOT_DEFINED_request",
   ],
   "kibana.alert.reason": Array [
+    "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
+  ],
+  "kibana.alert.reason.text": Array [
     "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
   ],
   "kibana.alert.rule.category": Array [
@@ -94,6 +100,9 @@ Object {
   "event.kind": Array [
     "signal",
   ],
+  "kibana.alert.consecutive_matches": Array [
+    0,
+  ],
   "kibana.alert.evaluation.threshold": Array [
     30,
   ],
@@ -107,6 +116,9 @@ Object {
     "opbeans-go_ENVIRONMENT_NOT_DEFINED_request",
   ],
   "kibana.alert.reason": Array [
+    "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
+  ],
+  "kibana.alert.reason.text": Array [
     "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
   ],
   "kibana.alert.rule.category": Array [

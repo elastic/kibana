@@ -8,16 +8,13 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
-import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
@@ -25,6 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const monacoEditor = getService('monacoEditor');
+  const toasts = getService('toasts');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -34,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testIndex = 'sample-01';
     const testRollupIndex = 'sample-01-rollup';
     const testRollupField = 'kubernetes.container.memory.usage.bytes';
-    const toastsSelector = '[data-test-subj=globalToastList] [data-test-subj=euiToastHeader]';
     const shardFailureType = 'unsupported_aggregation_on_downsampled_index';
     const shardFailureReason = `Field [${testRollupField}] of type [aggregate_metric_double] is not supported for aggregation [percentiles]`;
 
@@ -97,11 +95,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await PageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
     });
 
-    it('shows shard failure warning notifications by default', async () => {
+    it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
+
+      await retry.try(async () => {
+        expect(await toasts.getCount()).to.be(2);
+        await testSubjects.click('viewWarningBtn');
+      });
+
+      // request
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailRequest');
+        const requestText = await monacoEditor.getCodeEditorValue(0);
+        expect(requestText).to.contain(testRollupField);
+      });
+
+      // response
+      await retry.try(async () => {
+        await testSubjects.click('inspectorRequestDetailResponse');
+        const responseText = await monacoEditor.getCodeEditorValue(0);
+        expect(responseText).to.contain(shardFailureReason);
+      });
+
+      await testSubjects.click('euiFlyoutCloseButton');
 
       // wait for response - toasts appear before the response is rendered
       let response: estypes.SearchResponse | undefined;
@@ -109,30 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         response = await getTestJson('responseTab', 'responseCodeBlock');
         expect(response).not.to.eql({});
       });
-
-      // toasts
-      const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(2);
-      const expects = ['2 of 4 shards failed', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
-      });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
-      await openShardModalButton.click();
-      const modalHeader = await testSubjects.find('shardFailureModalTitle');
-      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
-      // request
-      await testSubjects.click('shardFailuresModalRequestButton');
-      const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
-      // response
-      await testSubjects.click('shardFailuresModalResponseButton');
-      const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
-
-      await testSubjects.click('closeShardFailureModal');
 
       // response tab
       assert(response && response._shards.failures);
@@ -150,57 +145,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(warnings).to.eql([]);
     });
 
-    it('able to handle shard failure warnings and prevent default notifications', async () => {
+    it('should show search warnings in results tab', async () => {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
       });
-      const expects = ['Query result', '2 of 4 shards failed'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
-      });
-
-      // click "see full error" button in the toast
-      const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
-      await openShardModalButton.click();
-      const modalHeader = await testSubjects.find('shardFailureModalTitle');
-      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
-      // request
-      await testSubjects.click('shardFailuresModalRequestButton');
-      const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
-      expect(await requestBlock.getVisibleText()).to.contain(testRollupField);
-      // response
-      await testSubjects.click('shardFailuresModalResponseButton');
-      const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
-      expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
-
-      await testSubjects.click('closeShardFailureModal');
-
-      // response tab
-      const response = await getTestJson('responseTab', 'responseCodeBlock');
-      expect(response._shards.total).to.be(4);
-      expect(response._shards.successful).to.be(2);
-      expect(response._shards.skipped).to.be(0);
-      expect(response._shards.failed).to.be(2);
-      expect(response._shards.failures.length).to.equal(1);
-      expect(response._shards.failures[0].index).to.equal(testRollupIndex);
-      expect(response._shards.failures[0].reason.type).to.equal(shardFailureType);
-      expect(response._shards.failures[0].reason.reason).to.equal(shardFailureReason);
 
       // warnings tab
       const warnings = await getTestJson('warningsTab', 'warningsCodeBlock');
-      expect(warnings).to.eql([
-        {
-          type: 'shard_failure',
-          message: '2 of 4 shards failed',
-          reason: { reason: shardFailureReason, type: shardFailureType },
-          text: 'The data might be incomplete or wrong.',
-        },
-      ]);
+      expect(warnings.length).to.be(1);
+      expect(warnings[0].type).to.be('incomplete');
     });
   });
 }

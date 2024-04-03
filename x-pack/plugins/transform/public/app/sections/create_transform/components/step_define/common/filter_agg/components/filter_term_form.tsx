@@ -6,23 +6,23 @@
  */
 
 import { debounce } from 'lodash';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isMultiBucketAggregate } from '@kbn/ml-agg-utils';
 
 import { useDataSearch } from '../../../../../../../hooks/use_data_search';
-import { isEsSearchResponseWithAggregations } from '../../../../../../../../../common/api_schemas/type_guards';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
 
-import { FilterAggConfigTerm } from '../types';
+import type { FilterAggConfigTerm } from '../types';
 
 /**
  * Form component for the term filter aggregation.
@@ -33,16 +33,22 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
-  const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
 
-  const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchValue, setSearchValue] = useState('');
+  const debouncedOnSearchChange = useMemo(
+    () => debounce((d: string) => setSearchValue(d), 600),
+    []
+  );
 
-  const onSearchChange = (newSearchValue: string) => {
-    setSearchValue(newSearchValue);
-  };
+  useEffect(() => {
+    // Simulate initial load.
+    debouncedOnSearchChange('');
+    // Cancel debouncing when unmounting
+    return () => debouncedOnSearchChange.cancel();
+    // Only call on mount
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
 
   const updateConfig = useCallback(
     (update) => {
@@ -56,80 +62,53 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
     [config, onChange]
   );
 
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    const fetchOptions = debounce(async () => {
-      if (selectedField === undefined) return;
-
-      setIsLoading(true);
-      setOptions([]);
-
-      const esSearchRequest = {
-        index: dataView!.title,
-        body: {
-          ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-          query: {
-            wildcard: {
-              [selectedField!]: {
-                value: `*${searchValue}*`,
-              },
+  const { data, isError, isLoading } = useDataSearch(
+    {
+      index: dataView!.title,
+      body: {
+        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+        query: {
+          wildcard: {
+            [selectedField!]: {
+              value: `*${searchValue}*`,
             },
           },
-          aggs: {
-            field_values: {
-              terms: {
-                field: selectedField,
-                size: 10,
-              },
-            },
-          },
-          size: 0,
         },
-      };
+        aggs: {
+          field_values: {
+            terms: {
+              field: selectedField,
+              size: 10,
+            },
+          },
+        },
+        size: 0,
+      },
+    },
+    // Check whether fetching should be enabled
+    selectedField !== undefined
+  );
 
-      const response = await dataSearch(esSearchRequest, abortController.signal);
+  useEffect(() => {
+    if (isError) {
+      toastNotifications.addWarning(
+        i18n.translate('xpack.transform.agg.popoverForm.filerAgg.term.errorFetchSuggestions', {
+          defaultMessage: 'Unable to fetch suggestions',
+        })
+      );
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [isError]);
 
-      setIsLoading(false);
-
-      if (
-        !(
-          isEsSearchResponseWithAggregations(response) &&
-          isMultiBucketAggregate<estypes.AggregationsSignificantLongTermsBucket>(
-            response.aggregations.field_values
-          )
-        )
-      ) {
-        toastNotifications.addWarning(
-          i18n.translate('xpack.transform.agg.popoverForm.filerAgg.term.errorFetchSuggestions', {
-            defaultMessage: 'Unable to fetch suggestions',
-          })
-        );
-        return;
-      }
-
-      setOptions(
-        (
-          response.aggregations.field_values
+  const options: EuiComboBoxOptionOption[] =
+    isMultiBucketAggregate<estypes.AggregationsSignificantLongTermsBucket>(
+      data?.aggregations?.field_values
+    )
+      ? (
+          data?.aggregations?.field_values
             .buckets as estypes.AggregationsSignificantLongTermsBucket[]
         ).map((value) => ({ label: value.key + '' }))
-      );
-    }, 600);
-
-    fetchOptions();
-
-    return () => {
-      // make sure the ongoing request is canceled
-      fetchOptions.cancel();
-      abortController.abort();
-    };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [selectedField]);
-
-  useEffect(() => {
-    // Simulate initial load.
-    onSearchChange('');
-  }, []);
+      : [];
 
   useUpdateEffect(() => {
     // Reset value control on field change
@@ -168,7 +147,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         onCreateOption={(value) => {
           updateConfig({ value });
         }}
-        onSearchChange={onSearchChange}
+        onSearchChange={debouncedOnSearchChange}
         data-test-subj="transformFilterTermValueSelector"
       />
     </EuiFormRow>

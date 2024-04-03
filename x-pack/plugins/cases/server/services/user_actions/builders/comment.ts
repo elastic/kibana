@@ -8,8 +8,8 @@
 import { uniqBy } from 'lodash';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
-import type { CommentUserAction } from '../../../../common/api';
-import { ActionTypes, Actions } from '../../../../common/api';
+import type { CommentUserAction } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
@@ -28,14 +28,14 @@ export class CommentUserActionBuilder extends UserActionBuilder {
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       });
 
-    const action = args.action ?? Actions.update;
+    const action = args.action ?? UserActionActions.update;
 
     const commentUserAction = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'comment',
       value: { ...transformedFields, ...extractedAttributes },
-      type: ActionTypes.comment,
+      type: UserActionTypes.comment,
     });
 
     const parameters = {

@@ -8,7 +8,7 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import type { CaseSeverity } from '../../../common/api';
+import type { CaseSeverity } from '../../../common/types/domain';
 import { severities } from './config';
 
 interface Props {

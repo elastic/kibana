@@ -5,27 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
+import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
+import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 interface RuleStatusFailedCallOutProps {
+  ruleName?: string | undefined;
+  dataSources?: string[] | undefined;
   date: string;
   message: string;
   status?: RuleExecutionStatus | null;
 }
 
 const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> = ({
+  ruleName,
+  dataSources,
   date,
   message,
   status,
 }) => {
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
+  const getPromptContext = useCallback(
+    async () =>
+      ruleName != null && dataSources != null
+        ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
+        : `Error message: ${message}`,
+    [message, ruleName, dataSources]
+  );
   if (!shouldBeDisplayed) {
     return null;
   }
@@ -59,6 +75,19 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
+        {hasAssistantPrivilege && (
+          <NewChat
+            category="detection-rules"
+            color={color}
+            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            description={i18n.ASK_ASSISTANT_DESCRIPTION}
+            getPromptContext={getPromptContext}
+            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+          >
+            {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+          </NewChat>
+        )}
       </EuiCallOut>
     </div>
   );
@@ -75,13 +104,13 @@ interface HelperProps {
 
 const getPropsByStatus = (status: RuleExecutionStatus | null | undefined): HelperProps => {
   switch (status) {
-    case RuleExecutionStatus.failed:
+    case RuleExecutionStatusEnum.failed:
       return {
         shouldBeDisplayed: true,
         color: 'danger',
         title: i18n.ERROR_CALLOUT_TITLE,
       };
-    case RuleExecutionStatus['partial failure']:
+    case RuleExecutionStatusEnum['partial failure']:
       return {
         shouldBeDisplayed: true,
         color: 'warning',

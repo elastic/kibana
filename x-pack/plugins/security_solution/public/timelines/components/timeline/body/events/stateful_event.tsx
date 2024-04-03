@@ -9,13 +9,18 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/right';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   RowRenderer,
 } from '../../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
   TimelineItem,
   TimelineNonEcsData,
@@ -29,13 +34,12 @@ import { useEventDetailsWidthContext } from '../../../../../common/components/ev
 import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
 import { appSelectors } from '../../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { timelineActions, timelineSelectors } from '../../../../store';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
-import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../../store/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {
@@ -103,6 +107,14 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
+
+  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableTimelineFlyoutEnabled'
+  );
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
     timelineID: timelineId,
@@ -200,18 +212,38 @@ const StatefulEventComponent: React.FC<Props> = ({
       },
     };
 
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        ...updatedExpandedDetail,
-        tabType,
-        id: timelineId,
-      })
-    );
-
-    if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
-      activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+    if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+      });
+    } else {
+      // opens the panel when clicking on the table row action
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          tabType,
+          id: timelineId,
+        })
+      );
     }
-  }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
+  }, [
+    dispatch,
+    event._id,
+    event._index,
+    expandableTimelineFlyoutEnabled,
+    isSecurityFlyoutEnabled,
+    openFlyout,
+    refetch,
+    tabType,
+    timelineId,
+  ]);
 
   const associateNote = useCallback(
     (noteId: string) => {

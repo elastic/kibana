@@ -37,7 +37,7 @@ export async function bootstrap() {
     server = new Server({ config: configService, logger });
     serverStart = await server.start();
   } catch (e) {
-    log.error(`Failed to start Server: ${e}`);
+    log.error(`Failed to start Server: ${e.message}`);
     process.exit(1);
   }
 
@@ -46,7 +46,7 @@ export async function bootstrap() {
     kibanaService = new KibanaService({ config: configService, logger });
     await kibanaService.start({ server: serverStart });
   } catch (e) {
-    log.error(`Failed to start Kibana service: ${e}`);
+    log.error(`Failed to start Kibana service: ${e.message}`);
     process.exit(1);
   }
 
@@ -58,7 +58,7 @@ export async function bootstrap() {
   };
 
   process.on('unhandledRejection', async (err: Error) => {
-    log.error(err);
+    log.error(`Unhandled rejection: ${err.message}`);
     await attemptGracefulShutdown(1);
   });
 

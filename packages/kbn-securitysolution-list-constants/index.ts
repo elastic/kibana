@@ -20,8 +20,8 @@ export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
  * Internal value list routes
  */
 export const INTERNAL_LIST_URL = '/internal/lists';
-export const FIND_LISTS_BY_SIZE = `${INTERNAL_LIST_URL}/_find_lists_by_size` as const;
-export const EXCEPTION_FILTER = `${INTERNAL_LIST_URL}/_create_filter` as const;
+export const INTERNAL_FIND_LISTS_BY_SIZE = `${INTERNAL_LIST_URL}/_find_lists_by_size` as const;
+export const INTERNAL_EXCEPTION_FILTER = `${INTERNAL_LIST_URL}/_create_filter` as const;
 
 /**
  * Exception list routes

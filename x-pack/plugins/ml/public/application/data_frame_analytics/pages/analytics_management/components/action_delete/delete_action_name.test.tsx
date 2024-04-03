@@ -99,7 +99,7 @@ describe('DeleteAction', () => {
       fireEvent.click(deleteButton);
       expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
       expect(queryByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeNull();
-      expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
+      expect(queryByTestId('mlAnalyticsJobDeleteDataViewSwitch')).toBeNull();
 
       mock.mockRestore();
     });

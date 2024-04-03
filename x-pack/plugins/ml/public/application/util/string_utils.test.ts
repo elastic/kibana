@@ -6,7 +6,7 @@
  */
 
 import type { MlCustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
-import { Detector } from '../../../common/types/anomaly_detection_jobs';
+import type { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 import {
   replaceStringTokens,
@@ -14,6 +14,7 @@ import {
   toLocaleString,
   mlEscape,
   escapeForElasticsearchQuery,
+  escapeKueryForEmbeddableFieldValuePair,
 } from './string_utils';
 
 describe('ML - string utils', () => {
@@ -158,6 +159,15 @@ describe('ML - string utils', () => {
       expect(escapeForElasticsearchQuery('foo:bar')).toBe('foo\\:bar');
       expect(escapeForElasticsearchQuery('foo\\bar')).toBe('foo\\\\bar');
       expect(escapeForElasticsearchQuery('foo/bar')).toBe('foo\\/bar');
+    });
+  });
+  describe('escapeKueryForEmbeddableFieldValuePair', () => {
+    test('should return correct escaping of kuery values', () => {
+      expect(escapeKueryForEmbeddableFieldValuePair('fieldName', '')).toBe('fieldName:""');
+      expect(escapeKueryForEmbeddableFieldValuePair('', 'fieldValue')).toBe('"":fieldValue');
+      expect(escapeKueryForEmbeddableFieldValuePair('@#specialCharsName%', '<>:;[})')).toBe(
+        '@#specialCharsName%:\\<\\>\\:;[}\\)'
+      );
     });
   });
 });

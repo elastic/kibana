@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MatrixHistogramRequestOptions,
-  MatrixHistogramType,
-} from '../../../../../common/search_strategy/security_solution';
+import type { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution';
 import { matrixHistogram } from '.';
 import {
   formattedAlertsSearchStrategyResponse,
@@ -36,6 +33,7 @@ import { mockOptions as mockAuthenticationsOptions } from './authentications/__m
 import { mockOptions as mockEventsOptions } from './events/__mocks__';
 import { mockOptions as mockDnsOptions } from './dns/__mocks__';
 import { mockOptions as mockPreviewOptions } from './preview/__mocks__';
+import type { MatrixHistogramRequestOptions } from '../../../../../common/api/search_strategy/matrix_histogram/matrix_histogram';
 
 describe('Alerts matrixHistogram search strategy', () => {
   const buildMatrixHistogramQuery = jest.spyOn(alertsMatrixHistogramConfig, 'buildDsl');
@@ -58,7 +56,7 @@ describe('Alerts matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -94,7 +92,7 @@ describe('Anomalies matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -130,7 +128,7 @@ describe('Authentications matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -166,7 +164,7 @@ describe('Events matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -202,7 +200,7 @@ describe('Dns matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 
@@ -235,7 +233,7 @@ describe('Preview matrixHistogram search strategy', () => {
 
       expect(() => {
         matrixHistogram.buildDsl(invalidOptions);
-      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+      }).toThrowError(/This histogram type xxx is unknown to the server side/);
     });
   });
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLink, EuiModal } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
@@ -14,13 +14,13 @@ import React, { ReactNode } from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { ErrorCallout } from './error_callout';
 
-const mockGetSearchErrorOverrideDisplay = jest.fn();
+const mockRenderSearchError = jest.fn();
 
-jest.mock('@kbn/data-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/data-plugin/public');
+jest.mock('@kbn/search-errors', () => {
+  const originalModule = jest.requireActual('@kbn/search-errors');
   return {
     ...originalModule,
-    getSearchErrorOverrideDisplay: () => mockGetSearchErrorOverrideDisplay(),
+    renderSearchError: () => mockRenderSearchError(),
   };
 });
 
@@ -31,20 +31,17 @@ describe('ErrorCallout', () => {
     );
 
   afterEach(() => {
-    mockGetSearchErrorOverrideDisplay.mockReset();
+    mockRenderSearchError.mockReset();
   });
 
   it('should render', () => {
     const title = 'Error title';
     const error = new Error('My error');
-    const wrapper = mountWithServices(
-      <ErrorCallout title={title} error={error} data-test-subj="errorCallout" />
-    );
+    const wrapper = mountWithServices(<ErrorCallout title={title} error={error} />);
     const prompt = wrapper.find(EuiEmptyPrompt);
     expect(prompt).toHaveLength(1);
     expect(prompt.prop('title')).toBeDefined();
     expect(prompt.prop('title')).not.toBeInstanceOf(String);
-    expect(prompt.prop('data-test-subj')).toBe('errorCallout');
     expect(prompt.prop('body')).toBeDefined();
     expect(findTestSubject(prompt, 'discoverErrorCalloutTitle').contains(title)).toBe(true);
     expect(findTestSubject(prompt, 'discoverErrorCalloutMessage').contains(error.message)).toBe(
@@ -53,94 +50,28 @@ describe('ErrorCallout', () => {
     expect(prompt.find(EuiButton)).toHaveLength(1);
   });
 
-  it('should render inline', () => {
-    const title = 'Error title';
-    const error = new Error('My error');
-    const wrapper = mountWithServices(
-      <ErrorCallout title={title} error={error} inline data-test-subj="errorCallout" />
-    );
-    const callout = wrapper.find(EuiCallOut);
-    expect(callout).toHaveLength(1);
-    expect(callout.prop('title')).toBeDefined();
-    expect(callout.prop('title')).not.toBeInstanceOf(String);
-    expect(callout.prop('size')).toBe('s');
-    expect(callout.prop('data-test-subj')).toBe('errorCallout');
-    expect(
-      findTestSubject(callout, 'discoverErrorCalloutMessage').contains(`${title}: ${error.message}`)
-    ).toBe(true);
-    expect(callout.find(EuiLink)).toHaveLength(1);
-  });
-
   it('should render with override display', () => {
     const title = 'Override title';
     const error = new Error('My error');
     const overrideDisplay = <div>Override display</div>;
-    mockGetSearchErrorOverrideDisplay.mockReturnValue({ title, body: overrideDisplay });
-    const wrapper = mountWithServices(
-      <ErrorCallout title="Original title" error={error} data-test-subj="errorCallout" />
-    );
+    mockRenderSearchError.mockReturnValue({ title, body: overrideDisplay });
+    const wrapper = mountWithServices(<ErrorCallout title="Original title" error={error} />);
     const prompt = wrapper.find(EuiEmptyPrompt);
     expect(prompt).toHaveLength(1);
     expect(prompt.prop('title')).toBeDefined();
     expect(prompt.prop('title')).not.toBeInstanceOf(String);
-    expect(prompt.prop('data-test-subj')).toBe('errorCallout');
     expect(prompt.prop('body')).toBeDefined();
     expect(findTestSubject(prompt, 'discoverErrorCalloutTitle').contains(title)).toBe(true);
     expect(prompt.contains(overrideDisplay)).toBe(true);
     expect(prompt.find(EuiButton)).toHaveLength(0);
   });
 
-  it('should render with override display and inline', () => {
-    const title = 'Override title';
-    const error = new Error('My error');
-    const overrideDisplay = <div>Override display</div>;
-    mockGetSearchErrorOverrideDisplay.mockReturnValue({ title, body: overrideDisplay });
-    const wrapper = mountWithServices(
-      <ErrorCallout title="Original title" error={error} inline data-test-subj="errorCallout" />
-    );
-    const callout = wrapper.find(EuiCallOut);
-    expect(callout).toHaveLength(1);
-    expect(callout.prop('title')).toBeDefined();
-    expect(callout.prop('title')).not.toBeInstanceOf(String);
-    expect(callout.prop('size')).toBe('s');
-    expect(callout.prop('data-test-subj')).toBe('errorCallout');
-    expect(callout.find(EuiLink)).toHaveLength(1);
-    expect(wrapper.find(EuiModal)).toHaveLength(0);
-    expect(wrapper.contains(title)).toBe(true);
-    expect(wrapper.contains(overrideDisplay)).toBe(false);
-    callout.find(EuiLink).simulate('click');
-    expect(wrapper.find(EuiModal)).toHaveLength(1);
-    expect(findTestSubject(wrapper, 'discoverErrorCalloutOverrideModalTitle').contains(title)).toBe(
-      true
-    );
-    expect(
-      findTestSubject(wrapper, 'discoverErrorCalloutOverrideModalBody').contains(overrideDisplay)
-    ).toBe(true);
-    expect(wrapper.contains(overrideDisplay)).toBe(true);
-  });
-
   it('should call showErrorDialog when the button is clicked', () => {
     (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
     const title = 'Error title';
     const error = new Error('My error');
-    const wrapper = mountWithServices(
-      <ErrorCallout title={title} error={error} data-test-subj="errorCallout" />
-    );
+    const wrapper = mountWithServices(<ErrorCallout title={title} error={error} />);
     wrapper.find(EuiButton).find('button').simulate('click');
-    expect(discoverServiceMock.core.notifications.showErrorDialog).toHaveBeenCalledWith({
-      title,
-      error,
-    });
-  });
-
-  it('should call showErrorDialog when the button is clicked inline', () => {
-    (discoverServiceMock.core.notifications.showErrorDialog as jest.Mock).mockClear();
-    const title = 'Error title';
-    const error = new Error('My error');
-    const wrapper = mountWithServices(
-      <ErrorCallout title={title} error={error} inline data-test-subj="errorCallout" />
-    );
-    wrapper.find(EuiLink).find('button').simulate('click');
     expect(discoverServiceMock.core.notifications.showErrorDialog).toHaveBeenCalledWith({
       title,
       error,

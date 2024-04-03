@@ -218,6 +218,12 @@ export async function pickTestGroupRunOrder() {
   if (Number.isNaN(FTR_CONFIGS_RETRY_COUNT)) {
     throw new Error(`invalid FTR_CONFIGS_RETRY_COUNT: ${process.env.FTR_CONFIGS_RETRY_COUNT}`);
   }
+  const JEST_CONFIGS_RETRY_COUNT = process.env.JEST_CONFIGS_RETRY_COUNT
+    ? parseInt(process.env.JEST_CONFIGS_RETRY_COUNT, 10)
+    : 1;
+  if (Number.isNaN(JEST_CONFIGS_RETRY_COUNT)) {
+    throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
+  }
 
   const FTR_CONFIGS_DEPS =
     process.env.FTR_CONFIGS_DEPS !== undefined
@@ -225,6 +231,10 @@ export async function pickTestGroupRunOrder() {
           .map((t) => t.trim())
           .filter(Boolean)
       : ['build'];
+
+  const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
+    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+    : {};
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
@@ -269,7 +279,12 @@ export async function pickTestGroupRunOrder() {
           ]
         : []),
       // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      ...(!prNumber && pipelineSlug !== 'kibana-on-merge'
+      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
+      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
+      // of too many ftr groups instead of potential timeouts.
+      ...(!prNumber &&
+      pipelineSlug !== 'kibana-on-merge' &&
+      pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
         ? [
             {
               branch: ownBranch,
@@ -408,10 +423,10 @@ export async function pickTestGroupRunOrder() {
             },
             retry: {
               automatic: [
-                {
-                  exit_status: '-1',
-                  limit: 3,
-                },
+                { exit_status: '-1', limit: 3 },
+                ...(JEST_CONFIGS_RETRY_COUNT > 0
+                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                  : []),
               ],
             },
           }
@@ -428,10 +443,10 @@ export async function pickTestGroupRunOrder() {
             },
             retry: {
               automatic: [
-                {
-                  exit_status: '-1',
-                  limit: 3,
-                },
+                { exit_status: '-1', limit: 3 },
+                ...(JEST_CONFIGS_RETRY_COUNT > 0
+                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                  : []),
               ],
             },
           }
@@ -464,6 +479,7 @@ export async function pickTestGroupRunOrder() {
                   },
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
+                    ...FTR_EXTRA_ARGS,
                   },
                   retry: {
                     automatic: [

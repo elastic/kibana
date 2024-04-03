@@ -18,7 +18,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { MlLicense } from '../../common/license';
+import type { CompatibleModule } from '../../common/constants/app';
+import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
 import type {
@@ -40,24 +41,24 @@ import {
 } from './providers';
 
 import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
-import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
+import type { HasMlCapabilities } from '../lib/capabilities';
+import { hasMlCapabilitiesProvider } from '../lib/capabilities';
 import {
   MLClusterClientUninitialized,
   MLFieldFormatRegistryUninitialized,
   MLUISettingsClientUninitialized,
 } from './errors';
-import { MlClient, getMlClient } from '../lib/ml_client';
-import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
-import {
-  getAlertingServiceProvider,
-  MlAlertingServiceProvider,
-} from './providers/alerting_service';
-import {
-  getJobsHealthServiceProvider,
-  JobsHealthServiceProvider,
-} from '../lib/alerts/jobs_health_service';
+import type { MlClient } from '../lib/ml_client';
+import { getMlClient } from '../lib/ml_client';
+import type { MLSavedObjectService } from '../saved_objects';
+import { mlSavedObjectServiceFactory } from '../saved_objects';
+import type { MlAlertingServiceProvider } from './providers/alerting_service';
+import { getAlertingServiceProvider } from './providers/alerting_service';
+import type { JobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
+import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
-import { getDataViewsServiceFactory, GetDataViewsService } from '../lib/data_views_utils';
+import type { GetDataViewsService } from '../lib/data_views_utils';
+import { getDataViewsServiceFactory } from '../lib/data_views_utils';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -109,7 +110,8 @@ export function createSharedServices(
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
-  isMlReady: () => Promise<void>
+  isMlReady: () => Promise<void>,
+  compatibleModuleType: CompatibleModule | null
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -182,11 +184,11 @@ export function createSharedServices(
     sharedServicesProviders: {
       ...getJobServiceProvider(getGuards),
       ...getAnomalyDetectorsProvider(getGuards),
-      ...getModulesProvider(getGuards, getDataViews),
+      ...getModulesProvider(getGuards, getDataViews, compatibleModuleType),
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
-      ...getTrainedModelsProvider(getGuards),
+      ...getTrainedModelsProvider(getGuards, cloud),
     },
     /**
      * Services providers for ML internal usage

@@ -7,16 +7,27 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import { PropsWithChildren, ReactElement, RefObject } from 'react';
-import React, { useMemo } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
+import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Chart } from '../chart';
-import { Panels, PANELS_MODE } from '../panels';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  LensEmbeddableOutput,
+  LensSuggestionsApi,
+  Suggestion,
+} from '@kbn/lens-plugin/public';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import {
+  ResizableLayout,
+  ResizableLayoutMode,
+  ResizableLayoutDirection,
+} from '@kbn/resizable-layout';
+import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import { Chart, checkChartAvailability } from '../chart';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
@@ -28,6 +39,11 @@ import type {
   UnifiedHistogramInput$,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
+import { shouldDisplayHistogram } from './helpers';
+
+const ChartMemoized = React.memo(Chart);
+
+const chartSpacer = <EuiSpacer size="s" />;
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -69,7 +85,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current columns
    */
-  columns?: string[];
+  columns?: DatatableColumn[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -78,7 +94,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the hits count -- leave undefined to hide the hits count
    */
   hits?: UnifiedHistogramHitsContext;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -88,17 +105,17 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   breakdown?: UnifiedHistogramBreakdownContext;
   /**
-   * Ref to the element wrapping the layout which will be used for resize calculations
+   * The parent container element, used to calculate the layout size
    */
-  resizeRef: RefObject<HTMLDivElement>;
+  container: HTMLElement | null;
   /**
    * Current top panel height -- leave undefined to use the default
    */
   topPanelHeight?: number;
   /**
-   * Append a custom element to the right of the hits count
+   * This element would replace the default chart toggle buttons
    */
-  appendHitsCounter?: ReactElement;
+  renderCustomChartToggleActions?: () => ReactElement | undefined;
   /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
@@ -115,6 +132,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Input observable
    */
   input$?: UnifiedHistogramInput$;
+  /**
+   * Flag indicating that the chart is currently loading
+   */
+  isChartLoading: boolean;
   /**
    * The Lens suggestions API
    */
@@ -156,6 +177,13 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to pass to the Lens embeddable to handle brush events
    */
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+  /**
+   * Allows users to enable/disable default actions
+   */
+  withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+
+  table?: Datatable;
+  abortController?: AbortController;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -165,23 +193,26 @@ export const UnifiedHistogramLayout = ({
   query,
   filters,
   currentSuggestion: originalSuggestion,
+  isChartLoading,
   isPlainRecord,
   timeRange,
   relativeTimeRange,
   columns,
   request,
   hits,
-  lensTablesAdapter,
+  lensAdapters,
+  lensEmbeddableOutput$,
   chart: originalChart,
   breakdown,
-  resizeRef,
+  container,
   topPanelHeight,
-  appendHitsCounter,
+  renderCustomChartToggleActions,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
   lensSuggestionsApi,
   input$,
+  table,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -192,27 +223,65 @@ export const UnifiedHistogramLayout = ({
   onFilter,
   onBrushEnd,
   children,
+  withDefaultActions,
+  abortController,
 }: UnifiedHistogramLayoutProps) => {
-  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
+  const {
+    allSuggestions,
+    currentSuggestion,
+    suggestionUnsupported,
+    isOnHistogramMode,
+    histogramQuery,
+  } = useLensSuggestions({
     dataView,
     query,
     originalSuggestion,
     isPlainRecord,
     columns,
+    timeRange,
+    data: services.data,
     lensSuggestionsApi,
     onSuggestionChange,
   });
 
+  // apply table to current suggestion
+  const usedSuggestion = useMemo(() => {
+    if (
+      currentSuggestion &&
+      table &&
+      query &&
+      isOfAggregateQueryType(query) &&
+      !shouldDisplayHistogram(query)
+    ) {
+      const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
+
+      const newState = {
+        ...currentSuggestion,
+        datasourceState: {
+          ...(currentSuggestion.datasourceState as TextBasedPersistedState),
+          layers: {} as Record<string, unknown>,
+        },
+      };
+
+      for (const key of Object.keys(layers)) {
+        const newLayer = { ...layers[key], table };
+        newState.datasourceState.layers[key] = newLayer;
+      }
+
+      return newState;
+    } else {
+      return currentSuggestion;
+    }
+  }, [currentSuggestion, query, table]);
+
   const chart = suggestionUnsupported ? undefined : originalChart;
+  const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
 
-  const topPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
+  const [topPanelNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
-
-  const mainPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
+  const [mainPanelNode] = useState(() =>
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -231,22 +300,18 @@ export const UnifiedHistogramLayout = ({
   const panelsMode =
     chart || hits
       ? showFixedPanels
-        ? PANELS_MODE.FIXED
-        : PANELS_MODE.RESIZABLE
-      : PANELS_MODE.SINGLE;
+        ? ResizableLayoutMode.Static
+        : ResizableLayoutMode.Resizable
+      : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
-
-  const onResetChartHeight = useMemo(() => {
-    return currentTopPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
-      ? () => onTopPanelHeightChange?.(undefined)
-      : undefined;
-  }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
 
   return (
     <>
       <InPortal node={topPanelNode}>
-        <Chart
+        <ChartMemoized
+          abortController={abortController}
+          isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
           dataView={dataView}
@@ -256,18 +321,18 @@ export const UnifiedHistogramLayout = ({
           relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
-          currentSuggestion={currentSuggestion}
+          currentSuggestion={usedSuggestion}
+          isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          appendHitsCounter={appendHitsCounter}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+          renderCustomChartToggleActions={renderCustomChartToggleActions}
+          appendHistogram={chartSpacer}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
@@ -276,20 +341,31 @@ export const UnifiedHistogramLayout = ({
           onChartLoad={onChartLoad}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
-          lensTablesAdapter={lensTablesAdapter}
+          lensAdapters={lensAdapters}
+          lensEmbeddableOutput$={lensEmbeddableOutput$}
+          isOnHistogramMode={isOnHistogramMode}
+          histogramQuery={histogramQuery}
+          withDefaultActions={withDefaultActions}
         />
       </InPortal>
-      <InPortal node={mainPanelNode}>{children}</InPortal>
-      <Panels
+      <InPortal node={mainPanelNode}>
+        {React.isValidElement(children)
+          ? // @ts-expect-error upgrade typescript v4.9.5
+            React.cloneElement(children, { isChartAvailable })
+          : children}
+      </InPortal>
+      <ResizableLayout
         className={className}
         mode={panelsMode}
-        resizeRef={resizeRef}
-        topPanelHeight={currentTopPanelHeight}
-        minTopPanelHeight={defaultTopPanelHeight}
-        minMainPanelHeight={minMainPanelHeight}
-        topPanel={<OutPortal node={topPanelNode} />}
-        mainPanel={<OutPortal node={mainPanelNode} />}
-        onTopPanelHeightChange={onTopPanelHeightChange}
+        direction={ResizableLayoutDirection.Vertical}
+        container={container}
+        fixedPanelSize={currentTopPanelHeight}
+        minFixedPanelSize={defaultTopPanelHeight}
+        minFlexPanelSize={minMainPanelHeight}
+        fixedPanel={<OutPortal node={topPanelNode} />}
+        flexPanel={<OutPortal node={mainPanelNode} />}
+        data-test-subj="unifiedHistogram"
+        onFixedPanelSizeChange={onTopPanelHeightChange}
       />
     </>
   );

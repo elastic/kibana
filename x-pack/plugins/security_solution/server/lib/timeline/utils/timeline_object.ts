@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  TimelineSavedObject,
-  TimelineTypeLiteral,
-} from '../../../../common/types/timeline/api';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import type { TimelineSavedObject, TimelineTypeLiteral } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 

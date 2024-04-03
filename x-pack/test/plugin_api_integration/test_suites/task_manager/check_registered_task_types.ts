@@ -20,6 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
+    'sampleAdHocTaskTimingOut',
+    'lowPriorityTask',
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
@@ -31,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
+    'taskToDisable',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -41,10 +44,14 @@ export default function ({ getService }: FtrProviderContext) {
         .filter((t: string) => !TEST_TYPES.includes(t))
         .sort();
       expect(types).to.eql([
+        'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
+        'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
+        'Synthetics:Clean-Up-Package-Policies',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
+        'actions:.bedrock',
         'actions:.cases-webhook',
         'actions:.d3security',
         'actions:.email',
@@ -54,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',
+        `actions:.sentinelone`,
         'actions:.server-log',
         'actions:.servicenow',
         'actions:.servicenow-itom',
@@ -75,7 +83,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:apm.transaction_duration',
         'alerting:apm.transaction_error_rate',
         'alerting:logs.alert.document.count',
-        'alerting:metrics.alert.anomaly',
         'alerting:metrics.alert.inventory.threshold',
         'alerting:metrics.alert.threshold',
         'alerting:monitoring_alert_cluster_health',
@@ -92,7 +99,9 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_alert_thread_pool_write_rejections',
         'alerting:monitoring_ccr_read_exceptions',
         'alerting:monitoring_shard_size',
+        'alerting:observability.rules.custom_threshold',
         'alerting:siem.eqlRule',
+        'alerting:siem.esqlRule',
         'alerting:siem.indicatorRule',
         'alerting:siem.mlRule',
         'alerting:siem.newTermsRule',
@@ -126,15 +135,17 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
         'fleet:upgrade_action:retry',
+        'observabilityAIAssistant:indexQueuedDocumentsTaskType',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
         'report:execute',
-        'reports:monitor',
+        'risk_engine:risk_scoring',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:telemetry-configuration',
         'security:telemetry-detection-rules',
+        'security:telemetry-diagnostic-timelines',
         'security:telemetry-filterlist-artifact',
         'security:telemetry-lists',
         'security:telemetry-prebuilt-rule-alerts',

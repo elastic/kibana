@@ -6,6 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
 
 const params = {
@@ -15,6 +16,7 @@ const params = {
   },
 };
 
+const logger = loggingSystemMock.createLogger();
 const alert1Expected = {
   _id: 'l8jb2e55f2740ab15ba4e2717a96c93396c4ce323ac7a486c7dc179d67rg3ft',
   _index: '.internal.alerts-security.alerts-default-000001',
@@ -59,12 +61,12 @@ describe('Tines body render', () => {
   describe('renderParameterTemplates', () => {
     it('should not render body on test action', () => {
       const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
-      const result = renderParameterTemplates(testParams, variables);
+      const result = renderParameterTemplates(logger, testParams, variables);
       expect(result).toEqual(testParams);
     });
 
     it('should rendered body from variables with cleaned alerts on run action', () => {
-      const result = renderParameterTemplates(params, variables);
+      const result = renderParameterTemplates(logger, params, variables);
 
       expect(result.subActionParams.body).toEqual(
         JSON.stringify({
@@ -79,14 +81,14 @@ describe('Tines body render', () => {
 
     it('should rendered body from variables on run action without context.alerts', () => {
       const variablesWithoutAlerts = set('context.alerts', undefined, variables);
-      const result = renderParameterTemplates(params, variablesWithoutAlerts);
+      const result = renderParameterTemplates(logger, params, variablesWithoutAlerts);
 
       expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutAlerts));
     });
 
     it('should rendered body from variables on run action without context', () => {
       const variablesWithoutContext = set('context', undefined, variables);
-      const result = renderParameterTemplates(params, variablesWithoutContext);
+      const result = renderParameterTemplates(logger, params, variablesWithoutContext);
 
       expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutContext));
     });
@@ -96,7 +98,7 @@ describe('Tines body render', () => {
       jest.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
-      const result = renderParameterTemplates(params, variables);
+      const result = renderParameterTemplates(logger, params, variables);
       expect(result.subActionParams.body).toEqual(
         JSON.stringify({ error: { message: errorMessage } })
       );

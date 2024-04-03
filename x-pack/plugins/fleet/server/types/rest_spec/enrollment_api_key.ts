@@ -7,11 +7,31 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
+
+import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
+
+import { validateKuery } from '../../routes/utils/filter_utils';
+
 export const GetEnrollmentAPIKeysRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 1 }),
     perPage: schema.number({ defaultValue: 20 }),
-    kuery: schema.maybe(schema.string()),
+    kuery: schema.maybe(
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(
+            value,
+            [FLEET_ENROLLMENT_API_PREFIX],
+            ENROLLMENT_API_KEY_MAPPINGS,
+            true
+          );
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      })
+    ),
   }),
 };
 

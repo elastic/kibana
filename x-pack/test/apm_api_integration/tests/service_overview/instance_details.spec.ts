@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 type ServiceOverviewInstanceDetails =
@@ -17,9 +17,10 @@ type ServiceOverviewInstanceDetails =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
+  const synthtrace = getService('synthtraceEsClient');
 
-  const archiveName = 'apm_8.0.0';
-  const { start, end } = archives[archiveName];
+  const start = '2023-08-22T00:00:00.000Z';
+  const end = '2023-08-22T01:00:00.000Z';
 
   registry.when(
     'Instance details when data is not loaded',
@@ -46,53 +47,94 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/160709
-  registry.when.skip(
-    'Instance details when data is loaded',
-    { config: 'basic', archives: [archiveName] },
-    () => {
-      describe('fetch instance details', () => {
-        let response: {
-          status: number;
-          body: ServiceOverviewInstanceDetails;
-        };
+  // FLAKY: https://github.com/elastic/kibana/issues/177494
+  registry.when('Instance details when data is loaded', { config: 'basic', archives: [] }, () => {
+    const range = timerange(new Date(start).getTime(), new Date(end).getTime());
 
-        let serviceNodeIds: string[];
+    const serviceInstance = apm
+      .service({ name: 'service1', environment: 'production', agentName: 'go' })
+      .instance('multiple-env-service-production');
 
-        before(async () => {
-          serviceNodeIds = await getServiceNodeIds({
-            apmApiClient,
-            start,
-            end,
-          });
+    const metricOnlyInstance = apm
+      .service({ name: 'service1', environment: 'production', agentName: 'java' })
+      .instance('multiple-env-service-production');
 
-          response = await apmApiClient.readUser({
-            endpoint:
-              'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
-            params: {
-              path: { serviceName: 'opbeans-java', serviceNodeName: serviceNodeIds[0] },
-              query: {
-                start,
-                end,
-              },
+    before(async () => {
+      return synthtrace.index([
+        range
+          .interval('1s')
+          .rate(4)
+          .generator((timestamp) =>
+            serviceInstance
+              .transaction({ transactionName: 'GET /api' })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
+        range
+          .interval('30s')
+          .rate(1)
+          .generator((timestamp) =>
+            metricOnlyInstance
+              .containerId('123')
+              .podId('234')
+              .appMetrics({
+                'system.memory.actual.free': 1,
+                'system.cpu.total.norm.pct': 1,
+                'system.memory.total': 1,
+                'system.process.cpu.total.norm.pct': 1,
+              })
+              .timestamp(timestamp)
+          ),
+      ]);
+    });
+
+    after(() => {
+      return synthtrace.clean();
+    });
+
+    describe('fetch instance details', () => {
+      let response: {
+        status: number;
+        body: ServiceOverviewInstanceDetails;
+      };
+
+      let serviceNodeIds: string[];
+
+      before(async () => {
+        serviceNodeIds = await getServiceNodeIds({
+          apmApiClient,
+          start,
+          end,
+          serviceName: 'service1',
+        });
+
+        response = await apmApiClient.readUser({
+          endpoint:
+            'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+          params: {
+            path: { serviceName: 'service1', serviceNodeName: serviceNodeIds[0] },
+            query: {
+              start,
+              end,
             },
-          });
-        });
-
-        it('returns the instance details', () => {
-          expect(response.body).to.not.eql({});
-        });
-
-        it('return the correct data', () => {
-          expectSnapshot(omit(response.body, '@timestamp')).toMatch();
+          },
         });
       });
-    }
-  );
+
+      it('returns the instance details', () => {
+        expect(response.body).to.not.eql({});
+      });
+
+      it('return the correct data', () => {
+        expectSnapshot(omit(response.body, '@timestamp')).toMatch();
+      });
+    });
+  });
 
   registry.when(
     'Instance details when data is loaded but details not found',
-    { config: 'basic', archives: [archiveName] },
+    { config: 'basic', archives: [] },
     () => {
       it('handles empty state when instance id not found', async () => {
         const response = await apmApiClient.readUser({

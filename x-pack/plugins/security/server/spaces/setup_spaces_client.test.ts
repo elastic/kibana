@@ -8,9 +8,9 @@
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
+import { setupSpacesClient } from './setup_spaces_client';
 import { auditServiceMock } from '../audit/mocks';
 import { authorizationMock } from '../authorization/index.mock';
-import { setupSpacesClient } from './setup_spaces_client';
 
 describe('setupSpacesClient', () => {
   it('does not setup the spaces client when spaces is disabled', () => {

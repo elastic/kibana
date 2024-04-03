@@ -7,29 +7,33 @@
  */
 
 import React from 'react';
-
-import './resizable_button.scss';
+import { EuiResizableButton } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
+  editorIsInline,
 }: {
   onMouseDownResizeHandler: (
-    mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent
   ) => void;
   onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
+  editorIsInline?: boolean;
 }) {
-  const setFocus = (e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.focus();
-
   return (
-    <div className="TextBasedLangEditor--resizableButtonContainer">
-      <button
-        data-test-subj="TextBasedLangEditor-resize"
-        className="TextBasedLangEditor--resizableButton"
-        onMouseDown={onMouseDownResizeHandler}
-        onKeyDown={onKeyDownResizeHandler}
-        onClick={setFocus}
-      />
-    </div>
+    <EuiResizableButton
+      data-test-subj="TextBasedLangEditor-resize"
+      onMouseDown={onMouseDownResizeHandler}
+      onKeyDown={onKeyDownResizeHandler}
+      onTouchStart={onMouseDownResizeHandler}
+      indicator="border"
+      css={css`
+        position: ${editorIsInline ? 'relative' : 'absolute'};
+        bottom: 0;
+        left: 0;
+        right: 0;
+      `}
+    />
   );
 }

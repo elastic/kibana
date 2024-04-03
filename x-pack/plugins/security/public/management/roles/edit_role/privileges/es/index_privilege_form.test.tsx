@@ -8,13 +8,15 @@
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
+import '@kbn/code-editor-mock/jest_helper';
+import { CodeEditorField } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CodeEditorField, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { IndexPrivilegeForm } from './index_privilege_form';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
-import { IndexPrivilegeForm } from './index_privilege_form';
 
 test('it renders without crashing', () => {
   const wrapper = shallowWithIntl(
@@ -118,6 +120,32 @@ test('should render clusters field for remote indices', () => {
           grant: [],
         },
       }}
+      remoteClusters={[
+        {
+          name: 'test1',
+          mode: 'proxy',
+          isConnected: false,
+          initialConnectTimeout: '30s',
+          skipUnavailable: false,
+          proxyAddress: 'localhost:9400',
+          proxySocketConnections: 18,
+          connectedSocketsCount: 0,
+          serverName: 'localhost',
+          securityModel: 'certificate',
+        },
+        {
+          name: 'test2',
+          mode: 'proxy',
+          isConnected: false,
+          initialConnectTimeout: '30s',
+          skipUnavailable: false,
+          proxyAddress: 'localhost:9400',
+          proxySocketConnections: 18,
+          connectedSocketsCount: 0,
+          serverName: 'localhost',
+          securityModel: 'api_key',
+        },
+      ]}
       formIndex={0}
       indexPatterns={[]}
       indicesAPIClient={indicesAPIClientMock.create()}
@@ -130,7 +158,17 @@ test('should render clusters field for remote indices', () => {
       onDelete={jest.fn()}
     />
   );
-  expect(wrapper.find('[data-test-subj="clustersInput0"]')).toHaveLength(1);
+  const clustersInput = wrapper.find('[data-test-subj="clustersInput0"]');
+  expect(clustersInput).toHaveLength(1);
+  expect(clustersInput.prop('options')).toEqual([
+    { label: 'test2' },
+    { label: expect.anything(), isGroupLabelOption: true },
+    {
+      label: 'test1',
+      disabled: true,
+      append: expect.anything(),
+    },
+  ]);
 });
 
 describe('delete button', () => {

@@ -10,7 +10,7 @@ import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelAlertTab } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE, ALERTS_TAB_EMPTY_STATE_TEST_ID } from '.';
 import {
   ALERT_LIST_ITEM_TEST_ID,

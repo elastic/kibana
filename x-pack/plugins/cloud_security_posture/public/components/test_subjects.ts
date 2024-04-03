@@ -29,7 +29,58 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
   INDEX_TIMEOUT: 'vulnerabilities-timeout',
 };
+export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
+export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
+export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
 
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 
-export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vuknerabilities_cvss_score_badge';
+export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
+
+export const TAKE_ACTION_SUBJ = 'csp:take_action';
+export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
+
+export const CSP_GROUPING = 'cloudSecurityGrouping';
+export const CSP_GROUPING_LOADING = 'cloudSecurityGroupingLoading';
+export const CSP_FINDINGS_COMPLIANCE_SCORE = 'cloudSecurityFindingsComplianceScore';
+
+export const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
+export const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
+export const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
+export const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
+
+export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
+export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
+  CLOUDFORMATION: 'aws-cloudformation-setup-option',
+  MANUAL: 'aws-manual-setup-option',
+};
+export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
+  CLOUD_SHELL: 'gcpGoogleCloudShellOptionTestId',
+  MANUAL: 'gcpManualOptionTestId',
+};
+export const CIS_GCP_OPTION_TEST_SUBJ = 'cisGcpTestId';
+export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
+
+export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
+export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
+  TENANT_ID: 'cisAzureTenantId',
+  CLIENT_ID: 'cisAzureClientId',
+  CLIENT_SECRET: 'cisAzureClientSecret',
+  CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
+  CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
+  CLIENT_USERNAME: 'cisAzureClientUsername',
+  CLIENT_PASSWORD: 'cisAzureClientPassword',
+};
+export const CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
+  ARM_TEMPLATE: 'cisAzureArmTemplate',
+  MANUAL: 'cisAzureManual',
+};
+export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+  GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
+  PROJECT_ID: 'project_id_test_id',
+  ORGANIZATION_ID: 'organization_id_test_id',
+  CREDENTIALS_TYPE: 'credentials_type_test_id',
+  CREDENTIALS_FILE: 'credentials_file_test_id',
+  CREDENTIALS_JSON: 'credentials_json_test_id',
+};

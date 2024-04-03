@@ -53,7 +53,7 @@ import { sortDatastreamsByDataset } from './sort_datastreams';
 
 const ScrollAnchor = styled.div`
   display: none;
-  scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
+  scroll-margin-top: var(--euiFixedHeadersOffset, 0);
 `;
 
 interface Props {

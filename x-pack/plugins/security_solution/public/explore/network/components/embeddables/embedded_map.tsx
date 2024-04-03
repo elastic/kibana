@@ -9,11 +9,15 @@
 
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import type { Filter, Query } from '@kbn/es-query';
-import type { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddablePanel,
+  isErrorEmbeddable,
+  type ErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { isEqual } from 'lodash/fp';
 import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
@@ -29,10 +33,9 @@ import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../common/store/sourcerer';
+import type { State } from '../../../../common/store';
 import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 
@@ -116,12 +119,10 @@ export const EmbeddedMapComponent = ({
 
   const { addError } = useAppToasts();
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
+  const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
+  const selectedPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.default);
+  });
 
   const isFieldInIndexPattern = useIsFieldInIndexPattern();
 
@@ -247,7 +248,6 @@ export const EmbeddedMapComponent = ({
     () => buildTimeRangeFilter(startDate, endDate),
     [startDate, endDate]
   );
-
   useEffect(() => {
     if (embeddable != null) {
       // pass time range as filter instead of via timeRange param
@@ -279,14 +279,14 @@ export const EmbeddedMapComponent = ({
           {isIndexError ? (
             <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
           ) : embeddable != null ? (
-            <services.embeddable.EmbeddablePanel embeddable={embeddable} />
+            <EmbeddablePanel embeddable={embeddable} />
           ) : (
             <Loader data-test-subj="loading-panel" overlay size="xl" />
           )}
         </EmbeddableMap>
       </Embeddable>
     );
-  }, [embeddable, isIndexError, portalNode, services, storageValue]);
+  }, [embeddable, isIndexError, portalNode, storageValue]);
 
   return isError ? null : (
     <StyledEuiAccordion

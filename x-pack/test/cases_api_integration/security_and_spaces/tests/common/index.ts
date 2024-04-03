@@ -10,6 +10,9 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
+    /**
+     * Public routes
+     */
     loadTestFile(require.resolve('./client/update_alert_status'));
     loadTestFile(require.resolve('./comments/delete_comment'));
     loadTestFile(require.resolve('./comments/delete_comments'));
@@ -37,22 +40,23 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
-    loadTestFile(require.resolve('./metrics/get_case_metrics'));
-    loadTestFile(require.resolve('./metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./metrics/get_case_metrics_actions'));
-    loadTestFile(require.resolve('./metrics/get_case_metrics_connectors'));
-    loadTestFile(require.resolve('./metrics/get_cases_metrics'));
+    loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
+    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
+    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
+    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
+    loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
     /**
      * Internal routes
      */
-
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
     loadTestFile(require.resolve('./internal/bulk_get_cases'));
     loadTestFile(require.resolve('./internal/bulk_get_attachments'));
     loadTestFile(require.resolve('./internal/get_connectors'));
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
+    loadTestFile(require.resolve('./internal/search_cases'));
+    loadTestFile(require.resolve('./internal/replace_custom_field'));
 
     /**
      * Attachments framework
@@ -60,6 +64,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
     loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+
+    /**
+     * Cases client
+     */
+    loadTestFile(require.resolve('./cases/bulk_create_cases'));
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those

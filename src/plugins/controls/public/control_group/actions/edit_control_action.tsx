@@ -9,18 +9,18 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { pluginServices } from '../../services';
-import { EditControlFlyout } from './edit_control_flyout';
-import { DeleteControlAction } from './delete_control_action';
-import { ControlGroupStrings } from '../control_group_strings';
 import { ACTION_EDIT_CONTROL, ControlGroupContainer } from '..';
+import { pluginServices } from '../../services';
 import { ControlEmbeddable, DataControlInput } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainerContext, setFlyoutRef } from '../embeddable/control_group_container';
 import { isControlGroup } from '../embeddable/control_group_helpers';
+import { DeleteControlAction } from './delete_control_action';
+import { EditControlFlyout } from './edit_control_flyout';
 
 export interface EditControlActionContext {
   embeddable: ControlEmbeddable<DataControlInput>;
@@ -33,13 +33,14 @@ export class EditControlAction implements Action<EditControlActionContext> {
 
   private getEmbeddableFactory;
   private openFlyout;
-  private theme$;
+  private theme;
+  private i18n;
 
   constructor(private deleteControlAction: DeleteControlAction) {
     ({
       embeddable: { getEmbeddableFactory: this.getEmbeddableFactory },
       overlays: { openFlyout: this.openFlyout },
-      theme: { theme$: this.theme$ },
+      core: { theme: this.theme, i18n: this.i18n },
     } = pluginServices.getServices());
   }
 
@@ -105,7 +106,7 @@ export class EditControlAction implements Action<EditControlActionContext> {
           />
         </ControlGroupContainerContext.Provider>,
 
-        { theme$: this.theme$ }
+        { theme: this.theme, i18n: this.i18n }
       ),
       {
         'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),

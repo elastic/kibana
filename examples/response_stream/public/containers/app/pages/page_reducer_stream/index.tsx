@@ -8,7 +8,15 @@
 
 import React, { useEffect, useState, FC } from 'react';
 
-import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  Axis,
+  BarSeries,
+  Position,
+  ScaleType,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 
 import {
   EuiBadge,
@@ -21,14 +29,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/aiops-utils';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
 
-import { ApiReducerStream } from '../../../../../common/api';
 import {
   initialState,
   resetStream,
   reducerStreamReducer,
 } from '../../../../../common/api/reducer_stream/reducer';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 
 import { Page } from '../../../../components/page';
 
@@ -41,18 +49,15 @@ export const PageReducerStream: FC = () => {
     core: { http, notifications },
   } = useDeps();
 
-  const basePath = http?.basePath.get() ?? '';
-
   const [simulateErrors, setSimulateErrors] = useState(false);
   const [compressResponse, setCompressResponse] = useState(true);
+  const [flushFix, setFlushFix] = useState(false);
 
-  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream<
-    ApiReducerStream,
-    typeof basePath
-  >(
-    `${basePath}/internal/response_stream/reducer_stream`,
+  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream(
+    http,
+    RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
     '1',
-    { compressResponse, simulateErrors },
+    { compressResponse, flushFix, simulateErrors },
     { reducer: reducerStreamReducer, initialState }
   );
 
@@ -100,7 +105,7 @@ export const PageReducerStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -116,7 +121,11 @@ export const PageReducerStream: FC = () => {
       <EuiSpacer />
       <div style={{ height: '300px' }}>
         <Chart>
-          <Settings rotation={90} />
+          <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
+            rotation={90}
+          />
           <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
           <Axis id="left2" title="Developers" position={Position.Left} />
 
@@ -151,6 +160,13 @@ export const PageReducerStream: FC = () => {
           label="Toggle compression setting for response stream."
           checked={compressResponse}
           onChange={(e) => setCompressResponse(!compressResponse)}
+          compressed
+        />
+        <EuiCheckbox
+          id="responseStreamFlushFixCheckbox"
+          label="Toggle flushFix setting for response stream."
+          checked={flushFix}
+          onChange={(e) => setFlushFix(!flushFix)}
           compressed
         />
       </EuiText>

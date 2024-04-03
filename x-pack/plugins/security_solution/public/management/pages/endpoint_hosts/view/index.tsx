@@ -7,8 +7,11 @@
 
 import React, { type CSSProperties, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
   type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,9 +45,11 @@ import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_con
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
   HostInfo,
+  HostInfoInterface,
   Immutable,
   PolicyDetailsRouteState,
 } from '../../../../../common/endpoint/types';
+import { EndpointSortableField } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { HostsEmptyState, PolicyEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -81,6 +86,21 @@ interface GetEndpointListColumnsProps {
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
 }
 
+const columnWidths: Record<
+  Exclude<EndpointSortableField, EndpointSortableField.ENROLLED_AT> | 'actions',
+  string
+> = {
+  [EndpointSortableField.HOSTNAME]: '18%',
+  [EndpointSortableField.HOST_STATUS]: '15%',
+  [EndpointSortableField.POLICY_NAME]: '20%',
+  [EndpointSortableField.POLICY_STATUS]: '150px',
+  [EndpointSortableField.HOST_OS_NAME]: '90px',
+  [EndpointSortableField.HOST_IP]: '22%',
+  [EndpointSortableField.AGENT_VERSION]: '10%',
+  [EndpointSortableField.LAST_SEEN]: '15%',
+  actions: '65px',
+};
+
 const getEndpointListColumns = ({
   canReadPolicyManagement,
   backToEndpointList,
@@ -96,17 +116,18 @@ const getEndpointListColumns = ({
 
   return [
     {
-      field: 'metadata',
-      width: '15%',
+      field: EndpointSortableField.HOSTNAME,
+      width: columnWidths[EndpointSortableField.HOSTNAME],
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
         defaultMessage: 'Endpoint',
       }),
-      render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
+      sortable: true,
+      render: (hostname: HostInfo['metadata']['host']['hostname'], item: HostInfo) => {
         const toRoutePath = getEndpointDetailsPath(
           {
             ...queryParams,
             name: 'endpointDetails',
-            selected_endpoint: id,
+            selected_endpoint: item.metadata.agent.id,
           },
           search
         );
@@ -124,11 +145,12 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'host_status',
-      width: '14%',
+      field: EndpointSortableField.HOST_STATUS,
+      width: columnWidths[EndpointSortableField.HOST_STATUS],
       name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
         defaultMessage: 'Agent status',
       }),
+      sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
         return (
           <EndpointAgentStatus
@@ -140,16 +162,22 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.Endpoint.policy.applied',
-      width: '15%',
+      field: EndpointSortableField.POLICY_NAME,
+      width: columnWidths[EndpointSortableField.POLICY_NAME],
       name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
         defaultMessage: 'Policy',
       }),
+      sortable: true,
       truncateText: true,
-      render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+      render: (
+        policyName: HostInfo['metadata']['Endpoint']['policy']['applied']['name'],
+        item: HostInfo
+      ) => {
+        const policy = item.metadata.Endpoint.policy.applied;
+
         return (
           <>
-            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
+            <EuiToolTip content={policyName} anchorClassName="eui-textTruncate">
               {canReadPolicyManagement ? (
                 <EndpointPolicyLink
                   policyId={policy.id}
@@ -157,10 +185,10 @@ const getEndpointListColumns = ({
                   data-test-subj="policyNameCellLink"
                   backLink={backToEndpointList}
                 >
-                  {policy.name}
+                  {policyName}
                 </EndpointPolicyLink>
               ) : (
-                <>{policy.name}</>
+                <>{policyName}</>
               )}
             </EuiToolTip>
             {policy.endpoint_policy_version && (
@@ -186,12 +214,16 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.Endpoint.policy.applied',
-      width: '9%',
+      field: EndpointSortableField.POLICY_STATUS,
+      width: columnWidths[EndpointSortableField.POLICY_STATUS],
       name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
         defaultMessage: 'Policy status',
       }),
-      render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
+      sortable: true,
+      render: (
+        status: HostInfo['metadata']['Endpoint']['policy']['applied']['status'],
+        item: HostInfo
+      ) => {
         const toRoutePath = getEndpointDetailsPath({
           name: 'endpointPolicyResponse',
           ...queryParams,
@@ -199,17 +231,14 @@ const getEndpointListColumns = ({
         });
         const toRouteUrl = getAppUrl({ path: toRoutePath });
         return (
-          <EuiToolTip
-            content={POLICY_STATUS_TO_TEXT[policy.status]}
-            anchorClassName="eui-textTruncate"
-          >
+          <EuiToolTip content={POLICY_STATUS_TO_TEXT[status]} anchorClassName="eui-textTruncate">
             <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+              color={POLICY_STATUS_TO_HEALTH_COLOR[status]}
               className="eui-textTruncate eui-fullWidth"
               data-test-subj="rowPolicyStatus"
             >
               <EndpointListNavLink
-                name={POLICY_STATUS_TO_TEXT[policy.status]}
+                name={POLICY_STATUS_TO_TEXT[status]}
                 href={toRouteUrl}
                 route={toRoutePath}
                 dataTestSubj="policyStatusCellLink"
@@ -220,11 +249,12 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.host.os.name',
-      width: '9%',
+      field: EndpointSortableField.HOST_OS_NAME,
+      width: columnWidths[EndpointSortableField.HOST_OS_NAME],
       name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
         defaultMessage: 'OS',
       }),
+      sortable: true,
       render: (os: string) => {
         return (
           <EuiToolTip content={os} anchorClassName="eui-textTruncate">
@@ -236,11 +266,12 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.host.ip',
-      width: '12%',
+      field: EndpointSortableField.HOST_IP,
+      width: columnWidths[EndpointSortableField.HOST_IP],
       name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
         defaultMessage: 'IP address',
       }),
+      sortable: true,
       render: (ip: string[]) => {
         return (
           <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-textTruncate">
@@ -254,11 +285,12 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.agent.version',
-      width: '9%',
+      field: EndpointSortableField.AGENT_VERSION,
+      width: columnWidths[EndpointSortableField.AGENT_VERSION],
       name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
         defaultMessage: 'Version',
       }),
+      sortable: true,
       render: (version: string) => {
         return (
           <EuiToolTip content={version} anchorClassName="eui-textTruncate">
@@ -270,10 +302,11 @@ const getEndpointListColumns = ({
       },
     },
     {
-      field: 'metadata.@timestamp',
+      field: EndpointSortableField.LAST_SEEN,
+      width: columnWidths[EndpointSortableField.LAST_SEEN],
       name: lastActiveColumnName,
-      width: '9%',
-      render(dateValue: HostInfo['metadata']['@timestamp']) {
+      sortable: true,
+      render(dateValue: HostInfo['last_checkin']) {
         return (
           <FormattedDate
             fieldName={lastActiveColumnName}
@@ -285,7 +318,7 @@ const getEndpointListColumns = ({
     },
     {
       field: '',
-      width: '8%',
+      width: columnWidths.actions,
       name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
         defaultMessage: 'Actions',
       }),
@@ -303,12 +336,18 @@ const getEndpointListColumns = ({
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 
+const stateHandleDeployEndpointsClick: AgentPolicyDetailsDeployAgentAction = {
+  onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
+};
+
 export const EndpointList = () => {
   const history = useHistory();
   const {
     listData,
     pageIndex,
     pageSize,
+    sortField,
+    sortDirection,
     totalHits: totalItemCount,
     listLoading: loading,
     listError,
@@ -323,6 +362,7 @@ export const EndpointList = () => {
     isAutoRefreshEnabled,
     patternsError,
     metadataTransformStats,
+    isInitialized,
   } = useEndpointSelector(selector);
   const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
@@ -369,7 +409,7 @@ export const EndpointList = () => {
   }, [pageIndex, pageSize, maxPageCount]);
 
   const onTableChange = useCallback(
-    ({ page }: { page: { index: number; size: number } }) => {
+    ({ page, sort }: CriteriaWithPagination<HostInfoInterface>) => {
       const { index, size } = page;
       // FIXME: PT: if endpoint details is open, table is not displaying correct number of rows
       history.push(
@@ -378,10 +418,31 @@ export const EndpointList = () => {
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
+          sort_direction: sort?.direction,
+          sort_field: sort?.field as EndpointSortableField,
         })
       );
     },
     [history, queryParams]
+  );
+
+  const stateHandleCreatePolicyClick: CreatePackagePolicyRouteState = useMemo(
+    () => ({
+      onCancelNavigateTo: [
+        APP_UI_ID,
+        {
+          path: getEndpointListPath({ name: 'endpointList' }),
+        },
+      ],
+      onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
+      onSaveNavigateTo: [
+        APP_UI_ID,
+        {
+          path: getEndpointListPath({ name: 'endpointList' }),
+        },
+      ],
+    }),
+    [getAppUrl]
   );
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
@@ -390,21 +451,7 @@ export const EndpointList = () => {
       path: `/integrations/${
         endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }/add-integration`,
-      state: {
-        onCancelNavigateTo: [
-          APP_UI_ID,
-          {
-            path: getEndpointListPath({ name: 'endpointList' }),
-          },
-        ],
-        onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
-        onSaveNavigateTo: [
-          APP_UI_ID,
-          {
-            path: getEndpointListPath({ name: 'endpointList' }),
-          },
-        ],
-      },
+      state: stateHandleCreatePolicyClick,
     }
   );
 
@@ -450,9 +497,7 @@ export const EndpointList = () => {
   const handleDeployEndpointsClick =
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
-      state: {
-        onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
-      },
+      state: stateHandleDeployEndpointsClick,
     });
 
   const handleSelectableOnChange = useCallback<(o: EuiSelectableProps['options']) => void>(
@@ -500,18 +545,52 @@ export const EndpointList = () => {
     ]
   );
 
+  const sorting = useMemo(
+    () => ({
+      sort: { field: sortField as keyof HostInfoInterface, direction: sortDirection },
+    }),
+    [sortDirection, sortField]
+  );
+
+  const mutableListData = useMemo(() => [...listData], [listData]);
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist) {
+    if (!isInitialized) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+            title={
+              <h2>
+                {i18n.translate('xpack.securitySolution.endpoint.list.loadingEndpointManagement', {
+                  defaultMessage: 'Loading Endpoint Management',
+                })}
+              </h2>
+            }
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (listError) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            title={<h2>{listError.error}</h2>}
+            body={<p>{listError.message}</p>}
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
-          items={[...listData]}
+          items={mutableListData}
           columns={columns}
-          error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
           rowProps={setTableRowProps}
+          sorting={sorting}
         />
       );
     } else if (canReadEndpointList && !canAccessFleet) {
@@ -545,30 +624,34 @@ export const EndpointList = () => {
       );
     }
   }, [
-    canAccessFleet,
-    canReadEndpointList,
-    columns,
+    isInitialized,
+    listError,
     endpointsExist,
-    endpointPrivilegesLoading,
-    handleCreatePolicyClick,
-    handleDeployEndpointsClick,
-    handleSelectableOnChange,
-    hasPolicyData,
-    listData,
-    listError?.message,
-    loading,
-    onTableChange,
-    paginationSetup,
+    canReadEndpointList,
+    canAccessFleet,
     policyItemsLoading,
-    policyItems,
-    selectedPolicyId,
+    hasPolicyData,
+    mutableListData,
+    columns,
+    paginationSetup,
+    onTableChange,
+    loading,
     setTableRowProps,
+    sorting,
+    endpointPrivilegesLoading,
+    policyItems,
+    handleDeployEndpointsClick,
+    selectedPolicyId,
+    handleSelectableOnChange,
+    handleCreatePolicyClick,
   ]);
+
+  const hideHeader = !(endpointsExist && isInitialized && !listError);
 
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!endpointsExist}
+      hideHeader={hideHeader}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -584,34 +667,36 @@ export const EndpointList = () => {
       headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      <>
-        <TransformFailedCallout
-          metadataTransformStats={metadataTransformStats}
-          hasNoPolicyData={!hasPolicyData}
-        />
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {shouldShowKQLBar && (
-            <EuiFlexItem>
-              <AdminSearchBar />
+      {isInitialized && !listError && (
+        <>
+          <TransformFailedCallout
+            metadataTransformStats={metadataTransformStats}
+            hasNoPolicyData={!hasPolicyData}
+          />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {shouldShowKQLBar && (
+              <EuiFlexItem>
+                <AdminSearchBar />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} style={refreshStyle}>
+              <StyledDatePicker>
+                <EuiSuperDatePicker
+                  className="endpointListDatePicker"
+                  onTimeChange={onTimeChange}
+                  isDisabled={hasSelectedEndpoint}
+                  onRefresh={onRefresh}
+                  isPaused={refreshIsPaused}
+                  refreshInterval={refreshInterval}
+                  onRefreshChange={onRefreshChange}
+                  isAutoRefreshOnly={true}
+                />
+              </StyledDatePicker>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false} style={refreshStyle}>
-            <StyledDatePicker>
-              <EuiSuperDatePicker
-                className="endpointListDatePicker"
-                onTimeChange={onTimeChange}
-                isDisabled={hasSelectedEndpoint}
-                onRefresh={onRefresh}
-                isPaused={refreshIsPaused}
-                refreshInterval={refreshInterval}
-                onRefreshChange={onRefreshChange}
-                isAutoRefreshOnly={true}
-              />
-            </StyledDatePicker>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">

@@ -30,9 +30,9 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { TimestampOverride } from '../../../../../common/detection_engine/rule_schema';
-import type { Privilege } from '../../../../../common/detection_engine/schemas/common';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { Privilege } from '../../../../../common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -49,6 +49,7 @@ import type {
 import type { ShardError } from '../../../types';
 import type {
   EqlRuleParams,
+  EsqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
   RuleParams,
@@ -61,7 +62,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 
@@ -71,7 +72,7 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
-}): Promise<boolean> => {
+}): Promise<{ wroteWarningMessage: boolean; warningStatusMessage: string | undefined }> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -86,17 +87,20 @@ export const hasReadIndexPrivileges = async (args: {
     (indexName) => privileges.index[indexName].read
   );
 
+  let warningStatusMessage;
+
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
+    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
     await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatus['partial failure'],
-      message: `This rule may not have the required read privileges to the following indices/index patterns: ${indexesString}`,
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningStatusMessage,
     });
-    return true;
+    return { wroteWarningMessage: true, warningStatusMessage };
   }
 
-  return false;
+  return { wroteWarningMessage: false, warningStatusMessage };
 };
 
 export const hasTimestampFields = async (args: {
@@ -107,12 +111,16 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<{ wroteWarningStatus: boolean; foundNoIndices: boolean }> => {
+}): Promise<{
+  wroteWarningStatus: boolean;
+  foundNoIndices: boolean;
+  warningMessage: string | undefined;
+}> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
       ruleName === 'Endpoint Security'
@@ -121,11 +129,15 @@ export const hasTimestampFields = async (args: {
     }`;
 
     await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatus['partial failure'],
+      newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString.trimEnd(),
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: true };
+    return {
+      wroteWarningStatus: true,
+      foundNoIndices: true,
+      warningMessage: errorString.trimEnd(),
+    };
   } else if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -145,14 +157,14 @@ export const hasTimestampFields = async (args: {
     )}`;
 
     await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatus['partial failure'],
+      newStatus: RuleExecutionStatusEnum['partial failure'],
       message: errorString,
     });
 
-    return { wroteWarningStatus: true, foundNoIndices: false };
+    return { wroteWarningStatus: true, foundNoIndices: false, warningMessage: errorString };
   }
 
-  return { wroteWarningStatus: false, foundNoIndices: false };
+  return { wroteWarningStatus: false, foundNoIndices: false, warningMessage: undefined };
 };
 
 export const checkPrivileges = async (
@@ -432,7 +444,9 @@ export const getRuleRangeTuples = ({
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
     ruleExecutionLogger.error(
-      'Failed to compute gap between rule runs: could not parse rule interval'
+      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
+        interval
+      )}"`
     );
     return { tuples, remainingGap: moment.duration(0) };
   }
@@ -654,6 +668,7 @@ export const createSearchAfterReturnType = ({
   createdSignals,
   errors,
   warningMessages,
+  suppressedAlertsCount,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -665,6 +680,7 @@ export const createSearchAfterReturnType = ({
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
+  suppressedAlertsCount?: number | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -677,6 +693,7 @@ export const createSearchAfterReturnType = ({
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
     warningMessages: warningMessages ?? [],
+    suppressedAlertsCount: suppressedAlertsCount ?? 0,
   };
 };
 
@@ -718,6 +735,10 @@ export const addToSearchAfterReturn = ({
   current.bulkCreateTimes.push(next.bulkCreateDuration);
   current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
+  if (next.suppressedItemsCount != null) {
+    current.suppressedAlertsCount =
+      (current.suppressedAlertsCount ?? 0) + next.suppressedItemsCount;
+  }
 };
 
 export const mergeReturns = (
@@ -735,6 +756,7 @@ export const mergeReturns = (
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
       warningMessages: existingWarningMessages,
+      suppressedAlertsCount: existingSuppressedAlertsCount,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -748,6 +770,7 @@ export const mergeReturns = (
       createdSignals: newCreatedSignals,
       errors: newErrors,
       warningMessages: newWarningMessages,
+      suppressedAlertsCount: newSuppressedAlertsCount,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -761,6 +784,7 @@ export const mergeReturns = (
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
+      suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
     };
   });
 };
@@ -833,6 +857,8 @@ export const calculateTotal = (
 };
 
 export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
+export const isEsqlParams = (params: RuleParams): params is EsqlRuleParams =>
+  params.type === 'esql';
 export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
   params.type === 'threshold';
 export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
@@ -956,4 +982,8 @@ export const getUnprocessedExceptionsWarnings = (
 
 export const getMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created.`;
+};
+
+export const getSuppressionMaxSignalsWarning = (): string => {
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
 };

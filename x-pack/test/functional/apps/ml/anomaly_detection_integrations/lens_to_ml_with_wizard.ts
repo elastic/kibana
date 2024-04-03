@@ -107,7 +107,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     let tabsCount = 1;

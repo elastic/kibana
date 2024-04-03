@@ -91,10 +91,6 @@ export const useStyles = () => {
       },
     };
 
-    const betaBadge: CSSObject = {
-      marginLeft: size.m,
-    };
-
     return {
       titleSection,
       titleText,
@@ -108,7 +104,6 @@ export const useStyles = () => {
       widgetsBottomSpacing,
       percentageChartTitle,
       widgetsGroup,
-      betaBadge,
     };
   }, [euiTheme]);
 

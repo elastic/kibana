@@ -67,6 +67,9 @@ const executorParams: ExecutorSubActionPushParams = {
     title: 'Incident title',
     description: 'Incident description',
     tags: ['kibana', 'elastic'],
+    id: '10006',
+    severity: 'High',
+    status: 'Open',
   },
   comments: [
     {

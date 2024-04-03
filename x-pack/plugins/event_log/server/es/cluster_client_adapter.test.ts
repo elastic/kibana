@@ -35,7 +35,7 @@ beforeEach(() => {
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
-    esNames: getEsNames('kibana', '1.2.3'),
+    esNames: getEsNames('kibana'),
     wait: () => Promise.resolve(true),
   });
 });
@@ -50,7 +50,7 @@ describe('indexDocument', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: [{ create: {} }, { message: 'foo' }],
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -103,7 +103,7 @@ describe('buffering documents', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       body: expectedBody,
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -124,12 +124,12 @@ describe('buffering documents', () => {
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(1, {
       body: expectedBody,
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
 
     expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
       body: [{ create: {} }, { message: `foo 100` }],
-      index: 'kibana-event-log-1.2.3',
+      index: 'kibana-event-log-ds',
     });
   });
 
@@ -158,96 +158,25 @@ describe('buffering documents', () => {
       }
 
       expect(clusterClient.bulk).toHaveBeenNthCalledWith(i + 1, {
-        index: 'kibana-event-log-1.2.3',
+        index: 'kibana-event-log-ds',
         body: expectedBody,
       });
     }
   });
 });
 
-describe('doesIlmPolicyExist', () => {
-  // ElasticsearchError can be a bit random in shape, we need an any here
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const notFoundError = new Error('Not found') as any;
-  notFoundError.statusCode = 404;
-
-  test('should call cluster with proper arguments', async () => {
-    await clusterClientAdapter.doesIlmPolicyExist('foo');
-    expect(clusterClient.transport.request).toHaveBeenCalledWith({
-      method: 'GET',
-      path: '/_ilm/policy/foo',
-    });
-  });
-
-  test('should return false when 404 error is returned by Elasticsearch', async () => {
-    clusterClient.transport.request.mockRejectedValue(notFoundError);
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when error is not 404', async () => {
-    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIlmPolicyExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error checking existance of ilm policy: Fail"`);
-  });
-
-  test('should return true when no error is thrown', async () => {
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(true);
-  });
-});
-
-describe('createIlmPolicy', () => {
-  test('should call cluster client with given policy', async () => {
-    clusterClient.transport.request.mockResolvedValue({ success: true });
-    await clusterClientAdapter.createIlmPolicy('foo', { args: true });
-    expect(clusterClient.transport.request).toHaveBeenCalledWith({
-      method: 'PUT',
-      path: '/_ilm/policy/foo',
-      body: { args: true },
-    });
-  });
-
-  test('should throw error when call cluster client throws', async () => {
-    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.createIlmPolicy('foo', { args: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating ilm policy: Fail"`);
-  });
-});
-
 describe('doesIndexTemplateExist', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.doesIndexTemplateExist('foo');
-    expect(clusterClient.indices.existsTemplate).toHaveBeenCalledWith({
+    expect(clusterClient.indices.existsIndexTemplate).toHaveBeenCalledWith({
       name: 'foo',
     });
-  });
-
-  test('should return true when call cluster to legacy template API returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(true);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return true when call cluster to index template API returns true', async () => {
     clusterClient.indices.existsTemplate.mockResponse(false);
     clusterClient.indices.existsIndexTemplate.mockResponse(true);
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
-  });
-
-  test('should return false when both call cluster calls returns false', async () => {
-    clusterClient.indices.existsTemplate.mockResponse(false);
-    clusterClient.indices.existsIndexTemplate.mockResponse(false);
-    await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
-  });
-
-  test('should throw error when call cluster to legacy template API throws an error', async () => {
-    clusterClient.indices.existsTemplate.mockRejectedValue(new Error('Fail'));
-    await expect(
-      clusterClientAdapter.doesIndexTemplateExist('foo')
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error checking existence of index template: Fail"`
-    );
   });
 
   test('should throw error when call cluster to index template API throws an error', async () => {
@@ -518,7 +447,7 @@ describe('setIndexAliasToHidden', () => {
   });
 });
 
-export const GetDataStreamsResponse = {
+export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
   data_streams: [
     {
       name: 'foo',
@@ -528,6 +457,8 @@ export const GetDataStreamsResponse = {
       indices: [],
       template: '',
       hidden: true,
+      prefer_ilm: false,
+      next_generation_managed_by: 'Index Lifecycle Management',
     },
   ],
 };
@@ -744,6 +675,13 @@ describe('aggregateEventsBySavedObject', () => {
           ],
         },
       },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
+        },
+      },
     });
   });
 });
@@ -840,6 +778,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });
@@ -988,6 +933,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });

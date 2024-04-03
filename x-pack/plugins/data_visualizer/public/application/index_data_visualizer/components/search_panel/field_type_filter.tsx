@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { getFieldTypeName } from '@kbn/unified-field-list/src/utils/field_types/get_field_type_name';
+import { getFieldTypeName } from '@kbn/field-utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldTypesHelpPopover } from '../../../common/components/field_types_filter/field_types_help_popover';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
-import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
+import type { Option } from '../../../common/components/multi_select_picker';
+import { MultiSelectPicker } from '../../../common/components/multi_select_picker';
 
 export const DataVisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: string[];

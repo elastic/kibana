@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getFieldType } from '@kbn/unified-field-list/src/utils/field_types/get_field_type';
+import { getFieldType } from '@kbn/field-utils/src/utils/get_field_type';
 import { SUPPORTED_FIELD_TYPES } from '../../../../common/constants';
 
 // convert kibana types to ML Job types

@@ -5,8 +5,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-export-transform": {
         "enabled": true,
         "title": "test_1-obj_1"
@@ -25,8 +24,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-export-transform": {
         "enabled": true,
         "title": "test_1-obj_2"
@@ -45,8 +43,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-export-add": {
         "title": "test_2-obj_1"
       },
@@ -64,8 +61,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-export-add": {
         "title": "test_2-obj_2"
       },
@@ -129,8 +125,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-export-invalid-transform": {
         "title": "test_2-obj_1"
       },
@@ -148,8 +143,7 @@
     "index": ".kibana",
     "source": {
       "coreMigrationVersion": "7.14.0",
-      "references": [
-      ],
+      "references": [],
       "test-export-transform-error": {
         "title": "test_2-obj_1"
       },
@@ -159,3 +153,4 @@
     "type": "_doc"
   }
 }
+

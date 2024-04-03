@@ -23,6 +23,10 @@
     "@kbn/utils",
     "@kbn/safer-lodash-set",
     "@kbn/core-logging-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-plugins-server",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -11,8 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
+
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
+import { useLink } from '../../../../hooks';
+import { useAuthz } from '../../../../../../hooks/use_authz';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -37,10 +40,9 @@ export const TableRowActions: React.FunctionComponent<{
   onRequestDiagnosticsClick,
 }) => {
   const { getHref } = useLink();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
 
   const isUnenrolling = agent.status === 'unenrolling';
-  const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
     ExperimentalFeaturesService.get();
@@ -54,7 +56,7 @@ export const TableRowActions: React.FunctionComponent<{
     </EuiContextMenuItem>,
   ];
 
-  if (agentPolicy?.is_managed === false) {
+  if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
     menuItems.push(
       <EuiContextMenuItem
         icon="tag"
@@ -84,7 +86,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="agentUnenrollBtn"
-        disabled={!hasFleetAllPrivileges || !agent.active}
+        disabled={!agent.active}
         icon="trash"
         onClick={() => {
           onUnenrollClick();
@@ -105,10 +107,11 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        disabled={!isAgentUpgradeable(agent)}
         onClick={() => {
           onUpgradeClick();
         }}
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
@@ -117,7 +120,25 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
 
-    if (agentTamperProtectionEnabled && agent.policy_id) {
+    if (authz.fleet.allAgents && isStuckInUpdating(agent)) {
+      menuItems.push(
+        <EuiContextMenuItem
+          key="agentRestartUpgradeBtn"
+          icon="refresh"
+          onClick={() => {
+            onUpgradeClick();
+          }}
+          data-test-subj="restartUpgradeBtn"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.restartUpgradeOneButton"
+            defaultMessage="Restart upgrade"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (authz.fleet.allAgents && agentTamperProtectionEnabled && agent.policy_id) {
       menuItems.push(
         <EuiContextMenuItem
           icon="minusInCircle"
@@ -138,13 +159,13 @@ export const TableRowActions: React.FunctionComponent<{
     }
   }
 
-  if (diagnosticFileUploadEnabled) {
+  if (authz.fleet.readAgents && diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         key="requestAgentDiagnosticsBtn"
         icon="download"
         data-test-subj="requestAgentDiagnosticsBtn"
-        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        disabled={!isAgentRequestDiagnosticsSupported(agent)}
         onClick={() => {
           onRequestDiagnosticsClick();
         }}

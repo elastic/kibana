@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';

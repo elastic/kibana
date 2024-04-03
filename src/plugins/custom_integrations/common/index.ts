@@ -39,6 +39,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   datastore: { title: 'Database', parent_id: undefined },
   dns_security: { title: 'DNS', parent_id: 'security' },
   edr_xdr: { title: 'EDR/XDR', parent_id: 'security' },
+  cloudsecurity_cdr: { title: 'Cloud Security/CDR', parent_id: 'security' },
   elasticsearch_sdk: { title: 'Elasticsearch SDK', parent_id: undefined },
   elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
   email_security: { title: 'Email', parent_id: 'security' },
@@ -78,7 +79,6 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   web: { title: 'Web Server', parent_id: 'observability' },
   web_application_firewall: { title: 'Web Application Firewall', parent_id: 'security' },
   websphere: { title: 'WebSphere Application Server', parent_id: 'observability' },
-  workplace_search: { title: 'Workplace Search', parent_id: 'enterprise_search' },
   workplace_search_content_source: {
     title: 'Workplace Search Content Source',
     parent_id: 'enterprise_search',
@@ -120,7 +120,7 @@ export interface IntegrationCategoryCount {
 // TODO: consider i18n
 export const SHIPPER_DISPLAY = {
   beats: 'Beats',
-  enterprise_search: 'Enterprise Search',
+  enterprise_search: 'Search',
   language_clients: 'Language clients',
   other: 'Other',
   sample_data: 'Sample data',

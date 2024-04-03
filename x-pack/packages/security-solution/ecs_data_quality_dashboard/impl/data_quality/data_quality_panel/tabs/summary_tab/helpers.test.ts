@@ -6,17 +6,19 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EMPTY_STAT } from '../../../helpers';
 
 import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 import { PartitionedFieldMetadata } from '../../../types';
 import {
   ALL_TAB_ID,
   CUSTOM_TAB_ID,
   ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
+  SAME_FAMILY_TAB_ID,
 } from '../../index_properties/helpers';
 import {
   CUSTOM_FIELDS,
@@ -24,6 +26,7 @@ import {
   INCOMPATIBLE_FIELDS,
   UNKNOWN,
 } from '../../index_properties/translations';
+import { SAME_FAMILY } from '../../stat_label/translations';
 import {
   CategoryId,
   getFillColor,
@@ -36,10 +39,11 @@ import {
 describe('helpers', () => {
   describe('getSummaryData', () => {
     test('it returns the expected `SummaryData`', () => {
-      expect(getSummaryData(mockPartitionedFieldMetadata)).toEqual([
+      expect(getSummaryData(mockPartitionedFieldMetadataWithSameFamily)).toEqual([
         { categoryId: 'incompatible', mappings: 3 },
         { categoryId: 'custom', mappings: 4 },
         { categoryId: 'ecs-compliant', mappings: 2 },
+        { categoryId: 'same-family', mappings: 1 },
       ]);
     });
   });
@@ -62,6 +66,10 @@ describe('helpers', () => {
       {
         categoryId: 'ecs-compliant',
         expectedColor: euiThemeVars.euiColorSuccess,
+      },
+      {
+        categoryId: 'same-family',
+        expectedColor: euiThemeVars.euiColorLightShade,
       },
       {
         categoryId: invalid,
@@ -96,6 +104,10 @@ describe('helpers', () => {
         expectedLabel: ECS_COMPLIANT_FIELDS,
       },
       {
+        categoryId: 'same-family',
+        expectedLabel: SAME_FAMILY,
+      },
+      {
         categoryId: invalid,
         expectedLabel: UNKNOWN,
       },
@@ -126,6 +138,10 @@ describe('helpers', () => {
         expectedTabId: ECS_COMPLIANT_TAB_ID,
       },
       {
+        groupByField: 'same-family',
+        expectedTabId: SAME_FAMILY_TAB_ID,
+      },
+      {
         groupByField: 'some-other-group',
         expectedTabId: ALL_TAB_ID,
       },
@@ -146,6 +162,7 @@ describe('helpers', () => {
     const defaultNumberFormat = '0,0.[000]';
     const formatNumber = (value: number | undefined) =>
       value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
+    const isILMAvailable = true;
 
     test('it returns the expected comment when the index has incompatible fields ', () => {
       expect(
@@ -155,6 +172,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
@@ -163,8 +181,8 @@ describe('helpers', () => {
       ).toEqual([
         '### auditbeat-custom-index-1\n',
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | `unmanaged` | 27.7KB |\n\n',
-        '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-        `#### 3 incompatible fields, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\nIncompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.\n\nWhen an incompatible field is not in the same family:\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
+        '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        `#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
         '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
       ]);
     });
@@ -182,6 +200,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable,
           partitionedFieldMetadata: noIncompatible,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
@@ -208,6 +227,7 @@ describe('helpers', () => {
             type: 'date',
           },
         ],
+        sameFamily: [],
       };
 
       expect(
@@ -217,6 +237,7 @@ describe('helpers', () => {
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-empty-index-1',
+          isILMAvailable,
           partitionedFieldMetadata: emptyIndex,
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
@@ -225,8 +246,8 @@ describe('helpers', () => {
       ).toEqual([
         '### auditbeat-custom-empty-index-1\n',
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | auditbeat-custom-empty-index-1 | 0 (0.0%) | 1 | `unmanaged` | 247B |\n\n',
-        '### **Incompatible fields** `1` **Custom fields** `0` **ECS compliant fields** `0` **All fields** `0`\n',
-        `#### 1 incompatible field, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\nIncompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.\n\nWhen an incompatible field is not in the same family:\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
+        '### **Incompatible fields** `1` **Same family** `0` **Custom fields** `0` **ECS compliant fields** `0` **All fields** `0`\n',
+        `#### 1 incompatible field\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
         '\n#### Incompatible field mappings - auditbeat-custom-empty-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| @timestamp | `date` | `-`  |\n\n\n',
         '#### Missing an @timestamp (date) field mapping for this index\n\nConsider adding an @timestamp (date) field mapping to this index, as required by the Elastic Common Schema (ECS), because:\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n',
       ]);

@@ -12,6 +12,8 @@ import type {
 } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { isSOError } from '../../../common/error';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
@@ -25,8 +27,8 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type { AttachmentTotals, AttributesTypeAlerts } from '../../../../common/api';
-import { CommentType, decodeOrThrow, AttributesTypeAlertsRt } from '../../../../common/api';
+import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
+import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
@@ -41,7 +43,6 @@ import {
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
-import { isSOError } from '../../../common/utils';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -140,11 +141,11 @@ export class AttachmentGetter {
   public async getAllAlertsAttachToCase({
     caseId,
     filter,
-  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AttributesTypeAlerts>>> {
+  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AlertAttachmentAttributes>>> {
     try {
       this.context.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
       const alertsFilter = buildFilter({
-        filters: [CommentType.alert],
+        filters: [AttachmentType.alert],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -164,7 +165,7 @@ export class AttachmentGetter {
           }
         );
 
-      let result: Array<SavedObject<AttributesTypeAlerts>> = [];
+      let result: Array<SavedObject<AlertAttachmentAttributes>> = [];
       for await (const userActionSavedObject of finder.find()) {
         result = result.concat(AttachmentGetter.decodeAlerts(userActionSavedObject));
       }
@@ -178,9 +179,9 @@ export class AttachmentGetter {
 
   private static decodeAlerts(
     response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): Array<SavedObject<AttributesTypeAlerts>> {
+  ): Array<SavedObject<AlertAttachmentAttributes>> {
     return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(AttributesTypeAlertsRt)(so.attributes);
+      const validatedAttributes = decodeOrThrow(AlertAttachmentAttributesRt)(so.attributes);
 
       return Object.assign(so, { attributes: validatedAttributes });
     });
@@ -193,7 +194,7 @@ export class AttachmentGetter {
     try {
       this.context.log.debug(`Attempting to GET all alerts ids for case id ${caseId}`);
       const alertsFilter = buildFilter({
-        filters: [CommentType.alert],
+        filters: [AttachmentType.alert],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -321,7 +322,7 @@ export class AttachmentGetter {
                   comments: {
                     filter: {
                       term: {
-                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.user,
+                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: AttachmentType.user,
                       },
                     },
                   },

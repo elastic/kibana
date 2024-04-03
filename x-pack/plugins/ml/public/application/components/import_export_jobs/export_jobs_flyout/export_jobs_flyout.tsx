@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,12 +27,13 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 
-import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { ExportJobDependenciesWarningCallout } from './export_job_warning_callout';
 import { JobsExportService } from './jobs_export_service';
 import type { JobDependencies } from './jobs_export_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
+import { useEnabledFeatures } from '../../../contexts/ml';
 
 interface Props {
   isDisabled: boolean;
@@ -39,21 +41,19 @@ interface Props {
 }
 
 export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
-  const mlApiServices = useMlApiContext();
+  const {
+    services: {
+      notifications: { toasts },
+      mlServices: { mlUsageCollection, mlApiServices },
+    },
+  } = useMlKibana();
+
   const {
     getJobs,
     dataFrameAnalytics: { getDataFrameAnalytics },
   } = mlApiServices;
 
-  const {
-    services: {
-      notifications: { toasts },
-      mlServices: { mlUsageCollection },
-    },
-  } = useMlKibana();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const jobsExportService = useMemo(() => new JobsExportService(mlApiServices), []);
+  const jobsExportService = useMemo(() => new JobsExportService(mlApiServices), [mlApiServices]);
 
   const [loadingADJobs, setLoadingADJobs] = useState(true);
   const [loadingDFAJobs, setLoadingDFAJobs] = useState(true);
@@ -69,9 +69,17 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     () => toastNotificationServiceProvider(toasts),
     [toasts]
   );
+  const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
 
   const [jobDependencies, setJobDependencies] = useState<JobDependencies>([]);
   const [selectedJobDependencies, setSelectedJobDependencies] = useState<JobDependencies>([]);
+
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(
     function onFlyoutChange() {
@@ -84,49 +92,68 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
       setSwitchTabConfirmVisible(false);
 
       if (showFlyout) {
-        getJobs()
-          .then(({ jobs }) => {
-            setLoadingADJobs(false);
-            setAdJobIds(jobs.map((j) => j.job_id));
+        if (isADEnabled) {
+          getJobs()
+            .then(({ jobs }) => {
+              if (isMounted.current === false) return;
+              setLoadingADJobs(false);
+              setAdJobIds(jobs.map((j) => j.job_id));
 
-            jobsExportService
-              .getJobDependencies(jobs)
-              .then((jobDeps) => {
-                setJobDependencies(jobDeps);
-                setLoadingADJobs(false);
-              })
-              .catch((error) => {
-                const errorTitle = i18n.translate(
-                  'xpack.ml.importExport.exportFlyout.calendarsError',
-                  {
-                    defaultMessage: 'Could not load calendars',
-                  }
-                );
-                displayErrorToast(error, errorTitle);
+              jobsExportService
+                .getJobDependencies(jobs)
+                .then((jobDeps) => {
+                  if (isMounted.current === false) return;
+                  setJobDependencies(jobDeps);
+                  setLoadingADJobs(false);
+                })
+                .catch((error) => {
+                  if (isMounted.current === false) return;
+                  const errorTitle = i18n.translate(
+                    'xpack.ml.importExport.exportFlyout.calendarsError',
+                    {
+                      defaultMessage: 'Could not load calendars',
+                    }
+                  );
+                  displayErrorToast(error, errorTitle);
+                });
+            })
+            .catch((error) => {
+              if (isMounted.current === false) return;
+              const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
+                defaultMessage: 'Could not load anomaly detection jobs',
               });
-          })
-          .catch((error) => {
-            const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
-              defaultMessage: 'Could not load anomaly detection jobs',
+              displayErrorToast(error, errorTitle);
             });
-            displayErrorToast(error, errorTitle);
-          });
+        }
 
-        getDataFrameAnalytics()
-          .then(({ data_frame_analytics: dataFrameAnalytics }) => {
-            setLoadingDFAJobs(false);
-            setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
-          })
-          .catch((error) => {
-            const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.dfaJobsError', {
-              defaultMessage: 'Could not load data frame analytics jobs',
+        if (isDFAEnabled) {
+          getDataFrameAnalytics()
+            .then(({ data_frame_analytics: dataFrameAnalytics }) => {
+              if (isMounted.current === false) return;
+              setLoadingDFAJobs(false);
+              setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
+            })
+            .catch((error) => {
+              if (isMounted.current === false) return;
+
+              const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.dfaJobsError', {
+                defaultMessage: 'Could not load data frame analytics jobs',
+              });
+              displayErrorToast(error, errorTitle);
             });
-            displayErrorToast(error, errorTitle);
-          });
+        }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [showFlyout]
+    [
+      currentTab,
+      displayErrorToast,
+      getDataFrameAnalytics,
+      getJobs,
+      isADEnabled,
+      isDFAEnabled,
+      jobsExportService,
+      showFlyout,
+    ]
   );
 
   function toggleFlyout() {
@@ -188,16 +215,15 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
       switchTab(jobType);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedJobIds]
+
+    [selectedJobIds, selectedJobType]
   );
 
   useEffect(() => {
     setSelectedJobDependencies(
       jobDependencies.filter(({ jobId }) => selectedJobIds.includes(jobId))
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedJobIds]);
+  }, [jobDependencies, selectedJobIds]);
 
   function switchTab(jobType: JobType) {
     setSwitchTabConfirmVisible(false);
@@ -212,6 +238,10 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
     } else {
       setSelectedJobIds([...ids]);
     }
+  }
+
+  if (isADEnabled === false && isDFAEnabled === false) {
+    return null;
   }
 
   return (
@@ -239,32 +269,36 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
             <EuiFlyoutBody>
               <ExportJobDependenciesWarningCallout jobs={selectedJobDependencies} />
               <EuiTabs size="s">
-                <EuiTab
-                  isSelected={selectedJobType === 'anomaly-detector'}
-                  onClick={() => attemptTabSwitch('anomaly-detector')}
-                  disabled={exporting}
-                  data-test-subj="mlJobMgmtExportJobsADTab"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.importExport.exportFlyout.adTab"
-                    defaultMessage="Anomaly detection"
-                  />
-                </EuiTab>
-                <EuiTab
-                  isSelected={selectedJobType === 'data-frame-analytics'}
-                  onClick={() => attemptTabSwitch('data-frame-analytics')}
-                  disabled={exporting}
-                  data-test-subj="mlJobMgmtExportJobsDFATab"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.importExport.exportFlyout.dfaTab"
-                    defaultMessage="Analytics"
-                  />
-                </EuiTab>
+                {isADEnabled === true ? (
+                  <EuiTab
+                    isSelected={selectedJobType === 'anomaly-detector'}
+                    onClick={() => attemptTabSwitch('anomaly-detector')}
+                    disabled={exporting}
+                    data-test-subj="mlJobMgmtExportJobsADTab"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.importExport.exportFlyout.adTab"
+                      defaultMessage="Anomaly detection"
+                    />
+                  </EuiTab>
+                ) : null}
+                {isDFAEnabled === true ? (
+                  <EuiTab
+                    isSelected={selectedJobType === 'data-frame-analytics'}
+                    onClick={() => attemptTabSwitch('data-frame-analytics')}
+                    disabled={exporting}
+                    data-test-subj="mlJobMgmtExportJobsDFATab"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.importExport.exportFlyout.dfaTab"
+                      defaultMessage="Analytics"
+                    />
+                  </EuiTab>
+                ) : null}
               </EuiTabs>
               <EuiSpacer size="s" />
               <>
-                {selectedJobType === 'anomaly-detector' && (
+                {isADEnabled === true && selectedJobType === 'anomaly-detector' && (
                   <>
                     {loadingADJobs === true ? (
                       <LoadingSpinner />
@@ -308,7 +342,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                     )}
                   </>
                 )}
-                {selectedJobType === 'data-frame-analytics' && (
+                {isDFAEnabled === true && selectedJobType === 'data-frame-analytics' && (
                   <>
                     {loadingDFAJobs === true ? (
                       <LoadingSpinner />

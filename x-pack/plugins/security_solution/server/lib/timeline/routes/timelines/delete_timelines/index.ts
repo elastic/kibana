@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
-import { deleteTimelinesSchema } from '../../../schemas/timelines/delete_timelines_schema';
+import { deleteTimelinesSchema } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';
@@ -22,32 +22,37 @@ export const deleteTimelinesRoute = (
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: TIMELINE_URL,
-      validate: {
-        body: buildRouteValidationWithExcess(deleteTimelinesSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { body: buildRouteValidationWithExcess(deleteTimelinesSchema) },
+        },
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { savedObjectIds } = request.body;
+        try {
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const { savedObjectIds, searchIds } = request.body;
 
-        await deleteTimeline(frameworkRequest, savedObjectIds);
-        return response.ok({ body: { data: { deleteTimeline: true } } });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
+          return response.ok({ body: { data: { deleteTimeline: true } } });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

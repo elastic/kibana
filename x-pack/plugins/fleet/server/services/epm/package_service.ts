@@ -8,33 +8,42 @@
 /* eslint-disable max-classes-per-file */
 
 import type {
-  KibanaRequest,
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  KibanaRequest,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type { PackageList } from '../../../common';
 
 import type {
+  ArchivePackage,
+  BundledPackage,
   CategoryId,
   EsAssetReference,
   InstallablePackage,
   Installation,
   RegistryPackage,
-  ArchivePackage,
-  BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../security';
-import { FleetUnauthorizedError } from '../../errors';
+import type { FleetAuthzRouteConfig } from '../security/types';
+import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } from '../security';
+import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
+import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
+
+import type { InstallResult } from '../../../common';
+
+import type { FetchFindLatestPackageOptions } from './registry';
+import * as Registry from './registry';
+import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
-import type { FetchFindLatestPackageOptions } from './registry';
-import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
-import { ensureInstalledPackage, getInstallation, getPackages } from './packages';
+import { ensureInstalledPackage, getInstallation, getPackages, installPackage } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
+import { getEsPackage } from './archive/storage';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -50,7 +59,15 @@ export interface PackageClient {
     pkgName: string;
     pkgVersion?: string;
     spaceId?: string;
+    force?: boolean;
   }): Promise<Installation | undefined>;
+
+  installPackage(options: {
+    pkgName: string;
+    pkgVersion?: string;
+    spaceId?: string;
+    force?: boolean;
+  }): Promise<InstallResult | undefined>;
 
   fetchFindLatestPackage(
     packageName: string,
@@ -86,8 +103,17 @@ export class PackageServiceImpl implements PackageService {
   ) {}
 
   public asScoped(request: KibanaRequest) {
-    const preflightCheck = () => {
-      if (!checkSuperuser(request)) {
+    const preflightCheck = async (requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) => {
+      if (requiredAuthz) {
+        const requestedAuthz = await getAuthzFromRequest(request);
+
+        const noRequiredAuthz = doesNotHaveRequiredFleetAuthz(requestedAuthz, requiredAuthz);
+        if (noRequiredAuthz) {
+          throw new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet packages.`
+          );
+        }
+      } else if (!checkSuperuser(request)) {
         throw new FleetUnauthorizedError(
           `User does not have adequate permissions to access Fleet packages.`
         );
@@ -115,7 +141,9 @@ class PackageClientImpl implements PackageClient {
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
     private readonly logger: Logger,
-    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly preflightCheck?: (
+      requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']
+    ) => void | Promise<void>,
     private readonly request?: KibanaRequest
   ) {}
 
@@ -127,7 +155,7 @@ class PackageClientImpl implements PackageClient {
   }
 
   public async getInstallation(pkgName: string) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getInstallation({
       pkgName,
       savedObjectsClient: this.internalSoClient,
@@ -138,8 +166,9 @@ class PackageClientImpl implements PackageClient {
     pkgName: string;
     pkgVersion?: string;
     spaceId?: string;
+    force?: boolean;
   }): Promise<Installation | undefined> {
-    await this.#runPreflight();
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     return ensureInstalledPackage({
       ...options,
@@ -147,18 +176,46 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
     });
   }
+  public async installPackage(options: {
+    pkgName: string;
+    pkgVersion?: string;
+    spaceId?: string;
+    force?: boolean;
+  }): Promise<InstallResult | undefined> {
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
+
+    const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = false } = options;
+
+    // If pkgVersion isn't specified, find the latest package version
+    const pkgKeyProps = pkgVersion
+      ? { name: pkgName, version: pkgVersion }
+      : await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease: true });
+    const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
+
+    return await installPackage({
+      force,
+      pkgkey,
+      spaceId,
+      installSource: 'registry',
+      esClient: this.internalEsClient,
+      savedObjectsClient: this.internalSoClient,
+      neverIgnoreVerificationError: !force,
+    });
+  }
 
   public async fetchFindLatestPackage(
     packageName: string,
     options?: FetchFindLatestPackageOptions
   ): Promise<RegistryPackage | BundledPackage> {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return fetchFindLatestPackageOrThrow(packageName, options);
   }
 
   public async readBundledPackage(bundledPackage: BundledPackage) {
-    await this.#runPreflight();
-    return generatePackageInfoFromArchiveBuffer(bundledPackage.buffer, 'application/zip');
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    const archiveBuffer = await bundledPackage.getBuffer();
+
+    return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
   public async getPackage(
@@ -166,7 +223,7 @@ class PackageClientImpl implements PackageClient {
     packageVersion: string,
     options?: Parameters<typeof getPackage>['2']
   ) {
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackage(packageName, packageVersion, options);
   }
 
@@ -176,7 +233,7 @@ class PackageClientImpl implements PackageClient {
     prerelease?: false;
   }) {
     const { excludeInstallStatus, category, prerelease } = params || {};
-    await this.#runPreflight();
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackages({
       savedObjectsClient: this.internalSoClient,
       excludeInstallStatus,
@@ -189,13 +246,13 @@ class PackageClientImpl implements PackageClient {
     packageInfo: InstallablePackage,
     assetPaths: string[]
   ): Promise<InstalledAssetType[]> {
-    await this.#runPreflight();
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
     let installedAssets: InstalledAssetType[] = [];
 
     const transformPaths = assetPaths.filter(isTransform);
 
     if (transformPaths.length !== assetPaths.length) {
-      throw new Error('reinstallEsAssets is currently only implemented for transform assets');
+      throw new FleetError('reinstallEsAssets is currently only implemented for transform assets');
     }
 
     if (transformPaths.length) {
@@ -207,11 +264,33 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
-    const authorizationHeader = await this.getAuthorizationHeader();
+    const authorizationHeader = this.getAuthorizationHeader();
+
+    const installation = await this.getInstallation(packageInfo.name);
+
+    if (!installation) {
+      throw new PackageNotFoundError(`Installation not found for package: ${packageInfo.name}`);
+    }
+
+    const esPackage = await getEsPackage(
+      packageInfo.name,
+      packageInfo.version,
+      installation.package_assets ?? [],
+      this.internalSoClient
+    );
+
+    if (!esPackage) {
+      throw new PackageNotFoundError(`ES package not found for package: ${packageInfo.name}`);
+    }
+
+    const { assetsMap } = esPackage;
 
     const { installedTransforms } = await installTransforms({
-      installablePackage: packageInfo,
-      paths,
+      packageInstallContext: {
+        assetsMap,
+        packageInfo,
+        paths,
+      },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       logger: this.logger,
@@ -222,9 +301,9 @@ class PackageClientImpl implements PackageClient {
     return installedTransforms;
   }
 
-  #runPreflight() {
+  async #runPreflight(requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) {
     if (this.preflightCheck) {
-      return this.preflightCheck();
+      return await this.preflightCheck(requiredAuthz);
     }
   }
 }

@@ -108,5 +108,6 @@
         "file": "ml_http_access_events_timechart_ecs.json"
       }
     ]
-  }
+  },
+  "tags": []
 }

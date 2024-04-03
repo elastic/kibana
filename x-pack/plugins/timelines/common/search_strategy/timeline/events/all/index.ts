@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
-import type { TimelineRequestOptionsPaginated } from '../..';
-import type { RunTimeMappings } from '../eql';
 
 export interface TimelineEdges {
   node: TimelineItem;
@@ -36,15 +32,4 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   inspect?: Maybe<Inspect>;
-}
-
-type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
-export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
-  authFilter?: JsonObject;
-  excludeEcsData?: boolean;
-  fieldRequested: string[];
-  fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
-  language: 'eql' | 'kuery' | 'lucene';
-  runtimeMappings: RunTimeMappings;
-  filterStatus?: AlertWorkflowStatus;
 }

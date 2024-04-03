@@ -9,7 +9,12 @@
 import agent, { AgentConfigOptions } from 'elastic-apm-node';
 import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
 
-const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = ['secretToken'];
+const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
+  'secretToken',
+  'apiKey',
+  'captureSpanStackTraces',
+  'metricsInterval',
+];
 
 export const getApmConfig = (requestPath: string) => {
   const baseConfig = getConfiguration('kibana-frontend') || {};
@@ -24,7 +29,7 @@ export const getApmConfig = (requestPath: string) => {
   }
 
   // Cleanup RUM unsupported attrbiutes from base apm config.
-  const { contextPropagationOnly, logUncaughtExceptions, ...restOfConfig } = baseConfig;
+  const { contextPropagationOnly, ...restOfConfig } = baseConfig;
   const config: Record<string, any> = {
     ...restOfConfig,
     pageLoadTransactionName: requestPath,

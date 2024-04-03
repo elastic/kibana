@@ -25,6 +25,13 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
 }
 
 /**
+ * Purpose for collecting references.
+ */
+export type SavedObjectsCollectMultiNamespaceReferencesPurpose =
+  | 'collectMultiNamespaceReferences'
+  | 'updateObjectsSpaces';
+
+/**
  * Options for collecting references.
  *
  * @public
@@ -32,7 +39,7 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions
   extends SavedObjectsBaseOptions {
   /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
-  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
+  purpose?: SavedObjectsCollectMultiNamespaceReferencesPurpose;
 }
 
 /**

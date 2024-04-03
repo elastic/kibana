@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
   /**
@@ -24,8 +25,9 @@ export default function (providerContext: FtrProviderContext) {
     const dockerServers = getService('dockerServers');
     const server = dockerServers.get('registry');
     const es = getService('es');
+    const log = getService('log');
     const pkgName = 'endpoint';
-    let pkgVersion: string;
+    const pkgVersion = '8.6.1';
 
     const transforms = [
       {
@@ -38,16 +40,24 @@ export default function (providerContext: FtrProviderContext) {
       },
     ];
 
+    const installPackage = async (name: string, version: string) => {
+      await supertest
+        .post(`/api/fleet/epm/packages/${name}/${version}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true });
+    };
+
     before(async () => {
       if (!server.enabled) return;
-      // The latest endpoint package is already installed by default in our FTR config,
-      // just get the most recent version number.
-      const getResp = await supertest.get(`/api/fleet/epm/packages/${pkgName}`).expect(200);
-      pkgVersion = getResp.body.response.version;
+      await bundlePackage('endpoint-8.6.1');
+      await installPackage('endpoint', '8.6.1');
+    });
+    after(async () => {
+      await uninstallPackage('endpoint', '8.6.1');
+      await removeBundledPackages(log);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156941
-    describe.skip('install', () => {
+    describe('install', () => {
       transforms.forEach((transform) => {
         it(`should have installed the [${transform.id}] transform`, async function () {
           const res = await es.transport.request(

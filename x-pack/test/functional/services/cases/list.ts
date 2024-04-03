@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import deepEqual from 'react-fast-compare';
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import rison from '@kbn/rison';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
 
@@ -21,6 +21,7 @@ export function CasesTableServiceProvider(
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const header = getPageObject('header');
+  const browser = getService('browser');
   const retry = getService('retry');
   const config = getService('config');
 
@@ -86,23 +87,34 @@ export function CasesTableServiceProvider(
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(3000, async () => {
+      await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-        expect(rows.length).equal(nrRows);
+        return rows.length === nrRows;
       });
+
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForNthToBeListed(numberOfCases: number) {
+      await retry.try(async () => {
+        await this.refreshTable();
+        await this.validateCasesTableHasNthRows(numberOfCases);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeDeleted() {
       await retry.waitFor('the cases table to be empty', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         return rows.length === 0;
       });
@@ -133,9 +145,16 @@ export function CasesTableServiceProvider(
       return rows[index] ?? null;
     },
 
+    async verifyCase(caseId: string, index: number) {
+      const theCaseById = await this.getCaseById(caseId);
+      const theCaseByIndex = await this.getCaseByIndex(index);
+
+      return (await theCaseById._webElement.getId()) === (await theCaseByIndex._webElement.getId());
+    },
+
     async filterByTag(tag: string) {
       await common.clickAndValidate(
-        'options-filter-popover-button-Tags',
+        'options-filter-popover-button-tags',
         `options-filter-popover-item-${tag}`
       );
 
@@ -144,7 +163,7 @@ export function CasesTableServiceProvider(
 
     async filterByCategory(category: string) {
       await common.clickAndValidate(
-        'options-filter-popover-button-Categories',
+        'options-filter-popover-button-category',
         `options-filter-popover-item-${category}`
       );
 
@@ -152,14 +171,28 @@ export function CasesTableServiceProvider(
     },
 
     async filterByStatus(status: CaseStatuses) {
-      await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
+      await common.clickAndValidate(
+        'options-filter-popover-button-status',
+        `options-filter-popover-item-${status}`
+      );
 
-      await testSubjects.click(`case-status-filter-${status}`);
+      await testSubjects.click(`options-filter-popover-item-${status}`);
+      // to close the popup
+      await testSubjects.click('options-filter-popover-button-status');
+
+      await testSubjects.missingOrFail(`options-filter-popover-item-${status}`, {
+        timeout: 5000,
+      });
     },
 
-    async filterBySeverity(severity: CaseSeverityWithAll) {
-      await common.clickAndValidate('case-severity-filter', `case-severity-filter-${severity}`);
-      await testSubjects.click(`case-severity-filter-${severity}`);
+    async filterBySeverity(severity: CaseSeverity) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-severity',
+        `options-filter-popover-item-${severity}`
+      );
+      await testSubjects.click(`options-filter-popover-item-${severity}`);
+      // to close the popup
+      await testSubjects.click('options-filter-popover-button-severity');
     },
 
     async filterByAssignee(assignee: string) {
@@ -169,13 +202,18 @@ export function CasesTableServiceProvider(
       await casesCommon.selectFirstRowInAssigneesPopover();
     },
 
-    async filterByOwner(owner: string) {
-      await common.clickAndValidate(
-        'solution-filter-popover-button',
-        `solution-filter-popover-item-${owner}`
-      );
+    async filterByOwner(
+      owner: string,
+      options: { popupAlreadyOpen: boolean } = { popupAlreadyOpen: false }
+    ) {
+      if (!options.popupAlreadyOpen) {
+        await common.clickAndValidate(
+          'options-filter-popover-button-owner',
+          `options-filter-popover-item-${owner}`
+        );
+      }
 
-      await testSubjects.click(`solution-filter-popover-item-${owner}`);
+      await testSubjects.click(`options-filter-popover-item-${owner}`);
     },
 
     async refreshTable() {
@@ -192,7 +230,10 @@ export function CasesTableServiceProvider(
 
       const row = rows[index];
       await row.click();
-      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+      await retry.waitFor(
+        'popover-action-exists',
+        async () => await find.existsByCssSelector('[data-test-subj*="case-action-popover-"')
+      );
     },
 
     async openAssigneesPopover() {
@@ -223,6 +264,7 @@ export function CasesTableServiceProvider(
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
@@ -240,6 +282,7 @@ export function CasesTableServiceProvider(
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
@@ -386,6 +429,81 @@ export function CasesTableServiceProvider(
       ).findByTestSubject('case-details-link');
 
       return await titleElement.getVisibleText();
+    },
+
+    async hasColumn(columnName: string) {
+      const column = await find.allByCssSelector(
+        `th.euiTableHeaderCell span[title="${columnName}"]`
+      );
+      return column.length !== 0;
+    },
+
+    async openColumnsPopover() {
+      await testSubjects.click('column-selection-popover-button');
+      await testSubjects.existOrFail('column-selection-popover-drag-drop-context');
+    },
+
+    async closeColumnsPopover() {
+      await testSubjects.click('column-selection-popover-button');
+    },
+
+    async toggleColumnInPopover(columnId: string) {
+      await this.openColumnsPopover();
+
+      await testSubjects.existOrFail(`column-selection-switch-${columnId}`);
+      await testSubjects.click(`column-selection-switch-${columnId}`);
+
+      // closes the popover
+      await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async clearFilters() {
+      if (await testSubjects.exists('all-cases-clear-filters-link-icon')) {
+        await testSubjects.click('all-cases-clear-filters-link-icon');
+        await header.waitUntilLoadingHasFinished();
+      }
+    },
+
+    async setAllCasesStateInLocalStorage(state: Record<string, unknown>) {
+      await browser.setLocalStorageItem('cases.cases.list.state', JSON.stringify(state));
+
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
+      );
+
+      expect(deepEqual(currentState, state)).to.be(true);
+    },
+
+    async getAllCasesStateInLocalStorage() {
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
+      );
+
+      return currentState;
+    },
+
+    async setFiltersConfigurationInLocalStorage(state: Array<{ key: string; isActive: boolean }>) {
+      await browser.setLocalStorageItem(
+        'cases.cases.list.tableFiltersConfig',
+        JSON.stringify(state)
+      );
+
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.tableFiltersConfig')) ?? '{}'
+      );
+
+      expect(deepEqual(currentState, state)).to.be(true);
+    },
+
+    async expectFiltersToBeActive(filters: string[]) {
+      for (const filter of filters) {
+        await testSubjects.existOrFail(`options-filter-popover-button-${filter}`);
+      }
+    },
+
+    async setStateToUrlAndNavigate(state: Record<string, unknown>) {
+      const encodedUrlParams = rison.encode(state);
+      await common.navigateToApp('cases', { search: `cases=${encodedUrlParams}` });
     },
   };
 }

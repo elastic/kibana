@@ -14,7 +14,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
@@ -22,7 +22,7 @@ import type {
   BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
-} from '../../../../../common/types/timeline/note/api';
+} from '../../../../../common/api/timeline';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';

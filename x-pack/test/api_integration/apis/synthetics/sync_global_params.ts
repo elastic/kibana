@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import {
   ConfigKey,
   HTTPFields,
+  LocationStatus,
+  PrivateLocation,
+  ServiceLocation,
   SyntheticsParams,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -40,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
+      await kServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
 
       _browserMonitorJson = getFixtureJson('browser_monitor');
@@ -64,18 +69,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
-      expect(apiResponse.body.locations).eql([
+      const testLocations: Array<PrivateLocation | ServiceLocation> = [
         {
-          id: 'localhost',
-          label: 'Local Synthetics Service',
+          id: 'dev',
+          label: 'Dev Service',
           geo: { lat: 0, lon: 0 },
           url: 'mockDevUrl',
           isServiceManaged: true,
-          status: 'experimental',
+          status: LocationStatus.EXPERIMENTAL,
           isInvalid: false,
         },
         {
-          concurrentMonitors: 1,
           id: testFleetPolicyID,
           isInvalid: false,
           isServiceManaged: false,
@@ -85,8 +89,11 @@ export default function ({ getService }: FtrProviderContext) {
             lon: '',
           },
           agentPolicyId: testFleetPolicyID,
+          namespace: 'default',
         },
-      ]);
+      ];
+
+      expect(apiResponse.body.locations).eql(testLocations);
     });
 
     it('adds a monitor in private location', async () => {
@@ -103,12 +110,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -210,12 +222,17 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: createdAt,
+            updated_at: updatedAt,
           },
           secretKeys
         )
@@ -263,8 +280,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const deleteResponse = await supertestAPI
         .delete(SYNTHETICS_API_URLS.PARAMS)
-        .query({ ids: JSON.stringify(ids) })
         .set('kbn-xsrf', 'true')
+        .send({ ids })
         .expect(200);
 
       expect(deleteResponse.body).to.have.length(2);

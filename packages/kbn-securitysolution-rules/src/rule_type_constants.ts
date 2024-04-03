@@ -16,6 +16,7 @@ export const SIGNALS_ID = `siem.signals` as const;
  */
 const RULE_TYPE_PREFIX = `siem` as const;
 export const EQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.eqlRule` as const;
+export const ESQL_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.esqlRule` as const;
 export const INDICATOR_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.indicatorRule` as const;
 export const ML_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.mlRule` as const;
 export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;

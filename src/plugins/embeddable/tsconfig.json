@@ -1,14 +1,9 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    ".storybook/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["*.ts", ".storybook/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -25,17 +20,16 @@
     "@kbn/test-jest-helpers",
     "@kbn/std",
     "@kbn/expressions-plugin",
-    "@kbn/usage-collection-plugin",
-    "@kbn/analytics",
-    "@kbn/data-plugin",
-    "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-theme-browser-mocks",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/ui-actions-browser",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

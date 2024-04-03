@@ -10,6 +10,7 @@ import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
 import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
+import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
@@ -17,12 +18,14 @@ import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
+import { getBundlesHref } from '../render_utils';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
 
 interface FactoryOptions {
-  serverBasePath: string;
+  /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
+  baseHref: string;
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
   auth: HttpAuth;
@@ -42,7 +45,7 @@ interface RendererResult {
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
-  serverBasePath,
+  baseHref,
   uiPlugins,
   auth,
   userSettingsService,
@@ -54,7 +57,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   };
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
-    let darkMode = false;
+    let darkMode: DarkModeValue = false;
     const themeVersion: ThemeVersion = 'v8';
 
     try {
@@ -63,38 +66,42 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       if (authenticated) {
         const userSettingDarkMode = await userSettingsService?.getUserSettingDarkMode(request);
 
-        if (userSettingDarkMode) {
+        if (userSettingDarkMode !== undefined) {
           darkMode = userSettingDarkMode;
         } else {
-          darkMode = await uiSettingsClient.get('theme:darkMode');
+          darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }
 
+    // keeping legacy themeTag support - note that the browser is now overriding it during setup.
+    if (darkMode === 'system') {
+      darkMode = false;
+    }
+
     const themeTag = getThemeTag({
       themeVersion,
       darkMode,
     });
-    const buildHash = packageInfo.buildNum;
-    const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
+    const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
-      regularBundlePath,
+      bundlesHref,
       isAnonymousPage,
     });
 
-    const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);
+    const jsDependencyPaths = getJsDependencyPaths(bundlesHref, bundlePaths);
 
     // These paths should align with the bundle routes configured in
     // src/optimize/bundles_route/bundles_route.ts
     const publicPathMap = JSON.stringify({
-      core: `${regularBundlePath}/core/`,
-      'kbn-ui-shared-deps-src': `${regularBundlePath}/kbn-ui-shared-deps-src/`,
-      'kbn-ui-shared-deps-npm': `${regularBundlePath}/kbn-ui-shared-deps-npm/`,
-      'kbn-monaco': `${regularBundlePath}/kbn-monaco/`,
+      core: `${bundlesHref}/core/`,
+      'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
+      'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
+      'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
       ...Object.fromEntries(
         [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
       ),

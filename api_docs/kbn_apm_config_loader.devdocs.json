@@ -66,7 +66,7 @@
                 "label": "rawKibanaConfig",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  "KibanaRawConfig"
                 ],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
@@ -122,6 +122,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-common.ApmConfiguration.isUsersRedactionEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsersRedactionEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -298,7 +314,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<{ active: ",
+          "<ExtendedProps<{ active: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -322,15 +338,47 @@
             "section": "def-common.Type",
             "text": "Type"
           },
+          "<string | undefined>; apiKey: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; environment: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
           "<string | undefined>; globalLabels: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
+            "section": "def-common.Type",
+            "text": "Type"
           },
-          "<{}>; }>"
+          "<Readonly<{} & {}> | undefined>; }, { servicesOverrides: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, Readonly<{ apiKey?: string | undefined; active?: boolean | undefined; environment?: string | undefined; serverUrl?: string | undefined; secretToken?: string | undefined; globalLabels?: Readonly<{} & {}> | undefined; } & {}>> | undefined>; redactUsers: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }>>"
         ],
         "path": "packages/kbn-apm-config-loader/src/apm_config.ts",
         "deprecated": false,

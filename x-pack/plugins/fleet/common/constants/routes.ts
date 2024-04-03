@@ -34,12 +34,14 @@ export const EPM_API_ROUTES = {
   DATA_STREAMS_PATTERN: `${EPM_API_ROOT}/data_streams`,
   INSTALL_FROM_REGISTRY_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
+  CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations`,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
   BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
+  INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
 
   INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
@@ -92,6 +94,7 @@ export const OUTPUT_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
+  GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 
@@ -203,3 +206,16 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
+
+// API versioning constants
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};
+
+export const PUBLIC_API_ACCESS = 'public';
+export const INTERNAL_API_ACCESS = 'internal';

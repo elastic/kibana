@@ -32,7 +32,6 @@ import {
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -57,6 +56,7 @@ import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
+import { useGetScopedSourcererDataView } from '../../../sourcerer/use_get_sourcerer_data_view';
 
 interface InsightComponentProps {
   label?: string;
@@ -277,21 +277,17 @@ const InsightEditorComponent = ({
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
-  const { sourcererDataView, indexPattern } = useSourcererDataView(SourcererScopeName.default);
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
     },
     uiSettings,
-    fieldFormats,
   } = useKibana().services;
-  const dataView = useMemo(() => {
-    if (sourcererDataView != null) {
-      return new DataView({ spec: sourcererDataView, fieldFormats });
-    } else {
-      return null;
-    }
-  }, [sourcererDataView, fieldFormats]);
+
+  const dataView = useGetScopedSourcererDataView({
+    sourcererScope: SourcererScopeName.default,
+  });
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -485,7 +481,7 @@ const InsightEditorComponent = ({
                   filters={filtersStub}
                   onChange={onChange}
                   dataView={dataView}
-                  maxDepth={2}
+                  maxDepth={1}
                 />
               ) : (
                 <></>
@@ -541,13 +537,17 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+export const plugin = ({
+  insightsUpsellingMessage,
+}: {
+  insightsUpsellingMessage: string | null;
+}) => {
   return {
     name: 'insights',
     button: {
-      label: licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INIGHT_UPSELL,
+      label: insightsUpsellingMessage ?? i18n.INVESTIGATE,
       iconType: 'timelineWithArrow',
-      isDisabled: !licenseIsPlatinum,
+      isDisabled: !!insightsUpsellingMessage,
     },
     helpText: (
       <div>

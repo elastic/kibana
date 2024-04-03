@@ -10,20 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { getUrlTracker } from '../../kibana_services';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 let bannerId: string | undefined;
 
 export function NotFoundRoute() {
   const services = useDiscoverServices();
-  const { urlForwarding, core, history } = services;
-  const currentLocation = history().location.pathname;
+  const { urlForwarding, urlTracker, core, history } = services;
+  const currentLocation = history.location.pathname;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
-    getUrlTracker().restorePreviousUrl();
+    urlTracker.restorePreviousUrl();
     urlForwarding.navigateToLegacyKibanaUrl(path);
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
@@ -33,20 +32,21 @@ export function NotFoundRoute() {
     bannerId = core.overlays.banners.replace(
       bannerId,
       toMountPoint(
-        wrapWithTheme(
-          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
-            <p data-test-subj="invalidRouteMessage">
-              <FormattedMessage
-                id="discover.noMatchRoute.bannerText"
-                defaultMessage="Discover application doesn't recognize this route: {route}"
-                values={{
-                  route: history().location.state.referrer,
-                }}
-              />
-            </p>
-          </EuiCallOut>,
-          core.theme.theme$
-        )
+        <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+          <p data-test-subj="invalidRouteMessage">
+            <FormattedMessage
+              id="discover.noMatchRoute.bannerText"
+              defaultMessage="Discover application doesn't recognize this route: {route}"
+              values={{
+                route: history.location.state.referrer,
+              }}
+            />
+          </p>
+        </EuiCallOut>,
+        {
+          theme: core.theme,
+          i18n: core.i18n,
+        }
       )
     );
 
@@ -56,7 +56,7 @@ export function NotFoundRoute() {
         core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [core.overlays.banners, history, urlForwarding, core.theme.theme$]);
+  }, [core, history, urlForwarding, urlTracker]);
 
   return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }

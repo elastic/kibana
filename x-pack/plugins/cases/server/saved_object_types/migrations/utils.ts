@@ -18,8 +18,11 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
-import { CommentType } from '../../../common/api';
-import type { AttributesTypePersistableState, AttributesTypeUser } from '../../../common/api';
+import { AttachmentType } from '../../../common/types/domain';
+import type {
+  PersistableStateAttachmentAttributes,
+  UserCommentAttachmentAttributes,
+} from '../../../common/types/domain';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {
@@ -73,14 +76,14 @@ export const isDeferredMigration = (
 
 export const isUserCommentSO = (
   doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
-): doc is SavedObjectUnsanitizedDoc<AttributesTypeUser> => {
-  return doc.attributes.type === CommentType.user;
+): doc is SavedObjectUnsanitizedDoc<UserCommentAttachmentAttributes> => {
+  return doc.attributes.type === AttachmentType.user;
 };
 
 export const isPersistableStateAttachmentSO = (
   doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>
-): doc is SavedObjectUnsanitizedDoc<AttributesTypePersistableState> => {
-  return doc.attributes.type === CommentType.persistableState;
+): doc is SavedObjectUnsanitizedDoc<PersistableStateAttachmentAttributes> => {
+  return doc.attributes.type === AttachmentType.persistableState;
 };
 
 interface GetLensMigrationsArgs<T> {

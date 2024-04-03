@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/management-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "management",
     "server": true,
@@ -10,7 +10,8 @@
       "share"
     ],
     "optionalPlugins": [
-      "home"
+      "home",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",

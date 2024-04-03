@@ -1,0 +1,15 @@
+title: Connector request properties for an Amazon Bedrock connector
+description: Defines properties for connectors when type is `.bedrock`.
+type: object
+required:
+  - apiUrl
+properties:
+  apiUrl:
+    type: string
+    description: The Amazon Bedrock request URL.
+  defaultModel:
+    type: string
+    description: >
+      The generative artificial intelligence model for Amazon Bedrock to use.
+      Current support is for the Anthropic Claude models.
+    default: anthropic.claude-3-sonnet-20240229-v1:0

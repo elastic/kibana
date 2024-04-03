@@ -17,7 +17,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     await ml.navigation.navigateToDataVisualizer();
 
     await ml.testExecution.logTestStep(`loads the saved search selection page`);
-    await ml.dataVisualizer.navigateToIndexPatternSelection();
+    await ml.dataVisualizer.navigateToDataViewSelection();
 
     await ml.testExecution.logTestStep(`loads the index data visualizer page`);
     await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(sourceIndexOrSavedSearch);
@@ -28,8 +28,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
 
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-      await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -40,8 +40,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_module_sample_logs');
       await browser.removeLocalStorageItem('dataVisualizer.randomSamplerPreference');
     });
 

@@ -13,15 +13,17 @@ import type {
   Plugin,
 } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { duration } from 'moment';
 
 interface SetupFullStoryDeps {
   analytics: AnalyticsServiceSetup;
   basePath: IBasePath;
 }
 
-interface CloudFullStoryConfig {
+export interface CloudFullStoryConfig {
   org_id?: string;
   eventTypesAllowlist: string[];
+  pageVarsDebounceTime: string;
 }
 
 interface CloudFullStorySetupDeps {
@@ -37,6 +39,12 @@ export class CloudFullStoryPlugin implements Plugin {
 
   public setup(core: CoreSetup, { cloud }: CloudFullStorySetupDeps) {
     if (cloud.isCloudEnabled) {
+      if (cloud.isElasticStaffOwned) {
+        this.initializerContext.logger
+          .get()
+          .info('Skipping FullStory setup for a Elastic-owned deployments');
+        return;
+      }
       this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
         // eslint-disable-next-line no-console
         console.debug(`Error setting up FullStory: ${e.toString()}`)
@@ -55,7 +63,7 @@ export class CloudFullStoryPlugin implements Plugin {
    * @private
    */
   private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
-    const { org_id: fullStoryOrgId, eventTypesAllowlist } = this.config;
+    const { org_id: fullStoryOrgId, eventTypesAllowlist, pageVarsDebounceTime } = this.config;
     if (!fullStoryOrgId) {
       return; // do not load any FullStory code in the browser if not enabled
     }
@@ -65,7 +73,14 @@ export class CloudFullStoryPlugin implements Plugin {
     analytics.registerShipper(FullStoryShipper, {
       eventTypesAllowlist,
       fullStoryOrgId,
-      // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
+      // Duration configs get stringified when forwarded to the UI and need reconversion
+      ...(pageVarsDebounceTime
+        ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTime).asMilliseconds() }
+        : {}),
+      /**
+       * FIXME: this should use the {@link IStaticAssets['getPluginAssetHref']}
+       * function. Then we can avoid registering our own endpoint in this plugin.
+       */
       scriptUrl: basePath.prepend(
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
       ),

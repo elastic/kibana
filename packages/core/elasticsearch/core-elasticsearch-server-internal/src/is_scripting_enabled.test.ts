@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isRetryableEsClientErrorMock } from './is_scripting_enabled.test.mocks';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
@@ -93,5 +94,59 @@ describe('isInlineScriptingEnabled', () => {
     });
 
     expect(await isInlineScriptingEnabled({ client })).toEqual(false);
+  });
+
+  describe('resiliency', () => {
+    beforeEach(() => {
+      isRetryableEsClientErrorMock.mockReset();
+    });
+
+    const mockSuccessOnce = () => {
+      client.cluster.getSettings.mockResolvedValueOnce({
+        transient: {},
+        persistent: {},
+        defaults: {},
+      });
+    };
+    const mockErrorOnce = () => {
+      client.cluster.getSettings.mockResponseImplementationOnce(() => {
+        throw Error('ERR CON REFUSED');
+      });
+    };
+
+    it('retries the ES api call in case of retryable error', async () => {
+      isRetryableEsClientErrorMock.mockReturnValue(true);
+
+      mockErrorOnce();
+      mockSuccessOnce();
+
+      await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 1 })).resolves.toEqual(true);
+      expect(client.cluster.getSettings).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws in case of non-retryable error', async () => {
+      isRetryableEsClientErrorMock.mockReturnValue(false);
+
+      mockErrorOnce();
+      mockSuccessOnce();
+
+      await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 0.1 })).rejects.toThrowError(
+        'ERR CON REFUSED'
+      );
+    });
+
+    it('retries up to `maxRetries` times', async () => {
+      isRetryableEsClientErrorMock.mockReturnValue(true);
+
+      mockErrorOnce();
+      mockErrorOnce();
+      mockErrorOnce();
+      mockSuccessOnce();
+
+      await expect(
+        isInlineScriptingEnabled({ client, maxRetryDelay: 0.1, maxRetries: 2 })
+      ).rejects.toThrowError('ERR CON REFUSED');
+      expect(client.cluster.getSettings).toHaveBeenCalledTimes(3);
+    });
   });
 });

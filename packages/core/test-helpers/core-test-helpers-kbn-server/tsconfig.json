@@ -18,6 +18,7 @@
     "@kbn/core-root-server-internal",
     "@kbn/repo-info",
     "@kbn/repo-packages",
+    "@kbn/es",
   ],
   "exclude": [
     "target/**/*",

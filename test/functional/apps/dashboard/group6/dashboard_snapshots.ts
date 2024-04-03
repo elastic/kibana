@@ -29,6 +29,9 @@ export default function ({
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const toasts = getService('toasts');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
@@ -43,7 +46,7 @@ export default function ({
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
       // session.  If we don't do this, the colors on the visualizations are different and the screenshots won't match.
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async function () {
@@ -56,7 +59,7 @@ export default function ({
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-      await PageObjects.common.closeToastIfExists();
+      await toasts.dismissIfExists();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -78,7 +81,7 @@ export default function ({
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await PageObjects.common.closeToastIfExists();
+      await toasts.dismissIfExists();
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -96,6 +99,15 @@ export default function ({
     });
 
     describe('compare controls snapshot', async () => {
+      const waitForPageReady = async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.waitFor('page ready for screenshot', async () => {
+          const queryBarVisible = await testSubjects.exists('globalQueryBar');
+          const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+          return queryBarVisible && controlGroupVisible;
+        });
+      };
+
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -115,6 +127,7 @@ export default function ({
       });
 
       it('in light mode', async () => {
+        await waitForPageReady();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_controls_light',
           updateBaselines
@@ -127,8 +140,7 @@ export default function ({
           'theme:darkMode': true,
         });
         await browser.refresh();
-        await PageObjects.dashboard.waitForRenderComplete();
-
+        await waitForPageReady();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_controls_dark',
           updateBaselines

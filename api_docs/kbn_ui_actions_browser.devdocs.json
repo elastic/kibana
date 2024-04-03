@@ -326,56 +326,6 @@
       },
       {
         "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.RowClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "RowClickContext",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.RowClickContext.embeddable",
-            "type": "Unknown",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.RowClickContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ rowIndex: number; table: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              "; columns?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
         "id": "def-common.Trigger",
         "type": "Interface",
         "tags": [],
@@ -440,21 +390,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.CATEGORIZE_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CATEGORIZE_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
-        ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
         "id": "def-common.PresentableGrouping",
         "type": "Type",
         "tags": [],
@@ -484,6 +419,37 @@
         "description": [],
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.RowClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RowClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { rowIndex: number; table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; columns?: string[] | undefined; }; }"
         ],
         "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
@@ -522,53 +488,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.categorizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "categorizeFieldTrigger",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.categorizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.categorizeFieldTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.categorizeFieldTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/ui-actions-browser",
         "id": "def-common.defaultTrigger",
@@ -641,13 +560,10 @@
           {
             "parentPluginId": "@kbn/ui-actions-browser",
             "id": "def-common.rowClickTrigger.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -655,13 +571,10 @@
           {
             "parentPluginId": "@kbn/ui-actions-browser",
             "id": "def-common.rowClickTrigger.description",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false

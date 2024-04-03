@@ -5,16 +5,16 @@
  * 2.0.
  */
 import type { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
+import type { ThreatIntelSourceRequestOptionsInput } from '../../../../common/api/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   Bucket,
   CtiDataSourceStrategyResponse,
-  CtiDataSourceRequestOptions,
 } from '../../../../common/search_strategy/security_solution/cti';
 import { CtiQueries } from '../../../../common/search_strategy/security_solution/cti';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../common/constants';
@@ -22,7 +22,7 @@ import type { GlobalTimeArgs } from '../../../common/containers/use_global_time'
 import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';
 import { OTHER_TI_DATASET_KEY } from '../../../../common/cti/constants';
 
-type GetThreatIntelSourcProps = CtiDataSourceRequestOptions & {
+type GetThreatIntelSourceProps = Omit<ThreatIntelSourceRequestOptionsInput, 'factoryQueryType'> & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
@@ -33,8 +33,8 @@ export const getTiDataSources = ({
   defaultIndex,
   timerange,
   signal,
-}: GetThreatIntelSourcProps): Observable<CtiDataSourceStrategyResponse> =>
-  data.search.search<CtiDataSourceRequestOptions, CtiDataSourceStrategyResponse>(
+}: GetThreatIntelSourceProps): Observable<CtiDataSourceStrategyResponse> =>
+  data.search.search<ThreatIntelSourceRequestOptionsInput, CtiDataSourceStrategyResponse>(
     {
       defaultIndex,
       factoryQueryType: CtiQueries.dataSource,
@@ -47,11 +47,11 @@ export const getTiDataSources = ({
   );
 
 export const getTiDataSourcesComplete = (
-  props: GetThreatIntelSourcProps
+  props: GetThreatIntelSourceProps
 ): Observable<CtiDataSourceStrategyResponse> => {
   return getTiDataSources(props).pipe(
     filter((response) => {
-      return isErrorResponse(response) || isCompleteResponse(response);
+      return !isRunningResponse(response);
     })
   );
 };

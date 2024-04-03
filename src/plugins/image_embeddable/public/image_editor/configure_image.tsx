@@ -9,9 +9,9 @@
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import { skip, take, takeUntil } from 'rxjs/operators';
+import { skip, take, takeUntil } from 'rxjs';
 import { Subject } from 'rxjs';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { ImageConfig } from '../types';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { ImageViewerContext } from '../image_viewer';

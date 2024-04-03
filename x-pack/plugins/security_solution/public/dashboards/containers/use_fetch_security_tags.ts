@@ -10,9 +10,10 @@ import { useKibana } from '../../common/lib/kibana';
 import { createTag, getTagsByName } from '../../common/containers/tags/api';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
 import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
+import { getRandomColor } from '../../../common/utils/get_ramdom_color';
 
 export const useFetchSecurityTags = () => {
-  const { http } = useKibana().services;
+  const { http, savedObjectsTagging } = useKibana().services;
   const tagCreated = useRef(false);
 
   const {
@@ -31,20 +32,31 @@ export const useFetchSecurityTags = () => {
   } = useFetch(REQUEST_NAMES.SECURITY_CREATE_TAG, createTag);
 
   useEffect(() => {
-    if (!isLoadingTags && !errorFetchTags && tags && tags.length === 0 && !tagCreated.current) {
+    if (
+      savedObjectsTagging &&
+      !isLoadingTags &&
+      !errorFetchTags &&
+      tags &&
+      tags.length === 0 &&
+      !tagCreated.current
+    ) {
       tagCreated.current = true;
       fetchCreateTag({
-        http,
-        tag: { name: SECURITY_TAG_NAME, description: SECURITY_TAG_DESCRIPTION },
+        savedObjectsTaggingClient: savedObjectsTagging.client,
+        tag: {
+          name: SECURITY_TAG_NAME,
+          description: SECURITY_TAG_DESCRIPTION,
+          color: getRandomColor(),
+        },
       });
     }
-  }, [errorFetchTags, fetchCreateTag, http, isLoadingTags, tags]);
+  }, [errorFetchTags, fetchCreateTag, savedObjectsTagging, isLoadingTags, tags]);
 
   const tagsResult = useMemo(() => {
     if (tags?.length) {
-      return tags;
+      return tags.map((t) => ({ id: t.id, type: 'tag', managed: t.managed, ...t.attributes }));
     }
-    return tag ? [tag] : undefined;
+    return tag ? [{ type: 'tag', ...tag }] : undefined;
   }, [tags, tag]);
 
   return {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -16,29 +16,29 @@ import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
 import { ProductFeatures } from '../../../../../common/types';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { NEW_INDEX_METHOD_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
+import { NEW_API_PATH, NEW_CRAWLER_PATH, NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { CannotConnect } from '../search_index/components/cannot_connect';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { NewIndexCard } from './new_index_card';
 
 const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_METHOD_IDS[] => {
   return [
+    INGESTION_METHOD_IDS.API,
     ...(productFeatures.hasWebCrawler ? [INGESTION_METHOD_IDS.CRAWLER] : []),
     ...(productFeatures.hasConnectors ? [INGESTION_METHOD_IDS.CONNECTOR] : []),
-    INGESTION_METHOD_IDS.API,
   ];
 };
 
 export const NewIndex: React.FC = () => {
-  const { capabilities, productFeatures } = useValues(KibanaLogic);
+  const { config, productFeatures } = useValues(KibanaLogic);
   const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
-  const [selectedMethod, setSelectedMethod] = useState<string>('');
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -60,38 +60,32 @@ export const NewIndex: React.FC = () => {
       }}
     >
       <EuiFlexGroup direction="column">
+        {errorConnectingMessage && productFeatures.hasWebCrawler && <CannotConnect />}
         <>
           <EuiFlexItem>
             <EuiFlexGroup>
               {availableIngestionMethodOptions.map((type) => (
                 <EuiFlexItem key={type}>
                   <NewIndexCard
+                    disabled={Boolean(
+                      type === INGESTION_METHOD_IDS.CRAWLER &&
+                        (errorConnectingMessage || !config.host)
+                    )}
                     type={type}
                     onSelect={() => {
-                      setSelectedMethod(type);
                       if (type === INGESTION_METHOD_IDS.CONNECTOR) {
                         KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                      } else if (type === INGESTION_METHOD_IDS.CRAWLER) {
+                        KibanaLogic.values.navigateToUrl(NEW_CRAWLER_PATH);
                       } else {
-                        KibanaLogic.values.navigateToUrl(
-                          generateEncodedPath(NEW_INDEX_METHOD_PATH, { type })
-                        );
+                        KibanaLogic.values.navigateToUrl(NEW_API_PATH);
                       }
                     }}
-                    isSelected={selectedMethod === type}
                   />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {capabilities.navLinks.integrations && (
-            <EuiFlexItem>
-              <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
-                {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
-                  defaultMessage: 'View additional integrations',
-                })}
-              </EuiLinkTo>
-            </EuiFlexItem>
-          )}
         </>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>

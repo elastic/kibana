@@ -11,7 +11,6 @@ import {
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
-  EuiBadge,
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
@@ -21,17 +20,20 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
+import { ExperimentalBadge } from '../../shared_components';
 
 interface AddLayerButtonProps {
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
+  isInlineEditing?: boolean;
 }
 
 export function AddLayerButton({
   supportedLayers,
   addLayer,
   eventAnnotationService,
+  isInlineEditing,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -49,17 +51,12 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: (
-        <EuiFlexGroup gutterSize="m" responsive={false}>
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
             <span className="lnsLayerAddButton__label">{label}</span>
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
-            <EuiBadge className="lnsLayerAddButton__techBadge" color="hollow" isDisabled={disabled}>
-              {i18n.translate('xpack.lens.configPanel.experimentalLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-            </EuiBadge>
+            <ExperimentalBadge color={disabled ? 'subdued' : undefined} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -162,6 +159,7 @@ export function AddLayerButton({
           isLoadLibraryVisible={isLoadLibraryVisible}
           setLoadLibraryFlyoutVisible={setLoadLibraryFlyoutVisible}
           eventAnnotationService={eventAnnotationService}
+          isInlineEditing={isInlineEditing}
           addLayer={(extraArg) => {
             addLayer(LayerTypes.ANNOTATIONS, extraArg);
           }}

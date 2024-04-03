@@ -6,32 +6,55 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
-import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
-import type { RuleInstallationInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import type { RuleSignatureId } from '../../../../../../common/detection_engine/rule_schema';
+import type {
+  RuleSignatureId,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 
-export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;
+export type TableColumn = EuiBasicTableColumn<RuleResponse>;
+
+interface RuleNameProps {
+  name: string;
+  ruleId: string;
+}
+
+const RuleName = ({ name, ruleId }: RuleNameProps) => {
+  const {
+    actions: { openRulePreview },
+  } = useAddPrebuiltRulesTableContext();
+
+  return (
+    <EuiLink
+      onClick={() => {
+        openRulePreview(ruleId);
+      }}
+      data-test-subj="ruleName"
+    >
+      {name}
+    </EuiLink>
+  );
+};
 
 export const RULE_NAME_COLUMN: TableColumn = {
   field: 'name',
   name: i18n.COLUMN_RULE,
-  render: (value: RuleInstallationInfoForReview['name']) => (
-    <EuiText id={value} size="s">
-      {value}
-    </EuiText>
+  render: (value: RuleResponse['name'], rule: RuleResponse) => (
+    <RuleName name={value} ruleId={rule.id} />
   ),
   sortable: true,
   truncateText: true,
@@ -41,9 +64,9 @@ export const RULE_NAME_COLUMN: TableColumn = {
 
 const TAGS_COLUMN: TableColumn = {
   field: 'tags',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_TAGS} />,
   align: 'center',
-  render: (tags: RuleInstallationInfoForReview['tags']) => {
+  render: (tags: RuleResponse['tags']) => {
     if (tags == null || tags.length === 0) {
       return null;
     }
@@ -70,9 +93,9 @@ const TAGS_COLUMN: TableColumn = {
 
 const INTEGRATIONS_COLUMN: TableColumn = {
   field: 'related_integrations',
-  name: null,
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_INTEGRATIONS} />,
   align: 'center',
-  render: (integrations: RuleInstallationInfoForReview['related_integrations']) => {
+  render: (integrations: RuleResponse['related_integrations']) => {
     if (integrations == null || integrations.length === 0) {
       return null;
     }
@@ -89,8 +112,8 @@ const createInstallButtonColumn = (
   isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
-  name: '',
-  render: (ruleId: RuleSignatureId) => {
+  name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
+  render: (ruleId: RuleSignatureId, record: Rule) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
     const isInstallButtonDisabled = isRuleInstalling || isDisabled;
     return (
@@ -98,8 +121,17 @@ const createInstallButtonColumn = (
         size="s"
         disabled={isInstallButtonDisabled}
         onClick={() => installOneRule(ruleId)}
+        data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
+        aria-label={i18n.INSTALL_RULE_BUTTON_ARIA_LABEL(record.name)}
       >
-        {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
+        {isRuleInstalling ? (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+          />
+        ) : (
+          i18n.INSTALL_RULE_BUTTON
+        )}
       </EuiButtonEmpty>
     );
   },
@@ -139,7 +171,7 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: ({ severity }: RuleInstallationInfoForReview) => getNormalizedSeverity(severity),
+        sortable: ({ severity }: RuleResponse) => getNormalizedSeverity(severity),
         truncateText: true,
         width: '12%',
       },

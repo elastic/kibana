@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function generateAgentDocs(timestamp: number, policyId: string) {
+export function generateAgentDocs(timestamps: number[], policyId: string) {
   return [
     {
       access_api_key_id: 'w4zJBHwBfQcM6aSYIRjO',
@@ -15,7 +15,7 @@ export function generateAgentDocs(timestamp: number, policyId: string) {
         id: '963b081e-60d1-482c-befd-a5815fa8290f',
         version: '8.0.0',
       },
-      enrolled_at: timestamp,
+      enrolled_at: timestamps[0],
       local_metadata: {
         elastic: {
           agent: {
@@ -53,9 +53,9 @@ export function generateAgentDocs(timestamp: number, policyId: string) {
       default_api_key_id: 'x4zJBHwBfQcM6aSYYxiY',
       policy_revision_idx: 1,
       policy_coordinator_idx: 1,
-      updated_at: timestamp,
+      updated_at: timestamps[0],
       last_checkin_status: 'online',
-      last_checkin: timestamp,
+      last_checkin: timestamps[0],
     },
     {
       access_api_key_id: 'w4zJBHwBfQcM6aSYIRjO',
@@ -65,7 +65,7 @@ export function generateAgentDocs(timestamp: number, policyId: string) {
         id: '3838df35-a095-4af4-8fce-0b6d78793f2e',
         version: '8.0.0',
       },
-      enrolled_at: timestamp,
+      enrolled_at: timestamps[1],
       local_metadata: {
         elastic: {
           agent: {
@@ -103,9 +103,9 @@ export function generateAgentDocs(timestamp: number, policyId: string) {
       default_api_key_id: 'x4zJBHwBfQcM6aSYYxiY',
       policy_revision_idx: 1,
       policy_coordinator_idx: 1,
-      updated_at: timestamp,
+      updated_at: timestamps[1],
       last_checkin_status: 'online',
-      last_checkin: timestamp,
+      last_checkin: timestamps[1],
     },
   ];
 }

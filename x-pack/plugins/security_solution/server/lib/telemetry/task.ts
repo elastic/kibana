@@ -14,7 +14,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryReceiver } from './receiver';
 import type { ITelemetryEventsSender } from './sender';
+import type { ITaskMetricsService } from './task_metrics.types';
 import { tlog } from './helpers';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;
@@ -31,6 +33,7 @@ export type SecurityTelemetryTaskRunner = (
   logger: Logger,
   receiver: ITelemetryReceiver,
   sender: ITelemetryEventsSender,
+  taskMetricsService: ITaskMetricsService,
   taskExecutionPeriod: TaskExecutionPeriod
 ) => Promise<number>;
 
@@ -49,17 +52,20 @@ export class SecurityTelemetryTask {
   private readonly logger: Logger;
   private readonly sender: ITelemetryEventsSender;
   private readonly receiver: ITelemetryReceiver;
+  private readonly taskMetricsService: ITaskMetricsService;
 
   constructor(
     config: SecurityTelemetryTaskConfig,
     logger: Logger,
     sender: ITelemetryEventsSender,
-    receiver: ITelemetryReceiver
+    receiver: ITelemetryReceiver,
+    taskMetricsService: ITaskMetricsService
   ) {
     this.config = config;
     this.logger = logger;
     this.sender = sender;
     this.receiver = receiver;
+    this.taskMetricsService = taskMetricsService;
   }
 
   public getLastExecutionTime = (
@@ -83,8 +89,9 @@ export class SecurityTelemetryTask {
       [this.config.type]: {
         title: this.config.title,
         timeout: this.config.timeout,
+        stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const { state } = taskInstance;
+          const state = taskInstance.state as LatestTaskStateSchema;
 
           return {
             run: async () => {
@@ -96,12 +103,14 @@ export class SecurityTelemetryTask {
 
               const hits = await this.runTask(taskInstance.id, executionPeriod);
 
+              const updatedState: LatestTaskStateSchema = {
+                lastExecutionTimestamp: taskExecutionTime,
+                runs: state.runs + 1,
+                hits,
+              };
+
               return {
-                state: {
-                  lastExecutionTimestamp: taskExecutionTime,
-                  runs: (state.runs || 0) + 1,
-                  hits,
-                },
+                state: updatedState,
               };
             },
             cancel: async () => {},
@@ -122,7 +131,7 @@ export class SecurityTelemetryTask {
         schedule: {
           interval: this.config.interval,
         },
-        state: { runs: 0 },
+        state: emptyState,
         params: { version: this.config.version },
       });
     } catch (e) {
@@ -150,6 +159,13 @@ export class SecurityTelemetryTask {
     }
 
     tlog(this.logger, `[task ${taskId}]: running task`);
-    return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
+    return this.config.runTask(
+      taskId,
+      this.logger,
+      this.receiver,
+      this.sender,
+      this.taskMetricsService,
+      executionPeriod
+    );
   };
 }

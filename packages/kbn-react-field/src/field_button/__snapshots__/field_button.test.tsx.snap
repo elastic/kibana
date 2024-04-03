@@ -9,7 +9,7 @@ exports[`fieldAction is rendered 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"
@@ -44,7 +44,7 @@ exports[`fieldIcon is rendered 1`] = `
       </span>
     </span>
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"
@@ -65,7 +65,7 @@ exports[`isActive defaults to false 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"
@@ -86,7 +86,7 @@ exports[`isActive renders true 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"
@@ -107,7 +107,7 @@ exports[`sizes s is applied 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"
@@ -128,7 +128,7 @@ exports[`sizes xs is applied 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"
@@ -156,7 +156,7 @@ exports[`with drag handle is rendered 1`] = `
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__name"
+      className="kbnFieldButton__name eui-textBreakAll"
     >
       <span
         className="kbnFieldButton__nameInner"

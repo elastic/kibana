@@ -11,9 +11,9 @@ import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/s
 import type {
   HealthIntervalGranularity,
   RuleHealthSnapshot,
-  RuleHealthStatsOverInterval,
-  StatsHistory,
-} from '../../../../../../../../common/detection_engine/rule_monitoring';
+  RuleHealthStats,
+  HealthHistory,
+} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 
 import * as f from '../../../event_log/event_log_fields';
@@ -57,7 +57,7 @@ const getRuleExecutionStatsHistoryAggregation = (
 export const normalizeRuleHealthAggregationResult = (
   result: AggregateEventsBySavedObjectResult,
   requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-): Omit<RuleHealthSnapshot, 'stats_at_the_moment'> => {
+): Omit<RuleHealthSnapshot, 'state_at_the_moment'> => {
   const aggregations = result.aggregations ?? {};
   return {
     stats_over_interval: normalizeRuleExecutionStatsAggregationResult(
@@ -76,7 +76,7 @@ export const normalizeRuleHealthAggregationResult = (
 
 const normalizeHistoryOverInterval = (
   aggregations: Record<string, RawData>
-): StatsHistory<RuleHealthStatsOverInterval> => {
+): HealthHistory<RuleHealthStats> => {
   const statsHistory = aggregations.statsHistory || {};
 
   return {

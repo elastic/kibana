@@ -39,15 +39,19 @@ Choose the data you want to visualize.
 
 Edit and delete.
 
-. To change the aggregation *Quick function* and display options, click the field in the layer pane. 
+. Click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] on the panel, then **Edit visualization**. 
 
-. To delete a field, close the configuration options, then click *X* next to the field.
+. To change the aggregation *Quick function* and, click the field in the flyout. 
 
-. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the layer pane, then select *Duplicate layer*.
+. To delete a field, click image:dashboard/images/trash_can.png[Actions menu icon to delete a field, width=5%] next to the field.
 
-. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the layer pane, then select *Clear layer*.
+. To duplicate a layer, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to duplicate Lens visualization layers] in the flyout, then select *Duplicate layer*.
 
-TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
+. To clear the layer configuration, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu to clear Lens visualization layers] in the flyout, then select *Clear layer*.
+
+. Click **Apply and close**. 
+
+TIP: Use the **Edit visualization** flyout to make edits without having to leave the dashboard, or click **Edit in Lens** to make edits using the Lens application.
 
 [float]
 [[change-the-fields]]
@@ -189,21 +193,20 @@ To create partition charts with multiple metrics, use the layer settings. Multip
 
 [float]
 [[improve-visualization-loading-time]]
-=== Improve visualization loading time
+==== Improve visualization loading time
 
 preview::[]
 
 Data sampling allows you to improve the visualization loading time. To decrease the loading time, use a lower sampling percentage, which also decreases the accuracy. 
 Use low sampling percentages on large datasets.
 
-. In the layer pane, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
+. In the **Edit visualization** flyout, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the partition visualization layer], then select *Layer settings*.
 
 . To select the *Sampling* percentage, use the slider.
 
-. Click *X*.
-+
-When you add the visualization to dashboards, image:dashboard/images/lens_visualizationModifierPopup_8.8.0.png[Visualization modifier popup] appears, 
-which allows you to view settings changes to the visualization.
+. Click *Apply and close*.
+
+. Click **Save**.
 
 [float]
 [[add-annotations]]
@@ -222,9 +225,11 @@ Annotations support two placement types:
 
 * *Custom query* &mdash; Displays annotations based on custom {es} queries. For detailed information about queries, check <<semi-structured-search>>. 
 
-Create the annotation layer. 
+Any annotation layer can be saved as an annotation group to the *Visualize Library* in order to reuse it in other visualizations. Any changes made to the annotation group will be reflected in all visualizations to which it is added.
 
-. In the layer pane, click *Add layer > Annotations*.
+Create a new annotation layer. 
+
+. In the layer pane, click *Add layer > Annotations > New annotation*.
 
 . Select the {data-source} for the annotation.
 
@@ -262,6 +267,20 @@ Specify the annotation appearance.
 . If you created a custom query annotation, click *Add field* to add a field to the annotation tooltip.
 
 . To close, click *X*.
+
+Save the annotation group to the library. 
+
+. In the layer pane, on your annotation layer, click image:images/lens_saveAnnotationLayerButton_8.9.0.png[Save button on annotations layer].
+
+. Enter the *Title*, *Description*, and add any applicable <<managing-tags,*Tags*>>.
+
+. Click *Save group*.
+
+Add a library annotation group to a visualization.
+
+. In the layer pane, click *Add layer > Annotations > Load from library*.
+
+. Select the annotation group you want to use.
 
 [float]
 [[add-reference-lines]]
@@ -597,4 +616,33 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
+====
+
+[discrete]
+[[dynamic-metric-coloring]]
+.*How does dynamic coloring work for the metric visualization?*
+[%collapsible]
+====
+In the color palette editor, if you select *Value type: Number* the colors are applied based on the *Primary metric* value.
+
+The *Primary metric* refers to the large number displayed in each tile.
+
+[role="screenshot"]
+image:images/lens_primaryMetric.png[Illustration of where to find the primary metric in a metric visualization.]
+
+
+If you select *Value type: Percent*, the primary metric values are mapped to a range between 0 and 100 percent. The bounds of the range depend on your configuration.
+
+The logic is as follows. If there is a Breakdown dimension for multiple visualization tiles:
+
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
+
+* When there is no *Maximum dimension*, the range is from the smallest primary metric values to the greatest primary metric values.
+
+If there is no Breakdown dimension for a single visualization tile:
+
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
+
+* When there is no *Maximum dimension*, *Value type: Percent* cannot be selected because there's no way to determine a range.
+
 ====

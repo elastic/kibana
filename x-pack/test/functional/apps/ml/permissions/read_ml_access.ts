@@ -138,9 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.loadIfNeeded(
           'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
         );
-        await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-        await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
-        await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
+        await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+        await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
+        await ml.testResources.createDataViewIfNeeded(ecIndexPattern, 'order_date');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
         await ml.api.createAndRunAnomalyDetectionLookbackJob(
@@ -176,9 +176,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.api.deleteCalendar(calendarId);
         await ml.api.deleteFilter(filterId);
         await ml.api.cleanMlIndices();
-        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-        await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
-        await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
+        await ml.testResources.deleteDataViewByTitle('ft_farequote');
+        await ml.testResources.deleteDataViewByTitle('ft_ihp_outlier');
+        await ml.testResources.deleteDataViewByTitle(ecIndexPattern);
       });
 
       for (const testUser of testUsers) {
@@ -378,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should load an index into the data visualizer page'
             );
-            await ml.dataVisualizer.navigateToIndexPatternSelection();
+            await ml.dataVisualizer.navigateToDataViewSelection();
             await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(ecIndexPattern);
 
             await ml.testExecution.logTestStep('should display the time range step');

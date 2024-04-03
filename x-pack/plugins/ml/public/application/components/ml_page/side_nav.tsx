@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import React, { ReactNode, useCallback, useMemo } from 'react';
-import { AIOPS_ENABLED, CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
 import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
@@ -234,55 +235,72 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: false,
             testSubj: 'mlMainTab indexDataVisualizer',
           },
+          {
+            id: 'esql_datavisualizer',
+            pathId: ML_PAGES.DATA_VISUALIZER_ESQL,
+            name: i18n.translate('xpack.ml.navMenu.esqlDataVisualizerLinkText', {
+              defaultMessage: 'ES|QL',
+            }),
+            disabled: false,
+            testSubj: 'mlMainTab esqlDataVisualizer',
+          },
+
+          {
+            id: 'data_drift',
+            pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
+            name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
+              defaultMessage: 'Data Drift',
+            }),
+            disabled: disableLinks,
+            testSubj: 'mlMainTab dataDrift',
+          },
         ],
       },
     ];
 
-    if (AIOPS_ENABLED) {
-      mlTabs.push({
-        id: 'aiops_section',
-        name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
-          defaultMessage: 'AIOps Labs',
-        }),
-        disabled: disableLinks,
-        items: [
-          {
-            id: 'explainlogratespikes',
-            pathId: ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.explainLogRateSpikesLinkText', {
-              defaultMessage: 'Explain Log Rate Spikes',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab explainLogRateSpikes',
-            relatedRouteIds: ['explain_log_rate_spikes'],
-          },
-          {
-            id: 'logCategorization',
-            pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
-              defaultMessage: 'Log Pattern Analysis',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab logCategorization',
-            relatedRouteIds: ['log_categorization'],
-          },
-          ...(CHANGE_POINT_DETECTION_ENABLED
-            ? [
-                {
-                  id: 'changePointDetection',
-                  pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
-                  name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
-                    defaultMessage: 'Change Point Detection',
-                  }),
-                  disabled: disableLinks,
-                  testSubj: 'mlMainTab changePointDetection',
-                  relatedRouteIds: ['change_point_detection'],
-                },
-              ]
-            : []),
-        ],
-      });
-    }
+    mlTabs.push({
+      id: 'aiops_section',
+      name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
+        defaultMessage: 'AIOps Labs',
+      }),
+      disabled: disableLinks,
+      items: [
+        {
+          id: 'logRateAnalysis',
+          pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
+          name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
+            defaultMessage: 'Log Rate Analysis',
+          }),
+          disabled: disableLinks,
+          testSubj: 'mlMainTab logRateAnalysis',
+          relatedRouteIds: ['log_rate_analysis'],
+        },
+        {
+          id: 'logCategorization',
+          pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+          name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
+            defaultMessage: 'Log Pattern Analysis',
+          }),
+          disabled: disableLinks,
+          testSubj: 'mlMainTab logCategorization',
+          relatedRouteIds: ['log_categorization'],
+        },
+        ...(CHANGE_POINT_DETECTION_ENABLED
+          ? [
+              {
+                id: 'changePointDetection',
+                pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
+                name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
+                  defaultMessage: 'Change Point Detection',
+                }),
+                disabled: disableLinks,
+                testSubj: 'mlMainTab changePointDetection',
+                relatedRouteIds: ['change_point_detection'],
+              },
+            ]
+          : []),
+      ],
+    });
 
     return mlTabs;
   }, [mlFeaturesDisabled, canViewMlNodes]);

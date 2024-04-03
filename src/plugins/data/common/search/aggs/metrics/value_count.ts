@@ -24,7 +24,7 @@ export interface AggParamsValueCount extends BaseAggParams {
 export const getValueCountMetricAgg = () =>
   new MetricAggType({
     name: METRIC_TYPES.VALUE_COUNT,
-    valueType: 'number',
+    getValueType: () => 'number',
     expressionName: aggValueCountFnName,
     title: valueCountTitle,
     enableEmptyAsNull: true,

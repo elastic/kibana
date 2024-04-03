@@ -12,9 +12,15 @@ import {
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
 } from '../constants';
+import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
-import { actionDomainSchema, actionSchema } from './action_schemas';
+import {
+  defaultActionDomainSchema,
+  defaultActionSchema,
+  systemActionDomainSchema,
+  systemActionSchema,
+} from './action_schemas';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
@@ -54,6 +60,7 @@ export const ruleExecutionStatusSchema = schema.object({
       reason: schema.oneOf([
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
+        schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
       ]),
       message: schema.string(),
     })
@@ -80,6 +87,7 @@ export const ruleLastRunSchema = schema.object({
         schema.literal(ruleExecutionStatusErrorReason.VALIDATE),
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
+        schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
       ])
     )
   ),
@@ -122,50 +130,15 @@ export const monitoringSchema = schema.object({
   }),
 });
 
-export const rRuleSchema = schema.object({
-  dtstart: schema.string(),
-  tzid: schema.string(),
-  freq: schema.maybe(
-    schema.oneOf([
-      schema.literal(0),
-      schema.literal(1),
-      schema.literal(2),
-      schema.literal(3),
-      schema.literal(4),
-      schema.literal(5),
-      schema.literal(6),
-    ])
-  ),
-  until: schema.maybe(schema.string()),
-  count: schema.maybe(schema.number()),
-  interval: schema.maybe(schema.number()),
-  wkst: schema.maybe(
-    schema.oneOf([
-      schema.literal('MO'),
-      schema.literal('TU'),
-      schema.literal('WE'),
-      schema.literal('TH'),
-      schema.literal('FR'),
-      schema.literal('SA'),
-      schema.literal('SU'),
-    ])
-  ),
-  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-  bymonth: schema.maybe(schema.arrayOf(schema.number())),
-  bysetpos: schema.maybe(schema.arrayOf(schema.number())),
-  bymonthday: schema.arrayOf(schema.number()),
-  byyearday: schema.arrayOf(schema.number()),
-  byweekno: schema.arrayOf(schema.number()),
-  byhour: schema.arrayOf(schema.number()),
-  byminute: schema.arrayOf(schema.number()),
-  bysecond: schema.arrayOf(schema.number()),
-});
-
 export const snoozeScheduleSchema = schema.object({
   duration: schema.number(),
   rRule: rRuleSchema,
   id: schema.maybe(schema.string()),
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const alertDelaySchema = schema.object({
+  active: schema.number(),
 });
 
 /**
@@ -179,7 +152,8 @@ export const ruleDomainSchema = schema.object({
   alertTypeId: schema.string(),
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
-  actions: schema.arrayOf(actionDomainSchema),
+  actions: schema.arrayOf(defaultActionDomainSchema),
+  systemActions: schema.maybe(schema.arrayOf(systemActionDomainSchema)),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduledTaskId: schema.maybe(schema.string()),
@@ -204,6 +178,7 @@ export const ruleDomainSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
+  alertDelay: schema.maybe(alertDelaySchema),
 });
 
 /**
@@ -217,7 +192,8 @@ export const ruleSchema = schema.object({
   alertTypeId: schema.string(),
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
-  actions: schema.arrayOf(actionSchema),
+  actions: schema.arrayOf(defaultActionSchema),
+  systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduledTaskId: schema.maybe(schema.string()),
@@ -241,4 +217,5 @@ export const ruleSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
+  alertDelay: schema.maybe(alertDelaySchema),
 });

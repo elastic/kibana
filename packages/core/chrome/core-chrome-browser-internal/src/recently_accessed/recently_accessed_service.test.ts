@@ -7,7 +7,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { takeUntil, bufferCount } from 'rxjs/operators';
+import { takeUntil, bufferCount } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RecentlyAccessedService } from './recently_accessed_service';
 
@@ -44,7 +44,10 @@ describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
-    window.localStorage = new LocalStorageMock();
+    Object.defineProperty(window, 'localStorage', {
+      value: new LocalStorageMock(),
+      writable: true,
+    });
   });
   beforeEach(() => localStorage.clear());
   afterAll(() => (window.localStorage = originalLocalStorage));

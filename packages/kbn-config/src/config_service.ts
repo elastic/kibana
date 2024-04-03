@@ -7,16 +7,18 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Type } from '@kbn/config-schema';
-import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
+import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
+import { cloneDeep, isEqual, merge } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
+import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
+import { getFlattenedObject } from '@kbn/std';
 import { Config, ConfigPath, Env } from '..';
 import { hasConfigPathIntersection } from './config';
-import { RawConfigurationProvider } from './raw/raw_config_service';
+import { RawConfigurationProvider } from './raw';
 import {
   applyDeprecations,
   ConfigDeprecationWithContext,
@@ -60,6 +62,8 @@ export class ConfigService {
   private readonly handledPaths: Set<ConfigPath> = new Set();
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
+  private readonly dynamicPaths = new Map<string, string[]>();
+  private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
   private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigDetails[]>();
 
   constructor(
@@ -69,11 +73,19 @@ export class ConfigService {
   ) {
     this.log = logger.get('config');
     this.deprecationLog = logger.get('config', 'deprecation');
-    this.docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
+    this.docLinks = getDocLinks({
+      kibanaBranch: env.packageInfo.branch,
+      buildFlavor: env.packageInfo.buildFlavor,
+    });
 
-    this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
-      map(([rawConfig, deprecations]) => {
-        const migrated = applyDeprecations(rawConfig, deprecations);
+    this.config$ = combineLatest([
+      this.rawConfigProvider.getConfig$(),
+      this.deprecations,
+      this.overrides$,
+    ]).pipe(
+      map(([rawConfig, deprecations, overrides]) => {
+        const overridden = merge(rawConfig, overrides);
+        const migrated = applyDeprecations(overridden, deprecations);
         this.deprecatedConfigPaths.next(migrated.changedPaths);
         return new ObjectToConfigAdapter(migrated.config);
       }),
@@ -150,9 +162,13 @@ export class ConfigService {
    * against its registered schema.
    *
    * @param path - The path to the desired subset of the config.
+   * @param ignoreUnchanged - If true (default), will not emit if the config at path did not change.
    */
-  public atPath<TSchema>(path: ConfigPath) {
-    return this.getValidatedConfigAtPath$(path) as Observable<TSchema>;
+  public atPath<TSchema>(
+    path: ConfigPath,
+    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+  ) {
+    return this.getValidatedConfigAtPath$(path, { ignoreUnchanged }) as Observable<TSchema>;
   }
 
   /**
@@ -213,6 +229,59 @@ export class ConfigService {
     return this.deprecatedConfigPaths.asObservable();
   }
 
+  /**
+   * Adds a specific setting to be allowed to change dynamically.
+   * @param configPath The namespace of the config
+   * @param dynamicConfigPaths The config keys that can be dynamically changed
+   */
+  public addDynamicConfigPaths(configPath: ConfigPath, dynamicConfigPaths: string[]) {
+    const _configPath = Array.isArray(configPath) ? configPath.join('.') : configPath;
+    this.dynamicPaths.set(_configPath, dynamicConfigPaths);
+  }
+
+  /**
+   * Used for dynamically extending the overrides.
+   * These overrides are not persisted and will be discarded after restarts.
+   * @param newOverrides
+   */
+  public setDynamicConfigOverrides(newOverrides: Record<string, unknown>) {
+    const globalOverrides = cloneDeep(this.overrides$.value);
+
+    const flattenedOverrides = getFlattenedObject(newOverrides);
+
+    const validateWithNamespace = new Set<string>();
+
+    keyLoop: for (const key in flattenedOverrides) {
+      // this if is enforced by an eslint rule :shrug:
+      if (key in flattenedOverrides) {
+        for (const [configPath, dynamicConfigKeys] of this.dynamicPaths.entries()) {
+          if (
+            key.startsWith(`${configPath}.`) &&
+            dynamicConfigKeys.some(
+              // The key is explicitly allowed OR its prefix is
+              (dynamicConfigKey) =>
+                key === `${configPath}.${dynamicConfigKey}` ||
+                key.startsWith(`${configPath}.${dynamicConfigKey}.`)
+            )
+          ) {
+            validateWithNamespace.add(configPath);
+            set(globalOverrides, key, flattenedOverrides[key]);
+            continue keyLoop;
+          }
+        }
+        throw new ValidationError(new SchemaTypeError(`not a valid dynamic option`, [key]));
+      }
+    }
+
+    const globalOverridesAsConfig = new ObjectToConfigAdapter(
+      merge({}, this.lastConfig, globalOverrides)
+    );
+
+    validateWithNamespace.forEach((ns) => this.validateAtPath(ns, globalOverridesAsConfig.get(ns)));
+
+    this.overrides$.next(globalOverrides);
+  }
+
   private async logDeprecation() {
     const rawConfig = await firstValueFrom(this.rawConfigProvider.getConfig$());
     const deprecations = await firstValueFrom(this.deprecations);
@@ -241,17 +310,20 @@ export class ConfigService {
       {
         dev: this.env.mode.dev,
         prod: this.env.mode.prod,
-        serverless: this.env.cliArgs.serverless === true,
+        serverless: this.env.packageInfo.buildFlavor === 'serverless',
         ...this.env.packageInfo,
       },
       `config validation of [${namespace}]`
     );
   }
 
-  private getValidatedConfigAtPath$(path: ConfigPath) {
+  private getValidatedConfigAtPath$(
+    path: ConfigPath,
+    { ignoreUnchanged = true }: { ignoreUnchanged?: boolean } = {}
+  ) {
     return this.config$.pipe(
       map((config) => config.get(path)),
-      distinctUntilChanged(isEqual),
+      ignoreUnchanged ? distinctUntilChanged(isEqual) : identity,
       map((config) => this.validateAtPath(path, config))
     );
   }

@@ -7,17 +7,29 @@
  */
 
 import { isUndefined } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../../..';
+import type { DataViewBase, DataViewFieldBase, KueryQueryOptions } from '../../..';
+import type { KqlFunctionNode, KqlLiteralNode, KqlWildcardNode } from '../node_types';
 import type { KqlContext } from '../types';
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
+
+export const KQL_FUNCTION_IS = 'is';
+
+export interface KqlIsFunctionNode extends KqlFunctionNode {
+  function: typeof KQL_FUNCTION_IS;
+  arguments: [KqlLiteralNode | KqlWildcardNode, KqlLiteralNode | KqlWildcardNode];
+}
+
+export function isNode(node: KqlFunctionNode): node is KqlIsFunctionNode {
+  return node.function === KQL_FUNCTION_IS;
+}
 
 export function buildNodeParams(fieldName: string, value: any) {
   if (isUndefined(fieldName)) {
@@ -38,11 +50,11 @@ export function buildNodeParams(fieldName: string, value: any) {
 }
 
 export function toElasticsearchQuery(
-  node: KueryNode,
+  node: KqlIsFunctionNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: KqlContext = {}
-): estypes.QueryDslQueryContainer {
+): QueryDslQueryContainer {
   const {
     arguments: [fieldNameArg, valueArg],
   } = node;
@@ -147,7 +159,7 @@ export function toElasticsearchQuery(
         ? {
             wildcard: {
               [field.name]: {
-                value,
+                value: wildcard.toQueryStringQuery(valueArg),
                 ...(typeof config.caseInsensitive === 'boolean' && {
                   case_insensitive: config.caseInsensitive,
                 }),
@@ -215,4 +227,10 @@ export function toElasticsearchQuery(
       minimum_should_match: 1,
     },
   };
+}
+
+export function toKqlExpression(node: KqlIsFunctionNode): string {
+  const [field, value] = node.arguments;
+  if (field.value === null) return `${ast.toKqlExpression(value)}`;
+  return `${ast.toKqlExpression(field)}: ${ast.toKqlExpression(value)}`;
 }

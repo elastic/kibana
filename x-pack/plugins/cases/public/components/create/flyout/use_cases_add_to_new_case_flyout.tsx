@@ -19,7 +19,15 @@ type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
   toastContent?: string;
 };
 
-export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) => {
+export const useCasesAddToNewCaseFlyout = ({
+  initialValue,
+  toastTitle,
+  toastContent,
+
+  afterCaseCreated,
+  onSuccess,
+  onClose,
+}: AddToNewCaseFlyoutProps = {}) => {
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
 
@@ -37,13 +45,13 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
-          ...props,
+          initialValue,
           attachments,
           headerContent,
           onClose: () => {
             closeFlyout();
-            if (props.onClose) {
-              return props.onClose();
+            if (onClose) {
+              return onClose();
             }
           },
           onSuccess: async (theCase: CaseUI) => {
@@ -51,24 +59,34 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
               casesToasts.showSuccessAttach({
                 theCase,
                 attachments: attachments ?? [],
-                title: props.toastTitle,
-                content: props.toastContent,
+                title: toastTitle,
+                content: toastContent,
               });
             }
-            if (props.onSuccess) {
-              return props.onSuccess(theCase);
+            if (onSuccess) {
+              return onSuccess(theCase);
             }
           },
           afterCaseCreated: async (...args) => {
             closeFlyout();
-            if (props.afterCaseCreated) {
-              return props.afterCaseCreated(...args);
+            if (afterCaseCreated) {
+              return afterCaseCreated(...args);
             }
           },
         },
       });
     },
-    [casesToasts, closeFlyout, dispatch, props]
+    [
+      initialValue,
+      casesToasts,
+      closeFlyout,
+      dispatch,
+      toastTitle,
+      toastContent,
+      afterCaseCreated,
+      onSuccess,
+      onClose,
+    ]
   );
   return {
     open: openFlyout,

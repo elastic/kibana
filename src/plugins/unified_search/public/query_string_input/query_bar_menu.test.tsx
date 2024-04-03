@@ -119,6 +119,8 @@ describe('Querybar Menu component', () => {
           ],
         }),
       },
+      additionalQueryBarMenuItems: {},
+      queryBarMenuRef: React.createRef(),
     };
   });
   it('should not render the popover if the openQueryBarMenu prop is false', async () => {
@@ -247,6 +249,7 @@ describe('Querybar Menu component', () => {
           },
           filters: [],
         },
+        namespaces: ['default'],
       },
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
@@ -341,5 +344,66 @@ describe('Querybar Menu component', () => {
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeFalsy();
+  });
+
+  it('should render additional menu items', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Test additional query bar menu item',
+            'data-test-subj': 'additional-query-bar-menu-item',
+          },
+        ],
+      },
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(component.find('[data-test-subj="additional-query-bar-menu-item"]').length).toBeTruthy();
+  });
+
+  it('should render additional menu panels', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Go to nested menu',
+            'data-test-subj': 'additional-query-bar-menu-panel-link',
+            panel: 'panel-1',
+          },
+        ],
+        panels: [
+          {
+            id: 'panel-1',
+            title: 'Grouped additional query bar menu items',
+            items: [
+              {
+                name: 'Test additional query bar menu item',
+                'data-test-subj': 'additional-query-bar-nested-menu-item',
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    component
+      .find('[data-test-subj="additional-query-bar-menu-panel-link"]')
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(
+        component.find('[data-test-subj="additional-query-bar-nested-menu-item"]').length
+      ).toBeTruthy();
+    });
   });
 });

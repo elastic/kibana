@@ -9,14 +9,13 @@ import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
 import type { AppUnmount } from '@kbn/core/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import { UserAPIClient } from '../management';
-import { securityMock } from '../mocks';
 import { accountManagementApp } from './account_management_app';
 import * as AccountManagementPageImports from './account_management_page';
 import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
+import { UserAPIClient } from '../management';
+import { securityMock } from '../mocks';
 
 const AccountManagementPageMock = jest
   .spyOn(AccountManagementPageImports, 'AccountManagementPage')
@@ -42,7 +41,7 @@ describe('accountManagementApp', () => {
       expect.objectContaining({
         id: 'security_account',
         appRoute: '/security/account',
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
         mount: expect.any(Function),
       })
     );

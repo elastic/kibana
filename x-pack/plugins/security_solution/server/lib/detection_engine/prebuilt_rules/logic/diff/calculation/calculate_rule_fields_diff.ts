@@ -9,33 +9,33 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 
 import type {
+  AllFieldsDiff,
   DiffableAllFields,
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
+  DiffableEsqlFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
   DiffableRule,
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
-import type {
-  AllFieldsDiff,
   CommonFieldsDiff,
   CustomQueryFieldsDiff,
   EqlFieldsDiff,
+  EsqlFieldsDiff,
   MachineLearningFieldsDiff,
   NewTermsFieldsDiff,
   RuleFieldsDiff,
   SavedQueryFieldsDiff,
   ThreatMatchFieldsDiff,
   ThresholdFieldsDiff,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
-import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
-import type { ThreeVersionsOf } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { MissingVersion } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
+import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import { simpleDiffAlgorithm } from './algorithms/simple_diff_algorithm';
 
@@ -144,6 +144,16 @@ export const calculateRuleFieldsDiff = (
         ...calculateNewTermsFieldsDiff({ base_version, current_version, target_version }),
       };
     }
+    case 'esql': {
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'esql', BASE_TYPE_ERROR);
+      }
+      invariant(target_version.type === 'esql', TARGET_TYPE_ERROR);
+      return {
+        ...commonFieldsDiff,
+        ...calculateEsqlFieldsDiff({ base_version, current_version, target_version }),
+      };
+    }
     default: {
       return assertUnreachable(current_version, 'Unhandled rule type');
     }
@@ -228,6 +238,17 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   tiebreaker_field: simpleDiffAlgorithm,
 };
 
+const calculateEsqlFieldsDiff = (
+  ruleVersions: ThreeVersionsOf<DiffableEsqlFields>
+): EsqlFieldsDiff => {
+  return calculateFieldsDiffFor(ruleVersions, esqlFieldsDiffAlgorithms);
+};
+
+const esqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEsqlFields> = {
+  type: simpleDiffAlgorithm,
+  esql_query: simpleDiffAlgorithm,
+};
+
 const calculateThreatMatchFieldsDiff = (
   ruleVersions: ThreeVersionsOf<DiffableThreatMatchFields>
 ): ThreatMatchFieldsDiff => {
@@ -297,6 +318,7 @@ const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
   ...customQueryFieldsDiffAlgorithms,
   ...savedQueryFieldsDiffAlgorithms,
   ...eqlFieldsDiffAlgorithms,
+  ...esqlFieldsDiffAlgorithms,
   ...threatMatchFieldsDiffAlgorithms,
   ...thresholdFieldsDiffAlgorithms,
   ...machineLearningFieldsDiffAlgorithms,

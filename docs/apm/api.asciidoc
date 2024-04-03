@@ -504,6 +504,16 @@ The following APIs are available:
 * <<rum-sourcemap-delete>>
 
 [float]
+[[limit-sourcemap-api]]
+==== Max payload size
+
+{kib}'s maximum payload size is 1mb.
+If you attempt to upload a source map that exceeds the max payload size, you will get a `413` error.
+
+Before uploading source maps that exceed this default, change the maximum payload size allowed by {kib}
+with the <<server-maxPayload,`server.maxPayload`>> variable.
+
+[float]
 [[use-sourcemap-api]]
 ==== How to use APM APIs
 
@@ -563,7 +573,7 @@ curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
 -H 'Authorization: ApiKey ${YOUR_API_KEY}' \
 -F 'service_name="foo"' \
 -F 'service_version="1.0.0"' \
--F 'bundle_filepath="/test/e2e/general-usecase/bundle.js.map"' \
+-F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
 -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' <1>
 --------------------------------------------------
 <1> Alternatively, upload the source map as a file with `-F 'sourcemap=@path/to/source_map/bundle.js.map'`
@@ -637,7 +647,7 @@ curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
       "body": {
         "serviceName": "foo",
         "serviceVersion": "1.0.0",
-        "bundleFilepath": "/test/e2e/general-usecase/bundle.js.map",
+        "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
         "sourceMap": {
           "version": 3,
           "file": "static/js/main.chunk.js",

@@ -34,6 +34,10 @@ import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
+import {
+  SENTINEL_ONE_AGENT_ID_FIELD,
+  isAlertFromSentinelOneEvent,
+} from '../../utils/sentinelone_alert_check';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -44,7 +48,14 @@ const THRESHOLD_COUNT = `${ALERT_THRESHOLD_RESULT}.count`;
 /** Always show these fields */
 const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
+  // ENDPOINT-related field //
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
+  {
+    id: SENTINEL_ONE_AGENT_ID_FIELD,
+    overrideField: AGENT_STATUS_FIELD_NAME,
+    label: i18n.AGENT_STATUS,
+  },
+  // ** //
   { id: 'user.name' },
   { id: 'rule.name' },
   { id: 'cloud.provider' },
@@ -216,8 +227,17 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
+ */
+function getHighlightedFieldsOverride(customs: string[]): EventSummaryField[] {
+  return customs.map((field) => ({ id: field }));
+}
+
+/**
   This function is exported because it is used in the Exception Component to
-  populate the conditions with the Highlighted Fields. Additionally, the new 
+  populate the conditions with the Highlighted Fields. Additionally, the new
   Alert Summary Flyout also requires access to these fields.
   As the Alert Summary components will undergo changes soon we will go with
   exporting the function only for now.
@@ -229,12 +249,15 @@ export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  highlightedFieldsOverride,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  highlightedFieldsOverride: string[];
 }): EventSummaryField[] {
   const fields = [
+    ...getHighlightedFieldsOverride(highlightedFieldsOverride),
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
@@ -255,7 +278,7 @@ interface EventCategories {
  * @param data The event details
  * @returns The event's primary category and all other categories in case there is more than one
  */
-function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
+export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
   const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
   let primaryEventCategory: string | undefined;
@@ -281,13 +304,17 @@ export const getSummaryRows = ({
   eventId,
   isDraggable = false,
   isReadOnly = false,
+  investigationFields,
+  sentinelOneManualHostActionsEnabled,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
+  investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
+  sentinelOneManualHostActionsEnabled?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -306,6 +333,7 @@ export const getSummaryRows = ({
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: investigationFields ?? [],
   });
 
   return data != null
@@ -339,6 +367,14 @@ export const getSummaryRows = ({
         };
 
         if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
+          return acc;
+        }
+
+        if (
+          field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
+          sentinelOneManualHostActionsEnabled &&
+          !isAlertFromSentinelOneEvent({ data })
+        ) {
           return acc;
         }
 

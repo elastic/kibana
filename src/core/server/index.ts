@@ -46,7 +46,10 @@ import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsear
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
-import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
+import type {
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
+} from '@kbn/core-plugins-server-internal';
 
 export { bootstrap } from '@kbn/core-root-server-internal';
 
@@ -115,6 +118,18 @@ export type {
   UnauthorizedErrorHandler,
 } from '@kbn/core-elasticsearch-server';
 
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+} from '@kbn/core-security-server';
+export type {
+  User,
+  UserRealm,
+  AuthenticatedUser,
+  AuthenticationProvider,
+} from '@kbn/core-security-common';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
@@ -150,7 +165,7 @@ export type {
   RouteValidationSpec,
   RouteValidationFunction,
   RouteValidatorOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RouteValidationResultFactory,
   RouteValidationError,
   RedirectResponseOptions,
@@ -181,6 +196,7 @@ export type {
   ICspConfig,
   IExternalUrlConfig,
   IBasePath,
+  IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
@@ -215,7 +231,7 @@ export type {
   AppenderConfigType,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
-export type { Ecs, EcsEvent } from '@kbn/ecs';
+export type { Ecs, EcsEvent } from '@elastic/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
@@ -234,6 +250,16 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
 } from '@kbn/core-plugins-server';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  NotFoundPluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  PluginContractResolverResponseItem,
+  PluginContractMap,
+  PluginContractResolverResponse,
+  PluginContractResolver,
+} from '@kbn/core-plugins-contracts-server';
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
@@ -472,8 +498,8 @@ export type {
   ExecutionContextSetup,
   ExecutionContextStart,
   HttpResources,
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
 };
 
 /**

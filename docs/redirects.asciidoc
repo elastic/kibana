@@ -7,6 +7,10 @@
 The following pages have moved or been deleted.
 
 --
+[role="exclude",id="explain-log-rate-spikes"]
+== Explain log rate spikes
+Refer to <<log-rate-analysis>>.
+
 [role="exclude",id="snapshot-repositories"]
 == Snapshot and Restore
 Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
@@ -287,7 +291,7 @@ This page has been moved. Refer to <<dashboard-drilldowns>>.
 [[development-plugin-localization]]
 === Localization for plugins
 
-This page has been moved. PRefer to <<external-plugin-localization>>.
+This page has been moved. Refer to <<external-plugin-localization>>.
 
 [role="exclude",id="visualize"]
 == Visualize
@@ -413,3 +417,19 @@ This page has been deleted. Refer to <<machine-learning-api-sync>>.
 == Alerts and Actions
 
 This page has been deleted. Refer to <<alerting-getting-started>>.
+
+[role="exclude",id="enhancements-and-bug-fixes-v8.10.0"]
+== Enhancements and bug fixes for 8.10.0
+
+This content has moved. Refer to <<enhancements-and-bug-fixes-v8.10.0-revised>> for 8.10.0.
+
+[role="exclude",id="gen-ai-action-type"]
+== Generative AI connector and action
+
+This connector was renamed. Refer to <<openai-action-type>>.
+
+[role="exclude",id="apis"]
+== APIs
+
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[machine learning] open API specifications.

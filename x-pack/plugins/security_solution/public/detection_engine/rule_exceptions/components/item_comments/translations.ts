@@ -32,3 +32,10 @@ export const COMMENTS_HIDE = (comments: number) =>
     values: { comments },
     defaultMessage: 'Hide ({comments}) {comments, plural, =1 {Comment} other {Comments}}',
   });
+
+export const COMMENT_MAX_LENGTH_ERROR = (length: number) =>
+  i18n.translate('xpack.securitySolution.rule_exceptions.itemComments.maxLengthError', {
+    values: { length },
+    defaultMessage:
+      'The length of the comment is too long. The maximum length is {length} characters.',
+  });

@@ -31,7 +31,7 @@ describe('transformActionParams', () => {
       empty1: null,
       empty2: undefined,
       date: '2019-02-12T21:01:22.479Z',
-      message: 'Value "{{params.foo}}" exists',
+      message: 'Value "{{rule.params.foo}}" exists',
     };
     const result = transformActionParams({
       actionsPlugin,
@@ -615,6 +615,208 @@ describe('transformActionParams', () => {
     expect(result).toMatchInlineSnapshot(`
           Object {
             "message": "Value \\"true\\" exists",
+          }
+      `);
+  });
+
+  test('alerts as data doc is passed to templates', () => {
+    const actionParams = {
+      message: 'Value "{{kibana.alert.rule.name}}" exists and {{context.foo}} exists',
+    };
+    const result = transformActionParams({
+      actionsPlugin,
+      actionTypeId,
+      actionParams,
+      state: {},
+      context: { foo: 'fooVal' },
+      alertId: '1',
+      alertType: 'rule-type-id',
+      actionId: 'action-id',
+      alertName: 'alert-name',
+      tags: ['tag-A', 'tag-B'],
+      spaceId: 'spaceId-A',
+      alertInstanceId: '2',
+      alertUuid: 'uuid-1',
+      alertActionGroup: 'action-group',
+      alertActionGroupName: 'Action Group',
+      alertParams: {},
+      flapping: false,
+      aadAlert: {
+        // @ts-expect-error
+        kibana: {
+          alert: {
+            url: '/app/management/insightsAndAlerting/triggersActions/rule/a36916ad-9e7e-4fb6-acb7-ff5ac6621fa9',
+            reason:
+              'Document count is 145 in the last 5d in .kibana-event-log* index. Alert when greater than 0.',
+            title: "rule 'test again' matched query",
+            evaluation: {
+              conditions: 'Number of matching documents is greater than 0',
+              value: '145',
+              threshold: 0,
+            },
+            rule: {
+              category: 'Elasticsearch query',
+              consumer: 'stackAlerts',
+              execution: {
+                uuid: '9db2f40d-ae46-47c6-9d94-4b7f538ccc99',
+              },
+              name: 'test again',
+              parameters: {
+                searchType: 'esQuery',
+                timeWindowSize: 5,
+                timeWindowUnit: 'd',
+                threshold: [0],
+                thresholdComparator: '>',
+                size: 100,
+                esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
+                aggType: 'count',
+                groupBy: 'all',
+                termSize: 5,
+                sourceFields: [],
+                index: ['.kibana-event-log*'],
+                timeField: '@timestamp',
+                excludeHitsFromPreviousRun: false,
+              },
+              producer: 'stackAlerts',
+              rule_type_id: '.es-query',
+              tags: [],
+              uuid: 'a36916ad-9e7e-4fb6-acb7-ff5ac6621fa9',
+              revision: 0,
+            },
+            action_group: 'query matched',
+            flapping_history: [
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            instance: {
+              id: 'query matched',
+            },
+            maintenance_window_ids: [],
+            status: 'active',
+            uuid: '6b02fc1e-a297-468d-a3a2-f0e8fdc03dbf',
+            workflow_status: 'open',
+            start: '2024-01-26T13:54:14.044Z',
+            time_range: {
+              gte: '2024-01-26T13:54:14.044Z',
+            },
+            duration: {
+              us: 752537000,
+            },
+            flapping: false,
+          },
+          space_ids: ['default'],
+          version: '8.13.0',
+        },
+        '@timestamp': '2024-01-26T14:06:46.581Z',
+        event: {
+          action: 'active',
+          kind: 'signal',
+        },
+        tags: [],
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+          Object {
+            "message": "Value \\"test again\\" exists and fooVal exists",
+          }
+      `);
+  });
+
+  test('flattened alerts as data doc is passed to templates', () => {
+    const actionParams = {
+      message: 'Value "{{kibana.alert.rule.name}}" exists and {{context.foo}} exists',
+    };
+    const result = transformActionParams({
+      actionsPlugin,
+      actionTypeId,
+      actionParams,
+      state: {},
+      context: { foo: 'fooVal' },
+      alertId: '1',
+      alertType: 'rule-type-id',
+      actionId: 'action-id',
+      alertName: 'alert-name',
+      tags: ['tag-A', 'tag-B'],
+      spaceId: 'spaceId-A',
+      alertInstanceId: '2',
+      alertUuid: 'uuid-1',
+      alertActionGroup: 'action-group',
+      alertActionGroupName: 'Action Group',
+      alertParams: {},
+      flapping: false,
+      aadAlert: {
+        'kibana.alert.url':
+          '/app/management/insightsAndAlerting/triggersActions/rule/a36916ad-9e7e-4fb6-acb7-ff5ac6621fa9',
+        'kibana.alert.reason':
+          'Document count is 145 in the last 5d in .kibana-event-log* index. Alert when greater than 0.',
+        // @ts-expect-error
+        'kibana.alert.title': "rule 'test again' matched query",
+        'kibana.alert.evaluation.conditions': 'Number of matching documents is greater than 0',
+        'kibana.alert.evaluation.value': '145',
+        'kibana.alert.evaluation.threshold': 0,
+        'kibana.alert.rule.category': 'Elasticsearch query',
+        'kibana.alert.rule.consumer': 'stackAlerts',
+        'kibana.alert.rule.execution.uuid': '9db2f40d-ae46-47c6-9d94-4b7f538ccc99',
+        'kibana.alert.rule.name': 'test again',
+        'kibana.alert.rule.producer': 'stackAlerts',
+        'kibana.alert.rule.rule_type_id': '.es-query',
+        'kibana.alert.rule.uuid': 'a36916ad-9e7e-4fb6-acb7-ff5ac6621fa9',
+        'kibana.alert.action_group': 'query matched',
+        'kibana.alert.instance.id': 'query matched',
+        'kibana.alert.status': 'active',
+        'kibana.alert.start': '2024-01-26T13:54:14.044Z',
+        'kibana.alert.duration.us': 752537000,
+        '@timestamp': '2024-01-26T14:06:46.581Z',
+        'event.action': 'active',
+        'event.kind': 'signal',
+        tags: [],
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+          Object {
+            "message": "Value \\"test again\\" exists and fooVal exists",
+          }
+      `);
+  });
+
+  test('consecutive matches is passed to templates', () => {
+    const actionParams = {
+      message: 'Value "{{alert.consecutiveMatches}}" exists',
+    };
+    const result = transformActionParams({
+      actionsPlugin,
+      actionTypeId,
+      actionParams,
+      state: {},
+      context: {},
+      alertId: '1',
+      alertType: 'rule-type-id',
+      actionId: 'action-id',
+      alertName: 'alert-name',
+      tags: ['tag-A', 'tag-B'],
+      spaceId: 'spaceId-A',
+      alertInstanceId: '2',
+      alertUuid: 'uuid-1',
+      alertActionGroup: 'action-group',
+      alertActionGroupName: 'Action Group',
+      alertParams: {},
+      flapping: true,
+      consecutiveMatches: 4,
+    });
+    expect(result).toMatchInlineSnapshot(`
+          Object {
+            "message": "Value \\"4\\" exists",
           }
       `);
   });

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
-import { useDataSource } from '../../../../../contexts/ml';
-import { DetailsStepTimeField } from './details_step_time_field';
+import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
+import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
+import { AdditionalSection } from './additional_section';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 
@@ -39,13 +44,19 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     services: { docLinks, notifications },
   } = useMlKibana();
 
-  const { selectedDataView } = useDataSource();
+  const canCreateDataView = useCanCreateDataView();
+  const { dataViewAvailableTimeFields, onTimeFieldChanged } = useDataViewTimeFields({
+    actions,
+    state,
+  });
 
   const createIndexLink = docLinks.links.apis.createIndex;
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
+    createDataView,
     description,
+    destinationDataViewTitleExists,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -60,47 +71,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   } = form;
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
-    cloneJob === undefined && hasSwitchedToEditor === false
+    hasSwitchedToEditor === false && destinationIndex !== undefined && destinationIndex === jobId
   );
   const [useResultsFieldDefault, setUseResultsFieldDefault] = useState<boolean>(
     (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
       (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
   );
-  const [dataViewAvailableTimeFields, setDataViewAvailableTimeFields] = useState<string[]>([]);
-
-  const onTimeFieldChanged = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const value = e.target.value;
-      // If the value is an empty string, it's not a valid selection
-      if (value === '') {
-        return;
-      }
-      // Find the time field based on the selected value
-      // this is to account for undefined when user chooses not to use a date field
-      const timeField = dataViewAvailableTimeFields.find((col) => col === value);
-
-      setFormState({ timeFieldName: timeField });
-    },
-    [dataViewAvailableTimeFields, setFormState]
-  );
-
-  useEffect(() => {
-    // Default timeFieldName to the source data view's time field if it exists
-    if (selectedDataView !== undefined) {
-      setFormState({ timeFieldName: selectedDataView.timeFieldName });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    // Get possible timefields for the results data view
-    if (selectedDataView !== undefined) {
-      const timefields = selectedDataView.fields
-        .filter((f) => f.type === 'date')
-        .map((f) => f.name);
-      setDataViewAvailableTimeFields(timefields);
-    }
-  }, [selectedDataView, setFormState]);
 
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -109,7 +85,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdExists === true ||
     jobIdValid === false ||
     destinationIndexNameEmpty === true ||
-    destinationIndexNameValid === false;
+    destinationIndexNameValid === false ||
+    (createDataView && destinationDataViewTitleExists === true);
 
   const debouncedIndexCheck = debounce(async () => {
     try {
@@ -177,14 +154,13 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destIndexSameAsId === true && !jobIdEmpty && jobIdValid) {
       setFormState({ destinationIndex: jobId });
-    } else if (destIndexSameAsId === false && hasSwitchedToEditor === false) {
-      setFormState({ destinationIndex: '' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [destIndexSameAsId, jobId]);
 
   return (
     <Fragment>
+      <IndexPermissionsCallout indexName={destinationIndex} docsType="start" />
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdLabel', {
@@ -266,73 +242,24 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           data-test-subj="mlDFAnalyticsJobCreationJobDescription"
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        helpText={
-          destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage
-        }
-      >
-        <EuiSwitch
-          disabled={isJobCreated}
-          name="mlDataFrameAnalyticsDestIndexSameAsId"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.DestIndexSameAsIdLabel', {
-            defaultMessage: 'Destination index same as job ID',
-          })}
-          checked={destIndexSameAsId === true}
-          onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
-          data-test-subj="mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch"
-        />
-      </EuiFormRow>
-      {destIndexSameAsId === false && (
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
-            defaultMessage: 'Destination index',
-          })}
-          isInvalid={
-            destinationIndexNameEmpty || (!destinationIndexNameEmpty && !destinationIndexNameValid)
+      <DestinationIndexForm
+        createIndexLink={createIndexLink}
+        destinationIndex={destinationIndex}
+        destinationIndexNameEmpty={destinationIndexNameEmpty}
+        destinationIndexNameExists={destinationIndexNameExists}
+        destinationIndexNameValid={destinationIndexNameValid}
+        destIndexSameAsId={destIndexSameAsId}
+        indexNameExistsMessage={indexNameExistsMessage}
+        isJobCreated={isJobCreated}
+        onDestinationIndexChange={(d) => setFormState({ destinationIndex: d })}
+        setDestIndexSameAsId={setDestIndexSameAsId}
+        switchLabel={i18n.translate(
+          'xpack.ml.dataframe.analytics.create.destinationIndexFormSwitchLabel',
+          {
+            defaultMessage: 'Use job ID as destination index name',
           }
-          helpText={destinationIndexNameExists && indexNameExistsMessage}
-          error={
-            !destinationIndexNameEmpty &&
-            !destinationIndexNameValid && [
-              <Fragment>
-                {i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.destinationIndexInvalidError',
-                  {
-                    defaultMessage: 'Invalid destination index name.',
-                  }
-                )}
-                <br />
-                <EuiLink href={createIndexLink} target="_blank">
-                  {i18n.translate(
-                    'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
-                    {
-                      defaultMessage: 'Learn more about index name limitations.',
-                    }
-                  )}
-                </EuiLink>
-              </Fragment>,
-            ]
-          }
-        >
-          <EuiFieldText
-            fullWidth
-            disabled={isJobCreated}
-            placeholder="destination index"
-            value={destinationIndex}
-            onChange={(e) => setFormState({ destinationIndex: e.target.value })}
-            aria-label={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
-              {
-                defaultMessage: 'Choose a unique destination index name.',
-              }
-            )}
-            isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
-            data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
-          />
-        </EuiFormRow>
-      )}
+        )}
+      />
       <EuiFormRow fullWidth>
         <EuiSwitch
           disabled={isJobCreated}
@@ -378,13 +305,17 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       )}
-      {destinationIndexNameValid && dataViewAvailableTimeFields.length > 0 ? (
-        <DetailsStepTimeField
-          dataViewAvailableTimeFields={dataViewAvailableTimeFields}
-          dataViewTimeField={timeFieldName}
-          onTimeFieldChanged={onTimeFieldChanged}
-        />
-      ) : null}
+      <CreateDataViewForm
+        canCreateDataView={canCreateDataView}
+        createDataView={createDataView}
+        dataViewTitleExists={destinationDataViewTitleExists}
+        setCreateDataView={() => setFormState({ createDataView: !createDataView })}
+        dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+        dataViewTimeField={timeFieldName}
+        onTimeFieldChanged={onTimeFieldChanged}
+      />
+      <EuiSpacer size="s" />
+      <AdditionalSection formState={state.form} setFormState={setFormState} />
       <EuiSpacer />
       <ContinueButton
         isDisabled={isStepInvalid}

@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC, ReactEventHandler } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
+  EuiButton,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
+  EuiFieldNumber,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
   EuiPopover,
-  EuiPopoverTitle,
+  EuiSpacer,
   formatDate,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -21,21 +31,27 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { useTableSeverity } from '../components/controls/select_severity';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/anomaly_charts_embeddable';
+import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { escapeKueryForFieldValuePair } from '../util/string_utils';
-import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
+import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
+import type { AnomalyChartsEmbeddableInput } from '../../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
-import {
-  AppStateSelectedCells,
-  ExplorerJob,
-  getSelectionInfluencers,
-  getSelectionTimeRange,
-} from './explorer_utils';
-import { TimeRangeBounds } from '../util/time_buckets';
-import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_anomaly_charts_to_dashboard_controls';
+import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
+import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -44,6 +60,16 @@ interface AnomalyContextMenuProps {
   interval?: number;
   chartsCount: number;
 }
+
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
+function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
+  return {
+    id: htmlIdGenerator()(),
+    title: getDefaultExplorerChartsPanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
+  };
+}
+
 export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   selectedJobs,
   selectedCells,
@@ -55,11 +81,14 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     services: {
       application: { capabilities },
       cases,
+      embeddable,
     },
   } = useMlKibana();
   const globalTimeRange = useTimeRangeUpdates(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
+  const [severity] = useTableSeverity();
+  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
   const closePopoverOnAction = useCallback(
     (actionCallback: Function) => {
       setIsMenuOpen(false);
@@ -103,77 +132,191 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     return globalTimeRange;
   }, [chartsData.seriesToPlot, globalTimeRange, selectedCells, bounds, interval]);
 
-  const menuItems = useMemo(() => {
-    const items = [];
-    if (canEditDashboards) {
-      items.push(
-        <EuiContextMenuItem
-          key="addToDashboard"
-          onClick={closePopoverOnAction.bind(null, setIsAddDashboardActive.bind(null, true))}
-          data-test-subj="mlAnomalyAddChartsToDashboardButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.explorer.anomalies.addToDashboardLabel"
-            defaultMessage="Add to dashboard"
-          />
-        </EuiContextMenuItem>
-      );
-    }
+  const isMaxSeriesToPlotValid =
+    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
 
-    if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
+  const jobIds = selectedJobs.map(({ id }) => id);
+
+  const getEmbeddableInput = useCallback(
+    (timeRange?: TimeRange) => {
+      // Respect the query and the influencers selected
+      // If no query or filter set, filter out to the lanes the selected cells
+      // And if no selected cells, show everything
+
       const selectionInfluencers = getSelectionInfluencers(
         selectedCells,
         selectedCells?.viewByFieldName!
       );
 
-      const queryFromSelectedCells = Array.isArray(selectionInfluencers)
-        ? selectionInfluencers
-            .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
-            .join(' or ')
-        : '';
+      const influencers = selectionInfluencers ?? [];
+      const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
+      const queryFromSelectedCells = influencers
+        .map((s) => escapeKueryForEmbeddableFieldValuePair(s.fieldName, s.fieldValue))
+        .join(' or ');
 
-      items.push(
-        <EuiContextMenuItem
-          key="attachToCase"
-          onClick={closePopoverOnAction.bind(
-            null,
-            openCasesModal.bind(null, {
-              jobIds: selectedJobs?.map((v) => v.id),
-              timeRange: timeRangeToPlot,
-              maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
-              ...((isDefined(queryString) && queryString !== '') || queryFromSelectedCells !== ''
-                ? {
-                    query: {
-                      query: queryString === '' ? queryFromSelectedCells : queryString,
-                      language: SEARCH_QUERY_LANGUAGE.KUERY,
-                    } as Query,
-                  }
-                : {}),
-            })
-          )}
-          data-test-subj="mlAnomalyAttachChartsToCasesButton"
-        >
-          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
-        </EuiContextMenuItem>
-      );
+      // When adding anomaly charts to Dashboard, we want to respect the Dashboard's time range
+      // so we are not passing the time range here
+      return {
+        ...config,
+        ...(timeRange ? { timeRange } : {}),
+        jobIds,
+        maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
+        severityThreshold: severity.val,
+        ...((isDefined(queryString) && queryString !== '') ||
+        (queryFromSelectedCells !== undefined && queryFromSelectedCells !== '')
+          ? {
+              query: {
+                query: queryString === '' ? queryFromSelectedCells : queryString,
+                language: SEARCH_QUERY_LANGUAGE.KUERY,
+              } as Query,
+            }
+          : {}),
+      };
+    },
+    [jobIds, maxSeriesToPlot, severity, queryString, selectedCells]
+  );
+
+  const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
+    ({ dashboardId, newTitle, newDescription }) => {
+      const stateTransfer = embeddable!.getStateTransfer();
+
+      const embeddableInput: Partial<AnomalyChartsEmbeddableInput> = {
+        ...getEmbeddableInput(),
+        title: newTitle,
+        description: newDescription,
+      };
+
+      const state = {
+        input: embeddableInput,
+        type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+      };
+
+      const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+        state,
+        path,
+      });
+    },
+    [embeddable, getEmbeddableInput]
+  );
+
+  const panels = useMemo<Exclude<EuiContextMenuProps['panels'], undefined>>(() => {
+    const rootItems: EuiContextMenuPanelItemDescriptor[] = [];
+    const menuPanels: EuiContextMenuPanelDescriptor[] = [{ id: 'panelActions', items: rootItems }];
+
+    const getContent = (callback: ReactEventHandler<HTMLButtonElement>) => (
+      <EuiPanel paddingSize={'s'}>
+        <EuiSpacer size={'s'} />
+        <EuiForm>
+          <EuiFormRow
+            isInvalid={!isMaxSeriesToPlotValid}
+            error={
+              !isMaxSeriesToPlotValid ? (
+                <FormattedMessage
+                  id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
+                  defaultMessage="Maximum number of series to plot must be between 1 and 50."
+                />
+              ) : undefined
+            }
+            label={
+              <FormattedMessage
+                id="xpack.ml.explorer.addToDashboard.anomalyCharts.maxSeriesToPlotLabel"
+                defaultMessage="Maximum number of series to plot"
+              />
+            }
+          >
+            <EuiFieldNumber
+              data-test-subj="mlAnomalyChartsInitializerMaxSeries"
+              id="selectMaxSeriesToPlot"
+              name="selectMaxSeriesToPlot"
+              value={maxSeriesToPlot}
+              onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
+              min={1}
+              max={MAX_ANOMALY_CHARTS_ALLOWED}
+            />
+          </EuiFormRow>
+
+          <EuiButton
+            fill
+            type={'submit'}
+            fullWidth
+            onClick={callback}
+            disabled={!isMaxSeriesToPlotValid}
+            data-test-subj={'mlAnomalyChartsSubmitAttachment'}
+          >
+            <FormattedMessage
+              id="xpack.ml.explorer.anomalies.submitAttachLabel"
+              defaultMessage="Attach"
+            />
+          </EuiButton>
+        </EuiForm>
+      </EuiPanel>
+    );
+
+    if (canEditDashboards) {
+      rootItems.push({
+        name: (
+          <FormattedMessage
+            id="xpack.ml.explorer.addToDashboardLabel"
+            defaultMessage="Add to dashboard"
+          />
+        ),
+        panel: 'addToDashboardPanel',
+        'data-test-subj': 'mlAnomalyAddChartsToDashboardButton',
+      });
+
+      menuPanels.push({
+        id: 'addToDashboardPanel',
+        size: 's',
+        title: i18n.translate('xpack.ml.explorer.anomalies.addToDashboardLabel', {
+          defaultMessage: 'Add to dashboard',
+        }),
+        content: getContent(
+          closePopoverOnAction.bind(null, setIsAddDashboardActive.bind(null, true))
+        ),
+      });
     }
-    return items;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
+      rootItems.push({
+        name: (
+          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
+        ),
+        panel: 'addToCasePanel',
+        'data-test-subj': 'mlAnomalyAttachChartsToCasesButton',
+      });
+
+      menuPanels.push({
+        id: 'addToCasePanel',
+        size: 's',
+        title: i18n.translate('xpack.ml.explorer.attachToCaseLabel', {
+          defaultMessage: 'Add to case',
+        }),
+        content: getContent(
+          closePopoverOnAction.bind(
+            null,
+            openCasesModal.bind(null, getEmbeddableInput(timeRangeToPlot))
+          )
+        ),
+      });
+    }
+
+    return menuPanels;
   }, [
+    getEmbeddableInput,
     canEditDashboards,
-    globalTimeRange,
+    casesPrivileges,
+    maxSeriesToPlot,
+    isMaxSeriesToPlotValid,
     closePopoverOnAction,
-    selectedJobs,
-    selectedCells,
-    queryString,
+    openCasesModal,
     timeRangeToPlot,
   ]);
 
-  const jobIds = selectedJobs.map(({ id }) => id);
-
   return (
     <>
-      {menuItems.length > 0 && chartsCount > 0 ? (
+      {!!panels[0]?.items?.length && chartsCount > 0 ? (
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
@@ -194,21 +337,21 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverLabel', {
-                defaultMessage: 'Anomaly charts',
-              })}
-            </EuiPopoverTitle>
-            <EuiContextMenuPanel items={menuItems} />
+            <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
           </EuiPopover>
         </EuiFlexItem>
       ) : null}
       {isAddDashboardsActive && selectedJobs ? (
-        <AddAnomalyChartsToDashboardControl
-          onClose={async () => {
-            setIsAddDashboardActive(false);
+        <SavedObjectSaveModalDashboard
+          canSaveByReference={false}
+          objectType={i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
+            defaultMessage: 'Anomaly charts',
+          })}
+          documentInfo={{
+            title: getDefaultExplorerChartsPanelTitle(selectedJobs.map(({ id }) => id)),
           }}
-          jobIds={jobIds}
+          onClose={setIsAddDashboardActive.bind(null, false)}
+          onSave={onSaveCallback}
         />
       ) : null}
     </>

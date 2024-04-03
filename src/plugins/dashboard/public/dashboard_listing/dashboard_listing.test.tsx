@@ -12,7 +12,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { pluginServices } from '../services/plugin_services';
-import { DashboardListing, DashboardListingProps } from './dashboard_listing';
+import { DashboardListing } from './dashboard_listing';
 
 /**
  * Mock Table List view. This dashboard component is a wrapper around the shared UX table List view. We
@@ -20,6 +20,7 @@ import { DashboardListing, DashboardListingProps } from './dashboard_listing';
  * in our tests because it is covered in its package.
  */
 import { TableListView } from '@kbn/content-management-table-list-view';
+import { DashboardListingProps } from './types';
 // import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view';
 jest.mock('@kbn/content-management-table-list-view-table', () => {
   const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');

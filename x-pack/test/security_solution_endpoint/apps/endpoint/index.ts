@@ -6,20 +6,21 @@
  */
 
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  isRegistryEnabled,
   getRegistryUrlFromTestEnv,
+  isRegistryEnabled,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
-  const { loadTestFile, getService } = providerContext;
+  const { loadTestFile, getService, getPageObjects } = providerContext;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/72874
-  describe.skip('endpoint', function () {
+  describe('endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');
+    const kbnClient = getService('kibanaServer');
 
     if (!isRegistryEnabled()) {
       log.warning('These tests are being run with an external package registry');
@@ -34,11 +35,16 @@ export default function (providerContext: FtrProviderContext) {
 
       log.info('installing/upgrading Endpoint fleet package');
       await endpointTestResources.installOrUpgradeEndpointFleetPackage();
+
+      if (await isServerlessKibanaFlavor(kbnClient)) {
+        log.info('login for serverless environment');
+        const pageObjects = getPageObjects(['svlCommonPage']);
+        await pageObjects.svlCommonPage.login();
+      }
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./endpoint_permissions'));
-    loadTestFile(require.resolve('./responder'));
     loadTestFile(require.resolve('./endpoint_solution_integrations'));
   });
 }

@@ -49,7 +49,7 @@ export default function ({
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
 
@@ -90,7 +90,8 @@ export default function ({
       });
     });
 
-    describe('non-default URL params', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/168648
+    describe.skip('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = [currentUrl].concat(urlParamExtensions).join('&');

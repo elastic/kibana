@@ -6,11 +6,14 @@
  */
 
 export const API_AUTH = {
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 };
 
-export const API_HEADERS = { 'kbn-xsrf': 'cypress' };
+export const API_HEADERS = {
+  'kbn-xsrf': 'cypress',
+  'x-elastic-internal-origin': 'security-solution',
+};
 
 export const request = <T = unknown>(
   options: Partial<Cypress.RequestOptions>

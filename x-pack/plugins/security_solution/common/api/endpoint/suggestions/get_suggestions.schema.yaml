@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Get Suggestions Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/suggestions/{suggestion_type}:
+    post:
+      summary: Get suggestions
+      operationId: GetEndpointSuggestions
+      x-codegen-enabled: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - parameters
+              properties:
+                field:
+                  type: string
+                query:
+                  type: string
+                filters: {}
+                fieldMeta: {}
+      parameters:
+        - name: suggestion_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - eventFilters
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

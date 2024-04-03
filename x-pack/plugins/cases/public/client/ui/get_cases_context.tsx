@@ -31,25 +31,23 @@ const CasesProviderLazyWrapper = ({
   children,
   releasePhase,
   getFilesClient,
-}: GetCasesContextPropsInternal & { children: ReactNode }) => {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <CasesProviderLazy
-        value={{
-          externalReferenceAttachmentTypeRegistry,
-          persistableStateAttachmentTypeRegistry,
-          owner,
-          permissions,
-          features,
-          releasePhase,
-          getFilesClient,
-        }}
-      >
-        {children}
-      </CasesProviderLazy>
-    </Suspense>
-  );
-};
+}: GetCasesContextPropsInternal & { children: ReactNode }) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <CasesProviderLazy
+      value={{
+        externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
+        owner,
+        permissions,
+        features,
+        releasePhase,
+        getFilesClient,
+      }}
+    >
+      {children}
+    </CasesProviderLazy>
+  </Suspense>
+);
 
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 

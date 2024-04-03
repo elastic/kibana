@@ -18,8 +18,8 @@ import {
   typeRegistryInstanceMock,
   applyTypeDefaultsMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
+import { skip } from 'rxjs';
 import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -547,6 +547,24 @@ describe('SavedObjectsService', () => {
 
       await setImmediate();
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not start the migration if esNodesCompatibility$ is closed before calling `start`', async () => {
+      expect.assertions(2);
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      const setupDeps = createSetupDeps();
+      // Create an new subject so that we can control when isCompatible=true
+      // is emitted.
+      setupDeps.elasticsearch.esNodesCompatibility$ = EMPTY;
+      await soService.setup(setupDeps);
+      await expect(() =>
+        soService.start(createStartDeps())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"esNodesCompatibility$ was closed before emitting"`
+      );
+
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {

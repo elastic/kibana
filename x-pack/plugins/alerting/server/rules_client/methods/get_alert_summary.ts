@@ -13,6 +13,7 @@ import { parseDuration } from '../../../common/parse_duration';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
 import { get } from './get';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetAlertSummaryParams {
   id: string;
@@ -48,7 +49,7 @@ export async function getAlertSummary(
   try {
     const [queryResults, executionResults] = await Promise.all([
       eventLogClient.findEventsBySavedObjectIds(
-        'alert',
+        RULE_SAVED_OBJECT_TYPE,
         [id],
         {
           page: 1,
@@ -62,7 +63,7 @@ export async function getAlertSummary(
         rule.legacyId !== null ? [rule.legacyId] : undefined
       ),
       eventLogClient.findEventsBySavedObjectIds(
-        'alert',
+        RULE_SAVED_OBJECT_TYPE,
         [id],
         {
           page: 1,

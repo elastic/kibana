@@ -8,17 +8,19 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { pairwise, startWith } from 'rxjs/operators';
+import { pairwise, startWith } from 'rxjs';
 
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { AppWrapper } from './app_containers';
 
 export interface StartDeps {
+  analytics: AnalyticsServiceStart;
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
@@ -36,7 +38,7 @@ export interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, theme, i18n, targetDomElement }: StartDeps) {
+  start({ analytics, application, chrome, overlays, theme, i18n, targetDomElement }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -51,7 +53,12 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
+      <KibanaRootContextProvider
+        analytics={analytics}
+        i18n={i18n}
+        theme={theme}
+        globalStyles={true}
+      >
         <>
           {/* Fixed headers */}
           {chromeHeader}
@@ -68,7 +75,7 @@ export class RenderingService {
             {appComponent}
           </AppWrapper>
         </>
-      </CoreContextProvider>,
+      </KibanaRootContextProvider>,
       targetDomElement
     );
   }

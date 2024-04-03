@@ -8,13 +8,15 @@
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
-import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
 import { getMockSearchConfig } from '../../../../config.mock';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 
 const mockAsyncResponse = {
   body: {
@@ -64,6 +66,7 @@ describe('ES search strategy', () => {
       },
     },
     searchSessionsClient: createSearchSessionsClientMock(),
+    rollupsEnabled: true,
   } as unknown as SearchStrategyDependencies;
   const mockLegacyConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
@@ -132,6 +135,30 @@ describe('ES search strategy', () => {
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '60000ms');
+      });
+
+      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = {
+          index: 'logstash-*',
+          body: { query: {} },
+          wait_for_completion_timeout: '10s',
+          keep_alive: '5m',
+        };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+
+        expect(mockGetCaller).toBeCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        expect(request.id).toEqual('foo');
+        expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
+        expect(request).toHaveProperty('keep_alive', '5m');
       });
 
       it('sets transport options on POST requests', async () => {
@@ -220,7 +247,7 @@ describe('ES search strategy', () => {
         await esSearch
           .search(
             {
-              indexType: 'rollup',
+              indexType: DataViewType.ROLLUP,
               params,
             },
             {},
@@ -232,6 +259,63 @@ describe('ES search strategy', () => {
         const { method, path } = mockApiCaller.mock.calls[0][0];
         expect(method).toBe('POST');
         expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+      });
+
+      it("doesn't call the rollup API if the index is a rollup type BUT rollups are disabled", async () => {
+        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'foo-程', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch
+          .search(
+            {
+              indexType: DataViewType.ROLLUP,
+              params,
+            },
+            {},
+            { ...mockDeps, rollupsEnabled: false }
+          )
+          .toPromise();
+
+        expect(mockApiCaller).toBeCalledTimes(0);
+      });
+
+      it('should delete when aborted', async () => {
+        mockSubmitCaller.mockResolvedValueOnce({
+          ...mockAsyncResponse,
+          body: {
+            ...mockAsyncResponse.body,
+            is_running: true,
+          },
+        });
+
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+
+        // Abort after an incomplete first response is returned
+        setTimeout(() => abortController.abort(), 100);
+
+        let err: KbnServerError | undefined;
+        try {
+          await esSearch.search({ params }, { abortSignal }, mockDeps).toPromise();
+        } catch (e) {
+          err = e;
+        }
+        expect(mockSubmitCaller).toBeCalled();
+        expect(err).not.toBeUndefined();
+        expect(mockDeleteCaller).toBeCalled();
       });
     });
 
@@ -340,6 +424,44 @@ describe('ES search strategy', () => {
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).not.toHaveProperty('keep_alive');
       });
+
+      it('should not delete a saved session when aborted', async () => {
+        mockSubmitCaller.mockResolvedValueOnce({
+          ...mockAsyncResponse,
+          body: {
+            ...mockAsyncResponse.body,
+            is_running: true,
+          },
+        });
+
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+
+        // Abort after an incomplete first response is returned
+        setTimeout(() => abortController.abort(), 100);
+
+        let err: KbnServerError | undefined;
+        try {
+          await esSearch
+            .search(
+              { params },
+              { abortSignal, sessionId: '1', isSearchStored: true, isStored: true },
+              mockDeps
+            )
+            .toPromise();
+        } catch (e) {
+          err = e;
+        }
+        expect(mockSubmitCaller).toBeCalled();
+        expect(err).not.toBeUndefined();
+        expect(mockDeleteCaller).not.toBeCalled();
+      });
     });
 
     it('throws normalized error if ResponseError is thrown', async () => {
@@ -360,17 +482,17 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSubmitCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(indexNotFoundException);
+      expect(err?.errBody).toEqual(indexNotFoundException);
     });
 
     it('throws normalized error if Error is thrown', async () => {
@@ -385,14 +507,14 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSubmitCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(undefined);
@@ -445,7 +567,7 @@ describe('ES search strategy', () => {
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(xContentParseException);
+      expect(err?.errBody).toEqual(xContentParseException);
     });
   });
 

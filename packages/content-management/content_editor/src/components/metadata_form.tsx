@@ -9,7 +9,14 @@
 import React from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiTextArea,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
 import type { MetadataFormState, Field } from './use_metadata_form';
@@ -20,6 +27,7 @@ interface Props {
     isSubmitted: boolean;
   };
   isReadonly: boolean;
+  readonlyReason: string;
   tagsReferences: SavedObjectsReference[];
   TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
@@ -33,6 +41,7 @@ export const MetadataForm: FC<Props> = ({
   TagList,
   TagSelector,
   isReadonly,
+  readonlyReason,
 }) => {
   const {
     title,
@@ -59,16 +68,22 @@ export const MetadataForm: FC<Props> = ({
         isInvalid={!isFormFieldValid(title)}
         fullWidth
       >
-        <EuiFieldText
-          isInvalid={!isFormFieldValid(title)}
-          value={title.value}
-          onChange={(e) => {
-            setTitle(e.target.value);
-          }}
-          fullWidth
-          data-test-subj="nameInput"
-          readOnly={isReadonly}
-        />
+        <EuiToolTip
+          position="top"
+          content={isReadonly ? readonlyReason : undefined}
+          display="block"
+        >
+          <EuiFieldText
+            isInvalid={!isFormFieldValid(title)}
+            value={title.value}
+            onChange={(e) => {
+              setTitle(e.target.value);
+            }}
+            fullWidth
+            data-test-subj="nameInput"
+            readOnly={isReadonly}
+          />
+        </EuiToolTip>
       </EuiFormRow>
 
       <EuiSpacer />
@@ -84,19 +99,25 @@ export const MetadataForm: FC<Props> = ({
         isInvalid={!isFormFieldValid(description)}
         fullWidth
       >
-        <EuiTextArea
-          isInvalid={!isFormFieldValid(description)}
-          value={description.value}
-          onChange={(e) => {
-            setDescription(e.target.value);
-          }}
-          fullWidth
-          data-test-subj="descriptionInput"
-          readOnly={isReadonly}
-        />
+        <EuiToolTip
+          position="top"
+          content={isReadonly ? readonlyReason : undefined}
+          display="block"
+        >
+          <EuiTextArea
+            isInvalid={!isFormFieldValid(description)}
+            value={description.value}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
+            fullWidth
+            data-test-subj="descriptionInput"
+            readOnly={isReadonly}
+          />
+        </EuiToolTip>
       </EuiFormRow>
 
-      {TagList && isReadonly && (
+      {TagList && isReadonly && tagsReferences.length > 0 && (
         <>
           <EuiSpacer />
           <EuiFormRow

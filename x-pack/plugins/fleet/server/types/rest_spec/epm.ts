@@ -37,7 +37,7 @@ export const GetInstalledPackagesRequestSchema = {
     ),
     nameQuery: schema.maybe(schema.string()),
     searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-    perPage: schema.number({ defaultValue: 30 }),
+    perPage: schema.number({ defaultValue: 15 }),
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
     }),
@@ -138,6 +138,8 @@ export const InstallPackageFromRegistryRequestSchema = {
   }),
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
+    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
   }),
   body: schema.nullable(
     schema.object({
@@ -166,6 +168,8 @@ export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   }),
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
+    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
   }),
   body: schema.nullable(
     schema.object({
@@ -182,7 +186,11 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
     packages: schema.arrayOf(
       schema.oneOf([
         schema.string(),
-        schema.object({ name: schema.string(), version: schema.string() }),
+        schema.object({
+          name: schema.string(),
+          version: schema.string(),
+          prerelease: schema.maybe(schema.boolean()),
+        }),
       ]),
       { minSize: 1 }
     ),
@@ -191,7 +199,30 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
 };
 
 export const InstallPackageByUploadRequestSchema = {
+  query: schema.object({
+    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
+    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+  }),
   body: schema.buffer(),
+};
+
+export const CreateCustomIntegrationRequestSchema = {
+  body: schema.object({
+    integrationName: schema.string(),
+    datasets: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        type: schema.oneOf([
+          schema.literal('logs'),
+          schema.literal('metrics'),
+          schema.literal('traces'),
+          schema.literal('synthetics'),
+          schema.literal('profiling'),
+        ]),
+      })
+    ),
+    force: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const DeletePackageRequestSchema = {
@@ -199,6 +230,10 @@ export const DeletePackageRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
+  // body is deprecated on delete request
   body: schema.nullable(
     schema.object({
       force: schema.boolean(),
@@ -215,4 +250,17 @@ export const DeletePackageRequestSchemaDeprecated = {
       force: schema.boolean(),
     })
   ),
+};
+
+export const GetInputsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')], {
+      defaultValue: 'json',
+    }),
+    prerelease: schema.maybe(schema.boolean()),
+  }),
 };

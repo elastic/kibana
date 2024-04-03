@@ -7,12 +7,12 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { SecuritySolutionEssPlugin } from './plugin';
 export { config } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
-export function plugin(_initializerContext: PluginInitializerContext) {
+export async function plugin(_initializerContext: PluginInitializerContext) {
+  const { SecuritySolutionEssPlugin } = await import('./plugin');
   return new SecuritySolutionEssPlugin();
 }
 

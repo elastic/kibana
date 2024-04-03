@@ -1,5 +1,9 @@
 [[rule-action-variables]]
 == Rule action variables
+:frontmatter-description: A summary of common variables for use in {kib} alerting rule actions.
+:frontmatter-tags-products: [alerting] 
+:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-user-goals: [configure]
 
 Alerting rules can use the https://mustache.github.io/mustache.5.html[Mustache] template syntax
 (`{{variable name}}`) to pass values when the actions run.
@@ -30,10 +34,12 @@ All rule types pass the following variables:
 
 `date`:: The date the rule scheduled the action, in ISO format.
 `kibanaBaseUrl`:: The configured <<server-publicBaseUrl,`server.publicBaseUrl`>>. If not configured, this will be empty.
-`rule.id`:: The ID of the rule.
-`rule.name`:: The name of the rule.
-`rule.spaceId`:: The ID of the space for the rule.
+`rule.id`:: The rule identifier.
+`rule.name`:: The rule name.
+`rule.params`:: The rule parameters, which vary by rule type.
+`rule.spaceId`:: The space identifier for the rule.
 `rule.tags`:: The list of tags applied to the rule.
+`rule.url`:: The URL for the rule that generated the alert. This will be an empty string if the `server.publicBaseUrl` setting is not configured.
 
 [float]
 [role="child_attributes"]
@@ -102,6 +108,7 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 `alert.actionGroup`:: The ID of the action group of the alert that scheduled the action.
 `alert.actionGroupName`:: The name of the action group of the alert that scheduled the action.
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
+`alert.consecutiveMatches`:: The number of consecutive runs that meet the rule conditions.
 `alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
 `alert.id`:: The ID of the alert that scheduled the action.
 `alert.uuid`:: A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs. preview:[]

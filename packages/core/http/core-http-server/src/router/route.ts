@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RouteValidatorFullConfig } from './route_validator';
+import type { RouteValidator } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -62,6 +62,11 @@ export interface RouteConfigOptionsBody {
    * * text/*
    */
   accepts?: RouteContentType | RouteContentType[] | string | string[];
+
+  /**
+   * A mime type string overriding the 'Content-Type' header value received.
+   */
+  override?: string;
 
   /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
@@ -126,9 +131,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *           In the future, may require an incomming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
-   * If not declared, infers access from route path:
-   * - access =`internal` for '/internal' route path prefix
-   * - access = `public` for everything else
+   * Defaults to 'internal' If not declared,
    */
   access?: 'public' | 'internal';
 
@@ -156,6 +159,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      */
     idleSocket?: number;
   };
+
+  /** Human-friendly description of this endpoint */
+  description?: string;
 }
 
 /**
@@ -234,7 +240,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidatorFullConfig<P, Q, B> | false;
+  validate: RouteValidator<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

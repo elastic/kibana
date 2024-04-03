@@ -7,13 +7,7 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { CursorType, Inspect, Maybe, PageInfoPaginated } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
-import type {
-  GeoItem,
-  FlowTargetSourceDest,
-  NetworkTopTablesFields,
-  TopNetworkTablesEcsField,
-} from '../common';
+import type { GeoItem, TopNetworkTablesEcsField } from '../common';
 
 export interface TopCountriesItemSource {
   country?: Maybe<string>;
@@ -21,12 +15,6 @@ export interface TopCountriesItemSource {
   flows?: Maybe<number>;
   location?: Maybe<GeoItem>;
   source_ips?: Maybe<number>;
-}
-
-export interface NetworkTopCountriesRequestOptions
-  extends RequestOptionsPaginated<NetworkTopTablesFields> {
-  flowTarget: FlowTargetSourceDest;
-  ip?: string;
 }
 
 export interface NetworkTopCountriesStrategyResponse extends IEsSearchResponse {

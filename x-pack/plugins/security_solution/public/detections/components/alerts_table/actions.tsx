@@ -33,6 +33,7 @@ import {
 import { lastValueFrom } from 'rxjs';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
@@ -41,9 +42,9 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import type { TimelineResult } from '../../../../common/types/timeline/api';
+import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -54,11 +55,10 @@ import type {
 } from './types';
 import type {
   TimelineEventsDetailsItem,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import {
   omitTypenameInTimeline,
   formatTimelineResultToModel,
@@ -451,6 +451,7 @@ const createThresholdTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -608,6 +609,7 @@ const createNewTermsTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -773,6 +775,7 @@ const createSuppressedTimeline = async (
     const alertResponse = await KibanaServices.get().http.fetch<
       estypes.SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
     >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(buildAlertsQuery([ecsData._id])),
     });
@@ -877,7 +880,7 @@ const createSuppressedTimeline = async (
   }
 };
 
-export const sendBulkEventsToTimelineAction = (
+export const sendBulkEventsToTimelineAction = async (
   createTimeline: CreateTimeline,
   ecs: Ecs[],
   prefer: 'dataProvider' | 'KqlFilter' = 'dataProvider',
@@ -893,7 +896,7 @@ export const sendBulkEventsToTimelineAction = (
     label || `${ecs.length} event IDs`
   );
 
-  createTimeline({
+  await createTimeline({
     from,
     notes: null,
     timeline: {
@@ -947,7 +950,6 @@ export const sendAlertToTimelineAction = async ({
       : ruleTimelineId
     : '';
   const { to, from } = determineToAndFrom({ ecs });
-
   // For now we do not want to populate the template timeline if we have alertIds
   if (!isEmpty(timelineId)) {
     try {
@@ -956,7 +958,7 @@ export const sendAlertToTimelineAction = async ({
         getTimelineTemplate(timelineId),
         lastValueFrom(
           searchStrategyClient.search<
-            TimelineEventsDetailsRequestOptions,
+            TimelineEventsDetailsRequestOptionsInput,
             TimelineEventsDetailsStrategyResponse
           >(
             {
@@ -971,6 +973,7 @@ export const sendAlertToTimelineAction = async ({
           )
         ),
       ]);
+
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {

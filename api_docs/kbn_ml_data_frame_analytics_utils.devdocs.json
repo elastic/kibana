@@ -758,7 +758,7 @@
               "\nInner data of the node element"
             ],
             "signature": [
-              "{ id: string; label: string; type: string; analysisType?: string | undefined; }"
+              "{ id: string; label: string; type: string; analysisType?: string | undefined; isRoot?: boolean | undefined; }"
             ],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
@@ -1416,10 +1416,10 @@
               "\nOptional error"
             ],
             "signature": [
-              "Boom",
-              "<any> | ",
               "ErrorResponseBase",
-              " | undefined"
+              " | ",
+              "Boom",
+              "<any> | undefined"
             ],
             "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
             "deprecated": false,
@@ -2215,7 +2215,7 @@
           "\nUnion type of DFA anlaysis config types"
         ],
         "signature": [
-          "\"classification\" | \"outlier_detection\" | \"regression\""
+          "\"outlier_detection\" | \"regression\" | \"classification\""
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/types.ts",
         "deprecated": false,
@@ -2417,7 +2417,7 @@
           "\nUnion type of JOB_MAP_NODE_TYPES"
         ],
         "signature": [
-          "\"index\" | \"transform\" | \"analytics\" | \"trainedModel\""
+          "\"index\" | \"transform\" | \"analytics\" | \"analytics-job-missing\" | \"trainedModel\" | \"ingestPipeline\""
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,
@@ -2742,7 +2742,7 @@
           "\nCustom enum for job map node types for the DFA map view"
         ],
         "signature": [
-          "{ readonly ANALYTICS: \"analytics\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; }"
+          "{ readonly ANALYTICS: \"analytics\"; readonly ANALYTICS_JOB_MISSING: \"analytics-job-missing\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; readonly INGEST_PIPELINE: \"ingestPipeline\"; }"
         ],
         "path": "x-pack/packages/ml/data_frame_analytics_utils/src/constants.ts",
         "deprecated": false,

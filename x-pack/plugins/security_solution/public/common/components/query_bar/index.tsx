@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import { cloneDeep } from 'lodash';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '../../lib/kibana';
+import { convertToQueryType } from './convert_to_query_type';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -36,6 +39,9 @@ export interface QueryBarComponentProps {
   isDisabled?: boolean;
 }
 
+export const isDataView = (obj: unknown): obj is DataView =>
+  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
+
 export const QueryBar = memo<QueryBarComponentProps>(
   ({
     dateRangeFrom,
@@ -56,19 +62,24 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
   }) => {
+    const { data } = useKibana().services;
+    const [dataView, setDataView] = useState<DataView>();
     const onQuerySubmit = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
+      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
-          onSubmitQuery(payload.query);
+          const payloadQuery = convertToQueryType(payload.query);
+
+          onSubmitQuery(payloadQuery);
         }
       },
       [filterQuery, onSubmitQuery]
     );
 
     const onQueryChange = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
+      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (onChangedQuery && payload.query != null && !deepEqual(payload.query, filterQuery)) {
-          onChangedQuery(payload.query);
+          const payloadQuery = convertToQueryType(payload.query);
+          onChangedQuery(payloadQuery);
         }
       },
       [filterQuery, onChangedQuery]
@@ -102,19 +113,58 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
+    const isEsql = filterQuery?.language === 'esql';
+    const query = useMemo(() => {
+      if (isEsql && typeof filterQuery.query === 'string') {
+        return { esql: filterQuery.query };
+      }
+      return filterQuery;
+    }, [filterQuery, isEsql]);
 
+    useEffect(() => {
+      let dv: DataView;
+      if (isDataView(indexPattern)) {
+        setDataView(indexPattern);
+      } else if (!isEsql) {
+        const createDataView = async () => {
+          dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
+          setDataView(dv);
+        };
+        createDataView();
+      }
+      return () => {
+        if (dv?.id) {
+          data.dataViews.clearInstanceCache(dv?.id);
+        }
+      };
+    }, [data.dataViews, indexPattern, isEsql]);
+
+    const searchBarFilters = useMemo(() => {
+      if (isDataView(indexPattern) || isEsql) {
+        return filters;
+      }
+
+      /**
+       * We update filters and set new data view id to make sure that SearchBar does not show data view picker
+       * More details in https://github.com/elastic/kibana/issues/174026
+       */
+      const updatedFilters = cloneDeep(filters);
+      updatedFilters.forEach((filter) => (filter.meta.index = indexPattern.title));
+      return updatedFilters;
+    }, [filters, indexPattern, isEsql]);
+
+    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
+    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
     return (
       <SearchBar
         showSubmitButton={false}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
-        filters={filters}
-        indexPatterns={indexPatterns as DataView[]}
+        filters={searchBarFilters}
+        indexPatterns={arrDataView}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
-        query={filterQuery}
+        query={query}
         onClearSavedQuery={onClearSavedQuery}
         onFiltersUpdated={onFiltersUpdated}
         onQueryChange={onQueryChange}

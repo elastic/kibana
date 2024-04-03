@@ -10,6 +10,7 @@ export type { IHttpConfig, ISslConfig, ICorsConfig } from './src/types';
 export { createServer } from './src/create_server';
 export { defaultValidationErrorHandler } from './src/default_validation_error_handler';
 export { getListenerOptions } from './src/get_listener_options';
-export { getServerOptions } from './src/get_server_options';
+export { getServerOptions, getServerTLSOptions } from './src/get_server_options';
 export { getRequestId } from './src/get_request_id';
+export { setTlsConfig } from './src/set_tls_config';
 export { sslSchema, SslConfig } from './src/ssl';

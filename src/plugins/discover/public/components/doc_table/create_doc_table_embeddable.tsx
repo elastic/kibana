@@ -9,7 +9,6 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DocTableEmbeddable, DocTableEmbeddableProps } from './doc_table_embeddable';
-import { DocViewer } from '../../services/doc_views/components/doc_viewer';
 
 export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
   return (
@@ -18,6 +17,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         columns={renderProps.columns}
         rows={renderProps.rows}
         rowsPerPageState={renderProps.rowsPerPageState}
+        sampleSizeState={renderProps.sampleSizeState}
         onUpdateRowsPerPage={renderProps.onUpdateRowsPerPage}
         totalHitCount={renderProps.totalHitCount}
         dataView={renderProps.dataView}
@@ -33,8 +33,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         sharedItemTitle={renderProps.sharedItemTitle}
         isLoading={renderProps.isLoading}
         isPlainRecord={renderProps.isPlainRecord}
-        dataTestSubj="embeddedSavedSearchDocTable"
-        DocViewer={DocViewer}
+        interceptedWarnings={renderProps.interceptedWarnings}
       />
     </I18nProvider>
   );

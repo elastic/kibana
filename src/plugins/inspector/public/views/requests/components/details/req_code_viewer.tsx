@@ -12,15 +12,18 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useCallback } from 'react';
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { InspectorPluginStartDeps } from '../../../../plugin';
 
 interface RequestCodeViewerProps {
   indexPattern?: string;
+  requestParams?: ConnectionRequestParams;
   json: string;
 }
 
@@ -39,19 +42,37 @@ const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearc
 /**
  * @internal
  */
-export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps) => {
+export const RequestCodeViewer = ({
+  indexPattern,
+  requestParams,
+  json,
+}: RequestCodeViewerProps) => {
   const { services } = useKibana<InspectorPluginStartDeps>();
 
   const navigateToUrl = services.application?.navigateToUrl;
 
-  const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
+  function getValue() {
+    if (!requestParams) {
+      return json;
+    }
+
+    const fullPath = requestParams.querystring
+      ? `${requestParams.path}?${requestParams.querystring}`
+      : requestParams.path;
+
+    return `${requestParams.method} ${fullPath}\n${json}`;
+  }
+
+  const value = getValue();
+
+  const devToolsDataUri = compressToEncodedURIComponent(value);
   const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
     ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const canShowDevTools =
     services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
-  const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
+  const shouldShowDevToolsLink = !!(requestParams && canShowDevTools);
   const handleDevToolsLinkClick = useCallback(
     () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
     [consoleHref, navigateToUrl]
@@ -135,7 +156,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
       <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
         <CodeEditor
           languageId={XJsonLang.ID}
-          value={json}
+          value={value}
           options={{
             readOnly: true,
             lineNumbers: 'off',

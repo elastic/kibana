@@ -9,7 +9,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
-import { EuiPage } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
 import { Sidebar } from './sidebar';
 import { routes } from '../../routes';
@@ -26,13 +26,15 @@ export const App: React.FC = () => {
 
   return (
     <Router basename={appBasePath}>
-      <EuiPage>
-        <Sidebar />
+      <EuiPageTemplate restrictWidth={true} offset={0}>
+        <EuiPageTemplate.Sidebar sticky={true}>
+          <Sidebar />
+        </EuiPageTemplate.Sidebar>
         <Routes>
           {routeElements}
           <Redirect to="/simple-string-stream" />
         </Routes>
-      </EuiPage>
+      </EuiPageTemplate>
     </Router>
   );
 };

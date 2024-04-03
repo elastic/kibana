@@ -17,6 +17,7 @@ import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -29,29 +30,37 @@ export const OptionsListPopoverSuggestions = ({
 }: OptionsListPopoverSuggestionsProps) => {
   const optionsList = useOptionsList();
 
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
   const searchString = optionsList.select((state) => state.componentState.searchString);
   const availableOptions = optionsList.select((state) => state.componentState.availableOptions);
   const totalCardinality = optionsList.select((state) => state.componentState.totalCardinality);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
 
   const sort = optionsList.select((state) => state.explicitInput.sort);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const hideExists = optionsList.select((state) => state.explicitInput.hideExists);
   const singleSelect = optionsList.select((state) => state.explicitInput.singleSelect);
   const existsSelected = optionsList.select((state) => state.explicitInput.existsSelected);
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
   const isLoading = optionsList.select((state) => state.output.loading) ?? false;
 
   const listRef = useRef<HTMLDivElement>(null);
 
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
+
   const canLoadMoreSuggestions = useMemo(
     () =>
-      totalCardinality
+      allowExpensiveQueries && searchString.valid && totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality]
+    [availableOptions, totalCardinality, searchString, showOnlySelected, allowExpensiveQueries]
   );
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
@@ -80,13 +89,14 @@ export const OptionsListPopoverSuggestions = ({
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
     const options: EuiSelectableOption[] = (suggestions ?? []).map((suggestion) => {
-      if (typeof suggestion === 'string') {
+      if (typeof suggestion !== 'object') {
         // this means that `showOnlySelected` is true, and doc count is not known when this is the case
         suggestion = { value: suggestion };
       }
+
       return {
         key: suggestion.value,
-        label: suggestion.value,
+        label: fieldFormatter(suggestion.value) ?? suggestion.value,
         checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
@@ -124,6 +134,7 @@ export const OptionsListPopoverSuggestions = ({
     invalidSelectionsSet,
     existsSelectableOption,
     canLoadMoreSuggestions,
+    fieldFormatter,
   ]);
 
   const loadMoreOptions = useCallback(() => {
@@ -137,6 +148,19 @@ export const OptionsListPopoverSuggestions = ({
       loadMoreSuggestions(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
     }
   }, [loadMoreSuggestions, totalCardinality]);
+
+  const renderOption = useCallback(
+    (option, searchStringValue) => {
+      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+
+      return (
+        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
+          {option.label}
+        </EuiHighlight>
+      );
+    },
+    [searchTechnique, allowExpensiveQueries]
+  );
 
   useEffect(() => {
     const container = listRef.current;
@@ -159,13 +183,7 @@ export const OptionsListPopoverSuggestions = ({
       <div ref={listRef}>
         <EuiSelectable
           options={selectableOptions}
-          renderOption={(option) => {
-            return (
-              <EuiHighlight search={option.key === 'exists-option' ? '' : searchString.value}>
-                {option.label}
-              </EuiHighlight>
-            );
-          }}
+          renderOption={(option) => renderOption(option, searchString.value)}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
             fieldName,

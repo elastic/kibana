@@ -9,10 +9,11 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { ExceptionsListPreDeleteItemServerExtension } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
-  TrustedAppValidator,
-  HostIsolationExceptionsValidator,
-  EventFilterValidator,
   BlocklistValidator,
+  EndpointExceptionsValidator,
+  EventFilterValidator,
+  HostIsolationExceptionsValidator,
+  TrustedAppValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreDeleteItemServerExtension['callback'];
@@ -61,6 +62,15 @@ export const getExceptionsPreDeleteItemHandler = (
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem();
+      return data;
+    }
+
+    // Validate Endpoint Exceptions
+    if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      await new EndpointExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreDeleteItem();
       return data;
     }
 

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionShapePlugin } from './plugin';
-
 export type { ExpressionShapePluginSetup, ExpressionShapePluginStart } from './plugin';
 
-export function plugin() {
+export async function plugin() {
+  const { ExpressionShapePlugin } = await import('./plugin');
   return new ExpressionShapePlugin();
 }

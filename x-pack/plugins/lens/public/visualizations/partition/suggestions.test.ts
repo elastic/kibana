@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';
 import type { PieLayerState, PieVisualizationState } from '../../../common/types';
@@ -594,7 +594,6 @@ describe('suggestions', () => {
     });
 
     it('should keep passed in palette', () => {
-      const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
       const results = suggestions({
         table: {
           layerId: 'first',
@@ -617,10 +616,13 @@ describe('suggestions', () => {
         },
         state: undefined,
         keptLayerIds: ['first'],
-        mainPalette,
+        mainPalette: {
+          type: 'legacyPalette',
+          value: { type: 'palette', name: 'mock' },
+        },
       });
 
-      expect(results[0].state.palette).toEqual(mainPalette);
+      expect(results[0].state.palette).toEqual({ type: 'palette', name: 'mock' });
     });
 
     it('should keep the layer settings and palette when switching from treemap', () => {
@@ -681,6 +683,7 @@ describe('suggestions', () => {
                 legendMaxLines: 1,
                 truncateLegend: true,
                 nestedLegend: true,
+                colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
               },
             ],
           },
@@ -1060,6 +1063,7 @@ describe('suggestions', () => {
                 Object {
                   "allowMultipleMetrics": false,
                   "categoryDisplay": "default",
+                  "colorMapping": undefined,
                   "layerId": "first",
                   "layerType": "data",
                   "legendDisplay": "show",
@@ -1169,6 +1173,7 @@ describe('suggestions', () => {
               "layers": Array [
                 Object {
                   "categoryDisplay": "default",
+                  "colorMapping": undefined,
                   "layerId": "first",
                   "layerType": "data",
                   "legendDisplay": "show",

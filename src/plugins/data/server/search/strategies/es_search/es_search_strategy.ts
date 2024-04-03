@@ -7,9 +7,9 @@
  */
 
 import { firstValueFrom, from, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
@@ -25,14 +25,14 @@ export const esSearchStrategyProvider = (
    * @param request
    * @param options
    * @param deps
-   * @throws `KbnServerError`
+   * @throws `KbnSearchError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, transport, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
-      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
+      throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
     const isPit = request.params?.body?.pit != null;
@@ -50,14 +50,15 @@ export const esSearchStrategyProvider = (
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
         };
-        const body = await esClient.asCurrentUser.search(params, {
+        const { body, meta } = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
           ...transport,
+          meta: true,
         });
         const response = shimHitsTotal(body, options);
-        return toKibanaSearchResponse(response);
+        return toKibanaSearchResponse(response, meta?.request?.params);
       } catch (e) {
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       }
     };
 

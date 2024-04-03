@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -19,6 +18,7 @@ import {
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../../types';
@@ -29,6 +29,7 @@ import {
   getSafeName,
   getFilter,
   getExistsFilter,
+  comparePreviousColumnFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
@@ -136,7 +137,7 @@ function setDefaultShowArrayValues(
 }
 
 export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'last_value';
+  operationType: typeof LAST_VALUE_ID;
   params: {
     sortField: string;
     showArrayValues: boolean;
@@ -161,11 +162,9 @@ export const lastValueOperation: OperationDefinition<
   Partial<LastValueIndexPatternColumn['params']>,
   true
 > = {
-  type: 'last_value',
-  displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
-    defaultMessage: 'Last value',
-  }),
-  getDefaultLabel: (column, indexPattern) =>
+  type: LAST_VALUE_ID,
+  displayName: LAST_VALUE_NAME,
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.timeShift,
@@ -188,7 +187,7 @@ export const lastValueOperation: OperationDefinition<
       params: newParams,
       scale: getScale(field.type),
       filter:
-        oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
+        oldColumn.filter && comparePreviousColumnFilter(oldColumn.filter, oldColumn.sourceField)
           ? getExistsFilter(field.name)
           : oldColumn.filter,
     };
@@ -250,7 +249,7 @@ export const lastValueOperation: OperationDefinition<
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: field.type as DataType,
-      operationType: 'last_value',
+      operationType: LAST_VALUE_ID,
       isBucketed: false,
       scale: getScale(field.type),
       sourceField: field.name,
@@ -449,22 +448,6 @@ export const lastValueOperation: OperationDefinition<
         </FormRow>
       </>
     );
-  },
-  documentation: {
-    section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.lastValue.signature', {
-      defaultMessage: 'field: string',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.lastValue.documentation.markdown', {
-      defaultMessage: `
-Returns the value of a field from the last document, ordered by the default time field of the data view.
-
-This function is usefull the retrieve the latest state of an entity.
-
-Example: Get the current status of server A:
-\`last_value(server.status, kql=\'server.name="A"\')\`
-      `,
-    }),
   },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.lastValue.documentation.quick',

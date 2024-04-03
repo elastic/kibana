@@ -8,48 +8,79 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { PreviewSection } from './preview_section';
-import { PREVIEW_SECTION_BACK_BUTTON, PREVIEW_SECTION_CLOSE_BUTTON } from './test_ids';
-import { ExpandableFlyoutContext } from '../context';
+import { PreviewBanner, PreviewSection } from './preview_section';
+import {
+  PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
+} from './test_ids';
+import { TestProvider } from '../test/provider';
+import { State } from '../state';
 
 describe('PreviewSection', () => {
-  const context: ExpandableFlyoutContext = {
-    panels: {
-      right: {},
-      left: {},
-      preview: [
-        {
-          id: 'key',
-        },
-      ],
-    },
-  } as unknown as ExpandableFlyoutContext;
+  const context = {
+    right: {},
+    left: {},
+    preview: [
+      {
+        id: 'key',
+      },
+    ],
+  } as unknown as State;
+
+  const component = <div>{'component'}</div>;
+  const left = 500;
 
   it('should render close button in header', () => {
-    const component = <div>{'component'}</div>;
-    const width = 500;
     const showBackButton = false;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
-        <PreviewSection component={component} width={width} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      <TestProvider state={context}>
+        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
+      </TestProvider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render back button in header', () => {
-    const component = <div>{'component'}</div>;
-    const width = 500;
     const showBackButton = true;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
-        <PreviewSection component={component} width={width} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      <TestProvider state={context}>
+        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
+      </TestProvider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render banner', () => {
+    const showBackButton = false;
+    const title = 'test';
+    const banner: PreviewBanner = {
+      title,
+      backgroundColor: 'primary',
+      textColor: 'red',
+    };
+
+    const { getByTestId, getByText } = render(
+      <TestProvider state={context}>
+        <PreviewSection
+          component={component}
+          leftPosition={left}
+          showBackButton={showBackButton}
+          banner={banner}
+        />
+      </TestProvider>
+    );
+
+    expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerPanel`)).toHaveClass(
+      `euiPanel--${banner.backgroundColor}`
+    );
+    expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerText`)).toHaveStyle(
+      `color: ${banner.textColor}`
+    );
+    expect(getByText(title)).toBeInTheDocument();
   });
 });

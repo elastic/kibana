@@ -12,9 +12,10 @@ import { EuiFlyout } from '@elastic/eui';
 
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import styled from 'styled-components';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
-import { timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
 import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
@@ -23,7 +24,6 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -35,6 +35,11 @@ interface DetailsPanelProps {
   scopeId: string;
   isReadOnly?: boolean;
 }
+
+// hack to to get around the fact that this flyout causes issue with timeline modal z-index
+const StyleEuiFlyout = styled(EuiFlyout)`
+  z-index: 1002;
+`;
 
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
@@ -53,7 +58,6 @@ export const DetailsPanel = React.memo(
     isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
-    const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
         return timelineSelectors.getTimelineByIdSelector();
@@ -89,7 +93,7 @@ export const DetailsPanel = React.memo(
       }
     }, [dispatch, scopeId]);
 
-    const activeTab = tabType ?? TimelineTabs.query;
+    const activeTab: TimelineTabs = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {
       if (handleOnPanelClosed) handleOnPanelClosed();
       else defaultOnPanelClose();
@@ -142,9 +146,6 @@ export const DetailsPanel = React.memo(
 
     if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
       flyoutUniqueKey = currentTabDetail.params.userName;
-      if (isNewUserDetailsFlyoutEnable) {
-        panelSize = 'm';
-      }
       visiblePanel = (
         <UserDetailsPanel
           contextID={contextID}
@@ -152,7 +153,6 @@ export const DetailsPanel = React.memo(
           handleOnClose={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
-          isNewUserDetailsFlyoutEnable={isNewUserDetailsFlyoutEnable}
           scopeId={scopeId}
         />
       );
@@ -172,7 +172,7 @@ export const DetailsPanel = React.memo(
     }
 
     return isFlyoutView ? (
-      <EuiFlyout
+      <StyleEuiFlyout
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
         onClose={closePanel}
@@ -180,7 +180,7 @@ export const DetailsPanel = React.memo(
         key={flyoutUniqueKey}
       >
         {visiblePanel}
-      </EuiFlyout>
+      </StyleEuiFlyout>
     ) : (
       visiblePanel
     );

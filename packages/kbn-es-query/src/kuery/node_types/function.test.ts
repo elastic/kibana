@@ -8,8 +8,16 @@
 
 import { nodeTypes } from '.';
 
-import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
-import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
+import {
+  buildNode,
+  buildNodeWithArgumentNodes,
+  toElasticsearchQuery,
+  toKqlExpression,
+} from './function';
+import {
+  KqlIsFunctionNode,
+  toElasticsearchQuery as isFunctionToElasticsearchQuery,
+} from '../functions/is';
 import { DataViewBase } from '../../es_query';
 import { fields } from '../../filters/stubs/fields.mocks';
 
@@ -53,11 +61,19 @@ describe('kuery node types', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should return the given function type's ES query representation", () => {
-        const node = buildNode('is', 'extension', 'jpg');
+        const node = buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
         const expected = isFunctionToElasticsearchQuery(node, indexPattern);
         const result = toElasticsearchQuery(node, indexPattern);
 
         expect(expected).toEqual(result);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test("should return the given function type's KQL representation", () => {
+        const node = buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
+        const result = toKqlExpression(node);
+        expect(result).toEqual('extension: jpg');
       });
     });
   });

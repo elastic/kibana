@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { generateAPIKeyName } from '@kbn/alerting-plugin/server/rules_client/common';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import {
   checkAAD,
   getEventLog,
@@ -128,7 +129,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -184,7 +185,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -248,7 +249,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: response.body.id,
         });
 
@@ -311,7 +312,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: response.body.id,
         });
 
@@ -347,7 +348,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -382,7 +383,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -397,7 +398,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .post(
             `${getUrlPrefix(
               SuperuserAtSpace1.space.id
-            )}/internal/alerting/rule/${ruleId}/_update_api_key`
+            )}/api/alerting/rule/${ruleId}/_update_api_key`
           )
           .set('kbn-xsrf', 'foo')
           .set('Authorization', `ApiKey ${apiKey}`);
@@ -407,7 +408,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -422,7 +423,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .post(
             `${getUrlPrefix(
               SuperuserAtSpace1.space.id
-            )}/internal/alerting/rule/${ruleId}/_update_api_key`
+            )}/api/alerting/rule/${ruleId}/_update_api_key`
           )
           .set('kbn-xsrf', 'foo');
         expect(response.status).to.eql(204);
@@ -431,7 +432,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -452,7 +453,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -472,7 +473,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -496,7 +497,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 
@@ -519,7 +520,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         await checkAAD({
           supertest,
           spaceId: SuperuserAtSpace1.space.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
         });
 

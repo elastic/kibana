@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 
 import { AggLabelForm } from './agg_label_form';
 
@@ -31,8 +31,8 @@ describe('Transform: <AggLabelForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<AggLabelForm {...props} />);
+    const { container } = render(<AggLabelForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toBe('the-group-by-agg-name');
   });
 });

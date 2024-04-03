@@ -12,7 +12,7 @@ import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 // Need to keep it separate to make it work Jest mocks in dimension_panel tests
 // import { QueryInput } from '../../../../shared_components/query_input';
-import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components/public';
+import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
 import { IndexPattern } from '../../../../../types';
@@ -53,7 +53,6 @@ export const FilterPopover = ({
   return (
     <EuiPopover
       data-test-subj="indexPattern-filters-existingFilterContainer"
-      anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpen}
       ownFocus

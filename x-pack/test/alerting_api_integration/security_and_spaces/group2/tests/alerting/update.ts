@@ -7,15 +7,18 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { RuleNotifyWhen, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core-saved-objects-api-server';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
   ensureDatetimeIsWithinRange,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -24,6 +27,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+  const es = getService('es');
 
   function getAlertingTaskById(taskId: string) {
     return supertest
@@ -89,11 +93,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -151,7 +151,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -199,7 +199,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'update',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -243,7 +243,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -289,7 +289,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'update',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -299,17 +299,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'update',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
@@ -346,7 +335,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -391,11 +380,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -405,7 +390,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'update',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -449,7 +434,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -504,11 +489,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -550,7 +531,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -591,11 +572,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -763,11 +740,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.validation',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.validation', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -864,11 +837,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -941,11 +910,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.longRunning',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.longRunning', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -1009,11 +974,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -1035,5 +996,287 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('Actions', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should update a rule with actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        const updateResponse = await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+          .expect(200);
+
+        objectRemover.add(space.id, updateResponse.body.id, 'rule', 'alerting');
+
+        const action = updateResponse.body.actions[0];
+        const systemAction = updateResponse.body.actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${updateResponse.body.id}`,
+          },
+          { meta: true }
+        );
+
+        expect(esResponse.statusCode).to.eql(200);
+        expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+
+        const rawAction = rawActions[0];
+        const rawSystemAction = rawActions[1];
+
+        const { uuid: rawActionUuid, ...rawActionRest } = rawAction;
+        const { uuid: rawSystemActionUuid, ...rawSystemActionRest } = rawSystemAction;
+
+        expect(rawActionRest).to.eql({
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          params: {},
+          group: 'default',
+        });
+
+        expect(rawSystemActionRest).to.eql({
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          params: {},
+        });
+
+        expect(rawActionUuid).to.not.be(undefined);
+        expect(rawSystemActionUuid).to.not.be(undefined);
+      });
+
+      it('should throw 400 if the system action is missing required params', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('strips out properties from system actions that are part of the default actions', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        for (const propertyToAdd of [
+          { group: 'default' },
+          {
+            frequency: {
+              summary: false,
+              throttle: '1s',
+              notify_when: RuleNotifyWhen.THROTTLE,
+            },
+          },
+          {
+            alerts_filter: {
+              query: { kql: 'kibana.alert.rule.name:abc', filters: [] },
+            },
+          },
+        ]) {
+          const updateResponse = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              name: 'bcd',
+              tags: ['bar'],
+              params: {
+                foo: true,
+              },
+              schedule: { interval: '12s' },
+              throttle: '1m',
+              notify_when: 'onThrottleInterval',
+              actions: [
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                  ...propertyToAdd,
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(updateResponse.body.actions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+
+          const esResponse = await es.get<SavedObject<RawRule>>(
+            {
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `alert:${updateResponse.body.id}`,
+            },
+            { meta: true }
+          );
+
+          expect(esResponse.statusCode).to.eql(200);
+          expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+
+          const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+          expect(rawActions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+        }
+      });
+
+      it('should throw 400 when using the same system action twice', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should not allow creating a default action without group', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                // group is missing
+                id: createdAction.id,
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+    });
   });
 }

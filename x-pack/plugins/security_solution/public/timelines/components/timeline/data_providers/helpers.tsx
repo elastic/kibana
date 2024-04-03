@@ -6,10 +6,10 @@
  */
 
 import { omit } from 'lodash/fp';
-import type { DraggableLocation } from 'react-beautiful-dnd';
+import type { DraggableLocation } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 
-import { updateProviders } from '../../../store/timeline/actions';
+import { updateProviders } from '../../../store/actions';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import { isPrimitiveArray } from '../helpers';
 
@@ -64,7 +64,7 @@ export const move = ({
 };
 
 export const isValidDestination = (
-  destination: DraggableLocation | undefined
+  destination: DraggableLocation | null
 ): destination is DraggableLocation => destination != null;
 
 export const sourceAndDestinationAreSameDroppable = ({
@@ -232,7 +232,7 @@ export const reArrangeProviders = ({
   timelineId,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destination: DraggableLocation | null;
   dispatch: Dispatch;
   source: DraggableLocation;
   timelineId: string;
@@ -271,7 +271,7 @@ export const addProviderToGroup = ({
   timelineId,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destination: DraggableLocation | null;
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
@@ -325,7 +325,7 @@ export const addContentToTimeline = ({
   timelineId,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destination: DraggableLocation | null;
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;

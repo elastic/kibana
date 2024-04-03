@@ -130,7 +130,7 @@ async function generateData({
       carrierMCC: '440',
     });
 
-  return await synthtraceEsClient.index([
+  await synthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
       .rate(1)
@@ -142,6 +142,7 @@ async function generateData({
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
             .errors(galaxy10.crash({ message: 'error' }).timestamp(timestamp))
+            .events(galaxy10.event().lifecycle('created').timestamp(timestamp))
             .timestamp(timestamp)
             .duration(500)
             .success()
@@ -159,12 +160,14 @@ async function generateData({
           galaxy7
             .transaction('Start View - View Appearing', 'Android Activity')
             .errors(galaxy7.crash({ message: 'error' }).timestamp(timestamp))
+            .events(galaxy7.event().lifecycle('created').timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success(),
           huaweiP2
             .transaction('Start View - View Appearing', 'huaweiP2 Activity')
             .errors(huaweiP2.crash({ message: 'error' }).timestamp(timestamp))
+            .events(huaweiP2.event().lifecycle('created').timestamp(timestamp))
             .timestamp(timestamp)
             .duration(20)
             .success(),
@@ -219,10 +222,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.currentPeriod.mostRequests.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
+        expect(response.currentPeriod.mostCrashes.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.mostLaunches.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
       });
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177396
   registry.when('Location stats', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
@@ -253,6 +263,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { location } = response.currentPeriod.mostRequests;
         expect(location).to.be('China');
       });
+
+      it('returns location for most crashes', () => {
+        const { location } = response.currentPeriod.mostCrashes;
+        expect(location).to.be('China');
+      });
+
+      it('returns location for most launches', () => {
+        const { location } = response.currentPeriod.mostLaunches;
+        expect(location).to.be('China');
+      });
     });
 
     describe('when filters are applied', () => {
@@ -265,11 +285,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.currentPeriod.mostSessions.value).to.eql(0);
         expect(response.currentPeriod.mostRequests.value).to.eql(0);
+        expect(response.currentPeriod.mostCrashes.value).to.eql(0);
+        expect(response.currentPeriod.mostLaunches.value).to.eql(0);
 
         expect(response.currentPeriod.mostSessions.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
         expect(response.currentPeriod.mostRequests.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.mostCrashes.timeseries.every((item) => item.y === 0)).to.eql(
+          true
+        );
+        expect(response.currentPeriod.mostLaunches.timeseries.every((item) => item.y === 0)).to.eql(
           true
         );
       });
@@ -281,8 +309,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1"`,
         });
 
+        expect(response.currentPeriod.mostSessions.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostCrashes.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostRequests.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostLaunches.timeseries[0].y).to.eql(1);
+
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
+        expect(response.currentPeriod.mostCrashes.value).to.eql(3);
+        expect(response.currentPeriod.mostLaunches.value).to.eql(3);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -291,8 +326,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"1.1" and service.environment: "production"`,
         });
 
+        expect(response.currentPeriod.mostSessions.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostCrashes.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostRequests.timeseries[0].y).to.eql(1);
+        expect(response.currentPeriod.mostLaunches.timeseries[0].y).to.eql(1);
+
         expect(response.currentPeriod.mostSessions.value).to.eql(3);
         expect(response.currentPeriod.mostRequests.value).to.eql(3);
+        expect(response.currentPeriod.mostCrashes.value).to.eql(3);
+        expect(response.currentPeriod.mostLaunches.value).to.eql(3);
       });
     });
   });

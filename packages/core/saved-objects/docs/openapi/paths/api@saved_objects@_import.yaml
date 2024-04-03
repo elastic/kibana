@@ -1,0 +1,85 @@
+post:
+  summary: Create sets of Kibana saved objects from a file created by the export API.
+  operationId: importSavedObjects
+  description: |
+    Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - in: query
+      name: createNewCopies
+      schema:
+        type: boolean
+      required: false
+      description: |
+        Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.
+    - in: query
+      name: overwrite
+      schema:
+        type: boolean
+      required: false
+      description: |
+        Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.
+    - in: query
+      name: compatibilityMode
+      schema:
+        type: boolean
+      required: false
+      description: |
+        Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              description: |
+                A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.
+        examples:
+          importObjectsRequest:
+            $ref: '../components/examples/import_objects_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                description: |
+                  Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.
+              successCount:
+                type: integer
+                description: Indicates the number of successfully imported records.
+              errors:
+                type: array
+                items:
+                  type: object
+                description: |
+                  Indicates the import was unsuccessful and specifies the objects that failed to import.
+
+                  NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.
+              successResults:
+                type: array
+                items:
+                  type: object
+                description: |
+                  Indicates the objects that are successfully imported, with any metadata if applicable.
+
+                  NOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.
+          examples:
+            importObjectsResponse:
+              $ref: '../components/examples/import_objects_response.yaml'
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

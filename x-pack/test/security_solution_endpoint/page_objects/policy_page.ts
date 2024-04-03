@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const retryService = getService('retry');
+  const toasts = getService('toasts');
+  const formTestSubj = getPolicySettingsFormTestSubjects();
 
   return {
     /**
@@ -59,16 +62,8 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       return await testSubjects.find('policyDetailsCancelButton');
     },
 
-    /**
-     * Finds and returns the Advanced Policy Show/Hide Button
-     */
-    async findAdvancedPolicyButton() {
-      await this.ensureIsOnDetailsPage();
-      return await testSubjects.find('advancedPolicyButton');
-    },
-
     async isAdvancedSettingsExpanded() {
-      return await testSubjects.exists('advancedPolicyPanel');
+      return await testSubjects.exists(formTestSubj.advancedSection.settingsContainer);
     },
 
     /**
@@ -76,12 +71,9 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async showAdvancedSettingsSection() {
       if (!(await this.isAdvancedSettingsExpanded())) {
-        const expandButton = await this.findAdvancedPolicyButton();
-        await expandButton.click();
+        await testSubjects.click(formTestSubj.advancedSection.showHideButton);
       }
-
-      await testSubjects.existOrFail('advancedPolicyPanel');
-      await testSubjects.scrollIntoView('advancedPolicyPanel');
+      await testSubjects.scrollIntoView(formTestSubj.advancedSection.settingsContainer);
     },
 
     /**
@@ -89,10 +81,9 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async hideAdvancedSettingsSection() {
       if (await this.isAdvancedSettingsExpanded()) {
-        const expandButton = await this.findAdvancedPolicyButton();
-        await expandButton.click();
+        await testSubjects.click(formTestSubj.advancedSection.showHideButton);
       }
-      await testSubjects.missingOrFail('advancedPolicyPanel');
+      await testSubjects.missingOrFail(formTestSubj.advancedSection.settingsContainer);
     },
 
     /**
@@ -104,7 +95,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
-     * ensures that the Details Page is the currently display view
+     * ensures that the Details Page is currently displayed
      */
     async ensureIsOnDetailsPage() {
       await testSubjects.existOrFail('policyDetailsPage');
@@ -116,38 +107,16 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
 
-      const saveButton = await this.findSaveButton();
-
       // Sometimes, data retrieval errors may have been encountered by other security solution processes
       // (ex. index fields search here: `x-pack/plugins/security_solution/public/common/containers/source/index.tsx:181`)
       // which are displayed using one or more Toast messages. This in turn prevents the user from
       // actually clicking the Save button. Because those errors are not associated with Policy details,
       // we'll first check that all toasts are cleared
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
 
-      await saveButton.click();
+      await testSubjects.click('policyDetailsSaveButton');
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
-    },
-
-    /**
-     * Finds and returns the Create New policy Policy button displayed on the List page
-     */
-    async findHeaderCreateNewButton() {
-      // The Create button is initially disabled because we need to first make a call to Ingest
-      // to retrieve the package version, so that the redirect works as expected. So, we wait
-      // for that to occur here a well.
-      await testSubjects.waitForEnabled('headerCreateNewPolicyButton');
-      return await testSubjects.find('headerCreateNewPolicyButton');
-    },
-
-    /**
-     * Used when looking a the Ingest create/edit package policy pages. Finds the endpoint
-     * custom configuration component
-     * @param onEditPage
-     */
-    async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointPackagePolicy_${onEditPage ? 'edit' : 'create'}`);
     },
 
     /**

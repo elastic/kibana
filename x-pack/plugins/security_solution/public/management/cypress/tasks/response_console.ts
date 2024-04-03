@@ -22,13 +22,11 @@ export const openResponseConsoleFromEndpointList = (): void => {
 };
 
 export const inputConsoleCommand = (command: string): void => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').click().type(command);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').type(command);
 };
 
 export const clearConsoleCommandInput = (): void => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture')
-    .click()
-    .type(`{selectall}{backspace}`);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').type(`{selectall}{backspace}`);
 };
 
 export const selectCommandFromHelpMenu = (command: string): void => {

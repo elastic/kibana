@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('with single metric job', function () {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-        await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+        await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
         await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
-        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+        await ml.testResources.deleteDataViewByTitle('ft_farequote');
       });
 
       it('opens a job from job list link', async () => {
@@ -89,6 +89,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
+      });
+
+      it('should click on an anomaly marker', async () => {
+        await ml.singleMetricViewer.assertAnomalyMarkerExist();
+        await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
+        await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+        await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
       });
     });
 
@@ -134,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-        await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+        await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
         await ml.testResources.setKibanaTimeZoneToUTC();
         await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);
         await ml.securityUI.loginAsMlPowerUser();
@@ -142,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await ml.api.cleanMlIndices();
-        await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+        await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
       });
 
       it('opens a job from job list link', async () => {
@@ -193,7 +200,9 @@ export default function ({ getService }: FtrProviderContext) {
         // Also sorting by name is enforced because the model plot is enabled
         // and anomalous only is disabled
         await ml.singleMetricViewer.assertEntityConfig('day_of_week', false, 'name', 'desc');
+      });
 
+      it('should render the singe metric viewer chart and anomaly table', async () => {
         await ml.testExecution.logTestStep('displays the chart');
         await ml.singleMetricViewer.assertChartExist();
 
@@ -202,6 +211,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
+      });
+
+      it('should click the Discover action in the anomaly table', async () => {
+        await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+        await ml.anomaliesTable.scrollRowIntoView(0);
+        await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+        await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+        await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
       });
     });
   });

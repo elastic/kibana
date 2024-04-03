@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types';
+import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface ResourceBucket {
@@ -23,9 +23,11 @@ export interface VulnerableResourcesQueryResult {
   };
 }
 
-const getVulnerabilitiesResourcesQuery = (query: QueryDslQueryContainer): SearchRequest => ({
+const getVulnerabilitiesResourcesQuery = (): SearchRequest => ({
   size: 0,
-  query,
+  query: {
+    match_all: {},
+  },
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   aggs: {
     vulnerable_resources: {
@@ -55,11 +57,10 @@ const getVulnerabilitiesResourcesQuery = (query: QueryDslQueryContainer): Search
 });
 
 export const getTopVulnerableResources = async (
-  esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  esClient: ElasticsearchClient
 ): Promise<VulnerableResourceStat[]> => {
   const queryResult = await esClient.search<unknown, VulnerableResourcesQueryResult>(
-    getVulnerabilitiesResourcesQuery(query)
+    getVulnerabilitiesResourcesQuery()
   );
   if (!queryResult?.aggregations?.vulnerable_resources) return [];
 

@@ -14,7 +14,7 @@ import { AutocompleteFieldWildcardComponent } from '.';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { fields, getField } from '../fields/index.mock';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
-import { FILENAME_WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
+import { WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
 
 jest.mock('../hooks/use_field_value_autocomplete');
 jest.mock('../translations', () => ({
@@ -168,7 +168,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] EuiComboBoxPill').at(0).text()
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').at(0).props().value
     ).toEqual('/opt/*/app.dmg');
   });
 
@@ -368,7 +368,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="invalid path"
-        warning={FILENAME_WILDCARD_WARNING}
+        warning={WILDCARD_WARNING}
       />
     );
 
@@ -384,7 +384,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
     const helpText = wrapper
       .find('[data-test-subj="valuesAutocompleteWildcardLabel"] div.euiFormHelpText')
       .at(0);
-    expect(helpText.text()).toEqual(FILENAME_WILDCARD_WARNING);
+    expect(helpText.text()).toEqual(WILDCARD_WARNING);
     expect(helpText.find('.euiToolTipAnchor')).toBeTruthy();
   });
   test('should show the warning helper text if the new value contains spaces when change', async () => {
@@ -412,7 +412,7 @@ describe('AutocompleteFieldWildcardComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
         selectedValue="invalid path"
-        warning={FILENAME_WILDCARD_WARNING}
+        warning={WILDCARD_WARNING}
       />
     );
 

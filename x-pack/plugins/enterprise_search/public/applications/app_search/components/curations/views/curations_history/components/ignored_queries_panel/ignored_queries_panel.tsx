@@ -36,6 +36,7 @@ export const IgnoredQueriesPanel: React.FC = () => {
     loadIgnoredQueries();
   }, [meta.page.current]);
 
+  // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
   const columns: Array<EuiBasicTableColumn<string>> = [
     {
       render: (query: string) => query,
@@ -108,8 +109,10 @@ export const IgnoredQueriesPanel: React.FC = () => {
       hasBorder
     >
       <EuiBasicTable
+        // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
         items={ignoredQueries}
         itemId="query"
+        // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
         columns={columns}
         hasActions
         pagination={{

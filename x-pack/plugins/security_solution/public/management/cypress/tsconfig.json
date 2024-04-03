@@ -2,9 +2,6 @@
   "extends": "../../../../../../tsconfig.base.json",
   "include": [
     "**/*",
-    "../cypress_endpoint.config.ts",
-    "../cypress.config.ts",
-    "./cypress.d.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -14,7 +11,6 @@
     "types": [
       "cypress",
       "node",
-      "cypress-react-selector"
     ],
   },
   "kbn_references": [
@@ -34,7 +30,6 @@
     "@kbn/cases-plugin",
     "@kbn/test",
     "@kbn/repo-info",
-    "@kbn/data-views-plugin",
-    "@kbn/osquery-plugin/cypress",
+    "@kbn/tooling-log",
   ]
 }

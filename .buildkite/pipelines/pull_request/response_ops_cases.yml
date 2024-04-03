@@ -3,11 +3,11 @@ steps:
     label: 'Cases Cypress Tests on Security Solution'
     agents:
       queue: n2-4-spot
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 120
     retry:
       automatic:
-        - exit_status: '-1'
-          limit: 3
         - exit_status: '*'
           limit: 1

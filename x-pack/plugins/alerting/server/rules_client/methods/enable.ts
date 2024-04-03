@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
@@ -13,6 +14,9 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -30,9 +34,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
 
   try {
     const decryptedAlert =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
     existingApiKey = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
@@ -40,10 +48,29 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
     attributes = alert.attributes;
     version = alert.version;
     references = alert.references;
+  }
+
+  const validationPayload = await validateScheduleLimit({
+    context,
+    updatedInterval: attributes.schedule.interval,
+  });
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name: attributes.name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'enable',
+      })
+    );
   }
 
   try {
@@ -55,13 +82,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     });
 
     if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized('execute');
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
     }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.ENABLE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -72,7 +99,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
     ruleAuditEvent({
       action: RuleAuditAction.ENABLE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -121,7 +148,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       // we call create with overwrite=true
       if (migratedActions.hasLegacyActions) {
         await context.unsecuredSavedObjectsClient.create<RawRule>(
-          'alert',
+          RULE_SAVED_OBJECT_TYPE,
           {
             ...updateAttributes,
             actions: migratedActions.resultedActions,
@@ -136,9 +163,14 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
           }
         );
       } else {
-        await context.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, {
-          version,
-        });
+        await context.unsecuredSavedObjectsClient.update(
+          RULE_SAVED_OBJECT_TYPE,
+          id,
+          updateAttributes,
+          {
+            version,
+          }
+        );
       }
     } catch (e) {
       throw e;
@@ -174,7 +206,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       schedule: attributes.schedule as IntervalSchedule,
       throwOnConflict: false,
     });
-    await context.unsecuredSavedObjectsClient.update('alert', id, {
+    await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, {
       scheduledTaskId: scheduledTask.id,
     });
   } else {

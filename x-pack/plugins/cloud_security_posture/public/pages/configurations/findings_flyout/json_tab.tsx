@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 
-const offsetHeight = 120;
+const offsetTopHeight = 120;
+const offsetBottomHeight = 72;
 
 export const JsonTab = ({ data }: { data: CspFinding }) => (
-  <div style={{ position: 'absolute', inset: 0, top: offsetHeight }}>
+  <div style={{ position: 'absolute', inset: 0, top: offsetTopHeight, bottom: offsetBottomHeight }}>
     <CodeEditor
       isCopyable
       allowFullScreen

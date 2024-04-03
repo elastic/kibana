@@ -1,5 +1,62 @@
 title: Connector request properties for an email connector
 description: Defines properties for connectors when type is `.email`.
+required:
+  - from
 type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.
+properties:
+  clientId:
+    description: >
+      The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format.
+      If `service` is `exchange_server`, this property is required.
+    type:
+      - "string"
+      - "null"
+  from:
+    description: >
+      The from address for all emails sent by the connector. It must be specified in `user@host-name` format.
+    type: string
+  hasAuth:
+    description: >
+      Specifies whether a user and password are required inside the secrets configuration.
+    default: true
+    type: boolean
+  host:
+    description: >
+      The host name of the service provider.
+      If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored.
+      If `service` is `other`, this property must be defined. 
+    type: string
+  oauthTokenUrl:
+    # description: TBD
+    type:
+      - "string"
+      - "null"
+  port:
+    description: >
+      The port to connect to on the service provider.
+      If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored.
+      If `service` is `other`, this property must be defined. 
+    type: integer
+  secure:
+    description: >
+      Specifies whether the connection to the service provider will use TLS.
+      If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored.
+    type: boolean
+  service:
+    description: >
+      The name of the email service.
+    type: string
+    enum:
+      - elastic_cloud
+      - exchange_server
+      - gmail
+      - other
+      - outlook365
+      - ses
+  tenantId:
+    description: >
+      The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format.
+      If `service` is `exchange_server`, this property is required.
+    type:
+      - "string"
+      - "null"

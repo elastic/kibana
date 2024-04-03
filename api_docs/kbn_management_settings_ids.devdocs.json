@@ -1,0 +1,2089 @@
+{
+  "id": "@kbn/management-settings-ids",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.ACCESSIBILITY_DISABLE_ANIMATIONS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ACCESSIBILITY_DISABLE_ANIMATIONS_ID",
+        "description": [],
+        "signature": [
+          "\"accessibility:disableAnimations\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AUTOCOMPLETE_USE_TIME_RANGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AUTOCOMPLETE_USE_TIME_RANGE_ID",
+        "description": [],
+        "signature": [
+          "\"autocomplete:useTimeRange\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID",
+        "description": [],
+        "signature": [
+          "\"autocomplete:valueSuggestionMethod\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.BANNERS_BACKGROUND_COLOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "BANNERS_BACKGROUND_COLOR_ID",
+        "description": [],
+        "signature": [
+          "\"banners:backgroundColor\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.BANNERS_PLACEMENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "BANNERS_PLACEMENT_ID",
+        "description": [],
+        "signature": [
+          "\"banners:placement\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.BANNERS_TEXT_COLOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "BANNERS_TEXT_COLOR_ID",
+        "description": [],
+        "signature": [
+          "\"banners:textColor\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.BANNERS_TEXT_CONTENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "BANNERS_TEXT_CONTENT_ID",
+        "description": [],
+        "signature": [
+          "\"banners:textContent\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.CONTEXT_DEFAULT_SIZE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_DEFAULT_SIZE_ID",
+        "description": [],
+        "signature": [
+          "\"context:defaultSize\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.CONTEXT_STEP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_STEP_ID",
+        "description": [],
+        "signature": [
+          "\"context:step\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.CONTEXT_TIE_BREAKER_FIELDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTEXT_TIE_BREAKER_FIELDS_ID",
+        "description": [],
+        "signature": [
+          "\"context:tieBreakerFields\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.COURIER_CUSTOM_REQUEST_PREFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COURIER_CUSTOM_REQUEST_PREFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\"courier:customRequestPreference\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID",
+        "description": [],
+        "signature": [
+          "\"courier:ignoreFilterIfFieldNotInIndex\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.COURIER_MAX_CONCURRENT_SHARD_REQUEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COURIER_MAX_CONCURRENT_SHARD_REQUEST_ID",
+        "description": [],
+        "signature": [
+          "\"courier:maxConcurrentShardRequests\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.COURIER_SET_REQUEST_PREFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COURIER_SET_REQUEST_PREFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\"courier:setRequestPreference\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.CSV_QUOTE_VALUES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CSV_QUOTE_VALUES_ID",
+        "description": [],
+        "signature": [
+          "\"csv:quoteValues\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.CSV_SEPARATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CSV_SEPARATOR_ID",
+        "description": [],
+        "signature": [
+          "\"csv:separator\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATE_FORMAT_DOW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATE_FORMAT_DOW_ID",
+        "description": [],
+        "signature": [
+          "\"dateFormat:dow\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATE_FORMAT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATE_FORMAT_ID",
+        "description": [],
+        "signature": [
+          "\"dateFormat\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATE_FORMAT_NANOS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATE_FORMAT_NANOS_ID",
+        "description": [],
+        "signature": [
+          "\"dateNanosFormat\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATE_FORMAT_SCALED_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATE_FORMAT_SCALED_ID",
+        "description": [],
+        "signature": [
+          "\"dateFormat:scaled\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DATE_FORMAT_TZ_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATE_FORMAT_TZ_ID",
+        "description": [],
+        "signature": [
+          "\"dateFormat:tz\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DEFAULT_COLUMNS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_COLUMNS_ID",
+        "description": [],
+        "signature": [
+          "\"defaultColumns\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DEFAULT_INDEX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_INDEX_ID",
+        "description": [],
+        "signature": [
+          "\"defaultIndex\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DEFAULT_ROUTE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_ROUTE_ID",
+        "description": [],
+        "signature": [
+          "\"defaultRoute\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISABLE_BATCH_COMPRESSION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISABLE_BATCH_COMPRESSION_ID",
+        "description": [],
+        "signature": [
+          "\"bfetch:disableCompression\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISABLE_REQUEST_BATCHING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISABLE_REQUEST_BATCHING_ID",
+        "description": [],
+        "signature": [
+          "\"bfetch:disable\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_ENABLE_SQL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_ENABLE_SQL_ID",
+        "description": [],
+        "signature": [
+          "\"discover:enableSql\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID",
+        "description": [],
+        "signature": [
+          "\"discover:maxDocFieldsDisplayed\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID",
+        "description": [],
+        "signature": [
+          "\"discover:modifyColumnsOnSwitch\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_ROW_HEIGHT_OPTION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_ROW_HEIGHT_OPTION_ID",
+        "description": [],
+        "signature": [
+          "\"discover:rowHeightOption\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SAMPLE_ROWS_PER_PAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SAMPLE_ROWS_PER_PAGE_ID",
+        "description": [],
+        "signature": [
+          "\"discover:sampleRowsPerPage\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SAMPLE_SIZE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SAMPLE_SIZE_ID",
+        "description": [],
+        "signature": [
+          "\"discover:sampleSize\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID",
+        "description": [],
+        "signature": [
+          "\"discover:searchFieldsFromSource\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SEARCH_ON_PAGE_LOAD_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SEARCH_ON_PAGE_LOAD_ID",
+        "description": [],
+        "signature": [
+          "\"discover:searchOnPageLoad\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SHOW_FIELD_STATISTICS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SHOW_FIELD_STATISTICS_ID",
+        "description": [],
+        "signature": [
+          "\"discover:showFieldStatistics\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID",
+        "description": [],
+        "signature": [
+          "\"discover:showLegacyFieldTopValues\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SHOW_MULTI_FIELDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SHOW_MULTI_FIELDS_ID",
+        "description": [],
+        "signature": [
+          "\"discover:showMultiFields\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DISCOVER_SORT_DEFAULT_ORDER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_SORT_DEFAULT_ORDER_ID",
+        "description": [],
+        "signature": [
+          "\"discover:sort:defaultOrder\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DOC_TABLE_HIDE_TIME_COLUMNS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_TABLE_HIDE_TIME_COLUMNS_ID",
+        "description": [],
+        "signature": [
+          "\"doc_table:hideTimeColumn\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DOC_TABLE_HIGHLIGHT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_TABLE_HIGHLIGHT_ID",
+        "description": [],
+        "signature": [
+          "\"doc_table:highlight\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.DOC_TABLE_LEGACY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DOC_TABLE_LEGACY_ID",
+        "description": [],
+        "signature": [
+          "\"doc_table:legacy\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FIELDS_POPULAR_LIMIT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FIELDS_POPULAR_LIMIT_ID",
+        "description": [],
+        "signature": [
+          "\"fields:popularLimit\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FILE_UPLOAD_MAX_SIZE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FILE_UPLOAD_MAX_SIZE_ID",
+        "description": [],
+        "signature": [
+          "\"fileUpload:maxFileSize\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FILTER_EDITOR_SUGGEST_VALUES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FILTER_EDITOR_SUGGEST_VALUES_ID",
+        "description": [],
+        "signature": [
+          "\"filterEditor:suggestValues\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FILTERS_PINNED_BY_DEFAULT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FILTERS_PINNED_BY_DEFAULT_ID",
+        "description": [],
+        "signature": [
+          "\"filters:pinnedByDefault\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FORMAT_BYTES_DEFAULT_PATTERN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FORMAT_BYTES_DEFAULT_PATTERN_ID",
+        "description": [],
+        "signature": [
+          "\"format:bytes:defaultPattern\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FORMAT_CURRENCY_DEFAULT_PATTERN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FORMAT_CURRENCY_DEFAULT_PATTERN_ID",
+        "description": [],
+        "signature": [
+          "\"format:currency:defaultPattern\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FORMAT_DEFAULT_TYPE_MAP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FORMAT_DEFAULT_TYPE_MAP_ID",
+        "description": [],
+        "signature": [
+          "\"format:defaultTypeMap\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FORMAT_NUMBER_DEFAULT_LOCALE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FORMAT_NUMBER_DEFAULT_LOCALE_ID",
+        "description": [],
+        "signature": [
+          "\"format:number:defaultLocale\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FORMAT_NUMBER_DEFAULT_PATTERN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FORMAT_NUMBER_DEFAULT_PATTERN_ID",
+        "description": [],
+        "signature": [
+          "\"format:number:defaultPattern\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.FORMAT_PERCENT_DEFAULT_PATTERN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FORMAT_PERCENT_DEFAULT_PATTERN_ID",
+        "description": [],
+        "signature": [
+          "\"format:percent:defaultPattern\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.HIDE_ANNOUNCEMENTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS_ID",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.HISTOGRAM_BAR_TARGET_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HISTOGRAM_BAR_TARGET_ID",
+        "description": [],
+        "signature": [
+          "\"histogram:barTarget\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.HISTOGRAM_MAX_BARS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HISTOGRAM_MAX_BARS_ID",
+        "description": [],
+        "signature": [
+          "\"histogram:maxBars\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.HISTORY_LIMIT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_LIMIT_ID",
+        "description": [],
+        "signature": [
+          "\"history:limit\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.LABS_CANVAS_BY_VALUE_EMBEDDABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_CANVAS_BY_VALUE_EMBEDDABLE_ID",
+        "description": [],
+        "signature": [
+          "\"labs:canvas:byValueEmbeddable\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.LABS_CANVAS_ENABLE_UI_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_CANVAS_ENABLE_UI_ID",
+        "description": [],
+        "signature": [
+          "\"labs:canvas:enable_ui\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.LABS_DASHBOARD_DEFER_BELOW_FOLD_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_DASHBOARD_DEFER_BELOW_FOLD_ID",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:deferBelowFold\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.LABS_DASHBOARDS_ENABLE_UI_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LABS_DASHBOARDS_ENABLE_UI_ID",
+        "description": [],
+        "signature": [
+          "\"labs:dashboard:enable_ui\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.META_FIELDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "META_FIELDS_ID",
+        "description": [],
+        "signature": [
+          "\"metaFields\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
+        "description": [],
+        "signature": [
+          "\"metrics:allowCheckingForFailedShards\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.METRICS_ALLOW_STRING_INDICES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "METRICS_ALLOW_STRING_INDICES_ID",
+        "description": [],
+        "signature": [
+          "\"metrics:allowStringIndices\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.METRICS_MAX_BUCKETS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "METRICS_MAX_BUCKETS_ID",
+        "description": [],
+        "signature": [
+          "\"metrics:max_buckets\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID",
+        "description": [],
+        "signature": [
+          "\"ml:anomalyDetection:results:enableTimeDefaults\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.ML_ANOMALY_DETECTION_RESULTS_TIME_DEFAULTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_DETECTION_RESULTS_TIME_DEFAULTS_ID",
+        "description": [],
+        "signature": [
+          "\"ml:anomalyDetection:results:timeDefaults\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.NOTIFICATIONS_BANNER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NOTIFICATIONS_BANNER_ID",
+        "description": [],
+        "signature": [
+          "\"notifications:banner\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.NOTIFICATIONS_LIFETIME_BANNER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NOTIFICATIONS_LIFETIME_BANNER_ID",
+        "description": [],
+        "signature": [
+          "\"notifications:lifetime:banner\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.NOTIFICATIONS_LIFETIME_ERROR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NOTIFICATIONS_LIFETIME_ERROR_ID",
+        "description": [],
+        "signature": [
+          "\"notifications:lifetime:error\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.NOTIFICATIONS_LIFETIME_INFO_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NOTIFICATIONS_LIFETIME_INFO_ID",
+        "description": [],
+        "signature": [
+          "\"notifications:lifetime:info\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.NOTIFICATIONS_LIFETIME_WARNING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NOTIFICATIONS_LIFETIME_WARNING_ID",
+        "description": [],
+        "signature": [
+          "\"notifications:lifetime:warning\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaPriceFactor\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmAWSLambdaRequestCostPerMillion\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmDefaultServiceEnvironment\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableContinuousRollups\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableCriticalPath\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableProfilingIntegration\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceInventoryTableSearchBar\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMetrics\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableTableSearchBar\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_LABS_BUTTON_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_LABS_BUTTON_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmLabsButton\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmProgressiveLoading\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmServiceGroupMaxNumberOfServices\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmServiceInventoryOptimizedSorting\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmTraceExplorerTab\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableAwsLambdaMetrics\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableComparisonByDefault\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureAssetCustomDashboards\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureHostsView\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:logsExplorer:allowedDataViews\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_MAX_SUGGESTIONS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_MAX_SUGGESTIONS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:maxSuggestions\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"observability:profilingElasticsearchPlugin\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.QUERY_ALLOW_LEADING_WILDCARDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_ALLOW_LEADING_WILDCARDS_ID",
+        "description": [],
+        "signature": [
+          "\"query:allowLeadingWildcards\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.QUERY_STRING_OPTIONS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "QUERY_STRING_OPTIONS_ID",
+        "description": [],
+        "signature": [
+          "\"query:queryString:options\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.ROLLUPS_ENABLE_INDEX_PATTERNS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ROLLUPS_ENABLE_INDEX_PATTERNS_ID",
+        "description": [],
+        "signature": [
+          "\"rollups.enableIndexPatterns\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SAVED_OBJECTS_LISTING_LIMIT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECTS_LISTING_LIMIT_ID",
+        "description": [],
+        "signature": [
+          "\"savedObjects:listingLimit\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SAVED_OBJECTS_PER_PAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECTS_PER_PAGE_ID",
+        "description": [],
+        "signature": [
+          "\"savedObjects:perPage\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SEARCH_INCLUDE_FROZEN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_INCLUDE_FROZEN_ID",
+        "description": [],
+        "signature": [
+          "\"search:includeFrozen\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SEARCH_QUERY_LANGUAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_QUERY_LANGUAGE_ID",
+        "description": [],
+        "signature": [
+          "\"search:queryLanguage\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SEARCH_TIMEOUT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_TIMEOUT_ID",
+        "description": [],
+        "signature": [
+          "\"search:timeout\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY",
+        "description": [],
+        "signature": [
+          "\"securitySolution:alertTags\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_ANOMALY_SCORE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_ANOMALY_SCORE_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:defaultAnomalyScore\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_INDEX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_INDEX_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:defaultIndex\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_THREAT_INDEX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_THREAT_INDEX_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:defaultThreatIndex\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature"
+        ],
+        "signature": [
+          "\"securitySolution:enableAssetCriticality\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:enableCcsWarning\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout"
+        ],
+        "signature": [
+          "\"securitySolution:enableExpandableFlyout\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_GROUPED_NAV_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_GROUPED_NAV_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:enableGroupedNav\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_NEWS_FEED_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_NEWS_FEED_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:enableNewsFeed\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer"
+        ],
+        "signature": [
+          "\"securitySolution:excludeColdAndFrozenTiersInAnalyzer\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:ipReputationLinks\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_NEWS_FEED_URL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_NEWS_FEED_URL_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:newsFeedUrl\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:refreshIntervalDefaults\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:rulesTableRefresh\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:showRelatedIntegrations\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_TIME_DEFAULTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_TIME_DEFAULTS_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolution:timeDefaults\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SHORT_DOTS_ENABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SHORT_DOTS_ENABLE_ID",
+        "description": [],
+        "signature": [
+          "\"shortDots:enable\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SORT_OPTIONS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SORT_OPTIONS_ID",
+        "description": [],
+        "signature": [
+          "\"sort:options\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.STATE_STORE_IN_SESSION_STORAGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STATE_STORE_IN_SESSION_STORAGE_ID",
+        "description": [],
+        "signature": [
+          "\"state:storeInSessionStorage\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.THEME_DARK_MODE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THEME_DARK_MODE_ID",
+        "description": [],
+        "signature": [
+          "\"theme:darkMode\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMELION_ES_DEFAULT_INDEX_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMELION_ES_DEFAULT_INDEX_ID",
+        "description": [],
+        "signature": [
+          "\"timelion:es.default_index\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMELION_ES_TIME_FIELD_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMELION_ES_TIME_FIELD_ID",
+        "description": [],
+        "signature": [
+          "\"timelion:es.timefield\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMELION_MAX_BUCKETS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMELION_MAX_BUCKETS_ID",
+        "description": [],
+        "signature": [
+          "\"timelion:max_buckets\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMELION_MIN_INTERVAL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMELION_MIN_INTERVAL_ID",
+        "description": [],
+        "signature": [
+          "\"timelion:min_interval\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMELION_TARGET_BUCKETS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMELION_TARGET_BUCKETS_ID",
+        "description": [],
+        "signature": [
+          "\"timelion:target_buckets\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMEPICKER_QUICK_RANGES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMEPICKER_QUICK_RANGES_ID",
+        "description": [],
+        "signature": [
+          "\"timepicker:quickRanges\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID",
+        "description": [],
+        "signature": [
+          "\"timepicker:refreshIntervalDefaults\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TIMEPICKER_TIME_DEFAULTS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TIMEPICKER_TIME_DEFAULTS_ID",
+        "description": [],
+        "signature": [
+          "\"timepicker:timeDefaults\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.TRUNCATE_MAX_HEIGHT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TRUNCATE_MAX_HEIGHT_ID",
+        "description": [],
+        "signature": [
+          "\"truncate:maxHeight\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.VISUALIZATION_COLOR_MAPPING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZATION_COLOR_MAPPING_ID",
+        "description": [],
+        "signature": [
+          "\"visualization:colorMapping\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.VISUALIZATION_ENABLE_LABS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZATION_ENABLE_LABS_ID",
+        "description": [],
+        "signature": [
+          "\"visualize:enableLabs\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.VISUALIZATION_HEATMAP_MAX_BUCKETS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZATION_HEATMAP_MAX_BUCKETS_ID",
+        "description": [],
+        "signature": [
+          "\"visualization:heatmap:maxBuckets\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID",
+        "description": [],
+        "signature": [
+          "\"visualization:visualize:legacyGaugeChartsLibrary\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.VISUALIZATION_LEGACY_HEATMAP_CHARTS_LIBRARY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZATION_LEGACY_HEATMAP_CHARTS_LIBRARY_ID",
+        "description": [],
+        "signature": [
+          "\"visualization:visualize:legacyHeatmapChartsLibrary\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.VISUALIZATION_USE_LEGACY_TIME_AXIS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZATION_USE_LEGACY_TIME_AXIS_ID",
+        "description": [],
+        "signature": [
+          "\"visualization:useLegacyTimeAxis\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.XPACK_REPORTING_CUSTOM_PDF_LOGO_ID",
+        "type": "string",
+        "tags": [],
+        "label": "XPACK_REPORTING_CUSTOM_PDF_LOGO_ID",
+        "description": [],
+        "signature": [
+          "\"xpackReporting:customPdfLogo\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

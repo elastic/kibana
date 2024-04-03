@@ -11,6 +11,8 @@ import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
 import { DATA_TIERS } from '../../../common/constants';
 
+const AGGREGATION_MAX_SIZE = 1000;
+
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {
     return await _fetchAndAssignAgentMetrics(esClient, agents);
@@ -112,6 +114,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
     agents: {
       terms: {
         field: 'elastic_agent.id',
+        size: AGGREGATION_MAX_SIZE,
       },
       aggs: {
         sum_memory_size: {
@@ -127,6 +130,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
         processes: {
           terms: {
             field: 'elastic_agent.process',
+            size: AGGREGATION_MAX_SIZE,
             order: {
               _count: 'desc',
             },

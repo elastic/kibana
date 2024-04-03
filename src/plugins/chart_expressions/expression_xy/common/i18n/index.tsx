@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.xAxisInterval.help', {
       defaultMessage: 'Specifies the min interval for time bar chart',
     }),
+  getMinBarHeightHelp: () =>
+    i18n.translate('expressionXY.xyVis.minBarHeight.help', {
+      defaultMessage: 'Specifies the min bar height in pixels for bar chart',
+    }),
   getSplitColumnAccessorHelp: () =>
     i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
       defaultMessage: 'Specifies split column of the xy chart',
@@ -208,6 +212,10 @@ export const strings = {
   getPaletteHelp: () =>
     i18n.translate('expressionXY.dataLayer.palette.help', {
       defaultMessage: 'Palette',
+    }),
+  getColorMappingHelp: () =>
+    i18n.translate('expressionXY.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
     }),
   getTableHelp: () =>
     i18n.translate('expressionXY.layers.table.help', {

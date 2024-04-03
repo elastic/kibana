@@ -10,8 +10,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601/api/fleet
-    description: local
+  - url: http://KIBANA_HOST:5601/api/fleet
 paths:
   /health_check:
     post:
@@ -368,6 +367,20 @@ paths:
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/zip:
@@ -516,6 +529,20 @@ paths:
           name: pkgkey
           in: path
           required: true
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/json:
@@ -689,6 +716,20 @@ paths:
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - in: query
+          name: ignoreMappingUpdateErrors
+          schema:
+            type: boolean
+            default: false
+          description: avoid erroring out on unexpected mapping update errors
+        - in: query
+          name: skipDataStreamRollover
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            skip data stream rollover during index template mapping or settings
+            update
       requestBody:
         content:
           application/json:
@@ -772,14 +813,86 @@ paths:
       operationId: delete-package
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: boolean
+          name: force
+          description: delete package even if policies used by agents
+          in: query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              deprecated: true
+              properties:
+                force:
+                  type: boolean
+  /epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
+    post:
+      summary: Authorize transforms
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        transformId:
+                          type: string
+                        success:
+                          type: boolean
+                        error:
+                          type: string
+                      required:
+                        - transformId
+                        - error
+                required:
+                  - items
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: reauthorize-transforms
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: string
+          name: pkgName
+          in: path
+          required: true
+        - schema:
+            type: string
+          name: pkgVersion
+          in: path
+          required: true
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to include prerelease packages in categories count (e.g.
+            beta, rc, preview)
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                force:
-                  type: boolean
+                transforms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      transformId:
+                        type: string
   /epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       summary: Get package file
@@ -846,6 +959,44 @@ paths:
         name: pkgName
         in: path
         required: true
+  /epm/templates/{pkgName}/{pkgVersion}/inputs:
+    get:
+      summary: Get inputs template
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-inputs-template
+      security:
+        - basicAuth: []
+    parameters:
+      - schema:
+          type: string
+        name: pkgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: pkgVersion
+        in: path
+        required: true
+      - schema:
+          type: string
+          enum:
+            - json
+            - yaml
+            - yml
+        name: format
+        description: Format of response - json or yaml
+        in: query
+      - schema:
+          type: boolean
+        name: prerelease
+        description: Specify if version is prerelease
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -1671,12 +1822,6 @@ paths:
             schema:
               type: object
               properties:
-                revoke:
-                  type: boolean
-                  description: Revokes API keys of agents
-                force:
-                  type: boolean
-                  description: Unenroll hosted agents too
                 agents:
                   oneOf:
                     - type: string
@@ -1685,6 +1830,17 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                revoke:
+                  type: boolean
+                  description: Revokes API keys of agents
+                force:
+                  type: boolean
+                  description: Unenrolls hosted agents too
+                includeInactive:
+                  type: boolean
+                  description: >-
+                    When passing agents by KQL query, unenrolls inactive agents
+                    too
               required:
                 - agents
             example:
@@ -1773,6 +1929,19 @@ paths:
       summary: Request agent diagnostics
       tags:
         - Agents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                additional_metrics:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                        enum:
+                          - CPU
       responses:
         '200':
           description: OK
@@ -1824,6 +1993,13 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                additional_metrics:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                        enum:
+                          - CPU
               required:
                 - agents
             example:
@@ -2774,7 +2950,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_create_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_create_request'
         '400':
           $ref: '#/components/responses/error'
       operationId: get-output
@@ -2821,11 +3000,45 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/output_update_request'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/output_update_request'
         '400':
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /outputs/{outputId}/health:
+    get:
+      summary: Get latest output health
+      tags:
+        - Outputs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: state of output, HEALTHY or DEGRADED
+                  message:
+                    type: string
+                    description: long message if unhealthy
+                  timestamp:
+                    type: string
+                    description: timestamp of reported state
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-output-health
+    parameters:
+      - schema:
+          type: string
+        name: outputId
+        in: path
+        required: true
   /logstash_api_keys:
     post:
       summary: Generate Logstash API key
@@ -3045,6 +3258,8 @@ paths:
                   type: string
                 is_default:
                   type: boolean
+                is_internal:
+                  type: boolean
                 host_urls:
                   type: array
                   items:
@@ -3114,6 +3329,8 @@ paths:
                 name:
                   type: string
                 is_default:
+                  type: boolean
+                is_internal:
                   type: boolean
                 host_urls:
                   type: array
@@ -3321,6 +3538,104 @@ paths:
           name: enrolToken
           in: query
           required: false
+  /uninstall_tokens:
+    get:
+      summary: List metadata for latest uninstall tokens per agent policy
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        policy_id:
+                          type: string
+                        created_at:
+                          type: string
+                      required:
+                        - id
+                        - policy_id
+                        - created_at
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-tokens
+      parameters:
+        - name: perPage
+          in: query
+          description: The number of items to return
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 5
+        - $ref: '#/components/parameters/page_index'
+        - name: policyId
+          in: query
+          description: Partial match filtering for policy IDs
+          required: false
+          schema:
+            type: string
+  /uninstall_tokens/{uninstallTokenId}:
+    get:
+      summary: Get one decrypted uninstall token by its ID
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      token:
+                        type: string
+                      policy_id:
+                        type: string
+                      created_at:
+                        type: string
+                    required:
+                      - id
+                      - token
+                      - policy_id
+                      - created_at
+                required:
+                  - item
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-token
+      parameters:
+        - name: uninstallTokenId
+          in: path
+          required: true
+          schema:
+            type: string
 components:
   securitySchemes:
     basicAuth:
@@ -3363,7 +3678,6 @@ components:
       name: kuery
       in: query
       required: false
-      deprecated: true
       schema:
         type: string
     show_inactive:
@@ -3637,6 +3951,25 @@ components:
           type: string
         install_format_schema_version:
           type: string
+        latest_install_failed_attempts:
+          description: Latest failed install errors
+          type: array
+          items:
+            type: object
+            properties:
+              created_at:
+                type: string
+              target_version:
+                type: string
+              error:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  message:
+                    type: string
+                  stack:
+                    type: string
         verification_status:
           type: string
           enum:
@@ -3676,6 +4009,7 @@ components:
         - install_started_at
         - install_source
         - verification_status
+        - latest_install_failed_attempts
     search_result:
       title: Search result
       type: object
@@ -4138,6 +4472,9 @@ components:
         force:
           type: boolean
           description: Force upgrade, skipping validation (should be used with caution)
+        skipRateLimitCheck:
+          type: boolean
+          description: Skip rate limit check for upgrade
       required:
         - agents
         - version
@@ -4179,6 +4516,9 @@ components:
         force:
           type: boolean
           description: Force upgrade, skipping validation (should be used with caution)
+        skipRateLimitCheck:
+          type: boolean
+          description: Skip rate limit check for upgrade
       required:
         - version
     agent_diagnostics:
@@ -4309,6 +4649,12 @@ components:
             enum:
               - metrics
               - logs
+        keep_monitoring_alive:
+          description: >-
+            When set to true, monitoring will be enabled but logs/metrics
+            collection will be disabled
+          type: boolean
+          nullable: true
         data_output_id:
           type: string
           nullable: true
@@ -4322,9 +4668,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         package_policies:
           description: >-
             This field is present only when retrieving a single agent policy, or
@@ -4403,9 +4749,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -4420,6 +4766,9 @@ components:
               - enabled
         is_protected:
           type: boolean
+        force:
+          type: boolean
+          description: Force agent policy creation even if packages are not verified.
       required:
         - name
         - namespace
@@ -4453,9 +4802,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -4470,6 +4819,9 @@ components:
               - enabled
         is_protected:
           type: boolean
+        force:
+          type: boolean
+          description: Force agent policy creation even if packages are not verified.
       required:
         - name
         - namespace
@@ -4683,8 +5035,10 @@ components:
           example: my description
         namespace:
           type: string
-          description: namespace by default "default"
-          example: default
+          description: >-
+            The package policy namespace. Leave blank to inherit the agent
+            policy's namespace.
+          example: customnamespace
         policy_id:
           type: string
           description: Agent policy ID where that package policy will be added
@@ -4870,6 +5224,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -4886,6 +5242,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -4930,6 +5294,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -4959,6 +5325,13 @@ components:
               type: string
             key:
               type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
         proxy_id:
           type: string
         shipper:
@@ -4990,6 +5363,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5011,7 +5389,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5019,6 +5401,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5038,10 +5424,18 @@ components:
           type: number
         broker_timeout:
           type: number
-        broker_buffer_size:
+        required_acks:
           type: number
-        broker_ack_reliability:
-          type: string
+        secrets:
+          type: object
+          properties:
+            password:
+              type: string
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - type
@@ -5057,6 +5451,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5106,22 +5502,63 @@ components:
               type: number
             loadbalance:
               type: boolean
+        secrets:
+          type: object
+          properties:
+            ssl:
+              type: object
+              properties:
+                key:
+                  type: string
       required:
         - name
         - hosts
         - type
+    output_create_request_remote_elasticsearch:
+      title: remote_elasticsearch
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        is_internal:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - remote_elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        service_token:
+          type: string
+        secrets:
+          type: object
+          properties:
+            service_token:
+              type: string
+      required:
+        - name
     output_create_request:
       title: Output
       oneOf:
         - $ref: '#/components/schemas/output_create_request_elasticsearch'
         - $ref: '#/components/schemas/output_create_request_kafka'
         - $ref: '#/components/schemas/output_create_request_logstash'
+        - $ref: '#/components/schemas/output_create_request_remote_elasticsearch'
       discriminator:
         propertyName: type
         mapping:
           elasticsearch: '#/components/schemas/output_create_request_elasticsearch'
           kafka: '#/components/schemas/output_create_request_kafka'
           logstash: '#/components/schemas/output_create_request_logstash'
+          remote_elasticsearch: '#/components/schemas/output_create_request_remote_elasticsearch'
     output_update_request_elasticsearch:
       title: elasticsearch
       type: object
@@ -5131,6 +5568,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5148,6 +5587,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5194,6 +5641,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5223,6 +5672,13 @@ components:
               type: string
             key:
               type: string
+            verification_mode:
+              type: string
+              enum:
+                - none
+                - full
+                - certificate
+                - strict
         proxy_id:
           type: string
         shipper:
@@ -5254,6 +5710,11 @@ components:
           type: string
         auth_type:
           type: string
+        connection_type:
+          type: string
+          enum:
+            - plaintext
+            - encryption
         username:
           type: string
         password:
@@ -5275,7 +5736,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5283,6 +5748,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5302,9 +5771,7 @@ components:
           type: number
         broker_timeout:
           type: number
-        broker_ack_reliability:
-          type: string
-        broker_buffer_size:
+        required_acks:
           type: number
       required:
         - name
@@ -5317,6 +5784,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5392,6 +5861,12 @@ components:
           type: string
         host:
           type: string
+        proxy_id:
+          description: >-
+            The ID of the proxy to use for this download source. See the proxies
+            API for more information.
+          type: string
+          nullable: true
       required:
         - is_default
         - name
@@ -5405,6 +5880,8 @@ components:
         name:
           type: string
         is_default:
+          type: boolean
+        is_internal:
           type: boolean
         is_preconfigured:
           type: boolean

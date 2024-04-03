@@ -8,13 +8,14 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { createServices } from './common/services';
-import { getSecurityGetStartedComponent } from './get_started';
+import { registerUpsellings } from './upselling/register_upsellings';
 import type {
   SecuritySolutionEssPluginSetup,
   SecuritySolutionEssPluginStart,
   SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStartDeps,
 } from './types';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionEssPlugin
   implements
@@ -36,10 +37,15 @@ export class SecuritySolutionEssPlugin
     core: CoreStart,
     startDeps: SecuritySolutionEssPluginStartDeps
   ): SecuritySolutionEssPluginStart {
-    const { securitySolution } = startDeps;
+    const { securitySolution, licensing } = startDeps;
     const services = createServices(core, startDeps);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+    licensing.license$.subscribe((license) => {
+      registerUpsellings(securitySolution.getUpselling(), license, services);
+    });
+
+    setOnboardingSettings(services);
+
     subscribeBreadcrumbs(services);
 
     return {};

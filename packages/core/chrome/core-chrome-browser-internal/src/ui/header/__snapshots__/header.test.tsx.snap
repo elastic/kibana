@@ -21,7 +21,7 @@ Array [
     </div>
   </div>,
   <button
-    class="euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
     tabindex="0"
     type="button"
   >
@@ -44,18 +44,19 @@ Array [
       id="globalHeaderBars"
     >
       <div
-        class="euiHeader euiHeader--dark euiHeader--fixed header__firstBar"
+        class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
         data-fixed-header="true"
+        style="inset-block-start: 0px;"
       >
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <a
               aria-label="Elastic home"
-              class="euiHeaderLogo"
+              class="chrHeaderLogo"
               data-test-subj="logo"
               href="/"
             >
@@ -88,79 +89,76 @@ Array [
           </div>
         </div>
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
         </div>
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="helpMenuButton"
               id="headerHelpMenu"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Help menu"
+                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+                type="button"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="true"
-                  aria-label="Help menu"
-                  class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
-                  type="button"
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
-                        class="euiHeaderSectionItemButton__content"
-                      >
-                        <span
-                          data-euiicon-type="help"
-                        />
-                      </span>
+                        data-euiicon-type="help"
+                      />
                     </span>
                   </span>
-                </button>
-              </div>
+                </span>
+              </button>
             </div>
           </div>
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           />
         </div>
       </div>
       <div
-        class="euiHeader euiHeader--default euiHeader--fixed header__secondBar"
+        class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
         data-fixed-header="true"
+        style="inset-block-start: 48px;"
       >
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          class="euiHeaderSection emotion-euiHeaderSection"
         >
           <div
-            class="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
+            class="euiHeaderSectionItem header__toggleNavButtonSection emotion-euiHeaderSectionItem"
           >
             <button
               aria-controls="generated-id"
               aria-expanded="false"
               aria-label="Toggle primary navigation"
               aria-pressed="false"
-              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
+              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
               data-test-subj="toggleNavButton"
               type="button"
             >
@@ -171,7 +169,7 @@ Array [
                   class="eui-textTruncate euiButtonEmpty__text"
                 >
                   <span
-                    class="euiHeaderSectionItemButton__content"
+                    class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                   >
                     <span
                       data-euiicon-type="menu"
@@ -196,7 +194,7 @@ Array [
             >
               <span
                 aria-current="page"
-                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast-euiTextColor-default"
                 data-test-subj="breadcrumb first last"
                 title="test"
               >
@@ -206,10 +204,10 @@ Array [
           </ol>
         </nav>
         <div
-          class="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--right"
+          class="euiHeaderSection emotion-euiHeaderSection-right"
         >
           <div
-            class="euiHeaderSectionItem"
+            class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <div
               data-test-subj="headerAppActionMenu"

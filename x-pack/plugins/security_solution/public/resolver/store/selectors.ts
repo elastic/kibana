@@ -21,14 +21,13 @@ import type {
 import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
-export const selectAnalyzerById = (state: State): AnalyzerById => state.analyzer.analyzerById;
+export const selectAnalyzer = (state: State): AnalyzerById => state.analyzer;
 
-export const selectAnalyzer = (state: State, id: string): ResolverState =>
-  state.analyzer.analyzerById[id];
+export const selectAnalyzerById = (state: State, id: string): ResolverState => state.analyzer[id];
 
 export const analyzerByIdSelector = createSelector(
-  selectAnalyzerById,
-  (analyzerById: AnalyzerById) => analyzerById
+  selectAnalyzer,
+  (analyzer: AnalyzerById) => analyzer
 );
 
 /**
@@ -43,6 +42,16 @@ export const projectionMatrix = composeSelectors(
 export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
 
 export const detectedBounds = composeSelectors(dataStateSelector, dataSelectors.detectedBounds);
+
+export const overriddenTimeBounds = composeSelectors(
+  dataStateSelector,
+  dataSelectors.overriddenTimeBounds
+);
+
+export const currentAppliedTimeRange = composeSelectors(
+  dataStateSelector,
+  dataSelectors.currentAppliedTimeRange
+);
 
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.

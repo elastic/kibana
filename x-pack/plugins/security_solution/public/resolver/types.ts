@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ResizeObserver } from '@juggle/resize-observer';
 import type React from 'react';
 import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
 import type { BBox } from 'rbush';
@@ -22,11 +21,8 @@ import type {
 import type { Tree } from '../../common/endpoint/generate_data';
 import type { State } from '../common/store/types';
 
-export interface AnalyzerOuterState {
-  analyzer: AnalyzerState;
-}
 export interface AnalyzerState {
-  analyzerById: AnalyzerById;
+  analyzer: AnalyzerById;
 }
 
 export interface AnalyzerById {
@@ -318,6 +314,8 @@ export interface DataState {
   };
 
   readonly detectedBounds?: TimeFilters;
+
+  readonly overriddenTimeBounds?: TimeFilters;
 
   readonly tree?: {
     /**
@@ -876,7 +874,7 @@ export interface ResolverPluginSetup {
    * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
    * All data acess (e.g. HTTP requests) are done through the store.
    */
-  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<AnalyzerState, AnyAction>;
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<AnalyzerById, AnyAction>;
 
   /**
    * The Resolver component without the required Providers.

@@ -8,8 +8,19 @@
 import { schema } from '@kbn/config-schema';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
+import { isValidNamespace } from '../../../common/services';
 
-import { PackagePolicySchema, NamespaceSchema } from './package_policy';
+import { PackagePolicySchema } from './package_policy';
+
+export const AgentPolicyNamespaceSchema = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    const namespaceValidation = isValidNamespace(value || '');
+    if (!namespaceValidation.valid && namespaceValidation.error) {
+      return namespaceValidation.error;
+    }
+  },
+});
 
 function validateNonEmptyString(val: string) {
   if (val.trim() === '') {
@@ -19,22 +30,33 @@ function validateNonEmptyString(val: string) {
 
 const TWO_WEEKS_SECONDS = 1209600;
 
+function isInteger(n: number) {
+  if (!Number.isInteger(n)) {
+    return `${n} is not a valid integer`;
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
-  namespace: NamespaceSchema,
+  namespace: AgentPolicyNamespaceSchema,
   description: schema.maybe(schema.string()),
   is_managed: schema.maybe(schema.boolean()),
   has_fleet_server: schema.maybe(schema.boolean()),
   is_default: schema.maybe(schema.boolean()),
   is_default_fleet_server: schema.maybe(schema.boolean()),
-  unenroll_timeout: schema.maybe(schema.number({ min: 0 })),
-  inactivity_timeout: schema.number({ min: 0, defaultValue: TWO_WEEKS_SECONDS }),
+  unenroll_timeout: schema.maybe(schema.number({ min: 0, validate: isInteger })),
+  inactivity_timeout: schema.number({
+    min: 0,
+    defaultValue: TWO_WEEKS_SECONDS,
+    validate: isInteger,
+  }),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(
       schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
     )
   ),
+  keep_monitoring_alive: schema.maybe(schema.boolean({ defaultValue: false })),
   data_output_id: schema.maybe(schema.nullable(schema.string())),
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
   download_source_id: schema.maybe(schema.nullable(schema.string())),
@@ -63,6 +85,7 @@ export const AgentPolicyBaseSchema = {
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
+  force: schema.maybe(schema.boolean()),
 });
 
 export const AgentPolicySchema = schema.object({

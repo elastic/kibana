@@ -7,98 +7,74 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
-
-import { TimelineId } from '../../../common/types/timeline';
-import { TimelineType } from '../../../common/types/timeline/api';
+import { NewTimelineButton } from '../components/new_timeline';
+import { TimelineType } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
-import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
-import { NewTemplateTimeline } from '../components/timeline/properties/new_template_timeline';
-import { NewTimeline } from '../components/timeline/properties/helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { LandingPageComponent } from '../../common/components/landing_page';
-
-const TimelinesContainer = styled.div`
-  width: 100%;
-`;
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-export const TimelinesPageComponent: React.FC = () => {
+export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
-  const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
-  const onImportTimelineBtnClick = useCallback(() => {
-    setImportDataModalToggle(true);
-  }, [setImportDataModalToggle]);
   const { indicesExist } = useSourcererDataView();
-
   const capabilitiesCanUserCRUD: boolean =
-    !!useKibana().services.application.capabilities.siem.crud;
+    !!useKibana().services?.application?.capabilities?.siem?.crud;
+
+  const [isImportDataModalOpen, setImportDataModal] = useState<boolean>(false);
+  const openImportModal = useCallback(() => {
+    setImportDataModal(true);
+  }, [setImportDataModal]);
+
+  const timelineType: TimelineType =
+    tabName === TimelineType.default ? TimelineType.default : TimelineType.template;
 
   return (
     <>
       {indicesExist ? (
-        <>
-          <SecuritySolutionPageWrapper>
-            <HeaderPage title={i18n.PAGE_TITLE}>
-              {capabilitiesCanUserCRUD && (
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiButton
-                      iconType="indexOpen"
-                      onClick={onImportTimelineBtnClick}
-                      data-test-subj="open-import-data-modal-btn"
-                    >
-                      {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  {tabName === TimelineType.default ? (
-                    <EuiFlexItem>
-                      <NewTimeline
-                        timelineId={TimelineId.active}
-                        outline={true}
-                        data-test-subj="create-default-btn"
-                      />
-                    </EuiFlexItem>
-                  ) : (
-                    <EuiFlexItem>
-                      <NewTemplateTimeline
-                        outline={true}
-                        title={NEW_TEMPLATE_TIMELINE}
-                        data-test-subj="create-template-btn"
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              )}
-            </HeaderPage>
+        <SecuritySolutionPageWrapper>
+          <HeaderPage title={i18n.PAGE_TITLE}>
+            {capabilitiesCanUserCRUD && (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiButton
+                    iconType="indexOpen"
+                    onClick={openImportModal}
+                    data-test-subj="timelines-page-open-import-data"
+                  >
+                    {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem data-test-subj="timelines-page-new">
+                  <NewTimelineButton type={timelineType} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </HeaderPage>
 
-            <TimelinesContainer data-test-subj="timelines-container">
-              <StatefulOpenTimeline
-                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                isModal={false}
-                importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
-                setImportDataModalToggle={setImportDataModalToggle}
-                title={i18n.ALL_TIMELINES_PANEL_TITLE}
-                data-test-subj="stateful-open-timeline"
-              />
-            </TimelinesContainer>
-          </SecuritySolutionPageWrapper>
-        </>
+          <StatefulOpenTimeline
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            isModal={false}
+            importDataModalToggle={isImportDataModalOpen && capabilitiesCanUserCRUD}
+            setImportDataModalToggle={setImportDataModal}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
+            data-test-subj="stateful-open-timeline"
+          />
+        </SecuritySolutionPageWrapper>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />
     </>
   );
-};
+});
 
-export const TimelinesPage = React.memo(TimelinesPageComponent);
+TimelinesPage.displayName = 'TimelinesPage';

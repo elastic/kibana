@@ -7,29 +7,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
-  emptyState: {
-    getBadge: () =>
-      i18n.translate('controls.controlGroup.emptyState.badgeText', {
-        defaultMessage: 'New',
+  invalidControlWarning: {
+    getTourTitle: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.tourStepTitle.default', {
+        defaultMessage: 'Invalid selections are no longer ignored',
       }),
-    getCallToAction: () =>
-      i18n.translate('controls.controlGroup.emptyState.callToAction', {
-        defaultMessage:
-          'Filtering your data just got better with Controls, letting you display only the data you want to explore.',
-      }),
-    getAddControlButtonTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
-        defaultMessage: 'Add control',
-      }),
-    getTwoLineLoadingTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
-        defaultMessage: '...',
-      }),
+    getTourContent: (controlType: string) => {
+      switch (controlType) {
+        case RANGE_SLIDER_CONTROL: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepContent.rangeSlider',
+            {
+              defaultMessage: 'The selected range is returning no results. Try changing the range.',
+            }
+          );
+        }
+        default: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepContent.default',
+            {
+              defaultMessage:
+                'Some selections are returning no results. Try changing the selections.',
+            }
+          );
+        }
+      }
+    },
+
     getDismissButton: () =>
-      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
+      i18n.translate('controls.controlGroup.invalidControlWarning.dismissButtonLabel', {
         defaultMessage: 'Dismiss',
+      }),
+    getSuppressTourLabel: () =>
+      i18n.translate('controls.controlGroup.invalidControlWarning.suppressTourLabel', {
+        defaultMessage: "Don't show again",
       }),
   },
   manageControl: {
@@ -58,10 +72,6 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewTitle', {
           defaultMessage: 'Data view',
         }),
-      noControlTypeMessage: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.noControlTypeMessage', {
-          defaultMessage: 'No field selected yet',
-        }),
       getFieldTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
           defaultMessage: 'Field',
@@ -70,6 +80,46 @@ export const ControlGroupStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.controlTypesTitle', {
           defaultMessage: 'Control type',
         }),
+      getControlTypeErrorMessage: ({
+        fieldSelected,
+        controlType,
+      }: {
+        fieldSelected?: boolean;
+        controlType?: string;
+      }) => {
+        if (!fieldSelected) {
+          return i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
+            {
+              defaultMessage: 'Select a field first.',
+            }
+          );
+        }
+
+        switch (controlType) {
+          /**
+           * Note that options list controls are currently compatible with every field type; so, there is no
+           * need to have a special error message for these.
+           */
+          case RANGE_SLIDER_CONTROL: {
+            return i18n.translate(
+              'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.rangeSlider',
+              {
+                defaultMessage: 'Range sliders are only compatible with number fields.',
+              }
+            );
+          }
+          default: {
+            /** This shouldn't ever happen - but, adding just in case as a fallback. */
+            return i18n.translate(
+              'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.default',
+              {
+                defaultMessage: 'Select a compatible control type.',
+              }
+            );
+          }
+        }
+      },
     },
     displaySettings: {
       getFormGroupTitle: () =>
@@ -122,6 +172,14 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.addControl', {
         defaultMessage: 'Add control',
       }),
+    getApplyButtonTitle: (applyResetButtonsEnabled: boolean) =>
+      applyResetButtonsEnabled
+        ? i18n.translate('controls.controlGroup.management.applyButtonTooltip.enabled', {
+            defaultMessage: 'Apply selections',
+          })
+        : i18n.translate('controls.controlGroup.management.applyButtonTooltip.disabled', {
+            defaultMessage: 'No new selections to apply',
+          }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Control settings',
@@ -232,53 +290,56 @@ export const ControlGroupStrings = {
           defaultMessage: 'Cancel',
         }),
     },
-    validateSelections: {
-      getValidateSelectionsTitle: () =>
-        i18n.translate('controls.controlGroup.management.validate.title', {
-          defaultMessage: 'Validate user selections',
+    selectionSettings: {
+      getSelectionSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.selectionSettings', {
+          defaultMessage: 'Selections',
         }),
-      getValidateSelectionsSubTitle: () =>
-        i18n.translate('controls.controlGroup.management.validate.subtitle', {
-          defaultMessage:
-            'Automatically ignore any control selection that would result in no data.',
-        }),
+      validateSelections: {
+        getValidateSelectionsTitle: () =>
+          i18n.translate('controls.controlGroup.management.validate.title', {
+            defaultMessage: 'Validate user selections',
+          }),
+        getValidateSelectionsTooltip: () =>
+          i18n.translate('controls.controlGroup.management.validate.tooltip', {
+            defaultMessage: 'Highlight control selections that result in no data.',
+          }),
+      },
+      controlChaining: {
+        getHierarchyTitle: () =>
+          i18n.translate('controls.controlGroup.management.hierarchy.title', {
+            defaultMessage: 'Chain controls',
+          }),
+        getHierarchyTooltip: () =>
+          i18n.translate('controls.controlGroup.management.hierarchy.tooltip', {
+            defaultMessage:
+              'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+          }),
+      },
+      showApplySelections: {
+        getShowApplySelectionsTitle: () =>
+          i18n.translate('controls.controlGroup.management.showApplySelections.title', {
+            defaultMessage: 'Apply selections automatically',
+          }),
+        getShowApplySelectionsTooltip: () =>
+          i18n.translate('controls.controlGroup.management.showApplySelections.tooltip', {
+            defaultMessage:
+              'If disabled, control selections will only be applied after clicking apply.',
+          }),
+      },
     },
-    controlChaining: {
-      getHierarchyTitle: () =>
-        i18n.translate('controls.controlGroup.management.hierarchy.title', {
-          defaultMessage: 'Chain controls',
+    filteringSettings: {
+      getFilteringSettingsTitle: () =>
+        i18n.translate('controls.controlGroup.management.filteringSettings', {
+          defaultMessage: 'Filtering',
         }),
-      getHierarchySubTitle: () =>
-        i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
-          defaultMessage:
-            'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+      getUseGlobalFiltersTitle: () =>
+        i18n.translate('controls.controlGroup.management.filtering.useGlobalFilters', {
+          defaultMessage: 'Apply global filters to controls',
         }),
-    },
-    querySync: {
-      getQuerySettingsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.searchSettingsTitle', {
-          defaultMessage: 'Sync with query bar',
-        }),
-      getQuerySettingsSubtitle: () =>
-        i18n.translate('controls.controlGroup.management.query.useAllSearchSettingsTitle', {
-          defaultMessage:
-            'Keeps the control group in sync with the query bar by applying time range, filter pills, and queries from the query bar',
-        }),
-      getAdvancedSettingsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.advancedSettings', {
-          defaultMessage: 'Advanced',
-        }),
-      getIgnoreTimerangeTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreTimerange', {
-          defaultMessage: 'Ignore timerange',
-        }),
-      getIgnoreQueryTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreQuery', {
-          defaultMessage: 'Ignore query bar',
-        }),
-      getIgnoreFilterPillsTitle: () =>
-        i18n.translate('controls.controlGroup.management.query.ignoreFilterPills', {
-          defaultMessage: 'Ignore filter pills',
+      getUseGlobalTimeRangeTitle: () =>
+        i18n.translate('controls.controlGroup.management.filtering.useGlobalTimeRange', {
+          defaultMessage: 'Apply global time range to controls',
         }),
     },
   },

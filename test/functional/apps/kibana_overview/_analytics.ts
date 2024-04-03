@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  // FLAKY https://github.com/elastic/kibana/issues/135089
-  describe.skip('overview page - Analytics apps', function describeIndexTests() {
+  describe('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
@@ -34,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    const apps = ['dashboard', 'discover', 'canvas', 'maps', 'ml'];
+    const apps = ['dashboards', 'discover', 'canvas', 'maps', 'ml'];
 
     it('should display Analytics apps cards', async () => {
       const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
@@ -47,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       for (let i = 0; i < apps.length; i++) {
-        verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
+        await verifyImageUrl(kbnOverviewAppsCards[i], `kibana_${apps[i]}_light.svg`);
       }
     });
 

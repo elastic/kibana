@@ -5,34 +5,45 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { CommentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
-import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
+import type { LensProps } from '@kbn/cases-plugin/public/types';
+import { APP_ID } from '../../../../common';
+import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
-
-import type { LensAttributes } from './types';
 
 export interface UseAddToNewCaseProps {
   onClick?: () => void;
-  timeRange: { from: string; to: string } | null;
-  lensAttributes: LensAttributes | null;
+  lensAttributes: LensProps['attributes'] | null;
+  timeRange: LensProps['timeRange'] | null;
+  lensMetadata?: LensProps['metadata'];
 }
 
-export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddToNewCaseProps) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
+export const useAddToNewCase = ({
+  onClick,
+  timeRange,
+  lensAttributes,
+  lensMetadata,
+}: UseAddToNewCaseProps) => {
   const { cases } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
   const attachments = useMemo(() => {
     return [
       {
-        persistableStateAttachmentState: { attributes: lensAttributes, timeRange },
+        persistableStateAttachmentState: {
+          attributes: lensAttributes,
+          timeRange,
+          metadata: lensMetadata,
+        },
         persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-        type: CommentType.persistableState as const,
+        type: AttachmentType.persistableState as const,
       },
     ] as CaseAttachmentsWithoutOwner;
-  }, [lensAttributes, timeRange]);
+  }, [lensAttributes, lensMetadata, timeRange]);
 
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
+  const { open: openCreateCaseFlyout } = cases.hooks.useCasesAddToNewCaseFlyout({
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 
@@ -41,8 +52,8 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
       onClick();
     }
 
-    createCaseFlyout.open({ attachments });
-  }, [attachments, createCaseFlyout, onClick]);
+    openCreateCaseFlyout({ attachments });
+  }, [attachments, openCreateCaseFlyout, onClick]);
 
   return {
     onAddToNewCaseClicked,

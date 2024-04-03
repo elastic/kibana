@@ -88,11 +88,12 @@ export function getActionType(): TorqActionType {
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
-  return renderMustacheObject(params, variables);
+  return renderMustacheObject(logger, params, variables);
 }
 
 function validateActionTypeConfig(
@@ -366,7 +367,6 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
 function retryResultSeconds(
   actionId: string,
   serviceMessage: string,
-
   retryAfter: number
 ): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;

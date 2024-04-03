@@ -9,7 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
   ],
   "exclude": [
     "target/**/*"
@@ -18,7 +18,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/management-plugin",
-    "@kbn/shared-ux-chrome-navigation",
     "@kbn/doc-links",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
@@ -27,8 +26,25 @@
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
-    "@kbn/ml-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
+    "@kbn/search-api-panels",
+    "@kbn/search-index-documents",
+    "@kbn/serverless-search-settings",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-connectors",
+    "@kbn/shared-ux-router",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-types",
+    "@kbn/code-editor",
+    "@kbn/console-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/discover-plugin",
+    "@kbn/search-connectors-plugin",
   ]
 }

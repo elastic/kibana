@@ -47,9 +47,7 @@ export const filterEventsAgainstList = async <T>({
     );
 
     if (!atLeastOneLargeValueList) {
-      ruleExecutionLogger.debug(
-        'no exception items of type list found - returning original search result'
-      );
+      ruleExecutionLogger.debug('No exception items of type list found - return unfiltered events');
       return [events, []];
     }
 

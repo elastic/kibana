@@ -10,7 +10,10 @@ import {
   registerBootstrapRouteMock,
   bootstrapRendererMock,
   getSettingValueMock,
-  getStylesheetPathsMock,
+  getCommonStylesheetPathsMock,
+  getThemeStylesheetPathsMock,
+  getScriptPathsMock,
+  getBrowserLoggingConfigMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -32,6 +35,7 @@ const INJECTED_METADATA = {
   version: expect.any(String),
   branch: expect.any(String),
   buildNumber: expect.any(Number),
+  logging: expect.any(Object),
   env: {
     mode: {
       name: expect.any(String),
@@ -45,6 +49,7 @@ const INJECTED_METADATA = {
       dist: expect.any(Boolean),
       version: expect.any(String),
       buildDate: new Date(BUILD_DATE).toISOString(),
+      buildFlavor: expect.any(String),
     },
   },
 };
@@ -164,7 +169,7 @@ function renderTestCases(
       expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
     });
 
-    it('calls `getStylesheetPaths` with the correct parameters', async () => {
+    it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
           return true;
@@ -175,13 +180,83 @@ function renderTestCases(
       const [render] = await getRender();
       await render(createKibanaRequest(), uiSettings);
 
-      expect(getStylesheetPathsMock).toHaveBeenCalledTimes(1);
-      expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+      expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
+      expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
+        baseHref: '/mock-server-basepath',
+      });
+    });
+
+    it('calls `getScriptPaths` with the correct parameters', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getScriptPathsMock).toHaveBeenCalledTimes(1);
+      expect(getScriptPathsMock).toHaveBeenCalledWith({
+        darkMode: true,
+        baseHref: '/mock-server-basepath',
+      });
+    });
+
+    it('calls `getThemeStylesheetPaths` with the correct parameters', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) => {
+        if (settingName === 'theme:darkMode') {
+          return true;
+        }
+        return settingName;
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getThemeStylesheetPathsMock).toHaveBeenCalledTimes(2);
+      expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         themeVersion: 'v8',
-        basePath: '/mock-server-basepath',
-        buildNum: expect.any(Number),
+        baseHref: '/mock-server-basepath',
       });
+      expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
+        darkMode: false,
+        themeVersion: 'v8',
+        baseHref: '/mock-server-basepath',
+      });
+    });
+
+    it('renders "core" CDN url injected', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+      (mockRenderingPrebootDeps.http.staticAssets.getHrefBase as jest.Mock).mockImplementation(
+        () => 'http://foo.bar:1773'
+      );
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" with logging config injected', async () => {
+      const loggingConfig = {
+        root: {
+          level: 'info',
+        },
+      };
+      getBrowserLoggingConfigMock.mockReturnValue(loggingConfig);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.logging).toEqual(loggingConfig);
     });
   });
 }
@@ -229,11 +304,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
 
@@ -255,11 +329,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
 
@@ -279,11 +352,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
 
@@ -303,11 +375,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
 
@@ -327,11 +398,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
 
@@ -351,11 +421,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
 
@@ -375,11 +444,10 @@ function renderDarkModeTestCases(
         const [render] = await getRender();
         await render(createKibanaRequest(), uiSettings);
 
-        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+        expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
-          buildNum: expect.any(Number),
+          baseHref: '/mock-server-basepath',
         });
       });
     });
@@ -403,7 +471,10 @@ describe('RenderingService', () => {
     service = new RenderingService(mockRenderingServiceParams);
 
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
-    getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getCommonStylesheetPathsMock.mockReturnValue(['/common-1.css']);
+    getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getScriptPathsMock.mockReturnValue(['/script-1.js']);
+    getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
   });
 
   describe('preboot()', () => {

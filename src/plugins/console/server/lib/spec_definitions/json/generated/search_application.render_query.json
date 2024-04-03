@@ -6,6 +6,10 @@
     "patterns": [
       "_application/search_application/{name}/_render_query"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-application-render-query.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-application-render-query.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

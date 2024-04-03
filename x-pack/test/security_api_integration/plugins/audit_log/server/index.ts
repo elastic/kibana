@@ -7,4 +7,4 @@
 
 import { AuditTrailTestPlugin } from './plugin';
 
-export const plugin = () => new AuditTrailTestPlugin();
+export const plugin = async () => new AuditTrailTestPlugin();

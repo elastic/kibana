@@ -24,25 +24,29 @@ import {
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
 import {
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
-} from '../../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
-} from '../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../common/api/detection_engine/rule_management/mocks';
 
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
-import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import type {
+  QuerySignalsSchemaDecoded,
+  SetSignalsStatusSchemaDecoded,
+} from '../../../../../common/api/detection_engine/signals';
+import {
+  getFinalizeSignalsMigrationSchemaMock,
+  getSignalsMigrationStatusSchemaMock,
+} from '../../../../../common/api/detection_engine/signals_migration/mocks';
 
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleNotificationAlertType } from '../../rule_actions_legacy';
+import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 
@@ -348,7 +352,10 @@ export const nonRuleAlert = () => ({
   alertTypeId: 'something',
 });
 
-export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> => ({
+export const getRuleMock = <T extends RuleParams>(
+  params: T,
+  rewrites?: Partial<SanitizedRule<T>>
+): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [],
@@ -373,6 +380,7 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   revision: 0,
+  ...rewrites,
 });
 
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
@@ -385,38 +393,23 @@ export const getMockPrivilegesResult = () => ({
   has_all_requested: false,
   cluster: {
     monitor_ml: true,
-    manage_ccr: false,
     manage_index_templates: true,
-    monitor_watcher: true,
     monitor_transform: true,
-    read_ilm: true,
     manage_api_key: false,
     manage_security: false,
     manage_own_api_key: false,
-    manage_saml: false,
     all: false,
-    manage_ilm: true,
-    manage_ingest_pipelines: true,
-    read_ccr: false,
-    manage_rollup: true,
     monitor: true,
-    manage_watcher: true,
     manage: true,
     manage_transform: true,
-    manage_token: false,
     manage_ml: true,
     manage_pipeline: true,
-    monitor_rollup: true,
-    transport_client: true,
-    create_snapshot: true,
   },
   index: {
     '.siem-signals-test-space': {
       all: false,
-      manage_ilm: true,
       read: false,
       create_index: true,
-      read_cross_cluster: false,
       index: false,
       monitor: true,
       delete: false,
@@ -425,8 +418,6 @@ export const getMockPrivilegesResult = () => ({
       create_doc: false,
       view_index_metadata: true,
       create: false,
-      manage_follow_index: true,
-      manage_leader_index: true,
       write: false,
     },
   },
@@ -502,6 +493,11 @@ export const getSignalsMigrationStatusRequest = () =>
     query: getSignalsMigrationStatusSchemaMock(),
   });
 
+export const getMockUserProfiles = () => [
+  { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },
+  { uid: 'default-test-assignee-id-2', enabled: true, user: { username: 'user2' }, data: {} },
+];
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
@@ -511,7 +507,7 @@ export const legacyGetNotificationResult = ({
 }: {
   id?: string;
   ruleId?: string;
-} = {}): LegacyRuleNotificationAlertType => ({
+} = {}): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -558,7 +554,7 @@ export const legacyGetNotificationResult = ({
  */
 export const legacyGetFindNotificationsResultWithSingleHit = (
   ruleId = '123'
-): FindHit<LegacyRuleNotificationAlertType> => ({
+): FindHit<LegacyRuleNotificationRuleType> => ({
   page: 1,
   perPage: 1,
   total: 1,

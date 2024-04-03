@@ -20,7 +20,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Text',
     }),
     documentation: {
-      main: '/text.html',
+      main: 'text.html',
     },
     description: () => (
       <p>
@@ -49,7 +49,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Match only text',
     }),
     documentation: {
-      main: '/text.html#match-only-text-field-type',
+      main: 'text.html#match-only-text-field-type',
     },
     description: () => (
       <p>
@@ -78,7 +78,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Keyword',
     }),
     documentation: {
-      main: '/keyword.html',
+      main: 'keyword.html',
     },
     description: () => (
       <p>
@@ -107,7 +107,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Constant keyword',
     }),
     documentation: {
-      main: '/keyword.html#constant-keyword-field-type',
+      main: 'keyword.html#constant-keyword-field-type',
     },
     description: () => (
       <p>
@@ -127,13 +127,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Numeric',
     }),
     documentation: {
-      main: '/number.html',
+      main: 'number.html',
     },
     subTypes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericSubtypeDescription', {
         defaultMessage: 'Numeric type',
       }),
-      types: ['byte', 'double', 'float', 'half_float', 'integer', 'long', 'scaled_float', 'short'],
+      types: [
+        'byte',
+        'double',
+        'float',
+        'half_float',
+        'integer',
+        'long',
+        'scaled_float',
+        'short',
+        'unsigned_long',
+      ],
     },
   },
   byte: {
@@ -187,6 +197,28 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
             maxValue: (
               <EuiCode>
                 2<sup className="eui-alignTop">31</sup>-1
+              </EuiCode>
+            ),
+          }}
+        />
+      </p>
+    ),
+  },
+  unsigned_long: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.unsignedLongDescription', {
+      defaultMessage: 'Unsigned long',
+    }),
+    value: 'unsigned_long',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.unsignedLongLongDescription"
+          defaultMessage="Unsigned long fields accept an unsigned 64-bit integer with a minimum value of {minValue} and a maximum value of {maxValue}."
+          values={{
+            minValue: <EuiCode>0</EuiCode>,
+            maxValue: (
+              <EuiCode>
+                2<sup className="eui-alignTop">64</sup>-1
               </EuiCode>
             ),
           }}
@@ -290,7 +322,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'date',
     documentation: {
-      main: '/date.html',
+      main: 'date.html',
     },
     description: () => (
       <p>
@@ -307,7 +339,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'date_nanos',
     documentation: {
-      main: '/date_nanos.html',
+      main: 'date_nanos.html',
     },
     description: () => (
       <p>
@@ -336,7 +368,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'binary',
     documentation: {
-      main: '/binary.html',
+      main: 'binary.html',
     },
     description: () => (
       <p>
@@ -353,7 +385,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'ip',
     documentation: {
-      main: '/ip.html',
+      main: 'ip.html',
     },
     description: () => (
       <p>
@@ -382,7 +414,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'boolean',
     documentation: {
-      main: '/boolean.html',
+      main: 'boolean.html',
     },
     description: () => (
       <p>
@@ -403,7 +435,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'range',
     documentation: {
-      main: '/range.html',
+      main: 'range.html',
     },
     subTypes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeSubtypeDescription', {
@@ -425,7 +457,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'object',
     documentation: {
-      main: '/object.html',
+      main: 'object.html',
     },
     description: () => (
       <p>
@@ -454,7 +486,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'nested',
     documentation: {
-      main: '/nested.html',
+      main: 'nested.html',
     },
     description: () => (
       <p>
@@ -483,7 +515,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'rank_feature',
     documentation: {
-      main: '/rank-feature.html',
+      main: 'rank-feature.html',
     },
     description: () => (
       <p>
@@ -512,7 +544,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'rank_features',
     documentation: {
-      main: '/rank-features.html',
+      main: 'rank-features.html',
     },
     description: () => (
       <p>
@@ -541,7 +573,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'dense_vector',
     documentation: {
-      main: '/dense-vector.html',
+      main: 'dense-vector.html',
     },
     description: () => (
       <p>
@@ -642,7 +674,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'geo_point',
     documentation: {
-      main: '/geo-point.html',
+      main: 'geo-point.html',
     },
     description: () => (
       <p>
@@ -659,7 +691,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'geo_shape',
     documentation: {
-      main: '/geo-shape.html',
+      main: 'geo-shape.html',
       learnMore: '/geo-shape.html#geoshape-indexing-approach',
     },
     description: () => (
@@ -692,7 +724,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'completion',
     documentation: {
-      main: '/search-suggesters.html#completion-suggester',
+      main: 'search-suggesters.html#completion-suggester',
     },
     description: () => (
       <p>
@@ -709,7 +741,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'token_count',
     documentation: {
-      main: '/token-count.html',
+      main: 'token-count.html',
     },
     description: () => (
       <p>
@@ -726,7 +758,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'percolator',
     documentation: {
-      main: '/percolator.html',
+      main: 'percolator.html',
     },
     description: () => (
       <p>
@@ -755,7 +787,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'histogram',
     documentation: {
-      main: '/histogram.html',
+      main: 'histogram.html',
     },
     description: () => (
       <p>
@@ -772,7 +804,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'join',
     documentation: {
-      main: '/parent-join.html',
+      main: 'parent-join.html',
     },
     description: () => (
       <p>
@@ -789,7 +821,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'alias',
     documentation: {
-      main: '/alias.html',
+      main: 'alias.html',
     },
     description: () => (
       <p>
@@ -806,7 +838,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'search_as_you_type',
     documentation: {
-      main: '/search-as-you-type.html',
+      main: 'search-as-you-type.html',
     },
     description: () => (
       <p>
@@ -823,7 +855,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'flattened',
     documentation: {
-      main: '/flattened.html',
+      main: 'flattened.html',
     },
     description: () => (
       <p>
@@ -840,7 +872,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'shape',
     documentation: {
-      main: '/shape.html',
+      main: 'shape.html',
     },
     description: () => (
       <p>
@@ -851,13 +883,30 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  sparse_vector: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.sparseVectorDescription', {
+      defaultMessage: 'Sparse vector',
+    }),
+    value: 'sparse_vector',
+    documentation: {
+      main: 'sparse-vector.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.sparseVectorLongDescription"
+          defaultMessage="Sparse vector fields index features and weights, useful for document scoring."
+        />
+      </p>
+    ),
+  },
   point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
       defaultMessage: 'Point',
     }),
     value: 'point',
     documentation: {
-      main: '/point.html',
+      main: 'point.html',
     },
     description: () => (
       <p>
@@ -877,7 +926,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'version',
     documentation: {
-      main: '/version.html',
+      main: 'version.html',
     },
     description: () => (
       <p>
@@ -906,7 +955,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'wildcard',
     documentation: {
-      main: '/keyword.html#wildcard-field-type',
+      main: 'keyword.html#wildcard-field-type',
     },
     description: () => (
       <p>
@@ -958,6 +1007,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'shape',
+  'sparse_vector',
   'text',
   'token_count',
   'histogram',

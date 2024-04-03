@@ -12,10 +12,8 @@ import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CoreStart, CoreSetup, DocLinksStart } from '@kbn/core/public';
 
-import {
-  telemetryManagementSectionWrapper,
-  TelemetryManagementSectionWrapperProps,
-} from './components/telemetry_management_section_wrapper';
+import { telemetryManagementSectionWrapper } from './components/telemetry_management_section_wrapper';
+import { SEARCH_TERMS } from '../common';
 
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;
@@ -40,20 +38,22 @@ export class TelemetryManagementSectionPlugin {
 
     const ApplicationUsageTrackingProvider =
       usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-    advancedSettings.component.register(
-      advancedSettings.component.componentType.PAGE_FOOTER_COMPONENT,
-      (props) => {
-        return (
-          <ApplicationUsageTrackingProvider>
-            {telemetryManagementSectionWrapper(
-              telemetryService,
-              docLinksLinks
-            )(props as TelemetryManagementSectionWrapperProps)}
-          </ApplicationUsageTrackingProvider>
-        );
-      },
-      true
-    );
+
+    const queryMatch = (query: string) => {
+      const searchTerm = query.toLowerCase();
+      return (
+        telemetryService.getCanChangeOptInStatus() &&
+        SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
+      );
+    };
+
+    advancedSettings.addGlobalSection((props) => {
+      return (
+        <ApplicationUsageTrackingProvider>
+          {telemetryManagementSectionWrapper(telemetryService, docLinksLinks)(props)}
+        </ApplicationUsageTrackingProvider>
+      );
+    }, queryMatch);
 
     return {};
   }

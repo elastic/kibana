@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -21,6 +21,7 @@ import {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 
 /** @internal */
 export interface InstanceInfo {
@@ -128,11 +129,13 @@ export function createPluginInitializerContext({
  * @param plugin The plugin we're building these values for.
  * @internal
  */
-export function createPluginPrebootSetupContext(
-  coreContext: CoreContext,
-  deps: PluginsServicePrebootSetupDeps,
-  plugin: PluginWrapper
-): CorePreboot {
+export function createPluginPrebootSetupContext({
+  deps,
+  plugin,
+}: {
+  deps: PluginsServicePrebootSetupDeps;
+  plugin: PluginWrapper;
+}): CorePreboot {
   return {
     analytics: {
       optIn: deps.analytics.optIn,
@@ -174,11 +177,15 @@ export function createPluginPrebootSetupContext(
  * @param deps Dependencies that Plugins services gets during setup.
  * @internal
  */
-export function createPluginSetupContext<TPlugin, TPluginDependencies>(
-  coreContext: CoreContext,
-  deps: PluginsServiceSetupDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): CoreSetup {
+export function createPluginSetupContext<TPlugin, TPluginDependencies>({
+  deps,
+  plugin,
+  runtimeResolver,
+}: {
+  deps: PluginsServiceSetupDeps;
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>;
+  runtimeResolver: IRuntimePluginContractResolver;
+}): CoreSetup {
   const router = deps.http.createRouter('', plugin.opaqueId);
 
   return {
@@ -228,6 +235,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
+        getPluginAssetHref: (assetPath: string) =>
+          deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
+      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -246,7 +258,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
-      getAllIndices: deps.savedObjects.getAllIndices,
     },
     status: {
       core$: deps.status.core$,
@@ -259,6 +270,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       register: deps.uiSettings.register,
       registerGlobal: deps.uiSettings.registerGlobal,
+      setAllowlist: deps.uiSettings.setAllowlist,
     },
     userSettings: {
       setUserProfileSettings: deps.userSettings.setUserProfileSettings,
@@ -267,6 +279,13 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+    },
+    plugins: {
+      onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
+      onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    security: {
+      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
     },
   };
 }
@@ -282,12 +301,16 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
  * @param plugin The plugin we're building these values for.
  * @param deps Dependencies that Plugins services gets during start.
  * @internal
- */
-export function createPluginStartContext<TPlugin, TPluginDependencies>(
-  coreContext: CoreContext,
-  deps: PluginsServiceStartDeps,
-  plugin: PluginWrapper<TPlugin, TPluginDependencies>
-): CoreStart {
+ */ //
+export function createPluginStartContext<TPlugin, TPluginDependencies>({
+  plugin,
+  deps,
+  runtimeResolver,
+}: {
+  deps: PluginsServiceStartDeps;
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>;
+  runtimeResolver: IRuntimePluginContractResolver;
+}): CoreStart {
   return {
     analytics: {
       optIn: deps.analytics.optIn,
@@ -302,12 +325,18 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
+      getCapabilities: deps.elasticsearch.getCapabilities,
     },
     executionContext: deps.executionContext,
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
+        getPluginAssetHref: (assetPath: string) =>
+          deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
+      },
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
@@ -331,5 +360,11 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
+    plugins: {
+      onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    security: {
+      authc: deps.security.authc,
+    },
   };
 }

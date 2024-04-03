@@ -7,6 +7,8 @@ properties:
     type: boolean
   is_default_monitoring:
     type: boolean
+  is_internal:
+    type: boolean
   name:
     type: string
   type:
@@ -54,6 +56,14 @@ properties:
         type: number
       loadbalance:
         type: boolean
+  secrets:
+      type: object
+      properties:
+        ssl:
+          type: object
+          properties:
+            key:
+              type: string
 required:
   - name
   - hosts

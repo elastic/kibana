@@ -8,7 +8,6 @@
 import React, { createContext, useContext } from 'react';
 import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   ApplicationStart,
@@ -18,14 +17,19 @@ import {
   DocLinksStart,
   IUiSettingsClient,
   ExecutionContextStart,
+  HttpSetup,
 } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
+import { IndexManagementBreadcrumb } from './services/breadcrumbs';
 
-const AppContext = createContext<AppDependencies | undefined>(undefined);
+export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   core: {
@@ -33,10 +37,14 @@ export interface AppDependencies {
     getUrlForApp: ApplicationStart['getUrlForApp'];
     executionContext: ExecutionContextStart;
     application: ApplicationStart;
+    http: HttpSetup;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
     isFleetEnabled: boolean;
+    share: SharePluginStart;
+    cloud?: CloudSetup;
+    console?: ConsolePluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -44,8 +52,15 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  config: {
+    enableIndexActions: boolean;
+    enableLegacyTemplates: boolean;
+    enableIndexStats: boolean;
+    editableIndexSettings: 'all' | 'limited';
+    enableDataStreamsStorageColumn: boolean;
+  };
   history: ScopedHistory;
-  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
   url: SharePluginStart['url'];

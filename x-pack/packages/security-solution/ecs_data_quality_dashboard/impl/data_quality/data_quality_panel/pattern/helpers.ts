@@ -9,7 +9,7 @@ import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { orderBy } from 'lodash/fp';
+import { isEqual, orderBy } from 'lodash/fp';
 
 import type { IndexSummaryTableItem } from '../summary_table/helpers';
 import type {
@@ -46,9 +46,10 @@ export const getPhaseCount = ({
 };
 
 export const getIlmPhase = (
-  ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined
+  ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined,
+  isILMAvailable: boolean
 ): IlmPhase | undefined => {
-  if (ilmExplainRecord == null) {
+  if (ilmExplainRecord == null || !isILMAvailable) {
     return undefined;
   }
 
@@ -142,6 +143,7 @@ export const getIndexIncompatible = ({
 export const getSummaryTableItems = ({
   ilmExplain,
   indexNames,
+  isILMAvailable,
   pattern,
   patternDocsCount,
   results,
@@ -151,6 +153,7 @@ export const getSummaryTableItems = ({
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexNames: string[];
+  isILMAvailable: boolean;
   pattern: string;
   patternDocsCount: number;
   results: Record<string, DataQualityCheckResult> | undefined;
@@ -162,10 +165,14 @@ export const getSummaryTableItems = ({
     docsCount: getDocsCount({ stats, indexName }),
     incompatible: getIndexIncompatible({ indexName, results }),
     indexName,
-    ilmPhase: ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined,
+    ilmPhase:
+      isILMAvailable && ilmExplain != null
+        ? getIlmPhase(ilmExplain[indexName], isILMAvailable)
+        : undefined,
     pattern,
     patternDocsCount,
     sizeInBytes: getSizeInBytes({ stats, indexName }),
+    checkedAt: results?.[indexName]?.checkedAt,
   }));
 
   return orderBy([sortByColumn], [sortByDirection], summaryTableItems);
@@ -174,29 +181,44 @@ export const getSummaryTableItems = ({
 export const shouldCreateIndexNames = ({
   ilmExplain,
   indexNames,
+  isILMAvailable,
+  newIndexNames,
   stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexNames: string[] | undefined;
+  isILMAvailable: boolean;
+  newIndexNames: string[];
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): boolean => indexNames == null && stats != null && ilmExplain != null;
+}): boolean => {
+  return (
+    !isEqual(newIndexNames, indexNames) &&
+    stats != null &&
+    ((isILMAvailable && ilmExplain != null) || !isILMAvailable)
+  );
+};
 
 export const shouldCreatePatternRollup = ({
   error,
   ilmExplain,
+  isILMAvailable,
+  newDocsCount,
   patternRollup,
   stats,
 }: {
   error: string | null;
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
+  isILMAvailable: boolean;
+  newDocsCount: number;
   patternRollup: PatternRollup | undefined;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): boolean => {
-  if (patternRollup != null) {
-    return false; // the rollup already exists
+  if (patternRollup?.docsCount === newDocsCount) {
+    return false;
   }
 
-  const allDataLoaded: boolean = stats != null && ilmExplain != null;
+  const allDataLoaded: boolean =
+    stats != null && ((isILMAvailable && ilmExplain != null) || !isILMAvailable);
   const errorOccurred: boolean = error != null;
 
   return allDataLoaded || errorOccurred;

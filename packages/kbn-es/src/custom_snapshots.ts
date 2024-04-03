@@ -42,7 +42,7 @@ export function resolveCustomSnapshotUrl(
 
   const ext = process.platform === 'win32' ? 'zip' : 'tar.gz';
   const os = process.platform === 'win32' ? 'windows' : process.platform;
-  const name = license === 'oss' ? 'elasticsearch-oss' : 'elasticsearch';
+  const name = 'elasticsearch';
   const overrideUrl = customSnapshotUrl
     .replace('{name}', name)
     .replace('{ext}', ext)

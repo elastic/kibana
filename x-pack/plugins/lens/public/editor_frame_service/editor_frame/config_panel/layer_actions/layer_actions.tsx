@@ -145,6 +145,9 @@ const InContextMenuActions = (props: LayerActionsProps) => {
                 ? {
                     css: css`
                       color: ${euiTheme.colors[i.color]};
+                      &:hover {
+                        text-decoration-color: ${euiTheme.colors[i.color]} !important;
+                      }
                     `,
                     size: 's', // need to be explicit here as css prop will disable the default small size
                   }
@@ -186,6 +189,7 @@ export const LayerActions = (props: LayerActionsProps) => {
       alignItems="center"
       direction="row"
       justifyContent="flexEnd"
+      data-test-subj="lnsLayerActions"
     >
       {outsideListAction && (
         <EuiFlexItem grow={false}>

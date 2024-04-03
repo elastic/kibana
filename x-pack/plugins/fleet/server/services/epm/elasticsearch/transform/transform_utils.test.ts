@@ -47,6 +47,35 @@ describe('test transform_utils', () => {
       ]);
     });
 
+    test('return transform alias settings when input is an array of object', () => {
+      const aliasSettings = [
+        { alias: 'alias1', move_on_creation: true },
+        { alias: 'alias2' },
+        { alias: 'alias3', move_on_creation: false },
+      ];
+      expect(getDestinationIndexAliases(aliasSettings)).toStrictEqual([
+        { alias: 'alias1', move_on_creation: true },
+        { alias: 'alias2', move_on_creation: false },
+        { alias: 'alias3', move_on_creation: false },
+      ]);
+
+      expect(
+        getDestinationIndexAliases([
+          ...aliasSettings,
+          undefined,
+          {},
+          { invalid_object: true },
+          null,
+          'alias3.all',
+        ])
+      ).toStrictEqual([
+        { alias: 'alias1', move_on_creation: true },
+        { alias: 'alias2', move_on_creation: false },
+        { alias: 'alias3', move_on_creation: false },
+        { alias: 'alias3.all', move_on_creation: false },
+      ]);
+    });
+
     test('return transform alias settings when input is a string', () => {
       expect(getDestinationIndexAliases('alias1.latest')).toStrictEqual([
         { alias: 'alias1.latest', move_on_creation: true },

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { AuthorizationContext } from '../../../../lib/authorization';
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { SECTION_SLUG } from '../../../../common/constants';
-import { useSearchItems } from '../../../../hooks/use_search_items';
+import { useTransformCapabilities, useSearchItems } from '../../../../hooks';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 
 import { cloneActionNameText, CloneActionName } from './clone_action_name';
@@ -26,7 +25,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
 
   const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
 
-  const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
+  const { canCreateTransform } = useTransformCapabilities();
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {

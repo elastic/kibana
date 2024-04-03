@@ -5,104 +5,51 @@
  * 2.0.
  */
 
-import './palette_panel_container.scss';
-
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, MutableRefObject } from 'react';
-import {
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFocusTrap,
-  EuiOutsideClickDetector,
-  EuiPortal,
-} from '@elastic/eui';
+import React, { MutableRefObject } from 'react';
+import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
+import { FIXED_PROGRESSION } from '@kbn/coloring';
+import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
 
-export function PalettePanelContainer({
-  isOpen,
-  handleClose,
-  siblingRef,
-  children,
-}: {
-  isOpen: boolean;
-  handleClose: () => void;
+export function PalettePanelContainer(props: {
+  palette: string[];
   siblingRef: MutableRefObject<HTMLDivElement | null>;
   children?: React.ReactElement | React.ReactElement[];
+  isInlineEditing?: boolean;
+  title?: string;
 }) {
-  const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
-
-  const closeFlyout = () => {
-    handleClose();
-    setFocusTrapIsEnabled(false);
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      // without setTimeout here the flyout pushes content when animating
-      setTimeout(() => {
-        setFocusTrapIsEnabled(true);
-      }, 255);
-    }
-  }, [isOpen]);
-
-  return isOpen && siblingRef.current ? (
-    <EuiPortal insert={{ sibling: siblingRef.current, position: 'after' }}>
-      <EuiFocusTrap disabled={!focusTrapIsEnabled} clickOutsideDisables={true}>
-        <EuiOutsideClickDetector onOutsideClick={closeFlyout} isDisabled={!isOpen}>
-          <div
-            role="dialog"
-            aria-labelledby="lnsPalettePanelContainerTitle"
-            data-test-subj="lns-indexPattern-PalettePanelContainer"
-            className="lnsPalettePanelContainer"
-          >
-            <EuiFlyoutHeader hasBorder className="lnsPalettePanelContainer__header">
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-PalettePanelContainerBack"
-                    className="lnsPalettePanelContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="sortLeft"
-                    aria-label={i18n.translate('xpack.lens.table.palettePanelContainer.back', {
-                      defaultMessage: 'Back',
-                    })}
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h2
-                      id="lnsPalettePanelContainerTitle"
-                      className="lnsPalettePanelContainer__headerTitle"
-                    >
-                      <strong>
-                        {i18n.translate('xpack.lens.table.palettePanelTitle', {
-                          defaultMessage: 'Color',
-                        })}
-                      </strong>
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlyoutHeader>
-
-            {children && <div className="lnsPalettePanelContainer__content">{children}</div>}
-
-            <EuiFlyoutFooter className="lnsPalettePanelContainer__footer">
-              <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
-                {i18n.translate('xpack.lens.table.palettePanelContainer.back', {
-                  defaultMessage: 'Back',
+  return (
+    <SettingWithSiblingFlyout
+      {...props}
+      SettingTrigger={({ onClick }: { onClick: () => void }) => (
+        <>
+          <EuiFlexItem>
+            <EuiColorPaletteDisplay
+              data-test-subj="lns_dynamicColoring_edit"
+              palette={props.palette}
+              type={FIXED_PROGRESSION}
+              onClick={onClick}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.colorMapping.editColors', {
+                defaultMessage: 'Edit colors',
+              })}
+            >
+              <EuiButtonIcon
+                data-test-subj="lns_colorEditing_trigger"
+                aria-label={i18n.translate('xpack.lens.colorMapping.editColors', {
+                  defaultMessage: 'Edit colors',
                 })}
-              </EuiButtonEmpty>
-            </EuiFlyoutFooter>
-          </div>
-        </EuiOutsideClickDetector>
-      </EuiFocusTrap>
-    </EuiPortal>
-  ) : null;
+                iconType="controlsHorizontal"
+                onClick={onClick}
+                size="xs"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </>
+      )}
+    />
+  );
 }

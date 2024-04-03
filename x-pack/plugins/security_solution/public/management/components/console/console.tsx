@@ -102,20 +102,6 @@ const ConsoleWindow = styled.div`
   .font-style-italic {
     font-style: italic;
   }
-
-  .descriptionList-20_80 {
-    &.euiDescriptionList {
-      > .euiDescriptionList__title {
-        width: 20%;
-        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
-      }
-
-      > .euiDescriptionList__description {
-        width: 80%;
-        margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
-      }
-    }
-  }
 `;
 
 export const Console = memo<ConsoleProps>(

@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
@@ -175,7 +175,6 @@ const generateCommonArguments = (
   const datasource = datasourceLayers[layer.layerId];
   const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasource);
   const sortedMetricAccessors = getSortedAccessorsForGroup(datasource, layer, 'metrics');
-
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer, columnToLabelMap),
     buckets: operations
@@ -200,6 +199,7 @@ const generateCommonArguments = (
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),
     addTooltip: true,
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   };
 };
 

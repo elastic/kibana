@@ -6,7 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
@@ -43,7 +42,11 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
+import {
+  defaultFleetErrorHandler,
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+} from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import {
@@ -244,7 +247,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
-        throw new Error('Package is required');
+        throw new PackagePolicyRequestError('Package is required');
       }
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -311,7 +314,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
-    throw Boom.notFound('Package policy not found');
+    throw new PackagePolicyNotFoundError('Package policy not found');
   }
 
   if (limitedToPackages && limitedToPackages.length) {
@@ -337,7 +340,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
     ) {
       if (!pkg) {
-        throw new Error('package is required');
+        throw new PackagePolicyRequestError('Package is required');
       }
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -368,7 +371,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         ...body,
         name: body.name ?? packagePolicy.name,
         description: body.description ?? packagePolicy.description,
-        namespace: body.namespace ?? packagePolicy.namespace,
+        namespace: body.namespace ?? packagePolicy?.namespace,
         policy_id: body.policy_id ?? packagePolicy.policy_id,
         enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,
@@ -376,7 +379,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
@@ -394,6 +396,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

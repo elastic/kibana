@@ -289,6 +289,61 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reduxjstoolkit",
+            "type": "string",
+            "tags": [],
+            "label": "'@reduxjs/toolkit'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactredux",
+            "type": "string",
+            "tags": [],
+            "label": "'react-redux'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.redux",
+            "type": "string",
+            "tags": [],
+            "label": "redux",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.immer",
+            "type": "string",
+            "tags": [],
+            "label": "immer",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reselect",
+            "type": "string",
+            "tags": [],
+            "label": "reselect",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.rxjs",
             "type": "string",
             "tags": [],
@@ -296,17 +351,6 @@
             "description": [
               "/**\n   * big deps which are locked to a single version\n   */"
             ],
-            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.rxjsoperators",
-            "type": "string",
-            "tags": [],
-            "label": "'rxjs/operators'",
-            "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
@@ -401,10 +445,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.reactbeautifuldnd",
+            "id": "def-common.externals.hellopangeadnd",
             "type": "string",
             "tags": [],
-            "label": "'react-beautiful-dnd'",
+            "label": "'@hello-pangea/dnd'",
             "description": [
               "// transient dep of eui"
             ],
@@ -493,6 +537,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnsearcherrors",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/search-errors'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnstd",
             "type": "string",
             "tags": [],
@@ -508,6 +563,17 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/safer-lodash-set'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnshareduxerrorboundary",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/shared-ux-error-boundary'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
@@ -563,6 +629,17 @@
             "type": "string",
             "tags": [],
             "label": "'@tanstack/react-query-devtools'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncodeeditor",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/code-editor'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

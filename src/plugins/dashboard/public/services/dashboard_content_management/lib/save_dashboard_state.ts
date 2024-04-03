@@ -10,30 +10,32 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import {
+  controlGroupInputToRawControlGroupAttributes,
+  generateNewControlIds,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
-  controlGroupInputToRawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
-import { isFilterPinned } from '@kbn/es-query';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
 
+import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
+import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
+import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { DashboardStartDependencies } from '../../../plugin';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import {
-  extractReferences,
-  DashboardContainerInput,
-  convertPanelMapToSavedPanels,
-} from '../../../../common';
-import {
+  DashboardContentManagementRequiredServices,
   SaveDashboardProps,
   SaveDashboardReturn,
-  DashboardContentManagementRequiredServices,
+  SavedDashboardInput,
 } from '../types';
-import { DashboardStartDependencies } from '../../../plugin';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
-import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { convertDashboardVersionToNumber } from './dashboard_versioning';
 
 export const serializeControlGroupInput = (
-  controlGroupInput: DashboardContainerInput['controlGroupInput']
+  controlGroupInput: SavedDashboardInput['controlGroupInput']
 ) => {
   // only save to saved object if control group is not default
   if (
@@ -60,9 +62,9 @@ type SaveDashboardStateProps = SaveDashboardProps & {
   contentManagement: DashboardStartDependencies['contentManagement'];
   embeddable: DashboardContentManagementRequiredServices['embeddable'];
   notifications: DashboardContentManagementRequiredServices['notifications'];
+  dashboardBackup: DashboardContentManagementRequiredServices['dashboardBackup'];
   initializerContext: DashboardContentManagementRequiredServices['initializerContext'];
   savedObjectsTagging: DashboardContentManagementRequiredServices['savedObjectsTagging'];
-  dashboardSessionStorage: DashboardContentManagementRequiredServices['dashboardSessionStorage'];
 };
 
 export const saveDashboardState = async ({
@@ -71,11 +73,11 @@ export const saveDashboardState = async ({
   lastSavedId,
   saveOptions,
   currentState,
+  panelReferences,
+  dashboardBackup,
   contentManagement,
   savedObjectsTagging,
-  dashboardSessionStorage,
   notifications: { toasts },
-  initializerContext: { kibanaVersion },
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
   const {
     search: dataSearchService,
@@ -88,11 +90,9 @@ export const saveDashboardState = async ({
     tags,
     query,
     title,
-    panels,
     filters,
     timeRestore,
     description,
-    controlGroupInput,
 
     // Dashboard options
     useMargins,
@@ -101,6 +101,12 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   } = currentState;
+
+  let { panels, controlGroupInput } = currentState;
+  if (saveOptions.saveAsCopy) {
+    panels = generateNewPanelIds(panels);
+    controlGroupInput = generateNewControlIds(controlGroupInput);
+  }
 
   /**
    * Stringify filters and query into search source JSON
@@ -128,7 +134,7 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, kibanaVersion));
+  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, true));
 
   /**
    * Parse global time filter settings
@@ -146,6 +152,7 @@ export const saveDashboardState = async ({
     : undefined;
 
   const rawDashboardAttributes: DashboardAttributes = {
+    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: serializeControlGroupInput(controlGroupInput),
     kibanaSavedObjectMeta: { searchSourceJSON },
     description: description ?? '',
@@ -156,7 +163,6 @@ export const saveDashboardState = async ({
     timeFrom,
     title,
     timeTo,
-    version: 1, // todo - where does version come from? Why is it needed?
   };
 
   /**
@@ -169,9 +175,12 @@ export const saveDashboardState = async ({
     },
     { embeddablePersistableStateService: embeddable }
   );
+
   const references = savedObjectsTagging.updateTagsReferences
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
+
+  const allReferences = [...references, ...(panelReferences ?? [])];
 
   /**
    * Save the saved object using the content management
@@ -184,13 +193,18 @@ export const saveDashboardState = async ({
     >({
       contentTypeId: DASHBOARD_CONTENT_ID,
       data: attributes,
-      options: { id: idToSaveTo, references, overwrite: true },
+      options: {
+        id: idToSaveTo,
+        references: allReferences,
+        overwrite: true,
+      },
     });
     const newId = result.item.id;
 
     if (newId) {
       toasts.addSuccess({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
+        className: 'eui-textBreakWord',
         'data-test-subj': 'saveDashboardSuccess',
       });
 
@@ -198,11 +212,13 @@ export const saveDashboardState = async ({
        * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
        */
       if (newId !== lastSavedId) {
-        dashboardSessionStorage.clearState(lastSavedId);
-        return { redirectRequired: true, id: newId };
+        dashboardBackup.clearState(lastSavedId);
+        return { redirectRequired: true, id: newId, references: allReferences };
+      } else {
+        dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
       }
     }
-    return { id: newId };
+    return { id: newId, references: allReferences };
   } catch (error) {
     toasts.addDanger({
       title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),

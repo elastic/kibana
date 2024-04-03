@@ -7,14 +7,25 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
+import { getDetailedErrorMessage } from '../../errors';
+import { ROUTE_TAG_ACCEPT_JWT } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
+
+/**
+ * A type-string of the Elasticsearch JWT realm.
+ */
+const JWT_REALM_TYPE = 'jwt';
 
 interface HTTPAuthenticationProviderOptions {
   supportedSchemes: Set<string>;
+  jwt?: {
+    // When set, only routes marked with `ROUTE_TAG_ACCEPT_JWT` tag will accept JWT as a means of authentication.
+    taggedRoutesOnly: boolean;
+  };
 }
 
 /**
@@ -32,6 +43,11 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly supportedSchemes: Set<string>;
 
+  /**
+   * Options relevant to the JWT authentication.
+   */
+  private readonly jwt: HTTPAuthenticationProviderOptions['jwt'];
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     httpOptions: Readonly<HTTPAuthenticationProviderOptions>
@@ -44,6 +60,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     this.supportedSchemes = new Set(
       [...httpOptions.supportedSchemes].map((scheme) => scheme.toLowerCase())
     );
+    this.jwt = httpOptions.jwt;
   }
 
   /**
@@ -70,7 +87,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     if (!this.supportedSchemes.has(authorizationHeader.scheme.toLowerCase())) {
-      this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
+      this.logger.warn(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
 
@@ -79,10 +96,29 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(
         `Request to ${request.url.pathname}${request.url.search} has been authenticated via authorization header with "${authorizationHeader.scheme}" scheme.`
       );
+
+      // If Kibana is configured to restrict JWT authentication only to selected routes, ensure that the route is marked
+      // with the `ROUTE_TAG_ACCEPT_JWT` tag to bypass that restriction.
+      if (
+        user.authentication_realm.type === JWT_REALM_TYPE &&
+        this.jwt?.taggedRoutesOnly &&
+        !request.route.options.tags.includes(ROUTE_TAG_ACCEPT_JWT)
+      ) {
+        // Log a portion of the JWT signature to make debugging easier.
+        const jwtExcerpt = authorizationHeader.credentials.slice(-10);
+        this.logger.error(
+          `Attempted to authenticate with JWT credentials (…${jwtExcerpt}) against ${request.url.pathname}${request.url.search}, but it's not allowed. ` +
+            `Ensure that the route is defined with the "${ROUTE_TAG_ACCEPT_JWT}" tag.`
+        );
+        return AuthenticationResult.notHandled();
+      }
+
       return AuthenticationResult.succeeded(user);
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request to ${request.url.pathname}${request.url.search} via authorization header with "${authorizationHeader.scheme}" scheme: ${err.message}`
+        `Failed to authenticate request to ${request.url.pathname} via authorization header with "${
+          authorizationHeader.scheme
+        }" scheme: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }

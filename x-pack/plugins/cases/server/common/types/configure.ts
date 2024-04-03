@@ -25,7 +25,16 @@ export interface ConfigurationPersistedAttributes {
   created_by: User;
   updated_at: string | null;
   updated_by: User | null;
+  customFields?: PersistedCustomFieldsConfiguration;
 }
+
+type PersistedCustomFieldsConfiguration = Array<{
+  key: string;
+  type: string;
+  label: string;
+  required: boolean;
+  defaultValue?: string | boolean | null;
+}>;
 
 export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;

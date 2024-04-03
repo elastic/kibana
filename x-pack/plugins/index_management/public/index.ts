@@ -14,8 +14,10 @@ export const plugin = (ctx: PluginInitializerContext) => {
   return new IndexMgmtUIPlugin(ctx);
 };
 
-export type { IndexManagementPluginSetup } from './types';
+export type { IndexManagementPluginSetup, IndexManagementPluginStart } from './types';
 
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
 
 export type { Index } from '../common';
+
+export type { IndexMappingProps } from './application/sections/home/index_list/details_page/index_mapping_with_context_types';

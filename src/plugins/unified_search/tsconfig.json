@@ -15,7 +15,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/data-view-editor-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/kibana-react-plugin",
@@ -40,7 +39,14 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/text-based-languages",
     "@kbn/text-based-editor",
-    "@kbn/core-doc-links-browser"
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/ml-string-hash",
+    "@kbn/code-editor",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/react-kibana-context-render",
+    "@kbn/data-view-utils",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

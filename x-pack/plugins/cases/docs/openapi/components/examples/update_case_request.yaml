@@ -19,7 +19,19 @@ value:
       "tags": [ "tag-1" ],
       "settings": {
         "syncAlerts": true
-      }
+      },
+      "customFields": [
+        {
+          "key": "fcc6840d-eb14-42df-8aaf-232201a705ec",
+          "type": "toggle",
+          "value": false
+        },
+        {
+          "key": "d312efda-ec2b-42ec-9e2c-84981795c581",
+          "type": "text",
+          "value": "My new field value"
+        }
+      ]
     }
   ]
-}
+  }

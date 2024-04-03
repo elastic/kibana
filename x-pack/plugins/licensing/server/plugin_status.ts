@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { takeUntil, startWith, map } from 'rxjs/operators';
-import { ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
-import { ILicense } from '../common/types';
+import type { Observable } from 'rxjs';
+import { takeUntil, map } from 'rxjs';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import type { ILicense } from '../common/types';
 
 export const getPluginStatus$ = (
   license$: Observable<ILicense>,
   stop$: Observable<void>
 ): Observable<ServiceStatus> => {
   return license$.pipe(
-    startWith(undefined),
     takeUntil(stop$),
     map((license) => {
       if (license) {

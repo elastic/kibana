@@ -6,6 +6,7 @@
  */
 
 import { getOr, noop, sortBy } from 'lodash/fp';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { rgba } from 'polished';
@@ -17,20 +18,28 @@ import {
   isTab,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
-
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { isInTableScope, isTimelineScope } from '../../../helpers';
-import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { getColumnHeaders } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { TimelineTabs } from '../../../../common/types/timeline';
+
+export type ColumnsProvider = (providerOptions: {
+  browserFields: BrowserFields;
+  eventId: string;
+  contextId: string;
+  scopeId: string;
+  getLinkValue: (field: string) => string | null;
+  isDraggable?: boolean;
+  isReadOnly?: boolean;
+}) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
 
 interface Props {
   browserFields: BrowserFields;
@@ -40,6 +49,7 @@ interface Props {
   scopeId: string;
   timelineTabType: TimelineTabs | 'flyout';
   isReadOnly?: boolean;
+  columnsProvider?: ColumnsProvider;
 }
 
 const TableWrapper = styled.div`
@@ -159,7 +169,16 @@ const useFieldBrowserPagination = () => {
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
+  ({
+    browserFields,
+    data,
+    eventId,
+    isDraggable,
+    timelineTabType,
+    scopeId,
+    isReadOnly,
+    columnsProvider = getColumns,
+  }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
@@ -210,7 +229,7 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const columns = useMemo(
       () =>
-        getColumns({
+        columnsProvider({
           browserFields,
           eventId,
           contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
@@ -219,17 +238,21 @@ export const EventFieldsBrowser = React.memo<Props>(
           isDraggable,
           isReadOnly,
         }),
-      [browserFields, eventId, scopeId, timelineTabType, getLinkValue, isDraggable, isReadOnly]
+      [
+        browserFields,
+        eventId,
+        scopeId,
+        columnsProvider,
+        timelineTabType,
+        getLinkValue,
+        isDraggable,
+        isReadOnly,
+      ]
     );
 
     const focusSearchInput = useCallback(() => {
       // the selector below is used to focus the input because EuiInMemoryTable does not expose a ref to its built-in search input
       containerElement.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
-    }, []);
-
-    const focusAddTimelineButton = useCallback(() => {
-      // the document selector below is required because we may be in a flyout or full screen timeline context
-      document.querySelector<HTMLButtonElement>(`.${ADD_TIMELINE_BUTTON_CLASS_NAME}`)?.focus();
     }, []);
 
     const onKeyDown = useCallback(
@@ -239,7 +262,7 @@ export const EventFieldsBrowser = React.memo<Props>(
             containerElement: containerElement.current,
             keyboardEvent,
             onSkipFocusBeforeEventsTable: focusSearchInput,
-            onSkipFocusAfterEventsTable: focusAddTimelineButton,
+            onSkipFocusAfterEventsTable: noop,
           });
         } else {
           onKeyDownFocusHandler({
@@ -253,7 +276,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           });
         }
       },
-      [data, focusAddTimelineButton, focusSearchInput]
+      [data, focusSearchInput]
     );
 
     useEffect(() => {

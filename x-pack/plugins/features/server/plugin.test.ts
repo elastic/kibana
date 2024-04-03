@@ -69,6 +69,7 @@ describe('Features Plugin', () => {
         "filesManagement",
         "filesSharedImage",
         "savedObjectsManagement",
+        "savedQueryManagement",
       ]
     `);
   });

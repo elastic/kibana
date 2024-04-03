@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
   ENDPOINT_ALERTS_INDEX,
@@ -20,6 +21,8 @@ import {
   METADATA_UNITED_TRANSFORM,
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
+  METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_UNITED_TRANSFORM_V2,
   POLICY_RESPONSE_INDEX,
 } from '../../../../../common/endpoint/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -47,11 +50,13 @@ export interface CyLoadEndpointDataOptions
  * Cypress plugin for handling loading Endpoint data into ES
  * @param esClient
  * @param kbnClient
+ * @param log
  * @param options
  */
 export const cyLoadEndpointDataHandler = async (
   esClient: Client,
   kbnClient: KbnClient,
+  log: ToolingLog,
   options: Partial<CyLoadEndpointDataOptions> = {}
 ): Promise<IndexedHostsAndAlertsResponse> => {
   const {
@@ -77,7 +82,9 @@ export const cyLoadEndpointDataHandler = async (
     // need this before indexing docs so that the united transform doesn't
     // create a checkpoint with a timestamp after the doc timestamps
     await stopTransform(esClient, metadataTransformPrefix);
+    await stopTransform(esClient, METADATA_CURRENT_TRANSFORM_V2);
     await stopTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await stopTransform(esClient, METADATA_UNITED_TRANSFORM_V2);
   }
 
   // load data into the system
@@ -97,16 +104,20 @@ export const cyLoadEndpointDataHandler = async (
     DocGenerator,
     withResponseActions,
     numResponseActions,
-    alertIds
+    alertIds,
+    log
   );
 
   if (waitUntilTransformed) {
+    // missing transforms are ignored, start either name
     await startTransform(esClient, metadataTransformPrefix);
+    await startTransform(esClient, METADATA_CURRENT_TRANSFORM_V2);
 
     const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
     await waitForEndpoints(esClient, 'endpoint_index', metadataIds);
 
     await startTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await startTransform(esClient, METADATA_UNITED_TRANSFORM_V2);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));

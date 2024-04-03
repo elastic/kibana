@@ -2,7 +2,7 @@
 == Linting
 
 A note about linting: We use http://eslint.org[eslint] to check that the
-link:STYLEGUIDE.mdx[styleguide] is being followed. It runs in a
+{kib-repo}blob/{branch}/STYLEGUIDE.mdx[styleguide] is being followed. It runs in a
 pre-commit hook and as a part of the tests, but most contributors
 integrate it with their code editors for real-time feedback.
 

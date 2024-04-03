@@ -22,27 +22,26 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestionStatus } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../../common/types/api';
+import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
-import { IngestionStatus } from '../../../../types';
+import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
 export const SyncsContextMenu: React.FC = () => {
-  const { productFeatures } = useValues(KibanaLogic);
-  const {
-    hasDocumentLevelSecurityFeature,
-    hasIncrementalSyncFeature,
-    ingestionMethod,
-    ingestionStatus,
-    isCanceling,
-    isSyncing,
-    isWaitingForSync,
-  } = useValues(IndexViewLogic);
+  const { config, productFeatures } = useValues(KibanaLogic);
+  const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
+    useValues(IndexViewLogic);
+  const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
+    useValues(ConnectorViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
   const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -74,6 +73,14 @@ export const SyncsContextMenu: React.FC = () => {
   const shouldShowIncrementalSync =
     productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
 
+  const isEnterpriseSearchNotAvailable = Boolean(
+    config.host && config.canDeployEntSearch && errorConnectingMessage
+  );
+  const isSyncsDisabled =
+    (connector?.is_native && isEnterpriseSearchNotAvailable) ||
+    ingestionStatus === IngestionStatus.INCOMPLETE ||
+    !connector?.index_name;
+
   const panels: EuiContextMenuProps['panels'] = [
     {
       id: 0,
@@ -85,7 +92,7 @@ export const SyncsContextMenu: React.FC = () => {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
                 'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
                 'data-test-subj': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
-                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                disabled: isSyncsDisabled,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullSync', {
                   defaultMessage: 'Full Content',
@@ -104,7 +111,7 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                disabled: isSyncsDisabled,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
                   defaultMessage: 'Incremental Content',
@@ -124,7 +131,9 @@ export const SyncsContextMenu: React.FC = () => {
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
                 'data-test-subj':
                   'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                disabled: ingestionStatus === IngestionStatus.INCOMPLETE,
+                disabled: Boolean(
+                  isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
+                ),
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.accessControlSync', {
                   defaultMessage: 'Access Control',

@@ -12,11 +12,10 @@ import { SemVer } from 'semver';
 
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { ConfigService, Env } from '@kbn/config';
+import { ConfigService, Env, BuildFlavor } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-
 import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
@@ -30,6 +29,7 @@ import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-inter
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
+  getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
@@ -50,6 +50,7 @@ import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
+import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -75,7 +76,9 @@ export interface KibanaMigratorTestKitParams {
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
   defaultIndexTypesMap?: IndexTypesMap;
+  hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
+  clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
 
 export interface KibanaMigratorTestKit {
@@ -129,11 +132,13 @@ export const getKibanaMigratorTestKit = async ({
   settings = {},
   kibanaIndex = defaultKibanaIndex,
   defaultIndexTypesMap = {}, // do NOT assume any types are stored in any index by default
+  hashToVersionMap = {}, // allows testing the md5 => modelVersion transition
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
+  clientWrapperFactory,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   const loggingSystem = new LoggingSystem();
@@ -145,7 +150,8 @@ export const getKibanaMigratorTestKit = async ({
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
   loggingSystem.upgrade(loggingConf);
 
-  const client = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
 
   const typeRegistry = new SavedObjectTypeRegistry();
 
@@ -159,6 +165,7 @@ export const getKibanaMigratorTestKit = async ({
     loggerFactory,
     kibanaIndex,
     defaultIndexTypesMap,
+    hashToVersionMap,
     kibanaVersion,
     kibanaBranch,
     nodeRoles,
@@ -271,20 +278,25 @@ interface GetMigratorParams {
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
+  hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor?: BuildFlavor;
   nodeRoles: NodeRoles;
 }
+
 const getMigrator = async ({
   configService,
   client,
   kibanaIndex,
   typeRegistry,
   defaultIndexTypesMap,
+  hashToVersionMap,
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
+  buildFlavor = 'traditional',
   nodeRoles,
 }: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
@@ -296,22 +308,37 @@ const getMigrator = async ({
   const soConfig = new SavedObjectConfig(savedObjectsConf, savedObjectsMigrationConf);
 
   const docLinks: DocLinksServiceStart = {
-    ...getDocLinksMeta({ kibanaBranch }),
-    links: getDocLinks({ kibanaBranch }),
+    ...getDocLinksMeta({ kibanaBranch, buildFlavor }),
+    links: getDocLinks({ kibanaBranch, buildFlavor }),
   };
+
+  const esCapabilities = await getCapabilitiesFromClient(client);
 
   return new KibanaMigrator({
     client,
     kibanaIndex,
     typeRegistry,
     defaultIndexTypesMap,
+    hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,
     logger: loggerFactory.get('savedobjects-service'),
     docLinks,
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
+    esCapabilities,
   });
+};
+
+export const deleteSavedObjectIndices = async (
+  client: ElasticsearchClient,
+  index: string[] = ALL_SAVED_OBJECT_INDICES
+) => {
+  const indices = await client.indices.get({ index, allow_no_indices: true }, { ignore: [404] });
+  return await client.indices.delete(
+    { index: Object.keys(indices), allow_no_indices: true },
+    { ignore: [404] }
+  );
 };
 
 export const getAggregatedTypesCount = async (
@@ -448,9 +475,21 @@ export const getCompatibleMappingsMigrator = async ({
           ...type,
           mappings: {
             properties: {
-              name: { type: 'text' },
-              value: { type: 'integer' },
+              ...type.mappings.properties,
               createdAt: { type: 'date' },
+            },
+          },
+          modelVersions: {
+            ...type.modelVersions,
+            2: {
+              changes: [
+                {
+                  type: 'mappings_addition',
+                  addedMappings: {
+                    createdAt: { type: 'date' },
+                  },
+                },
+              ],
             },
           },
         };
@@ -476,9 +515,26 @@ export const getIncompatibleMappingsMigrator = async ({
         ...type,
         mappings: {
           properties: {
-            name: { type: 'keyword' },
-            value: { type: 'long' },
+            ...type.mappings.properties,
+            value: { type: 'text' }, // we're forcing an incompatible udpate (number => text)
             createdAt: { type: 'date' },
+          },
+        },
+        modelVersions: {
+          ...type.modelVersions,
+          2: {
+            changes: [
+              {
+                type: 'data_removal', // not true (we're testing reindex migrations, and modelVersions do not support breaking changes)
+                removedAttributePaths: ['complex.properties.value'],
+              },
+              {
+                type: 'mappings_addition',
+                addedMappings: {
+                  createdAt: { type: 'date' },
+                },
+              },
+            ],
           },
         },
       };

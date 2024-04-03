@@ -21,7 +21,7 @@ describe('createKibanaProgram', () => {
             "fetch": Object {
               "typeDescriptor": Object {
                 "locale": Object {
-                  "kind": 149,
+                  "kind": 152,
                   "type": "StringKeyword",
                 },
               },

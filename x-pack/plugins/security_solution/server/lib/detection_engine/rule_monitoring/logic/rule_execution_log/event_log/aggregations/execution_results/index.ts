@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { flatMap, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { flatMap, get } from 'lodash';
 
 import type {
-  RuleExecutionResult,
   GetRuleExecutionResultsResponse,
-} from '../../../../../../../../../common/detection_engine/rule_monitoring';
-import { RuleExecutionStatus } from '../../../../../../../../../common/detection_engine/rule_monitoring';
+  RuleExecutionResult,
+  RuleExecutionStatus,
+} from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
+import * as f from '../../../../event_log/event_log_fields';
 import type {
   ExecutionEventAggregationOptions,
-  ExecutionUuidAggResult,
   ExecutionUuidAggBucket,
+  ExecutionUuidAggResult,
 } from './types';
-import * as f from '../../../../event_log/event_log_fields';
 
 // TODO: https://github.com/elastic/kibana/issues/125642 Move the fields from this file to `event_log_fields.ts`
 
@@ -378,9 +379,9 @@ export const mapRuleExecutionStatusToPlatformStatus = (
 ): string[] => {
   return flatMap(ruleStatuses, (rs) => {
     switch (rs) {
-      case RuleExecutionStatus.failed:
+      case RuleExecutionStatusEnum.failed:
         return 'failure';
-      case RuleExecutionStatus.succeeded:
+      case RuleExecutionStatusEnum.succeeded:
         return 'success';
       default:
         return [];
@@ -397,9 +398,9 @@ export const mapPlatformStatusToRuleExecutionStatus = (
 ): RuleExecutionStatus | undefined => {
   switch (platformStatus) {
     case 'failure':
-      return RuleExecutionStatus.failed;
+      return RuleExecutionStatusEnum.failed;
     case 'success':
-      return RuleExecutionStatus.succeeded;
+      return RuleExecutionStatusEnum.succeeded;
     default:
       return undefined;
   }

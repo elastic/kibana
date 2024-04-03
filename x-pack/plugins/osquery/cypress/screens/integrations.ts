@@ -27,8 +27,7 @@ export const LATEST_VERSION = 'latestVersion';
 export const PACKAGE_VERSION = 'packageVersionText';
 export const SAVE_PACKAGE_CONFIRM = '[data-test-subj=confirmModalConfirmButton]';
 
-export const getAdvancedButton = () =>
-  cy.react('EuiAccordionClass', { props: { buttonContent: 'Advanced' } }).last();
+export const getAdvancedButton = () => cy.get(`[data-test-subj="advanced-accordion-content"]`);
 
 export const DATE_PICKER_ABSOLUTE_TAB = 'superDatePickerAbsoluteTab';
 export const DATE_PICKER_ABSOLUTE_TAB_SEL = `[data-test-subj=${DATE_PICKER_ABSOLUTE_TAB}]`;

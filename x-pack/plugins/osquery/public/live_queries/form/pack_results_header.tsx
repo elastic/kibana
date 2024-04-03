@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
@@ -17,16 +17,16 @@ interface PackResultsHeadersProps {
   agentIds?: string[];
 }
 
-const StyledResultsHeading = styled(EuiFlexItem)`
-  padding-right: 20px;
-  border-right: 2px solid #d3dae6;
-`;
+const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
+  paddingRight: '20px',
+  borderRight: euiTheme.border.thick,
+});
 
-const StyledIconsList = styled(EuiFlexItem)`
-  align-content: center;
-  justify-content: center;
-  padding-left: 10px;
-`;
+const iconsListCss = {
+  alignContent: 'center',
+  justifyContent: 'center',
+  paddingLeft: '10px',
+};
 
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
   ({ actionId, agentIds, queryIds }) => {
@@ -36,7 +36,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
       <>
         <EuiSpacer size={'l'} />
         <EuiFlexGroup direction="row" gutterSize="m">
-          <StyledResultsHeading grow={false}>
+          <EuiFlexItem css={resultsHeadingCss} grow={false}>
             <EuiText>
               <h2>
                 <FormattedMessage
@@ -45,8 +45,8 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                 />
               </h2>
             </EuiText>
-          </StyledResultsHeading>
-          <StyledIconsList grow={false}>
+          </EuiFlexItem>
+          <EuiFlexItem css={iconsListCss} grow={false}>
             <span>
               {actionId && (
                 <EuiFlexGroup>
@@ -69,7 +69,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                 </EuiFlexGroup>
               )}
             </span>
-          </StyledIconsList>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size={'l'} />
       </>

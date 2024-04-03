@@ -10,7 +10,7 @@ import { TRANSFORM_STATE } from '../../../common/constants';
 import mockTransformListRow from './__mocks__/transform_list_row.json';
 import mockTransformStats from './__mocks__/transform_stats.json';
 
-import { TransformListRow } from './transform_list';
+import type { TransformListRow } from './transform_list';
 import { getTransformProgress, isCompletedBatchTransform } from './transform_stats';
 
 const getRow = (statsId: string) => {
@@ -18,7 +18,7 @@ const getRow = (statsId: string) => {
     // @ts-expect-error mock data does not actually match TransformListRow type
     ...(mockTransformListRow as TransformListRow),
     stats: {
-      ...(mockTransformStats.transforms as Array<TransformListRow['stats']>).find(
+      ...(mockTransformStats.transforms as Array<NonNullable<TransformListRow['stats']>>).find(
         (stats) => stats.id === statsId
       )!,
     },
@@ -47,7 +47,7 @@ describe('Transform: Transform stats.', () => {
     // that will be used by isCompletedBatchTransform()
     // followed by a call to isCompletedBatchTransform() itself
     // @ts-expect-error mock data is too loosely typed
-    const row = mockTransformListRow as TransformListRow;
+    const row = mockTransformListRow as Required<TransformListRow>;
     expect(row.stats.checkpointing.last.checkpoint === 1).toBe(true);
     expect(row.config.sync === undefined).toBe(true);
     expect(row.stats.state === TRANSFORM_STATE.STOPPED).toBe(true);

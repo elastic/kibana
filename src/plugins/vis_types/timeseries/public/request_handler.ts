@@ -8,7 +8,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import { KibanaContext } from '@kbn/data-plugin/public';
-import { getTimezone } from './application/lib/get_timezone';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES } from '../common/constants';
 
@@ -44,7 +44,7 @@ export const metricsRequestHandler = async ({
 
     expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
-    const timezone = getTimezone(config);
+    const timezone = getTimeZone(config);
     const uiStateObj = uiState[visParams.type] ?? {};
     const dataSearch = data.search;
     const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);

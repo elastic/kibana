@@ -9,11 +9,19 @@
 import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
-  popover: {
-    getNoDataHelpText: () =>
-      i18n.translate('controls.rangeSlider.popover.noDataHelpText', {
-        defaultMessage: 'Selected range resulted in no data. No filter was applied.',
+  control: {
+    getInvalidSelectionWarningLabel: () =>
+      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {
+        defaultMessage: 'Selected range returns no results.',
       }),
+  },
+  editor: {
+    getStepTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {
+        defaultMessage: 'Step size',
+      }),
+  },
+  popover: {
     getNoAvailableDataHelpText: () =>
       i18n.translate('controls.rangeSlider.popover.noAvailableDataHelpText', {
         defaultMessage: 'There is no data to display. Adjust the time range and filters.',

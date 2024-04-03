@@ -22,7 +22,7 @@ pluginServices.getServices().visualizations.getAliases = jest
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
-    const dashboardContainer = buildMockDashboard({ viewMode });
+    const dashboardContainer = buildMockDashboard({ overrides: { viewMode } });
     return mountWithIntl(
       <DashboardContainerContext.Provider value={dashboardContainer}>
         <DashboardEmptyScreen />

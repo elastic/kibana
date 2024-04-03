@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo '--- Setup environment vars'
+
 export CI=true
 
 KIBANA_DIR=$(pwd)
@@ -28,6 +30,24 @@ export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_VERSION
 
+# Detects and exports the final target branch when using a merge queue
+if [[ "${BUILDKITE_BRANCH:-}" == "gh-readonly-queue"* ]]; then
+  # removes gh-readonly-queue/
+  BKBRANCH_WITHOUT_GH_MQ_PREFIX="${BUILDKITE_BRANCH#gh-readonly-queue/}"
+
+  # extracts target mqueue branch
+  MERGE_QUEUE_TARGET_BRANCH=${BKBRANCH_WITHOUT_GH_MQ_PREFIX%/*}
+else
+  MERGE_QUEUE_TARGET_BRANCH=""
+fi
+export MERGE_QUEUE_TARGET_BRANCH
+
+# Exports BUILDKITE_BRANCH_MERGE_QUEUE which will use the value from MERGE_QUEUE_TARGET_BRANCH if defined otherwise
+# will fallback to BUILDKITE_BRANCH.
+BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
+export BUILDKITE_BRANCH_MERGE_QUEUE
+
+
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -52,9 +72,7 @@ export TEST_BROWSER_HEADLESS=1
 
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
-export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
-# Not really a secret, if APM supported public auth we would use it and APM requires that we use this name
-export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
+export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=false
 
 if is_pr; then
   if is_pr_with_label "ci:collect-apm"; then

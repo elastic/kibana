@@ -11,7 +11,7 @@ tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry
 As a way to better understand user experience with Kibana in cloud, we support running performance journeys against
 Cloud deployments.
 The process takes a few steps:
-- Create a cloud deployment
+- Create a cloud deployment (8.11.0+ is supported)
 - Re-configure deployment with APM enabled and reporting metrics to the monitoring cluster
 - Create a user with `superuser` role to run tests with
 - Checkout the branch that matches your cloud deployment version
@@ -35,7 +35,7 @@ Navigate to `Advanced Edit` page and change `Deployment Configuration` by adding
 ```
 "user_settings_override_json": {
   "tracing.apm.enabled": "true",
-  "tracing.apm.environment": "development",
+  "tracing.apm.agent.environment": "development",
   "tracing.apm.agent.service_name": "elasticsearch",
   "tracing.apm.agent.server_url": "<SERVER_URL>",
   "tracing.apm.agent.metrics_interval": "120s",
@@ -50,6 +50,7 @@ Navigate to `Advanced Edit` page and change `Deployment Configuration` by adding
 
 ```
 "user_settings_override_json": {
+  "coreApp.allowDynamicConfigOverrides": true,
   "elastic.apm.active": true,
   "elastic.apm.breakdownMetrics": false,
   "elastic.apm.captureBody": "all",
@@ -74,8 +75,28 @@ Note: DEPLOYMENT_ID and YOUR_JOURNEY_NAME values are optional labels to find the
 
 Save changes and make sure cluster is restarted successfully.
 
+### Use QAF to prepare the deployment
+The quickest way to prepare ESS deployment is to use [QAF](https://github.com/elastic/qaf):
+
+- Make sure to add `~/.elastic/cloud.json` and ~/.elastic/cloud-admin.json with Cloud API (to create deployment) & Cloud Admin API (to modify it) keys
+```
+{
+  "api_key": {
+    "production": "<PROD KEY>",
+    "staging": "<STAGING KEY>",
+    "qa": "<QA KEY>"
+  }
+}
+```
+- Create deployment and modify it
+```
+export EC_DEPLOYMENT_NAME=kibana-perf-8.11
+qaf elastic-cloud deployments create --stack-version 8.11.0-SNAPSHOT --environment staging --region gcp-us-central1
+qaf elastic-cloud deployments configure-for-performance-journeys
+```
+
 ### Run the journey
-Make sure you have created user with `superuser` role and the Kibana repo branch is matching your deployment version.
+Make sure the Kibana repo branch is matching your deployment version.
 Set env variables to run FTR against your cloud deployment:
 
 ```
@@ -87,7 +108,9 @@ export TEST_CLOUD=1
 Run your journey with the command:
 
 ```
-node scripts/functional_test_runner.js --config x-pack/performance/journeys/$YOUR_JOURNEY_NAME.ts`
+node scripts/functional_test_runner.js --config x-pack/performance/journeys_e2e/$YOUR_JOURNEY_NAME.ts`
 ```
+
+APM & Telemetry labels will be updated on the fly and metrics/traces should be available in Telemetry Staging and kibana-ops-e2e-perf cluster.
 
 

@@ -18,7 +18,7 @@ import type { Anomaly } from '../../../machine_learning';
 import type { BulkCreate, WrapHits } from '../types';
 import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
-import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 

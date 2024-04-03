@@ -2,9 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
   },
-  "include": ["**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "kbn_archives/large_arrays_data_view.json"
+  ],
   "exclude": [
     "target/**/*",
   ],
@@ -14,5 +20,7 @@
     "@kbn/tooling-log",
     "@kbn/test",
     "@kbn/expect",
+    "@kbn/dev-utils",
+    "@kbn/apm-synthtrace-client",
   ]
 }

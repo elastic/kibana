@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import { ZodError } from 'zod';
 import { BadRequestError } from '../bad_request_error';
 
 export interface OutputError {
@@ -20,6 +22,15 @@ export const transformError = (err: Error & Partial<errors.ResponseError>): Outp
     return {
       message: err.output.payload.message,
       statusCode: err.output.statusCode,
+    };
+  } else if (err instanceof ZodError) {
+    const message = stringifyZodError(err);
+
+    return {
+      message,
+      // These errors can occur when handling requests after validation and can
+      // indicate of issues in business logic, so they are 500s instead of 400s
+      statusCode: 500,
     };
   } else {
     if (err.statusCode != null) {

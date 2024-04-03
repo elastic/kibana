@@ -6,28 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import React from 'react';
 
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-  IEmbeddable,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
 import { Toast } from '@kbn/core/public';
-
-import { DashboardPanelState } from '../../common';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
+import { ReplacePanelActionApi } from './replace_panel_action';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
-import { DashboardContainer } from '../dashboard_container';
+import { ReplacePanelSOFinder } from '.';
 
 interface Props {
-  container: IContainer;
-  savedObjectsFinder: React.ComponentType<any>;
+  api: ReplacePanelActionApi;
+  savedObjectsFinder: ReplacePanelSOFinder;
   onClose: () => void;
-  panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
 }
 
 export class ReplacePanelFlyout extends React.Component<Props> {
@@ -57,33 +49,10 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
-    const { panelToRemove, container } = this.props;
-    const { w, h, x, y } = (container.getInput().panels[panelToRemove.id] as DashboardPanelState)
-      .gridData;
-
-    const { id } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, {
-      savedObjectId,
+    this.props.api.parentApi.replacePanel(this.props.api.uuid, {
+      panelType: type,
+      initialState: { savedObjectId },
     });
-
-    const { [panelToRemove.id]: omit, ...panels } = container.getInput().panels;
-
-    container.updateInput({
-      panels: {
-        ...panels,
-        [id]: {
-          ...panels[id],
-          gridData: {
-            ...(panels[id] as DashboardPanelState).gridData,
-            w,
-            h,
-            x,
-            y,
-          },
-        } as DashboardPanelState,
-      },
-    });
-
-    (container as DashboardContainer).setHighlightPanelId(id);
     this.showToast(name);
     this.props.onClose();
   };
@@ -108,14 +77,14 @@ export class ReplacePanelFlyout extends React.Component<Props> {
       />
     );
 
-    const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
-
     return (
       <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <span>{panelToReplace}</span>
+              <span>
+                {dashboardReplacePanelActionStrings.getFlyoutHeader(getPanelTitle(this.props.api))}
+              </span>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

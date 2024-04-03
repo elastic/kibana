@@ -8,7 +8,7 @@
 import lodash from 'lodash';
 import type { Moment } from 'moment';
 
-export { template } from './template';
+export { indexTemplate } from './index_template_def';
 
 const createGroupIndex = (index: number) => Math.floor(index / 1000) * 1000;
 
@@ -20,6 +20,19 @@ const generateNetworkData = lodash.memoize(() => {
   networkDataCount += 10000;
   return networkDataCount;
 });
+
+let currentStatic = 0;
+
+const staticBetween = (end = 1, step = 0.1) => {
+  {
+    if (currentStatic + step > end) {
+      currentStatic = 0;
+    } else {
+      currentStatic = currentStatic + step;
+    }
+    return currentStatic;
+  }
+};
 
 export const generateEvent = (index: number, timestamp: Moment, interval: number) => {
   const groupIndex = createGroupIndex(index);
@@ -47,14 +60,14 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
           cores: 4,
           total: {
             norm: {
-              pct: randomBetween(),
+              pct: 0.8,
             },
           },
           user: {
-            pct: randomBetween(1, 4),
+            pct: 2.5,
           },
           system: {
-            pct: randomBetween(1, 4),
+            pct: 3,
           },
         },
       },
@@ -134,7 +147,22 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
       container: {
         id: `container-${index}`,
         name: 'container-name',
+        cpu: {
+          cores: 4,
+          total: {
+            norm: {
+              pct: 0.8,
+            },
+          },
+          user: {
+            pct: staticBetween(1, 1),
+          },
+          system: {
+            pct: randomBetween(1, 4),
+          },
+        },
       },
+      tags: [`${randomBetween(1, 4, 1)}`],
     },
   ];
 };

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
 import {
   BulkCreateRulesRequestBody,
   validateCreateRuleProps,
   BulkCrudRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
@@ -23,10 +23,10 @@ import { createRules } from '../../../logic/crud/create_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDuplicates } from './get_duplicates';
 import { transformValidateBulkError } from '../../../utils/validate';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
-
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import {
   transformBulkError,
   createBulkErrorObject,
@@ -42,117 +42,127 @@ export const bulkCreateRulesRoute = (
   ml: SetupPlugins['ml'],
   logger: Logger
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_CREATE,
-      validate: {
-        body: buildRouteValidation(BulkCreateRulesRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
+        },
       },
-    },
-    async (context, request, response) => {
-      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(BulkCreateRulesRequestBody),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<BulkCrudRulesResponse>> => {
+        logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
 
-      const siemResponse = buildSiemResponse(response);
+        const siemResponse = buildSiemResponse(response);
 
-      const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
+        try {
+          const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
 
-      const rulesClient = ctx.alerting.getRulesClient();
-      const savedObjectsClient = ctx.core.savedObjects.client;
+          const rulesClient = ctx.alerting.getRulesClient();
+          const savedObjectsClient = ctx.core.savedObjects.client;
 
-      const mlAuthz = buildMlAuthz({
-        license: ctx.licensing.license,
-        ml,
-        request,
-        savedObjectsClient,
-      });
+          const mlAuthz = buildMlAuthz({
+            license: ctx.licensing.license,
+            ml,
+            request,
+            savedObjectsClient,
+          });
 
-      const ruleDefinitions = request.body;
-      const dupes = getDuplicates(ruleDefinitions, 'rule_id');
+          const ruleDefinitions = request.body;
+          const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
-      const rules = await Promise.all(
-        ruleDefinitions
-          .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
-          .map(async (payloadRule) => {
-            if (payloadRule.rule_id != null) {
-              const rule = await readRules({
-                id: undefined,
-                rulesClient,
-                ruleId: payloadRule.rule_id,
-              });
-              if (rule != null) {
-                return createBulkErrorObject({
-                  ruleId: payloadRule.rule_id,
-                  statusCode: 409,
-                  message: `rule_id: "${payloadRule.rule_id}" already exists`,
-                });
-              }
-            }
+          const rules = await Promise.all(
+            ruleDefinitions
+              .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
+              .map(async (payloadRule) => {
+                if (payloadRule.rule_id != null) {
+                  const rule = await readRules({
+                    id: undefined,
+                    rulesClient,
+                    ruleId: payloadRule.rule_id,
+                  });
+                  if (rule != null) {
+                    return createBulkErrorObject({
+                      ruleId: payloadRule.rule_id,
+                      statusCode: 409,
+                      message: `rule_id: "${payloadRule.rule_id}" already exists`,
+                    });
+                  }
+                }
 
-            try {
-              validateRulesWithDuplicatedDefaultExceptionsList({
-                allRules: request.body,
-                exceptionsList: payloadRule.exceptions_list,
-                ruleId: payloadRule.rule_id,
-              });
+                try {
+                  validateRulesWithDuplicatedDefaultExceptionsList({
+                    allRules: request.body,
+                    exceptionsList: payloadRule.exceptions_list,
+                    ruleId: payloadRule.rule_id,
+                  });
 
-              await validateRuleDefaultExceptionList({
-                exceptionsList: payloadRule.exceptions_list,
-                rulesClient,
-                ruleRuleId: payloadRule.rule_id,
-                ruleId: undefined,
-              });
+                  await validateRuleDefaultExceptionList({
+                    exceptionsList: payloadRule.exceptions_list,
+                    rulesClient,
+                    ruleRuleId: payloadRule.rule_id,
+                    ruleId: undefined,
+                  });
 
-              const validationErrors = validateCreateRuleProps(payloadRule);
-              if (validationErrors.length) {
-                return createBulkErrorObject({
-                  ruleId: payloadRule.rule_id,
-                  statusCode: 400,
-                  message: validationErrors.join(),
-                });
-              }
+                  const validationErrors = validateCreateRuleProps(payloadRule);
+                  if (validationErrors.length) {
+                    return createBulkErrorObject({
+                      ruleId: payloadRule.rule_id,
+                      statusCode: 400,
+                      message: validationErrors.join(),
+                    });
+                  }
 
-              throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
+                  throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
-              const createdRule = await createRules({
-                rulesClient,
-                params: payloadRule,
-              });
+                  const createdRule = await createRules({
+                    rulesClient,
+                    params: payloadRule,
+                  });
 
-              return transformValidateBulkError(createdRule.params.ruleId, createdRule);
-            } catch (err) {
-              return transformBulkError(
-                payloadRule.rule_id,
-                err as Error & { statusCode?: number }
-              );
-            }
-          })
-      );
-      const rulesBulk = [
-        ...rules,
-        ...dupes.map((ruleId) =>
-          createBulkErrorObject({
-            ruleId,
-            statusCode: 409,
-            message: `rule_id: "${ruleId}" already exists`,
-          })
-        ),
-      ];
-      const [validated, errors] = validate(rulesBulk, BulkCrudRulesResponse);
-      if (errors != null) {
-        return siemResponse.error({
-          statusCode: 500,
-          body: errors,
-          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
-        });
-      } else {
-        return response.ok({
-          body: validated ?? {},
-          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
-        });
+                  return transformValidateBulkError(createdRule.params.ruleId, createdRule);
+                } catch (err) {
+                  return transformBulkError(
+                    payloadRule.rule_id,
+                    err as Error & { statusCode?: number }
+                  );
+                }
+              })
+          );
+          const rulesBulk = [
+            ...rules,
+            ...dupes.map((ruleId) =>
+              createBulkErrorObject({
+                ruleId,
+                statusCode: 409,
+                message: `rule_id: "${ruleId}" already exists`,
+              })
+            ),
+          ];
+          return response.ok({
+            body: BulkCrudRulesResponse.parse(rulesBulk),
+            headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

@@ -14,7 +14,11 @@ import {
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 
-export function notificationsRoutes({ router, routeGuard, enabledFeatures }: RouteInitialization) {
+export function notificationsRoutes({
+  router,
+  routeGuard,
+  getEnabledFeatures,
+}: RouteInitialization) {
   /**
    * @apiGroup Notifications
    *
@@ -49,7 +53,7 @@ export function notificationsRoutes({ router, routeGuard, enabledFeatures }: Rou
             const notificationsService = new NotificationsService(
               client,
               mlSavedObjectService,
-              enabledFeatures
+              getEnabledFeatures()
             );
 
             const results = await notificationsService.searchMessages(request.query);
@@ -98,7 +102,7 @@ export function notificationsRoutes({ router, routeGuard, enabledFeatures }: Rou
             const notificationsService = new NotificationsService(
               client,
               mlSavedObjectService,
-              enabledFeatures
+              getEnabledFeatures()
             );
 
             const results = await notificationsService.countMessages(request.query);

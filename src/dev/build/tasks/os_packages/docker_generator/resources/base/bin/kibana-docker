@@ -136,12 +136,14 @@ kibana_vars=(
     ops.interval
     path.data
     pid.file
+    profiler.signal
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
     savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
+    server.cdn.url
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors
@@ -287,6 +289,7 @@ kibana_vars=(
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.packages
+    xpack.fleet.packageVerification.gpgKeyPath
     xpack.fleet.registryProxyUrl
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
@@ -307,8 +310,8 @@ kibana_vars=(
     xpack.observability.unsafe.alertDetails.metrics.enabled
     xpack.observability.unsafe.alertDetails.logs.enabled
     xpack.observability.unsafe.alertDetails.uptime.enabled
+    xpack.observability.unsafe.alertDetails.observability.enabled
     xpack.observability.unsafe.thresholdRule.enabled
-    xpack.observability.compositeSlo.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -336,6 +339,7 @@ kibana_vars=(
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
+    xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
@@ -401,6 +405,7 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.task_manager.claim_strategy
     xpack.task_manager.max_attempts
     xpack.task_manager.max_workers
     xpack.task_manager.monitored_aggregated_stats_refresh_rate

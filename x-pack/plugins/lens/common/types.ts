@@ -8,7 +8,7 @@
 import type { Filter, FilterMeta } from '@kbn/es-query';
 import type { Position } from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CustomPaletteParams, PaletteOutput, ColorMapping } from '@kbn/coloring';
 import type { ColorMode } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/common';
 import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
@@ -20,7 +20,7 @@ export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 export type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
-export type { FormatFactory } from '@kbn/visualization-ui-components/public';
+export type { FormatFactory } from '@kbn/visualization-ui-components';
 
 export interface DateRange {
   fromDate: string;
@@ -71,6 +71,7 @@ export interface SharedPieLayerState {
   legendMaxLines?: number;
   legendSize?: LegendSize;
   truncateLegend?: boolean;
+  colorMapping?: ColorMapping.Config;
 }
 
 export type PieLayerState = SharedPieLayerState & {

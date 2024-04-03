@@ -132,6 +132,8 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     operationType: aggregation.name,
     sourceField,
     ...createColumn(series, metric, field, additionalArgs),
+    // dataType has to be number in Lens to inherit the formatter
+    ...(sourceField === 'document' ? { dataType: 'number' } : {}),
     params: { ...getFormat(series) },
   } as MetricAggregationColumnWithoutSpecialParams;
 };

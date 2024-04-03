@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'Kibana',
 };
 
 export type MlCommonAPI = ProvidedType<typeof MachineLearningCommonAPIProvider>;

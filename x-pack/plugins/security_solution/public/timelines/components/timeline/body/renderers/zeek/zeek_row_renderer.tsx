@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/types/timeline/api';
+import { RowRendererId } from '../../../../../../../common/api/timeline';
 
 import { RowRendererContainer } from '../row_renderer';
 import { ZeekDetails } from './zeek_details';

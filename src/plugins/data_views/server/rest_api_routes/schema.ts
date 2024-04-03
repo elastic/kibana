@@ -15,6 +15,7 @@ import {
   serializedFieldFormatSchema,
   fieldSpecSchemaFields,
 } from '../../common/schemas';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../common/constants';
 
 export const dataViewSpecSchema = schema.object({
   title: schema.string(),
@@ -26,6 +27,7 @@ export const dataViewSpecSchema = schema.object({
     schema.arrayOf(
       schema.object({
         value: schema.string(),
+        clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
       })
     )
   ),
@@ -37,6 +39,11 @@ export const dataViewSpecSchema = schema.object({
       schema.string(),
       schema.object({
         customLabel: schema.maybe(schema.string()),
+        customDescription: schema.maybe(
+          schema.string({
+            maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+          })
+        ),
         count: schema.maybe(schema.number()),
       })
     )
@@ -45,6 +52,7 @@ export const dataViewSpecSchema = schema.object({
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
   name: schema.maybe(schema.string()),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  allowHidden: schema.maybe(schema.boolean()),
 });
 
 export const dataViewsRuntimeResponseSchema = schema.object({

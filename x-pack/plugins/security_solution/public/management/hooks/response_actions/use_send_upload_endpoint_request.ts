@@ -11,7 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
-import type { UploadActionUIRequestBody } from '../../../../common/endpoint/schema/actions';
+import type { UploadActionUIRequestBody } from '../../../../common/api/endpoint';
 
 export const useSendUploadEndpointRequest = (
   options?: UseMutationOptions<
@@ -29,7 +29,9 @@ export const useSendUploadEndpointRequest = (
       formData.append('file', file, file.name);
 
       for (const [key, value] of Object.entries(payload)) {
-        formData.append(key, typeof value !== 'string' ? JSON.stringify(value) : value);
+        if (typeof value !== 'undefined') {
+          formData.append(key, typeof value !== 'string' ? JSON.stringify(value) : value);
+        }
       }
 
       return http.post<ResponseActionApiResponse>(UPLOAD_ROUTE, {

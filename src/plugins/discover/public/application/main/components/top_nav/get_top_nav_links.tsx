@@ -27,15 +27,15 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isPlainRecord,
+  isTextBased,
   adHocDataViews,
   topNavCustomization,
 }: {
-  dataView: DataView;
+  dataView: DataView | undefined;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isPlainRecord: boolean;
+  isTextBased: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
@@ -49,12 +49,11 @@ export const getTopNavLinks = ({
     }),
     run: async (anchorElement: HTMLElement) => {
       openAlertsPopover({
-        I18nContext: services.core.i18n.Context,
-        theme$: services.core.theme.theme$,
         anchorElement,
         services,
         stateContainer: state,
         adHocDataViews,
+        isPlainRecord: isTextBased,
       });
     },
     testId: 'discoverAlertsButton',
@@ -107,8 +106,6 @@ export const getTopNavLinks = ({
     run: () =>
       showOpenSearchPanel({
         onOpenSavedSearch: state.actions.onOpenSavedSearch,
-        I18nContext: services.core.i18n.Context,
-        theme$: services.core.theme.theme$,
         services,
       }),
   };
@@ -125,11 +122,11 @@ export const getTopNavLinks = ({
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
       const savedSearch = state.savedSearchState.getState();
-      const sharingData = await getSharingData(
+      const searchSourceSharingData = await getSharingData(
         savedSearch.searchSource,
         state.appState.getState(),
         services,
-        isPlainRecord
+        isTextBased
       );
 
       const { locator } = services;
@@ -137,16 +134,15 @@ export const getTopNavLinks = ({
       const { timefilter } = services.data.query.timefilter;
       const timeRange = timefilter.getTime();
       const refreshInterval = timefilter.getRefreshInterval();
-      const { grid, ...otherState } = appState;
       const filters = services.filterManager.getFilters();
 
       // Share -> Get links -> Snapshot
       const params: DiscoverAppLocatorParams = {
-        ...otherState,
+        ...appState,
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
-          : { dataViewSpec: dataView?.toSpec() }),
+          : { dataViewSpec: dataView?.toMinimalSpec() }),
         filters,
         timeRange,
         refreshInterval,
@@ -187,7 +183,9 @@ export const getTopNavLinks = ({
         objectId: savedSearch.id,
         objectType: 'search',
         sharingData: {
-          ...sharingData,
+          isTextBased,
+          locatorParams: [{ id: locator.id, params }],
+          ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title
           title:
             savedSearch.title ||
@@ -236,7 +234,6 @@ export const getTopNavLinks = ({
   if (
     services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
-    !isPlainRecord &&
     !defaultMenu?.alertsItem?.disabled
   ) {
     entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 400 });

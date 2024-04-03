@@ -11,18 +11,31 @@ import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '..
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
+import type { kafkaVerificationModes } from '../../constants';
+import type { kafkaConnectionType } from '../../constants';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
+export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
+export type KafkaVerificationMode = typeof kafkaVerificationModes;
+export type OutputSecret =
+  | string
+  | {
+      id: string;
+      hash?: string;
+    };
+
+export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'latency';
 
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_internal?: boolean;
   is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;
@@ -34,21 +47,41 @@ interface NewBaseOutput {
     certificate_authorities?: string[];
     certificate?: string;
     key?: string;
+    verification_mode?: ValueOf<KafkaVerificationMode>;
   } | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
+  secrets?: {};
+  preset?: OutputPreset;
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
   type: OutputType['Elasticsearch'];
 }
 
-export interface NewLogstashOutput extends NewBaseOutput {
-  type: OutputType['Logstash'];
+export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?: OutputSecret;
+  };
 }
 
-export type NewOutput = NewElasticsearchOutput | NewLogstashOutput | KafkaOutput;
+export interface NewLogstashOutput extends NewBaseOutput {
+  type: OutputType['Logstash'];
+  secrets?: {
+    ssl?: {
+      key?: OutputSecret;
+    };
+  };
+}
+
+export type NewOutput =
+  | NewElasticsearchOutput
+  | NewRemoteElasticsearchOutput
+  | NewLogstashOutput
+  | KafkaOutput;
 
 export type Output = NewOutput & {
   id: string;
@@ -76,6 +109,7 @@ export interface KafkaOutput extends NewBaseOutput {
   compression?: ValueOf<KafkaCompressionType>;
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string;
   password?: string;
   sasl?: {
@@ -92,6 +126,7 @@ export interface KafkaOutput extends NewBaseOutput {
     hash?: string;
     random?: boolean;
   };
+  topic?: string;
   topics?: Array<{
     topic: string;
     when?: {
@@ -105,6 +140,11 @@ export interface KafkaOutput extends NewBaseOutput {
   }>;
   timeout?: number;
   broker_timeout?: number;
-  broker_ack_reliability?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
-  broker_buffer_size?: number;
+  required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  secrets?: {
+    password?: OutputSecret;
+    ssl?: {
+      key?: OutputSecret;
+    };
+  };
 }

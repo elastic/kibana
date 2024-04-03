@@ -9,7 +9,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleAction } from '../../../types';
+import { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleUiAction } from '../../../types';
 import { getValidConnectors } from '../common/connectors';
 
 interface ConnectorOption {
@@ -20,7 +20,7 @@ interface ConnectorOption {
 
 interface SelectionProps {
   allowGroupConnector?: string[];
-  actionItem: RuleAction;
+  actionItem: RuleUiAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
   actionTypeRegistered: ActionTypeModel;
@@ -94,12 +94,8 @@ const getValueOfSelectedConnector = (
   actionTypeRegistered: ActionTypeModel,
   allowGroupConnector: string[] = []
 ): Array<EuiComboBoxOptionOption<ConnectorOption>> => {
-  let selectedConnector = connectors.find((connector) => connector.id === actionItemId);
-  if (allowGroupConnector.length > 0 && !selectedConnector) {
-    selectedConnector = connectors.find((connector) =>
-      allowGroupConnector.includes(connector.actionTypeId)
-    );
-  }
+  const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
+
   if (!selectedConnector) {
     return [];
   }

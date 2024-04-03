@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import { isString } from 'lodash/fp';
 import * as i18n from './translations';
 import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
@@ -42,6 +43,7 @@ import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/uti
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { MatrixHistogramChartContent } from './chart_content';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
@@ -64,8 +66,10 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     stackByOptions: MatrixHistogramOption[];
     subtitle?: string | GetSubTitle;
     scopeId?: string;
+    sourcererScopeId?: SourcererScopeName;
     title: string | GetTitle;
     hideQueryToggle?: boolean;
+    applyGlobalQueriesAndFilters?: boolean;
   };
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -78,10 +82,14 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = 150;
 
-const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
-  Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
-    ({ buckets }) => buckets.length > 0
-  );
+const visualizationResponseHasData = (response: VisualizationResponse[]): boolean => {
+  if (response.length === 0) {
+    return false;
+  }
+  return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
+    response[0].aggregations ?? {}
+  ).some(({ buckets }) => buckets.length > 0);
+};
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -112,11 +120,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   startDate,
   subtitle,
   scopeId,
+  sourcererScopeId,
   title,
   titleSize,
   yTickFormatter,
   skip,
   hideQueryToggle = false,
+  applyGlobalQueriesAndFilters = true,
 }) => {
   const visualizationId = `${id}-embeddable`;
   const dispatch = useDispatch();
@@ -203,7 +213,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const visualizationResponse = useVisualizationResponse({ visualizationId });
+  const { responses } = useVisualizationResponse({ visualizationId });
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
@@ -211,10 +221,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     if (typeof subtitle === 'function') {
       if (isChartEmbeddablesEnabled) {
-        if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse[0])) {
+        if (!responses || !visualizationResponseHasData(responses)) {
           return subtitle(0);
         }
-        const visualizationCount = visualizationResponse[0].hits.total;
+        const visualizationCount = responses[0].hits.total;
         return visualizationCount >= 0 ? subtitle(visualizationCount) : null;
       } else {
         return totalCount >= 0 ? subtitle(totalCount) : null;
@@ -222,7 +232,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     }
 
     return subtitle;
-  }, [isChartEmbeddablesEnabled, isInitialLoading, subtitle, totalCount, visualizationResponse]);
+  }, [isChartEmbeddablesEnabled, isInitialLoading, responses, subtitle, totalCount]);
 
   const hideHistogram = useMemo(
     () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
@@ -258,9 +268,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   const extraVisualizationOptions = useMemo(
-    () => ({ dnsIsPtrIncluded: isPtrIncluded ?? false }),
-    [isPtrIncluded]
+    () => ({
+      dnsIsPtrIncluded: isPtrIncluded ?? false,
+      filters: filterQuery
+        ? [
+            {
+              query: isString(filterQuery) ? JSON.parse(filterQuery) : filterQuery,
+              meta: {},
+            },
+          ]
+        : undefined,
+    }),
+    [isPtrIncluded, filterQuery]
   );
+
   if (hideHistogram) {
     return null;
   }
@@ -320,6 +341,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                     options={stackByOptions}
                     prepend={i18n.STACK_BY}
                     value={selectedStackByOption?.value}
+                    aria-label={i18n.STACK_BY}
                   />
                 )}
               </EuiFlexItem>
@@ -329,6 +351,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
           {toggleStatus ? (
             isChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
+                scopeId={sourcererScopeId}
+                applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                 data-test-subj="embeddable-matrix-histogram"
                 extraOptions={extraVisualizationOptions}
                 getLensAttributes={getLensAttributes}

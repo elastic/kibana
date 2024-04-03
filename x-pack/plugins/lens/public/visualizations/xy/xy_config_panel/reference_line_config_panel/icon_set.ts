@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
-import { type IconSet } from '@kbn/visualization-ui-components/public';
+import { type IconSet } from '@kbn/visualization-ui-components';
 
 export const referenceLineIconsSet: IconSet<AvailableReferenceLineIcon> = [
   {

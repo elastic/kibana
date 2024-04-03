@@ -60,11 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('applied on dashboard', async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('dashboard with table');
       await dashboard.waitForRenderComplete();
       const fieldLink = await visChart.getFieldLinkInVisTable(`${fieldName}: Descending`);
       const fieldValue = await fieldLink.getVisibleText();
+      await fieldLink.moveMouseTo();
       await fieldLink.click();
       await retry.try(async () => {
         await checkUrl(fieldValue);

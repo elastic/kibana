@@ -19,13 +19,13 @@ import {
 } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
 import type { UserProfileWithSecurity } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
 import { sessionMock } from '../session_management/session.mock';
-import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {

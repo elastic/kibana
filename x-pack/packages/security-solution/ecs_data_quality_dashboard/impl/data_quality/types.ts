@@ -53,6 +53,7 @@ export interface PartitionedFieldMetadata {
   custom: EnrichedFieldMetadata[];
   ecsCompliant: EnrichedFieldMetadata[];
   incompatible: EnrichedFieldMetadata[];
+  sameFamily: EnrichedFieldMetadata[];
 }
 
 export interface PartitionedFieldMetadataStats {
@@ -60,6 +61,7 @@ export interface PartitionedFieldMetadataStats {
   custom: number;
   ecsCompliant: number;
   incompatible: number;
+  sameFamily: number;
 }
 
 export interface UnallowedValueRequestItem {
@@ -103,7 +105,9 @@ export interface DataQualityCheckResult {
   incompatible: number | undefined;
   indexName: string;
   markdownComments: string[];
+  sameFamily: number | undefined;
   pattern: string;
+  checkedAt: number | undefined;
 }
 
 export interface PatternRollup {
@@ -139,22 +143,18 @@ export interface IndexToCheck {
   indexName: string;
 }
 
-export type OnCheckCompleted = ({
-  error,
-  formatBytes,
-  formatNumber,
-  indexName,
-  partitionedFieldMetadata,
-  pattern,
-  version,
-}: {
+export type OnCheckCompleted = (param: {
+  batchId: string;
+  checkAllStartTime: number;
   error: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
+  isLastCheck: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
   version: string;
+  requestTime?: number;
 }) => void;
 
 export interface ErrorSummary {
@@ -173,4 +173,37 @@ export interface SortConfig {
 export interface SelectedIndex {
   indexName: string;
   pattern: string;
+}
+
+export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams & {
+  errorCount?: number;
+  ilmPhase?: string;
+  indexId: string;
+  indexName: string;
+  sameFamilyFields?: string[];
+  unallowedMappingFields?: string[];
+  unallowedValueFields?: string[];
+};
+
+export interface DataQualityCheckAllCompletedParams {
+  batchId: string;
+  ecsVersion: string;
+  isCheckAll: boolean;
+  numberOfDocuments?: number;
+  numberOfIncompatibleFields?: number;
+  numberOfIndices?: number;
+  numberOfIndicesChecked?: number;
+  numberOfSameFamily?: number;
+  sizeInBytes?: number;
+  timeConsumedMs?: number;
+}
+
+export type ReportDataQualityIndexChecked = (params: DataQualityIndexCheckedParams) => void;
+export type ReportDataQualityCheckAllCompleted = (
+  params: DataQualityCheckAllCompletedParams
+) => void;
+
+export interface TelemetryEvents {
+  reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
+  reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
 }

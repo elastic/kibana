@@ -19,11 +19,13 @@ export function LoadAnnotationLibraryFlyout({
   isLoadLibraryVisible,
   setLoadLibraryFlyoutVisible,
   addLayer,
+  isInlineEditing,
 }: {
   isLoadLibraryVisible: boolean;
   setLoadLibraryFlyoutVisible: (visible: boolean) => void;
   eventAnnotationService: EventAnnotationServiceType;
   addLayer: (argument?: ExtraAppendLayerArg) => void;
+  isInlineEditing?: boolean;
 }) {
   const {
     renderEventAnnotationGroupSavedObjectFinder: EventAnnotationGroupSavedObjectFinder,
@@ -59,13 +61,13 @@ export function LoadAnnotationLibraryFlyout({
         </EuiFlyoutFooter>
       }
       isOpen={Boolean(isLoadLibraryVisible)}
-      groupLabel={i18n.translate('xpack.lens.editorFrame.loadFromLibrary', {
+      label={i18n.translate('xpack.lens.editorFrame.loadFromLibrary', {
         defaultMessage: 'Select annotations from library',
       })}
       handleClose={() => {
         setLoadLibraryFlyoutVisible(false);
-        return true;
       }}
+      isInlineEditing={isInlineEditing}
     >
       <div
         css={css`

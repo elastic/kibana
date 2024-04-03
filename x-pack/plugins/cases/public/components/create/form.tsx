@@ -6,24 +6,28 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSteps,
+  useEuiTheme,
+  logicalCSS,
 } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
+import type { ActionConnector } from '../../../common/types/domain';
+import type { CasePostRequest } from '../../../common/types/api';
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import type { ActionConnector, CasePostRequest } from '../../../common/api';
 import type { CaseUI } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -43,29 +47,21 @@ import { Assignees } from './assignees';
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from './category';
+import { CustomFields } from './custom_fields';
 
-interface ContainerProps {
-  big?: boolean;
-}
-
-const Container = styled.div.attrs((props) => props)<ContainerProps>`
-  ${({ big, theme }) => css`
-    margin-top: ${big ? theme.eui?.euiSizeXL ?? '32px' : theme.eui?.euiSize ?? '16px'};
-  `}
-`;
-
-const MySpinner = styled(EuiLoadingSpinner)`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 99;
-`;
+const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
+  big
+    ? css`
+        ${logicalCSS('margin-top', euiTheme.size.xl)};
+      `
+    : css`
+        ${logicalCSS('margin-top', euiTheme.size.base)};
+      `;
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
   isLoadingConnectors: boolean;
   withSteps: boolean;
-  owner: string[];
   draftStorageKey: string;
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -82,12 +78,13 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
+  ({ connectors, isLoadingConnectors, withSteps, draftStorageKey }) => {
+    const { owner } = useCasesContext();
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-
+    const { euiTheme } = useEuiTheme();
     const availableOwners = useAvailableCasesOwners();
-    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
     const firstStep = useMemo(
       () => ({
@@ -96,36 +93,40 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           <>
             <Title isLoading={isSubmitting} />
             {caseAssignmentAuthorized ? (
-              <Container>
+              <div css={containerCss(euiTheme)}>
                 <Assignees isLoading={isSubmitting} />
-              </Container>
+              </div>
             ) : null}
-            <Container>
+            <div css={containerCss(euiTheme)}>
               <Tags isLoading={isSubmitting} />
-            </Container>
-            <Container>
+            </div>
+            <div css={containerCss(euiTheme)}>
               <Category isLoading={isSubmitting} />
-            </Container>
-            <Container>
+            </div>
+            <div css={containerCss(euiTheme)}>
               <Severity isLoading={isSubmitting} />
-            </Container>
+            </div>
             {canShowCaseSolutionSelection && (
-              <Container big>
+              <div css={containerCss(euiTheme, true)}>
                 <CreateCaseOwnerSelector
                   availableOwners={availableOwners}
                   isLoading={isSubmitting}
                 />
-              </Container>
+              </div>
             )}
-            <Container big>
+            <div css={containerCss(euiTheme, true)}>
               <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
-            </Container>
-            <Container />
+            </div>
+            <div css={containerCss(euiTheme)}>
+              <CustomFields isLoading={isSubmitting} />
+            </div>
+            <div css={containerCss(euiTheme)} />
           </>
         ),
       }),
       [
         isSubmitting,
+        euiTheme,
         caseAssignmentAuthorized,
         canShowCaseSolutionSelection,
         availableOwners,
@@ -137,9 +138,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       () => ({
         title: i18n.STEP_TWO_TITLE,
         children: (
-          <Container>
+          <div>
             <SyncAlertsToggle isLoading={isSubmitting} />
-          </Container>
+          </div>
         ),
       }),
       [isSubmitting]
@@ -149,13 +150,13 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       () => ({
         title: i18n.STEP_THREE_TITLE,
         children: (
-          <Container>
+          <div>
             <Connector
               connectors={connectors}
               isLoadingConnectors={isLoadingConnectors}
               isLoading={isSubmitting}
             />
-          </Container>
+          </div>
         ),
       }),
       [connectors, isLoadingConnectors, isSubmitting]
@@ -168,7 +169,18 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
     return (
       <>
-        {isSubmitting && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
+        {isSubmitting && (
+          <EuiLoadingSpinner
+            css={css`
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              z-index: 99;
+            `}
+            data-test-subj="create-case-loading-spinner"
+            size="xl"
+          />
+        )}
         {withSteps ? (
           <EuiSteps
             headingElement="h2"
@@ -199,8 +211,12 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     attachments,
     initialValue,
   }) => {
-    const { owner, appId } = useCasesContext();
-    const draftStorageKey = getMarkdownEditorStorageKey(appId, 'createCase', 'description');
+    const { owner } = useCasesContext();
+    const draftStorageKey = getMarkdownEditorStorageKey({
+      appId: owner[0],
+      caseId: 'createCase',
+      commentId: 'description',
+    });
 
     const handleOnConfirmationCallback = (): void => {
       onCancel();
@@ -229,10 +245,9 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
             connectors={empty}
             isLoadingConnectors={false}
             withSteps={withSteps}
-            owner={owner}
             draftStorageKey={draftStorageKey}
           />
-          <Container>
+          <div>
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
@@ -260,7 +275,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
                 <SubmitCaseButton />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </Container>
+          </div>
           <InsertTimeline fieldName={descriptionFieldName} />
         </FormContext>
       </CasesTimelineIntegrationProvider>

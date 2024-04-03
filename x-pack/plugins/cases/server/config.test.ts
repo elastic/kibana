@@ -106,6 +106,9 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "stack": Object {
+            "enabled": true,
+          },
         }
       `);
     });

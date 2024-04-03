@@ -69,10 +69,10 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
 
   const dispatchLens = useLensDispatch();
   const setDatasourceState: StateSetter<unknown, { applyImmediately?: boolean }> = useMemo(() => {
-    return (updater: unknown | ((prevState: unknown) => unknown), options) => {
+    return (newDatasourceState: unknown, options) => {
       dispatchLens(
         updateDatasourceState({
-          updater,
+          newDatasourceState,
           datasourceId: activeDatasourceId!,
           clearStagedPreview: true,
         })
@@ -194,7 +194,9 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     <>
       <Easteregg query={externalContext?.query} />
       {DataPanelComponent && (
-        <div className="lnsDataPanelWrapper">{DataPanelComponent(datasourceProps)}</div>
+        <div className="lnsDataPanelWrapper" data-test-subj="lnsDataPanelWrapper">
+          {DataPanelComponent(datasourceProps)}
+        </div>
       )}
     </>
   );

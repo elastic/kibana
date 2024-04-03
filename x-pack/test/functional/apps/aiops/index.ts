@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
+  // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
   describe('aiops', function () {
@@ -29,7 +29,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./explain_log_rate_spikes'));
+    loadTestFile(require.resolve('./log_rate_analysis'));
+    loadTestFile(require.resolve('./log_rate_analysis_anomaly_table'));
     loadTestFile(require.resolve('./change_point_detection'));
     loadTestFile(require.resolve('./log_pattern_analysis'));
     loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));

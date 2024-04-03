@@ -14,11 +14,12 @@ import { generateUniqueKey } from '../../lib/get_test_data';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const comboBox = getService('comboBox');
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
-  const browser = getService('browser');
   const rules = getService('rules');
+  const toasts = getService('toasts');
 
   async function getAlertsByName(name: string) {
     const {
@@ -39,17 +40,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function deleteConnectorByName(connectorName: string) {
+    const { body: connectors } = await supertest.get(`/api/actions/connectors`).expect(200);
+    const connector = connectors?.find((c: { name: string }) => c.name === connectorName);
+    if (!connector) {
+      return;
+    }
+    await supertest
+      .delete(`/api/actions/connector/${connector.id}`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204, '');
+  }
+
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
-    const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
-    await indexComboBox.click();
-    await indexComboBox.type('k');
-    const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
-    await filterSelectItem.click();
+    await comboBox.set('thresholdIndexesComboBox', 'k');
     await testSubjects.click('thresholdAlertTimeFieldSelect');
     await retry.try(async () => {
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
@@ -64,8 +73,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function defineAlwaysFiringAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
-    await testSubjects.setValue('ruleNameInput', alertName);
     await testSubjects.click('test.always-firing-SelectOption');
+    await testSubjects.setValue('ruleNameInput', alertName);
   }
 
   async function discardNewRuleCreation() {
@@ -73,15 +82,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   describe('create alert', function () {
-    before(async () => {
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('rulesTab');
-    });
-
-    afterEach(async () => {
-      // Reset the Rules tab without reloading the entire page
-      // This is safer than trying to close the alert flyout, which may or may not be open at the end of a test
-      await testSubjects.click('logsTab');
       await testSubjects.click('rulesTab');
     });
 
@@ -118,6 +120,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertsToDelete = await getAlertsByName(ruleName);
       await deleteAlerts(alertsToDelete.map((rule: { id: string }) => rule.id));
       expect(true).to.eql(true);
+      // Additional cleanup step to prevent
+      // FLAKY: https://github.com/elastic/kibana/issues/167443
+      // FLAKY: https://github.com/elastic/kibana/issues/167444
+      await deleteConnectorByName('webhook-test');
     });
 
     it('should create an alert', async () => {
@@ -137,17 +143,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
+
+      // Alerts search bar (conditional actions)
+      await testSubjects.click('alertsFilterQueryToggle');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('addFilter');
+      await testSubjects.click('filterFieldSuggestionList');
+      await comboBox.set('filterFieldSuggestionList', '_id');
+      await comboBox.set('filterOperatorList', 'is not');
+      await testSubjects.setValue('filterParams', 'fake-rule-id');
+      await testSubjects.click('saveFilter');
+      await testSubjects.setValue('queryInput', '_id: *');
+
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        `alert '{{alertName}}' is active for group '{{context.group}}':
+        `Rule '{{rule.name}}' is active for group '{{context.group}}':
 
 - Value: {{context.value}}
-- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
 - Timestamp: {{context.date}}`
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
@@ -167,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -195,7 +214,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
@@ -217,7 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -248,7 +267,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
 
-      const toastTitle = await pageObjects.common.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -267,10 +286,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show discard confirmation before closing flyout without saving', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click(`.es-query-SelectOption`);
       await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
@@ -316,27 +337,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('testQuery');
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
-
-      await discardNewRuleCreation();
-    });
-
-    it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
-      await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', 'alertName');
-      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="ruleSearchField"]');
-      await ruleTypeSearchBox.type('notexisting rule type');
-      await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
-
-      const ruleTypes = await find.allByCssSelector('.triggersActionsUI__ruleTypeNodeHeading');
-      expect(ruleTypes).to.have.length(0);
-
-      const searchClearButton = await find.byCssSelector('.euiFormControlLayoutClearButton');
-      await searchClearButton.click();
-
-      const ruleTypesClearFilter = await find.allByCssSelector(
-        '.triggersActionsUI__ruleTypeNodeHeading'
-      );
-      expect(ruleTypesClearFilter.length).to.above(0);
 
       await discardNewRuleCreation();
     });

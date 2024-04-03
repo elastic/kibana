@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
-import classNames from 'classnames';
-
+import { css } from '@emotion/react';
 import {
-  EmbeddableChildPanel,
-  EmbeddablePhaseEvent,
+  EmbeddablePanel,
+  reactEmbeddableRegistryHasKey,
+  ReactEmbeddableRenderer,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
-
+import { PhaseEvent } from '@kbn/presentation-publishing';
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
+import { getReferencesForPanelId } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
@@ -26,14 +28,14 @@ export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
-  focusedPanelId?: string;
   expandedPanelId?: string;
+  focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
+  onPanelStatusChange?: (info: PhaseEvent) => void;
 }
 
-const Item = React.forwardRef<HTMLDivElement, Props>(
+export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       expandedPanelId,
@@ -47,23 +49,25 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
       children,
       className,
-      style,
       ...rest
     },
     ref
   ) => {
-    const {
-      embeddable: { EmbeddablePanel: PanelComponent },
-    } = pluginServices.getServices();
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
+    const useMargins = container.select((state) => state.explicitInput.useMargins);
+    const panel = container.select((state) => state.explicitInput.panels[id]);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
+    const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
+    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
     const classes = classNames({
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
+      'dshDashboardGrid__item--focused': focusPanel,
+      'dshDashboardGrid__item--blurred': blurPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
@@ -76,12 +80,73 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         if (highlightPanelId === id) {
           container.highlightPanel(ref.current);
         }
+
+        ref.current.querySelectorAll('*').forEach((e) => {
+          if (blurPanel) {
+            // remove blurred panels and nested elements from tab order
+            e.setAttribute('tabindex', '-1');
+          } else {
+            // restore tab order
+            e.removeAttribute('tabindex');
+          }
+        });
       }
-    }, [id, container, scrollToPanelId, highlightPanelId, ref]);
+    }, [id, container, scrollToPanelId, highlightPanelId, ref, blurPanel]);
+
+    const focusStyles = blurPanel
+      ? css`
+          pointer-events: none;
+          opacity: 0.25;
+        `
+      : undefined;
+
+    const renderedEmbeddable = useMemo(() => {
+      const references = getReferencesForPanelId(id, container.savedObjectReferences);
+
+      const panelProps = {
+        showBadges: true,
+        showBorder: useMargins,
+        showNotifications: true,
+        showShadow: false,
+      };
+
+      // render React embeddable
+      if (reactEmbeddableRegistryHasKey(type)) {
+        return (
+          <ReactEmbeddableRenderer
+            type={type}
+            maybeId={id}
+            parentApi={container}
+            key={`${type}_${id}`}
+            state={{ rawState: panel.explicitInput, version: panel.version, references }}
+            panelProps={panelProps}
+          />
+        );
+      }
+      // render legacy embeddable
+      return (
+        <EmbeddablePanel
+          key={type}
+          index={index}
+          onPanelStatusChange={onPanelStatusChange}
+          embeddable={() => container.untilEmbeddableLoaded(id)}
+          {...panelProps}
+        />
+      );
+    }, [
+      id,
+      container,
+      type,
+      index,
+      useMargins,
+      onPanelStatusChange,
+      panel.explicitInput,
+      panel.version,
+    ]);
 
     return (
       <div
-        style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
+        css={focusStyles}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
@@ -90,18 +155,11 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       >
         {isRenderable ? (
           <>
-            <EmbeddableChildPanel
-              // This key is used to force rerendering on embeddable type change while the id remains the same
-              key={type}
-              embeddableId={id}
-              index={index}
-              onPanelStatusChange={onPanelStatusChange}
-              {...{ container, PanelComponent }}
-            />
+            {renderedEmbeddable}
             {children}
           </>
         ) : (
-          <div className="embPanel embPanel-isLoading">
+          <div>
             <EuiLoadingChart size="l" mono />
           </div>
         )}
@@ -147,11 +205,16 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
+  const container = useDashboardContainer();
+  const focusedPanelId = container.select((state) => state.componentState.focusedPanelId);
 
   const dashboard = useDashboardContainer();
 
   const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
-  const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
+  const isEnabled =
+    !isPrintMode &&
+    isProjectEnabledInLabs('labs:dashboard:deferBelowFold') &&
+    (!focusedPanelId || focusedPanelId === props.id);
 
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });

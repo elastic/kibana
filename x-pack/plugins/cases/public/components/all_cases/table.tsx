@@ -7,14 +7,15 @@
 
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import classnames from 'classnames';
-import styled from 'styled-components';
 
-import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
-import type { CasesFindResponseUI, CasesUI, CaseUI } from '../../../common/ui/types';
+
+import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
+
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -29,17 +30,12 @@ interface CasesTableProps {
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<CaseUI>['onChange'];
   pagination: Pagination;
-  selectedCases: CasesUI;
   selection: EuiTableSelectionType<CaseUI>;
   sorting: EuiBasicTableProps<CaseUI>['sorting'];
-  tableRef: MutableRefObject<EuiBasicTable | null>;
+  tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
-  deselectCases: () => void;
+  isLoadingColumns: boolean;
 }
-
-const Div = styled.div`
-  margin-top: ${({ theme }) => theme.eui.euiSizeM};
-`;
 
 export const CasesTable: FunctionComponent<CasesTableProps> = ({
   columns,
@@ -51,15 +47,15 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   isSelectorView,
   onChange,
   pagination,
-  selectedCases,
   selection,
   sorting,
   tableRef,
   tableRowProps,
-  deselectCases,
+  isLoadingColumns,
 }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const { euiTheme } = useEuiTheme();
   const navigateToCreateCaseClick = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -72,18 +68,16 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     [goToCreateCase, navigateToCreateCase]
   );
 
-  return isCasesLoading && isDataEmpty ? (
-    <Div>
+  return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
       <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />
-    </Div>
+    </div>
   ) : (
     <>
-      <CasesTableUtilityBar
-        isSelectorView={isSelectorView}
-        totalCases={data.total ?? 0}
-        selectedCases={selectedCases}
-        deselectCases={deselectCases}
-      />
       <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}

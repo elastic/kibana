@@ -18,24 +18,29 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/lib/kibana';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
-  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  LOADING_ENDPOINT_DATA_TOOLTIP,
+  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../endpoint_responder/translations';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
-  isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
+  isAlertFromEndpointEvent,
 } from '../../../common/utils/endpoint_alert_check';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+  ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+} from '../../../common/components/toolbar/bulk_actions/translations';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -44,7 +49,6 @@ jest.mock('../user_info', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
-(useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
@@ -55,6 +59,10 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
   }),
+}));
+
+jest.mock('../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
@@ -80,7 +88,7 @@ jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
 
 jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
   return {
-    useHostIsolationStatus: jest.fn().mockReturnValue({
+    useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
       loading: false,
       isIsolated: false,
       agentStatus: 'healthy',
@@ -117,7 +125,13 @@ describe('take action dropdown', () => {
         services: {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
-          cases: mockCasesContract(),
+          cases: {
+            ...mockCasesContract(),
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
+              getRuleIdFromEvent: () => null,
+            },
+          },
           osquery: {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
@@ -240,6 +254,20 @@ describe('take action dropdown', () => {
         ).toEqual('Respond');
       });
     });
+    test('should render "Apply alert tags"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').first().text()
+        ).toEqual(ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE);
+      });
+    });
+    test('should render "Assign alert"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').first().text()
+        ).toEqual(ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE);
+      });
+    });
   });
 
   describe('for Endpoint related actions', () => {
@@ -331,7 +359,7 @@ describe('take action dropdown', () => {
         wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
         await waitFor(() => {
           expect(
-            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+            wrapper.find('[data-test-subj="add-event-filter-menu-item"]').last().getDOMNode()
           ).toBeEnabled();
         });
       });
@@ -469,17 +497,45 @@ describe('take action dropdown', () => {
         expect(findLaunchResponderButton()).toHaveLength(0);
       });
 
-      it('should disable the button if alert NOT from a host running endpoint', async () => {
+      it('should enable button for non endpoint event type when defend integration present', async () => {
         setTypeOnEcsDataWithAgentType('filebeat');
         if (defaultProps.detailsData) {
           defaultProps.detailsData = generateAlertDetailsDataMock() as TimelineEventsDetailsItem[];
         }
         render();
 
-        const consoleButton = findLaunchResponderButton().first();
+        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+          LOADING_ENDPOINT_DATA_TOOLTIP
+        );
 
-        expect(consoleButton.prop('disabled')).toBe(true);
-        expect(consoleButton.prop('toolTipContent')).toEqual(NOT_FROM_ENDPOINT_HOST_TOOLTIP);
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(false);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(undefined);
+        });
+      });
+
+      it('should disable the button for non endpoint event type when defend integration not present', async () => {
+        setAlertDetailsDataMockToEndpointAgent();
+        apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
+          const error: Error & { body?: { statusCode: number } } = new Error();
+          error.body = { statusCode: 404 };
+          throw error;
+        });
+        render();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toThrow();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            NOT_FROM_ENDPOINT_HOST_TOOLTIP
+          );
+        });
       });
 
       it('should disable the button if host status is unenrolled', async () => {

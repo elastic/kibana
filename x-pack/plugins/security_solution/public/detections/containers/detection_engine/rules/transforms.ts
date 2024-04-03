@@ -9,9 +9,9 @@ import { flow } from 'fp-ts/lib/function';
 import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import type {
   RuleCreateProps,
+  RuleResponse,
   RuleUpdateProps,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these
@@ -45,7 +45,7 @@ export const transformOutput = (
  * @param rule The rule to transform the output of
  * @returns The rule transformed from the output
  */
-export const transformInput = (rule: Rule): Rule => flow(addIdToThreatMatchArray)(rule);
+export const transformInput = (rule: RuleResponse): RuleResponse => addIdToThreatMatchArray(rule);
 
 /**
  * This adds an id to the incoming threat match arrays as ReactJS prefers to have
@@ -62,7 +62,7 @@ export const transformInput = (rule: Rule): Rule => flow(addIdToThreatMatchArray
  * @param rule The rule to add an id to the threat matches.
  * @returns rule The rule but with id added to the threat array and entries
  */
-export const addIdToThreatMatchArray = (rule: Rule): Rule => {
+export const addIdToThreatMatchArray = (rule: RuleResponse): RuleResponse => {
   if (rule.type === 'threat_match' && rule.threat_mapping != null) {
     const threatMapWithId = rule.threat_mapping.map((mapping) => {
       const newEntries = mapping.entries.map((entry) => addIdToItem(entry));

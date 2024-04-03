@@ -13,6 +13,7 @@ import { DataViewBase } from '../../..';
 import * as ast from '../ast';
 
 import * as or from './or';
+import { KqlOrFunctionNode } from './or';
 jest.mock('../grammar');
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
@@ -43,7 +44,10 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap subqueries in an ES bool query's should clause", () => {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -57,10 +61,30 @@ describe('kuery functions', () => {
       });
 
       test('should require one of the clauses to match', () => {
-        const node = nodeTypes.function.buildNode('or', [childNode1, childNode2]);
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
         const result = or.toElasticsearchQuery(node, indexPattern);
 
         expect(result.bool).toHaveProperty('minimum_should_match', 1);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('with one sub-expression', () => {
+        const node = nodeTypes.function.buildNode('or', [childNode1]) as KqlOrFunctionNode;
+        const result = or.toKqlExpression(node);
+        expect(result).toBe('(machine.os: osx)');
+      });
+
+      test('with two sub-expressions', () => {
+        const node = nodeTypes.function.buildNode('or', [
+          childNode1,
+          childNode2,
+        ]) as KqlOrFunctionNode;
+        const result = or.toKqlExpression(node);
+        expect(result).toBe('(machine.os: osx OR extension: jpg)');
       });
     });
   });

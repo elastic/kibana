@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { ANTLRErrorListener, Recognizer } from 'antlr4ts';
-import type { EditorError } from '../types';
+import type { Recognizer, RecognitionException } from 'antlr4';
+import { ErrorListener } from 'antlr4';
+import type { MonacoEditorError } from '../types';
 
-export class ANTLREErrorListener implements ANTLRErrorListener<any> {
-  private errors: EditorError[] = [];
+export class ANTLRErrorListener extends ErrorListener<any> {
+  protected errors: MonacoEditorError[] = [];
 
   syntaxError(
-    recognizer: Recognizer<any, any>,
+    recognizer: Recognizer<any>,
     offendingSymbol: any,
     line: number,
     column: number,
-    message: string
+    message: string,
+    error: RecognitionException | undefined
   ): void {
     let endColumn = column + 1;
 
@@ -31,10 +33,11 @@ export class ANTLREErrorListener implements ANTLRErrorListener<any> {
       startColumn: column,
       endColumn,
       message,
+      severity: 8,
     });
   }
 
-  getErrors(): EditorError[] {
+  getErrors(): MonacoEditorError[] {
     return this.errors;
   }
 }

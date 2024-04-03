@@ -7,12 +7,12 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
@@ -52,6 +52,7 @@ import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vec
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 import { transformRequest } from './transform_request';
+import { boundsToExtent } from '../../classes/util/maplibre_utils';
 
 export interface Props {
   isMapReady: boolean;
@@ -85,7 +86,6 @@ interface State {
 }
 
 export class MbMap extends Component<Props, State> {
-  private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
   private _prevCustomIcons?: CustomIcon[];
@@ -110,9 +110,6 @@ export class MbMap extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._checker) {
-      this._checker.destroy();
-    }
     if (this.state.mbMap) {
       this.state.mbMap.remove();
       this.state.mbMap = undefined;
@@ -145,12 +142,7 @@ export class MbMap extends Component<Props, State> {
         lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
         lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION),
       },
-      extent: {
-        minLon: _.round(mbBounds.getWest(), DECIMAL_DEGREES_PRECISION),
-        minLat: _.round(mbBounds.getSouth(), DECIMAL_DEGREES_PRECISION),
-        maxLon: _.round(mbBounds.getEast(), DECIMAL_DEGREES_PRECISION),
-        maxLat: _.round(mbBounds.getNorth(), DECIMAL_DEGREES_PRECISION),
-      },
+      extent: boundsToExtent(mbBounds),
     };
   }
 
@@ -195,8 +187,13 @@ export class MbMap extends Component<Props, State> {
         }
       });
       mbMap.on('load', () => {
-        emptyImage = new Image();
+        // Map instance automatically resizes when container size changes.
+        // However, issues may arise if container resizes before map finishes loading.
+        // This is occuring when by-value maps are used in dashboard.
+        // To prevent issues, resize container after load
+        mbMap.resize();
 
+        emptyImage = new Image();
         emptyImage.src =
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
         emptyImage.crossOrigin = 'anonymous';
@@ -239,7 +236,6 @@ export class MbMap extends Component<Props, State> {
 
     this.setState({ mbMap }, () => {
       this._loadMakiSprites(mbMap);
-      this._initResizerChecker();
       this._registerMapEventListeners(mbMap);
       this.props.onMapReady(this._getMapExtentState());
     });
@@ -284,19 +280,11 @@ export class MbMap extends Component<Props, State> {
     }
   }
 
-  _initResizerChecker() {
-    this.state.mbMap?.resize(); // ensure map is sized for container prior to monitoring
-    this._checker = new ResizeChecker(this._containerRef!);
-    this._checker.on('resize', () => {
-      this.state.mbMap?.resize();
-    });
-  }
-
   _reportUsage() {
     const usageCollector = getUsageCollection();
     if (!usageCollector) return;
 
-    const webglSupport = maplibregl.supported();
+    const webglSupport = maplibreglSupported();
 
     usageCollector.reportUiCounter(
       APP_ID,
@@ -305,7 +293,7 @@ export class MbMap extends Component<Props, State> {
     );
 
     // Report low system performance or no hardware GPU
-    if (webglSupport && !maplibregl.supported({ failIfMajorPerformanceCaveat: true })) {
+    if (webglSupport && !maplibreglSupported({ failIfMajorPerformanceCaveat: true })) {
       usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, 'gl_majorPerformanceCaveat');
     }
   }

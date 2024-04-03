@@ -23,24 +23,40 @@ import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal
 import { ActionsConfig } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../../common';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const CERT_DIR = '../../../../../../packages/kbn-dev-utils/certs';
+const MOCK_CERT_DIR = '../mock_certs';
 
 const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
 const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
+const KIBANA_P12_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.p12'));
 const CA_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'ca.crt'));
+
+const UNAUTHORIZED_CA_FILE = pathResolve(
+  __filename,
+  pathJoin(MOCK_CERT_DIR, 'unauthorized_ca.crt')
+);
+const UNAUTHORIZED_CRT_FILE = pathResolve(__filename, pathJoin(MOCK_CERT_DIR, 'unauthorized.crt'));
+const UNAUTHORIZED_KEY_FILE = pathResolve(__filename, pathJoin(MOCK_CERT_DIR, 'unauthorized.key'));
 
 const KIBANA_KEY = fsReadFileSync(KIBANA_KEY_FILE, 'utf8');
 const KIBANA_CRT = fsReadFileSync(KIBANA_CRT_FILE, 'utf8');
+const KIBANA_P12 = fsReadFileSync(KIBANA_P12_FILE);
 const CA = fsReadFileSync(CA_FILE, 'utf8');
+
+const UNAUTHORIZED_KEY = fsReadFileSync(UNAUTHORIZED_KEY_FILE);
+const UNAUTHORIZED_CRT = fsReadFileSync(UNAUTHORIZED_CRT_FILE);
+const UNAUTHORIZED_CA = fsReadFileSync(UNAUTHORIZED_CA_FILE);
 
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const AxiosDefaultsAadapter = require('axios/lib/adapters/http');
 
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
@@ -51,7 +67,7 @@ describe('axios connections', () => {
     // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
     // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
     savedAxiosDefaultsAdapter = axios.defaults.adapter;
-    axios.defaults.adapter = AxiosDefaultsAadapter;
+    axios.defaults.adapter = 'http';
   });
 
   afterEach(() => {
@@ -205,6 +221,96 @@ describe('axios connections', () => {
       const configurationUtilities = getACUfromConfig({
         customHostSettings: [{ url, ssl: { certificateAuthoritiesData: ca } }],
       });
+      const fn = async () => await request({ axios, url, logger, configurationUtilities });
+      await expect(fn()).rejects.toThrow('certificate');
+    });
+
+    test('it works with ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        ca: Buffer.from(CA),
+      };
+      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with cert, key, and ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        ca: Buffer.from(CA),
+        cert: Buffer.from(KIBANA_CRT),
+        key: Buffer.from(KIBANA_KEY),
+      };
+      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      expect(res.status).toBe(200);
+    });
+
+    test('it works with pfx and passphrase in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        pfx: KIBANA_P12,
+        passphrase: 'storepass',
+      };
+      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      expect(res.status).toBe(200);
+    });
+
+    test('it fails with cert and key but no ca in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        cert: Buffer.from(KIBANA_CRT),
+        key: Buffer.from(KIBANA_KEY),
+      };
+      const fn = async () =>
+        await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      await expect(fn()).rejects.toThrow('certificate');
+    });
+
+    test('it fails with pfx but no passphrase in SSL overrides', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        pfx: KIBANA_P12,
+      };
+      const fn = async () =>
+        await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      await expect(fn()).rejects.toThrow('mac verify');
+    });
+
+    test('it fails with a client-side certificate issued by an invalid ca', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
+      const sslOverrides = {
+        ca: UNAUTHORIZED_CA,
+        cert: UNAUTHORIZED_CRT,
+        key: UNAUTHORIZED_KEY,
+      };
+      const fn = async () =>
+        await request({ axios, url, logger, configurationUtilities, sslOverrides });
+      await expect(fn()).rejects.toThrow('certificate');
+    });
+
+    test('it fails when requesting a client-side cert and none is provided', async () => {
+      const { url, server } = await createServer({ useHttps: true, requestCert: true });
+      testServer = server;
+
+      const configurationUtilities = getACUfromConfig();
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
     });
@@ -458,11 +564,13 @@ function removePassword(url: string) {
 const TlsOptions = {
   cert: KIBANA_CRT,
   key: KIBANA_KEY,
+  ca: CA,
 };
 
 interface CreateServerOptions {
   useHttps: boolean;
   requireAuth?: boolean;
+  requestCert?: boolean;
 }
 
 interface CreateServerResult {
@@ -471,7 +579,7 @@ interface CreateServerResult {
 }
 
 async function createServer(options: CreateServerOptions): Promise<CreateServerResult> {
-  const { useHttps, requireAuth = false } = options;
+  const { useHttps, requireAuth = false, requestCert = false } = options;
   const port = await getPort();
   const url = `http${useHttps ? 's' : ''}://${requireAuth ? `${Auth}@` : ''}localhost:${port}`;
 
@@ -499,7 +607,7 @@ async function createServer(options: CreateServerOptions): Promise<CreateServerR
   if (!useHttps) {
     server = http.createServer(requestHandler);
   } else {
-    server = https.createServer(TlsOptions, requestHandler);
+    server = https.createServer({ ...TlsOptions, requestCert }, requestHandler);
   }
   server.unref();
 
@@ -580,6 +688,9 @@ const BaseActionsConfig: ActionsConfig = {
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
   enableFooterInEmail: true,
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

@@ -10,7 +10,7 @@ import {
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { createCloudUsageCollector } from './cloud_usage_collector';
+import { CloudUsageCollectorConfig, createCloudUsageCollector } from './cloud_usage_collector';
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 describe('createCloudUsageCollector', () => {
@@ -23,18 +23,25 @@ describe('createCloudUsageCollector', () => {
   });
 
   it('calls `makeUsageCollector`', () => {
-    createCloudUsageCollector(usageCollection, { isCloudEnabled: false });
+    createCloudUsageCollector(usageCollection, {
+      isCloudEnabled: false,
+    } as CloudUsageCollectorConfig);
     expect(usageCollection.makeUsageCollector).toBeCalledTimes(1);
   });
 
   describe('Fetched Usage data', () => {
     it('return isCloudEnabled boolean', async () => {
-      const collector = createCloudUsageCollector(usageCollection, { isCloudEnabled: true });
+      const collector = createCloudUsageCollector(usageCollection, {
+        isCloudEnabled: true,
+      } as CloudUsageCollectorConfig);
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
         isCloudEnabled: true,
         isElasticStaffOwned: undefined,
         trialEndDate: undefined,
+        deploymentId: undefined,
+        projectId: undefined,
+        projectType: undefined,
       });
     });
 
@@ -42,13 +49,37 @@ describe('createCloudUsageCollector', () => {
       const collector = createCloudUsageCollector(usageCollection, {
         isCloudEnabled: true,
         trialEndDate: '2020-10-01T14:30:16Z',
-      });
+      } as CloudUsageCollectorConfig);
 
       expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
         isCloudEnabled: true,
         isElasticStaffOwned: undefined,
         trialEndDate: '2020-10-01T14:30:16Z',
         inTrial: false,
+        deploymentId: undefined,
+        projectId: undefined,
+        projectType: undefined,
+      });
+    });
+
+    it('pass-through properties are copied as expected', async () => {
+      const collector = createCloudUsageCollector(usageCollection, {
+        isCloudEnabled: true,
+        trialEndDate: '2020-10-01T14:30:16Z',
+        isElasticStaffOwned: true,
+        deploymentId: 'a-deployment-id',
+        projectId: 'a-project-id',
+        projectType: 'security',
+      });
+
+      expect(await collector.fetch(collectorFetchContext)).toStrictEqual({
+        isCloudEnabled: true,
+        trialEndDate: '2020-10-01T14:30:16Z',
+        inTrial: false,
+        isElasticStaffOwned: true,
+        deploymentId: 'a-deployment-id',
+        projectId: 'a-project-id',
+        projectType: 'security',
       });
     });
   });

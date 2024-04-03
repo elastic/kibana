@@ -12,8 +12,8 @@ import type { RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
@@ -52,11 +52,11 @@ const shouldSkipIndexPatternsBulkAction = (
     return true;
   }
 
-  if (action.type === BulkActionEditType.add_index_patterns) {
+  if (action.type === BulkActionEditTypeEnum.add_index_patterns) {
     return hasIndexPatterns(indexPatterns, action);
   }
 
-  if (action.type === BulkActionEditType.delete_index_patterns) {
+  if (action.type === BulkActionEditTypeEnum.delete_index_patterns) {
     return hasNotIndexPattern(indexPatterns, action);
   }
 
@@ -80,10 +80,14 @@ const applyBulkActionEditToRuleParams = (
   switch (action.type) {
     // index_patterns actions
     // index pattern is not present in machine learning rule type, so we throw error on it
-    case BulkActionEditType.add_index_patterns: {
+    case BulkActionEditTypeEnum.add_index_patterns: {
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be added. ES|QL rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
@@ -98,10 +102,14 @@ const applyBulkActionEditToRuleParams = (
       ruleParams.index = addItemsToArray(ruleParams.index ?? [], action.value);
       break;
     }
-    case BulkActionEditType.delete_index_patterns: {
+    case BulkActionEditTypeEnum.delete_index_patterns: {
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be deleted. ES|QL rule doesn't have index patterns property"
       );
 
       if (
@@ -121,10 +129,14 @@ const applyBulkActionEditToRuleParams = (
       }
       break;
     }
-    case BulkActionEditType.set_index_patterns: {
+    case BulkActionEditTypeEnum.set_index_patterns: {
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
@@ -140,7 +152,7 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     // timeline actions
-    case BulkActionEditType.set_timeline: {
+    case BulkActionEditTypeEnum.set_timeline: {
       ruleParams = {
         ...ruleParams,
         timelineId: action.value.timeline_id || undefined,
@@ -150,7 +162,7 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     // update look-back period in from and meta.from fields
-    case BulkActionEditType.set_schedule: {
+    case BulkActionEditTypeEnum.set_schedule: {
       const interval = parseInterval(action.value.interval) ?? moment.duration(0);
       const parsedFrom = parseInterval(action.value.lookback) ?? moment.duration(0);
 
@@ -191,7 +203,7 @@ export const ruleParamsModifier = (
     if (!isActionSkipped) {
       isParamsUpdateSkipped = false;
     }
-    return { ...acc, ...ruleParams };
+    return { ...acc, ...ruleParams } as RuleAlertType['params'];
   }, existingRuleParams);
 
   // increment version even if actions are empty, as attributes can be modified as well outside of ruleParamsModifier

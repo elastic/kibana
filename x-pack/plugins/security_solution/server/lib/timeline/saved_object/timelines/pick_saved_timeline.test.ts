@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import type { SavedTimeline } from '../../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
-import type { Note } from '../../../../../common/types/timeline/note/api';
+import type { SavedTimeline, Note } from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 

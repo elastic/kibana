@@ -30,7 +30,7 @@ Table of Contents
 	- [Internal HTTP APIs](#internal-http-apis)
 		- [`GET /internal/alerting/rule/{id}/state`: Get rule state](#get-internalalertingruleidstate-get-rule-state)
 		- [`GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-internalalertingruleidalertsummary-get-rule-alert-summary)
-		- [`POST /internal/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-internalalertingruleidupdateapikey-update-rule-api-key)
+		- [`POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-internalalertingruleidupdateapikey-update-rule-api-key)
 	- [Alert Factory](#alert-factory)
 	- [Templating Actions](#templating-actions)
 		- [Examples](#examples)
@@ -99,7 +99,6 @@ The following table describes the properties of the `options` object.
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 |defaultScheduleInterval|(Optional) The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
 |doesSetRecoveryContext|(Optional) Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
-|getSummarizedAlerts|(Optional) When developing a rule type, you can choose to implement this hook for retrieving summarized alerts based on execution UUID or time range. This hook will be invoked when an alert summary action is configured for the rule.|Function|
 |alerts|(Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.|IRuleTypeAlerts|
 |autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
 |getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
@@ -307,7 +306,7 @@ interface MyRuleTypeAlertContext extends AlertInstanceContext {
 }
 
 type MyRuleTypeActionGroups = 'default' | 'warning';
-  
+
 const myRuleType: RuleType<
 	MyRuleTypeParams,
 	MyRuleTypeExtractedParams,
@@ -381,9 +380,9 @@ const myRuleType: RuleType<
 
 		// Only execute if CPU usage is greater than threshold
 		if (currentCpuUsage > threshold) {
-			// The first argument is a unique identifier for the alert. In this 
-			// scenario the provided server will be used. Also, this ID will be 
-			// used to make `getState()` return previous state, if any, on 
+			// The first argument is a unique identifier for the alert. In this
+			// scenario the provided server will be used. Also, this ID will be
+			// used to make `getState()` return previous state, if any, on
 			// matching identifiers.
 			const alert = services.alertFactory.create(server);
 
@@ -396,7 +395,7 @@ const myRuleType: RuleType<
 				cpuUsage: currentCpuUsage,
 			});
 
-			// 'default' refers to the id of a group of actions to be scheduled 
+			// 'default' refers to the id of a group of actions to be scheduled
 			// for execution, see 'actions' in create rule section
 			alert.scheduleActions('default', {
 				server,
@@ -407,8 +406,8 @@ const myRuleType: RuleType<
 		// Returning updated rule type level state, this will become available
 		// within the `state` function parameter at the next execution
 		return {
-			// This is an example attribute you could set, it makes more sense 
-			// to use this state when the rule type executes multiple 
+			// This is an example attribute you could set, it makes more sense
+			// to use this state when the rule type executes multiple
 			// alerts but wants a single place to track certain values.
 			lastChecked: new Date(),
 		};
@@ -498,7 +497,7 @@ features.registerKibanaFeature({
 						// grant `read` over our own type
 						'my-application-id.my-alert-type',
 						// grant `read` over the built-in IndexThreshold
-						'.index-threshold', 
+						'.index-threshold',
 						// grant `read` over Uptime's TLS RuleType
 						'xpack.uptime.alerts.actionGroups.tls'
 					],
@@ -508,7 +507,7 @@ features.registerKibanaFeature({
 						// grant `read` over our own type
 						'my-application-id.my-alert-type',
 						// grant `read` over the built-in IndexThreshold
-						'.index-threshold', 
+						'.index-threshold',
 						// grant `read` over Uptime's TLS RuleType
 						'xpack.uptime.alerts.actionGroups.tls'
 					],
@@ -556,7 +555,7 @@ features.registerKibanaFeature({
           read: [
             'my-application-id.my-restricted-rule-type'
           ],
-        }, 
+        },
         alert: {
           all: [
             'my-application-id.my-rule-type'
@@ -564,7 +563,7 @@ features.registerKibanaFeature({
           read: [
             'my-application-id.my-restricted-rule-type'
           ],
-        }, 
+        },
       },
       savedObject: {
         all: [],
@@ -799,7 +798,7 @@ Query:
 |---|---|---|
 |dateStart|The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
 
-### `POST /internal/alerting/rule/{id}/_update_api_key`: Update rule API key
+### `POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key
 
 |Property|Description|Type|
 |---|---|---|
@@ -874,7 +873,7 @@ Below is an example of a rule that takes advantage of templating:
         "from": "example@elastic.co",
         "to": ["destination@elastic.co"],
         "subject": "A notification about {{context.server}}",
-        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alertInstanceId}} was created by the rule {{alertId}} {{alertName}}."
+        "body": "The server {{context.server}} has a CPU usage of {{state.cpuUsage}}%. This message for {{alert.id}} was created by the rule {{rule.id}} {{rule.name}}."
       }
     }
   ]

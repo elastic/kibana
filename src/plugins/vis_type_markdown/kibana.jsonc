@@ -13,7 +13,6 @@
     ],
     "requiredBundles": [
       "expressions",
-      "kibanaReact",
       "visDefaultEditor",
       "visualizations"
     ]

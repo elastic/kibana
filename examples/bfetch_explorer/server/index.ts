@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BfetchExplorerPlugin } from './plugin';
-
-export const plugin = () => new BfetchExplorerPlugin();
+export const plugin = async () => {
+  const { BfetchExplorerPlugin } = await import('./plugin');
+  return new BfetchExplorerPlugin();
+};

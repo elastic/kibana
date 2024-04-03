@@ -15,7 +15,7 @@ import { RuleStatus } from '../../types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({

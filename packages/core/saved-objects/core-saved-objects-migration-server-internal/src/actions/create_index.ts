@@ -10,7 +10,10 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
   catchRetryableEsClientErrors,
@@ -19,6 +22,7 @@ import {
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
+  INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
@@ -42,8 +46,10 @@ export interface CreateIndexParams {
   client: ElasticsearchClient;
   indexName: string;
   mappings: IndexMapping;
+  esCapabilities: ElasticsearchCapabilities;
   aliases?: string[];
   timeout?: string;
+  waitForIndexStatusTimeout?: string;
 }
 
 export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_already_exists';
@@ -62,8 +68,10 @@ export const createIndex = ({
   client,
   indexName,
   mappings,
+  esCapabilities,
   aliases = [],
   timeout = DEFAULT_TIMEOUT,
+  waitForIndexStatusTimeout = DEFAULT_TIMEOUT,
 }: CreateIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   CreateIndexSuccessResponse
@@ -73,6 +81,28 @@ export const createIndex = ({
     CreateIndexSuccessResponse
   > = () => {
     const aliasesObject = aliasArrayToRecord(aliases);
+
+    const indexSettings = {
+      // settings not being supported on serverless ES
+      ...(esCapabilities.serverless
+        ? {}
+        : {
+            // ES rule of thumb: shards should be several GB to 10's of GB, so
+            // Kibana is unlikely to cross that limit.
+            number_of_shards: INDEX_NUMBER_OF_SHARDS,
+            auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
+            // Set an explicit refresh interval so that we don't inherit the
+            // value from incorrectly configured index templates (not required
+            // after we adopt system indices)
+            refresh_interval: '1s',
+            // Bump priority so that recovery happens before newer indices
+            priority: 10,
+          }),
+      // Increase the fields limit beyond the default of 1000
+      mapping: {
+        total_fields: { limit: 1500 },
+      },
+    };
 
     return client.indices
       .create({
@@ -87,22 +117,7 @@ export const createIndex = ({
         mappings,
         aliases: aliasesObject,
         settings: {
-          index: {
-            // ES rule of thumb: shards should be several GB to 10's of GB, so
-            // Kibana is unlikely to cross that limit.
-            number_of_shards: 1,
-            auto_expand_replicas: INDEX_AUTO_EXPAND_REPLICAS,
-            // Set an explicit refresh interval so that we don't inherit the
-            // value from incorrectly configured index templates (not required
-            // after we adopt system indices)
-            refresh_interval: '1s',
-            // Bump priority so that recovery happens before newer indices
-            priority: 10,
-            // Increase the fields limit beyond the default of 1000
-            mapping: {
-              total_fields: { limit: 1500 },
-            },
-          },
+          index: indexSettings,
         },
       })
       .then(() => {
@@ -137,7 +152,7 @@ export const createIndex = ({
         waitForIndexStatus({
           client,
           index: indexName,
-          timeout: DEFAULT_TIMEOUT,
+          timeout: waitForIndexStatusTimeout,
           status: 'green',
         }),
         TaskEither.map(() => res)

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import {
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+  type CategoryFieldExample,
+  type FieldExampleCheck,
+} from '@kbn/ml-category-validator';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationDetector } from '../categorization_detector';
 import { CategorizationPerPartitionField } from '../categorization_partition_field';
@@ -18,11 +24,6 @@ import { CategorizationPerPartitionField } from '../categorization_partition_fie
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
 import { InvalidCssVersionCallout } from './invalid_ccs_version_valid_callout';
-import {
-  CategoryFieldExample,
-  FieldExampleCheck,
-} from '../../../../../../../../../common/types/categories';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/categorization_job';
 import { LoadingWrapper } from '../../../charts/loading_wrapper';
 
 interface Props {

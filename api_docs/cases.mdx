@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/cases
 title: "cases"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the cases plugin
-date: 2023-07-11
+date: 2024-04-03
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'cases']
 ---
 import casesObj from './cases.devdocs.json';
@@ -21,9 +21,12 @@ Contact [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-o
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 80 | 0 | 65 | 27 |
+| 115 | 0 | 95 | 27 |
 
 ## Client
+
+### Setup
+<DocDefinitionList data={[casesObj.client.setup]}/>
 
 ### Start
 <DocDefinitionList data={[casesObj.client.start]}/>
@@ -34,19 +37,19 @@ Contact [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-o
 ### Functions
 <DocDefinitionList data={casesObj.client.functions}/>
 
-### Interfaces
-<DocDefinitionList data={casesObj.client.interfaces}/>
-
 ### Consts, variables and types
 <DocDefinitionList data={casesObj.client.misc}/>
 
 ## Server
 
+### Setup
+<DocDefinitionList data={[casesObj.server.setup]}/>
+
+### Start
+<DocDefinitionList data={[casesObj.server.start]}/>
+
 ### Classes
 <DocDefinitionList data={casesObj.server.classes}/>
-
-### Interfaces
-<DocDefinitionList data={casesObj.server.interfaces}/>
 
 ## Common
 

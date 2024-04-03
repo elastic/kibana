@@ -8,7 +8,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -30,7 +30,7 @@ export interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
-  disableShardWarnings?: boolean;
+  disableWarningToasts?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
   title?: string;
@@ -48,7 +48,7 @@ export const handleRequest = ({
   searchSourceService,
   timeFields,
   timeRange,
-  disableShardWarnings,
+  disableWarningToasts,
   getNow,
   executionContext,
   title,
@@ -110,7 +110,7 @@ export const handleRequest = ({
       requestSearchSource
         .fetch$({
           abortSignal,
-          disableShardFailureWarning: disableShardWarnings,
+          disableWarningToasts,
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,

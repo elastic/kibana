@@ -8,8 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '@kbn/core/server';
+import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
-import { SavedQueryRestResponse } from './route_types';
 import { SAVED_QUERY_BASE_URL } from '../../common/constants';
 
 const SAVED_QUERY_ID_CONFIG = schema.object({
@@ -29,6 +29,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
 const savedQueryResponseSchema = schema.object({
   id: schema.string(),
   attributes: SAVED_QUERY_ATTRS_CONFIG,
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const access = 'internal';
@@ -36,6 +37,37 @@ const version = '1';
 
 export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   const router = http.createRouter<SavedQueryRouteHandlerContext>();
+
+  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, access }).addVersion(
+    {
+      version,
+      validate: {
+        request: {
+          body: schema.object({
+            title: schema.string(),
+            id: schema.maybe(schema.string()),
+          }),
+        },
+        response: {
+          200: {
+            body: schema.object({
+              isDuplicate: schema.boolean(),
+            }),
+          },
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const savedQuery = await context.savedQuery;
+        const isDuplicate = await savedQuery.isDuplicateTitle(request.body);
+        return response.ok({ body: { isDuplicate } });
+      } catch (e) {
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
+      }
+    }
+  );
 
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_create`, access }).addVersion(
     {
@@ -54,11 +86,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       try {
         const savedQuery = await context.savedQuery;
-        const body: SavedQueryRestResponse = await savedQuery.create(request.body);
+        const body = await savedQuery.create(request.body);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -82,11 +114,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       const { id } = request.params;
       try {
         const savedQuery = await context.savedQuery;
-        const body: SavedQueryRestResponse = await savedQuery.update(id, request.body);
+        const body = await savedQuery.update(id, request.body);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -109,11 +141,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       const { id } = request.params;
       try {
         const savedQuery = await context.savedQuery;
-        const body: SavedQueryRestResponse = await savedQuery.get(id);
+        const body = await savedQuery.get(id);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -136,8 +168,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         const count: number = await savedQuery.count();
         return response.ok({ body: `${count}` });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -166,40 +198,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       try {
         const savedQuery = await context.savedQuery;
-        const body: { total: number; savedQueries: SavedQueryRestResponse[] } =
-          await savedQuery.find(request.body);
+        const body = await savedQuery.find(request.body);
         return response.ok({ body });
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
-      }
-    }
-  );
-
-  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_all`, access }).addVersion(
-    {
-      version,
-      validate: {
-        request: {},
-        response: {
-          200: {
-            body: schema.object({
-              total: schema.number(),
-              savedQueries: schema.arrayOf(savedQueryResponseSchema),
-            }),
-          },
-        },
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const savedQuery = await context.savedQuery;
-        const body: { total: number; savedQueries: SavedQueryRestResponse[] } =
-          await savedQuery.getAll();
-        return response.ok({ body });
-      } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );
@@ -225,8 +228,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         await savedQuery.delete(id);
         return response.ok();
       } catch (e) {
-        // TODO: Handle properly
-        return response.customError(e);
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
       }
     }
   );

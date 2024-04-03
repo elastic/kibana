@@ -1,11 +1,21 @@
 {
   "ml.put_trained_model_definition_part": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_ml/trained_models/{model_id}/definition/{part}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-model-definition-part.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-model-definition-part.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

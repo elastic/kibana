@@ -12,10 +12,28 @@ import { DataQualityProvider } from '../data_quality_panel/data_quality_context'
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
 import { ERROR_LOADING_ILM_EXPLAIN } from '../translations';
 import { useIlmExplain, UseIlmExplain } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockHttpFetch = jest.fn();
-const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch}>{children}</DataQualityProvider>
+const mockReportDataQualityIndexChecked = jest.fn();
+const mockReportDataQualityCheckAllClicked = jest.fn();
+const mockTelemetryEvents = {
+  reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
+};
+const { toasts } = notificationServiceMock.createSetupContract();
+const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: boolean }> = ({
+  children,
+  isILMAvailable = true,
+}) => (
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={isILMAvailable}
+    toasts={toasts}
+  >
+    {children}
+  </DataQualityProvider>
 );
 
 const pattern = 'packetbeat-*';
@@ -48,6 +66,35 @@ describe('useIlmExplain', () => {
 
     test('it returns a null error, because no errors occurred', async () => {
       expect(ilmExplainResult?.error).toBeNull();
+    });
+  });
+
+  describe('skip ilm api when isILMAvailable is false', () => {
+    let ilmExplainResult: UseIlmExplain | undefined;
+
+    beforeEach(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+        wrapper: ({ children }) => (
+          <DataQualityProvider
+            httpFetch={mockHttpFetch}
+            telemetryEvents={mockTelemetryEvents}
+            isILMAvailable={false}
+            toasts={toasts}
+          >
+            {children}
+          </DataQualityProvider>
+        ),
+      });
+      await waitForNextUpdate();
+      ilmExplainResult = await result.current;
+    });
+
+    test('it returns the expected ilmExplain map', async () => {
+      expect(ilmExplainResult?.ilmExplain).toEqual(null);
+    });
+
+    test('it returns loading: false, because the request is aborted', async () => {
+      expect(ilmExplainResult?.loading).toBe(false);
     });
   });
 

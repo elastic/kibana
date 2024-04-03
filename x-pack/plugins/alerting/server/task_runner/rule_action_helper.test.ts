@@ -60,6 +60,7 @@ describe('rule_action_helper', () => {
       const result = isSummaryAction(mockAction);
       expect(result).toBe(false);
     });
+
     test('should return false if the action does not have frequency field', () => {
       const result = isSummaryAction(mockOldAction);
       expect(result).toBe(false);
@@ -146,21 +147,21 @@ describe('rule_action_helper', () => {
       const result = getSummaryActionsFromTaskState({
         actions: [mockSummaryAction],
         summaryActions: {
-          '111-111': { date: new Date('01.01.2020') },
-          '222-222': { date: new Date('01.01.2020') },
+          '111-111': { date: new Date('01.01.2020').toISOString() },
+          '222-222': { date: new Date('01.01.2020').toISOString() },
         },
       });
-      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020').toISOString() } });
     });
 
     test('should replace hash with uuid', () => {
       const result = getSummaryActionsFromTaskState({
         actions: [mockSummaryAction],
         summaryActions: {
-          'slack:summary:1d': { date: new Date('01.01.2020') },
+          'slack:summary:1d': { date: new Date('01.01.2020').toISOString() },
         },
       });
-      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020') } });
+      expect(result).toEqual({ '111-111': { date: new Date('01.01.2020').toISOString() } });
     });
   });
 
@@ -180,7 +181,7 @@ describe('rule_action_helper', () => {
       jest.useRealTimers();
     });
     const logger = { debug: jest.fn() } as unknown as Logger;
-    const throttledSummaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
+    const throttledSummaryActions = { '111-111': { date: '2020-01-01T00:00:00.000Z' } };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({
@@ -227,7 +228,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is not in the task instance', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: '2020-01-01T00:00:00.000Z' } },
         logger,
       });
       expect(result).toBe(false);
@@ -237,7 +238,7 @@ describe('rule_action_helper', () => {
       jest.advanceTimersByTime(3600000 * 2);
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: '2020-01-01T00:00:00.000Z' } },
         logger,
       });
       expect(result).toBe(false);

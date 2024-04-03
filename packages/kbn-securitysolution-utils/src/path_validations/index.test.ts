@@ -11,10 +11,43 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
+  hasWildcardAndInvalidOperator,
+  validatePotentialWildcardInput,
   validateFilePathInput,
-  FILENAME_WILDCARD_WARNING,
+  validateWildcardInput,
+  WILDCARD_WARNING,
   FILEPATH_WARNING,
 } from '.';
+
+describe('validatePotentialWildcardInput', () => {
+  it('warns on wildcard when field is file.path.text', () => {
+    expect(
+      validatePotentialWildcardInput({
+        field: 'file.path.text',
+        os: OperatingSystem.WINDOWS,
+        value: 'c:\\path*.exe',
+      })
+    ).toEqual(WILDCARD_WARNING);
+  });
+  it('warns on wildcard when field is not file.path.text', () => {
+    expect(
+      validatePotentialWildcardInput({
+        field: 'event.category',
+        os: OperatingSystem.WINDOWS,
+        value: 'some*value',
+      })
+    ).toEqual(WILDCARD_WARNING);
+  });
+});
+
+describe('validateWildcardInput', () => {
+  it('warns on wildcard for fields that are not file paths', () => {
+    expect(validateWildcardInput('*')).toEqual(WILDCARD_WARNING);
+  });
+  it('does not warn if no wildcard', () => {
+    expect(validateWildcardInput('non-wildcard')).toEqual(undefined);
+  });
+});
 
 describe('validateFilePathInput', () => {
   describe('windows', () => {
@@ -36,15 +69,13 @@ describe('validateFilePathInput', () => {
     });
 
     it('warns on wildcard in file name at the end of the path', () => {
-      expect(validateFilePathInput({ os, value: 'c:\\path*.exe' })).toEqual(
-        FILENAME_WILDCARD_WARNING
-      );
+      expect(validateFilePathInput({ os, value: 'c:\\path*.exe' })).toEqual(WILDCARD_WARNING);
       expect(
         validateFilePathInput({
           os,
           value: 'C:\\Windows\\*\\FILENAME.EXE-*.gz',
         })
-      ).toEqual(FILENAME_WILDCARD_WARNING);
+      ).toEqual(WILDCARD_WARNING);
     });
 
     it('warns on unix paths or non-windows paths', () => {
@@ -65,20 +96,23 @@ describe('validateFilePathInput', () => {
         : OperatingSystem.LINUX;
 
     it('does not warn on valid filenames', () => {
-      expect(validateFilePathInput({ os, value: '/opt/*/FILENAME.EXE-1231205124.gz' })).not.toEqual(
-        FILENAME_WILDCARD_WARNING
-      );
+      expect(
+        validateFilePathInput({
+          os,
+          value: '/opt/*/FILENAME.EXE-1231205124.gz',
+        })
+      ).not.toEqual(WILDCARD_WARNING);
       expect(
         validateFilePathInput({
           os,
           value: "/opt/*/test$  as2@13---12!@#A,DS.#$^&$!#~ 'as'd.华语.txt",
         })
-      ).not.toEqual(FILENAME_WILDCARD_WARNING);
+      ).not.toEqual(WILDCARD_WARNING);
     });
     it('warns on wildcard in file name at the end of the path', () => {
-      expect(validateFilePathInput({ os, value: '/opt/bin*' })).toEqual(FILENAME_WILDCARD_WARNING);
+      expect(validateFilePathInput({ os, value: '/opt/bin*' })).toEqual(WILDCARD_WARNING);
       expect(validateFilePathInput({ os, value: '/opt/FILENAME.EXE-*.gz' })).toEqual(
-        FILENAME_WILDCARD_WARNING
+        WILDCARD_WARNING
       );
     });
 
@@ -92,6 +126,21 @@ describe('validateFilePathInput', () => {
       expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
       expect(validateFilePathInput({ os, value: '/folder/' })).toEqual(FILEPATH_WARNING);
     });
+  });
+});
+
+describe('Wildcard and invalid operator', () => {
+  it('should return TRUE when operator is not "WILDCARD" and value contains a wildcard', () => {
+    expect(hasWildcardAndInvalidOperator({ operator: 'match', value: 'asdf*' })).toEqual(true);
+  });
+  it('should return FALSE when operator is not "WILDCARD" and value does not contain a wildcard', () => {
+    expect(hasWildcardAndInvalidOperator({ operator: 'match', value: 'asdf' })).toEqual(false);
+  });
+  it('should return FALSE when operator is "WILDCARD" and value contains a wildcard', () => {
+    expect(hasWildcardAndInvalidOperator({ operator: 'wildcard', value: 'asdf*' })).toEqual(false);
+  });
+  it('should return FALSE when operator is "WILDCARD" and value does not contain a wildcard', () => {
+    expect(hasWildcardAndInvalidOperator({ operator: 'wildcard', value: 'asdf' })).toEqual(false);
   });
 });
 

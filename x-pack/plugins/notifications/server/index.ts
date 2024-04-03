@@ -6,13 +6,13 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { NotificationsPlugin } from './plugin';
 export { config } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
-export type { NotificationsPluginStart } from './types';
+export type { NotificationsServerStart as NotificationsPluginStart } from './types';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { NotificationsPlugin } = await import('./plugin');
   return new NotificationsPlugin(initializerContext);
 }

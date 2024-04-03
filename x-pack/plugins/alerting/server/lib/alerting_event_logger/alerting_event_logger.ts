@@ -13,6 +13,7 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
@@ -54,7 +55,7 @@ interface AlertOpts {
   maintenanceWindowIds?: string[];
 }
 
-interface ActionOpts {
+export interface ActionOpts {
   id: string;
   typeId: string;
   alertId?: string;
@@ -92,12 +93,12 @@ export class AlertingEventLogger {
     this.ruleContext = context;
   }
 
-  public start() {
+  public start(runDate: Date) {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.startTime = new Date();
+    this.startTime = runDate;
 
     const context = {
       ...this.ruleContext,
@@ -259,7 +260,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -286,7 +287,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -319,7 +320,7 @@ export function createExecuteTimeoutRecord(context: RuleContextOpts) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -346,7 +347,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -439,6 +440,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
         new: metrics.numberOfNewAlerts ? metrics.numberOfNewAlerts : 0,
         recovered: metrics.numberOfRecoveredAlerts ? metrics.numberOfRecoveredAlerts : 0,
       },
+      number_of_delayed_alerts: metrics.numberOfDelayedAlerts ? metrics.numberOfDelayedAlerts : 0,
       number_of_searches: metrics.numSearches ? metrics.numSearches : 0,
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,

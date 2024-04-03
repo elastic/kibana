@@ -9,7 +9,7 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import React from 'react';
 
 import { SameFamily } from '../../data_quality_panel/same_family';
-import { CodeDanger, CodeSuccess, CodeWarning } from '../../styles';
+import { CodeDanger, CodeSuccess } from '../../styles';
 import * as i18n from '../translations';
 import type { EnrichedFieldMetadata } from '../../types';
 
@@ -43,7 +43,7 @@ export const getIncompatibleMappingsTableColumns = (): Array<
     render: (indexFieldType: string, x) =>
       x.isInSameFamily ? (
         <div>
-          <CodeWarning data-test-subj="codeWarning">{indexFieldType}</CodeWarning>
+          <CodeSuccess data-test-subj="codeSuccess">{indexFieldType}</CodeSuccess>
           <SameFamily />
         </div>
       ) : (

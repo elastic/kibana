@@ -16,7 +16,7 @@ import {
   SHOW_MULTIFIELDS,
   SEARCH_FIELDS_FROM_SOURCE,
   ROW_HEIGHT_OPTION,
-} from '../../common';
+} from '@kbn/discover-utils';
 
 export const uiSettingsMock = {
   get: (key: string) => {

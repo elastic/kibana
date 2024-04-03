@@ -8,9 +8,14 @@
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
+import {
+  LATEST_FINDINGS_INDEX_PATTERN,
+  SECURITY_DEFAULT_DATA_VIEW_ID,
+} from '../../../common/constants';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { useKibana } from './use_kibana';
+import { useLatestFindingsDataView } from '../api/use_latest_findings_data_view';
 
 interface NegatedValue {
   value: string | number;
@@ -21,7 +26,7 @@ type FilterValue = string | number | NegatedValue;
 
 export type NavFilter = Record<string, FilterValue>;
 
-const createFilter = (key: string, filterValue: FilterValue): Filter => {
+const createFilter = (key: string, filterValue: FilterValue, dataViewId: string): Filter => {
   let negate = false;
   let value = filterValue;
   if (typeof filterValue === 'object') {
@@ -32,7 +37,7 @@ const createFilter = (key: string, filterValue: FilterValue): Filter => {
   if (value === '*') {
     return {
       query: { exists: { field: key } },
-      meta: { type: 'exists' },
+      meta: { type: 'exists', index: dataViewId },
     };
   }
   return {
@@ -42,18 +47,19 @@ const createFilter = (key: string, filterValue: FilterValue): Filter => {
       disabled: false,
       type: 'phrase',
       key,
+      index: dataViewId,
     },
     query: { match_phrase: { [key]: value } },
   };
 };
-const useNavigate = (pathname: string) => {
+const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID) => {
   const history = useHistory();
   const { services } = useKibana();
 
   return useCallback(
-    (filterParams: NavFilter = {}) => {
+    (filterParams: NavFilter = {}, groupBy?: string[]) => {
       const filters = Object.entries(filterParams).map(([key, filterValue]) =>
-        createFilter(key, filterValue)
+        createFilter(key, filterValue, dataViewId)
       );
 
       history.push({
@@ -62,17 +68,23 @@ const useNavigate = (pathname: string) => {
           // Set query language from user's preference
           query: services.data.query.queryString.getDefaultQuery(),
           filters,
+          ...(groupBy && { groupBy }),
         }),
       });
     },
-    [pathname, history, services.data.query.queryString]
+    [history, pathname, services.data.query.queryString, dataViewId]
   );
 };
 
-export const useNavigateFindings = () => useNavigate(findingsNavigation.findings_default.path);
+export const useNavigateFindings = () => {
+  const { data } = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  return useNavigate(findingsNavigation.findings_default.path, data?.id);
+};
 
-export const useNavigateFindingsByResource = () =>
-  useNavigate(findingsNavigation.findings_by_resource.path);
+export const useNavigateFindingsByResource = () => {
+  const { data } = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  return useNavigate(findingsNavigation.findings_by_resource.path, data?.id);
+};
 
 export const useNavigateVulnerabilities = () =>
   useNavigate(findingsNavigation.vulnerabilities.path);

@@ -8,8 +8,8 @@
 import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
@@ -87,7 +87,7 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
                 handleChange={(value) => {
                   handleInputChange({
                     ...inputValue,
-                    labelMinor: value.label,
+                    labelMinor: value.mode === 'none' ? '' : value.label,
                   });
                   setSubtitleMode(value.mode);
                 }}

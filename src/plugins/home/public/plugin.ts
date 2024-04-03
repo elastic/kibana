@@ -19,10 +19,8 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { CloudChatProviderPluginStart } from '@kbn/cloud-chat-provider-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import { ConfigSchema } from '../config';
@@ -42,12 +40,13 @@ import {
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  cloudChatProvider?: CloudChatProviderPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
+  cloud: CloudStart;
+  share: SharePluginStart;
 }
 
 export interface HomePluginSetupDependencies {
-  cloud?: CloudSetup;
+  cloud: CloudSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
@@ -77,15 +76,14 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [
-          coreStart,
-          { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding, cloudChatProvider },
-        ] = await core.getStartServices();
+        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
+          await core.getStartServices();
+
         setServices({
           share,
           trackUiMetric,
@@ -108,9 +106,11 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guidedOnboardingService: guidedOnboarding.guidedOnboardingApi,
+          guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
-          cloudChat: cloudChatProvider,
+          openModal: coreStart.overlays.openModal,
+          theme: core.theme,
+          i18nStart: coreStart.i18n,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
@@ -140,6 +140,7 @@ export class HomePublicPlugin
 
     const environment = { ...this.environmentService.setup() };
     const tutorials = { ...this.tutorialService.setup() };
+
     if (cloud) {
       environment.update({ cloud: cloud.isCloudEnabled });
       if (cloud.isCloudEnabled) {

@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { popupVersionsMap } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
+import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/protection_notice_supported_endpoint_version';
+import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -26,8 +28,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/171653
+  // FLAKY: https://github.com/elastic/kibana/issues/171654
   describe('When on the Endpoint Policy Details Page', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
+    const formTestSubjects = getPolicySettingsFormTestSubjects();
 
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
@@ -72,99 +79,107 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should not hide the side navigation', async () => {
-        await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
-        // ensure center of button is visible and not hidden by sticky bottom bar
-        await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
-        // test cleanup: go back to policy details page
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+      describe('side navigation', function () {
+        targetTags(this, ['@skipInServerless']);
+
+        it('should not hide the side navigation', async function () {
+          await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
+          // ensure center of button is visible and not hidden by sticky bottom bar
+          await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
+          // test cleanup: go back to policy details page
+          await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        });
       });
 
-      it('and the show advanced settings button is clicked', async () => {
-        await testSubjects.missingOrFail('advancedPolicyPanel');
+      it('Should show/hide advanced section when button is clicked', async () => {
+        await testSubjects.missingOrFail(formTestSubjects.advancedSection.settingsContainer);
 
         // Expand
         await pageObjects.policy.showAdvancedSettingsSection();
-        await testSubjects.existOrFail('advancedPolicyPanel');
+        await testSubjects.existOrFail(formTestSubjects.advancedSection.settingsContainer);
 
         // Collapse
         await pageObjects.policy.hideAdvancedSettingsSection();
-        await testSubjects.missingOrFail('advancedPolicyPanel');
+        await testSubjects.missingOrFail(formTestSubjects.advancedSection.settingsContainer);
       });
     });
 
     ['malware', 'ransomware'].forEach((protection) => {
-      describe(`on the ${protection} protections section`, () => {
+      describe(`on the ${protection} protections card`, () => {
         let policyInfo: PolicyTestResourceInfo;
+        const cardTestSubj:
+          | typeof formTestSubjects['ransomware']
+          | typeof formTestSubjects['malware'] =
+          formTestSubjects[
+            protection as keyof Pick<typeof formTestSubjects, 'malware' | 'ransomware'>
+          ];
 
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
-          await testSubjects.existOrFail(`${protection}ProtectionsForm`);
         });
 
         afterEach(async () => {
           if (policyInfo) {
             await policyInfo.cleanup();
+
+            // @ts-expect-error forcing to undefined
+            policyInfo = undefined;
           }
         });
 
-        it('should show the supported Endpoint version', async () => {
-          const supportedVersionElement = await testSubjects.findDescendant(
-            'policySupportedVersions',
-            await testSubjects.find(`${protection}ProtectionsForm`)
-          );
-
-          expect(await supportedVersionElement.getVisibleText()).to.equal(
-            'Agent version ' + popupVersionsMap.get(protection)
+        it('should show the supported Endpoint version for user notification', async () => {
+          expect(await testSubjects.getVisibleText(cardTestSubj.notifySupportedVersion)).to.equal(
+            'Agent version ' +
+              PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
+                protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
+              ]
           );
         });
 
         it('should show the custom message text area when the Notify User checkbox is checked', async () => {
-          expect(await testSubjects.isChecked(`${protection}UserNotificationCheckbox`)).to.be(true);
-          await testSubjects.existOrFail(`${protection}UserNotificationCustomMessage`);
+          expect(await testSubjects.isChecked(cardTestSubj.notifyUserCheckbox)).to.be(true);
+          await testSubjects.existOrFail(cardTestSubj.notifyCustomMessage);
         });
 
         it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
-          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
-            `${protection}UserNotificationCheckbox`
-          );
-          expect(await testSubjects.isChecked(`${protection}UserNotificationCheckbox`)).to.be(
-            false
-          );
-          await testSubjects.missingOrFail(`${protection}UserNotificationCustomMessage`);
+          await pageObjects.endpointPageUtils.clickOnEuiCheckbox(cardTestSubj.notifyUserCheckbox);
+          expect(await testSubjects.isChecked(cardTestSubj.notifyUserCheckbox)).to.be(false);
+          await testSubjects.missingOrFail(cardTestSubj.notifyCustomMessage);
         });
 
         it('should show a sample custom message', async () => {
-          const customMessageBox = await testSubjects.find(
-            `${protection}UserNotificationCustomMessage`
-          );
-          expect(await customMessageBox.getVisibleText()).equal(
+          expect(await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessage)).equal(
             'Elastic Security {action} {filename}'
           );
         });
 
-        it('should show a tooltip ', async () => {
-          const malwareTooltipIcon = await testSubjects.find(`${protection}TooltipIcon`);
-          await malwareTooltipIcon.moveMouseTo();
+        it('should show a tooltip on hover', async () => {
+          await testSubjects.moveMouseTo(cardTestSubj.notifyCustomMessageTooltipIcon);
 
-          const malwareTooltip = await testSubjects.find(`${protection}Tooltip`);
-          expect(await malwareTooltip.getVisibleText()).equal(
-            `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
+          await retry.waitFor(
+            'should show a tooltip on hover',
+            async () =>
+              (await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessageTooltipInfo)) ===
+              `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
           );
         });
 
         it('should preserve a custom notification message upon saving', async () => {
-          const customMessageBox = await testSubjects.find(
-            `${protection}UserNotificationCustomMessage`
+          await testSubjects.setValue(cardTestSubj.notifyCustomMessage, '', {
+            clearWithKeyboard: true,
+          });
+          await testSubjects.setValue(
+            cardTestSubj.notifyCustomMessage,
+            'a custom notification message @$% 123',
+            { typeCharByChar: true }
           );
-          await customMessageBox.clearValue();
-          await customMessageBox.type('a custom notification message @$% 123');
+
           await pageObjects.policy.confirmAndSave();
           await testSubjects.existOrFail('policyDetailsSuccessMessage');
-          expect(
-            await testSubjects.getVisibleText(`${protection}UserNotificationCustomMessage`)
-          ).to.equal('a custom notification message @$% 123');
+          expect(await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessage)).to.equal(
+            'a custom notification message @$% 123'
+          );
         });
       });
     });
@@ -180,31 +195,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       afterEach(async () => {
         if (policyInfo) {
           await policyInfo.cleanup();
+
+          // @ts-expect-error forcing to undefined
+          policyInfo = undefined;
         }
       });
 
       it('should display success toast on successful save', async () => {
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+          formTestSubjects.windowsEvents.dnsCheckbox
+        );
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-          `Integration ${policyInfo.packagePolicy.name} has been updated.`
+          `Success!\nIntegration ${policyInfo.packagePolicy.name} has been updated.`
         );
       });
 
       it('should persist update on the screen', async () => {
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_process');
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+          formTestSubjects.windowsEvents.processCheckbox
+        );
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.existOrFail('toastCloseButton');
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
 
-        expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
-          false
-        );
+        expect(
+          await (
+            await testSubjects.find(formTestSubjects.windowsEvents.processCheckbox)
+          ).isSelected()
+        ).to.equal(false);
       });
 
       it('should have updated policy data in overall Agent Policy', async () => {
@@ -212,9 +236,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // to the generated Agent Policy that is dispatch down to the Elastic Agent.
 
         await Promise.all([
-          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_file'),
-          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
-          pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+            formTestSubjects.windowsEvents.fileCheckbox
+          ),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+            formTestSubjects.linuxEvents.fileCheckbox
+          ),
+          pageObjects.endpointPageUtils.clickOnEuiCheckbox(formTestSubjects.macEvents.fileCheckbox),
         ]);
 
         await pageObjects.policy.showAdvancedSettingsSection();
@@ -290,7 +318,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id,
           policyInfo.packagePolicy.id
         );
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
 
       afterEach(async () => {
@@ -300,27 +327,41 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show the endpoint policy form', async () => {
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+        await testSubjects.existOrFail(formTestSubjects.form);
       });
 
       it('should allow updates to policy items', async () => {
-        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
+        const winDnsEventingCheckbox = await testSubjects.find(
+          formTestSubjects.windowsEvents.dnsCheckbox
+        );
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
           winDnsEventingCheckbox
         );
         expect(await winDnsEventingCheckbox.isSelected()).to.be(true);
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-        await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+          formTestSubjects.windowsEvents.dnsCheckbox
+        );
+        await pageObjects.policy.waitForCheckboxSelectionChange(
+          formTestSubjects.windowsEvents.dnsCheckbox,
+          false
+        );
       });
 
       it('should include updated endpoint data when saved', async () => {
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-          await testSubjects.find('policyWindowsEvent_dns')
+          await testSubjects.find(formTestSubjects.windowsEvents.dnsCheckbox)
         );
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-        const updatedCheckboxValue = await testSubjects.isSelected('policyWindowsEvent_dns');
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox(
+          formTestSubjects.windowsEvents.dnsCheckbox
+        );
+        const updatedCheckboxValue = await testSubjects.isSelected(
+          formTestSubjects.windowsEvents.dnsCheckbox
+        );
 
-        await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
+        await pageObjects.policy.waitForCheckboxSelectionChange(
+          formTestSubjects.windowsEvents.dnsCheckbox,
+          false
+        );
 
         await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton(true)).click();
         await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification(true);
@@ -331,7 +372,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await pageObjects.policy.waitForCheckboxSelectionChange(
-          'policyWindowsEvent_dns',
+          formTestSubjects.windowsEvents.dnsCheckbox,
           updatedCheckboxValue
         );
       });

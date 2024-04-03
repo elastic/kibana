@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext, IStaticAssets } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import {
@@ -71,10 +71,13 @@ function registerBeatsTutorialsWithCustomIntegrations(
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
+  private staticAssets!: IStaticAssets;
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
+    this.staticAssets = core.http.staticAssets;
+
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
@@ -143,7 +146,10 @@ export class TutorialsRegistry {
   }
 
   private get baseTutorialContext(): TutorialContext {
-    return { kibanaBranch: this.initContext.env.packageInfo.branch };
+    return {
+      kibanaBranch: this.initContext.env.packageInfo.branch,
+      staticAssets: this.staticAssets,
+    };
   }
 }
 

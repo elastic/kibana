@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, ReplaySubject, firstValueFrom } from 'rxjs';
+import { type Observable, combineLatest, ReplaySubject, firstValueFrom, startWith } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { PackageInfo } from '@kbn/config';
 import type { PluginName } from '@kbn/core-base-common';
@@ -15,12 +15,12 @@ import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
 import {
-  ServiceStatus,
-  ServiceStatusLevel,
-  CoreStatus,
+  type ServiceStatus,
+  type ServiceStatusLevel,
+  type CoreStatus,
   ServiceStatusLevels,
 } from '@kbn/core-status-common';
-import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
+import { calculateLegacyStatus, type LegacyStatusInfo } from '../legacy_status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
@@ -61,6 +61,11 @@ export interface RedactedStatusHttpBody {
   };
 }
 
+const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
+  level: ServiceStatusLevels.unavailable,
+  summary: 'Status not yet reported',
+};
+
 export const registerStatusRoute = ({
   router,
   config,
@@ -73,16 +78,28 @@ export const registerStatusRoute = ({
   const combinedStatus$ = new ReplaySubject<
     [ServiceStatus<unknown>, ServiceStatus, CoreStatus, Record<string, ServiceStatus<unknown>>]
   >(1);
-  combineLatest([status.overall$, status.coreOverall$, status.core$, status.plugins$]).subscribe(
-    combinedStatus$
-  );
+  combineLatest([
+    status.overall$.pipe(startWith(SERVICE_UNAVAILABLE_NOT_REPORTED)),
+    status.coreOverall$.pipe(startWith(SERVICE_UNAVAILABLE_NOT_REPORTED)),
+    status.core$.pipe(
+      startWith<CoreStatus>({
+        elasticsearch: SERVICE_UNAVAILABLE_NOT_REPORTED,
+        savedObjects: SERVICE_UNAVAILABLE_NOT_REPORTED,
+      })
+    ),
+    status.plugins$.pipe(startWith({})),
+  ]).subscribe(combinedStatus$);
 
   router.get(
     {
       path: '/api/status',
       options: {
         authRequired: 'optional',
-        tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
+        // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.
+        // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
+        // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
+        tags: ['api', 'security:acceptJWT'],
+        access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
       },
       validate: {
         query: schema.object(
@@ -139,7 +156,7 @@ const getFullStatusResponse = async ({
   };
   query: { v8format?: boolean; v7format?: boolean };
 }): Promise<StatusHttpBody> => {
-  const { version, buildSha, buildNum, buildDate } = config.packageInfo;
+  const { version, buildSha, buildNum, buildDate, buildFlavor } = config.packageInfo;
   const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
 
   let statusInfo: StatusInfo | LegacyStatusInfo;
@@ -169,6 +186,7 @@ const getFullStatusResponse = async ({
       build_hash: buildSha,
       build_number: buildNum,
       build_snapshot: SNAPSHOT_POSTFIX.test(version),
+      build_flavor: buildFlavor,
       build_date: buildDate.toISOString(),
     },
     status: statusInfo,

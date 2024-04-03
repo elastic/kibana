@@ -11,9 +11,10 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
-  RuleAction,
   Rule,
+  RuleAction,
   RuleType,
+  RuleTypeIndex,
   RuleTypeModel,
   RuleStatusFilterProps,
   RuleStatus,
@@ -43,6 +44,7 @@ export type {
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
   NotifyWhenSelectOptions,
+  RuleCreationValidConsumer,
 } from './types';
 
 export type {
@@ -89,6 +91,7 @@ export {
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
@@ -115,13 +118,14 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from './common';
 
-export { useLoadRuleTypes, useSubAction } from './application/hooks';
+export { useLoadRuleTypesQuery, useSubAction } from './application/hooks';
 
 export type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -134,6 +138,7 @@ export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { bulkDeleteRules } from './application/lib/rule_api/bulk_delete';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { loadRule } from './application/lib/rule_api/get_rule';
+export { loadRuleTypes } from './application/lib/rule_api/rule_types';
 export { suspendedComponentWithProps } from './application/lib/suspended_component_with_props';
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 export { TIME_UNITS } from './application/constants';
@@ -149,3 +154,7 @@ export const getNotifyWhenOptions = async () => {
 export { transformRule } from './application/lib/rule_api/common_transformations';
 
 export { validateActionFilterQuery } from './application/lib/value_validators';
+
+export { useBulkUntrackAlerts } from './application/sections/alerts_table/hooks/use_bulk_untrack_alerts';
+
+export { AlertsTableContext } from './application/sections/alerts_table/contexts/alerts_table_context';

@@ -50,7 +50,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -122,16 +122,24 @@ Array [
       />
     </span>
   </div>,
-  <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+  .c0 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
+<div
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>,
 ]
@@ -164,6 +172,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   padding: 0 12px 12px;
 }
 
+.c2 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
 <div
   data-eui="EuiFlyout"
   data-test-subj="timeline:details-panel:flyout"
@@ -187,7 +199,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -255,15 +267,19 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     </div>
   </div>
   <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c2 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -271,7 +287,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 
 exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -328,6 +344,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   transition: opacity 250ms ease;
 }
 
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
@@ -364,7 +385,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Host ID
         </dt>
@@ -378,7 +399,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           First seen
         </dt>
@@ -393,7 +414,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           />
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Last seen
         </dt>
@@ -417,7 +438,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           IP addresses
         </dt>
@@ -431,7 +452,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           MAC addresses
         </dt>
@@ -445,7 +466,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Platform
         </dt>
@@ -468,7 +489,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Operating system
         </dt>
@@ -482,7 +503,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Family
         </dt>
@@ -496,7 +517,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Version
         </dt>
@@ -510,7 +531,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Architecture
         </dt>
@@ -533,7 +554,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Cloud provider
         </dt>
@@ -547,7 +568,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Region
         </dt>
@@ -561,7 +582,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Instance ID
         </dt>
@@ -575,7 +596,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Machine type
         </dt>
@@ -615,7 +636,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -672,6 +693,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   transition: opacity 250ms ease;
 }
 
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
@@ -707,7 +733,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Location
         </dt>
@@ -721,7 +747,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Autonomous system
         </dt>
@@ -744,7 +770,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           First seen
         </dt>
@@ -759,7 +785,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           />
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Last seen
         </dt>
@@ -783,7 +809,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Host ID
         </dt>
@@ -797,7 +823,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Host name
         </dt>
@@ -820,7 +846,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           WhoIs
         </dt>
@@ -839,13 +865,13 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
             >
               iana.org
               <span
-                class="emotion-euiLink__externalIcon"
+                class="emotion-EuiExternalLinkIcon"
                 data-euiicon-type="popout"
               >
                 External link
               </span>
               <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                class="emotion-euiScreenReaderOnly"
               >
                 (opens in a new tab or window)
               </span>
@@ -853,7 +879,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Reputation
         </dt>

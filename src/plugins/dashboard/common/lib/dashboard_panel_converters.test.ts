@@ -89,7 +89,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel, '6.3.0')).toEqual({
+  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel)).toEqual({
     type: 'search',
     embeddableConfig: {
       something: 'hi!',
@@ -103,7 +103,6 @@ test('convertPanelStateToSavedDashboardPanel', () => {
       w: 15,
       i: '123',
     },
-    version: '6.3.0',
   });
 });
 
@@ -123,7 +122,7 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0');
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
   expect(converted.hasOwnProperty('id')).toBe(false);
 });
 
@@ -143,7 +142,49 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0');
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
   expect(converted.embeddableConfig.hasOwnProperty('title')).toBe(false);
   expect(converted.title).toBe('title');
+});
+
+test('convertPanelStateToSavedDashboardPanel retains legacy version info when not passed removeLegacyVersion', () => {
+  const dashboardPanel: DashboardPanelState = {
+    gridData: {
+      x: 0,
+      y: 0,
+      h: 15,
+      w: 15,
+      i: '123',
+    },
+    explicitInput: {
+      id: '123',
+      title: 'title',
+    } as EmbeddableInput,
+    type: 'search',
+    version: '8.10.0',
+  };
+
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  expect(converted.version).toBe('8.10.0');
+});
+
+test('convertPanelStateToSavedDashboardPanel removes legacy version info when passed removeLegacyVersion', () => {
+  const dashboardPanel: DashboardPanelState = {
+    gridData: {
+      x: 0,
+      y: 0,
+      h: 15,
+      w: 15,
+      i: '123',
+    },
+    explicitInput: {
+      id: '123',
+      title: 'title',
+    } as EmbeddableInput,
+    type: 'search',
+    version: '8.10.0',
+  };
+
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, true);
+  expect(converted.version).not.toBeDefined();
 });

@@ -10,16 +10,12 @@ import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  mapAndFlattenFilters,
-  getTime,
-  type SavedQuery,
-  type ISearchSource,
-} from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
+import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -28,10 +24,16 @@ import {
   isGroupAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { Comparator } from '../../../../common/comparator_types';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
-import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import {
+  CommonRuleParams,
+  EsQueryRuleMetaData,
+  EsQueryRuleParams,
+  SearchType,
+  SourceField,
+} from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -51,7 +53,9 @@ interface LocalState extends CommonRuleParams {
 
 interface LocalStateAction {
   type: SearchSourceParamsAction['type'] | keyof CommonRuleParams;
-  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean | undefined);
+  payload:
+    | SearchSourceParamsAction['payload']
+    | (number[] | number | string | string[] | boolean | SourceField[] | undefined);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -114,6 +118,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+      sourceFields: ruleParams.sourceFields,
     }
   );
 
@@ -125,8 +130,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onSelectDataView = useCallback((newDataView: DataView) => {
-    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
     dispatch({ type: 'index', payload: newDataView });
+    dispatch({ type: 'sourceFields', payload: undefined });
+    setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
   const onUpdateFilters = useCallback((newFilters) => {
@@ -201,7 +207,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onChangeSelectedTermField = useCallback(
-    (selectedTermField?: string) => dispatch({ type: 'termField', payload: selectedTermField }),
+    (selectedTermField?: string | string[]) =>
+      dispatch({ type: 'termField', payload: selectedTermField }),
     []
   );
 
@@ -224,6 +231,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeExcludeHitsFromPreviousRun = useCallback(
     (exclude: boolean) => dispatch({ type: 'excludeHitsFromPreviousRun', payload: exclude }),
+    []
+  );
+
+  const onChangeSourceFields = useCallback(
+    (selectedSourceFields: SourceField[]) =>
+      dispatch({ type: 'sourceFields', payload: selectedSourceFields }),
     []
   );
 
@@ -287,22 +300,23 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectDataViewPrompt"
             defaultMessage="Select a data view"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <DataViewSelectPopover
-        dependencies={{ dataViews, dataViewEditor }}
-        dataView={dataView}
-        metadata={props.metadata}
-        onSelectDataView={onSelectDataView}
-        onChangeMetaData={props.onChangeMetaData}
-      />
+        }
+      >
+        <DataViewSelectPopover
+          dependencies={{ dataViews, dataViewEditor }}
+          dataView={dataView}
+          metadata={props.metadata}
+          onSelectDataView={onSelectDataView}
+          onChangeMetaData={props.onChangeMetaData}
+        />
+      </EuiFormRow>
       {Boolean(dataView?.id) && (
         <>
           <EuiSpacer size="s" />
@@ -329,7 +343,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             onClearSavedQuery={onClearSavedQuery}
             onSavedQueryUpdated={onSavedQuery}
             onSaved={onSavedQuery}
-            showSaveQuery
+            saveQueryMenuVisibility="allowed_by_app_privilege"
             showQueryInput
             showFilterBar
             showDatePicker={false}
@@ -372,6 +386,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        onChangeSourceFields={onChangeSourceFields}
+        sourceFields={ruleConfiguration.sourceFields}
       />
       <EuiSpacer />
     </Fragment>

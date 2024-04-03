@@ -18,7 +18,48 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.parseDarkModeValue",
+        "type": "Function",
+        "tags": [],
+        "label": "parseDarkModeValue",
+        "description": [],
+        "signature": [
+          "(rawValue: unknown) => ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.DarkModeValue",
+            "text": "DarkModeValue"
+          }
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.parseDarkModeValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "rawValue",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
@@ -215,6 +256,29 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.readonlyMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readonlyMode",
+            "description": [
+              "a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.ReadonlyModeType",
+                "text": "ReadonlyModeType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
             "id": "def-common.UiSettingsParams.sensitive",
             "type": "CompoundType",
             "tags": [],
@@ -297,7 +361,9 @@
             "type": "Object",
             "tags": [],
             "label": "schema",
-            "description": [],
+            "description": [
+              "\nValue validation schema.\nUsed to validate value on write and read.\n\nThis schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.\nUse schema options to specify limits on the value. For example:\n`schema.number({ min: 0, max: 100 })`\n\nMore information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -331,8 +397,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "advancedSettings",
-                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
+                "plugin": "@kbn/management-settings-field-definition",
+                "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
               },
               {
                 "plugin": "discover",
@@ -433,6 +499,40 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.DarkModeValue",
+        "type": "Type",
+        "tags": [],
+        "label": "DarkModeValue",
+        "description": [
+          "\nThe list of possible values for the dark mode UI setting.\n- false: dark mode is disabled\n- true: dark mode is enabled\n- \"system\": dark mode will follow the user system preference."
+        ],
+        "signature": [
+          "boolean | \"system\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.ReadonlyModeType",
+        "type": "Type",
+        "tags": [],
+        "label": "ReadonlyModeType",
+        "description": [
+          "\nType for the readonly mode of the readonly settings.\n'strict' indicates that the value cannot be changed through API and is not displayed in the UI\n'ui' indicates that the value is just not displayed in the UI"
+        ],
+        "signature": [
+          "\"strict\" | \"ui\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.TIMEZONE_OPTIONS",
         "type": "Array",
         "tags": [],
@@ -473,7 +573,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

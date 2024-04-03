@@ -23,7 +23,7 @@ export type {
 } from './services';
 export { SavedObjectsManagementAction } from './services';
 export type { ProcessedImportResponse, FailedImport } from './lib';
-export { processImportResponse } from './lib';
+export { processImportResponse, getTagFindReferences, parseQuery } from './lib';
 export type {
   SavedObjectRelation,
   SavedObjectWithMetadata,

@@ -25,13 +25,12 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
@@ -47,6 +46,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -145,7 +145,6 @@ export interface LensAppServices {
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;
-  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
@@ -160,6 +159,7 @@ export interface LensAppServices {
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
@@ -168,12 +168,11 @@ export interface LensAppServices {
   share?: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
-  // Temporarily required until the 'by value' paradigm is default.
-  dashboardFeatureFlag: DashboardFeatureFlagConfig;
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;
   savedObjectStore: SavedObjectIndexStore;
+  serverless?: ServerlessPluginStart;
 }
 
 interface TopNavAction {

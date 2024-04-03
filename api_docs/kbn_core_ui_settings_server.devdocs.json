@@ -264,7 +264,7 @@
               "\nRemoves multiple uiSettings values by keys."
             ],
             "signature": [
-              "(keys: string[]) => Promise<void>"
+              "(keys: string[], options?: { validateKeys?: boolean | undefined; handleWriteErrors?: boolean | undefined; } | undefined) => Promise<void>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
@@ -284,6 +284,47 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.IUiSettingsClient.removeMany.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-ui-settings-server",
+                    "id": "def-common.IUiSettingsClient.removeMany.$2.validateKeys",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "validateKeys",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/core-ui-settings-server",
+                    "id": "def-common.IUiSettingsClient.removeMany.$2.handleWriteErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "handleWriteErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -347,6 +388,55 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server",
+            "id": "def-common.IUiSettingsClient.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [
+              "\nValidates the uiSettings value and returns a ValueValidation object."
+            ],
+            "signature": [
+              "(key: string, value: unknown) => Promise<ValueValidation>"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.IUiSettingsClient.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.IUiSettingsClient.validate.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
@@ -517,6 +607,40 @@
                     "text": "UiSettingsParams"
                   },
                   "<unknown>>"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-server",
+            "id": "def-common.UiSettingsServiceSetup.setAllowlist",
+            "type": "Function",
+            "tags": [],
+            "label": "setAllowlist",
+            "description": [
+              "\nSets an allowlist of setting keys."
+            ],
+            "signature": [
+              "(keys: string[]) => void"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-server",
+                "id": "def-common.UiSettingsServiceSetup.setAllowlist.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "keys",
+                "description": [],
+                "signature": [
+                  "string[]"
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
                 "deprecated": false,

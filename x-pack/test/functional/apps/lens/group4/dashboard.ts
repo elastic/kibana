@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens dashboard tests', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await security.testUser.setRoles(
         [
           'global_dashboard_all',
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to add filters/timerange by clicking in XYChart', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to add filters by right clicking in XYChart', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
@@ -107,16 +107,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         // show the tooltip actions
         await rightClickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
-        await (await find.byCssSelector('.echTooltipActions__action')).click();
+        await (await find.allByCssSelector('.echTooltipActions__action'))[1].click();
         const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
         expect(hasIpFilter).to.be(true);
+        await rightClickInChart(35, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await (await find.allByCssSelector('.echTooltipActions__action'))[0].click();
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
+        expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
       });
     });
 
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
     // setting set in kibana.yml to test (not enabled by default)
     it('should hide old "explore underlying data" action', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
@@ -130,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to add filters by clicking in pie chart', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
@@ -151,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
@@ -169,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('CSV export action exists in panel context menu', async () => {
       const ACTION_ID = 'ACTION_EXPORT_CSV';
       const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
@@ -185,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show all data from all layers in the inspector', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -229,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('unlink lens panel from embeddable library', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
@@ -237,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.unlinkFromLibary(originalPanel);
+      await panelActions.legacyUnlinkFromLibary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
@@ -250,7 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save lens panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.saveToLibrary('lnsPieVis - copy', originalPanel);
+      await panelActions.legacySaveToLibrary('lnsPieVis - copy', originalPanel);
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis-copy');
       const libraryActionExists = await testSubjects.descendantExists(
@@ -265,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show validation messages if any error appears', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
 
       await dashboardAddPanel.clickCreateNewLink();
@@ -295,7 +300,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should recover lens panel in an error state when fixing search query', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');

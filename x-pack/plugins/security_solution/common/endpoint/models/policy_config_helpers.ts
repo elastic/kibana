@@ -5,8 +5,61 @@
  * 2.0.
  */
 
+import { get, set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes } from '../types';
+
+interface PolicyProtectionReference {
+  keyPath: string;
+  osList: PolicyOperatingSystem[];
+  enableValue: unknown;
+  disableValue: unknown;
+}
+
+const allOsValues = [
+  PolicyOperatingSystem.mac,
+  PolicyOperatingSystem.linux,
+  PolicyOperatingSystem.windows,
+];
+
+const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
+  {
+    keyPath: 'malware.mode',
+    osList: [...allOsValues],
+    disableValue: ProtectionModes.off,
+    enableValue: ProtectionModes.prevent,
+  },
+  {
+    keyPath: 'ransomware.mode',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: ProtectionModes.off,
+    enableValue: ProtectionModes.prevent,
+  },
+  {
+    keyPath: 'memory_protection.mode',
+    osList: [...allOsValues],
+    disableValue: ProtectionModes.off,
+    enableValue: ProtectionModes.prevent,
+  },
+  {
+    keyPath: 'behavior_protection.mode',
+    osList: [...allOsValues],
+    disableValue: ProtectionModes.off,
+    enableValue: ProtectionModes.prevent,
+  },
+  {
+    keyPath: 'attack_surface_reduction.credential_hardening.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: false,
+    enableValue: true,
+  },
+  {
+    keyPath: 'antivirus_registration.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: false,
+    enableValue: true,
+  },
+];
 
 /**
  * Returns a copy of the passed `PolicyConfig` with all protections set to disabled.
@@ -32,8 +85,8 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
 
 const disableCommonProtections = (policy: PolicyConfig) => {
   return Object.keys(policy).reduce<PolicyConfig>((acc, item) => {
-    const os = item as keyof PolicyConfig;
-    if (os === 'meta') {
+    const os = item as keyof PolicyConfig as PolicyOperatingSystem;
+    if (!allOsValues.includes(os)) {
       return acc;
     }
     return {
@@ -52,8 +105,8 @@ const disableCommonProtections = (policy: PolicyConfig) => {
 
 const getDisabledCommonProtectionsForOS = (
   policy: PolicyConfig,
-  os: keyof Omit<PolicyConfig, 'meta'>
-) => ({
+  os: PolicyOperatingSystem
+): Partial<PolicyConfig['windows']> => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
     mode: ProtectionModes.off,
@@ -65,14 +118,12 @@ const getDisabledCommonProtectionsForOS = (
   malware: {
     ...policy[os].malware,
     blocklist: false,
+    on_write_scan: false,
     mode: ProtectionModes.off,
   },
 });
 
-const getDisabledCommonPopupsForOS = (
-  policy: PolicyConfig,
-  os: keyof Omit<PolicyConfig, 'meta'>
-) => ({
+const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
   behavior_protection: {
     ...policy[os].popup.behavior_protection,
     enabled: false,
@@ -106,3 +157,44 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
     enabled: false,
   },
 });
+
+/**
+ * Returns the provided with only event collection turned enabled
+ * @param policy
+ */
+export const ensureOnlyEventCollectionIsAllowed = (policy: PolicyConfig): PolicyConfig => {
+  const updatedPolicy = disableProtections(policy);
+
+  set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
+
+  return updatedPolicy;
+};
+
+/**
+ * Checks to see if the provided policy is set to Event Collection only
+ */
+export const isPolicySetToEventCollectionOnly = (
+  policy: PolicyConfig
+): { isOnlyCollectingEvents: boolean; message?: string } => {
+  const protectionsRef = getPolicyProtectionsReference();
+  let message: string | undefined;
+
+  const hasEnabledProtection = protectionsRef.some(({ keyPath, osList, disableValue }) => {
+    return osList.some((osValue) => {
+      const fullKeyPathForOs = `${osValue}.${keyPath}`;
+      const currentValue = get(policy, fullKeyPathForOs);
+      const isEnabled = currentValue !== disableValue;
+
+      if (isEnabled) {
+        message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
+      }
+
+      return isEnabled;
+    });
+  });
+
+  return {
+    isOnlyCollectingEvents: !hasEnabledProtection,
+    message,
+  };
+};

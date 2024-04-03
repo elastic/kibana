@@ -37,6 +37,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment,
           kuery,
           indexLifecyclePhase,
+          start,
+          end,
         },
       },
     });
@@ -49,6 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       }));
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177519
   registry.when('Get services', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const serviceA = apm

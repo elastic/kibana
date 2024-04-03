@@ -7,9 +7,9 @@
 
 import type { Observable } from 'rxjs';
 
-import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -25,7 +25,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
@@ -48,8 +48,16 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
+import type { RouteProps } from 'react-router-dom';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -65,13 +73,18 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { NavigationLink } from './common/links';
+import type { AppLinksSwitcher, NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
-import type { UpsellingService } from './common/lib/upsellings';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
+import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { SetComponents, GetComponents$ } from './contract_components';
+import type { ConfigSettings } from '../common/config_settings';
+import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -81,6 +94,7 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
+  cases?: CasesPublicSetup;
 }
 
 /**
@@ -93,14 +107,14 @@ export interface SetupPlugins {
  * in the code.
  */
 export interface StartPlugins {
-  cases: CasesUiStart;
+  cases: CasesPublicStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
@@ -122,26 +136,36 @@ export interface StartPlugins {
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
+  discover: DiscoverStart;
+  navigation: NavigationPublicPluginStart;
+  expressions: ExpressionsStart;
+  dataViewEditor: DataViewEditorStart;
+  charts: ChartsPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
+  core: CoreStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
 export interface ContractStartServices {
-  isSidebarEnabled$: Observable<boolean>;
-  getStartedComponent$: Observable<React.ComponentType | null>;
+  extraRoutes$: Observable<RouteProps[]>;
+  getComponents$: GetComponents$;
   upselling: UpsellingService;
+  onboarding: OnboardingPageService;
 }
 
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onAppLeave: (handler: AppLeaveHandler) => void;
 
     /**
@@ -151,29 +175,33 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
-    savedObjectsManagement: SavedObjectsManagementPluginStart;
+    contentManagement: ContentManagementPublicStart;
     telemetry: TelemetryClientStart;
+    customDataService: DataPublicPluginStart;
+    topValuesPopover: TopValuesPopoverService;
+    timelineFilterManager: FilterManager;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
-  upselling: UpsellingService;
+  experimentalFeatures: ExperimentalFeatures;
+  setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
+  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
-  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
-  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
+  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
+  setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
-}
-
-export interface AppObservableLibs {
-  kibana: CoreStart;
+  getUpselling: () => UpsellingService;
+  setOnboardingPageSettings: OnboardingPageService;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
+
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;

@@ -700,13 +700,42 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertTransformDescriptionValue(transformDescription);
     },
 
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlCreationWizardUtilsJobIdAsDestIndexNameSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
+    },
+
     async assertDestinationIndexInputExists() {
-      await testSubjects.existOrFail('transformDestinationIndexInput');
+      await testSubjects.existOrFail('mlCreationWizardUtilsDestinationIndexInput');
     },
 
     async assertDestinationIndexValue(expectedValue: string) {
       const actualDestinationIndex = await testSubjects.getAttribute(
-        'transformDestinationIndexInput',
+        'mlCreationWizardUtilsDestinationIndexInput',
         'value'
       );
       expect(actualDestinationIndex).to.eql(
@@ -716,20 +745,23 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
-        clearWithKeyboard: true,
-      });
+      await ml.commonUI.setValueWithChecks(
+        'mlCreationWizardUtilsDestinationIndexInput',
+        destinationIndex,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertDestinationIndexValue(destinationIndex);
     },
 
     async assertCreateDataViewSwitchExists() {
-      await testSubjects.existOrFail(`transformCreateDataViewSwitch`, { allowHidden: true });
+      await testSubjects.existOrFail(`mlCreateDataViewSwitch`, { allowHidden: true });
     },
 
     async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('transformCreateDataViewSwitch', 'aria-checked')) ===
-        'true';
+        (await testSubjects.getAttribute('mlCreateDataViewSwitch', 'aria-checked')) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -737,14 +769,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertDataViewTimeFieldInputExists() {
-      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
+      await testSubjects.existOrFail(`mlDataViewTimeFieldSelect`);
     },
 
     async assertDataViewTimeFieldValue(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute(
-        `transformDataViewTimeFieldSelect`,
-        'value'
-      );
+      const actualValue = await testSubjects.getAttribute(`mlDataViewTimeFieldSelect`, 'value');
       expect(actualValue).to.eql(
         expectedValue,
         `Data view time field should be ${expectedValue}, got ${actualValue}`
@@ -752,7 +781,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDataViewTimeField(fieldName: string) {
-      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
+      const selectControl = await testSubjects.find('mlDataViewTimeFieldSelect');
       await selectControl.type(fieldName);
       await this.assertDataViewTimeFieldValue(fieldName);
     },
@@ -1149,10 +1178,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertErrorToastsNotExist() {
-      const toastCount = await toasts.getToastCount();
+      const toastCount = await toasts.getCount();
       // Toast element index starts at 1, not 0
       for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
-        const toast = await toasts.getToastElement(toastIdx);
+        const toast = await toasts.getElementByIndex(toastIdx);
         const isErrorToast = await toast.elementHasClass('euiToast--danger');
         expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
       }

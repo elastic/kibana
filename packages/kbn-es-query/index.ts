@@ -40,13 +40,7 @@ export type {
   CombinedFilter,
 } from './src/filters';
 
-export type {
-  DslQuery,
-  FunctionTypeBuildNode,
-  KueryNode,
-  KueryParseOptions,
-  KueryQueryOptions,
-} from './src/kuery';
+export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
 
 export {
   buildEsQuery,
@@ -57,9 +51,10 @@ export {
   migrateFilter,
   fromCombinedFilter,
   isOfQueryType,
+  isOfEsqlQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
+  getLanguageDisplayName,
 } from './src/es_query';
 
 export {
@@ -117,10 +112,12 @@ export {
 export {
   KQLSyntaxError,
   fromKueryExpression,
+  toKqlExpression,
   nodeBuilder,
   nodeTypes,
   toElasticsearchQuery,
   escapeKuery,
+  escapeQuotes,
 } from './src/kuery';
 
 export {
@@ -129,3 +126,5 @@ export {
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
 } from './src/utils';
+
+export type { ExecutionContextSearch } from './src/expressions/types';

@@ -1,0 +1,5 @@
+{
+  "id": "@kbn/elastic-assistant-common",
+  "owner": "@elastic/security-generative-ai",
+  "type": "shared-common"
+}

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
-  type SavedObjectsMigrationConfigType,
-  type MigrationResult,
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
+import type {
+  SavedObjectsMigrationConfigType,
+  MigrationResult,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   ISavedObjectTypeRegistry,
@@ -19,7 +23,6 @@ import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { NodeRoles } from '@kbn/core-node-server';
 import { migrationStateActionMachine } from './migration_state_action_machine';
-import type { VersionedTransformer } from '../document_migrator';
 import { createContext } from './context';
 import { next } from './next';
 import { model } from './model';
@@ -34,7 +37,7 @@ export interface MigrateIndexOptions {
   /** Logger to use for migration output */
   logger: Logger;
   /** The document migrator to use to convert the document */
-  documentMigrator: VersionedTransformer;
+  documentMigrator: IDocumentMigrator;
   /** The migration config to use for the migration */
   migrationConfig: SavedObjectsMigrationConfigType;
   /** docLinks contract to use to link to documentation */
@@ -45,6 +48,8 @@ export interface MigrateIndexOptions {
   elasticsearchClient: ElasticsearchClient;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
+  /** Capabilities of the ES cluster we're using */
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 export const migrateIndex = async ({

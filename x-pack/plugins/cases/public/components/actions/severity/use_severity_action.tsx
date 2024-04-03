@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseSeverity } from '../../../../common/types/domain';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
 

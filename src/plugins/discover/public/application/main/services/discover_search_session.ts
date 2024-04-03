@@ -8,7 +8,7 @@
 
 import { History } from 'history';
 import * as Rx from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   createQueryParamObservable,
@@ -68,6 +68,13 @@ export class DiscoverSearchSessionManager {
       }
     }
     return searchSessionIdFromURL ?? this.deps.session.start();
+  }
+
+  /**
+   * Get current search session id
+   */
+  getCurrentSearchSessionId() {
+    return this.deps.session.getSessionId();
   }
 
   /**

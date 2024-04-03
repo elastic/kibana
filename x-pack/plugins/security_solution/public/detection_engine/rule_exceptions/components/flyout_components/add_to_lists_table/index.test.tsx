@@ -54,7 +54,7 @@ describe.skip('ExceptionsAddToListsTable', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('it displays loading state while fetching data', () => {

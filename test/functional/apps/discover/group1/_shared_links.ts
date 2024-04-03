@@ -33,11 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       baseUrl = baseUrl.replace(':80', '').replace(':443', '');
       log.debug('New baseUrl = ' + baseUrl);
 
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
-
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -45,17 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.replace({
         'state:storeInSessionStorage': storeStateInSessionStorage,
+        defaultIndex: 'logstash-*',
       });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
 
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-
-      // After hiding the time picker, we need to wait for
-      // the refresh button to hide before clicking the share button
-      await PageObjects.common.sleep(1000);
-
       await PageObjects.share.clickShareTopNavButton();
 
       return async () => {
@@ -167,30 +156,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.clearSessionStorage();
         await browser.get(actualUrl, false);
-        await retry.waitFor('shortUrl resolves and opens', async () => {
+        await retry.try(async () => {
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
           const resolvedTime = await PageObjects.timePicker.getTimeConfig();
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
-          return true;
         });
+        await toasts.dismissAll();
       });
 
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
-        await browser.clearSessionStorage();
-        await browser.get(currentUrl, false);
-        await retry.waitFor('discover to open', async () => {
+        await retry.try(async () => {
+          await browser.clearSessionStorage();
+          await browser.get(currentUrl, false);
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const { message } = await toasts.getErrorToast();
-          expect(message).to.contain(
+          const { title } = await toasts.getErrorByIndex(1, true);
+          expect(title).to.contain(
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
-          await toasts.dismissAllToasts();
-          return true;
         });
+        await toasts.dismissAll();
       });
     });
   });

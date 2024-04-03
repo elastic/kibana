@@ -5,48 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
 import { omit } from 'lodash';
+import React, { useCallback, useState } from 'react';
 
 import {
-  EuiText,
-  EuiRadio,
-  EuiPanel,
   EuiButton,
-  EuiSpacer,
-  EuiFormRow,
-  EuiFocusTrap,
-  EuiModalBody,
   EuiButtonEmpty,
+  EuiFormRow,
+  EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOutsideClickDetector,
+  EuiRadio,
+  EuiSpacer,
 } from '@elastic/eui';
-import { IEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardPanelState } from '../../common';
-import { pluginServices } from '../services/plugin_services';
-import { type DashboardContainer } from '../dashboard_container';
-import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
+import { pluginServices } from '../services/plugin_services';
+import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 
 interface CopyToDashboardModalProps {
-  PresentationUtilContext: React.FC;
-  embeddable: IEmbeddable;
-  dashboardId?: string;
+  api: CopyToDashboardAPI;
   closeModal: () => void;
 }
 
 const DashboardPicker = withSuspense(LazyDashboardPicker);
 
-export function CopyToDashboardModal({
-  PresentationUtilContext,
-  dashboardId,
-  embeddable,
-  closeModal,
-}: CopyToDashboardModalProps) {
+export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalProps) {
   const {
     embeddable: { getStateTransfer },
     dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
@@ -58,17 +46,24 @@ export function CopyToDashboardModal({
     null
   );
 
-  const onSubmit = useCallback(() => {
-    const dashboard = embeddable.getRoot() as DashboardContainer;
-    const panelToCopy = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+  const dashboardId = api.parentApi.savedObjectId.value;
+
+  const onSubmit = useCallback(async () => {
+    const dashboard = api.parentApi;
+    const panelToCopy = await dashboard.getDashboardPanelFromId(api.uuid);
+
     if (!panelToCopy) {
       throw new PanelNotFoundError();
     }
 
-    const state = {
-      type: embeddable.type,
+    const state: EmbeddablePackageState = {
+      type: panelToCopy.type,
       input: {
         ...omit(panelToCopy.explicitInput, 'id'),
+      },
+      size: {
+        width: panelToCopy.gridData.w,
+        height: panelToCopy.gridData.h,
       },
     };
 
@@ -82,96 +77,79 @@ export function CopyToDashboardModal({
       state,
       path,
     });
-  }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
+  }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';
 
   return (
-    <EuiFocusTrap clickOutsideDisables={true}>
-      <EuiOutsideClickDetector onOutsideClick={closeModal}>
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={titleId}
-          aria-describedby={descriptionId}
+    <div role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={titleId} component="h2">
+          {dashboardCopyToDashboardActionStrings.getDisplayName()}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <>
+          <EuiFormRow hasChildLabel={false}>
+            <div data-test-subj="add-to-dashboard-options">
+              {canEditExisting && (
+                <>
+                  <EuiRadio
+                    checked={dashboardOption === 'existing'}
+                    data-test-subj="add-to-existing-dashboard-option"
+                    id="existing-dashboard-option"
+                    name="dashboard-option"
+                    label={dashboardCopyToDashboardActionStrings.getExistingDashboardOption()}
+                    onChange={() => setDashboardOption('existing')}
+                  />
+                  <EuiSpacer size="s" />
+                  <div>
+                    <DashboardPicker
+                      isDisabled={dashboardOption !== 'existing'}
+                      idsToOmit={dashboardId ? [dashboardId] : undefined}
+                      onChange={(dashboard) => {
+                        setSelectedDashboard(dashboard);
+                        setDashboardOption('existing');
+                      }}
+                    />
+                  </div>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              {canCreateNew && (
+                <>
+                  <EuiRadio
+                    checked={dashboardOption === 'new'}
+                    data-test-subj="add-to-new-dashboard-option"
+                    id="new-dashboard-option"
+                    name="dashboard-option"
+                    disabled={!dashboardId}
+                    label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
+                    onChange={() => setDashboardOption('new')}
+                  />
+                  <EuiSpacer size="s" />
+                </>
+              )}
+            </div>
+          </EuiFormRow>
+        </>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="cancelCopyToButton" onClick={() => closeModal()}>
+          {dashboardCopyToDashboardActionStrings.getCancelButtonName()}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          data-test-subj="confirmCopyToButton"
+          onClick={onSubmit}
+          disabled={dashboardOption === 'existing' && !selectedDashboard}
         >
-          <PresentationUtilContext>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle id={titleId} component="h2">
-                {dashboardCopyToDashboardActionStrings.getDisplayName()}
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-
-            <EuiModalBody>
-              <>
-                <EuiText>
-                  <p id={descriptionId}>{dashboardCopyToDashboardActionStrings.getDescription()}</p>
-                </EuiText>
-                <EuiSpacer />
-                <EuiFormRow hasChildLabel={false}>
-                  <EuiPanel
-                    color="subdued"
-                    hasShadow={false}
-                    data-test-subj="add-to-dashboard-options"
-                  >
-                    <div>
-                      {canEditExisting && (
-                        <>
-                          <EuiRadio
-                            checked={dashboardOption === 'existing'}
-                            data-test-subj="add-to-existing-dashboard-option"
-                            id="existing-dashboard-option"
-                            name="dashboard-option"
-                            label={dashboardCopyToDashboardActionStrings.getExistingDashboardOption()}
-                            onChange={() => setDashboardOption('existing')}
-                          />
-                          <div className="savAddDashboard__searchDashboards">
-                            <DashboardPicker
-                              isDisabled={dashboardOption !== 'existing'}
-                              idsToOmit={dashboardId ? [dashboardId] : undefined}
-                              onChange={(dashboard) => setSelectedDashboard(dashboard)}
-                            />
-                          </div>
-                          <EuiSpacer size="s" />
-                        </>
-                      )}
-                      {canCreateNew && (
-                        <>
-                          <EuiRadio
-                            checked={dashboardOption === 'new'}
-                            data-test-subj="add-to-new-dashboard-option"
-                            id="new-dashboard-option"
-                            name="dashboard-option"
-                            disabled={!dashboardId}
-                            label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
-                            onChange={() => setDashboardOption('new')}
-                          />
-                          <EuiSpacer size="s" />
-                        </>
-                      )}
-                    </div>
-                  </EuiPanel>
-                </EuiFormRow>
-              </>
-            </EuiModalBody>
-
-            <EuiModalFooter>
-              <EuiButtonEmpty data-test-subj="cancelCopyToButton" onClick={() => closeModal()}>
-                {dashboardCopyToDashboardActionStrings.getCancelButtonName()}
-              </EuiButtonEmpty>
-              <EuiButton
-                fill
-                data-test-subj="confirmCopyToButton"
-                onClick={onSubmit}
-                disabled={dashboardOption === 'existing' && !selectedDashboard}
-              >
-                {dashboardCopyToDashboardActionStrings.getAcceptButtonName()}
-              </EuiButton>
-            </EuiModalFooter>
-          </PresentationUtilContext>
-        </div>
-      </EuiOutsideClickDetector>
-    </EuiFocusTrap>
+          {dashboardCopyToDashboardActionStrings.getAcceptButtonName()}
+        </EuiButton>
+      </EuiModalFooter>
+    </div>
   );
 }

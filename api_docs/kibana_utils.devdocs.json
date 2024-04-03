@@ -906,7 +906,8 @@
             "section": "def-public.ResizeChecker",
             "text": "ResizeChecker"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
         "deprecated": false,
@@ -3350,8 +3351,8 @@
             "pluginId": "@kbn/core-theme-browser",
             "scope": "common",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
+            "section": "def-common.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
           },
           "; }) => (error: ",
           {
@@ -3568,8 +3569,8 @@
                     "pluginId": "@kbn/core-theme-browser",
                     "scope": "common",
                     "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
+                    "section": "def-common.ThemeServiceSetup",
+                    "text": "ThemeServiceSetup"
                   }
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
@@ -6715,7 +6716,7 @@
             "section": "def-common.StateContainer",
             "text": "StateContainer"
           },
-          "<infer T, any, {}> ? T : never"
+          "<infer T extends object, any, {}> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
@@ -6941,55 +6942,20 @@
         "initialIsOpen": false
       }
     ],
-    "setup": {
+    "start": {
       "parentPluginId": "kibanaUtils",
-      "id": "def-public.KibanaUtilsSetup",
-      "type": "Interface",
+      "id": "def-public.KibanaUtilsPublicStart",
+      "type": "Type",
       "tags": [],
-      "label": "KibanaUtilsSetup",
+      "label": "KibanaUtilsPublicStart",
       "description": [],
+      "signature": [
+        "undefined"
+      ],
       "path": "src/plugins/kibana_utils/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "kibanaUtils",
-          "id": "def-public.KibanaUtilsSetup.setVersion",
-          "type": "Function",
-          "tags": [],
-          "label": "setVersion",
-          "description": [],
-          "signature": [
-            "(history: Pick<",
-            "History",
-            "<unknown>, \"replace\" | \"location\">) => void"
-          ],
-          "path": "src/plugins/kibana_utils/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "kibanaUtils",
-              "id": "def-public.KibanaUtilsSetup.setVersion.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "history",
-              "description": [],
-              "signature": [
-                "Pick<",
-                "History",
-                "<unknown>, \"replace\" | \"location\">"
-              ],
-              "path": "src/plugins/kibana_utils/public/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        }
-      ],
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -9243,7 +9209,7 @@
             "section": "def-common.Serializable",
             "text": "Serializable"
           },
-          ">) => S"
+          ">, loose: boolean | undefined) => S"
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
         "deprecated": false,
@@ -9299,6 +9265,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.migrateToLatest.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "loose",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -10079,7 +10060,7 @@
             "tags": [],
             "label": "migrations",
             "description": [
-              "\nA list of migration functions, which migrate the persistable state\nserializable object to the next version. Migration functions should are\nkeyed by the Kibana version using semver, where the version indicates to\nwhich version the state will be migrated to."
+              "\nA list of migration functions, which migrate the persistable state\nserializable object to the next version. Migration functions should be\nkeyed using semver, where the version indicates which version the state\nwill be migrated to."
             ],
             "signature": [
               {
@@ -11615,7 +11596,7 @@
             "section": "def-common.StateContainer",
             "text": "StateContainer"
           },
-          "<infer T, any, {}> ? T : never"
+          "<infer T extends object, any, {}> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,

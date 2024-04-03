@@ -15,6 +15,7 @@ export interface ClusterInfo {
   cluster_name: string;
   cluster_uuid: string;
   cluster_version: string;
+  cluster_build_flavor?: string;
 }
 
 /**
@@ -28,6 +29,7 @@ export function getClusterInfo$(internalClient: ElasticsearchClient): Observable
       cluster_name: info.cluster_name,
       cluster_uuid: info.cluster_uuid,
       cluster_version: info.version.number,
+      cluster_build_flavor: info.version.build_flavor,
     })),
     retry({ delay: 1000 }),
     shareReplay(1)

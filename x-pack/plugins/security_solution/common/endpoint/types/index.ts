@@ -12,6 +12,8 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export * from './utility_types';
+export * from './agents';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -942,7 +944,13 @@ export interface PolicyConfig {
   meta: {
     license: string;
     cloud: boolean;
+    license_uuid: string;
+    cluster_uuid: string;
+    cluster_name: string;
+    serverless: boolean;
+    heartbeatinterval?: number;
   };
+  global_manifest_version: 'latest' | string;
   windows: {
     advanced?: {
       [key: string]: unknown;
@@ -965,9 +973,9 @@ export interface PolicyConfig {
       registry: boolean;
       security: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     memory_protection: ProtectionFields & SupportedFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
@@ -1006,8 +1014,8 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1036,8 +1044,8 @@ export interface PolicyConfig {
       session_data: boolean;
       tty_io: boolean;
     };
-    malware: ProtectionFields & BlocklistFields;
-    behavior_protection: ProtectionFields & SupportedFields;
+    malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
@@ -1099,6 +1107,10 @@ export interface ProtectionFields {
   mode: ProtectionModes;
 }
 
+export interface BehaviorProtectionFields extends ProtectionFields {
+  reputation_service: boolean;
+}
+
 /** Policy:  Supported fields */
 export interface SupportedFields {
   supported: boolean;
@@ -1106,6 +1118,10 @@ export interface SupportedFields {
 
 export interface BlocklistFields {
   blocklist: boolean;
+}
+
+export interface OnWriteScanFields {
+  on_write_scan?: boolean;
 }
 
 /** Policy protection mode options */
@@ -1318,25 +1334,40 @@ export interface ListPageRouteState {
   backButtonLabel?: string;
 }
 
-/**
- * REST API standard base response for list types
- */
-interface BaseListResponse<D = unknown> {
-  data: D[];
-  page: number;
-  pageSize: number;
-  total: number;
-}
-
 export interface AdditionalOnSwitchChangeParams {
   value: boolean;
   policyConfigData: UIPolicyConfig;
   protectionOsList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
 }
 
+/** Allowed fields for sorting in the EndpointList table.
+ * These are the column fields in the EndpointList table, based on the
+ * returned `HostInfoInterface` data type (and not on the internal data structure).
+ */
+export enum EndpointSortableField {
+  ENROLLED_AT = 'enrolled_at',
+  HOSTNAME = 'metadata.host.hostname',
+  HOST_STATUS = 'host_status',
+  POLICY_NAME = 'metadata.Endpoint.policy.applied.name',
+  POLICY_STATUS = 'metadata.Endpoint.policy.applied.status',
+  HOST_OS_NAME = 'metadata.host.os.name',
+  HOST_IP = 'metadata.host.ip',
+  AGENT_VERSION = 'metadata.agent.version',
+  LAST_SEEN = 'last_checkin',
+}
+
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
-export type MetadataListResponse = BaseListResponse<HostInfo>;
+export interface MetadataListResponse {
+  data: HostInfo[];
+  page: number;
+  pageSize: number;
+  total: number;
+  sortField: EndpointSortableField;
+  sortDirection: 'asc' | 'desc';
+}
 
 export type { EndpointPrivileges } from './authz';
+
+export type { EndpointHeartbeat } from './heartbeat';

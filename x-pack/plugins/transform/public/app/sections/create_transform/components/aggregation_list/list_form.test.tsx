@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 
-import { AggListForm, AggListProps } from './list_form';
+import type { AggListProps } from './list_form';
+import { AggListForm } from './list_form';
 
 describe('Transform: <AggListForm />', () => {
   test('Minimal initialization', () => {
@@ -29,8 +30,8 @@ describe('Transform: <AggListForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<AggListForm {...props} />);
+    const { container } = render(<AggListForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toBe('the-group-by-agg-name');
   });
 });

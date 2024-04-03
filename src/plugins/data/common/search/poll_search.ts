@@ -7,10 +7,10 @@
  */
 
 import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
-import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IAsyncSearchOptions, IKibanaSearchResponse } from '..';
-import { isErrorResponse, isPartialResponse } from '..';
+import { isAbortResponse, isRunningResponse } from '..';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
@@ -22,6 +22,8 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     else {
       // if static pollInterval is not provided, then use default back-off logic
       switch (true) {
+        case elapsedTime < 1500:
+          return 300;
         case elapsedTime < 5000:
           return 1000;
         case elapsedTime < 20000:
@@ -55,11 +57,11 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         return timer(getPollInterval(elapsedTime)).pipe(switchMap(search));
       }),
       tap((response) => {
-        if (isErrorResponse(response)) {
-          throw response ? new Error('Received partial response') : new AbortError();
+        if (isAbortResponse(response)) {
+          throw new AbortError();
         }
       }),
-      takeWhile<Response>(isPartialResponse, true),
+      takeWhile<Response>(isRunningResponse, true),
       takeUntil<Response>(aborted$)
     );
   });

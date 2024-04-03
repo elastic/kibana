@@ -20,7 +20,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...svlSharedConfig.get('esTestCluster.serverArgs'),
         // define custom es server here
         // API Keys is enabled at the top level
-        'xpack.security.enabled=true',
       ],
     },
     kbnTestServer: {

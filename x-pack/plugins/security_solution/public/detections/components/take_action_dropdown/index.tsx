@@ -10,6 +10,7 @@ import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
@@ -17,16 +18,15 @@ import {
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { useResponderActionItem } from '../endpoint_responder';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
-import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
+import { useAlertExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
 
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -35,6 +35,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../osquery/osquery_action_item';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
 import { useAlertTagsActions } from '../alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertAssigneesActions } from '../alerts_table/timeline_actions/use_alert_assignees_actions';
 
 interface ActionsData {
   alertStatus: Status;
@@ -59,6 +60,7 @@ export interface TakeActionDropdownProps {
   scopeId: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const TakeActionDropdown = React.memo(
   ({
     detailsData,
@@ -156,7 +158,7 @@ export const TakeActionDropdown = React.memo(
       [onAddExceptionTypeClick]
     );
 
-    const { exceptionActionItems } = useExceptionActions({
+    const { exceptionActionItems } = useAlertExceptionActions({
       isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
@@ -185,8 +187,21 @@ export const TakeActionDropdown = React.memo(
     const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
       closePopover: closePopoverHandler,
       ecsRowData: ecsData ?? { _id: actionsData.eventId },
-      scopeId,
       refetch,
+    });
+
+    const onAssigneesUpdate = useCallback(() => {
+      if (refetch) {
+        refetch();
+      }
+      if (refetchFlyoutData) {
+        refetchFlyoutData();
+      }
+    }, [refetch, refetchFlyoutData]);
+    const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
+      closePopover: closePopoverHandler,
+      ecsRowData: ecsData ?? { _id: actionsData.eventId },
+      refetch: onAssigneesUpdate,
     });
 
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({
@@ -214,7 +229,12 @@ export const TakeActionDropdown = React.memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
-          ? [...statusActionItems, ...alertTagsItems, ...exceptionActionItems]
+          ? [
+              ...statusActionItems,
+              ...alertTagsItems,
+              ...alertAssigneesItems,
+              ...exceptionActionItems,
+            ]
           : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
@@ -227,6 +247,7 @@ export const TakeActionDropdown = React.memo(
         isEvent,
         actionsData.ruleId,
         alertTagsItems,
+        alertAssigneesItems,
       ]
     );
 
@@ -271,6 +292,7 @@ export const TakeActionDropdown = React.memo(
         items,
       },
       ...alertTagsPanels,
+      ...alertAssigneesPanels,
     ];
 
     const takeActionButton = useMemo(

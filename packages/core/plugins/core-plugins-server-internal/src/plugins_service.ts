@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { firstValueFrom, Observable } from 'rxjs';
-import { filter, map, tap, toArray } from 'rxjs/operators';
+import { filter, map, tap, toArray } from 'rxjs';
 import { getFlattenedObject } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';
@@ -43,7 +43,7 @@ export type DiscoveredPlugins = {
 };
 
 /** @internal */
-export interface PluginsServiceSetup {
+export interface InternalPluginsServiceSetup {
   /** Indicates whether or not plugins were initialized. */
   initialized: boolean;
   /** Setup contracts returned by plugins. */
@@ -51,7 +51,7 @@ export interface PluginsServiceSetup {
 }
 
 /** @internal */
-export interface PluginsServiceStart {
+export interface InternalPluginsServiceStart {
   /** Start contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
 }
@@ -72,7 +72,9 @@ export interface PluginsServiceDiscoverDeps {
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
+export class PluginsService
+  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
+{
   private readonly log: Logger;
   private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
@@ -148,7 +150,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `preboot` plugins since plugin initialization is disabled.'
@@ -164,7 +165,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
-      this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -199,7 +199,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.log.debug('Stopping plugins service');
 
     if (!this.arePrebootPluginsStopped) {
-      this.arePrebootPluginsStopped = false;
+      this.arePrebootPluginsStopped = true;
       await this.prebootPluginsSystem.stopPlugins();
     }
 
@@ -278,6 +278,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             getFlattenedObject(configDescriptor.exposeToUsage)
           );
         }
+        if (configDescriptor.dynamicConfig) {
+          const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
+            .filter(([, value]) => value === true)
+            .map(([key]) => key);
+          if (configKeys.length > 0) {
+            this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+          }
+        }
         this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
       }
     }
@@ -317,10 +325,19 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
+    const disabledPlugins = [];
+    const disabledDependants = [];
+    const disabledDependantsCauses = new Set<string>();
+    const pluginEnablementCache = new Map<PluginName, PluginEnablementResult>();
+
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
-      const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
+      const pluginEnablement = shouldEnablePlugin({
+        pluginName,
+        pluginEnableStatuses,
+        cache: pluginEnablementCache,
+      });
 
       if (pluginEnablement.enabled) {
         if (plugin.manifest.type === PluginType.preboot) {
@@ -329,17 +346,26 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           this.standardPluginsSystem.addPlugin(plugin);
         }
       } else if (isEnabled) {
-        this.log.info(
-          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${pluginEnablement.missingOrIncompatibleDependencies.join(
-            ', '
-          )}]`
+        disabledDependants.push(pluginName);
+        pluginEnablement.missingOrIncompatibleDependencies.forEach((dependency) =>
+          disabledDependantsCauses.add(dependency)
         );
       } else {
-        this.log.info(`Plugin "${pluginName}" is disabled.`);
+        disabledPlugins.push(pluginName);
       }
     }
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
+    if (disabledPlugins.length) {
+      this.log.info(`The following plugins are disabled: "${disabledPlugins}".`);
+    }
+    if (disabledDependants.length) {
+      this.log.info(
+        `Plugins "${disabledDependants}" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${Array.from(
+          disabledDependantsCauses
+        )}].`
+      );
+    }
   }
 
   /** Throws an error if the plugin's dependencies are invalid. */
@@ -383,52 +409,63 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       }
     }
   }
+}
 
-  private shouldEnablePlugin(
-    pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
-    parents: PluginName[] = []
-  ): { enabled: true } | { enabled: false; missingOrIncompatibleDependencies: string[] } {
-    const pluginInfo = pluginEnableStatuses.get(pluginName);
+type PluginEnablementResult =
+  | { enabled: true }
+  | { enabled: false; missingOrIncompatibleDependencies: string[] };
 
-    if (pluginInfo === undefined || !pluginInfo.isEnabled) {
-      return {
-        enabled: false,
-        missingOrIncompatibleDependencies: [],
-      };
-    }
+function shouldEnablePlugin({
+  pluginName,
+  pluginEnableStatuses,
+  cache,
+  parents = [],
+}: {
+  pluginName: PluginName;
+  pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>;
+  cache: Map<PluginName, PluginEnablementResult>;
+  parents?: PluginName[];
+}): PluginEnablementResult {
+  const cachedValue = cache.get(pluginName);
+  if (cachedValue) {
+    return cachedValue;
+  }
 
+  const pluginInfo = pluginEnableStatuses.get(pluginName);
+
+  let result: PluginEnablementResult;
+  if (pluginInfo === undefined || !pluginInfo.isEnabled) {
+    result = {
+      enabled: false,
+      missingOrIncompatibleDependencies: [],
+    };
+  } else {
     const missingOrIncompatibleDependencies = pluginInfo.plugin.requiredPlugins
       .filter((dep) => !parents.includes(dep))
       .filter(
         (dependencyName) =>
           pluginEnableStatuses.get(dependencyName)?.plugin.manifest.type !==
             pluginInfo.plugin.manifest.type ||
-          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
-            .enabled
+          !shouldEnablePlugin({
+            pluginName: dependencyName,
+            pluginEnableStatuses,
+            parents: [...parents, pluginName],
+            cache,
+          }).enabled
       );
 
     if (missingOrIncompatibleDependencies.length === 0) {
-      return {
+      result = {
         enabled: true,
       };
-    }
-
-    return {
-      enabled: false,
-      missingOrIncompatibleDependencies,
-    };
-  }
-
-  private registerPluginStaticDirs(
-    deps: PluginsServiceSetupDeps | PluginsServicePrebootSetupDeps,
-    uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
-  ) {
-    for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      deps.http.registerStaticDir(
-        `/plugins/${pluginName}/assets/{path*}`,
-        pluginInfo.publicAssetsDir
-      );
+    } else {
+      result = {
+        enabled: false,
+        missingOrIncompatibleDependencies,
+      };
     }
   }
+
+  cache.set(pluginName, result);
+  return result;
 }

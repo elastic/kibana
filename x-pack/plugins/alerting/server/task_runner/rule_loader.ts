@@ -5,73 +5,100 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import {
+  CoreKibanaRequest,
+  FakeRawRequest,
+  Headers,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
   RuleExecutionStatusErrorReasons,
   RawRule,
   RuleTypeRegistry,
   RuleTypeParamsValidator,
-  SanitizedRule,
-  RulesClientApi,
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
-export interface LoadRuleParams<Params extends RuleTypeParams> {
-  paramValidator?: RuleTypeParamsValidator<Params>;
-  ruleId: string;
-  spaceId: string;
-  context: TaskRunnerContext;
-  ruleTypeRegistry: RuleTypeRegistry;
-  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
+interface RuleData {
+  rawRule: RawRule;
+  version: string | undefined;
+  references: SavedObjectReference[];
 }
 
-export async function loadRule<Params extends RuleTypeParams>(params: LoadRuleParams<Params>) {
-  const { paramValidator, ruleId, spaceId, context, ruleTypeRegistry, alertingEventLogger } =
-    params;
-  let enabled: boolean;
-  let apiKey: string | null;
-  let rule: SanitizedRule<Params>;
-  let fakeRequest: CoreKibanaRequest;
-  let rulesClient: RulesClientApi;
-  let version: string | undefined;
+interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> {
+  context: TaskRunnerContext;
+  paramValidator?: RuleTypeParamsValidator<Params>;
+  ruleData: RuleData;
+  ruleId: string;
+  ruleTypeRegistry: RuleTypeRegistry;
+  spaceId: string;
+}
 
-  try {
-    const attributes = await getRuleAttributes<Params>(context, ruleId, spaceId);
-    apiKey = attributes.apiKey;
-    enabled = attributes.enabled;
-    rule = attributes.rule;
-    fakeRequest = attributes.fakeRequest;
-    rulesClient = attributes.rulesClient;
-    version = attributes.version;
-  } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
-  }
+/**
+ * With the decrypted rule saved object
+ * - transform from domain model to application model (rule)
+ * - create a fakeRequest object using the rule API key
+ * - get an instance of the RulesClient using the fakeRequest
+ */
+export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
+  params: ValidateRuleAndCreateFakeRequestParams<Params>
+): RunRuleParams<Params> {
+  const {
+    context,
+    paramValidator,
+    ruleData: { rawRule, references, version },
+    ruleId,
+    ruleTypeRegistry,
+    spaceId,
+  } = params;
+
+  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
-    throw new ErrorWithReason(
-      RuleExecutionStatusErrorReasons.Disabled,
-      new Error(`Rule failed to execute because rule ran after it was disabled.`)
+    throw createTaskRunError(
+      new ErrorWithReason(
+        RuleExecutionStatusErrorReasons.Disabled,
+        new Error(`Rule failed to execute because rule ran after it was disabled.`)
+      ),
+      TaskErrorSource.FRAMEWORK
     );
   }
 
-  alertingEventLogger.setRuleName(rule.name);
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
+  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
+  const rule = rulesClient.getAlertFromRaw({
+    id: ruleId,
+    ruleTypeId,
+    rawRule,
+    references,
+    includeLegacyId: false,
+    omitGeneratedValues: false,
+  });
 
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
+    throw createTaskRunError(
+      new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err),
+      TaskErrorSource.USER
+    );
   }
 
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
   } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
+    throw createTaskRunError(
+      new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err),
+      TaskErrorSource.USER
+    );
   }
 
   if (rule.monitoring) {
@@ -82,55 +109,45 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   }
 
   return {
-    rule,
-    fakeRequest,
     apiKey,
+    fakeRequest,
+    rule,
     rulesClient,
     validatedParams,
     version,
   };
 }
 
-export async function getRuleAttributes<Params extends RuleTypeParams>(
+/**
+ * Loads the decrypted rule saved object
+ */
+export async function getDecryptedRule(
   context: TaskRunnerContext,
   ruleId: string,
   spaceId: string
-): Promise<{
-  apiKey: string | null;
-  enabled: boolean;
-  consumer: string;
-  rule: SanitizedRule<Params>;
-  fakeRequest: CoreKibanaRequest;
-  rulesClient: RulesClientApi;
-  version?: string;
-}> {
+): Promise<RuleData> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
-  const rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-    'alert',
-    ruleId,
-    { namespace }
-  );
+  let rawRule: SavedObject<RawRule>;
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
-  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rule = rulesClient.getAlertFromRaw({
-    id: ruleId,
-    ruleTypeId: rawRule.attributes.alertTypeId as string,
-    rawRule: rawRule.attributes as RawRule,
-    references: rawRule.references,
-    includeLegacyId: false,
-    omitGeneratedValues: false,
-  });
+  try {
+    rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      ruleId,
+      { namespace }
+    );
+  } catch (e) {
+    const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, e);
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
+    throw createTaskRunError(error, TaskErrorSource.FRAMEWORK);
+  }
 
   return {
-    rule,
     version: rawRule.version,
-    apiKey: rawRule.attributes.apiKey,
-    enabled: rawRule.attributes.enabled,
-    consumer: rawRule.attributes.consumer,
-    fakeRequest,
-    rulesClient,
+    rawRule: rawRule.attributes,
+    references: rawRule.references,
   };
 }
 

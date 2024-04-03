@@ -34,7 +34,12 @@ export interface DataViewsState {
   indexPatterns: Record<string, IndexPattern>;
 }
 
-export type DatasourceStates = Record<string, { isLoading: boolean; state: unknown }>;
+export interface DatasourceState {
+  isLoading: boolean;
+  state: unknown;
+}
+
+export type DatasourceStates = Record<string, DatasourceState>;
 export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
@@ -65,12 +70,10 @@ export interface LensAppState extends EditorFrameState {
   // Dataview/Indexpattern management has moved in here from datasource
   dataViews: DataViewsState;
   annotationGroups: AnnotationGroups;
-}
 
-export type DispatchSetState = (state: Partial<LensAppState>) => {
-  payload: Partial<LensAppState>;
-  type: string;
-};
+  // Whether the current visualization is managed by the system
+  managed: boolean;
+}
 
 export interface LensState {
   lens: LensAppState;

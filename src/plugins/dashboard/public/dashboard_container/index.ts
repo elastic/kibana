@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { LATEST_VERSION } from '../../common/content_management';
+import { convertNumberToDashboardVersion } from '../services/dashboard_content_management/lib/dashboard_versioning';
+
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
+
+export const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
 export type { DashboardContainer } from './embeddable/dashboard_container';
 export {
@@ -17,3 +22,4 @@ export {
 
 export { DashboardRenderer } from './external_api/dashboard_renderer';
 export type { DashboardAPI, AwaitingDashboardAPI } from './external_api/dashboard_api';
+export type { DashboardLocatorParams } from './types';

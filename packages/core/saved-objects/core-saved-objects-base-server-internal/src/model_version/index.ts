@@ -19,6 +19,7 @@ export {
   getCurrentVirtualVersion,
   getVirtualVersionMap,
   getLatestMigrationVersion,
+  getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,
   type VirtualVersionMap,
 } from './version_map';
@@ -37,3 +38,4 @@ export { getModelVersionDelta } from './get_version_delta';
 export { buildModelVersionTransformFn } from './build_transform_fn';
 export { aggregateMappingAdditions } from './aggregate_model_changes';
 export { convertModelVersionBackwardConversionSchema } from './backward_conversion_schema';
+export { getVersionAddedFields, getVersionAddedMappings } from './version_mapping_changes';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -33,6 +34,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { HelpPopover } from '../components/help_popover';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
@@ -48,19 +50,22 @@ import {
   getKqlQueryValues,
   DEFAULT_QUERY_LANG,
 } from './components/explorer_query_bar/explorer_query_bar';
+import type {
+  OverallSwimlaneData,
+  AppStateSelectedCells,
+  SourceIndicesWithGeoFields,
+} from './explorer_utils';
 import {
   getDateFormatTz,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
-  OverallSwimlaneData,
-  AppStateSelectedCells,
   getDataViewsAndIndicesWithGeoFields,
-  SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
-import { FILTER_ACTION, FilterAction } from './explorer_constants';
+import type { FilterAction } from './explorer_constants';
+import { FILTER_ACTION } from './explorer_constants';
 // Explorer Charts
 // @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
@@ -73,11 +78,12 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import type { ExplorerState } from './reducers';
-import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
+import { AlertsPanel } from './alerts';
+import { useMlIndexUtils } from '../util/index_service';
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
@@ -263,8 +269,12 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }, [anomalyExplorerPanelState]);
 
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
-  const { anomalyTimelineStateService, anomalyExplorerCommonStateService, chartsStateService } =
-    useAnomalyExplorerContext();
+  const {
+    anomalyTimelineStateService,
+    anomalyExplorerCommonStateService,
+    chartsStateService,
+    anomalyDetectionAlertsStateService,
+  } = useAnomalyExplorerContext();
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
@@ -282,6 +292,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyExplorerCommonStateService.getSelectedJobs$(),
     anomalyExplorerCommonStateService.getSelectedJobs()
   );
+
+  const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
 
   const applyFilter = useCallback(
     (fieldName: string, fieldValue: string, action: FilterAction) => {
@@ -364,6 +376,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
+  const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
   const {
@@ -437,7 +450,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService)
+      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService, mlIndexUtils)
         .then(({ sourceIndicesWithGeoFieldsMap, dataViews: dv }) => {
           setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap);
           setDataViews(dv);
@@ -486,6 +499,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
       <AnomalyTimeline explorerState={explorerState} />
 
       <EuiSpacer size="m" />
+
+      {alertsData.length > 0 ? <AlertsPanel /> : null}
 
       {annotationsError !== undefined && (
         <>

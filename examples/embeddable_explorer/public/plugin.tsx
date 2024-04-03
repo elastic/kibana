@@ -7,7 +7,7 @@
  */
 
 import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
@@ -30,7 +30,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
     core.application.register({
       id: 'embeddableExplorer',
       title: 'Embeddable explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
@@ -48,7 +48,6 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
             uiActionsApi: depsStart.uiActions,
             basename: params.appBasePath,
             uiSettingsClient: coreStart.uiSettings,
-            savedObject: coreStart.savedObjects,
             overlays: coreStart.overlays,
             navigateToApp: coreStart.application.navigateToApp,
             embeddableExamples: depsStart.embeddableExamples,

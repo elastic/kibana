@@ -1,0 +1,50 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "server/lib/**/*",
+    "server/**/*",
+    "scripts/**/*.ts",
+    // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/analytics-client",
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/licensing-plugin",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/actions-plugin",
+    "@kbn/elastic-assistant",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/utility-types-jest",
+    "@kbn/utility-types",
+    "@kbn/tooling-log",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/ml-plugin",
+    "@kbn/apm-utils",
+    "@kbn/core-analytics-server",
+    "@kbn/elastic-assistant-common",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/data-stream-adapter",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/task-manager-plugin",
+    "@kbn/security-plugin",
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/config-schema",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin-types-common",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -17,17 +17,26 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
+import { EmbeddableStart, registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
+  SavedSearchUnwrapResult,
+  SearchByValueInput,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 import { kibanaContext } from '../common/expressions';
 import { getKibanaContext } from './expressions/kibana_context';
+import {
+  type SavedSearchAttributeService,
+  getSavedSearchAttributeService,
+  toSavedSearch,
+} from './services/saved_searches';
+import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
 
 /**
  * Saved search plugin public Setup contract
@@ -46,6 +55,13 @@ export interface SavedSearchPublicPluginStart {
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
+  byValue: {
+    attributeService: SavedSearchAttributeService;
+    toSavedSearch: (
+      id: string | undefined,
+      result: SavedSearchUnwrapResult
+    ) => Promise<SavedSearch>;
+  };
 }
 
 /**
@@ -64,6 +80,7 @@ export interface SavedSearchPublicStartDependencies {
   spaces?: SpacesApi;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   contentManagement: ContentManagementPublicStart;
+  embeddable: EmbeddableStart;
 }
 
 export class SavedSearchPublicPlugin
@@ -100,18 +117,48 @@ export class SavedSearchPublicPlugin
 
     expressions.registerType(kibanaContext);
 
+    registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
+      SavedSearchType,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        return {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+      }
+    );
+
     return {};
   }
 
   public start(
-    core: CoreStart,
+    _: CoreStart,
     {
       data: { search },
       spaces,
       savedObjectsTaggingOss,
       contentManagement: { client: contentManagement },
+      embeddable,
     }: SavedSearchPublicStartDependencies
   ): SavedSearchPublicPluginStart {
-    return new SavedSearchesService({ search, spaces, savedObjectsTaggingOss, contentManagement });
+    const deps = { search, spaces, savedObjectsTaggingOss, contentManagement, embeddable };
+    const service = new SavedSearchesService(deps);
+
+    return {
+      get: (savedSearchId: string) => service.get(savedSearchId),
+      getAll: () => service.getAll(),
+      getNew: () => service.getNew(),
+      save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
+        return service.save(savedSearch, options);
+      },
+      byValue: {
+        attributeService: getSavedSearchAttributeService(deps),
+        toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
+          return toSavedSearch(id, result, deps);
+        },
+      },
+    };
   }
 }

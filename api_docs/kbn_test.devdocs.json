@@ -1651,6 +1651,156 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.SamlSessionManager",
+        "type": "Class",
+        "tags": [],
+        "label": "SamlSessionManager",
+        "description": [
+          "\nManages cookies associated with user roles"
+        ],
+        "path": "packages/kbn-test/src/auth/session_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.SamlSessionManagerOptions",
+                    "text": "SamlSessionManagerOptions"
+                  }
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.getApiCredentialsForRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getApiCredentialsForRole",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<{ Cookie: string; }>"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getApiCredentialsForRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.getSessionCookieForRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getSessionCookieForRole",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<string>"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getSessionCookieForRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.getUserData",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserData",
+            "description": [],
+            "signature": [
+              "(role: string) => Promise<{ email: string; fullname: string; }>"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.getUserData.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -2091,6 +2241,41 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.getDockerFileMountPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getDockerFileMountPath",
+        "description": [
+          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ES serverless container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
+        ],
+        "signature": [
+          "(hostPath: string) => string"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.getDockerFileMountPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "hostPath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.getKibanaCliArg",
         "type": "Function",
         "tags": [],
@@ -2365,6 +2550,23 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.runCheckFtrCodeOwnersCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrCodeOwnersCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/run_check_ftr_code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.runCheckFtrConfigsCli",
         "type": "Function",
         "tags": [],
@@ -2521,7 +2723,7 @@
             "section": "def-common.Config",
             "text": "Config"
           },
-          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; }) => Promise<void>"
+          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; inspect?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
         "deprecated": false,
@@ -2651,6 +2853,20 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.inspect",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "inspect",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2684,7 +2900,7 @@
             "section": "def-common.EsVersion",
             "text": "EsVersion"
           },
-          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }) => Promise<void>"
+          "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; esServerlessImage: string | undefined; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }) => Promise<void>"
         ],
         "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
         "deprecated": false,
@@ -2727,7 +2943,7 @@
                 "section": "def-common.EsVersion",
                 "text": "EsVersion"
               },
-              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\"; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }"
+              "; bail: boolean; dryRun: boolean; updateBaselines: boolean; updateSnapshots: boolean; logsDir: string | undefined; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; esServerlessImage: string | undefined; installDir: string | undefined; grep: string | undefined; suiteTags: { include: string[]; exclude: string[]; }; suiteFilters: { include: string[]; exclude: string[]; }; }"
             ],
             "path": "packages/kbn-test/src/functional_tests/run_tests/run_tests.ts",
             "deprecated": false,
@@ -2819,7 +3035,7 @@
             "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
-          ", options: { config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
+          ", options: { config: string; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; esVersion: ",
           {
             "pluginId": "@kbn/test",
             "scope": "common",
@@ -2862,7 +3078,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ config: string; esFrom: \"source\" | \"snapshot\" | undefined; esVersion: ",
+              "{ config: string; esFrom: \"source\" | \"snapshot\" | \"serverless\" | undefined; esVersion: ",
               {
                 "pluginId": "@kbn/test",
                 "scope": "common",
@@ -3079,6 +3295,22 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.esServerlessOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "esServerlessOptions",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "ServerlessOptions",
+              ", \"host\" | \"tag\" | \"image\" | \"dataPath\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-common.CreateTestEsClusterOptions.esJavaOpts",
             "type": "string",
             "tags": [],
@@ -3101,7 +3333,14 @@
               "\nLicense to run your cluster under. Keep in mind that a `trial` license\nhas an expiration date. If you are using a `dataArchive` with your tests,\nyou'll likely need to use `basic` or `gold` to prevent the test from failing\nwhen the license expires."
             ],
             "signature": [
-              "\"basic\" | \"gold\" | \"trial\" | undefined"
+              {
+                "pluginId": "@kbn/es",
+                "scope": "common",
+                "docId": "kibKbnEsPluginApi",
+                "section": "def-common.ArtifactLicense",
+                "text": "ArtifactLicense"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -3254,6 +3493,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.serverless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serverless",
+            "description": [
+              "\nIs this a serverless project"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.files",
+            "type": "Array",
+            "tags": [],
+            "label": "files",
+            "description": [
+              "\nFiles to mount inside ES containers"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-test/src/es/test_es_cluster.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4405,6 +4676,81 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.HostOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostOptions",
+        "description": [],
+        "path": "packages/kbn-test/src/auth/session_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.HostOptions.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "\"http\" | \"https\""
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.HostOptions.hostname",
+            "type": "string",
+            "tags": [],
+            "label": "hostname",
+            "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.HostOptions.port",
+            "type": "number",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.HostOptions.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.HostOptions.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.ICluster",
         "type": "Interface",
         "tags": [],
@@ -4631,6 +4977,85 @@
               "string | undefined"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.SamlSessionManagerOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SamlSessionManagerOptions",
+        "description": [],
+        "path": "packages/kbn-test/src/auth/session_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.hostOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "hostOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.HostOptions",
+                "text": "HostOptions"
+              }
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.supportedRoles",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedRoles",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5227,6 +5652,42 @@
           {
             "parentPluginId": "@kbn/test",
             "id": "def-common.kibanaServerTestUser.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "packages/kbn-test/src/kbn/users.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.kibanaTestSuperuserServerless",
+        "type": "Object",
+        "tags": [],
+        "label": "kibanaTestSuperuserServerless",
+        "description": [],
+        "path": "packages/kbn-test/src/kbn/users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.kibanaTestSuperuserServerless.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "packages/kbn-test/src/kbn/users.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.kibanaTestSuperuserServerless.password",
             "type": "string",
             "tags": [],
             "label": "password",

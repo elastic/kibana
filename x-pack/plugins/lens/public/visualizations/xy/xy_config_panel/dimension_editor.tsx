@@ -5,21 +5,43 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
-import { ColorPicker } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
+
+import {
+  EuiBadge,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import {
+  PaletteRegistry,
+  ColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  CategoricalColorMapping,
+  PaletteOutput,
+  SPECIAL_TOKENS_STRING_CONVERTION,
+  AVAILABLE_PALETTES,
+  getColorsFromMapping,
+} from '@kbn/coloring';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
-import { PalettePicker } from '../../../shared_components';
+import { PalettePanelContainer, PalettePicker } from '../../../shared_components';
 import { getDataLayers } from '../visualization_helpers';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { getSortedAccessors } from '../to_expression';
 import { getColorAssignments, getAssignedColorConfig } from '../color_assignment';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -43,11 +65,15 @@ export function DataDimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
+    darkMode: boolean;
   }
 ) {
-  const { state, setState, layerId, accessor } = props;
+  const { state, layerId, accessor, darkMode, isInlineEditing } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index] as XYDataLayerConfig;
+  const canUseColorMapping = layer.colorMapping ? true : false;
+
+  const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
@@ -79,6 +105,19 @@ export function DataDimensionEditor(
     [accessor, index, localState, layer, setLocalState]
   );
 
+  const setColorMapping = useCallback(
+    (colorMapping?: ColorMapping.Config) => {
+      setLocalState(updateLayer(localState, { ...layer, colorMapping }, index));
+    },
+    [index, localState, layer, setLocalState]
+  );
+  const setPalette = useCallback(
+    (palette: PaletteOutput) => {
+      setLocalState(updateLayer(localState, { ...layer, palette }, index));
+    },
+    [index, localState, layer, setLocalState]
+  );
+
   const overwriteColor = getSeriesColor(layer, accessor);
   const assignedColor = useMemo(() => {
     const sortedAccessors: string[] = getSortedAccessors(
@@ -105,19 +144,99 @@ export function DataDimensionEditor(
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
   const localLayer: XYDataLayerConfig = layer;
-  if (props.groupId === 'breakdown') {
+
+  const colors = layer.colorMapping
+    ? getColorsFromMapping(props.darkMode, layer.colorMapping)
+    : props.paletteService
+        .get(layer.palette?.name || 'default')
+        .getCategoricalColors(10, layer.palette);
+
+  const table = props.frame.activeData?.[layer.layerId];
+  const { splitAccessor } = layer;
+  const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
+
+  if (props.groupId === 'breakdown' && !layer.collapseFn) {
     return (
-      <>
-        {!layer.collapseFn && (
-          <PalettePicker
-            palettes={props.paletteService}
-            activePalette={localLayer?.palette}
-            setPalette={(newPalette) => {
-              setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
-            }}
-          />
-        )}
-      </>
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+          defaultMessage: 'Color mapping',
+        })}
+        style={{ alignItems: 'center' }}
+        fullWidth
+      >
+        <PalettePanelContainer
+          palette={colors}
+          siblingRef={props.panelRef}
+          title={
+            useNewColorMapping
+              ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
+                  defaultMessage: 'Edit colors by term mapping',
+                })
+              : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
+                  defaultMessage: 'Edit colors',
+                })
+          }
+          isInlineEditing={isInlineEditing}
+        >
+          <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded lnsIndexPatternDimensionEditor--padded">
+            <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+              <EuiFlexItem>
+                <EuiSwitch
+                  label={
+                    <EuiText size="xs">
+                      <span>
+                        {i18n.translate('xpack.lens.colorMapping.tryLabel', {
+                          defaultMessage: 'Use the new Color Mapping feature',
+                        })}{' '}
+                        <EuiBadge color="hollow">
+                          {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
+                            defaultMessage: 'Tech preview',
+                          })}
+                        </EuiBadge>
+                      </span>
+                    </EuiText>
+                  }
+                  data-test-subj="lns_colorMappingOrLegacyPalette_switch"
+                  compressed
+                  checked={useNewColorMapping}
+                  onChange={({ target: { checked } }) => {
+                    trackUiCounterEvents(
+                      `color_mapping_switch_${checked ? 'enabled' : 'disabled'}`
+                    );
+                    setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
+                    setUseNewColorMapping(checked);
+                  }}
+                />
+                <EuiSpacer size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {canUseColorMapping || useNewColorMapping ? (
+                  <CategoricalColorMapping
+                    isDarkMode={darkMode}
+                    model={layer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                    onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                    palettes={AVAILABLE_PALETTES}
+                    data={{
+                      type: 'categories',
+                      categories: splitCategories,
+                    }}
+                    specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
+                  />
+                ) : (
+                  <PalettePicker
+                    palettes={props.paletteService}
+                    activePalette={localLayer?.palette}
+                    setPalette={(newPalette) => {
+                      setPalette(newPalette);
+                    }}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </PalettePanelContainer>
+      </EuiFormRow>
     );
   }
 

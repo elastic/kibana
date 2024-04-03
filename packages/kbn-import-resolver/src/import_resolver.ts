@@ -86,7 +86,7 @@ export class ImportResolver {
 
   getPackageIdForPath(path: string) {
     const relative = Path.relative(this.cwd, path);
-    if (relative.startsWith('..')) {
+    if (relative.startsWith('..') || path.includes(NODE_MODULE_SEG)) {
       return null;
     }
 

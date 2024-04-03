@@ -29,6 +29,7 @@ interface Props {
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
   onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
   systemPrompts: Prompt[];
+  autoFocus?: boolean;
   selectedSystemPrompt?: Prompt;
 }
 
@@ -42,6 +43,7 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
  */
 export const SystemPromptSelector: React.FC<Props> = React.memo(
   ({
+    autoFocus = false,
     systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
@@ -146,25 +148,33 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           alignItems="center"
           className={'parentFlexGroup'}
           component={'span'}
-          gutterSize={'none'}
           justifyContent="spaceBetween"
           data-test-subj="systemPromptOptionSelector"
         >
-          <EuiFlexItem grow={1} component={'span'}>
+          <EuiFlexItem
+            grow={false}
+            component={'span'}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
             <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
-              <EuiFlexItem grow={false} component={'span'}>
-                <span className={contentClassName}>
-                  <EuiHighlight
-                    search={searchValue}
-                    css={css`
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                      max-width: 70%;
-                    `}
-                  >
-                    {label}
-                  </EuiHighlight>
-                </span>
+              <EuiFlexItem
+                component={'span'}
+                grow={false}
+                css={css`
+                  max-width: 100%;
+                `}
+              >
+                <EuiHighlight
+                  search={searchValue}
+                  css={css`
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  `}
+                >
+                  {label}
+                </EuiHighlight>
               </EuiFlexItem>
               {value?.isNewConversationDefault && (
                 <EuiFlexItem grow={false} component={'span'}>
@@ -177,12 +187,13 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           </EuiFlexItem>
 
           {!value?.isDefault && (
-            <EuiFlexItem grow={2} component={'span'}>
+            <EuiFlexItem grow={false} component={'span'}>
               <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18n.DELETE_SYSTEM_PROMPT}
                   color="danger"
+                  data-test-subj="delete-prompt"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     onDelete(label);
@@ -203,9 +214,11 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
-        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
-        data-test-subj={TEST_IDS.SYSTEM_PROMPT_SELECTOR}
         aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
+        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
+        compressed
+        data-test-subj={TEST_IDS.SYSTEM_PROMPT_SELECTOR}
+        fullWidth
         placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={{ asPlainText: true }}
@@ -214,7 +227,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         onChange={onChange}
         onCreateOption={onCreateOption}
         renderOption={renderOption}
-        autoFocus
+        autoFocus={autoFocus}
       />
     );
   }

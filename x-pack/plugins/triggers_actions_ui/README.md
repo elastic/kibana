@@ -535,10 +535,10 @@ Props definition:
 interface GroupByExpressionProps {
   groupBy: string;
   termSize?: number;
-  termField?: string;
+  termField?: string | string[];
   errors: { [key: string]: string[] };
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
-  onChangeSelectedTermField: (selectedTermField?: string) => void;
+  onChangeSelectedTermField: (selectedTermField?: string | string[]) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
   fields: Record<string, any>;
   customGroupByTypes?: {
@@ -555,9 +555,9 @@ interface GroupByExpressionProps {
 | termSize                  | Selected term size that will be set as the alert type property.                                                                                                          |
 | termField                 | Selected term field that will be set as the alert type property.                                                                                                         |
 | errors                    | List of errors with proper messages for the alert params that should be validated. In current component is validated `termSize` and `termField`.                         |
-| onChangeSelectedTermSize  | Event handler that will be excuted if selected term size is changed.                                                                                                     |
-| onChangeSelectedTermField | Event handler that will be excuted if selected term field is changed.                                                                                                    |
-| onChangeSelectedGroupBy   | Event handler that will be excuted if selected group by is changed.                                                                                                      |
+| onChangeSelectedTermSize  | Event handler that will be executed if selected term size is changed.                                                                                                     |
+| onChangeSelectedTermField | Event handler that will be executed if selected term field is changed.                                                                                                    |
+| onChangeSelectedGroupBy   | Event handler that will be executed if selected group by is changed.                                                                                                      |
 | fields                    | Fields list with options for the `termField` dropdown.                                                                                                                   |
 | customGroupByTypes        | (Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`. |
 | popupPosition             | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                      |
@@ -1038,9 +1038,9 @@ Example of the index document for Index Threshold alert:
 
 ```
 {
-    "alert_id": "{{alertId}}",
-    "alert_name": "{{alertName}}",
-    "alert_instance_id": "{{alertInstanceId}}",
+    "rule_id": "{{rule.id}}",
+    "rule_name": "{{rule.name}}",
+    "alert_id": "{{alert.id}}",
     "context_title": "{{context.title}}",
     "context_value": "{{context.value}}",
     "context_message": "{{context.message}}"

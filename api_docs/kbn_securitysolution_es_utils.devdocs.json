@@ -95,6 +95,58 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.createDataStream",
+        "type": "Function",
+        "tags": [],
+        "label": "createDataStream",
+        "description": [
+          "\ncreates data stream"
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", name: string) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.createDataStream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.createDataStream.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/create_data_stream/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
         "id": "def-common.decodeVersion",
         "type": "Function",
         "tags": [],
@@ -198,6 +250,58 @@
               "number"
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.deleteDataStream",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteDataStream",
+        "description": [
+          "\ndeletes data stream"
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", name: string) => Promise<boolean>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.deleteDataStream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.deleteDataStream.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/delete_data_stream/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -449,6 +553,58 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.getDataStreamExists",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataStreamExists",
+        "description": [
+          "\nchecks if data stream exists"
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", name: string) => Promise<boolean>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.getDataStreamExists.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.getDataStreamExists.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/get_data_stream_exists/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
         "id": "def-common.getIndexAliases",
         "type": "Function",
         "tags": [],
@@ -484,7 +640,39 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -588,41 +776,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; }; helpers: ",
+                  ">; }; helpers: ",
                   "default",
-                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -821,6 +977,8 @@
                   ">; }; enrich: ",
                   "default",
                   "; eql: ",
+                  "default",
+                  "; esql: ",
                   "default",
                   "; exists: { (this: That, params: ",
                   "ExistsRequest",
@@ -1073,6 +1231,8 @@
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; }; indices: ",
+                  "default",
+                  "; inference: ",
                   "default",
                   "; info: { (this: That, params?: ",
                   "InfoRequest",
@@ -1328,7 +1488,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
-                  ">; }; rankEval: { (this: That, params: ",
+                  ">; }; queryRuleset: ",
+                  "default",
+                  "; rankEval: { (this: That, params: ",
                   "RankEvalRequest",
                   " | ",
                   "RankEvalRequest",
@@ -1579,6 +1741,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; synonyms: ",
                   "default",
                   "; tasks: ",
                   "default",
@@ -1756,7 +1920,39 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+                  "AggregationsAggregate",
+                  ">>(this: That, params?: ",
+                  "SearchRequest",
+                  " | ",
+                  "SearchRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "SearchResponse",
+                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                   "CreateRequest",
                   "<TDocument> | ",
                   "CreateRequest",
@@ -1860,41 +2056,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-                  "AggregationsAggregate",
-                  ">>(this: That, params?: ",
-                  "SearchRequest",
-                  " | ",
-                  "SearchRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "SearchResponse",
-                  "<TDocument, TAggregations>>; }; helpers: ",
+                  ">; }; helpers: ",
                   "default",
-                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; asyncSearch: ",
                   "default",
@@ -2093,6 +2257,8 @@
                   ">; }; enrich: ",
                   "default",
                   "; eql: ",
+                  "default",
+                  "; esql: ",
                   "default",
                   "; exists: { (this: That, params: ",
                   "ExistsRequest",
@@ -2345,6 +2511,8 @@
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; }; indices: ",
+                  "default",
+                  "; inference: ",
                   "default",
                   "; info: { (this: That, params?: ",
                   "InfoRequest",
@@ -2600,7 +2768,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
-                  ">; }; rankEval: { (this: That, params: ",
+                  ">; }; queryRuleset: ",
+                  "default",
+                  "; rankEval: { (this: That, params: ",
                   "RankEvalRequest",
                   " | ",
                   "RankEvalRequest",
@@ -2851,6 +3021,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; synonyms: ",
                   "default",
                   "; tasks: ",
                   "default",
@@ -3193,6 +3365,129 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.migrateToDataStream",
+        "type": "Function",
+        "tags": [],
+        "label": "migrateToDataStream",
+        "description": [
+          "\nmigrate to data stream"
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", name: string) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.migrateToDataStream.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.migrateToDataStream.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/migrate_to_data_stream/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.putMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "putMappings",
+        "description": [
+          "\nupdate mappings of index"
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", index: string, mappings: Record<string, ",
+          "MappingProperty",
+          ">) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.putMappings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.putMappings.$2",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.putMappings.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "MappingProperty",
+              ">"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/put_mappings/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
         "id": "def-common.readIndex",
         "type": "Function",
         "tags": [],
@@ -3283,6 +3578,56 @@
               "string"
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-common.removePolicyFromIndex",
+        "type": "Function",
+        "tags": [],
+        "label": "removePolicyFromIndex",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", index: string) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.removePolicyFromIndex.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.removePolicyFromIndex.$2",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/remove_policy_from_index/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

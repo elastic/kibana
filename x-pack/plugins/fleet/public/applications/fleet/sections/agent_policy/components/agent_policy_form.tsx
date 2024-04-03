@@ -17,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
+import { useAuthz } from '../../../../../hooks';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
@@ -36,7 +37,6 @@ interface Props {
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
   isEditing?: boolean;
-  onDelete?: () => void;
 }
 
 export const AgentPolicyForm: React.FunctionComponent<Props> = ({
@@ -46,8 +46,10 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   updateSysMonitoring,
   validation,
   isEditing = false,
-  onDelete = () => {},
 }) => {
+  const authz = useAuthz();
+  const disabled = !authz.fleet.allAgents;
+
   const generalSettingsWrapper = (children: JSX.Element[]) => (
     <EuiDescribedFormGroup
       title={
@@ -76,6 +78,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           agentPolicy={agentPolicy}
           updateAgentPolicy={updateAgentPolicy}
           validation={validation}
+          disabled={disabled}
         />
       ) : (
         generalSettingsWrapper([
@@ -83,6 +86,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             agentPolicy={agentPolicy}
             updateAgentPolicy={updateAgentPolicy}
             validation={validation}
+            disabled={disabled}
           />,
         ])
       )}
@@ -112,7 +116,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
               isEditing={isEditing}
-              onDelete={onDelete}
             />
           </StyledEuiAccordion>
         </>
@@ -122,7 +125,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           updateAgentPolicy={updateAgentPolicy}
           validation={validation}
           isEditing={isEditing}
-          onDelete={onDelete}
+          disabled={disabled}
         />
       )}
     </EuiForm>

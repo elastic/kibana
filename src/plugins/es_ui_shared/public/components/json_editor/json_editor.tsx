@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
@@ -31,6 +31,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   defaultValue,
   codeEditorProps,
   error: propsError,
+  ...rest
 }: Props<T>) {
   const {
     content,
@@ -82,6 +83,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
       isInvalid={typeof error === 'string'}
       error={error}
       fullWidth
+      {...rest}
     >
       <CodeEditor
         languageId="json"

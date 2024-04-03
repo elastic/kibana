@@ -6,33 +6,32 @@
  */
 
 import Boom from '@hapi/boom';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { Case, CasePostRequest } from '../../../common/api';
-import {
-  CaseRt,
-  ActionTypes,
-  CasePostRequestRt,
-  CaseSeverity,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import type { Case } from '../../../common/types/domain';
+import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { CasePostRequest } from '../../../common/types/api';
+import { CasePostRequestRt } from '../../../common/types/api';
+import {} from '../utils';
+import { validateCustomFields } from './validators';
+import { normalizeCreateCaseRequest } from './utils';
 
 /**
  * Creates a new case.
  *
- * @ignore
  */
-export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs): Promise<Case> => {
+export const create = async (
+  data: CasePostRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<Case> => {
   const {
     services: { caseService, userActionService, licensingService, notificationService },
     user,
@@ -42,6 +41,15 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
 
   try {
     const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const configurations = await casesClient.configure.get({ owner: data.owner });
+    const customFieldsConfiguration = configurations[0]?.customFields;
+
+    const customFieldsValidationParams = {
+      requestCustomFields: data.customFields,
+      customFieldsConfiguration,
+    };
+
+    validateCustomFields(customFieldsValidationParams);
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -66,32 +74,37 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
-    if (areTotalAssigneesInvalid(query.assignees)) {
-      throw Boom.badRequest(
-        `You cannot assign more than ${MAX_ASSIGNEES_PER_CASE} assignees to a case.`
-      );
-    }
+    /**
+     * Trim title, category, description and tags
+     * and fill out missing custom fields
+     * before saving to ES
+     */
 
-    const newCase = await caseService.postNewCase({
+    const normalizedCase = normalizeCreateCaseRequest(query, customFieldsConfiguration);
+
+    const newCase = await caseService.createCase({
       attributes: transformNewCase({
         user,
-        newCase: query,
+        newCase: normalizedCase,
       }),
       id: savedObjectID,
       refresh: false,
     });
 
     await userActionService.creator.createUserAction({
-      type: ActionTypes.create_case,
-      caseId: newCase.id,
-      user,
-      payload: {
-        ...query,
-        severity: query.severity ?? CaseSeverity.LOW,
-        assignees: query.assignees ?? [],
-        category: query.category ?? null,
+      userAction: {
+        type: UserActionTypes.create_case,
+        caseId: newCase.id,
+        user,
+        payload: {
+          ...query,
+          severity: query.severity ?? CaseSeverity.LOW,
+          assignees: query.assignees ?? [],
+          category: query.category ?? null,
+          customFields: query.customFields ?? [],
+        },
+        owner: newCase.attributes.owner,
       },
-      owner: newCase.attributes.owner,
     });
 
     if (query.assignees && query.assignees.length !== 0) {

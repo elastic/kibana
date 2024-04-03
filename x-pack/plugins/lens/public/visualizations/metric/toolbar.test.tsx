@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Toolbar } from './toolbar';
 import { MetricVisualizationState } from './visualization';
 import { createMockFramePublicAPI } from '../../mocks';
-import { HTMLAttributes, ReactWrapper } from 'enzyme';
-import { EuiFieldText } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 describe('metric toolbar', () => {
   const palette: PaletteOutput<CustomPaletteParams> = {
@@ -59,52 +47,32 @@ describe('metric toolbar', () => {
 
   const frame = createMockFramePublicAPI();
 
-  class Harness {
-    public _wrapper;
-
-    constructor(wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>) {
-      this._wrapper = wrapper;
-    }
-
-    private get subtitleField() {
-      return this._wrapper.find(EuiFieldText);
-    }
-
-    public get textOptionsButton() {
-      const toolbarButtons = this._wrapper.find('button[data-test-subj="lnsLabelsButton"]');
-      return toolbarButtons.at(0);
-    }
-
-    public toggleOpenTextOptions() {
-      this.textOptionsButton.simulate('click');
-    }
-
-    public setSubtitle(subtitle: string) {
-      act(() => {
-        this.subtitleField.props().onChange!({
-          target: { value: subtitle },
-        } as unknown as ChangeEvent<HTMLInputElement>);
-      });
-    }
-  }
-
   const mockSetState = jest.fn();
 
-  const getHarnessWithState = (state: MetricVisualizationState) =>
-    new Harness(mountWithIntl(<Toolbar state={state} setState={mockSetState} frame={frame} />));
+  const renderToolbar = (state: MetricVisualizationState) => {
+    return { ...render(<Toolbar state={state} setState={mockSetState} frame={frame} />) };
+  };
 
   afterEach(() => mockSetState.mockClear());
 
   describe('text options', () => {
-    it('sets a subtitle', () => {
-      const localHarness = getHarnessWithState({ ...fullState, breakdownByAccessor: undefined });
-
-      localHarness.toggleOpenTextOptions();
+    it('sets a subtitle', async () => {
+      renderToolbar({
+        ...fullState,
+        breakdownByAccessor: undefined,
+      });
+      const textOptionsButton = screen.getByTestId('lnsLabelsButton');
+      textOptionsButton.click();
 
       const newSubtitle = 'new subtitle hey';
-      localHarness.setSubtitle(newSubtitle + ' 1');
-      localHarness.setSubtitle(newSubtitle + ' 2');
-      localHarness.setSubtitle(newSubtitle + ' 3');
+      const subtitleField = screen.getByDisplayValue('subtitle');
+      // cannot use userEvent because the element cannot be clicked on
+      fireEvent.change(subtitleField, { target: { value: newSubtitle + ' 1' } });
+      await waitFor(() => expect(mockSetState).toHaveBeenCalled());
+      fireEvent.change(subtitleField, { target: { value: newSubtitle + ' 2' } });
+      await waitFor(() => expect(mockSetState).toHaveBeenCalledTimes(2));
+      fireEvent.change(subtitleField, { target: { value: newSubtitle + ' 3' } });
+      await waitFor(() => expect(mockSetState).toHaveBeenCalledTimes(3));
       expect(mockSetState.mock.calls.map(([state]) => state.subtitle)).toMatchInlineSnapshot(`
         Array [
           "new subtitle hey 1",
@@ -115,12 +83,11 @@ describe('metric toolbar', () => {
     });
 
     it('hides text options when has breakdown by', () => {
-      expect(
-        getHarnessWithState({
-          ...fullState,
-          breakdownByAccessor: 'some-accessor',
-        }).textOptionsButton.exists()
-      ).toBeFalsy();
+      renderToolbar({
+        ...fullState,
+        breakdownByAccessor: 'some-accessor',
+      });
+      expect(screen.queryByTestId('lnsLabelsButton')).not.toBeInTheDocument();
     });
   });
 });

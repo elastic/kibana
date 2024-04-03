@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Request } from '../../../../common/adapters/request/types';
-
-export interface RequestDetailsProps {
-  request: Request;
+export interface DetailViewData {
+  name: string;
+  label: string;
+  component: any;
 }

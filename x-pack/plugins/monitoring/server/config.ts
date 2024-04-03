@@ -82,6 +82,7 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export class MonitoringElasticsearchConfig extends ElasticsearchConfig {

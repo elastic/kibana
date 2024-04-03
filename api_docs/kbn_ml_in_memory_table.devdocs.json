@@ -1,0 +1,254 @@
+{
+  "id": "@kbn/ml-in-memory-table",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-in-memory-table",
+        "id": "def-common.useTableState",
+        "type": "Function",
+        "tags": [],
+        "label": "useTableState",
+        "description": [
+          "\nHook to help with managing the pagination and sorting for EuiInMemoryTable"
+        ],
+        "signature": [
+          "(items: T[], initialSortField: string, initialSortDirection: \"asc\" | \"desc\", initialPagionation: Partial<",
+          "Pagination",
+          "> | undefined) => { onTableChange: ({ page, sort }: ",
+          "Criteria",
+          "<T>) => void; pagination: ",
+          "Pagination",
+          "; sorting: { sort: { field: string; direction: ",
+          "Direction",
+          "; }; }; setPageIndex: React.Dispatch<React.SetStateAction<number>>; }"
+        ],
+        "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.useTableState.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [
+              "- data to show in the table"
+            ],
+            "signature": [
+              "T[]"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.useTableState.$2",
+            "type": "string",
+            "tags": [],
+            "label": "initialSortField",
+            "description": [
+              "- field name to sort by default"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.useTableState.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialSortDirection",
+            "description": [
+              "- default to 'asc'"
+            ],
+            "signature": [
+              "\"asc\" | \"desc\""
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.useTableState.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "initialPagionation",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "Pagination",
+              "> | undefined"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-in-memory-table",
+        "id": "def-common.UseTableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseTableState",
+        "description": [
+          "\nReturned type for useTableState hook"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-in-memory-table",
+            "scope": "common",
+            "docId": "kibKbnMlInMemoryTablePluginApi",
+            "section": "def-common.UseTableState",
+            "text": "UseTableState"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.UseTableState.onTableChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTableChange",
+            "description": [
+              "\nCallback function which gets called whenever the pagination or sorting state of the table changed"
+            ],
+            "signature": [
+              "({ page, sort }: ",
+              "Criteria",
+              "<T>) => void"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-in-memory-table",
+                "id": "def-common.UseTableState.onTableChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "Criteria",
+                  "<T>"
+                ],
+                "path": "node_modules/@elastic/eui/eui.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.UseTableState.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [
+              "\nPagination object which contains pageIndex, pageSize"
+            ],
+            "signature": [
+              "Pagination"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.UseTableState.sorting",
+            "type": "Object",
+            "tags": [],
+            "label": "sorting",
+            "description": [
+              "\nSort field and sort direction"
+            ],
+            "signature": [
+              "{ sort: { field: string; direction: ",
+              "Direction",
+              "; }; }"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-in-memory-table",
+            "id": "def-common.UseTableState.setPageIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "setPageIndex",
+            "description": [
+              "\nsetPageIndex setter function which updates page index"
+            ],
+            "signature": [
+              "(value: React.SetStateAction<number>) => void"
+            ],
+            "path": "x-pack/packages/ml/in_memory_table/hooks/use_table_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-in-memory-table",
+                "id": "def-common.UseTableState.setPageIndex.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

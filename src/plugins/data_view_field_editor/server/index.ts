@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { PluginInitializerContext } from '@kbn/core/server';
-import { IndexPatternPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { IndexPatternPlugin } = await import('./plugin');
   return new IndexPatternPlugin(initializerContext);
 }

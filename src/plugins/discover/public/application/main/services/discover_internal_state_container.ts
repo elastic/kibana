@@ -12,17 +12,21 @@ import {
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '../../../types';
+import { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 export interface InternalState {
   dataView: DataView | undefined;
+  isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
+  customFilters: Filter[];
 }
 
-interface InternalStateTransitions {
+export interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
+  setIsDataViewLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
   setSavedDataViews: (state: InternalState) => (dataView: DataViewListItem[]) => InternalState;
   setAdHocDataViews: (state: InternalState) => (dataViews: DataView[]) => InternalState;
   appendAdHocDataViews: (
@@ -35,6 +39,7 @@ interface InternalStateTransitions {
   setExpandedDoc: (
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
+  setCustomFilters: (state: InternalState) => (customFilters: Filter[]) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -49,14 +54,20 @@ export function getInternalStateContainer() {
   return createStateContainer<InternalState, InternalStateTransitions, {}>(
     {
       dataView: undefined,
+      isDataViewLoading: false,
       adHocDataViews: [],
       savedDataViews: [],
       expandedDoc: undefined,
+      customFilters: [],
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
         ...prevState,
         dataView: nextDataView,
+      }),
+      setIsDataViewLoading: (prevState: InternalState) => (loading: boolean) => ({
+        ...prevState,
+        isDataViewLoading: loading,
       }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
@@ -96,6 +107,10 @@ export function getInternalStateContainer() {
       setExpandedDoc: (prevState: InternalState) => (expandedDoc: DataTableRecord | undefined) => ({
         ...prevState,
         expandedDoc,
+      }),
+      setCustomFilters: (prevState: InternalState) => (customFilters: Filter[]) => ({
+        ...prevState,
+        customFilters,
       }),
     },
     {},

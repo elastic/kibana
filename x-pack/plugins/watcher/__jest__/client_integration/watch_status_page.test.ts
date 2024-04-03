@@ -45,7 +45,7 @@ describe('<WatchStatusPage />', () => {
   let testBed: WatchStatusTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -57,7 +57,9 @@ describe('<WatchStatusPage />', () => {
       httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, { watch });
       httpRequestsMockHelpers.setLoadWatchHistoryResponse(WATCH_ID, watchHistoryItems);
 
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -75,13 +77,13 @@ describe('<WatchStatusPage />', () => {
         expect(find('tab').map((t) => t.text())).toEqual(['Execution history', 'Action statuses']);
       });
 
-      test('should navigate to the "Action statuses" tab', () => {
+      test('should navigate to the "Action statuses" tab', async () => {
         const { exists, actions } = testBed;
 
         expect(exists('watchHistorySection')).toBe(true);
         expect(exists('watchDetailSection')).toBe(false);
 
-        actions.selectTab('action statuses');
+        await actions.selectTab('action statuses');
 
         expect(exists('watchHistorySection')).toBe(false);
         expect(exists('watchDetailSection')).toBe(true);
@@ -222,10 +224,10 @@ describe('<WatchStatusPage />', () => {
     });
 
     describe('action statuses', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         const { actions } = testBed;
 
-        actions.selectTab('action statuses');
+        await actions.selectTab('action statuses');
       });
 
       test('should list the watch actions in a table', () => {

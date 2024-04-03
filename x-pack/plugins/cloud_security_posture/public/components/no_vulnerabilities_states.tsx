@@ -25,12 +25,15 @@ import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types';
-import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
+import type { IndexDetails } from '../../common/types_old';
+import {
+  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+  CNVM_NOT_INSTALLED_ACTION_SUBJ,
+} from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
+import { PostureTypes } from '../../common/types_old';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -66,7 +69,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   return (
     <EuiEmptyPrompt
       data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
           <FormattedHTMLMessage
@@ -89,7 +92,12 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
       actions={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={vulnMgmtIntegrationLink}
+              data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
                 defaultMessage="Install Cloud Native Vulnerability Management"
@@ -183,21 +191,9 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     }
   />
 );
-const AgentNotDeployedEmptyPrompt = () => {
-  // using an existing hook to get agent id and package policy id
-  const benchmarks = useCspBenchmarkIntegrations({
-    name: '',
-    page: 1,
-    perPage: 1,
-    sortField: 'package_policy.name',
-    sortOrder: 'asc',
-  });
-
-  // the ids are not a must, but as long as we have them we can open the add agent flyout
-  const firstBenchmark = benchmarks.data?.items?.[0];
+const AgentNotDeployedEmptyPrompt = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
-    addAgentToPolicyId: firstBenchmark?.agent_policy.id || '',
-    integration: firstBenchmark?.package_policy.id || '',
+    postureType,
   });
 
   return (
@@ -260,7 +256,8 @@ export const NoVulnerabilitiesStates = () => {
       return (
         <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />
       );
-    if (status === 'not-deployed') return <AgentNotDeployedEmptyPrompt />;
+    if (status === 'not-deployed')
+      return <AgentNotDeployedEmptyPrompt postureType={VULN_MGMT_POLICY_TEMPLATE} />;
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
   };

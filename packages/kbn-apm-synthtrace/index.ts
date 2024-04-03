@@ -12,7 +12,15 @@ export { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_cl
 export { ApmSynthtraceKibanaClient } from './src/lib/apm/client/apm_synthtrace_kibana_client';
 
 export { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
+export { InfraSynthtraceKibanaClient } from './src/lib/infra/infra_synthtrace_kibana_client';
 
 export { AssetsSynthtraceEsClient } from './src/lib/assets/assets_synthtrace_es_client';
 
 export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
+
+export { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
+
+export {
+  addObserverVersionTransform,
+  deleteSummaryFieldTransform,
+} from './src/lib/utils/transform_helpers';

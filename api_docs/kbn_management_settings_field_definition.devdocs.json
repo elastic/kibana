@@ -1,0 +1,1073 @@
+{
+  "id": "@kbn/management-settings-field-definition",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.getFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldDefinition",
+        "description": [
+          "\nCreate a {@link FieldDefinition} from a {@link UiSettingMetadata} object for use\nin the UI.\n"
+        ],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">(parameters: GetDefinitionParams<T>) => ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<T, ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.KnownTypeToValue",
+            "text": "KnownTypeToValue"
+          },
+          "<T> | null>"
+        ],
+        "path": "packages/kbn-management/settings/field_definition/get_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.getFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "parameters",
+            "description": [
+              "The {@link GetDefinitionParams } for creating the {@link FieldDefinition }."
+            ],
+            "signature": [
+              "GetDefinitionParams<T>"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/get_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.getFieldDefinitions",
+        "type": "Function",
+        "tags": [],
+        "label": "getFieldDefinitions",
+        "description": [
+          "\nConvenience function to convert settings taken from a UiSettingsClient into\n{@link FieldDefinition} objects.\n"
+        ],
+        "signature": [
+          "(settings: Record<string, ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ", string | number | boolean | (string | number)[] | null | undefined>>, client: SettingsClient) => ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ", string | number | boolean | (string | number)[] | null | undefined>[]"
+        ],
+        "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.getFieldDefinitions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "The settings retreived from the UiSettingsClient."
+            ],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UiSettingMetadata",
+                "text": "UiSettingMetadata"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>>"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.getFieldDefinitions.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "The client itself, used to determine if a setting is custom or overridden."
+            ],
+            "signature": [
+              "SettingsClient"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of {@link FieldDefinition } objects."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isArrayFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isArrayFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link ArrayFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.ArrayFieldDefinition",
+            "text": "ArrayFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isArrayFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isArrayFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isArrayFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link ArrayUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.ArrayUnsavedFieldChange",
+            "text": "ArrayUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isArrayFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isBooleanFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isBooleanFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link BooleanFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.BooleanFieldDefinition",
+            "text": "BooleanFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isBooleanFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isBooleanFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isBooleanFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link BooleanUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.BooleanUnsavedFieldChange",
+            "text": "BooleanUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isBooleanFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isColorFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isColorFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link ColorFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.ColorFieldDefinition",
+            "text": "ColorFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isColorFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isColorFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isColorFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link ColorUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.ColorUnsavedFieldChange",
+            "text": "ColorUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isColorFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isImageFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isImageFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link ImageFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.ImageFieldDefinition",
+            "text": "ImageFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isImageFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isImageFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isImageFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link ImageUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.ImageUnsavedFieldChange",
+            "text": "ImageUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isImageFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isJsonFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isJsonFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link JsonFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.JsonFieldDefinition",
+            "text": "JsonFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isJsonFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isJsonFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isJsonFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link JsonUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.JsonUnsavedFieldChange",
+            "text": "JsonUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isJsonFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isMarkdownFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isMarkdownFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link MarkdownFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.MarkdownFieldDefinition",
+            "text": "MarkdownFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isMarkdownFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isMarkdownFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isMarkdownFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link MarkdownUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.MarkdownUnsavedFieldChange",
+            "text": "MarkdownUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isMarkdownFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isNumberFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isNumberFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link NumberFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.NumberFieldDefinition",
+            "text": "NumberFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isNumberFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isNumberFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isNumberFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link NumberUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.NumberUnsavedFieldChange",
+            "text": "NumberUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isNumberFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isSelectFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isSelectFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link SelectFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.SelectFieldDefinition",
+            "text": "SelectFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isSelectFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isSelectFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isSelectFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link SelectUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.SelectUnsavedFieldChange",
+            "text": "SelectUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isSelectFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isStringFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isStringFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link StringFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.StringFieldDefinition",
+            "text": "StringFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isStringFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isStringFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isStringFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link StringUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.StringUnsavedFieldChange",
+            "text": "StringUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isStringFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isUndefinedFieldDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isUndefinedFieldDefinition",
+        "description": [
+          "\nReturns `true` if the given {@link FieldDefinition} is an {@link UndefinedFieldDefinition},\n`false` otherwise."
+        ],
+        "signature": [
+          "(d: Definition) => d is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UndefinedFieldDefinition",
+            "text": "UndefinedFieldDefinition"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isUndefinedFieldDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "d",
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-field-definition",
+        "id": "def-common.isUndefinedFieldUnsavedChange",
+        "type": "Function",
+        "tags": [],
+        "label": "isUndefinedFieldUnsavedChange",
+        "description": [
+          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link UndefinedUnsavedFieldChange},\n`false` otherwise."
+        ],
+        "signature": [
+          "(c?: Change | undefined) => c is ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UndefinedUnsavedFieldChange",
+            "text": "UndefinedUnsavedFieldChange"
+          }
+        ],
+        "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-field-definition",
+            "id": "def-common.isUndefinedFieldUnsavedChange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "c",
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
+            "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

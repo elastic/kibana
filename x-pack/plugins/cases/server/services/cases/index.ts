@@ -9,7 +9,6 @@ import type {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-  SavedObjectsBulkResponse,
   SavedObjectsFindResult,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
@@ -17,21 +16,25 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
-  SavedObject,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, User, CaseStatuses } from '../../../common/api';
-import { decodeOrThrow, caseStatuses } from '../../../common/api';
-import type { SavedObjectFindOptionsKueryNode, SOWithErrors } from '../../common/types';
-import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
+import { decodeOrThrow } from '../../common/runtime_types';
+import type {
+  SavedObjectFindOptionsKueryNode,
+  SavedObjectsBulkResponseWithErrors,
+  SOWithErrors,
+} from '../../common/types';
+import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -43,7 +46,7 @@ import {
 } from './transform';
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
@@ -66,10 +69,11 @@ import type {
   FindCaseCommentsArgs,
   GetReportersArgs,
   GetTagsArgs,
-  PostCaseArgs,
+  CreateCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
   GetCategoryArgs,
+  BulkCreateCasesArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
@@ -324,37 +328,28 @@ export class CasesService {
 
   public async getCases({
     caseIds,
-  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseTransformedAttributes>> {
+  }: GetCasesArgs): Promise<SavedObjectsBulkResponseWithErrors<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
       const cases = await this.unsecuredSavedObjectsClient.bulkGet<CasePersistedAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
 
-      const res = cases.saved_objects.reduce((acc, theCase) => {
+      const res = cases.saved_objects.map((theCase) => {
         if (isSOError(theCase)) {
-          acc.push(theCase);
-          return acc;
+          return theCase;
         }
 
         const so = Object.assign(theCase, transformSavedObjectToExternalModel(theCase));
         const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(so.attributes);
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
-        acc.push(soWithDecodedRes);
-
-        return acc;
-      }, [] as Array<SavedObject<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
+        return soWithDecodedRes;
+      });
 
       return Object.assign(cases, {
         saved_objects: res,
-        /**
-         * The case is needed here because
-         * the SavedObjectsBulkResponse is wrong.
-         * It assumes that the attributes exist
-         * on an error which is not true.
-         */
-      }) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
+      });
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
       throw error;
@@ -588,13 +583,13 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({
+  public async createCase({
     attributes,
     id,
     refresh,
-  }: PostCaseArgs): Promise<CaseSavedObjectTransformed> {
+  }: CreateCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
-      this.log.debug(`Attempting to POST a new case`);
+      this.log.debug(`Attempting to create a new case`);
 
       const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
@@ -613,7 +608,57 @@ export class CasesService {
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
-      this.log.error(`Error on POST a new case: ${error}`);
+      this.log.error(`Error on creating a new case: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreateCases({
+    cases,
+    refresh,
+  }: BulkCreateCasesArgs): Promise<SavedObjectsBulkResponseWithErrors<CaseTransformedAttributes>> {
+    try {
+      this.log.debug(`Attempting to bulk create cases`);
+
+      const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
+        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+
+        const { attributes: transformedAttributes, referenceHandler } =
+          transformAttributesToESModel(decodedAttributes);
+
+        transformedAttributes.total_alerts = -1;
+        transformedAttributes.total_comments = -1;
+
+        return {
+          type: CASE_SAVED_OBJECT,
+          id,
+          attributes: transformedAttributes,
+          references: referenceHandler.build(),
+        };
+      });
+
+      const bulkCreateResponse =
+        await this.unsecuredSavedObjectsClient.bulkCreate<CasePersistedAttributes>(
+          bulkCreateRequest,
+          {
+            refresh,
+          }
+        );
+
+      const res = bulkCreateResponse.saved_objects.map((theCase) => {
+        if (isSOError<CasePersistedAttributes>(theCase)) {
+          return theCase;
+        }
+
+        const transformedCase = transformSavedObjectToExternalModel(theCase);
+        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+
+        return { ...transformedCase, attributes: decodedRes };
+      });
+
+      return { saved_objects: res };
+    } catch (error) {
+      this.log.error(`Case Service: Error on bulk creating cases: ${error}`);
       throw error;
     }
   }

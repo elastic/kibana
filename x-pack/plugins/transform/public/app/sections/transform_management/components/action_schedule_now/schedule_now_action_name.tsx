@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { type FC } from 'react';
+
 import { EuiToolTip } from '@elastic/eui';
 
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
-import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
+import { i18n } from '@kbn/i18n';
+
+import { missingTransformStats } from '../../../../common/transform_list';
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+
+import { useTransformCapabilities } from '../../../../hooks';
+import type { TransformListRow } from '../../../../common';
+import { isCompletedBatchTransform } from '../../../../common';
 
 export const scheduleNowActionNameText = i18n.translate(
   'xpack.transform.transformList.scheduleNowActionNameText',
@@ -34,7 +38,8 @@ export const isScheduleNowActionDisabled = (
     !canScheduleNowTransform ||
     completedBatchTransform ||
     items.length === 0 ||
-    transformNodes === 0
+    transformNodes === 0 ||
+    missingTransformStats(items)
   );
 };
 
@@ -48,7 +53,7 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
   forceDisable,
   transformNodes,
 }) => {
-  const { canScheduleNowTransform } = useContext(AuthorizationContext).capabilities;
+  const { canScheduleNowTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 
   // Disable schedule-now for batch transforms which have completed.
@@ -91,6 +96,11 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
       content = createCapabilityFailureMessage('canScheduleNowTransform');
     } else if (completedBatchTransform) {
       content = completedBatchTransformMessage;
+    } else if (missingTransformStats(items)) {
+      content = createNoStatsTooltipMessage({
+        actionName: scheduleNowActionNameText,
+        count: items.length,
+      });
     }
   }
 

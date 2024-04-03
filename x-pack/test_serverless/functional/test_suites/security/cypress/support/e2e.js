@@ -20,13 +20,10 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
 import './commands';
 import 'cypress-real-events/support';
+import '@kbn/security-solution-plugin/public/management/cypress/support/e2e';
 
 Cypress.on('uncaught:exception', () => {
   return false;
 });
-
-// Alternatively you can use CommonJS syntax:
-// require('./commands')

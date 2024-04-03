@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardBadgeActions = getService('dashboardBadgeActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -34,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
@@ -44,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can add a custom time range to a panel', async () => {
         await PageObjects.lens.createAndAddLensFromDashboard({});
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickToggleQuickMenuButton();
+        await dashboardCustomizePanel.enableCustomTimeRange();
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -56,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can remove a custom time range from a panel', async () => {
         await dashboardBadgeActions.clickTimeRangeBadgeAction();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+        await dashboardCustomizePanel.disableCustomTimeRange();
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectMissingTimeRangeBadgeAction();
@@ -66,10 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('by reference', () => {
       it('can add a custom time range to panel', async () => {
-        await dashboardPanelActions.saveToLibrary('My by reference visualization');
+        await dashboardPanelActions.legacySaveToLibrary('My by reference visualization');
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickToggleQuickMenuButton();
+        await dashboardCustomizePanel.enableCustomTimeRange();
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -80,25 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can remove a custom time range from a panel', async () => {
         await dashboardBadgeActions.clickTimeRangeBadgeAction();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+        await dashboardCustomizePanel.disableCustomTimeRange();
         await dashboardCustomizePanel.clickSaveButton();
         await PageObjects.dashboard.waitForRenderComplete();
         await dashboardBadgeActions.expectMissingTimeRangeBadgeAction();
         expect(await testSubjects.exists('xyVisChart')).to.be(true);
-      });
-    });
-
-    describe('embeddable that does not support time', () => {
-      it('should not show custom time picker in flyout', async () => {
-        await dashboardPanelActions.removePanel();
-        await PageObjects.dashboard.waitForRenderComplete();
-        await dashboardAddPanel.clickMarkdownQuickButton();
-        await PageObjects.visEditor.setMarkdownTxt('I am timeless!');
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.visualize.saveVisualizationAndReturn();
-        await PageObjects.dashboard.clickQuickSave();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.expectMissingCustomTimeRange();
       });
     });
   });

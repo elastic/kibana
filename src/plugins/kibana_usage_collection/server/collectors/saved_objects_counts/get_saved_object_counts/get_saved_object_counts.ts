@@ -41,17 +41,24 @@ export interface SavedObjectsCounts {
  *
  * @param soClient The {@link SavedObjectsClientContract} to use when performing the aggregation.
  * @param soTypes The SO types we want to know about.
- * @param exclusive If `true`, the results will only contain the breakdown for the specified `soTypes`. Otherwise, it'll also return `missing` and `others` bucket.
+ * @param options.exclusive If `true`, the results will only contain the breakdown for the specified `soTypes`. Otherwise, it'll also return `missing` and `others` bucket.
+ * @param options.namespaces array of namespaces to search. Otherwise it'll default to all namespaces ['*'].
  * @returns {@link SavedObjectsCounts}
  */
 export async function getSavedObjectsCounts(
   soClient: SavedObjectsClientContract,
   soTypes: string[],
-  exclusive: boolean = false
+  options?: {
+    exclusive?: boolean;
+    namespaces?: string[];
+  }
 ): Promise<SavedObjectsCounts> {
+  const { exclusive = false, namespaces = ['*'] } = options || {};
+
   const body = await soClient.find<void, { types: estypes.AggregationsStringTermsAggregate }>({
     type: soTypes,
     perPage: 0,
+    namespaces,
     aggs: {
       types: {
         terms: {

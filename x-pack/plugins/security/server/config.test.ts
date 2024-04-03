@@ -60,14 +60,13 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
@@ -115,14 +114,13 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
@@ -170,17 +168,77 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
         "showNavLinks": true,
+      }
+    `);
+
+    expect(ConfigSchema.validate({}, { serverless: true, dist: true })).toMatchInlineSnapshot(`
+      Object {
+        "audit": Object {
+          "enabled": false,
+        },
+        "authc": Object {
+          "http": Object {
+            "autoSchemesEnabled": true,
+            "enabled": true,
+            "jwt": Object {
+              "taggedRoutesOnly": true,
+            },
+            "schemes": Array [
+              "apikey",
+              "bearer",
+            ],
+          },
+          "providers": Object {
+            "anonymous": undefined,
+            "basic": Object {
+              "basic": Object {
+                "accessAgreement": undefined,
+                "description": undefined,
+                "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": undefined,
+                  "lifespan": undefined,
+                },
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
+        },
+        "cookieName": "sid",
+        "loginAssistanceMessage": "",
+        "public": Object {},
+        "roleManagementEnabled": false,
+        "secureCookies": false,
+        "session": Object {
+          "cleanupInterval": "PT1H",
+          "idleTimeout": "P3D",
+          "lifespan": "P30D",
+        },
+        "showInsecureClusterWarning": true,
+        "showNavLinks": true,
+        "ui": Object {
+          "roleMappingManagementEnabled": true,
+          "userManagementEnabled": true,
+        },
       }
     `);
   });
@@ -1412,6 +1470,28 @@ describe('config schema', () => {
     });
   });
 
+  describe('authc.http', () => {
+    it('should not allow xpack.security.authc.http.jwt.* to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[authc.http.jwt]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.authc.http.jwt.* to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
+          { serverless: true }
+        ).authc.http.jwt.taggedRoutesOnly
+      ).toEqual(false);
+    });
+  });
+
   describe('ui', () => {
     it('should not allow xpack.security.ui.* to be configured outside of the serverless context', () => {
       expect(() =>
@@ -1419,7 +1499,6 @@ describe('config schema', () => {
           {
             ui: {
               userManagementEnabled: false,
-              roleManagementEnabled: false,
               roleMappingManagementEnabled: false,
             },
           },
@@ -1434,7 +1513,6 @@ describe('config schema', () => {
           {
             ui: {
               userManagementEnabled: false,
-              roleManagementEnabled: false,
               roleMappingManagementEnabled: false,
             },
           },
@@ -1442,11 +1520,36 @@ describe('config schema', () => {
         ).ui
       ).toMatchInlineSnapshot(`
         Object {
-          "roleManagementEnabled": false,
           "roleMappingManagementEnabled": false,
           "userManagementEnabled": false,
         }
       `);
+    });
+  });
+
+  describe('roleManagementEnabled', () => {
+    it('should not allow xpack.security.roleManagementEnabled to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[roleManagementEnabled]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.roleManagementEnabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: true }
+        ).roleManagementEnabled
+      ).toEqual(false);
     });
   });
 
@@ -1485,7 +1588,7 @@ describe('config schema', () => {
           "concurrentSessions": Object {
             "maxSessions": 3,
           },
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         }
       `);
@@ -1912,7 +2015,7 @@ describe('createConfig()', () => {
       expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "P30D",
         }
       `);
@@ -1962,7 +2065,7 @@ describe('createConfig()', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT0.456S",
         }
       `);
@@ -1996,7 +2099,7 @@ describe('createConfig()', () => {
           createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
         ).toMatchInlineSnapshot(`
           Object {
-            "idleTimeout": "PT8H",
+            "idleTimeout": "P3D",
             "lifespan": "PT0.456S",
           }
         `);
@@ -2077,14 +2180,14 @@ describe('createConfig()', () => {
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);
       expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT11M5.544S",
         }
       `);
@@ -2101,7 +2204,7 @@ describe('createConfig()', () => {
       expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
         .toMatchInlineSnapshot(`
         Object {
-          "idleTimeout": "PT8H",
+          "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);

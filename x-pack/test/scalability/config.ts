@@ -18,8 +18,8 @@ import { FtrProviderContext } from './ftr_provider_context';
 import { ScalabilityJourney } from './types';
 
 // These "secret" values are intentionally written in the source.
-const APM_SERVER_URL = 'https://142fea2d3047486e925eb8b223559cae.apm.europe-west1.gcp.cloud.es.io';
-const APM_PUBLIC_TOKEN = 'pWFFEym07AKBBhUE2i';
+const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';
+const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
 
 const AGGS_SHARD_DELAY = process.env.LOAD_TESTING_SHARD_DELAY;
 const DISABLE_PLUGINS = process.env.LOAD_TESTING_DISABLE_PLUGINS;
@@ -42,7 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   }
 
   const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
-  const configPath = journey.configPath ?? 'x-pack/performance/journeys/login.ts';
+  const configPath = journey.configPath ?? 'x-pack/performance/journeys_e2e/login.ts';
 
   const baseConfig = (await readConfigFile(path.resolve(REPO_ROOT, configPath))).getAll();
 

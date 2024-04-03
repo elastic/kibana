@@ -11,7 +11,7 @@ import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
@@ -32,12 +32,9 @@ export function updateLayer(
   layer: UnwrapArray<State['layers']>,
   index: number
 ): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
   return {
     ...state,
-    layers: newLayers,
+    layers: state.layers.map((l, i) => (i === index ? layer : l)),
   };
 }
 

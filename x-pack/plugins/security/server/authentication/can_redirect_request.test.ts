@@ -7,8 +7,8 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
 import { canRedirectRequest } from './can_redirect_request';
+import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
 
 describe('can_redirect_request', () => {
   it('returns true if request does not have either a kbn-version or kbn-xsrf header or x-elastic-internal-origin', () => {

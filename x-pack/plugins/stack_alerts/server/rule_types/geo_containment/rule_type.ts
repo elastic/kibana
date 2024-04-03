@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
-import { STACK_ALERTS_FEATURE_ID } from '../../../common';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type {
   GeoContainmentRuleType,
   GeoContainmentExtractedRuleParams,
@@ -17,6 +17,7 @@ import type {
 } from './types';
 import { executor } from './executor';
 import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import { STACK_ALERTS_AAD_CONFIG } from '../constants';
 
 const actionVariables = {
   context: [
@@ -44,7 +45,7 @@ const actionVariables = {
       description: i18n.translate(
         'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDocumentIdLabel',
         {
-          defaultMessage: 'The id of the contained entity document',
+          defaultMessage: 'The ID of the contained entity document',
         }
       ),
     },
@@ -53,7 +54,7 @@ const actionVariables = {
       description: i18n.translate(
         'xpack.stackAlerts.geoContainment.actionVariableContextDetectionDateTimeLabel',
         {
-          defaultMessage: 'The alert interval end time this change was recorded',
+          defaultMessage: 'The end of the check interval when the alert occurred',
         }
       ),
     },
@@ -72,7 +73,7 @@ const actionVariables = {
         'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryIdLabel',
         {
           defaultMessage:
-            'The id of the boundary containing the entity. Value not set for recovered alerts',
+            'The ID of the boundary containing the entity. Value not set for recovered alerts',
         }
       ),
     },
@@ -179,9 +180,16 @@ export function getRuleType(): GeoContainmentRuleType {
     doesSetRecoveryContext: true,
     defaultActionGroupId: ActionGroupId,
     executor,
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ParamsSchema,
+      },
     },
     actionVariables,
     minimumLicenseRequired: 'gold',
@@ -199,5 +207,7 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
+    // @ts-ignore
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

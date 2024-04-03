@@ -7,7 +7,8 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -17,7 +18,6 @@ import {
   BulkActionsVerbs,
   UseBulkActionsRegistry,
 } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 import {
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
   GetLeadingControlColumn,
@@ -27,9 +27,12 @@ import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
+  MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
+import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
+import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -37,6 +40,7 @@ interface BulkActionsProps {
   casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
+  featureIds?: ValidFeatureId[];
 }
 
 export interface UseBulkActions {
@@ -50,6 +54,11 @@ export interface UseBulkActions {
 
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
+
+type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh' | 'query' | 'featureIds'> &
+  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
+    isAllSelected: boolean;
+  };
 
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
   alerts.filter(
@@ -171,38 +180,116 @@ export const useBulkAddToCaseActions = ({
   ]);
 };
 
+export const useBulkUntrackActions = ({
+  setIsBulkActionsLoading,
+  refresh,
+  clearSelection,
+  query,
+  featureIds = [],
+  isAllSelected,
+}: UseBulkUntrackActionsProps) => {
+  const onSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const { application } = useKibana().services;
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const { mutateAsync: untrackAlertsByQuery } = useBulkUntrackAlertsByQuery();
+
+  // Check if at least one Observability feature is enabled
+  if (!application?.capabilities) return [];
+  const hasApmPermission = application.capabilities.apm?.['alerting:show'];
+  const hasInfrastructurePermission = application.capabilities.infrastructure?.show;
+  const hasLogsPermission = application.capabilities.logs?.show;
+  const hasUptimePermission = application.capabilities.uptime?.show;
+  const hasSloPermission = application.capabilities.slo?.show;
+  const hasObservabilityPermission = application.capabilities.observability?.show;
+
+  if (
+    !hasApmPermission &&
+    !hasInfrastructurePermission &&
+    !hasLogsPermission &&
+    !hasUptimePermission &&
+    !hasSloPermission &&
+    !hasObservabilityPermission
+  )
+    return [];
+
+  return [
+    {
+      label: MARK_AS_UNTRACKED,
+      key: 'mark-as-untracked',
+      disableOnQuery: false,
+      disabledLabel: MARK_AS_UNTRACKED,
+      'data-test-subj': 'mark-as-untracked',
+      onClick: async (alerts?: TimelineItem[]) => {
+        if (!alerts) return;
+        const alertUuids = alerts.map((alert) => alert._id);
+        const indices = alerts.map((alert) => alert._index ?? '');
+        try {
+          setIsBulkActionsLoading(true);
+          if (isAllSelected) {
+            await untrackAlertsByQuery({ query, featureIds });
+          } else {
+            await untrackAlerts({ indices, alertUuids });
+          }
+          onSuccess();
+        } finally {
+          setIsBulkActionsLoading(false);
+        }
+      },
+    },
+  ];
+};
+
 export function useBulkActions({
   alerts,
   casesConfig,
   query,
   refresh,
   useBulkActionsConfig = () => [],
+  featureIds,
 }: BulkActionsProps): UseBulkActions {
-  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [bulkActionsState, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
   const configBulkActionPanels = useBulkActionsConfig(query);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
+  }, [updateBulkActionsState]);
+  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
+    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
+  const untrackBulkActions = useBulkUntrackActions({
+    setIsBulkActionsLoading,
+    refresh,
+    clearSelection,
+    query,
+    featureIds,
+    isAllSelected: bulkActionsState.isAllSelected,
+  });
 
-  const bulkActions =
-    caseBulkActions.length !== 0
-      ? addItemsToInitialPanel({
-          panels: configBulkActionPanels,
-          items: caseBulkActions,
-        })
-      : configBulkActionPanels;
+  const initialItems = [
+    ...caseBulkActions,
+    // SECURITY SOLUTION WORKAROUND: Disable untrack action for SIEM
+    ...(featureIds?.includes('siem') ? [] : untrackBulkActions),
+  ];
+
+  const bulkActions = initialItems.length
+    ? addItemsToInitialPanel({
+        panels: configBulkActionPanels,
+        items: initialItems,
+      })
+    : configBulkActionPanels;
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
   useEffect(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
   }, [alerts, updateBulkActionsState]);
-
-  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
-    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
-  };
 
   return {
     isBulkActionsColumnActive,

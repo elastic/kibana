@@ -1,6 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<ToolbarButton /> is rendered - default 1`] = `
+exports[`<ToolbarButton /> iconButton is rendered - default 1`] = `
+<button
+  as="iconButton"
+  class="euiButtonIcon emotion-EuiButtonIcon"
+  intl="[object Object]"
+  type="button"
+>
+  <span
+    aria-hidden="true"
+    class="euiButtonIcon__icon"
+    color="inherit"
+    data-euiicon-type="launch"
+  />
+</button>
+`;
+
+exports[`<ToolbarButton /> standard is rendered - default 1`] = `
 <button
   class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
   intl="[object Object]"
@@ -14,19 +30,49 @@ exports[`<ToolbarButton /> is rendered - default 1`] = `
     >
       Create chart
     </span>
+    <span
+      color="inherit"
+      data-euiicon-type="arrowDown"
+    />
   </span>
 </button>
 `;
 
-exports[`<ToolbarButton /> is rendered - primary 1`] = `
+exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
   intl="[object Object]"
   type="button"
 >
   <span
     class="emotion-euiButtonDisplayContent"
   >
+    <span
+      class="eui-textTruncate"
+    >
+      Create chart
+    </span>
+    <span
+      color="inherit"
+      data-euiicon-type="arrowDown"
+    />
+  </span>
+</button>
+`;
+
+exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
+<button
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
+  intl="[object Object]"
+  type="button"
+>
+  <span
+    class="emotion-euiButtonDisplayContent"
+  >
+    <span
+      color="inherit"
+      data-euiicon-type="plusInCircle"
+    />
     <span
       class="eui-textTruncate"
     >

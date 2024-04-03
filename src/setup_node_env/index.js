@@ -8,5 +8,12 @@
 
 // development env setup includes babel/register after the env is initialized
 require('./setup_env');
+
+// restore < Node 16 default DNS lookup behavior
+require('./dns_ipv4_first');
+
 require('@kbn/babel-register').install();
 require('./polyfill');
+
+require('@kbn/security-hardening');
+require('reflect-metadata');

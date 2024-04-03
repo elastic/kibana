@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import pMap from 'p-map';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
@@ -152,13 +152,20 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[]) {
+  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
     return await retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !!task.enabled,
-      map: (task) => ({ ...task, enabled: false }),
+      map: (task) => ({
+        ...task,
+        enabled: false,
+        ...((Array.isArray(clearStateIdsOrBoolean) && clearStateIdsOrBoolean.includes(task.id)) ||
+        clearStateIdsOrBoolean === true
+          ? { state: {} }
+          : {}),
+      }),
       validate: false,
     });
   }
@@ -169,12 +176,35 @@ export class TaskScheduling {
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => !task.enabled,
-      map: (task) => {
+      map: (task, i) => {
         if (runSoon) {
-          return { ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() };
+          // Run the first task now. Run all other tasks a random number of ms in the future,
+          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          const taskToRun =
+            i === 0
+              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
+              : randomlyOffsetRunTimestamp(task);
+          return { ...taskToRun, enabled: true };
         }
         return { ...task, enabled: true };
       },
+      validate: false,
+    });
+  }
+
+  public async bulkUpdateState(
+    taskIds: string[],
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+  ) {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: () => true,
+      map: (task) => ({
+        ...task,
+        state: stateMapFn(task.state, task.id),
+      }),
       validate: false,
     });
   }
@@ -414,5 +444,20 @@ const cancellablePromise = () => {
       .pipe(take(1))
       .toPromise()
       .then(() => {}),
+  };
+};
+
+const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+  const now = Date.now();
+  const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
+  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
+
+  // Offset between 1 and maximumRunAt ms
+  const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
+  return {
+    ...task,
+    runAt,
+    scheduledAt: runAt,
   };
 };

@@ -10,15 +10,13 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type { NetworkKpiTlsHandshakesRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  NetworkKpiTlsHandshakesRequestOptions,
-  NetworkKpiTlsHandshakesStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { NetworkKpiTlsHandshakesStrategyResponse } from '../../../../../../common/search_strategy';
 import { NetworkKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -57,7 +55,7 @@ export const useNetworkKpiTlsHandshakes = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [networkKpiTlsHandshakesRequest, setNetworkKpiTlsHandshakesRequest] =
-    useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
+    useState<NetworkKpiTlsHandshakesRequestOptionsInput | null>(null);
 
   const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] =
     useState<NetworkKpiTlsHandshakesArgs>({
@@ -70,10 +68,10 @@ export const useNetworkKpiTlsHandshakes = ({
       isInspected: false,
       refetch: refetch.current,
     });
-  const { addError, addWarning } = useAppToasts();
+  const { addError } = useAppToasts();
 
   const networkKpiTlsHandshakesSearch = useCallback(
-    (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
+    (request: NetworkKpiTlsHandshakesRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -82,16 +80,16 @@ export const useNetworkKpiTlsHandshakes = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<NetworkKpiTlsHandshakesRequestOptions, NetworkKpiTlsHandshakesStrategyResponse>(
-            request,
-            {
-              strategy: 'securitySolutionSearchStrategy',
-              abortSignal: abortCtrl.current.signal,
-            }
-          )
+          .search<
+            NetworkKpiTlsHandshakesRequestOptionsInput,
+            NetworkKpiTlsHandshakesStrategyResponse
+          >(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 setLoading(false);
                 setNetworkKpiTlsHandshakesResponse((prevResponse) => ({
                   ...prevResponse,
@@ -99,10 +97,6 @@ export const useNetworkKpiTlsHandshakes = ({
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
                 }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_NETWORK_KPI_TLS_HANDSHAKES);
                 searchSubscription$.current.unsubscribe();
               }
             },
@@ -120,12 +114,12 @@ export const useNetworkKpiTlsHandshakes = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [data.search, addError, skip]
   );
 
   useEffect(() => {
     setNetworkKpiTlsHandshakesRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkKpiTlsHandshakesRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.tlsHandshakes,

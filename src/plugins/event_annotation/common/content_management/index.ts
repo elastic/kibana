@@ -27,6 +27,7 @@ export type {
   EventAnnotationGroupSearchIn,
   EventAnnotationGroupSearchOut,
   EventAnnotationGroupSearchQuery,
+  EventAnnotationGroupCrudTypes,
 } from './latest';
 
 export * as EventAnnotationGroupV1 from './v1';

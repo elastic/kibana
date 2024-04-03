@@ -35,7 +35,6 @@ export const ExploreMatchingButton = ({
         alignItems="center"
         gutterSize="none"
         justifyContent="spaceBetween"
-        data-test-subj="select-text-based-language-panel"
         css={css`
           margin: ${euiTheme.size.s};
           margin-bottom: 0;

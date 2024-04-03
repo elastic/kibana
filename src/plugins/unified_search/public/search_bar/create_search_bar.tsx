@@ -21,9 +21,10 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { type SavedQueryMenuVisibility, canShowSavedQuery } from './lib/can_show_saved_query';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
-interface StatefulSearchBarDeps {
+export interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
@@ -32,14 +33,17 @@ interface StatefulSearchBarDeps {
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
 }
 
-export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
-  SearchBarOwnProps<QT> & {
-    appName: string;
-    useDefaultBehaviors?: boolean;
-    savedQueryId?: string;
-    onSavedQueryIdChange?: (savedQueryId?: string) => void;
-    onFiltersUpdated?: (filters: Filter[]) => void;
-  };
+export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
+  SearchBarOwnProps<QT>,
+  'showSaveQuery'
+> & {
+  appName: string;
+  useDefaultBehaviors?: boolean;
+  savedQueryId?: string;
+  saveQueryMenuVisibility?: SavedQueryMenuVisibility;
+  onSavedQueryIdChange?: (savedQueryId?: string) => void;
+  onFiltersUpdated?: (filters: Filter[]) => void;
+};
 
 // Respond to user changing the filters
 const defaultFiltersUpdated = (
@@ -194,6 +198,12 @@ export function createSearchBar({
       );
     }, [query, timeRange, useDefaultBehaviors]);
 
+    const showSaveQuery = canShowSavedQuery({
+      saveQueryMenuVisibility: props.saveQueryMenuVisibility,
+      query,
+      core,
+    });
+
     return (
       <KibanaContextProvider
         services={{
@@ -212,7 +222,7 @@ export function createSearchBar({
             showFilterBar={props.showFilterBar}
             showQueryMenu={props.showQueryMenu}
             showQueryInput={props.showQueryInput}
-            showSaveQuery={props.showSaveQuery}
+            showSaveQuery={showSaveQuery}
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
@@ -224,6 +234,8 @@ export function createSearchBar({
             dateRangeTo={timeRange.to}
             refreshInterval={refreshInterval.value}
             isRefreshPaused={refreshInterval.pause}
+            isLoading={props.isLoading}
+            onCancel={props.onCancel}
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
@@ -244,14 +256,17 @@ export function createSearchBar({
             dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
+            additionalQueryBarMenuItems={props.additionalQueryBarMenuItems}
             {...overrideDefaultBehaviors(props)}
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
+            textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
             onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
+            prependFilterBar={props.prependFilterBar}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

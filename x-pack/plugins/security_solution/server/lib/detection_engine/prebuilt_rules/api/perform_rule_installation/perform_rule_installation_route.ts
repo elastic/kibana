@@ -6,13 +6,15 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { PERFORM_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
-import { PerformRuleInstallationRequestBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
+import {
+  PERFORM_RULE_INSTALLATION_URL,
+  PerformRuleInstallationRequestBody,
+  SkipRuleInstallReason,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
-} from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
-import { SkipRuleInstallReason } from '../../../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
@@ -26,115 +28,126 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: PERFORM_RULE_INSTALLATION_URL,
-      validate: {
-        body: buildRouteValidation(PerformRuleInstallationRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+        },
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidation(PerformRuleInstallationRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-        const config = ctx.securitySolution.getConfig();
-        const soClient = ctx.core.savedObjects.client;
-        const rulesClient = ctx.alerting.getRulesClient();
-        const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
-        const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
-        const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
+        try {
+          const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
+          const config = ctx.securitySolution.getConfig();
+          const soClient = ctx.core.savedObjects.client;
+          const rulesClient = ctx.alerting.getRulesClient();
+          const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+          const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+          const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
 
-        const { mode } = request.body;
+          const { mode } = request.body;
 
-        // This will create the endpoint list if it does not exist yet
-        await exceptionsListClient?.createEndpointList();
+          // This will create the endpoint list if it does not exist yet
+          await exceptionsListClient?.createEndpointList();
 
-        // If this API is used directly without hitting any detection engine
-        // pages first, the rules package might be missing.
-        await ensureLatestRulesPackageInstalled(ruleAssetsClient, config, ctx.securitySolution);
+          // If this API is used directly without hitting any detection engine
+          // pages first, the rules package might be missing.
+          await ensureLatestRulesPackageInstalled(ruleAssetsClient, config, ctx.securitySolution);
 
-        const fetchErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
-        const skippedRules: SkippedRuleInstall[] = [];
+          const fetchErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
+          const skippedRules: SkippedRuleInstall[] = [];
 
-        const ruleVersionsMap = await fetchRuleVersionsTriad({
-          ruleAssetsClient,
-          ruleObjectsClient,
-          versionSpecifiers: mode === 'ALL_RULES' ? undefined : request.body.rules,
-        });
-        const { currentRules, installableRules } = getVersionBuckets(ruleVersionsMap);
+          const ruleVersionsMap = await fetchRuleVersionsTriad({
+            ruleAssetsClient,
+            ruleObjectsClient,
+            versionSpecifiers: mode === 'ALL_RULES' ? undefined : request.body.rules,
+          });
+          const { currentRules, installableRules } = getVersionBuckets(ruleVersionsMap);
 
-        // Perform all the checks we can before we start the upgrade process
-        if (mode === 'SPECIFIC_RULES') {
-          const currentRuleIds = new Set(currentRules.map((rule) => rule.rule_id));
-          const installableRuleIds = new Set(installableRules.map((rule) => rule.rule_id));
-          request.body.rules.forEach((rule) => {
-            // Check that the requested rule is not installed yet
-            if (currentRuleIds.has(rule.rule_id)) {
-              skippedRules.push({
-                rule_id: rule.rule_id,
-                reason: SkipRuleInstallReason.ALREADY_INSTALLED,
-              });
-              return;
-            }
+          // Perform all the checks we can before we start the upgrade process
+          if (mode === 'SPECIFIC_RULES') {
+            const currentRuleIds = new Set(currentRules.map((rule) => rule.rule_id));
+            const installableRuleIds = new Set(installableRules.map((rule) => rule.rule_id));
+            request.body.rules.forEach((rule) => {
+              // Check that the requested rule is not installed yet
+              if (currentRuleIds.has(rule.rule_id)) {
+                skippedRules.push({
+                  rule_id: rule.rule_id,
+                  reason: SkipRuleInstallReason.ALREADY_INSTALLED,
+                });
+                return;
+              }
 
-            // Check that the requested rule is installable
-            if (!installableRuleIds.has(rule.rule_id)) {
-              fetchErrors.push({
-                error: new Error(
-                  `Rule with ID "${rule.rule_id}" and version "${rule.version}" not found`
-                ),
-                item: rule,
-              });
-            }
+              // Check that the requested rule is installable
+              if (!installableRuleIds.has(rule.rule_id)) {
+                fetchErrors.push({
+                  error: new Error(
+                    `Rule with ID "${rule.rule_id}" and version "${rule.version}" not found`
+                  ),
+                  item: rule,
+                });
+              }
+            });
+          }
+
+          const { results: installedRules, errors: installationErrors } = await createPrebuiltRules(
+            rulesClient,
+            installableRules
+          );
+          const ruleErrors = [...fetchErrors, ...installationErrors];
+
+          const { error: timelineInstallationError } = await performTimelinesInstallation(
+            ctx.securitySolution
+          );
+
+          const allErrors = aggregatePrebuiltRuleErrors(ruleErrors);
+          if (timelineInstallationError) {
+            allErrors.push({
+              message: timelineInstallationError,
+              rules: [],
+            });
+          }
+
+          const body: PerformRuleInstallationResponseBody = {
+            summary: {
+              total: installedRules.length + skippedRules.length + ruleErrors.length,
+              succeeded: installedRules.length,
+              skipped: skippedRules.length,
+              failed: ruleErrors.length,
+            },
+            results: {
+              created: installedRules.map(({ result }) => internalRuleToAPIResponse(result)),
+              skipped: skippedRules,
+            },
+            errors: allErrors,
+          };
+
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        const { results: installedRules, errors: installationErrors } = await createPrebuiltRules(
-          rulesClient,
-          installableRules
-        );
-        const ruleErrors = [...fetchErrors, ...installationErrors];
-
-        const { error: timelineInstallationError } = await performTimelinesInstallation(
-          ctx.securitySolution
-        );
-
-        const allErrors = aggregatePrebuiltRuleErrors(ruleErrors);
-        if (timelineInstallationError) {
-          allErrors.push({
-            message: timelineInstallationError,
-            rules: [],
-          });
-        }
-
-        const body: PerformRuleInstallationResponseBody = {
-          summary: {
-            total: installedRules.length + skippedRules.length + ruleErrors.length,
-            succeeded: installedRules.length,
-            skipped: skippedRules.length,
-            failed: ruleErrors.length,
-          },
-          results: {
-            created: installedRules.map(({ result }) => internalRuleToAPIResponse(result)),
-            skipped: skippedRules,
-          },
-          errors: allErrors,
-        };
-
-        return response.ok({ body });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

@@ -10,14 +10,14 @@ import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@ela
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import {
   EuiIconAxisBottom,
   EuiIconAxisLeft,
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
@@ -131,7 +131,7 @@ const popoverConfig = (
   isHorizontal: boolean
 ): {
   icon: IconType;
-  groupPosition: ToolbarButtonProps['groupPosition'];
+  groupPosition: ToolbarButtonProps<'iconButton'>['groupPosition'];
   popoverTitle: string;
   buttonDataTestSubj: string;
 } => {

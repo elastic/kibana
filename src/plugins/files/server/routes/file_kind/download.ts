@@ -12,7 +12,7 @@ import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import { fileNameWithExt } from '../common_schemas';
 import { fileErrors } from '../../file';
-import { getDownloadHeadersForFile } from '../common';
+import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
 import { getById } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
@@ -39,8 +39,9 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   if (error) return error;
   try {
     const body: Response = await file.downloadContent();
-    return res.ok({
+    return res.file({
       body,
+      filename: fileName ?? getDownloadedFileName(file),
       headers: getDownloadHeadersForFile({ file, fileName }),
     });
   } catch (e) {
@@ -59,6 +60,7 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
         validate: { ...rt },
         options: {
           tags: fileKind.http.download.tags,
+          access: 'public', // the endpoint is used by <img src=""/> and should work without any special headers
         },
       },
       handler

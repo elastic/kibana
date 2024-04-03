@@ -13,14 +13,17 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableColumnMeta,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
+import { buildColumnsMetaLookup } from './helpers';
+
+const hasFilterCellAction = (actions: LensCellValueAction[]) => {
+  return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
+};
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -53,12 +56,7 @@ export const createGridColumns = (
   closeCellPopover?: Function,
   columnFilterable?: boolean[]
 ) => {
-  const columnsReverseLookup = table.columns.reduce<
-    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-  >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
-    return memo;
-  }, {});
+  const columnsReverseLookup = buildColumnsMetaLookup(table);
 
   const getContentData = ({
     rowIndex,
@@ -79,8 +77,17 @@ export const createGridColumns = (
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
-    const cellActions = [];
-    if (filterable && handleFilterClick && !columnArgs?.oneClickFilter) {
+    const cellActions: EuiDataGridColumnCellAction[] = [];
+
+    // compatible cell actions from actions registry
+    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
+
+    if (
+      !hasFilterCellAction(compatibleCellActions) &&
+      filterable &&
+      handleFilterClick &&
+      !columnArgs?.oneClickFilter
+    ) {
       cellActions.push(
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
           const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -91,33 +98,35 @@ export const createGridColumns = (
           const filterForText = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterForValueText',
             {
-              defaultMessage: 'Filter for value',
+              defaultMessage: 'Filter for',
             }
           );
           const filterForAriaLabel = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
             {
-              defaultMessage: 'Filter for value: {cellContent}',
+              defaultMessage: 'Filter for: {cellContent}',
               values: {
                 cellContent,
               },
             }
           );
 
+          if (!contentsIsDefined) {
+            return null;
+          }
+
           return (
-            contentsIsDefined && (
-              <Component
-                aria-label={filterForAriaLabel}
-                data-test-subj="lensDatatableFilterFor"
-                onClick={() => {
-                  handleFilterClick(field, rowValue, colIndex, rowIndex);
-                  closeCellPopover?.();
-                }}
-                iconType="plusInCircle"
-              >
-                {filterForText}
-              </Component>
-            )
+            <Component
+              aria-label={filterForAriaLabel}
+              data-test-subj="lensDatatableFilterFor"
+              onClick={() => {
+                handleFilterClick(field, rowValue, colIndex, rowIndex);
+                closeCellPopover?.();
+              }}
+              iconType="plusInCircle"
+            >
+              {filterForText}
+            </Component>
           );
         },
         ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
@@ -129,40 +138,40 @@ export const createGridColumns = (
           const filterOutText = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterOutValueText',
             {
-              defaultMessage: 'Filter out value',
+              defaultMessage: 'Filter out',
             }
           );
           const filterOutAriaLabel = i18n.translate(
             'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
             {
-              defaultMessage: 'Filter out value: {cellContent}',
+              defaultMessage: 'Filter out: {cellContent}',
               values: {
                 cellContent,
               },
             }
           );
 
+          if (!contentsIsDefined) {
+            return null;
+          }
+
           return (
-            contentsIsDefined && (
-              <Component
-                data-test-subj="lensDatatableFilterOut"
-                aria-label={filterOutAriaLabel}
-                onClick={() => {
-                  handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                  closeCellPopover?.();
-                }}
-                iconType="minusInCircle"
-              >
-                {filterOutText}
-              </Component>
-            )
+            <Component
+              data-test-subj="lensDatatableFilterOut"
+              aria-label={filterOutAriaLabel}
+              onClick={() => {
+                handleFilterClick(field, rowValue, colIndex, rowIndex, true);
+                closeCellPopover?.();
+              }}
+              iconType="minusInCircle"
+            >
+              {filterOutText}
+            </Component>
           );
         }
       );
     }
 
-    // Add all the column compatible cell actions
-    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
     compatibleCellActions.forEach((action) => {
       cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
         const rowValue = table.rows[rowIndex][columnId];
@@ -171,20 +180,23 @@ export const createGridColumns = (
           value: rowValue,
           columnMeta,
         };
+
+        if (rowValue == null) {
+          return null;
+        }
+
         return (
-          rowValue != null && (
-            <Component
-              aria-label={action.displayName}
-              data-test-subj={`lensDatatableCellAction-${action.id}`}
-              onClick={() => {
-                action.execute([data]);
-                closeCellPopover?.();
-              }}
-              iconType={action.iconType}
-            >
-              {action.displayName}
-            </Component>
-          )
+          <Component
+            aria-label={action.displayName}
+            data-test-subj={`lensDatatableCellAction-${action.id}`}
+            onClick={() => {
+              action.execute([data]);
+              closeCellPopover?.();
+            }}
+            iconType={action.iconType}
+          >
+            {action.displayName}
+          </Component>
         );
       });
     });
@@ -230,7 +242,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, false),
           iconType: 'plusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-            defaultMessage: 'Filter for column',
+            defaultMessage: 'Filter for',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
@@ -241,7 +253,7 @@ export const createGridColumns = (
           onClick: () => handleTransposedColumnClick(bucketValues, true),
           iconType: 'minusInCircle',
           label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-            defaultMessage: 'Filter out column',
+            defaultMessage: 'Filter out',
           }),
           'data-test-subj': 'lensDatatableHide',
         });
@@ -268,6 +280,7 @@ export const createGridColumns = (
       visibleCellActions: 5,
       display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
+      schema: field,
       actions: {
         showHide: false,
         showMoveLeft: false,

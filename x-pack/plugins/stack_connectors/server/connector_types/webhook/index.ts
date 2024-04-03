@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type {
@@ -24,6 +25,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';
@@ -54,6 +56,25 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
+  authType: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal(WebhookAuthType.Basic),
+        schema.literal(WebhookAuthType.SSL),
+        schema.literal(null),
+      ],
+      {
+        defaultValue: WebhookAuthType.Basic,
+      }
+    )
+  ),
+  certType: schema.maybe(
+    schema.oneOf([schema.literal(SSLCertType.CRT), schema.literal(SSLCertType.PFX)])
+  ),
+  ca: schema.maybe(schema.string()),
+  verificationMode: schema.maybe(
+    schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
+  ),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -63,14 +84,20 @@ export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
+  crt: schema.nullable(schema.string()),
+  key: schema.nullable(schema.string()),
+  pfx: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
     // user and password must be set together (or not at all)
-    if (!secrets.password && !secrets.user) return;
-    if (secrets.password && secrets.user) return;
+    if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
+    if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
+    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
+    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
     return i18n.translate('xpack.stackConnectors.webhook.invalidUsernamePassword', {
-      defaultMessage: 'both user and password must be specified',
+      defaultMessage:
+        'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
     });
   },
 });
@@ -113,12 +140,13 @@ export function getConnectorType(): WebhookConnectorType {
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(logger, params.body, variables, 'json'),
   };
 }
 
@@ -153,6 +181,15 @@ function validateConnectorTypeConfig(
       })
     );
   }
+
+  if (Boolean(configObject.authType) && !configObject.hasAuth) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
+        defaultMessage:
+          'error configuring webhook action: authType must be null or undefined if hasAuth is false',
+      })
+    );
+  }
 }
 
 // action executor
@@ -160,16 +197,41 @@ export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { actionId, config, params, configurationUtilities, logger } = execOptions;
-  const { method, url, headers = {}, hasAuth } = config;
+  const { method, url, headers = {}, hasAuth, authType, ca, verificationMode } = config;
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
+  // For backwards compatibility with connectors created before authType was added, interpret a
+  // hasAuth: true and undefined authType as basic auth
   const basicAuth =
-    hasAuth && isString(secrets.user) && isString(secrets.password)
+    hasAuth &&
+    (authType === WebhookAuthType.Basic || !authType) &&
+    isString(secrets.user) &&
+    isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
+      : {};
+  const sslCertificate =
+    authType === WebhookAuthType.SSL &&
+    ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
+      ? isString(secrets.pfx)
+        ? {
+            pfx: Buffer.from(secrets.pfx, 'base64'),
+            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
+          }
+        : {
+            cert: Buffer.from(secrets.crt!, 'base64'),
+            key: Buffer.from(secrets.key!, 'base64'),
+            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
+          }
       : {};
 
   const axiosInstance = axios.create();
+
+  const sslOverrides = {
+    ...sslCertificate,
+    ...(verificationMode ? { verificationMode } : {}),
+    ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
+  };
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
@@ -181,6 +243,7 @@ export async function executor(
       headers: headers ? headers : {},
       data,
       configurationUtilities,
+      sslOverrides,
     })
   );
 

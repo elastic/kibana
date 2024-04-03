@@ -927,7 +927,7 @@
               "EuiButtonIconPropsForAnchor",
               ", ",
               "EuiButtonIconPropsForButton",
-              "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
+              "> & { type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
               "EuiButtonIconProps",
               " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
               "DisambiguateSet",
@@ -937,9 +937,7 @@
               "EuiButtonIconPropsForAnchor",
               "> & { type?: string | undefined; } & ",
               "EuiButtonIconProps",
-              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | typeof ",
-              "EuiContextMenuItem",
-              " | undefined"
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | React.FunctionComponent<Props> | undefined"
             ],
             "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
@@ -1378,30 +1376,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -1439,6 +1413,38 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
           {
@@ -1495,14 +1501,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
           },
           {
@@ -1511,39 +1509,55 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/utils.ts"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/utils.ts"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/utils.ts"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/threatmatch_input/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/threatmatch_input/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -2939,150 +2953,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.TimelineEqlRequestOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "TimelineEqlRequestOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEqlRequestOptions",
-            "text": "TimelineEqlRequestOptions"
-          },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.EqlSearchStrategyRequest",
-            "text": "EqlSearchStrategyRequest"
-          },
-          ",Omit<",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsAllRequestOptions",
-            "text": "TimelineEventsAllRequestOptions"
-          },
-          ", \"params\">"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEqlRequestOptions.eventCategoryField",
-            "type": "string",
-            "tags": [],
-            "label": "eventCategoryField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEqlRequestOptions.tiebreakerField",
-            "type": "string",
-            "tags": [],
-            "label": "tiebreakerField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEqlRequestOptions.timestampField",
-            "type": "string",
-            "tags": [],
-            "label": "timestampField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEqlRequestOptions.size",
-            "type": "number",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEqlRequestOptions.runtime_mappings",
-            "type": "Object",
-            "tags": [],
-            "label": "runtime_mappings",
-            "description": [],
-            "signature": [
-              "Record<string, Omit<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              ", \"type\"> & { type: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimePrimitiveTypes",
-                "text": "RuntimePrimitiveTypes"
-              },
-              "; }> | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEqlRequestOptions.body",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "(Omit<",
-              "EqlSearchRequest",
-              ", \"body\"> & EqlBody & { runtime_mappings?: ",
-              "RunTimeMappings",
-              "; }) | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.TimelineEqlResponse",
         "type": "Interface",
         "tags": [],
@@ -3176,153 +3046,6 @@
               " | null"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.TimelineEventsAllRequestOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "TimelineEventsAllRequestOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsAllRequestOptions",
-            "text": "TimelineEventsAllRequestOptions"
-          },
-          " extends ",
-          "TimelineRequestOptionsPaginated",
-          "<string>"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.authFilter",
-            "type": "Object",
-            "tags": [],
-            "label": "authFilter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.JsonObject",
-                "text": "JsonObject"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.excludeEcsData",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "excludeEcsData",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.fieldRequested",
-            "type": "Array",
-            "tags": [],
-            "label": "fieldRequested",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.fields",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "string[] | { field: string; include_unmapped: boolean; }[]"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.language",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "language",
-            "description": [],
-            "signature": [
-              "\"eql\" | \"kuery\" | \"lucene\""
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.runtimeMappings",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeMappings",
-            "description": [],
-            "signature": [
-              "Record<string, Omit<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeFieldSpec",
-                "text": "RuntimeFieldSpec"
-              },
-              ", \"type\"> & { type: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimePrimitiveTypes",
-                "text": "RuntimePrimitiveTypes"
-              },
-              "; }> | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsAllRequestOptions.filterStatus",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "filterStatus",
-            "description": [],
-            "signature": [
-              "AlertWorkflowStatus | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3540,75 +3263,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.TimelineEventsDetailsRequestOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "TimelineEventsDetailsRequestOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsDetailsRequestOptions",
-            "text": "TimelineEventsDetailsRequestOptions"
-          },
-          " extends Partial<",
-          "TimelineRequestOptionsPaginated",
-          "<string>>"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsDetailsRequestOptions.indexName",
-            "type": "string",
-            "tags": [],
-            "label": "indexName",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsDetailsRequestOptions.eventId",
-            "type": "string",
-            "tags": [],
-            "label": "eventId",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsDetailsRequestOptions.authFilter",
-            "type": "Object",
-            "tags": [],
-            "label": "authFilter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.JsonObject",
-                "text": "JsonObject"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.TimelineEventsDetailsStrategyResponse",
         "type": "Interface",
         "tags": [],
@@ -3717,72 +3371,6 @@
               "<object> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.TimelineEventsLastEventTimeRequestOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "TimelineEventsLastEventTimeRequestOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsLastEventTimeRequestOptions",
-            "text": "TimelineEventsLastEventTimeRequestOptions"
-          },
-          " extends Omit<",
-          "TimelineRequestBasicOptions",
-          ", \"timerange\" | \"runtimeMappings\" | \"filterQuery\">"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsLastEventTimeRequestOptions.indexKey",
-            "type": "Enum",
-            "tags": [],
-            "label": "indexKey",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.LastEventIndexKey",
-                "text": "LastEventIndexKey"
-              }
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineEventsLastEventTimeRequestOptions.details",
-            "type": "Object",
-            "tags": [],
-            "label": "details",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.LastTimeDetails",
-                "text": "LastTimeDetails"
-              }
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4199,7 +3787,19 @@
         "tags": [],
         "label": "LastEventIndexKey",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineEventsQueries",
+        "type": "Enum",
+        "tags": [],
+        "label": "TimelineEventsQueries",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/model/timeline_events_queries.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4274,34 +3874,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -4323,10 +3895,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
           },
           {
@@ -4403,6 +3971,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
           },
           {
@@ -4452,6 +4028,34 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4515,11 +4119,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/query_bar/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/query_bar/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4599,7 +4203,7 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4659,22 +4263,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
           },
           {
@@ -4707,7 +4295,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4715,7 +4315,7 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4727,35 +4327,55 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/left/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/left/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/hooks/use_prevalence.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/right/hooks/use_prevalence.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_tab_content/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_tab_content/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
@@ -4807,9 +4427,9 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ id: string; type?: ",
           "DataProviderType",
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4900,20 +4520,12 @@
             "section": "def-common.DeprecatedRowRenderer",
             "text": "DeprecatedRowRenderer"
           },
-          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
+          "[] | undefined; setFlyoutAlert?: ((alertId: string) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/alerts_table/render_cell_value.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/alerts_table/render_cell_value.tsx"
-          },
           {
             "plugin": "@kbn/securitysolution-data-table",
             "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
@@ -5091,43 +4703,131 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.TimelineKpiStrategyRequest",
+        "id": "def-common.TimelineEqlRequestOptionsInput",
         "type": "Type",
         "tags": [],
-        "label": "TimelineKpiStrategyRequest",
+        "label": "TimelineEqlRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; params?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchRequestParams",
-            "text": "ISearchRequestParams"
-          },
-          " | undefined; timerange?: ",
+          "{ sort: { field: string; direction: ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimerangeInput",
-            "text": "TimerangeInput"
+            "section": "def-common.Direction",
+            "text": "Direction"
           },
-          " | undefined; defaultIndex: string[]; filterQuery: string | ",
-          "ESQuery",
-          " | undefined; factoryQueryType?: ",
-          "TimelineEventsQueries",
-          " | undefined; entityType?: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.EntityType",
-            "text": "EntityType"
-          },
-          " | undefined; indexType?: string | undefined; }"
+          "; esTypes?: string[] | undefined; type?: string | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; must: {}[]; must_not: {}[]; should: {}[]; }; } | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; timestampField?: string | undefined; size?: number | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineEventsAllOptionsInput",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelineEventsAllOptionsInput",
+        "description": [],
+        "signature": [
+          "{ sort: { field: string; esTypes: string[]; direction: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.Direction",
+            "text": "Direction"
+          },
+          "; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsQueries",
+            "text": "TimelineEventsQueries"
+          },
+          ".all; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; filterQuery?: any; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+        ],
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineEventsDetailsRequestOptionsInput",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelineEventsDetailsRequestOptionsInput",
+        "description": [],
+        "signature": [
+          "{ indexName: string; factoryQueryType: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsQueries",
+            "text": "TimelineEventsQueries"
+          },
+          ".details; eventId: string; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; must: {}[]; must_not: {}[]; should: {}[]; }; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+        ],
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineEventsLastEventTimeRequestOptionsInput",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelineEventsLastEventTimeRequestOptionsInput",
+        "description": [],
+        "signature": [
+          "{ details: { hostName?: string | null | undefined; userName?: string | null | undefined; ip?: string | null | undefined; }; factoryQueryType: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsQueries",
+            "text": "TimelineEventsQueries"
+          },
+          ".lastEventTime; indexKey: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.LastEventIndexKey",
+            "text": "LastEventIndexKey"
+          },
+          "; params?: any; id?: string | undefined; defaultIndex?: string[] | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+        ],
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineKpiRequestOptionsInput",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelineKpiRequestOptionsInput",
+        "description": [],
+        "signature": [
+          "{ factoryQueryType: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsQueries",
+            "text": "TimelineEventsQueries"
+          },
+          ".kpi; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; must: {}[]; must_not: {}[]; should: {}[]; }; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+        ],
+        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

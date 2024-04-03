@@ -27,6 +27,7 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly comboBox = this.ctx.getService('comboBox');
   private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
@@ -43,6 +44,8 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+  private readonly appsMenu = this.ctx.getService('appsMenu');
+  private readonly toasts = this.ctx.getService('toasts');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -51,12 +54,29 @@ export class DashboardPageObject extends FtrService {
     ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
     : 'test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
+  public readonly APP_ID = 'dashboards';
+
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.kibanaServer.savedObjects.cleanStandardList();
     await this.kibanaServer.importExport.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
-    await this.common.navigateToApp('dashboard');
+    await this.navigateToApp();
+  }
+
+  public async navigateToApp() {
+    await this.common.navigateToApp(this.APP_ID);
+  }
+
+  public async navigateToAppFromAppsMenu() {
+    await this.retry.try(async () => {
+      await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await this.header.waitUntilLoadingHasFinished();
+      const currentUrl = await this.browser.getCurrentUrl();
+      if (!currentUrl.includes('app/dashboard')) {
+        throw new Error(`Not in dashboard application after clicking 'Dashboard' in apps menu`);
+      }
+    });
   }
 
   public async expectAppStateRemovedFromURL() {
@@ -138,7 +158,7 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
 
-  public async expectUnsavedChangesDoesNotExist(title: string) {
+  public async expectUnsavedChangesListingDoesNotExist(title: string) {
     this.log.debug(`Expect Unsaved Changes Listing Does Not Exist for `, title);
     await this.testSubjects.missingOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
   }
@@ -174,37 +194,34 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.existOrFail('dashboardLandingPage');
   }
 
-  public async clickDashboardBreadcrumbLink() {
-    this.log.debug('clickDashboardBreadcrumbLink');
-    await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
-  }
-
   public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
-      `last breadcrumb to have dashboard title: ${expectedTitle}`,
+      `last breadcrumb to have dashboard title: ${expectedTitle} OR Editing ${expectedTitle}`,
       async () => {
         const actualTitle = await this.globalNav.getLastBreadcrumb();
         this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
-        return actualTitle === expectedTitle;
+        return actualTitle === expectedTitle || actualTitle === `Editing ${expectedTitle}`;
       }
     );
   }
 
   public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
     this.log.debug('gotoDashboardLandingPage');
-    const onPage = await this.onDashboardLandingPage();
-    if (!onPage) {
-      await this.clickDashboardBreadcrumbLink();
-      await this.retry.try(async () => {
-        const warning = await this.testSubjects.exists('confirmModalTitleText');
-        if (warning) {
-          await this.testSubjects.click(
-            ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-          );
-        }
-      });
-      await this.expectExistsDashboardLandingPage();
-    }
+    if (await this.onDashboardLandingPage()) return;
+
+    const breadcrumbLink = this.config.get('serverless')
+      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+      : 'breadcrumb dashboardListingBreadcrumb first';
+    await this.testSubjects.click(breadcrumbLink);
+    await this.retry.try(async () => {
+      const warning = await this.testSubjects.exists('confirmModalTitleText');
+      if (warning) {
+        await this.testSubjects.click(
+          ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+        );
+      }
+    });
+    await this.expectExistsDashboardLandingPage();
   }
 
   public async clickClone() {
@@ -331,8 +348,16 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectUnsavedChangesBadge() {
+    this.log.debug('Expect unsaved changes badge to be present');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
+  }
+
+  public async expectMissingUnsavedChangesBadge() {
+    this.log.debug('Expect there to be no unsaved changes badge');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
   }
 
@@ -404,7 +429,7 @@ export class DashboardPageObject extends FtrService {
   public async clearSavedObjectsFromAppLinks() {
     await this.header.clickVisualize();
     await this.visualize.gotoLandingPage();
-    await this.header.clickDashboard();
+    await this.navigateToAppFromAppsMenu();
     await this.gotoDashboardLandingPage();
   }
 
@@ -467,7 +492,7 @@ export class DashboardPageObject extends FtrService {
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
-    const message = await this.common.closeToast();
+    const message = await this.toasts.getTitleAndDismiss();
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForSaveModalToClose();
 
@@ -534,9 +559,9 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async selectDashboardTags(tagNames: string[]) {
-    await this.testSubjects.click('savedObjectTagSelector');
+    const tagsComboBox = await this.testSubjects.find('savedObjectTagSelector');
     for (const tagName of tagNames) {
-      await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      await this.comboBox.setElement(tagsComboBox, tagName);
     }
     await this.testSubjects.click('savedObjectTitle');
   }
@@ -562,7 +587,7 @@ export class DashboardPageObject extends FtrService {
 
     await this.gotoDashboardLandingPage();
 
-    await this.listingTable.searchForItemWithName(dashboardName);
+    await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       await this.listingTable.clickItemLink('dashboard', dashboardName);
       await this.header.waitUntilLoadingHasFinished();
@@ -603,8 +628,12 @@ export class DashboardPageObject extends FtrService {
     return visibilities;
   }
 
+  public async getPanels() {
+    return await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+  }
+
   public async getPanelDimensions() {
-    const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+    const panels = await this.getPanels();
     return await Promise.all(
       panels.map(async (panel) => {
         const size = await panel.getSize();

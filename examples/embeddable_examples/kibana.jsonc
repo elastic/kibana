@@ -8,19 +8,15 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "dataViews",
       "embeddable",
       "uiActions",
-      "savedObjects",
       "dashboard",
-      "kibanaUtils"
+      "data",
+      "charts",
+      "fieldFormats"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "extraPublicDirs": [
-      "public/todo",
-      "public/hello_world",
-      "public/todo/todo_ref_embeddable"
-    ]
+    "requiredBundles": ["presentationUtil"],
+    "extraPublicDirs": ["public/hello_world"]
   }
 }

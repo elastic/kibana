@@ -29,7 +29,6 @@ jest.mock('./setup/upgrade_package_install_version');
 jest.mock('./epm/elasticsearch/template/install', () => {
   return {
     ...jest.requireActual('./epm/elasticsearch/template/install'),
-    ensureFileUploadWriteIndices: jest.fn(),
   };
 });
 
@@ -66,6 +65,7 @@ describe('setupFleet', () => {
 
     (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
 
+    soClient.get.mockResolvedValue({ attributes: {} } as any);
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
     soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
   });

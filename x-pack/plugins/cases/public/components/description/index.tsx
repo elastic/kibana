@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
 import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPanel,
@@ -38,34 +38,32 @@ export interface DescriptionProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
 }
 
-const DescriptionFooter = styled(EuiFlexItem)`
-  ${({ theme }) => `
-    border-top: ${theme.eui.euiBorderThin};
-    padding: ${theme.eui.euiSizeS};
-  `}
-`;
-
-const Panel = styled(EuiPanel)`
-  padding: 0;
-`;
-
-const Header = styled(EuiFlexGroup)`
-  ${({ theme }) => `
-    display: flex;
-    padding: ${theme.eui.euiSizeS};
-    align-items: center;
-  `}
-`;
-
-const Body = styled(EuiFlexItem)`
-  ${({ theme }) => `
-    padding: ${theme.eui.euiSize};
-    padding-top: 0;
-
-    > div {
-      padding: 0;
-    }
-  `}
+const getFlexGroupCss = ({
+  euiTheme,
+  isCollapsed,
+  hasUnsavedChanges,
+}: {
+  euiTheme: EuiThemeComputed<{}>;
+  isCollapsed: boolean;
+  hasUnsavedChanges?: boolean;
+}) => css`
+  padding: ${euiTheme.size.s};
+  align-items: center;
+  ${!isCollapsed
+    ? css`
+        border-bottom: ${euiTheme.border.thin};
+        border-radius: none;
+      `
+    : css`
+        background: ${euiTheme.colors.lightestShade};
+        border-radius: ${euiTheme.border.radius.medium};
+        ${hasUnsavedChanges
+          ? css`
+              border-bottom-left-radius: 0;
+              border-bottom-right-radius: 0;
+            `
+          : css``}
+      `}
 `;
 
 const getDraftDescription = (
@@ -73,7 +71,7 @@ const getDraftDescription = (
   caseId: string,
   commentId: string
 ): string | null => {
-  const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
+  const draftStorageKey = getMarkdownEditorStorageKey({ appId: applicationId, caseId, commentId });
 
   return sessionStorage.getItem(draftStorageKey);
 };
@@ -97,7 +95,7 @@ export const Description = ({
   const descriptionMarkdownRef = useRef<DescriptionMarkdownRefObject | null>(null);
 
   const { euiTheme } = useEuiTheme();
-  const { appId, permissions } = useCasesContext();
+  const { permissions, owner } = useCasesContext();
 
   const {
     clearDraftComment: clearLensDraftComment,
@@ -113,7 +111,7 @@ export const Description = ({
 
   const handleOnSave = useCallback(
     (content: string) => {
-      onUpdateField({ key: DESCRIPTION_ID, value: content });
+      onUpdateField({ key: DESCRIPTION_ID, value: content.trim() });
       setIsEditable(false);
     },
     [onUpdateField, setIsEditable]
@@ -121,7 +119,7 @@ export const Description = ({
 
   const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
 
-  const draftDescription = getDraftDescription(appId, caseData.id, DESCRIPTION_ID);
+  const draftDescription = getDraftDescription(owner[0], caseData.id, DESCRIPTION_ID);
 
   if (
     hasIncomingLensState &&
@@ -148,8 +146,9 @@ export const Description = ({
     }
   }, [clearLensDraftComment, lensDraftComment, hasIncomingLensState, openLensModal]);
 
-  const hasUnsavedChanges =
-    draftDescription && draftDescription !== caseData.description && !isLoadingDescription;
+  const hasUnsavedChanges = Boolean(
+    draftDescription && draftDescription !== caseData.description && !isLoadingDescription
+  );
 
   return isEditable ? (
     <EditableMarkdown
@@ -165,28 +164,14 @@ export const Description = ({
       ref={descriptionMarkdownRef}
     />
   ) : (
-    <Panel hasShadow={false} hasBorder={true} data-test-subj="description">
+    <EuiPanel paddingSize="none" hasBorder data-test-subj="description">
       <EuiFlexGroup direction="column" gutterSize={isCollapsed ? 'none' : 'm'}>
         <EuiFlexItem>
-          <Header
+          <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
-            {...(!isCollapsed
-              ? {
-                  css: css`
-                    border-bottom: ${euiTheme.border.thin};
-                    border-radius: none;
-                  `,
-                }
-              : {
-                  css: css`
-                    background: ${euiTheme.colors.lightestShade};
-                    border-radius: 6px;
-                    ${hasUnsavedChanges
-                      ? 'border-bottom-left-radius: 0; border-bottom-right-radius: 0;'
-                      : ''}
-                  `,
-                })}
+            gutterSize="s"
+            css={getFlexGroupCss({ euiTheme, isCollapsed, hasUnsavedChanges })}
           >
             <EuiFlexItem>
               <EuiText data-test-subj="description-title" size="s">
@@ -213,22 +198,36 @@ export const Description = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </Header>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {!isCollapsed ? (
-          <Body>
+          <EuiFlexItem
+            css={css`
+              padding: ${euiTheme.size.s};
+              padding-top: 0;
+
+              > div {
+                padding: 0;
+              }
+            `}
+          >
             <ScrollableMarkdown content={caseData.description} />
-          </Body>
+          </EuiFlexItem>
         ) : null}
         {hasUnsavedChanges ? (
-          <DescriptionFooter>
+          <EuiFlexItem
+            css={css`
+              border-top: ${euiTheme.border.thin};
+              padding: ${euiTheme.size.s};
+            `}
+          >
             <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
               {i18n.UNSAVED_DRAFT_DESCRIPTION}
             </EuiText>
-          </DescriptionFooter>
+          </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-    </Panel>
+    </EuiPanel>
   );
 };
 

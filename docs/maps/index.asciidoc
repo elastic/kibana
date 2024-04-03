@@ -13,22 +13,6 @@ Create beautiful maps from your geographical data. With **Maps**, you can:
 * Symbolize features using data values.
 * Focus on only the data that’s important to you.
 
-*Ready to get started?* Watch the https://videos.elastic.co/watch/BYzRDtH4u7RSD8wKhuEW1b[video], and then start your tour of **Maps** with the <<maps-getting-started, getting started tutorial>>.
-
-++++
-<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
-</script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/mBuWenQ2uSLY9YjEkPtzJC.jpg"
-data-uuid="mBuWenQ2uSLY9YjEkPtzJC"
-data-v="4"
-data-type="inline"
-/>
-</br>
-++++
-
 [float]
 === Build maps with multiple layers and indices
 Use multiple layers and indices to show all your data in a single map. Show how data sits relative to physical features like weather patterns, human-made features like international borders, and business-specific features like sales regions. Plot individual documents or use aggregations to plot any data set, no matter how large.
@@ -80,5 +64,6 @@ include::search.asciidoc[]
 include::map-settings.asciidoc[]
 include::connect-to-ems.asciidoc[]
 include::import-geospatial-data.asciidoc[]
+include::clean-data.asciidoc[]
 include::indexing-geojson-data-tutorial.asciidoc[]
 include::trouble-shooting.asciidoc[]

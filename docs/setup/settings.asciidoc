@@ -113,7 +113,7 @@ List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
 header from being whitelisted means that you cannot use
 <<basic-authentication, basic authentication>> in {kib}.
-*Default: `[ 'authorization' ]`*
+*Default: `[ 'authorization', 'es-client-authentication' ]`*
 
 [[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout`::
 Time in milliseconds to wait for responses from the back end or {es}.
@@ -323,8 +323,7 @@ run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
 `notifications.connectors.default.email`::
-Specifies the name of the connector that is used to send email notifications.
-In {ecloud}, the default value is `elastic-cloud-email`.
+ Choose the default email connector for user notifications. As of `8.6.0`, {kib} is shipping with a new notification mechanism that will send email notifications for various user actions, e.g. assigning a _Case_ to a user. To enable notifications, an email connector must be <<pre-configured-connectors,preconfigured>> in the system via `kibana.yml`, and the notifications plugin must be configured to point to the ID of that connector.
 
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
@@ -406,7 +405,7 @@ disable, set to `null`. *Default:* `"nosniff"`
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
-`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
+`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"strict-origin-when-cross-origin"`
 
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
 experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header
@@ -467,6 +466,11 @@ default is `true`. *Default: `deprecated`*
 [[server-socketTimeout]] `server.socketTimeout`::
 The number of milliseconds to wait before closing an
 inactive socket. *Default: `"120000"`*
+
+[[server-payloadTimeout]] `server.payloadTimeout`::
+Sets the maximum time allowed for the client to transmit the request payload (body) before giving up
+and responding with a Request Timeout (408) error response.
+*Default: `"20000"`*
 
 [[server-ssl-cert-key]] `server.ssl.certificate` and `server.ssl.key`::
 Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
@@ -606,6 +610,8 @@ Set this value to false to disable the Remote Clusters UI.
 
 `xpack.rollup.ui.enabled`::
 Set this value to false to disable the Rollup Jobs UI. *Default: true*
++
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 `xpack.snapshot_restore.ui.enabled`::
 Set this value to false to disable the Snapshot and Restore UI. *Default: true*
@@ -615,24 +621,24 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 `i18n.locale` {ess-icon}::
 Set this value to change the {kib} interface language.
-Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
+Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
-include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
-include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
-include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
-include::{kib-repo-dir}/settings/cases-settings.asciidoc[leveloffset=+1]
-include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
-include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
-include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
-include::{kib-repo-dir}/settings/logging-settings.asciidoc[]
-include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
-include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
-include::{kib-repo-dir}/settings/search-sessions-settings.asciidoc[]
+include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[leveloffset=+1]
+include::{kibana-root}/docs/settings/apm-settings.asciidoc[]
+include::{kibana-root}/docs/settings/banners-settings.asciidoc[]
+include::{kibana-root}/docs/settings/cases-settings.asciidoc[leveloffset=+1]
+include::{kibana-root}/docs/settings/enterprise-search-settings.asciidoc[]
+include::{kibana-root}/docs/settings/fleet-settings.asciidoc[]
+include::{kibana-root}/docs/settings/i18n-settings.asciidoc[]
+include::{kibana-root}/docs/settings/logging-settings.asciidoc[]
+include::{kibana-root}/docs/settings/logs-ui-settings.asciidoc[]
+include::{kibana-root}/docs/settings/infrastructure-ui-settings.asciidoc[]
+include::{kibana-root}/docs/settings/monitoring-settings.asciidoc[]
+include::{kibana-root}/docs/settings/reporting-settings.asciidoc[]
+include::{kibana-root}/docs/settings/search-sessions-settings.asciidoc[]
 include::secure-settings.asciidoc[]
-include::{kib-repo-dir}/settings/security-settings.asciidoc[]
-include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
-include::{kib-repo-dir}/settings/task-manager-settings.asciidoc[]
-include::{kib-repo-dir}/settings/telemetry-settings.asciidoc[]
-include::{kib-repo-dir}/settings/url-drilldown-settings.asciidoc[]
+include::{kibana-root}/docs/settings/security-settings.asciidoc[]
+include::{kibana-root}/docs/settings/spaces-settings.asciidoc[]
+include::{kibana-root}/docs/settings/task-manager-settings.asciidoc[]
+include::{kibana-root}/docs/settings/telemetry-settings.asciidoc[]
+include::{kibana-root}/docs/settings/url-drilldown-settings.asciidoc[]

@@ -1,11 +1,21 @@
 {
   "search_application.get": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_application/search_application/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-search-application.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-search-application.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

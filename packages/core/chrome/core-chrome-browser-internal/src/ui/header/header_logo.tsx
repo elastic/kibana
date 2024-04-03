@@ -44,12 +44,6 @@ function onClick(
     return;
   }
 
-  const navLink = navLinks.find((item) => item.href === anchor.href);
-  if (navLink && navLink.disabled) {
-    event.preventDefault();
-    return;
-  }
-
   if (event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
     return;
   }
@@ -95,7 +89,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
-      className="euiHeaderLogo"
+      className="chrHeaderLogo"
       href={href}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {

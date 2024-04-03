@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import { PosturePolicyTemplate } from '../../../common/types';
+import { PosturePolicyTemplate } from '../../../common/types_old';
 import type {
   CspBenchmarksPage,
   CspIntegrationDocNavigationItem,
@@ -27,7 +27,7 @@ const NAV_ITEMS_NAMES = {
     defaultMessage: 'Findings',
   }),
   BENCHMARKS: i18n.translate('xpack.csp.navigation.myBenchmarksNavItemLabel', {
-    defaultMessage: 'Cloud Posture Benchmarks',
+    defaultMessage: 'Benchmarks',
   }),
   RULES: i18n.translate('xpack.csp.navigation.rulesNavItemLabel', {
     defaultMessage: 'Rules',
@@ -37,11 +37,24 @@ const NAV_ITEMS_NAMES = {
 /** The base path for all cloud security posture pages. */
 export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
 
+const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
+const KSPM_DASHBOARD_TAB_NAME = 'Kubernetes';
+
 export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
   dashboard: {
     name: NAV_ITEMS_NAMES.DASHBOARD,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard`,
     id: 'cloud_security_posture-dashboard',
+  },
+  cspm_dashboard: {
+    name: CSPM_DASHBOARD_TAB_NAME,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard/${CSPM_POLICY_TEMPLATE}`,
+    id: 'cloud_security_posture-cspm-dashboard',
+  },
+  kspm_dashboard: {
+    name: KSPM_DASHBOARD_TAB_NAME,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/dashboard/${KSPM_POLICY_TEMPLATE}`,
+    id: 'cloud_security_posture-kspm-dashboard',
   },
   vulnerability_dashboard: {
     name: NAV_ITEMS_NAMES.VULNERABILITY_DASHBOARD,
@@ -63,7 +76,7 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
 export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:benchmarkId/:benchmarkVersion/rules/:ruleId?`,
     id: 'cloud_security_posture-benchmarks-rules',
   },
 };

@@ -7,12 +7,10 @@
  */
 
 import React from 'react';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -23,9 +21,11 @@ export const DashboardAppNoDataPage = ({
     application,
     data: { dataViews },
     dataViewEditor,
-    http: { basePath },
-    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
+    http: { basePath, get },
+    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink, esqlDocLink },
     customBranding,
+    noDataPage,
+    share,
   } = pluginServices.getServices();
 
   const analyticsServices = {
@@ -34,17 +34,37 @@ export const DashboardAppNoDataPage = ({
         links: {
           kibana: { guide: kibanaGuideDocLink },
           indexPatterns: { introduction: indexPatternsDocLink },
+          query: { queryESQL: esqlDocLink },
         },
       },
       application,
-      http: { basePath },
+      http: { basePath, get },
       customBranding: {
         hasCustomBranding$: customBranding.hasCustomBranding$,
       },
     },
     dataViews,
     dataViewEditor,
+    noDataPage,
+    share: share.url ? { url: share.url } : undefined,
   };
+
+  const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+  const AnalyticsNoDataPageKibanaProvider = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+        return { default: NoDataProvider };
+      })
+    )
+  );
+  const AnalyticsNoDataPage = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+        return { default: NoDataPage };
+      })
+    )
+  );
+
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
       <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
@@ -55,8 +75,29 @@ export const DashboardAppNoDataPage = ({
 export const isDashboardAppInNoDataState = async () => {
   const {
     data: { dataViews },
+    embeddable,
+    dashboardContentManagement,
+    dashboardBackup,
   } = pluginServices.getServices();
 
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
-  return !hasUserDataView;
+
+  if (hasUserDataView) return false;
+
+  // consider has data if there is an incoming embeddable
+  const hasIncomingEmbeddable = embeddable
+    .getStateTransfer()
+    .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false);
+  if (hasIncomingEmbeddable) return false;
+
+  // consider has data if there is unsaved dashboard with edits
+  if (dashboardBackup.dashboardHasUnsavedEdits()) return false;
+
+  // consider has data if there is at least one dashboard
+  const { total } = await dashboardContentManagement.findDashboards
+    .search({ search: '', size: 1 })
+    .catch(() => ({ total: 0 }));
+  if (total > 0) return false;
+
+  return true;
 };

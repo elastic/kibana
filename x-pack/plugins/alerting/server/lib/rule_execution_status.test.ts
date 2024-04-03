@@ -6,11 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ActionsCompletion,
-  RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusWarningReasons,
-} from '../types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { RuleExecutionStatusErrorReasons, RuleExecutionStatusWarningReasons } from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,
@@ -20,6 +17,7 @@ import {
 import { ErrorWithReason } from './error_with_reason';
 import { translations } from '../constants/translations';
 import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
+import { RuleResultService } from '../monitoring/rule_result_service';
 
 const MockLogger = loggingSystemMock.create().get();
 const executionMetrics = {
@@ -31,8 +29,10 @@ const executionMetrics = {
   numberOfActiveAlerts: 2,
   numberOfNewAlerts: 3,
   numberOfRecoveredAlerts: 13,
+  numberOfDelayedAlerts: 7,
   hasReachedAlertLimit: false,
   triggeredActionsStatus: ActionsCompletion.COMPLETE,
+  hasReachedQueuedActionsLimit: false,
 };
 
 describe('RuleExecutionStatus', () => {
@@ -51,12 +51,16 @@ describe('RuleExecutionStatus', () => {
     expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
     expect(received.hasReachedAlertLimit).toEqual(expected.hasReachedAlertLimit);
     expect(received.triggeredActionsStatus).toEqual(expected.triggeredActionsStatus);
+    expect(received.hasReachedQueuedActionsLimit).toEqual(expected.hasReachedQueuedActionsLimit);
   }
 
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
       const emptyRuleRunState = new RuleRunMetricsStore().getMetrics();
-      const { status, metrics } = executionStatusFromState({ metrics: emptyRuleRunState });
+      const { status, metrics } = executionStatusFromState({
+        stateWithMetrics: { metrics: emptyRuleRunState },
+        ruleResultService: new RuleResultService(),
+      });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
@@ -67,8 +71,11 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with no instances', () => {
       const { status, metrics } = executionStatusFromState({
-        alertInstances: {},
-        metrics: executionMetrics,
+        stateWithMetrics: {
+          alertInstances: {},
+          metrics: executionMetrics,
+        },
+        ruleResultService: new RuleResultService(),
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
@@ -80,8 +87,11 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with one instance', () => {
       const { status, metrics } = executionStatusFromState({
-        alertInstances: { a: {} },
-        metrics: executionMetrics,
+        stateWithMetrics: {
+          alertInstances: { a: {} },
+          metrics: executionMetrics,
+        },
+        ruleResultService: new RuleResultService(),
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('active');
@@ -93,8 +103,11 @@ describe('RuleExecutionStatus', () => {
 
     test('task state with max executable actions warning', () => {
       const { status, metrics } = executionStatusFromState({
-        alertInstances: { a: {} },
-        metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
+        stateWithMetrics: {
+          alertInstances: { a: {} },
+          metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
+        },
+        ruleResultService: new RuleResultService(),
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.warning).toEqual({
@@ -110,10 +123,40 @@ describe('RuleExecutionStatus', () => {
       });
     });
 
+    test('task state with max queued actions warning', () => {
+      const { status, metrics } = executionStatusFromState({
+        stateWithMetrics: {
+          alertInstances: { a: {} },
+          metrics: {
+            ...executionMetrics,
+            triggeredActionsStatus: ActionsCompletion.PARTIAL,
+            hasReachedQueuedActionsLimit: true,
+          },
+        },
+        ruleResultService: new RuleResultService(),
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxQueuedActions,
+        reason: RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, {
+        ...executionMetrics,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+        hasReachedQueuedActionsLimit: true,
+      });
+    });
+
     test('task state with max alerts warning', () => {
       const { status, metrics } = executionStatusFromState({
-        alertInstances: { a: {} },
-        metrics: { ...executionMetrics, hasReachedAlertLimit: true },
+        stateWithMetrics: {
+          alertInstances: { a: {} },
+          metrics: { ...executionMetrics, hasReachedAlertLimit: true },
+        },
+        ruleResultService: new RuleResultService(),
       });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.warning).toEqual({
@@ -127,6 +170,23 @@ describe('RuleExecutionStatus', () => {
         ...executionMetrics,
         hasReachedAlertLimit: true,
       });
+    });
+
+    test('task state with lastRun error', () => {
+      const ruleResultService = new RuleResultService();
+      const lastRunSetters = ruleResultService.getLastRunSetters();
+      lastRunSetters.addLastRunError('an error');
+
+      const { status } = executionStatusFromState({
+        stateWithMetrics: {
+          alertInstances: {},
+          metrics: executionMetrics,
+        },
+        ruleResultService,
+      });
+      expect(status.status).toBe('error');
+      expect(status.error).toEqual({ message: 'an error', reason: 'unknown' });
+      expect(status.warning).toBe(undefined);
     });
   });
 

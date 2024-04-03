@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   getAnalysisType,
   INDEX_CREATED_BY,
@@ -18,33 +18,63 @@ import {
   type AnalyticsMapNodeElement,
   type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { MlFeatures } from '../../../common/constants/app';
+import type { ModelService } from '../model_management/models_provider';
+import { modelsProvider } from '../model_management';
 import {
-  ExtendAnalyticsMapArgs,
-  GetAnalyticsMapArgs,
-  InitialElementsReturnType,
+  type ExtendAnalyticsMapArgs,
+  type GetAnalyticsMapArgs,
+  type InitialElementsReturnType,
+  type NextLinkReturnType,
+  type GetAnalyticsJobIdArg,
+  type GetAnalyticsModelIdArg,
   isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  NextLinkReturnType,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
+  private _modelsProvider: ModelService;
 
-  constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
+  constructor(
+    private readonly _mlClient: MlClient,
+    private readonly _client: IScopedClusterClient,
+    private readonly _enabledFeatures: MlFeatures,
+    cloud: CloudSetup
+  ) {
+    this._modelsProvider = modelsProvider(this._client, this._mlClient, cloud);
+  }
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels(),
-      this._mlClient.getDataFrameAnalytics({ size: 1000 }),
+      this._enabledFeatures.nlp || this._enabledFeatures.dfa
+        ? this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE })
+        : { trained_model_configs: [] },
+      this._enabledFeatures.dfa
+        ? this._mlClient.getDataFrameAnalytics({ size: 1000 })
+        : { data_frame_analytics: [] },
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;
+  }
+
+  private getMissingJobNode(label: string): AnalyticsMapNodeElement {
+    return {
+      data: {
+        id: `${label}-${JOB_MAP_NODE_TYPES.ANALYTICS}`,
+        label,
+        type: JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING,
+      },
+    };
   }
 
   private isDuplicateElement(analyticsId: string, elements: MapElements[]): boolean {
@@ -86,12 +116,8 @@ export class AnalyticsManager {
     );
   }
 
-  private findJob(id: string): estypes.MlDataframeAnalyticsSummary {
-    const job = this._jobs.find((js) => js.id === id);
-    if (job === undefined) {
-      throw Error(`No known job with id '${id}'`);
-    }
-    return job;
+  private findJob(id: string): estypes.MlDataframeAnalyticsSummary | undefined {
+    return this._jobs.find((js) => js.id === id);
   }
 
   private findTrainedModel(id: string): estypes.MlTrainedModelConfig {
@@ -136,14 +162,16 @@ export class AnalyticsManager {
 
   private getAnalyticsModelElements(
     analyticsId: string,
-    analyticsCreateTime: number
+    analyticsCreateTime?: number
   ): {
     modelElement?: AnalyticsMapNodeElement;
     modelDetails?: any;
     edgeElement?: AnalyticsMapEdgeElement;
   } {
     // Get trained model for analytics job and create model node
-    const analyticsModel = this.findJobModel(analyticsId, analyticsCreateTime);
+    const analyticsModel = analyticsCreateTime
+      ? this.findJobModel(analyticsId, analyticsCreateTime)
+      : undefined;
     let modelElement;
     let edgeElement;
 
@@ -201,7 +229,7 @@ export class AnalyticsManager {
     const resultElements = [];
     const modelElements = [];
     const details: any = {};
-    let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary;
+    let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary | undefined;
     // fetch model data and create model elements
     data = this.findTrainedModel(modelId);
     const modelNodeId = `${data.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
@@ -223,37 +251,35 @@ export class AnalyticsManager {
     details[modelNodeId] = data;
     // fetch source job data and create elements
     if (sourceJobId !== undefined) {
-      try {
-        data = this.findJob(sourceJobId);
+      data = this.findJob(sourceJobId);
 
-        nextLinkId = data?.source?.index[0];
-        nextType = JOB_MAP_NODE_TYPES.INDEX;
+      nextLinkId = data?.source?.index[0];
+      nextType = JOB_MAP_NODE_TYPES.INDEX;
+      previousNodeId = `${data?.id ?? sourceJobId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+      // If data is undefined - job wasn't found. Create missing job node.
+      resultElements.push(
+        data === undefined
+          ? this.getMissingJobNode(sourceJobId)
+          : {
+              data: {
+                id: previousNodeId,
+                label: data.id,
+                type: JOB_MAP_NODE_TYPES.ANALYTICS,
+                analysisType: getAnalysisType(data?.analysis),
+              },
+            }
+      );
+      // Create edge between job and model
+      modelElements.push({
+        data: {
+          id: `${previousNodeId}~${modelNodeId}`,
+          source: previousNodeId,
+          target: modelNodeId,
+        },
+      });
 
-        previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
-
-        resultElements.push({
-          data: {
-            id: previousNodeId,
-            label: data.id,
-            type: JOB_MAP_NODE_TYPES.ANALYTICS,
-            analysisType: getAnalysisType(data?.analysis),
-          },
-        });
-        // Create edge between job and model
-        modelElements.push({
-          data: {
-            id: `${previousNodeId}~${modelNodeId}`,
-            source: previousNodeId,
-            target: modelNodeId,
-          },
-        });
-
+      if (data) {
         details[previousNodeId] = data;
-      } catch (error) {
-        // fail silently if job doesn't exist
-        if (error.statusCode !== 404) {
-          throw error.body ?? error;
-        }
       }
     }
 
@@ -275,21 +301,25 @@ export class AnalyticsManager {
 
     const nextLinkId = data?.source?.index[0];
     const nextType: JobMapNodeTypes = JOB_MAP_NODE_TYPES.INDEX;
+    const previousNodeId = `${data?.id ?? jobId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
-    const previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+    resultElements.push(
+      data === undefined
+        ? this.getMissingJobNode(jobId)
+        : {
+            data: {
+              id: previousNodeId,
+              label: data.id,
+              type: JOB_MAP_NODE_TYPES.ANALYTICS,
+              analysisType: getAnalysisType(data?.analysis),
+              isRoot: true,
+            },
+          }
+    );
 
-    resultElements.push({
-      data: {
-        id: previousNodeId,
-        label: data.id,
-        type: JOB_MAP_NODE_TYPES.ANALYTICS,
-        analysisType: getAnalysisType(data?.analysis),
-        isRoot: true,
-      },
-    });
-
-    details[previousNodeId] = data;
-
+    if (data) {
+      details[previousNodeId] = data;
+    }
     const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
       jobId,
       jobCreateTime
@@ -310,7 +340,7 @@ export class AnalyticsManager {
    * @param jobId (optional)
    * @param modelId (optional)
    */
-  public async getAnalyticsMap({
+  private async getAnalyticsMap({
     analyticsId,
     modelId,
   }: GetAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
@@ -409,33 +439,40 @@ export class AnalyticsManager {
               nextType = JOB_MAP_NODE_TYPES.TRANSFORM;
             }
           } else if (isJobDataLinkReturnType(link) && link.isJob === true) {
+            // Create missing job node here if job is undefined
             data = link.jobData;
-            const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+            const nodeId = `${data?.id ?? nextLinkId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
             previousNodeId = nodeId;
 
-            result.elements.unshift({
-              data: {
-                id: nodeId,
-                label: data.id,
-                type: JOB_MAP_NODE_TYPES.ANALYTICS,
-                analysisType: getAnalysisType(data?.analysis),
-              },
-            });
+            result.elements.unshift(
+              data === undefined
+                ? this.getMissingJobNode(nextLinkId)
+                : {
+                    data: {
+                      id: nodeId,
+                      label: data.id,
+                      type: JOB_MAP_NODE_TYPES.ANALYTICS,
+                      analysisType: getAnalysisType(data?.analysis),
+                    },
+                  }
+            );
             result.details[nodeId] = data;
             nextLinkId = data?.source?.index[0];
             nextType = JOB_MAP_NODE_TYPES.INDEX;
 
-            // Get trained model for analytics job and create model node
-            ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
-              data.id,
-              data.create_time
-            ));
-            if (isAnalyticsMapNodeElement(modelElement)) {
-              modelElements.push(modelElement);
-              result.details[modelElement.data.id] = modelDetails;
-            }
-            if (isAnalyticsMapEdgeElement(edgeElement)) {
-              modelElements.push(edgeElement);
+            if (data) {
+              // Get trained model for analytics job and create model node
+              ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
+                data.id,
+                data.create_time
+              ));
+              if (isAnalyticsMapNodeElement(modelElement)) {
+                modelElements.push(modelElement);
+                result.details[modelElement.data.id] = modelDetails;
+              }
+              if (isAnalyticsMapEdgeElement(edgeElement)) {
+                modelElements.push(edgeElement);
+              }
             }
           } else if (isTransformLinkReturnType(link) && link.isTransform === true) {
             data = link.transformData;
@@ -527,6 +564,71 @@ export class AnalyticsManager {
     }
   }
 
+  /**
+   * Expanded wrapper of getAnalyticsMap, which also handles generic models that are not tied to an analytics job
+   * Retrieves info about model and ingest pipeline, index, and transforms associated with the model
+   * @param analyticsId
+   * @param modelId
+   */
+  public async extendModelsMap({
+    analyticsId,
+    modelId,
+  }: {
+    analyticsId?: string;
+    modelId?: string;
+  }): Promise<AnalyticsMapReturnType> {
+    const result: AnalyticsMapReturnType = {
+      elements: [],
+      details: {},
+      error: null,
+    };
+    try {
+      if (analyticsId && !modelId) {
+        return this.getAnalyticsMap({
+          analyticsId,
+          modelId,
+        } as GetAnalyticsJobIdArg);
+      }
+
+      await this.initData();
+
+      const modelNodeId = `${modelId}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
+      const model = modelId ? this.findTrainedModel(modelId) : undefined;
+
+      const isDFAModel = isPopulatedObject(model?.metadata, ['analytics_config']);
+      if (isDFAModel) {
+        return this.getAnalyticsMap({
+          analyticsId,
+          modelId,
+        } as GetAnalyticsModelIdArg);
+      }
+
+      if (modelId && model) {
+        const pipelinesAndIndicesResults =
+          await this._modelsProvider.getModelsPipelinesAndIndicesMap(modelId, {
+            withIndices: true,
+          });
+        // Adding information about the trained model
+        pipelinesAndIndicesResults.elements.push({
+          data: {
+            id: modelNodeId,
+            label: modelId,
+            type: JOB_MAP_NODE_TYPES.TRAINED_MODEL,
+            isRoot: true,
+          },
+        });
+        pipelinesAndIndicesResults.details[modelNodeId] = model;
+
+        return pipelinesAndIndicesResults;
+      }
+    } catch (error) {
+      result.error = error.message || 'An error occurred fetching map';
+      return result;
+    }
+
+    return result;
+  }
+
   public async extendAnalyticsMapForAnalyticsJob({
     analyticsId,
     index,
@@ -541,7 +643,7 @@ export class AnalyticsManager {
       if (analyticsId !== undefined) {
         const jobData = this.findJob(analyticsId);
 
-        const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+        const currentJobNodeId = `${jobData?.id ?? analyticsId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
         rootIndex = Array.isArray(jobData?.dest?.index)
           ? jobData?.dest?.index[0]
           : jobData?.dest?.index;
@@ -550,7 +652,7 @@ export class AnalyticsManager {
         // Fetch trained model for incoming job id and add node and edge
         const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
           analyticsId,
-          jobData.create_time!
+          jobData?.create_time
         );
         if (isAnalyticsMapNodeElement(modelElement)) {
           result.elements.push(modelElement);

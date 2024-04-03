@@ -1,0 +1,16 @@
+CEIL
+
+Syntax
+Parameters
+n
+Numeric expression. If null, the function returns null.
+DescriptionRound a number up to the nearest integer.
+This is a noop for long (including unsigned) and integer.
+      For double this picks the closest double value to the integer
+      similar to Math.ceil.
+Supported types
+Example
+```esql
+ROW a=1.8
+| EVAL a=CEIL(a)
+```

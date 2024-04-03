@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import '../../../../common/mock/formatted_relative';
 
 import { NoteCards } from '.';
-import { TimelineStatus } from '../../../../../common/types/timeline/api';
+import { TimelineStatus } from '../../../../../common/api/timeline';
 import { TestProviders } from '../../../../common/mock';
 import type { TimelineResultNote } from '../../open_timeline/types';
 

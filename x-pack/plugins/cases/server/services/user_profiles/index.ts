@@ -14,7 +14,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SuggestUserProfilesRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
+import type { SuggestUserProfilesRequest } from '../../../common/types/api';
+import { SuggestUserProfilesRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
@@ -69,7 +71,9 @@ export class UserProfileService {
     });
   }
 
-  public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
+  public async suggest(
+    request: KibanaRequest<{}, {}, SuggestUserProfilesRequest>
+  ): Promise<UserProfile[]> {
     try {
       const params = decodeWithExcessOrThrow(SuggestUserProfilesRequestRt)(request.body);
 
@@ -147,9 +151,7 @@ export class UserProfileService {
   private static buildRequiredPrivileges(owners: string[], security: SecurityPluginStart) {
     const privileges: string[] = [];
     for (const owner of owners) {
-      for (const operation of [Operations.updateCase.name, Operations.getCase.name]) {
-        privileges.push(security.authz.actions.cases.get(owner, operation));
-      }
+      privileges.push(security.authz.actions.cases.get(owner, Operations.getCase.name));
     }
 
     return privileges;

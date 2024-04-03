@@ -35,7 +35,8 @@ const FIRST_BLOCK_LIST_NEW_DESCRIPTION = 'the first description';
 const SECOND_BLOCK_LIST_NEW_NAME = 'second blocklist entry';
 const SECOND_BLOCK_LIST_NEW_DESCRIPTION = 'the second description';
 
-describe('Block list with invalid indicators', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171783
+describe.skip('Block list with invalid indicators', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
     login();
@@ -56,7 +57,7 @@ describe('Block list with invalid indicators', () => {
   });
 });
 
-describe('Block list interactions', () => {
+describe('Block list interactions', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
@@ -67,7 +68,7 @@ describe('Block list interactions', () => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add to block list from the indicators table and from flyout', () => {
+  it.skip('should add to block list from the indicators table and from flyout', () => {
     // first indicator is a valid indicator for add to blocklist feature
     const firstIndicatorId = 'd86e656455f985357df3063dff6637f7f3b95bb27d1769a6b88c7adecaf7763f';
     openIndicatorsTableMoreActions(0);

@@ -51,6 +51,7 @@ export const packetbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 512194751,
+          total_data_set_size_in_bytes: 512194751,
           reserved_in_bytes: 0,
         },
       },
@@ -68,6 +69,7 @@ export const packetbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 584326147,
+          total_data_set_size_in_bytes: 584326147,
           reserved_in_bytes: 0,
         },
       },
@@ -129,6 +131,8 @@ export const packetbeatWithSomeErrors: PatternRollup = {
       indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'packetbeat-*',
+      sameFamily: undefined,
+      checkedAt: 1706526408000,
     },
     '.ds-packetbeat-8.6.1-2023.02.04-000001': {
       docsCount: 1628343,
@@ -138,6 +142,8 @@ export const packetbeatWithSomeErrors: PatternRollup = {
       indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'packetbeat-*',
+      sameFamily: 0,
+      checkedAt: 1706526408000,
     },
   },
   sizeInBytes: 1096520898,

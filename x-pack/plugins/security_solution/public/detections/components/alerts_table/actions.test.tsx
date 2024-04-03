@@ -33,7 +33,7 @@ import {
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
@@ -57,7 +57,7 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -265,8 +265,6 @@ describe('alert actions', () => {
     // jest carries state between mocked implementations when using
     // spyOn. So now we're doing all three of these.
     // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
     mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
 
@@ -453,9 +451,13 @@ describe('alert actions', () => {
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
+            savedSearchId: null,
+            savedSearch: null,
+            isDataProviderVisible: false,
+            rowHeight: 3,
+            sampleSize: 500,
           },
           to: '2018-11-05T19:03:25.937Z',
-          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
           ruleAuthor: ['elastic'],
         };

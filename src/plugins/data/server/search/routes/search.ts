@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
 
@@ -71,7 +72,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
 
           return res.ok({ body: response });
         } catch (err) {
-          return reportServerError(res, err);
+          return reportSearchError(res, err);
         }
       }
     );

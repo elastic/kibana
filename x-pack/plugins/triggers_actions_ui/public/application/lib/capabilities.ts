@@ -18,8 +18,8 @@ type Capabilities = Record<string, any>;
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
-export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
-  capabilities?.actions?.execute;
+export const hasExecuteActionsCapability = (capabilities: Capabilities, actionTypeId?: string) =>
+  actionTypeId === '.sentinelone' ? capabilities?.actions?.save : capabilities?.actions?.execute;
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 
@@ -29,8 +29,20 @@ export function hasAllPrivilege(
 ): boolean {
   return ruleType?.authorizedConsumers[ruleConsumer]?.all ?? false;
 }
+
+export function hasAllPrivilegeWithProducerCheck(
+  ruleConsumer: InitialRule['consumer'],
+  ruleType?: RuleType
+): boolean {
+  if (ruleConsumer === ruleType?.producer) {
+    return true;
+  }
+  return hasAllPrivilege(ruleConsumer, ruleType);
+}
+
 export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
   return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;
 }
+
 export const hasManageApiKeysCapability = (capabilities: Capabilities) =>
   capabilities?.management?.security?.api_keys;

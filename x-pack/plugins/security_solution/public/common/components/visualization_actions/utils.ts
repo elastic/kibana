@@ -6,10 +6,13 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+
 import { SecurityPageName } from '../../../../common/constants';
 import type { Request } from './types';
 
 export const VISUALIZATION_ACTIONS_BUTTON_CLASS = 'histogram-actions-trigger';
+export const FILTER_IN_LEGEND_ACTION = `filterIn`;
+export const FILTER_OUT_LEGEND_ACTION = `filterOut`;
 
 const pageFilterFieldMap: Record<string, string> = {
   [SecurityPageName.hosts]: 'host',

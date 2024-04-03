@@ -7,7 +7,7 @@
 
 import {
   CASE_DETAILS_URL,
-  CASE_METRICS_DETAILS_URL,
+  INTERNAL_CASE_METRICS_DETAILS_URL,
   CASE_COMMENTS_URL,
   CASE_USER_ACTIONS_URL,
   CASE_PUSH_URL,
@@ -21,6 +21,7 @@ import {
   INTERNAL_CASE_USERS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   CASE_FIND_ATTACHMENTS_URL,
+  INTERNAL_PUT_CUSTOM_FIELDS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -28,7 +29,7 @@ export const getCaseDetailsUrl = (id: string): string => {
 };
 
 export const getCaseDetailsMetricsUrl = (id: string): string => {
-  return CASE_METRICS_DETAILS_URL.replace('{case_id}', id);
+  return INTERNAL_CASE_METRICS_DETAILS_URL.replace('{case_id}', id);
 };
 
 export const getCaseCommentsUrl = (id: string): string => {
@@ -81,4 +82,11 @@ export const getCaseUsersUrl = (id: string): string => {
 
 export const getCasesDeleteFileAttachmentsUrl = (id: string): string => {
   return INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', id);
+};
+
+export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string): string => {
+  return INTERNAL_PUT_CUSTOM_FIELDS_URL.replace('{case_id}', caseId).replace(
+    '{custom_field_id}',
+    customFieldId
+  );
 };

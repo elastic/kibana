@@ -9,4 +9,4 @@
 import { CorePluginDeprecationsPlugin } from './plugin';
 
 export { config } from './config';
-export const plugin = () => new CorePluginDeprecationsPlugin();
+export const plugin = async () => new CorePluginDeprecationsPlugin();

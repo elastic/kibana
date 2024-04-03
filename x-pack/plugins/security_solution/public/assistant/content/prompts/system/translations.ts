@@ -41,7 +41,7 @@ export const FORMAT_OUTPUT_CORRECTLY = i18n.translate(
   'xpack.securitySolution.assistant.content.prompts.system.outputFormatting',
   {
     defaultMessage:
-      'If you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline, please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.',
+      'If you answer a question related to KQL, EQL, or ES|QL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.',
   }
 );
 

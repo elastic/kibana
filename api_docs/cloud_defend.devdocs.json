@@ -335,6 +335,360 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.Response",
+        "type": "Interface",
+        "tags": [],
+        "label": "Response",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.match",
+            "type": "Array",
+            "tags": [],
+            "label": "match",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.exclude",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.actions",
+            "type": "Array",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloudDefend",
+                "scope": "common",
+                "docId": "kibCloudDefendPluginApi",
+                "section": "def-common.ResponseAction",
+                "text": "ResponseAction"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"file\" | \"process\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Response.hasErrors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasErrors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.Selector",
+        "type": "Interface",
+        "tags": [],
+        "label": "Selector",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.operation",
+            "type": "Array",
+            "tags": [],
+            "label": "operation",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.containerImageFullName",
+            "type": "Array",
+            "tags": [],
+            "label": "containerImageFullName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.containerImageName",
+            "type": "Array",
+            "tags": [],
+            "label": "containerImageName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.containerImageTag",
+            "type": "Array",
+            "tags": [],
+            "label": "containerImageTag",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesClusterId",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesClusterId",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesClusterName",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesClusterName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesNamespace",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesNamespace",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesPodLabel",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesPodLabel",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.kubernetesPodName",
+            "type": "Array",
+            "tags": [],
+            "label": "kubernetesPodName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.targetFilePath",
+            "type": "Array",
+            "tags": [],
+            "label": "targetFilePath",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.ignoreVolumeFiles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreVolumeFiles",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.ignoreVolumeMounts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreVolumeMounts",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.processExecutable",
+            "type": "Array",
+            "tags": [],
+            "label": "processExecutable",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.processName",
+            "type": "Array",
+            "tags": [],
+            "label": "processName",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.sessionLeaderInteractive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sessionLeaderInteractive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"file\" | \"process\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-common.Selector.hasErrors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasErrors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -418,6 +772,53 @@
           "{ readonly policy_name?: string | undefined; readonly per_page: number; readonly page: number; readonly sort_field: \"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\"; readonly sort_order: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.ResponseAction",
+        "type": "Type",
+        "tags": [],
+        "label": "ResponseAction",
+        "description": [],
+        "signature": [
+          "\"log\" | \"alert\" | \"block\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.SelectorCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectorCondition",
+        "description": [],
+        "signature": [
+          "\"operation\" | \"containerImageFullName\" | \"containerImageName\" | \"containerImageTag\" | \"kubernetesClusterId\" | \"kubernetesClusterName\" | \"kubernetesNamespace\" | \"kubernetesPodLabel\" | \"kubernetesPodName\" | \"targetFilePath\" | \"ignoreVolumeFiles\" | \"ignoreVolumeMounts\" | \"processExecutable\" | \"processName\" | \"sessionLeaderInteractive\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-common.SelectorType",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectorType",
+        "description": [
+          "\ncloud_defend/control types"
+        ],
+        "signature": [
+          "\"file\" | \"process\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

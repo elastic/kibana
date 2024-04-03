@@ -408,15 +408,6 @@ const expectAssetsInstalled = ({
       { meta: true }
     );
     expect(resPackage.statusCode).equal(200);
-
-    const resUserSettings = await es.transport.request(
-      {
-        method: 'GET',
-        path: `/_component_template/${logsTemplateName}@custom`,
-      },
-      { meta: true }
-    );
-    expect(resUserSettings.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
     // These are installed from Fleet along with every package
@@ -437,61 +428,75 @@ const expectAssetsInstalled = ({
       id: 'sample_dashboard',
     });
     expect(resDashboard.id).equal('sample_dashboard');
+    expect(resDashboard.managed).be(true);
     expect(resDashboard.references.map((ref: any) => ref.id).includes('sample_tag')).equal(true);
     const resDashboard2 = await kibanaServer.savedObjects.get({
       type: 'dashboard',
       id: 'sample_dashboard2',
     });
     expect(resDashboard2.id).equal('sample_dashboard2');
+    expect(resDashboard2.managed).be(true);
     const resVis = await kibanaServer.savedObjects.get({
       type: 'visualization',
       id: 'sample_visualization',
     });
+
     expect(resVis.id).equal('sample_visualization');
+    expect(resVis.managed).be(true);
     const resSearch = await kibanaServer.savedObjects.get({
       type: 'search',
       id: 'sample_search',
     });
     expect(resSearch.id).equal('sample_search');
+    expect(resSearch.managed).be(true);
     const resLens = await kibanaServer.savedObjects.get({
       type: 'lens',
       id: 'sample_lens',
     });
+
     expect(resLens.id).equal('sample_lens');
+    expect(resLens.managed).be(true);
     const resMlModule = await kibanaServer.savedObjects.get({
       type: 'ml-module',
       id: 'sample_ml_module',
     });
     expect(resMlModule.id).equal('sample_ml_module');
+    expect(resMlModule.managed).be(true);
     const resSecurityRule = await kibanaServer.savedObjects.get({
       type: 'security-rule',
       id: 'sample_security_rule',
     });
     expect(resSecurityRule.id).equal('sample_security_rule');
+    expect(resSecurityRule.managed).be(true);
     const resOsqueryPackAsset = await kibanaServer.savedObjects.get({
       type: 'osquery-pack-asset',
       id: 'sample_osquery_pack_asset',
     });
     expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
+    expect(resOsqueryPackAsset.managed).be(true);
     const resOsquerySavedObject = await kibanaServer.savedObjects.get({
       type: 'osquery-saved-query',
       id: 'sample_osquery_saved_query',
     });
     expect(resOsquerySavedObject.id).equal('sample_osquery_saved_query');
+    expect(resOsquerySavedObject.managed).be(true);
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
     });
     expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
+    expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
     const resTag = await kibanaServer.savedObjects.get({
       type: 'tag',
       id: 'sample_tag',
     });
+    expect(resTag.managed).be(true);
     expect(resTag.id).equal('sample_tag');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
     });
+    expect(resIndexPattern.managed).be(true);
     expect(resIndexPattern.id).equal('test-*');
 
     let resInvalidTypeIndexPattern;
@@ -772,6 +777,7 @@ const expectAssetsInstalled = ({
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,
       install_source: 'registry',
+      latest_install_failed_attempts: [],
       install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       verification_status: 'unknown',
       verification_key_id: null,

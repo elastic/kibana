@@ -82,6 +82,8 @@ export const alertIndexWithAllResults: PatternRollup = {
       indexName: '.internal.alerts-security.alerts-default-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: '.alerts-security.alerts-default',
+      sameFamily: 0,
+      checkedAt: 1706526408000,
     },
   },
   sizeInBytes: 29717961631,

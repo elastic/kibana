@@ -1,20 +1,24 @@
 title: Create Slack connector request
-description: The Slack connector uses Slack Incoming Webhooks.
+description: The Slack connector uses an API method to send Slack messages.
 type: object
 required:
   - connector_type_id
   - name
   - secrets
 properties:
+  config:
+    $ref: 'config_properties_slack_api.yaml'
   connector_type_id:
     type: string
     description: The type of connector.
     enum:
       - .slack_api
-    example: .slack_api
+    examples:
+      - .slack_api
   name:
     type: string
     description: The display name for the connector.
-    example: my-connector
+    examples:
+      - my-connector
   secrets:
     $ref: 'secrets_properties_slack_api.yaml'

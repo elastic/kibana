@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
-import type { Embeddable } from '@kbn/lens-plugin/public';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyoutFooter,
@@ -18,21 +18,20 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-
+import { getPanelTitle } from '@kbn/presentation-publishing';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
-import { useMlFromLensKibanaContext } from '../context';
+import { useMlFromLensKibanaContext } from '../../common/context';
 
 interface Props {
-  embeddable: Embeddable;
+  embeddable: LensApi;
   onClose: () => void;
 }
 
 export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { data, lens },
   } = useMlFromLensKibanaContext();
@@ -68,11 +67,11 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
           <FormattedMessage
             id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
             defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
-            values={{ title: embeddable.getTitle() }}
+            values={{ title: getPanelTitle(embeddable) ?? '' }}
           />
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
+      <EuiFlyoutBody>
         {layerResults.map((layer, i) => (
           <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
         ))}

@@ -457,7 +457,13 @@ describe('suggestion helpers', () => {
   it('should pass passed in main palette if specified', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    const mainPalette: { type: 'legacyPalette'; value: PaletteOutput } = {
+      type: 'legacyPalette',
+      value: {
+        type: 'palette',
+        name: 'mock',
+      },
+    };
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(0),
       generateSuggestion(1),
@@ -490,7 +496,13 @@ describe('suggestion helpers', () => {
   it('should query active visualization for main palette if not specified', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
-    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    const mainPalette: { type: 'legacyPalette'; value: PaletteOutput } = {
+      type: 'legacyPalette',
+      value: {
+        type: 'palette',
+        name: 'mock',
+      },
+    };
     mockVisualization1.getMainPalette = jest.fn(() => mainPalette);
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(0),

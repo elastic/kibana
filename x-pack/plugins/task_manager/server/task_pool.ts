@@ -34,6 +34,7 @@ export enum TaskPoolRunResult {
 }
 
 const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana service';
+const MAX_RUN_ATTEMPTS = 3;
 
 /**
  * Runs tasks in batches, taking costs into account.
@@ -107,8 +108,27 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
-    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
+  public async run(tasks: TaskRunner[], attempt = 1): Promise<TaskPoolRunResult> {
+    // Note `this.availableWorkers` is a getter with side effects, so we just want
+    // to call it once for this bit of the code.
+    const availableWorkers = this.availableWorkers;
+    const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, availableWorkers);
+
+    if (attempt > MAX_RUN_ATTEMPTS) {
+      const stats = [
+        `availableWorkers: ${availableWorkers}`,
+        `tasksToRun: ${tasksToRun.length}`,
+        `leftOverTasks: ${leftOverTasks.length}`,
+        `maxWorkers: ${this.maxWorkers}`,
+        `occupiedWorkers: ${this.occupiedWorkers}`,
+        `workerLoad: ${this.workerLoad}`,
+      ].join(', ');
+      this.logger.warn(
+        `task pool run attempts exceeded ${MAX_RUN_ATTEMPTS}; assuming ran out of capacity; ${stats}`
+      );
+      return TaskPoolRunResult.RanOutOfCapacity;
+    }
+
     if (tasksToRun.length) {
       await Promise.all(
         tasksToRun
@@ -144,14 +164,14 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
-        return this.run(leftOverTasks);
+        return this.run(leftOverTasks, attempt + 1);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
     } else if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
-  };
+  }
 
   public cancelRunningTasks() {
     this.logger.debug('Cancelling running tasks.');

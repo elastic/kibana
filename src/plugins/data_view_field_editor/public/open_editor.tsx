@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
@@ -21,7 +22,7 @@ import type {
   FieldFormatsStart,
   DataViewField,
 } from './shared_imports';
-import { createKibanaReactContext, toMountPoint } from './shared_imports';
+import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
 /**
@@ -120,6 +121,7 @@ export const getFieldEditorOpener =
           esTypes: [],
           type: undefined,
           customLabel: undefined,
+          customDescription: undefined,
           count: undefined,
           spec: {
             parentName: undefined,
@@ -158,6 +160,7 @@ export const getFieldEditorOpener =
           field = {
             name: fieldNameToEdit!,
             customLabel: dataViewField.customLabel,
+            customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             ...dataView.getRuntimeField(fieldNameToEdit!)!,
@@ -168,6 +171,7 @@ export const getFieldEditorOpener =
             name: fieldNameToEdit!,
             type: (dataViewField?.esTypes ? dataViewField.esTypes[0] : 'keyword') as RuntimeType,
             customLabel: dataViewField.customLabel,
+            customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             parentName: dataViewField.spec.parentName,
@@ -196,7 +200,7 @@ export const getFieldEditorOpener =
               uiSettings={uiSettings}
             />
           </KibanaReactContextProvider>,
-          { theme$: core.theme.theme$ }
+          { theme: core.theme, i18n: core.i18n }
         ),
         {
           className: euiFlyoutClassname,
@@ -222,6 +226,8 @@ export const getFieldEditorOpener =
           },
           maskProps: {
             className: 'indexPatternFieldEditorMaskOverlay',
+            // // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+            style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
         }
       );

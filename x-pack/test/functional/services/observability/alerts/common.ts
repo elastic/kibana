@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -20,6 +20,7 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_ACTIONS_MENU_SELECTOR = 'alertsTableActionsMenu';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
@@ -51,6 +52,15 @@ export function ObservabilityAlertsCommonProvider({
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts/rules',
+      '',
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToRulesLogsPage = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/alerts/rules/logs',
       '',
       { ensureCurrentUrl: false }
     );
@@ -149,8 +159,8 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const openAlertsFlyout = retryOnStale.wrap(async () => {
-    await openActionsMenuForRow(0);
+  const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
+    await openActionsMenuForRow(index);
     await testSubjects.click('viewAlertDetailsFlyout');
     await retry.waitFor(
       'flyout open',
@@ -209,6 +219,7 @@ export function ObservabilityAlertsCommonProvider({
   const openActionsMenuForRow = retryOnStale.wrap(async (rowIndex: number) => {
     const actionsOverflowButton = await getActionsButtonByIndex(rowIndex);
     await actionsOverflowButton.click();
+    await testSubjects.existOrFail(ALERTS_TABLE_ACTIONS_MENU_SELECTOR);
   });
 
   const viewRuleDetailsButtonClick = async () => {
@@ -230,8 +241,8 @@ export function ObservabilityAlertsCommonProvider({
     }
 
     // wait for a confirmation toast (the css index is 1-based)
-    await toasts.getToastElement(1);
-    await toasts.dismissAllToasts();
+    await toasts.getElementByIndex(1);
+    await toasts.dismissAll();
   };
 
   const setWorkflowStatusFilter = retryOnStale.wrap(async (workflowStatus: WorkflowStatus) => {
@@ -336,6 +347,7 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
     getRuleStatValue,
     navigateToRulesPage,
+    navigateToRulesLogsPage,
     navigateToRuleDetailsByRuleId,
     navigateToAlertDetails,
   };

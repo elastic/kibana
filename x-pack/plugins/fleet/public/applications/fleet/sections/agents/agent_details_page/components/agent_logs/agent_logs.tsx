@@ -4,20 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import url from 'url';
-import { stringify } from 'querystring';
-
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { encode } from '@kbn/rison';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
   EuiFilterGroup,
   EuiPanel,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
@@ -28,7 +22,7 @@ import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
 import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { TimeRange } from '@kbn/es-query';
 import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
@@ -41,6 +35,7 @@ import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
+import { ViewLogsButton } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -117,8 +112,9 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, http } = useStartServices();
+    const { data, application, cloud } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
+    const isLogsUIAvailable = !cloud?.isServerlessEnabled;
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
@@ -214,28 +210,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           userQuery: state.query,
         }),
       [agent.id, state.datasets, state.logLevels, state.query]
-    );
-
-    // Generate URL to pass page state to Logs UI
-    const viewInLogsUrl = useMemo(
-      () =>
-        http.basePath.prepend(
-          url.format({
-            pathname: '/app/logs/stream',
-            search: stringify({
-              logPosition: encode({
-                start: state.start,
-                end: state.end,
-                streamLive: false,
-              }),
-              logFilter: encode({
-                expression: logStreamQuery,
-                kind: 'kuery',
-              }),
-            }),
-          })
-        ),
-      [http.basePath, state.start, state.end, logStreamQuery]
     );
 
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
@@ -341,13 +315,17 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               />
             </DatePickerFlexItem>
             <EuiFlexItem grow={false}>
-              <RedirectAppLinks application={application}>
-                <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
-                  <FormattedMessage
-                    id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                    defaultMessage="Open in Logs"
-                  />
-                </EuiButtonEmpty>
+              <RedirectAppLinks
+                coreStart={{
+                  application,
+                }}
+              >
+                <ViewLogsButton
+                  viewInLogs={isLogsUIAvailable}
+                  logStreamQuery={logStreamQuery}
+                  startTime={state.start}
+                  endTime={state.end}
+                />
               </RedirectAppLinks>
             </EuiFlexItem>
           </EuiFlexGroup>

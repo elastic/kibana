@@ -17,6 +17,7 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
+import { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import { GraphContentType } from '../types';
 
@@ -113,3 +114,13 @@ export interface GraphSearchQuery {
 export type GraphSearchIn = SearchIn<GraphContentType, {}>;
 
 export type GraphSearchOut = SearchResult<GraphSavedObject>;
+
+// ----------- CRUD TYPES --------------
+
+export type GraphCrudTypes = ContentManagementCrudTypes<
+  GraphContentType,
+  GraphSavedObjectAttributes,
+  CreateOptions,
+  UpdateOptions,
+  {}
+>;

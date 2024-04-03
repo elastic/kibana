@@ -187,9 +187,13 @@ describe('When calling package policy', () => {
     };
 
     beforeEach(() => {
-      [routeConfig, routeHandler] = routerMock.put.mock.calls.find(([{ path }]) =>
+      // @ts-ignore
+      const putMock = routerMock.versioned.put.mock;
+      // @ts-ignore
+      routeConfig = putMock.calls.find(([{ path }]) =>
         path.startsWith(PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
       )!;
+      routeHandler = putMock.results[0].value.addVersion.mock.calls[0][1];
     });
 
     beforeEach(() => {

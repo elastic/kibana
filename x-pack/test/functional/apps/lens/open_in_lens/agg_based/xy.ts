@@ -118,15 +118,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(1, 'histogram');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(2);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(2);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area');
-        expect(await layersSettings[1].getVisibleText()).to.be('Bar vertical');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(2);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area');
+        expect(await layerChartSwitches[1].getVisibleText()).to.be('Bar vertical');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -145,14 +145,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(1, 'histogram');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Bar vertical');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar vertical');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
         expect(yDimensionText1).to.be('Count');
@@ -167,7 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Date histogram');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -185,7 +185,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -209,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(line?.length).to.be(1);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(2);
@@ -232,13 +232,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area stacked');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area stacked');
       });
     });
 
@@ -252,13 +252,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Area percentage');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Area percentage');
       });
     });
 
@@ -271,13 +271,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings');
-        expect(layersSettings.length).to.be(1);
-        expect(await layersSettings[0].getVisibleText()).to.be('Bar horizontal');
+        const layerChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
+        expect(layerChartSwitches.length).to.be(1);
+        expect(await layerChartSwitches[0].getVisibleText()).to.be('Bar horizontal');
       });
     });
 
@@ -296,7 +296,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -324,7 +324,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
@@ -346,7 +346,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
@@ -356,6 +356,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(xDimensionText).to.be('machine.os.raw: Descending');
       });
       expect(data?.legend?.items.map((item) => item.name)).to.eql(expectedData);
+    });
+
+    it('should convert correctly percentiles with decimals', async () => {
+      await visEditor.clickBucket('Y-axis', 'metrics');
+      await visEditor.selectAggregation('Percentiles', 'metrics');
+      await visEditor.selectField('memory', 'metrics');
+      await visEditor.setPercentileValue('99.99', 6);
+      await visEditor.clickGo();
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await lens.getWorkspaceErrorCount()).to.eql(0);
     });
   });
 }

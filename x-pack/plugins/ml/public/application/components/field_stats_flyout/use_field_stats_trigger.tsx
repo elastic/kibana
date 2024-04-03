@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback } from 'react';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field } from '@kbn/ml-anomaly-utils';
 import { optionCss } from './eui_combo_box_with_field_stats';
 import { useFieldStatsFlyoutContext } from '.';
-import { FieldForStats, FieldStatsInfoButton } from './field_stats_info_button';
-
+import type { FieldForStats } from './field_stats_info_button';
+import { FieldStatsInfoButton } from './field_stats_info_button';
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
+
 export const useFieldStatsTrigger = () => {
-  const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
+  const { setIsFlyoutVisible, setFieldName, populatedFields } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), [setIsFlyoutVisible]);
 
@@ -29,6 +31,7 @@ export const useFieldStatsTrigger = () => {
     },
     [setFieldName, setIsFlyoutVisible]
   );
+
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;
@@ -36,13 +39,15 @@ export const useFieldStatsTrigger = () => {
         option.label
       ) : (
         <FieldStatsInfoButton
+          isEmpty={populatedFields && !populatedFields.has(field.id)}
           field={field}
           label={option.label}
           onButtonClick={handleFieldStatsButtonClick}
         />
       );
     },
-    [handleFieldStatsButtonClick]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [handleFieldStatsButtonClick, populatedFields?.size]
   );
   return {
     renderOption,
@@ -51,5 +56,6 @@ export const useFieldStatsTrigger = () => {
     handleFieldStatsButtonClick,
     closeFlyout,
     optionCss,
+    populatedFields,
   };
 };

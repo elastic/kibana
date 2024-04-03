@@ -8,12 +8,12 @@
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 import { prepareSearchParams } from './prepare_search_params';
-import { convertRulesFilterToKQL } from '../../../../../../../common/utils/kql';
 
-jest.mock('../../../../../../../common/utils/kql', () => ({
+jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
   convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),
 }));
 
@@ -61,6 +61,16 @@ describe('prepareSearchParams', () => {
         showCustomRules: false,
         showElasticRules: false,
         excludeRuleTypes: ['machine_learning'],
+      },
+    ],
+    [
+      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        excludeRuleTypes: ['esql'],
       },
     ],
     [

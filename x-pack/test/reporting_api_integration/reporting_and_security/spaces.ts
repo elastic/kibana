@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import * as Rx from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { filter, first, map, switchMap, tap, timeout } from 'rxjs/operators';
+import { filter, first, map, switchMap, tap, timeout } from 'rxjs';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const setSpaceConfig = async (spaceId: string, settings: object) => {
     return await kibanaServer.request({
-      path: `/s/${spaceId}/api/kibana/settings`,
+      path: `/s/${spaceId}/internal/kibana/settings`,
       method: 'POST',
       body: { changes: settings },
     });
@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should complete a job of PNG export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
-        `/s/non_default_space/api/reporting/generate/png`,
+        `/s/non_default_space/api/reporting/generate/pngV2`,
         {
           jobParams: `(browserTimezone:UTC,layout:(dimensions:(height:512,width:2402),id:png),objectType:dashboard,relativeUrl:'/s/non_default_space/app/dashboards#/view/3c9ee360-e7ee-11ea-a730-d58e9ea7581b?_g=(filters:!!(),refreshInterval:(pause:!!t,value:0),time:(from:!'2019-06-10T03:17:28.800Z!',to:!'2019-07-14T19:25:06.385Z!'))&_a=(description:!'!',filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),query:(language:kuery,query:!'!'),timeRestore:!!t,title:!'Ecom%20Dashboard%20Non%20Default%20Space!',viewMode:view)',title:'Ecom Dashboard Non Default Space')`,
         }

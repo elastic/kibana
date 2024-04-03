@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { getTransformProgress, TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
+import { getTransformProgress } from '../../../../common';
 
 export const discoverActionNameText = i18n.translate(
   'xpack.transform.transformList.discoverActionNameText',
@@ -32,7 +34,7 @@ export const isDiscoverActionDisabled = (
   const item = items[0];
 
   // Disable discover action if it's a batch transform and was never started
-  const stoppedTransform = item.stats.state === TRANSFORM_STATE.STOPPED;
+  const stoppedTransform = item.stats?.state === TRANSFORM_STATE.STOPPED;
   const transformProgress = getTransformProgress(item);
   const isBatchTransform = typeof item.config.sync === 'undefined';
   const transformNeverStarted =
@@ -51,7 +53,7 @@ export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ dataViewExists
   const item = items[0];
 
   // Disable discover action if it's a batch transform and was never started
-  const stoppedTransform = item.stats.state === TRANSFORM_STATE.STOPPED;
+  const stoppedTransform = item.stats?.state === TRANSFORM_STATE.STOPPED;
   const transformProgress = getTransformProgress(item);
   const isBatchTransform = typeof item.config.sync === 'undefined';
   const transformNeverStarted =

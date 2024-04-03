@@ -6,14 +6,14 @@
  */
 
 import { omit } from 'lodash';
-import { CaseStatuses } from '@kbn/cases-components';
-import { ConnectorTypes, CaseSeverity, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   CaseTransformedAttributesRt,
   getPartialCaseTransformedAttributesRt,
   OwnerRt,
 } from './case';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../runtime_types';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 
 describe('case types', () => {
   describe('getPartialCaseTransformedAttributesRt', () => {

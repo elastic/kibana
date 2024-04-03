@@ -6,13 +6,15 @@ properties:
     description: The new comment. It is required only when `type` is `user`.
     type: string
     maxLength: 30000
-    example: A new comment.
+    examples:
+      - A new comment.
   id:
     type: string
     description: >
       The identifier for the comment. To retrieve comment IDs, use the
       get comments API.
-    example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+    examples:
+      - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
   owner:
     $ref: 'owners.yaml'
   type: 
@@ -20,13 +22,15 @@ properties:
     description: The type of comment.
     enum:
       - user
-    example: user
+    examples:
+      - user
   version:
     description: >
       The current comment version. To retrieve version values, use the get
       comments API.
     type: string
-    example: Wzk1LDFd
+    examples:
+      - Wzk1LDFd
 required:
   - comment
   - id

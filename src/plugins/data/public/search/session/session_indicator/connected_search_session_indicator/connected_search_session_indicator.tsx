@@ -7,11 +7,11 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { debounce } from 'rxjs/operators';
+import { debounce } from 'rxjs';
 import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
@@ -150,7 +150,11 @@ export const createConnectedSearchSessionIndicator = ({
 
     if (!sessionService.isSessionStorageReady()) return null;
     return (
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <SearchSessionIndicator
           ref={searchSessionIndicatorRef}
           state={state}

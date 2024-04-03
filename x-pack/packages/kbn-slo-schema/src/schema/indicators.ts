@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString, dateRangeSchema } from './common';
+import { allOrAnyString, dateRangeSchema, querySchema } from './common';
 
 const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = t.type({
@@ -21,7 +21,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -38,7 +38,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -46,43 +46,200 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
 const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    filter: t.string,
-    good: t.string,
-    total: t.string,
-    timestampField: t.string,
-  }),
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      good: querySchema,
+      total: querySchema,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: querySchema,
+    }),
+  ]),
 });
 
-const metricCustomValidAggregations = t.keyof({
-  sum: true,
+const timesliceMetricComparatorMapping = {
+  GT: '>',
+  GTE: '>=',
+  LT: '<',
+  LTE: '<=',
+};
+
+const timesliceMetricComparator = t.keyof(timesliceMetricComparatorMapping);
+
+const timesliceMetricBasicMetricWithField = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.keyof({
+      avg: true,
+      max: true,
+      min: true,
+      sum: true,
+      cardinality: true,
+      last_value: true,
+      std_deviation: true,
+    }),
+    field: t.string,
+  }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
+const timesliceMetricDocCountMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('doc_count'),
+  }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
+const timesliceMetricPercentileMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('percentile'),
+    field: t.string,
+    percentile: t.number,
+  }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
+const timesliceMetricMetricDef = t.union([
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricPercentileMetric,
+]);
+
+const timesliceMetricDef = t.type({
+  metrics: t.array(timesliceMetricMetricDef),
+  equation: t.string,
+  threshold: t.number,
+  comparator: timesliceMetricComparator,
 });
+const timesliceMetricIndicatorTypeSchema = t.literal('sli.metric.timeslice');
+const timesliceMetricIndicatorSchema = t.type({
+  type: timesliceMetricIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      metric: timesliceMetricDef,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: querySchema,
+    }),
+  ]),
+});
+
+const metricCustomDocCountMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('doc_count'),
+  }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
+const metricCustomBasicMetric = t.intersection([
+  t.type({
+    name: t.string,
+    aggregation: t.literal('sum'),
+    field: t.string,
+  }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
 const metricCustomMetricDef = t.type({
-  metrics: t.array(
-    t.intersection([
-      t.type({
-        name: t.string,
-        aggregation: metricCustomValidAggregations,
-        field: t.string,
-      }),
-      t.partial({
-        filter: t.string,
-      }),
-    ])
-  ),
+  metrics: t.array(t.union([metricCustomBasicMetric, metricCustomDocCountMetric])),
   equation: t.string,
 });
 const metricCustomIndicatorTypeSchema = t.literal('sli.metric.custom');
 const metricCustomIndicatorSchema = t.type({
   type: metricCustomIndicatorTypeSchema,
-  params: t.type({
-    index: t.string,
-    filter: t.string,
-    good: metricCustomMetricDef,
-    total: metricCustomMetricDef,
-    timestampField: t.string,
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      good: metricCustomMetricDef,
+      total: metricCustomMetricDef,
+      timestampField: t.string,
+    }),
+    t.partial({
+      filter: querySchema,
+    }),
+  ]),
+});
+
+const rangeHistogramMetricType = t.literal('range');
+const rangeBasedHistogramMetricDef = t.intersection([
+  t.type({
+    field: t.string,
+    aggregation: rangeHistogramMetricType,
+    from: t.number,
+    to: t.number,
   }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
+const valueCountHistogramMetricType = t.literal('value_count');
+const valueCountBasedHistogramMetricDef = t.intersection([
+  t.type({
+    field: t.string,
+    aggregation: valueCountHistogramMetricType,
+  }),
+  t.partial({
+    filter: querySchema,
+  }),
+]);
+
+const histogramMetricDef = t.union([
+  valueCountBasedHistogramMetricDef,
+  rangeBasedHistogramMetricDef,
+]);
+
+const histogramIndicatorTypeSchema = t.literal('sli.histogram.custom');
+const histogramIndicatorSchema = t.type({
+  type: histogramIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      index: t.string,
+      timestampField: t.string,
+      good: histogramMetricDef,
+      total: histogramMetricDef,
+    }),
+    t.partial({
+      filter: querySchema,
+    }),
+  ]),
+});
+
+const syntheticsParamSchema = t.type({
+  value: allOrAnyString,
+  label: allOrAnyString,
+});
+const syntheticsAvailabilityIndicatorTypeSchema = t.literal('sli.synthetics.availability');
+const syntheticsAvailabilityIndicatorSchema = t.type({
+  type: syntheticsAvailabilityIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      monitorIds: t.array(syntheticsParamSchema),
+      index: t.string,
+    }),
+    t.partial({
+      tags: t.array(syntheticsParamSchema),
+      projects: t.array(syntheticsParamSchema),
+      filter: querySchema,
+    }),
+  ]),
 });
 
 const indicatorDataSchema = t.type({
@@ -94,8 +251,11 @@ const indicatorDataSchema = t.type({
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  syntheticsAvailabilityIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
+  timesliceMetricIndicatorTypeSchema,
+  histogramIndicatorTypeSchema,
 ]);
 
 // Validate that a string is a comma separated list of indicator types,
@@ -120,8 +280,11 @@ const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
 const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
+  timesliceMetricIndicatorSchema,
+  histogramIndicatorSchema,
 ]);
 
 export {
@@ -129,10 +292,23 @@ export {
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  syntheticsAvailabilityIndicatorSchema,
+  syntheticsAvailabilityIndicatorTypeSchema,
   kqlCustomIndicatorSchema,
   kqlCustomIndicatorTypeSchema,
-  metricCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,
+  metricCustomIndicatorTypeSchema,
+  metricCustomDocCountMetric,
+  metricCustomBasicMetric,
+  timesliceMetricComparatorMapping,
+  timesliceMetricIndicatorSchema,
+  timesliceMetricIndicatorTypeSchema,
+  timesliceMetricMetricDef,
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricDocCountMetric,
+  timesliceMetricPercentileMetric,
+  histogramIndicatorTypeSchema,
+  histogramIndicatorSchema,
   indicatorSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,

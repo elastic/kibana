@@ -9,16 +9,19 @@
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import {
-  type SavedObjectsMigrationConfigType,
-  type MigrationResult,
+import type {
+  SavedObjectsMigrationConfigType,
+  MigrationResult,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { VersionedTransformer } from '../document_migrator';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
@@ -32,7 +35,7 @@ export interface RunZeroDowntimeMigrationOpts {
   /** Logger to use for migration output */
   logger: Logger;
   /** The document migrator to use to convert the document */
-  documentMigrator: VersionedTransformer;
+  documentMigrator: IDocumentMigrator;
   /** The migration config to use for the migration */
   migrationConfig: SavedObjectsMigrationConfigType;
   /** docLinks contract to use to link to documentation */
@@ -43,6 +46,8 @@ export interface RunZeroDowntimeMigrationOpts {
   elasticsearchClient: ElasticsearchClient;
   /** The node roles of the Kibana instance */
   nodeRoles: NodeRoles;
+  /** Capabilities of the ES cluster we're using */
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 export const runZeroDowntimeMigration = async (

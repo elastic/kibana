@@ -24,8 +24,9 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
-    "@kbn/core-application-browser",
-    "@kbn/core-http-browser"
+    "@kbn/serverless",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/deeplinks-management",
   ],
   "exclude": [
     "target/**/*"

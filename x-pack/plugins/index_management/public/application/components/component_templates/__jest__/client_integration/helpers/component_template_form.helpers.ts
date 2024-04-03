@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { TestBed } from '@kbn/test-jest-helpers';
+import { DataRetention } from '../../../../../../../common';
 
 interface MappingField {
   name: string;
@@ -52,10 +53,27 @@ export const getFormActions = (testBed: TestBed) => {
       .simulate('click');
   };
 
-  const completeStepLogistics = async ({ name }: { name: string }) => {
+  const completeStepLogistics = async ({
+    name,
+    lifecycle,
+  }: {
+    name: string;
+    lifecycle: DataRetention;
+  }) => {
     const { form, component } = testBed;
     // Add name field
     form.setInputValue('nameField.input', name);
+
+    if (lifecycle && lifecycle.enabled) {
+      act(() => {
+        form.toggleEuiSwitch('dataRetentionToggle.input');
+      });
+      component.update();
+
+      act(() => {
+        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
+      });
+    }
 
     await act(async () => {
       clickNextButton();
@@ -164,6 +182,9 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.content'
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
+  | 'valueDataRetentionField'
+  | 'deprecatedTemplateCallout'
+  | 'dataRetentionToggle.input'
   | 'versionField'
   | 'aliasesEditor'
   | 'mappingsEditor'

@@ -25,14 +25,6 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
-export {
-  rawAlertInstance,
-  DateFromString,
-  wrappedStateRt,
-  ActionsCompletion,
-  ruleStateSchema,
-  ruleParamsSchema,
-} from '@kbn/alerting-state-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';
@@ -42,10 +34,12 @@ export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
 export * from './rrule_type';
-export * from './default_rule_aggregation';
 export * from './rule_tags_aggregation';
 export * from './iso_weekdays';
 export * from './saved_objects/rules/mappings';
+export * from './rule_circuit_breaker_error_message';
+export * from './maintenance_window_scoped_query_error_message';
+export * from './action_ref_prefix';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -56,6 +50,7 @@ export type {
   MaintenanceWindowCreateBody,
   MaintenanceWindowClientContext,
   MaintenanceWindowDeepLinkIds,
+  ScopedQueryAttributes,
 } from './maintenance_window';
 
 export {
@@ -95,6 +90,6 @@ export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
 export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
   `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
 
-export const ALERTS_FEATURE_ID = 'alerts';
+export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
 export const ENABLE_MAINTENANCE_WINDOWS = true;

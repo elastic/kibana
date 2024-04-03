@@ -8,12 +8,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { has, sortBy } from 'lodash/fp';
 
+import { getAggregatedAnomaliesQuery } from '../../../../entity_analytics/components/entity_analytics_anomalies/query';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { anomaliesSearch } from '../api/anomalies_search';
-import { getAggregatedAnomaliesQuery } from '../../../../overview/components/entity_analytics/anomalies/query';
 import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';
@@ -125,7 +125,7 @@ function formatResultData(
 ): AnomaliesCount[] {
   const unsortedAnomalies: AnomaliesCount[] = anomaliesJobs.map((job) => {
     const bucket = buckets.find(({ key }) => key === job?.id);
-    const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
+    const hasUserName = has("entity.hits.hits[0].fields['user.name']", bucket);
 
     return {
       name: job?.customSettings?.security_app_display_name ?? job.id,

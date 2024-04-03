@@ -1,11 +1,10 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "exclude": [
-    "cypress.config.ts",
-    "target/**/*",
+    "target/**/*"
   ],
   "include": [
     // add all the folders contains files to be compiled
@@ -14,10 +13,11 @@
     "scripts/**/*",
     "scripts/**/**.json",
     "server/**/*",
-    "cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",
+    // Emotion theme typing
+    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -43,7 +43,6 @@
     "@kbn/utility-types",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/osquery-io-ts-types",
-    "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/discover-plugin",
     "@kbn/lens-plugin",
@@ -72,6 +71,10 @@
     "@kbn/licensing-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/io-ts-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/openapi-generator",
+    "@kbn/code-editor"
   ]
 }

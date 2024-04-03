@@ -6,49 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
-  CONTEXT_MENU_TRIGGER,
+  registerReactEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { Plugin, CoreSetup, CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddableFactoryDefinition,
 } from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoEmbeddableFactoryDefinition } from './todo';
 
-import {
-  MULTI_TASK_TODO_EMBEDDABLE,
-  MultiTaskTodoEmbeddableFactory,
-  MultiTaskTodoEmbeddableFactoryDefinition,
-} from './multi_task_todo';
-import {
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableListContainerFactoryDefinition,
-  SearchableListContainerFactory,
-} from './searchable_list_container';
 import {
   LIST_CONTAINER,
   ListContainerFactoryDefinition,
   ListContainerFactory,
 } from './list_container';
-import { createSampleData } from './create_sample_data';
-import { TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
-import {
-  TodoRefEmbeddableFactory,
-  TodoRefEmbeddableFactoryDefinition,
-} from './todo/todo_ref_embeddable_factory';
-import { createEditBookActionDefinition } from './book/edit_book_action';
-import { BOOK_EMBEDDABLE } from './book/book_embeddable';
-import {
-  BookEmbeddableFactory,
-  BookEmbeddableFactoryDefinition,
-} from './book/book_embeddable_factory';
-import { createAddBookToLibraryActionDefinition } from './book/add_book_to_library_action';
-import { createUnlinkBookFromLibraryActionDefinition } from './book/unlink_book_from_library_action';
+
 import {
   SIMPLE_EMBEDDABLE,
   SimpleEmbeddableFactory,
@@ -59,6 +39,12 @@ import {
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
 } from './filter_debugger';
+import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
+import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
+import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
+import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -66,18 +52,17 @@ export interface EmbeddableExamplesSetupDependencies {
 }
 
 export interface EmbeddableExamplesStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 interface ExampleEmbeddableFactories {
   getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;
-  getMultiTaskTodoEmbeddableFactory: () => MultiTaskTodoEmbeddableFactory;
-  getSearchableListContainerEmbeddableFactory: () => SearchableListContainerFactory;
   getListContainerEmbeddableFactory: () => ListContainerFactory;
-  getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
-  getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
-  getBookEmbeddableFactory: () => BookEmbeddableFactory;
   getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
   getFilterDebuggerEmbeddableFactory: () => FilterDebuggerEmbeddableFactory;
 }
@@ -114,20 +99,6 @@ export class EmbeddableExamplesPlugin
         new SimpleEmbeddableFactoryDefinition()
       );
 
-    this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        MULTI_TASK_TODO_EMBEDDABLE,
-        new MultiTaskTodoEmbeddableFactoryDefinition()
-      );
-
-    this.exampleEmbeddableFactories.getSearchableListContainerEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        SEARCHABLE_LIST_CONTAINER,
-        new SearchableListContainerFactoryDefinition(async () => ({
-          embeddableServices: (await core.getStartServices())[1].embeddable,
-        }))
-      );
-
     this.exampleEmbeddableFactories.getListContainerEmbeddableFactory =
       deps.embeddable.registerEmbeddableFactory(
         LIST_CONTAINER,
@@ -136,62 +107,43 @@ export class EmbeddableExamplesPlugin
         }))
       );
 
-    this.exampleEmbeddableFactories.getTodoEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        TODO_EMBEDDABLE,
-        new TodoEmbeddableFactoryDefinition(async () => ({
-          openModal: (await core.getStartServices())[0].overlays.openModal,
-        }))
-      );
-
-    this.exampleEmbeddableFactories.getTodoRefEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        TODO_REF_EMBEDDABLE,
-        new TodoRefEmbeddableFactoryDefinition(async () => ({
-          savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-          getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
-        }))
-      );
-    this.exampleEmbeddableFactories.getBookEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        BOOK_EMBEDDABLE,
-        new BookEmbeddableFactoryDefinition(async () => ({
-          getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
-          openModal: (await core.getStartServices())[0].overlays.openModal,
-          savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-          overlays: (await core.getStartServices())[0].overlays,
-        }))
-      );
-
     this.exampleEmbeddableFactories.getFilterDebuggerEmbeddableFactory =
       deps.embeddable.registerEmbeddableFactory(
         FILTER_DEBUGGER_EMBEDDABLE,
         new FilterDebuggerEmbeddableFactoryDefinition()
       );
-
-    const editBookAction = createEditBookActionDefinition(async () => ({
-      getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
-      openModal: (await core.getStartServices())[0].overlays.openModal,
-      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-    }));
-    deps.uiActions.registerAction(editBookAction);
-    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
-
-    const addBookToLibraryAction = createAddBookToLibraryActionDefinition();
-    deps.uiActions.registerAction(addBookToLibraryAction);
-    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
-
-    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryActionDefinition();
-    deps.uiActions.registerAction(unlinkBookFromLibraryAction);
-    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
   }
 
   public start(
     core: CoreStart,
     deps: EmbeddableExamplesStartDependencies
   ): EmbeddableExamplesStart {
+    registerCreateFieldListAction(deps.uiActions);
+    registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
+      const { getFieldListFactory } = await import(
+        './react_embeddables/field_list/field_list_react_embeddable'
+      );
+      return getFieldListFactory(core, deps);
+    });
+
+    registerCreateEuiMarkdownAction(deps.uiActions);
+    registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
+      const { markdownEmbeddableFactory } = await import(
+        './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
+      );
+      return markdownEmbeddableFactory;
+    });
+
+    registerAddSearchPanelAction(deps.uiActions);
+    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_ID, async () => {
+      const { getSearchEmbeddableFactory } = await import(
+        './react_embeddables/search/search_react_embeddable'
+      );
+      return getSearchEmbeddableFactory(deps);
+    });
+
     return {
-      createSampleData: () => createSampleData(core.savedObjects.client),
+      createSampleData: async () => {},
       factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
     };
   }

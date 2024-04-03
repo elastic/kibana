@@ -7,9 +7,9 @@
  */
 
 import { merge } from 'lodash';
-import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
@@ -124,6 +124,33 @@ describe('SQL search strategy', () => {
           signal: undefined,
         });
       });
+
+      it('should delete when aborted', async () => {
+        mockSqlQuery.mockResolvedValueOnce({
+          ...mockSqlResponse,
+          body: {
+            ...mockSqlResponse.body,
+            is_running: true,
+          },
+        });
+        const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+
+        // Abort after an incomplete first response is returned
+        setTimeout(() => abortController.abort(), 100);
+
+        let err: any;
+        try {
+          await esSearch.search({ params: {} }, { abortSignal }, mockDeps).toPromise();
+        } catch (e) {
+          err = e;
+        }
+
+        expect(mockSqlQuery).toBeCalled();
+        expect(err).not.toBeUndefined();
+        expect(mockSqlDelete).toBeCalled();
+      });
     });
 
     // skip until full search session support https://github.com/elastic/kibana/issues/127880
@@ -221,17 +248,17 @@ describe('SQL search strategy', () => {
       };
       const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSqlQuery).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(indexNotFoundException);
+      expect(err?.errBody).toEqual(indexNotFoundException);
     });
 
     it('throws normalized error if Error is thrown', async () => {
@@ -245,14 +272,14 @@ describe('SQL search strategy', () => {
       };
       const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSqlQuery).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(undefined);
@@ -266,7 +293,9 @@ describe('SQL search strategy', () => {
       );
 
       const esSearch = await sqlSearchStrategyProvider(mockSearchConfig, mockLogger);
-      await esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise();
+      esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps);
+      // await next tick. esSearch.search will not resolve until `is_running: false`
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(mockSqlClearCursor).not.toHaveBeenCalled();
     });

@@ -7,8 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { V8ProfilerExamplesPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { V8ProfilerExamplesPlugin } = await import('./plugin');
   return new V8ProfilerExamplesPlugin(initializerContext);
 }

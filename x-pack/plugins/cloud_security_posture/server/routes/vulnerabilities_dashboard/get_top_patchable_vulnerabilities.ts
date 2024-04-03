@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AggFieldBucket, PatchableVulnerabilityStat } from '../../../common/types';
+import { AggFieldBucket, PatchableVulnerabilityStat } from '../../../common/types_old';
 import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface VulnerabilityBucket {
@@ -26,9 +26,19 @@ export interface PatchableVulnerabilitiesQueryResult {
   };
 }
 
-const getPatchableVulnerabilitiesQuery = (query: QueryDslQueryContainer): SearchRequest => ({
+const getPatchableVulnerabilitiesQuery = (): SearchRequest => ({
   size: 0,
-  query,
+  query: {
+    bool: {
+      filter: [
+        {
+          exists: {
+            field: 'package.fixed_version',
+          },
+        },
+      ],
+    },
+  },
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   aggs: {
     patchable_vulnerabilities: {
@@ -64,24 +74,10 @@ const getPatchableVulnerabilitiesQuery = (query: QueryDslQueryContainer): Search
 });
 
 export const getTopPatchableVulnerabilities = async (
-  esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  esClient: ElasticsearchClient
 ): Promise<PatchableVulnerabilityStat[]> => {
   const queryResult = await esClient.search<unknown, PatchableVulnerabilitiesQueryResult>(
-    getPatchableVulnerabilitiesQuery({
-      ...query,
-      bool: {
-        ...query.bool,
-        filter: [
-          ...(query.bool?.filter as QueryDslQueryContainer[]),
-          {
-            exists: {
-              field: 'package.fixed_version',
-            },
-          },
-        ],
-      },
-    })
+    getPatchableVulnerabilitiesQuery()
   );
   if (!queryResult?.aggregations?.patchable_vulnerabilities) return [];
 

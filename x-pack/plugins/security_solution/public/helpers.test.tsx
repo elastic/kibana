@@ -14,8 +14,8 @@ import {
   parseRoute,
   isSubPluginAvailable,
   getSubPluginRoutesByCapabilities,
-  RedirectRoute,
   getField,
+  isDashboardViewPath,
 } from './helpers';
 import type { StartedSubPlugins } from './types';
 import {
@@ -210,92 +210,6 @@ describe('#isSubPluginAvailable', () => {
   });
 });
 
-describe('RedirectRoute', () => {
-  it('RedirectRoute should redirect to overview page when siem and case privileges are all', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: true, crud: true },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem and case privileges are read', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: readCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem and case privileges are off', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: noCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is all', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to overview page when siem privilege is read and case privilege is read', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: true, crud: false },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/get_started"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is read', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: readCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/cases"
-      />
-    `);
-  });
-
-  it('RedirectRoute should redirect to cases page when siem privilege is none and case privilege is all', () => {
-    const mockCapabilities = {
-      [SERVER_APP_ID]: { show: false, crud: false },
-      [CASES_FEATURE_ID]: allCasesCapabilities(),
-    } as unknown as Capabilities;
-    expect(shallow(<RedirectRoute capabilities={mockCapabilities} />)).toMatchInlineSnapshot(`
-      <Redirect
-        to="/cases"
-      />
-    `);
-  });
-});
-
 describe('public helpers getField', () => {
   it('should return the same value for signal.rule fields as for kibana.alert.rule fields', () => {
     const signalRuleName = getField(mockEcsDataWithAlert, 'signal.rule.name');
@@ -342,5 +256,25 @@ describe('public helpers getField', () => {
     const signalQuery = getField(mockAlertWithParameters, 'signal.rule.query');
     const aadQuery = getField(mockAlertWithParameters, `${ALERT_RULE_PARAMETERS}.query`);
     expect(signalQuery).toEqual(aadQuery);
+  });
+});
+
+describe('isDashboardViewPath', () => {
+  it('returns true for dashboard view path', () => {
+    expect(isDashboardViewPath('/dashboards/59c085c3-394d-49ab-a83a-56a63f38aa5f')).toEqual(true);
+  });
+
+  it('returns true for dashboard edit path', () => {
+    expect(isDashboardViewPath('/dashboards/59c085c3-394d-49ab-a83a-56a63f38aa5f/edit')).toEqual(
+      true
+    );
+  });
+
+  it('returns true for dashboard creation path', () => {
+    expect(isDashboardViewPath('/dashboards/create')).toEqual(true);
+  });
+
+  it('returns false for dashboard listing path', () => {
+    expect(isDashboardViewPath('/dashboards')).toEqual(false);
   });
 });

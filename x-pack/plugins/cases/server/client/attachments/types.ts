@@ -6,11 +6,11 @@
  */
 
 import type {
-  BulkCreateCommentRequest,
-  CommentPatchRequest,
-  CommentRequest,
-  FindCommentsQueryParams,
-} from '../../../common/api';
+  BulkCreateAttachmentsRequest,
+  AttachmentPatchRequest,
+  AttachmentRequest,
+  FindAttachmentsQueryParams,
+} from '../../../common/types/api';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -23,12 +23,12 @@ export interface AddArgs {
   /**
    * The attachment values.
    */
-  comment: CommentRequest;
+  comment: AttachmentRequest;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
-  attachments: BulkCreateCommentRequest;
+  attachments: BulkCreateAttachmentsRequest;
 }
 
 /**
@@ -80,7 +80,7 @@ export interface FindCommentsArgs {
   /**
    * Optional parameters for filtering the returned attachments
    */
-  findQueryParams?: FindCommentsQueryParams;
+  findQueryParams?: FindAttachmentsQueryParams;
 }
 
 /**
@@ -130,5 +130,5 @@ export interface UpdateArgs {
   /**
    * The full attachment request with the fields updated with appropriate values
    */
-  updateRequest: CommentPatchRequest;
+  updateRequest: AttachmentPatchRequest;
 }

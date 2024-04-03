@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiPopover,
@@ -21,12 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
-import {
-  RandomSampler,
-  RandomSamplerOption,
-  RANDOM_SAMPLER_OPTION,
-  RANDOM_SAMPLER_SELECT_OPTIONS,
-} from './random_sampler';
+import type { RandomSampler, RandomSamplerOption } from './random_sampler';
+import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_sampler';
 
 interface Props {
   randomSampler: RandomSampler;
@@ -118,6 +115,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
       id="aiopsSamplingOptions"
       button={
         <EuiButtonEmpty
+          data-test-subj="aiopsLogPatternAnalysisShowSamplingOptionsButton"
           onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
           iconSide="right"
           iconType="arrowDown"

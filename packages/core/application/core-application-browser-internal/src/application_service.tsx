@@ -8,16 +8,16 @@
 
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   App,
   AppDeepLink,
@@ -29,7 +29,7 @@ import type {
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
-import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
@@ -46,7 +46,7 @@ import {
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 export interface SetupDeps {
-  http: HttpSetup;
+  http: InternalHttpSetup;
   analytics: AnalyticsServiceSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
@@ -54,7 +54,8 @@ export interface SetupDeps {
 }
 
 export interface StartDeps {
-  http: HttpStart;
+  http: InternalHttpStart;
+  analytics: AnalyticsServiceStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
@@ -112,6 +113,7 @@ export class ApplicationService {
   private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
+  private location$?: Observable<string>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
@@ -136,10 +138,10 @@ export class ApplicationService {
         }),
       });
 
-    const location$ = getLocationObservable(window.location, this.history);
+    this.location$ = getLocationObservable(window.location, this.history);
     registerAnalyticsContextProvider({
       analytics,
-      location$,
+      location$: this.location$,
     });
 
     this.navigate = (url, state, replace) => {
@@ -204,7 +206,6 @@ export class ApplicationService {
         this.apps.set(app.id, {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
@@ -224,6 +225,7 @@ export class ApplicationService {
   }
 
   public async start({
+    analytics,
     http,
     overlays,
     theme,
@@ -311,6 +313,7 @@ export class ApplicationService {
         shareReplay(1)
       ),
       capabilities,
+      currentLocation$: this.location$!.pipe(takeUntil(this.stop$)),
       currentAppId$: this.currentAppId$.pipe(
         filter((appId) => appId !== undefined),
         distinctUntilChanged(),
@@ -362,6 +365,7 @@ export class ApplicationService {
         }
         return (
           <AppRouter
+            analytics={analytics}
             history={this.history}
             theme$={theme.theme$}
             mounters={availableMounters}
@@ -463,10 +467,6 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
           changes.status ?? AppStatus.accessible,
           fields.status ?? AppStatus.accessible
         ),
-        navLinkStatus: Math.max(
-          changes.navLinkStatus ?? AppNavLinkStatus.default,
-          fields.navLinkStatus ?? AppNavLinkStatus.default
-        ),
         ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
@@ -484,7 +484,7 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }
   return deepLinks.map((deepLink) => ({
     ...deepLink,
-    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
+    visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
     deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
   }));
 };

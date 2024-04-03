@@ -45,6 +45,7 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
   async pipeRun<
     T extends ExtensionPoint['type'],
     D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
+    // @ts-expect-error ts upgrade v4.7.4
     P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
@@ -60,9 +61,6 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
     }
 
     for (const externalExtension of externalExtensions) {
-      const extensionRegistrationSource =
-        this.storage.getExtensionRegistrationSource(externalExtension);
-
       inputArgument = await externalExtension.callback({
         context: callbackContext,
         data: inputArgument as ExtensionPointCallbackDataArgument,
@@ -75,7 +73,11 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
         if (validationError) {
           this.logger.error(
             new ExtensionPointError(
-              `Extension point for ${externalExtension.type} returned data that failed validation: ${extensionRegistrationSource}`,
+              `Extension point for ${
+                externalExtension.type
+              } returned data that failed validation: ${
+                validationError.message
+              }\nCallback src: ${externalExtension.callback.toString().substring(0, 300)}...`,
               {
                 validationError,
               }

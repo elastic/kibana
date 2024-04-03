@@ -6,62 +6,152 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiMarkdownFormat, EuiText } from '@elastic/eui';
+import type { Conversation, Message } from '@kbn/elastic-assistant';
+import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
+import { AssistantAvatar } from '@kbn/elastic-assistant';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
+export interface ContentMessage extends Message {
+  content: string;
+}
+const transformMessageWithReplacements = ({
+  message,
+  content,
+  showAnonymizedValues,
+  replacements,
+}: {
+  message: Message;
+  content: string;
+  showAnonymizedValues: boolean;
+  replacements: Replacements;
+}): ContentMessage => {
+  return {
+    ...message,
+    content: showAnonymizedValues
+      ? content
+      : replaceAnonymizedValuesWithOriginalValues({
+          messageContent: content,
+          replacements,
+        }),
+  };
+};
+
 export const getComments = ({
   currentConversation,
-  lastCommentRef,
+  isFetchingResponse,
+  refetchCurrentConversation,
+  regenerateMessage,
   showAnonymizedValues,
 }: {
   currentConversation: Conversation;
-  lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+  isFetchingResponse: boolean;
+  refetchCurrentConversation: () => void;
+  regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
-}): EuiCommentProps[] =>
-  currentConversation.messages.map((message, index) => {
-    const isUser = message.role === 'user';
-    const replacements = currentConversation.replacements;
-    const messageContentWithReplacements =
-      replacements != null
-        ? Object.keys(replacements).reduce(
-            (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-            message.content
-          )
-        : message.content;
-    const transformedMessage = {
-      ...message,
-      content: messageContentWithReplacements,
-    };
+}): EuiCommentProps[] => {
+  const regenerateMessageOfConversation = () => {
+    regenerateMessage(currentConversation.id);
+  };
+  const connectorId = currentConversation.apiConfig?.connectorId ?? '';
 
-    return {
-      actions: <CommentActions message={transformedMessage} />,
-      children:
-        index !== currentConversation.messages.length - 1 ? (
-          <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>
-              {showAnonymizedValues ? message.content : transformedMessage.content}
-            </EuiMarkdownFormat>
-          </EuiText>
+  const extraLoadingComment = isFetchingResponse
+    ? [
+        {
+          username: i18n.ASSISTANT,
+          timelineAvatar: <EuiLoadingSpinner size="xl" />,
+          timestamp: '...',
+          children: (
+            <StreamComment
+              connectorId={connectorId}
+              content=""
+              refetchCurrentConversation={refetchCurrentConversation}
+              regenerateMessage={regenerateMessageOfConversation}
+              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              isFetching
+              // we never need to append to a code block in the loading comment, which is what this index is used for
+              index={999}
+            />
+          ),
+        },
+      ]
+    : [];
+
+  return [
+    ...currentConversation.messages.map((message, index) => {
+      const isLastComment = index === currentConversation.messages.length - 1;
+      const isUser = message.role === 'user';
+      const replacements = currentConversation.replacements;
+
+      const messageProps = {
+        timelineAvatar: isUser ? (
+          <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
         ) : (
-          <EuiText>
-            <EuiMarkdownFormat className={`message-${index}`}>
-              {showAnonymizedValues ? message.content : transformedMessage.content}
-            </EuiMarkdownFormat>
-            <span ref={lastCommentRef} />
-          </EuiText>
+          <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
         ),
-      timelineAvatar: isUser ? (
-        <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
-      ) : (
-        <EuiAvatar name="machine" size="l" color="subdued" iconType="logoSecurity" />
-      ),
-      timestamp: i18n.AT(
-        message.timestamp.length === 0 ? new Date().toLocaleString() : message.timestamp
-      ),
-      username: isUser ? i18n.YOU : i18n.ASSISTANT,
-    };
-  });
+        timestamp: i18n.AT(
+          message.timestamp.length === 0
+            ? new Date().toLocaleString()
+            : new Date(message.timestamp).toLocaleString()
+        ),
+        username: isUser ? i18n.YOU : i18n.ASSISTANT,
+        eventColor: message.isError ? 'danger' : undefined,
+      };
+
+      const isControlsEnabled = isLastComment && !isUser;
+
+      const transformMessage = (content: string) =>
+        transformMessageWithReplacements({
+          message,
+          content,
+          showAnonymizedValues,
+          replacements,
+        });
+
+      // message still needs to stream, no actions returned and replacements handled by streamer
+      if (!(message.content && message.content.length)) {
+        return {
+          ...messageProps,
+          children: (
+            <StreamComment
+              connectorId={connectorId}
+              index={index}
+              isControlsEnabled={isControlsEnabled}
+              isError={message.isError}
+              reader={message.reader}
+              refetchCurrentConversation={refetchCurrentConversation}
+              regenerateMessage={regenerateMessageOfConversation}
+              transformMessage={transformMessage}
+            />
+          ),
+        };
+      }
+
+      // transform message here so we can send correct message to CommentActions
+      const transformedMessage = transformMessage(message.content ?? '');
+
+      return {
+        ...messageProps,
+        actions: <CommentActions message={transformedMessage} />,
+        children: (
+          <StreamComment
+            connectorId={connectorId}
+            content={transformedMessage.content}
+            index={index}
+            isControlsEnabled={isControlsEnabled}
+            reader={transformedMessage.reader}
+            regenerateMessage={regenerateMessageOfConversation}
+            refetchCurrentConversation={refetchCurrentConversation}
+            transformMessage={transformMessage}
+          />
+        ),
+      };
+    }),
+    ...extraLoadingComment,
+  ];
+};

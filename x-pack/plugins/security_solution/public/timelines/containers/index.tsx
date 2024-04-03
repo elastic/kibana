@@ -12,37 +12,38 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import { DataLoadingState } from '@kbn/unified-data-table';
+import type {
+  TimelineEqlRequestOptionsInput,
+  TimelineEventsAllOptionsInput,
+} from '@kbn/timelines-plugin/common/api/search_strategy';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
 import type { RunTimeMappings } from '../../common/store/sourcerer/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../store/timeline';
+import { timelineActions } from '../store';
 import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
 import type { InspectResponse } from '../../types';
-import * as i18n from './translations';
 import type { KueryFilterQueryKind } from '../../../common/types/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import type {
   EqlOptionsSelected,
-  TimelineEqlRequestOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
 
@@ -54,7 +55,7 @@ export interface TimelineArgs {
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  updatedAt: number;
+  refreshedAt: number;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -64,12 +65,12 @@ type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => v
 type LoadPage = (newActivePage: number) => void;
 
 type TimelineRequest<T extends KueryFilterQueryKind> = T extends 'kuery'
-  ? TimelineEventsAllRequestOptions
+  ? TimelineEventsAllOptionsInput
   : T extends 'lucene'
-  ? TimelineEventsAllRequestOptions
+  ? TimelineEventsAllOptionsInput
   : T extends 'eql'
-  ? TimelineEqlRequestOptions
-  : TimelineEventsAllRequestOptions;
+  ? TimelineEqlRequestOptionsInput
+  : TimelineEventsAllOptionsInput;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllStrategyResponse
@@ -147,14 +148,14 @@ export const useTimelineEventsHandler = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-}: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
+}: UseTimelineEventsProps): [DataLoadingState, TimelineArgs, TimelineEventsSearchHandler] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
   const [activePage, setActivePage] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
@@ -176,7 +177,6 @@ export const useTimelineEventsHandler = ({
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
       setActivePage(newActivePage);
@@ -190,13 +190,6 @@ export const useTimelineEventsHandler = ({
     }
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
-
-  const setUpdated = useCallback(
-    (updatedAt: number) => {
-      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
-    },
-    [dispatch, id]
-  );
 
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
@@ -212,9 +205,8 @@ export const useTimelineEventsHandler = ({
     },
     events: [],
     loadPage: wrappedLoadPage,
-    updatedAt: 0,
+    refreshedAt: 0,
   });
-  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     async (
@@ -228,7 +220,11 @@ export const useTimelineEventsHandler = ({
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
-        setLoading(true);
+        if (activePage === 0) {
+          setLoading(DataLoadingState.loading);
+        } else {
+          setLoading(DataLoadingState.loadingMore);
+        }
         const { endTracking } = startTracking({ name: `${APP_UI_ID} timeline events search` });
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
@@ -240,9 +236,9 @@ export const useTimelineEventsHandler = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 endTracking('success');
-                setLoading(false);
+                setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
                     ...prevResponse,
@@ -250,17 +246,14 @@ export const useTimelineEventsHandler = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
-                    updatedAt: Date.now(),
+                    refreshedAt: Date.now(),
                   };
-                  setUpdated(newTimelineResponse.updatedAt);
                   if (id === TimelineId.active) {
-                    activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
                     if (request.language === 'eql') {
-                      activeTimeline.setEqlRequest(request as TimelineEqlRequestOptions);
+                      activeTimeline.setEqlRequest(request as TimelineEqlRequestOptionsInput);
                       activeTimeline.setEqlResponse(newTimelineResponse);
                     } else {
-                      // @ts-expect-error EqlSearchRequest.query is not compatible with QueryDslQueryContainer
                       activeTimeline.setRequest(request);
                       activeTimeline.setResponse(newTimelineResponse);
                     }
@@ -270,16 +263,11 @@ export const useTimelineEventsHandler = ({
                 });
 
                 searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                endTracking('invalid');
-                setLoading(false);
-                addWarning(i18n.ERROR_TIMELINE_EVENTS);
-                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               endTracking(abortCtrl.current.signal.aborted ? 'aborted' : 'error');
-              setLoading(false);
+              setLoading(DataLoadingState.loaded);
               data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
             },
@@ -293,7 +281,7 @@ export const useTimelineEventsHandler = ({
       ) {
         activeTimeline.setPageName(pageName);
         abortCtrl.current.abort();
-        setLoading(false);
+        setLoading(DataLoadingState.loaded);
 
         if (request.language === 'eql') {
           prevTimelineRequest.current = activeTimeline.getEqlRequest();
@@ -333,11 +321,10 @@ export const useTimelineEventsHandler = ({
       pageName,
       skip,
       id,
+      activePage,
       startTracking,
       data.search,
       dataViewId,
-      setUpdated,
-      addWarning,
       refetchGrid,
       wrappedLoadPage,
     ]
@@ -349,14 +336,14 @@ export const useTimelineEventsHandler = ({
     }
 
     setTimelineRequest((prevRequest) => {
-      const prevEqlRequest = prevRequest as TimelineEqlRequestOptions;
+      const prevEqlRequest = prevRequest as TimelineEqlRequestOptionsInput;
       const prevSearchParameters = {
         defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
-        querySize: prevRequest?.pagination.querySize ?? 0,
+        querySize: prevRequest?.pagination?.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as RunTimeMappings,
+        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
@@ -393,7 +380,7 @@ export const useTimelineEventsHandler = ({
         sort,
         ...timerange,
         ...(eqlOptions ? eqlOptions : {}),
-      };
+      } as const;
 
       if (activePage !== newActivePage) {
         setActivePage(newActivePage);
@@ -455,7 +442,7 @@ export const useTimelineEventsHandler = ({
         },
         events: [],
         loadPage: wrappedLoadPage,
-        updatedAt: 0,
+        refreshedAt: 0,
       });
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
@@ -478,8 +465,8 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
-  const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
+}: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
     eqlOptions,
@@ -501,5 +488,5 @@ export const useTimelineEvents = ({
     timelineSearchHandler();
   }, [timelineSearchHandler]);
 
-  return [loading, timelineResponse];
+  return [dataLoadingState, timelineResponse];
 };

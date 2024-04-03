@@ -8,11 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { SwimlaneConnectorType } from '../../../../common/api';
 import Fields from './case_fields';
 import * as i18n from './translations';
 import { swimlaneConnector as connector } from '../mock';
 import { MockFormWrapperComponent } from '../test_utils';
+import { SwimlaneConnectorType } from '../../../../common/types/domain';
 
 const fields = {
   caseId: '123',

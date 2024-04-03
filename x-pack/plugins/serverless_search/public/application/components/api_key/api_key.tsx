@@ -14,10 +14,9 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiSplitPanel,
   EuiStep,
   EuiText,
-  EuiThemeProvider,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,12 +25,13 @@ import { ApiKey } from '@kbn/security-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { MANAGEMENT_API_KEYS } from '../../routes';
+import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import { CreateApiKeyResponse } from './types';
+import './api_key.scss';
+import { CreateApiKeyResponse } from '../../hooks/api/use_create_api_key';
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
-  const { cloud, http, userProfile } = useKibanaServices();
+  const { http, user } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
@@ -49,11 +49,11 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         <CreateApiKeyFlyout
           onClose={() => setIsFlyoutOpen(false)}
           setApiKey={saveApiKey}
-          username={userProfile.user.full_name || userProfile.user.username}
+          username={user?.full_name || user?.username || ''}
         />
       )}
       {apiKey ? (
-        <EuiPanel color="success">
+        <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">
           <EuiStep
             css={css`
               .euiStep__content {
@@ -74,132 +74,95 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               })}
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable>{JSON.stringify(apiKey, undefined, 2)}</EuiCodeBlock>
+            <EuiCodeBlock isCopyable data-test-subj="api-key-created-key-codeblock">
+              {JSON.stringify(apiKey, undefined, 2)}
+            </EuiCodeBlock>
           </EuiStep>
         </EuiPanel>
       ) : (
         <EuiPanel>
-          <EuiStep
-            css={css`
-              .euiStep__content {
-                padding-bottom: 0;
-              }
-            `}
-            status="incomplete"
-            headingElement="h3"
-            title={i18n.translate('xpack.serverlessSearch.apiKey.stepOneTitle', {
-              defaultMessage: 'Generate and store your API key',
-            })}
-            titleSize="xs"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.serverlessSearch.apiKey.stepOneDescription', {
-                defaultMessage: 'Unique identifier for authentication and authorization. ',
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.serverlessSearch.apiKey.panel.title', {
+                defaultMessage: 'Add an API Key',
               })}
-            </EuiText>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <span>
-                      <EuiButton
-                        iconType="plusInCircleFilled"
-                        size="s"
-                        fill
-                        onClick={() => setIsFlyoutOpen(true)}
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.serverlessSearch.apiKey.newButtonLabel', {
-                            defaultMessage: 'New',
-                          })}
-                        </EuiText>
-                      </EuiButton>
-                    </span>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span>
-                      <EuiButton
-                        iconType="popout"
-                        size="s"
-                        href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
-                        target="_blank"
-                      >
-                        {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
-                          defaultMessage: 'Manage',
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            {i18n.translate('xpack.serverlessSearch.apiKey.panel.description', {
+              defaultMessage:
+                'Use an existing key, or create a new one and copy it somewhere safe.',
+            })}
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="m">
+                <EuiFlexItem>
+                  <span>
+                    <EuiButton
+                      iconType="plusInCircleFilled"
+                      size="s"
+                      fill
+                      onClick={() => setIsFlyoutOpen(true)}
+                      data-test-subj="new-api-key-button"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.serverlessSearch.apiKey.newButtonLabel', {
+                          defaultMessage: 'New',
                         })}
-                      </EuiButton>
-                    </span>
+                      </EuiText>
+                    </EuiButton>
+                  </span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>
+                    <EuiButton
+                      iconType="popout"
+                      size="s"
+                      href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                      target="_blank"
+                      data-test-subj="manage-api-keys-button"
+                    >
+                      {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
+                        defaultMessage: 'Manage',
+                      })}
+                    </EuiButton>
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {!!data?.apiKeys && (
+                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon size="s" type="iInCircle" color="subdued" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      <FormattedMessage
+                        id="xpack.serverlessSearch.apiKey.activeKeys"
+                        defaultMessage="You have {number} active keys."
+                        values={{
+                          number: (
+                            <EuiBadge
+                              color={data.apiKeys.length > 0 ? 'success' : 'warning'}
+                              data-test-subj="api-keys-count-badge"
+                            >
+                              {data.apiKeys.length}
+                            </EuiBadge>
+                          ),
+                        }}
+                      />
+                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {!!data?.apiKeys && (
-                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon size="s" type="iInCircle" color="subdued" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        <FormattedMessage
-                          id="xpack.serverlessSearch.apiKey.activeKeys"
-                          defaultMessage="You have {number} active keys."
-                          values={{
-                            number: (
-                              <EuiBadge color={data.apiKeys.length > 0 ? 'success' : 'warning'}>
-                                {data.apiKeys.length}
-                              </EuiBadge>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiStep>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       )}
-      <EuiSpacer />
-      <EuiSplitPanel.Outer>
-        <EuiSplitPanel.Inner>
-          <EuiStep
-            css={css`
-              .euiStep__content {
-                padding-bottom: 0;
-              }
-            `}
-            headingElement="h3"
-            step={2}
-            status="incomplete"
-            title={i18n.translate('xpack.serverlessSearch.apiKey.stepTwoTitle', {
-              defaultMessage: 'Store your unique Cloud ID',
-            })}
-            titleSize="xs"
-          >
-            <EuiText>
-              {i18n.translate('xpack.serverlessSearch.apiKey.stepTwoDescription', {
-                defaultMessage: 'Unique identifier for specific project. ',
-              })}
-            </EuiText>
-          </EuiStep>
-        </EuiSplitPanel.Inner>
-        <EuiThemeProvider colorMode="dark">
-          <EuiSplitPanel.Inner paddingSize="none">
-            <EuiCodeBlock
-              isCopyable
-              fontSize="m"
-              // Code block isn't respecting overflow in only this situation
-              css={css`
-                overflow-wrap: anywhere;
-              `}
-            >
-              {cloud.cloudId}
-            </EuiCodeBlock>
-          </EuiSplitPanel.Inner>
-        </EuiThemeProvider>
-      </EuiSplitPanel.Outer>
     </>
   );
 };

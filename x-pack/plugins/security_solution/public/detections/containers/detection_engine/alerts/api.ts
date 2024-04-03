@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -47,6 +48,7 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
   return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
+      version: '2023-10-31',
       method: 'POST',
       body: JSON.stringify(query),
       signal,
@@ -91,6 +93,7 @@ export const updateAlertStatusByQuery = async ({
   signal,
 }: UpdateAlertStatusByQueryProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+    version: '2023-10-31',
     method: 'POST',
     body: JSON.stringify({ conflicts: 'proceed', status, query }),
     signal,
@@ -109,8 +112,9 @@ export const updateAlertStatusByIds = async ({
   signalIds,
   status,
   signal,
-}: UpdateAlertStatusByIdsProps): Promise<estypes.BulkResponse> =>
+}: UpdateAlertStatusByIdsProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+    version: '2023-10-31',
     method: 'POST',
     body: JSON.stringify({ status, signal_ids: signalIds }),
     signal,
@@ -125,6 +129,7 @@ export const updateAlertStatusByIds = async ({
  */
 export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIndex> =>
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
+    version: '2023-10-31',
     method: 'GET',
     signal,
   });
@@ -138,6 +143,7 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIn
  */
 export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckSignalIndex> =>
   KibanaServices.get().http.fetch<CheckSignalIndex>(DETECTION_ENGINE_ALERTS_INDEX_URL, {
+    version: '2023-10-31',
     method: 'GET',
     signal,
   });
@@ -151,6 +157,7 @@ export const checkSignalIndex = async ({ signal }: BasicSignals): Promise<CheckS
  */
 export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege> =>
   KibanaServices.get().http.fetch<Privilege>(DETECTION_ENGINE_PRIVILEGES_URL, {
+    version: '2023-10-31',
     method: 'GET',
     signal,
   });
@@ -164,6 +171,7 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
  */
 export const createSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIndex> =>
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
+    version: '2023-10-31',
     method: 'POST',
     signal,
   });
@@ -181,15 +189,18 @@ export const createHostIsolation = async ({
   endpointId,
   comment = '',
   caseIds,
+  agentType,
 }: {
   endpointId: string;
   comment?: string;
   caseIds?: string[];
+  agentType: ResponseActionAgentType;
 }): Promise<ResponseActionApiResponse> =>
   isolateHost({
     endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
+    agent_type: agentType,
   });
 
 /**
@@ -205,15 +216,18 @@ export const createHostUnIsolation = async ({
   endpointId,
   comment = '',
   caseIds,
+  agentType,
 }: {
   endpointId: string;
   comment?: string;
   caseIds?: string[];
+  agentType: ResponseActionAgentType;
 }): Promise<ResponseActionApiResponse> =>
   unIsolateHost({
     endpoint_ids: [endpointId],
     comment,
     case_ids: caseIds,
+    agent_type: agentType,
   });
 
 /**

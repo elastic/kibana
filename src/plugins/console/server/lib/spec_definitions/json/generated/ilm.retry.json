@@ -1,11 +1,21 @@
 {
   "ilm.retry": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
-      "{indices}/_ilm/retry"
+      "{index}/_ilm/retry"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-retry-policy.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-retry-policy.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

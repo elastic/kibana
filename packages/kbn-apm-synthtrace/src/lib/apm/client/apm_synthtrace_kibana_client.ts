@@ -9,6 +9,7 @@
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
+import { kibanaHeaders } from '../../shared/client_headers';
 
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
@@ -44,13 +45,31 @@ export class ApmSynthtraceKibanaClient {
     this.logger.debug(`Installing APM package ${packageVersion}`);
 
     const url = `${this.target}/api/fleet/epm/packages/apm/${packageVersion}`;
-    const response = await pRetry(() => {
-      return fetch(url, {
-        method: 'POST',
-        headers: kibanaHeaders(),
-        body: '{"force":true}',
-      });
-    });
+    const response = await pRetry(
+      async () => {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: kibanaHeaders(),
+          body: '{"force":true}',
+        });
+
+        if (res.status >= 400) {
+          const errorJson = await res.json();
+          throw new Error(
+            `APM package installation returned ${res.status} status code\nError: ${errorJson}`
+          );
+        }
+        return res;
+      },
+      {
+        retries: 5,
+        onFailedAttempt: (error) => {
+          this.logger.debug(
+            `APM package installation failure. ${error.retriesLeft >= 1 ? 'Retrying' : 'Aborting'}`
+          );
+        },
+      }
+    );
 
     const responseJson = await response.json();
 
@@ -62,12 +81,4 @@ export class ApmSynthtraceKibanaClient {
 
     this.logger.info(`Installed APM package ${packageVersion}`);
   }
-}
-
-function kibanaHeaders() {
-  return {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'kbn-xsrf': 'kibana',
-  };
 }

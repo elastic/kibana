@@ -20,9 +20,5 @@ export const TelemetryContextProvider: FC<TelemetryProviderProps> = ({ children,
 };
 
 export const useTelemetryContext = () => {
-  const context = useContext(TelemetryContext);
-  if (!context) {
-    throw new Error('No TelemetryContext found.');
-  }
-  return context;
+  return useContext(TelemetryContext) ?? {};
 };

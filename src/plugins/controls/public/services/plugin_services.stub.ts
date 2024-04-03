@@ -7,25 +7,26 @@
  */
 
 import {
-  PluginServiceProviders,
   PluginServiceProvider,
+  PluginServiceProviders,
   PluginServices,
 } from '@kbn/presentation-util-plugin/public';
 
-import { ControlsServices } from './types';
 import { ControlsPluginStart } from '../types';
+import { ControlsServices } from './types';
 
-import { httpServiceFactory } from './http/http.stub';
-import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { controlsServiceFactory } from './controls/controls.story';
+import { coreServiceFactory } from './core/core.story';
 import { dataServiceFactory } from './data/data.story';
 import { dataViewsServiceFactory } from './data_views/data_views.story';
+import { embeddableServiceFactory } from './embeddable/embeddable.story';
+import { httpServiceFactory } from './http/http.stub';
 import { optionsListServiceFactory } from './options_list/options_list.story';
+import { overlaysServiceFactory } from './overlays/overlays.stub';
+import { registry as stubRegistry } from './plugin_services.story';
 import { settingsServiceFactory } from './settings/settings.story';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
-import { themeServiceFactory } from './theme/theme.story';
-import { registry as stubRegistry } from './plugin_services.story';
-import { embeddableServiceFactory } from './embeddable/embeddable.story';
+import { storageServiceFactory } from './storage/storage_service.stub';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
@@ -36,7 +37,8 @@ export const providers: PluginServiceProviders<ControlsServices> = {
   optionsList: new PluginServiceProvider(optionsListServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
-  theme: new PluginServiceProvider(themeServiceFactory),
+  core: new PluginServiceProvider(coreServiceFactory),
+  storage: new PluginServiceProvider(storageServiceFactory),
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };
 

@@ -8,10 +8,23 @@ exports[`KibanaPageTemplateInner isEmpty no pageHeader 1`] = `
 />
 `;
 
-exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
+exports[`KibanaPageTemplateInner isEmpty no pageHeader, isEmptyState, emptyPageBody 1`] = `
 <_EuiPageTemplate
   className="kbnPageTemplate"
   minHeight={0}
+  offset={0}
+>
+  <div>
+    custom empty page body
+  </div>
+</_EuiPageTemplate>
+`;
+
+exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
+<_EuiPageTemplate
+  className="kbnPageTemplate"
+  grow={false}
+  minHeight="calc(100vh - var(--euiFixedHeadersOffset, 0))"
   offset={0}
 >
   <_EuiPageHeader
@@ -66,7 +79,9 @@ exports[`KibanaPageTemplateInner page sidebar 1`] = `
   minHeight={0}
   offset={0}
 >
-  <EuiPageSidebar>
+  <EuiPageSidebar
+    sticky={true}
+  >
     Test
   </EuiPageSidebar>
 </_EuiPageTemplate>

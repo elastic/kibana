@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule } from '../../types';
+import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RawRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -18,16 +20,24 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../common';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  getAlertFromRaw,
-  scheduleTask,
   updateMeta,
   createNewAPIKeySet,
   migrateLegacyActions,
 } from '../lib';
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+import { RuleAttributes } from '../../data/rule/types';
+import {
+  transformRuleAttributesToRuleDomain,
+  transformRuleDomainToRule,
+} from '../../application/rule/transforms';
+import type { RuleParams } from '../../application/rule/types';
+import { ruleDomainSchema } from '../../application/rule/schemas';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -53,8 +63,12 @@ const getShouldScheduleTask = async (
   }
 };
 
-export const bulkEnableRules = async (context: RulesClientContext, options: BulkOptions) => {
+export const bulkEnableRules = async <Params extends RuleParams>(
+  context: RulesClientContext,
+  options: BulkOptions
+) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);
+  const actionsClient = await context.getActionsClient();
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'ENABLE' });
@@ -85,18 +99,32 @@ export const bulkEnableRules = async (context: RulesClientContext, options: Bulk
     taskManager: context.taskManager,
   });
 
-  const updatedRules = rules.map(({ id, attributes, references }) => {
-    return getAlertFromRaw(
-      context,
-      id,
-      attributes.alertTypeId as string,
-      attributes as RawRule,
-      references,
-      false
+  const enabledRules = rules.map(({ id, attributes, references }) => {
+    // TODO (http-versioning): alertTypeId should never be null, but we need to
+    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+    // when we are doing the bulk disable and this should fix itself
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
+
+    try {
+      ruleDomainSchema.validate(ruleDomain);
+    } catch (e) {
+      context.logger.warn(`Error validating bulk enabled rule domain object for id: ${id}, ${e}`);
+    }
+    return transformRuleDomainToRule(ruleDomain);
   });
 
-  return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
+  return { errors, rules: enabledRules, total, taskIdsFailedToBeEnabled };
 };
 
 const bulkEnableRulesWithOCC = async (
@@ -114,125 +142,163 @@ const bulkEnableRulesWithOCC = async (
       await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
         {
           filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
       )
   );
 
+  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  let scheduleValidationError = '';
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await pMap(response.saved_objects, async (rule) => {
-          try {
-            if (rule.attributes.actions.length) {
-              try {
-                await context.actionsAuthorization.ensureAuthorized('execute');
-              } catch (error) {
-                throw Error(`Rule not authorized for bulk enable - ${error.message}`);
-              }
-            }
-            if (rule.attributes.name) {
-              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-            }
-
-            const migratedActions = await migrateLegacyActions(context, {
-              ruleId: rule.id,
-              actions: rule.attributes.actions,
-              references: rule.references,
-              attributes: rule.attributes,
-            });
-
-            const updatedAttributes = updateMeta(context, {
-              ...rule.attributes,
-              ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, {
-                  id: rule.attributes.alertTypeId,
-                  ruleName: rule.attributes.name,
-                  username,
-                  shouldUpdateApiKey: true,
-                }))),
-              ...(migratedActions.hasLegacyActions
-                ? {
-                    actions: migratedActions.resultedActions,
-                    throttle: undefined,
-                    notifyWhen: undefined,
-                  }
-                : {}),
-              enabled: true,
-              updatedBy: username,
-              updatedAt: new Date().toISOString(),
-              executionStatus: {
-                status: 'pending',
-                lastDuration: 0,
-                lastExecutionDate: new Date().toISOString(),
-                error: null,
-                warning: null,
-              },
-            });
-
-            const shouldScheduleTask = await getShouldScheduleTask(
-              context,
-              rule.attributes.scheduledTaskId
-            );
-
-            let scheduledTaskId;
-            if (shouldScheduleTask) {
-              const scheduledTask = await scheduleTask(context, {
-                id: rule.id,
-                consumer: rule.attributes.consumer,
-                ruleTypeId: rule.attributes.alertTypeId,
-                schedule: rule.attributes.schedule as IntervalSchedule,
-                throwOnConflict: false,
-              });
-              scheduledTaskId = scheduledTask.id;
-            }
-
-            rulesToEnable.push({
-              ...rule,
-              attributes: {
-                ...updatedAttributes,
-                ...(scheduledTaskId ? { scheduledTaskId } : undefined),
-              },
-              ...(migratedActions.hasLegacyActions
-                ? { references: migratedActions.resultedReferences }
-                : {}),
-            });
-
-            context.auditLogger?.log(
-              ruleAuditEvent({
-                action: RuleAuditAction.ENABLE,
-                outcome: 'unknown',
-                savedObject: { type: 'alert', id: rule.id },
-              })
-            );
-          } catch (error) {
-            errors.push({
-              message: error.message,
-              rule: {
-                id: rule.id,
-                name: rule.attributes?.name,
-              },
-            });
-            context.auditLogger?.log(
-              ruleAuditEvent({
-                action: RuleAuditAction.ENABLE,
-                error,
-              })
-            );
-          }
-        });
+        rulesFinderRules.push(...response.saved_objects);
       }
       await rulesFinder.close();
+
+      const updatedInterval = rulesFinderRules
+        .filter((rule) => !rule.attributes.enabled)
+        .map((rule) => rule.attributes.schedule?.interval);
+
+      const validationPayload = await validateScheduleLimit({
+        context,
+        updatedInterval,
+      });
+
+      if (validationPayload) {
+        scheduleValidationError = getRuleCircuitBreakerErrorMessage({
+          interval: validationPayload.interval,
+          intervalAvailable: validationPayload.intervalAvailable,
+          action: 'bulkEnable',
+          rules: updatedInterval.length,
+        });
+      }
+
+      await pMap(rulesFinderRules, async (rule) => {
+        try {
+          if (scheduleValidationError) {
+            throw Error(scheduleValidationError);
+          }
+          if (rule.attributes.actions.length) {
+            try {
+              await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+            } catch (error) {
+              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+            }
+          }
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+
+          const migratedActions = await migrateLegacyActions(context, {
+            ruleId: rule.id,
+            actions: rule.attributes.actions,
+            references: rule.references,
+            attributes: rule.attributes,
+          });
+
+          const updatedAttributes = updateMeta(context, {
+            ...rule.attributes,
+            ...(!rule.attributes.apiKey &&
+              (await createNewAPIKeySet(context, {
+                id: rule.attributes.alertTypeId,
+                ruleName: rule.attributes.name,
+                username,
+                shouldUpdateApiKey: true,
+              }))),
+            ...(migratedActions.hasLegacyActions
+              ? {
+                  actions: migratedActions.resultedActions,
+                  throttle: undefined,
+                  notifyWhen: undefined,
+                }
+              : {}),
+            enabled: true,
+            updatedBy: username,
+            updatedAt: new Date().toISOString(),
+            executionStatus: {
+              status: 'pending',
+              lastDuration: 0,
+              lastExecutionDate: new Date().toISOString(),
+              error: null,
+              warning: null,
+            },
+            scheduledTaskId: rule.id,
+          });
+
+          const shouldScheduleTask = await getShouldScheduleTask(
+            context,
+            rule.attributes.scheduledTaskId
+          );
+
+          if (shouldScheduleTask) {
+            tasksToSchedule.push({
+              id: rule.id,
+              taskType: `alerting:${rule.attributes.alertTypeId}`,
+              schedule: rule.attributes.schedule,
+              params: {
+                alertId: rule.id,
+                spaceId: context.spaceId,
+                consumer: rule.attributes.consumer,
+              },
+              state: {
+                previousStartedAt: null,
+                alertTypeState: {},
+                alertInstances: {},
+              },
+              scope: ['alerting'],
+              enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
+            });
+          }
+
+          rulesToEnable.push({
+            ...rule,
+            attributes: updatedAttributes,
+            ...(migratedActions.hasLegacyActions
+              ? { references: migratedActions.resultedReferences }
+              : {}),
+          });
+
+          context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              outcome: 'unknown',
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+            })
+          );
+        } catch (error) {
+          errors.push({
+            message: error.message,
+            rule: {
+              id: rule.id,
+              name: rule.attributes?.name,
+            },
+          });
+          context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.ENABLE,
+              error,
+            })
+          );
+        }
+      });
     }
   );
+
+  if (tasksToSchedule.length > 0) {
+    await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
+      context.taskManager.bulkSchedule(tasksToSchedule)
+    );
+  }
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
@@ -262,7 +328,12 @@ const bulkEnableRulesWithOCC = async (
       });
     }
   });
-  return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
+  return {
+    errors,
+    // TODO: delete the casting when we do versioning of bulk disable api
+    rules: rules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
+    accListSpecificForBulkOperation: [taskIdsToEnable],
+  };
 };
 
 export const tryToEnableTasks = async ({

@@ -12,14 +12,14 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
 import { GetStateReturn } from './services/context_state';
 import { SortDirection } from '@kbn/data-plugin/public';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 
 describe('ContextAppContent test', () => {
@@ -72,6 +72,7 @@ describe('ContextAppContent test', () => {
       isLegacy: isLegacy ?? true,
       setAppState: () => {},
       addFilter: () => {},
+      interceptedWarnings: [],
     } as unknown as ContextAppContentProps;
 
     const component = mountWithIntl(
@@ -103,6 +104,13 @@ describe('ContextAppContent test', () => {
 
   it('should render discover grid correctly', async () => {
     const component = await mountComponent({ isLegacy: false });
-    expect(component.find(DiscoverGrid).length).toBe(1);
+    expect(component.find(UnifiedDataTable).length).toBe(1);
+    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
+  });
+
+  it('should not show display options button', async () => {
+    const component = await mountComponent({ isLegacy: false });
+    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'dataGridDisplaySelectorButton').exists()).toBe(false);
   });
 });

@@ -1,0 +1,3673 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data table columns Textbased languages grid columns returns columns in correct format when column customisation is provided 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <span>
+      test
+    </span>,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": true,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="message"
+      columnName="message"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "var_test",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": true,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
+exports[`Data table columns column tokens returns eui grid columns with tokens 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": false,
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableTimeColumnHeader)
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      dataViewField={
+        Object {
+          "aggregatable": true,
+          "displayName": "timestamp",
+          "filterable": true,
+          "name": "timestamp",
+          "scripted": false,
+          "sortable": true,
+          "type": "date",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "timestamp",
+    "id": "timestamp",
+    "initialWidth": 212,
+    "isSortable": true,
+    "schema": "datetime",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="extension"
+      columnName="extension"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+      showColumnTokens={true}
+    />,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="message"
+      columnName="message"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+      showColumnTokens={true}
+    />,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
+exports[`Data table columns column tokens returns eui grid columns with tokens for custom column types 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="extension"
+      columnName="extension"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+        }
+      }
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+      showColumnTokens={true}
+    />,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": false,
+    "schema": "numeric",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="message"
+      columnName="message"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "number",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+        }
+      }
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+      showColumnTokens={true}
+    />,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
+exports[`Data table columns getEuiGridColumns returns eui grid columns showing default columns 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": false,
+      "showMoveLeft": false,
+      "showMoveRight": false,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="extension"
+      columnName="extension"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": false,
+      "showMoveLeft": false,
+      "showMoveRight": false,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="message"
+      columnName="message"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
+exports[`Data table columns getEuiGridColumns returns eui grid columns with time column 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": false,
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableTimeColumnHeader)
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      dataViewField={
+        Object {
+          "aggregatable": true,
+          "displayName": "timestamp",
+          "filterable": true,
+          "name": "timestamp",
+          "scripted": false,
+          "sortable": true,
+          "type": "date",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "timestamp",
+    "id": "timestamp",
+    "initialWidth": 212,
+    "isSortable": true,
+    "schema": "datetime",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="extension"
+      columnName="extension"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="message"
+      columnName="message"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": false,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
+exports[`Data table columns getEuiGridColumns returns eui grid with in memory sorting 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": false,
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableTimeColumnHeader)
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      dataViewField={
+        Object {
+          "aggregatable": true,
+          "displayName": "timestamp",
+          "filterable": true,
+          "name": "timestamp",
+          "scripted": false,
+          "sortable": true,
+          "type": "date",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "timestamp",
+    "id": "timestamp",
+    "initialWidth": 212,
+    "isSortable": true,
+    "schema": "datetime",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="extension"
+      columnName="extension"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": true,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": <Memo(DataTableColumnHeader)
+      columnDisplayName="message"
+      columnName="message"
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      headerRowHeight={5}
+    />,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": true,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;

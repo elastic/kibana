@@ -14,12 +14,12 @@ import type {
   HostAggEsItem,
   HostsStrategyResponse,
   HostsQueries,
-  HostsRequestOptions,
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import {
+  RiskQueries,
   RiskScoreEntity,
   getHostRiskIndex,
   buildHostNamesFilter,
@@ -34,14 +34,14 @@ import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
-  buildDsl: (options: HostsRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildHostsQuery(options);
   },
   parse: async (
-    options: HostsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>,
     deps?: {
       esClient: IScopedClusterClient;
@@ -67,7 +67,13 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
     const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
     const enhancedEdges = deps?.spaceId
-      ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
+      ? await enhanceEdges(
+          edges,
+          hostNames,
+          deps.spaceId,
+          deps.esClient,
+          options.isNewRiskScoreModuleInstalled
+        )
       : edges;
 
     return {
@@ -88,9 +94,15 @@ async function enhanceEdges(
   edges: HostsEdges[],
   hostNames: string[],
   spaceId: string,
-  esClient: IScopedClusterClient
+  esClient: IScopedClusterClient,
+  isNewRiskScoreModuleInstalled: boolean
 ): Promise<HostsEdges[]> {
-  const hostRiskData = await getHostRiskData(esClient, spaceId, hostNames);
+  const hostRiskData = await getHostRiskData(
+    esClient,
+    spaceId,
+    hostNames,
+    isNewRiskScoreModuleInstalled
+  );
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
@@ -113,14 +125,16 @@ async function enhanceEdges(
 export async function getHostRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
-  hostNames: string[]
+  hostNames: string[],
+  isNewRiskScoreModuleInstalled: boolean
 ) {
   try {
     const hostRiskResponse = await esClient.asCurrentUser.search<HostRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getHostRiskIndex(spaceId)],
+        defaultIndex: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
         filterQuery: buildHostNamesFilter(hostNames),
         riskScoreEntity: RiskScoreEntity.host,
+        factoryQueryType: RiskQueries.hostsRiskScore,
       })
     );
     return hostRiskResponse;

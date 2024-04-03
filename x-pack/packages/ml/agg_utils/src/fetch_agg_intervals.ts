@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -23,6 +23,17 @@ const MAX_CHART_COLUMNS = 20;
 
 /**
  * Returns aggregation intervals for the supplied document fields.
+ *
+ * @param client - The Elasticsearch client.
+ * @param indexPattern - The index pattern to search.
+ * @param query - The query to filter documents.
+ * @param fields - An array of field definitions for which aggregation intervals are requested.
+ * @param samplerShardSize - The shard size parameter for sampling aggregations. A value less than 1 indicates no sampling.
+ * @param runtimeMappings - Optional runtime mappings to apply.
+ * @param abortSignal - Optional AbortSignal for canceling the request.
+ * @param randomSamplerProbability - Optional probability value for random sampling.
+ * @param randomSamplerSeed - Optional seed value for random sampling.
+ * @returns A promise that resolves to a map of aggregation intervals for the specified fields.
  */
 export const fetchAggIntervals = async (
   client: ElasticsearchClient,

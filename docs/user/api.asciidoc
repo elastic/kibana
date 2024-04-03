@@ -53,6 +53,8 @@ Calls to the API endpoints require different operations. To interact with the {k
 
 * *PUT* - Updates the existing information.
 
+* *PATCH* - Applies partial modifications to the existing information.
+
 * *DELETE* - Removes the information.
 
 [float]
@@ -90,20 +92,22 @@ curl -X POST \
 --------------------------------------------
 
 
-include::{kib-repo-dir}/api/features.asciidoc[]
-include::{kib-repo-dir}/api/spaces-management.asciidoc[]
-include::{kib-repo-dir}/api/role-management.asciidoc[]
-include::{kib-repo-dir}/api/session-management.asciidoc[]
-include::{kib-repo-dir}/api/saved-objects.asciidoc[]
-include::{kib-repo-dir}/api/data-views.asciidoc[]
-include::{kib-repo-dir}/api/index-patterns.asciidoc[]
-include::{kib-repo-dir}/api/alerting.asciidoc[]
-include::{kib-repo-dir}/api/actions-and-connectors.asciidoc[]
-include::{kib-repo-dir}/api/cases.asciidoc[]
-include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
-include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
-include::{kib-repo-dir}/api/machine-learning.asciidoc[]
-include::{kib-repo-dir}/api/osquery-manager.asciidoc[]
-include::{kib-repo-dir}/api/short-urls.asciidoc[]
-include::{kib-repo-dir}/api/task-manager/health.asciidoc[]
-include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]
+include::{kibana-root}/docs/api/features.asciidoc[]
+include::{kibana-root}/docs/api/spaces-management.asciidoc[]
+include::{kibana-root}/docs/api/role-management.asciidoc[]
+include::{kibana-root}/docs/api/session-management.asciidoc[]
+include::{kibana-root}/docs/api/saved-objects.asciidoc[]
+include::{kibana-root}/docs/api/data-views.asciidoc[]
+include::{kibana-root}/docs/api/index-patterns.asciidoc[]
+include::{kibana-root}/docs/api/alerting.asciidoc[]
+include::{kibana-root}/docs/api/actions-and-connectors.asciidoc[]
+include::{kibana-root}/docs/api/cases.asciidoc[]
+include::{kibana-root}/docs/api/dashboard-api.asciidoc[]
+include::{kibana-root}/docs/api/logstash-configuration-management.asciidoc[]
+include::{kibana-root}/docs/api/machine-learning.asciidoc[]
+include::{kibana-root}/docs/api/osquery-manager.asciidoc[]
+include::{kibana-root}/docs/api/short-urls.asciidoc[]
+include::{kibana-root}/docs/api/task-manager/health.asciidoc[]
+include::{kibana-root}/docs/api/upgrade-assistant.asciidoc[]
+include::{kibana-root}/docs/api/synthetics/synthetics-api.asciidoc[]
+include::{kibana-root}/docs/api/uptime-api.asciidoc[]

@@ -236,7 +236,7 @@ describe('Response actions history page', () => {
           return {
             id: `agent-id-${i}`,
             name: `Host-name-${i}`,
-            selected: [0, 1, 3, 5].includes(i) ? true : false,
+            selected: [0, 1, 3, 5].includes(i),
           };
         }),
         page: 0,
@@ -387,6 +387,59 @@ describe('Response actions history page', () => {
       // verify 5 rows that are expanded are the ones from before
       expect(expandedButtons).toEqual([0, 2, 3, 4, 5]);
     });
+
+    it('should read and set action type filter values using `types` URL params', () => {
+      const filterPrefix = 'types-filter';
+
+      reactTestingLibrary.act(() => {
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?types=automated,manual`);
+      });
+
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
+        if (option.getAttribute('aria-checked') === 'true') {
+          acc.push(option.textContent?.split('-')[0].trim() as string);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions.length).toEqual(2);
+      expect(selectedFilterOptions).toEqual([
+        'Triggered by rule. Checked option.',
+        'Triggered manually. Checked option.',
+      ]);
+      expect(history.location.search).toEqual('?types=automated,manual');
+    });
+
+    it('should read and set agent type filter values using `agentTypes` URL params', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
+      const filterPrefix = 'types-filter';
+      reactTestingLibrary.act(() => {
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?agentTypes=endpoint`);
+      });
+
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
+        if (option.getAttribute('aria-checked') === 'true') {
+          acc.push(option.textContent?.split('-')[0].trim() as string);
+        }
+        return acc;
+      }, []);
+
+      expect(selectedFilterOptions.length).toEqual(1);
+      expect(selectedFilterOptions).toEqual(['Elastic Defend. Checked option.']);
+      expect(history.location.search).toEqual('?agentTypes=endpoint');
+    });
   });
 
   describe('Set selected/set values to URL params', () => {
@@ -487,7 +540,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?endDate=now&startDate=now-15m');
     });
 
-    it('should set actionIds using `withOutputs` to URL params ', async () => {
+    it('should set actionIds to URL params using `withOutputs`', async () => {
       const allActionIds = mockUseGetEndpointActionList.data?.data.map((action) => action.id) ?? [];
       const actionIdsWithDetails = allActionIds
         .reduce<string[]>((acc, e, i) => {
@@ -513,6 +566,134 @@ describe('Response actions history page', () => {
 
       // verify 2 rows are expanded and are the ones from before
       expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);
+    });
+
+    it('should set selected action type to URL params using `types`', () => {
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        if (option.title.includes('Triggered')) {
+          userEvent.click(option);
+        }
+      });
+
+      expect(history.location.search).toEqual('?types=automated%2Cmanual');
+    });
+
+    it('should set selected agent type filter options to URL params using `agentTypes`', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        if (!option.title.includes('Triggered')) {
+          userEvent.click(option);
+        }
+      });
+
+      expect(history.location.search).toEqual('?agentTypes=endpoint%2Csentinel_one');
+    });
+  });
+
+  describe('Clear all selected options on a filter', () => {
+    it('should clear all selected options on `actions` filter', () => {
+      const filterPrefix = 'actions-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual(
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      clearAllButton.style.pointerEvents = 'all';
+      userEvent.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear all selected options on `hosts` filter', () => {
+      const filterPrefix = 'hosts-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual(
+        '?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2%2Cagent-id-3%2Cagent-id-4%2Cagent-id-5%2Cagent-id-6%2Cagent-id-7%2Cagent-id-8'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      clearAllButton.style.pointerEvents = 'all';
+      userEvent.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear all selected options on `statuses` filter', () => {
+      const filterPrefix = 'statuses-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      clearAllButton.style.pointerEvents = 'all';
+      userEvent.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual(
+        '?agentTypes=endpoint%2Csentinel_one&types=automated%2Cmanual'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      clearAllButton.style.pointerEvents = 'all';
+      userEvent.click(clearAllButton);
+      expect(history.location.search).toEqual('');
     });
   });
 });

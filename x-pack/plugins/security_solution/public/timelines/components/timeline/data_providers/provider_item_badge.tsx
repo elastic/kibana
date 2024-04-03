@@ -9,13 +9,13 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 
 import type { OnDataProviderEdited } from '../events';
@@ -24,7 +24,7 @@ import { ProviderItemActions } from './provider_item_actions';
 import type { DataProvidersAnd, QueryOperator } from './data_provider';
 import { DataProviderType } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;

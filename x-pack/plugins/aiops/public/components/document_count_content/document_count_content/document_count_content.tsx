@@ -8,16 +8,21 @@
 import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { DocumentCountChart, type BrushSelectionUpdateHandler } from '@kbn/aiops-components';
 
-import { DocumentCountStats } from '../../../get_document_stats';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import type { DocumentCountStats } from '../../../get_document_stats';
 
-import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
 
 export interface DocumentCountContentProps {
-  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
+  brushSelectionUpdateHandler: BrushSelectionUpdateHandler;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
   documentCountStatsSplitLabel?: string;
@@ -29,6 +34,13 @@ export interface DocumentCountContentProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  windowParameters?: WindowParameters;
+  incomingInitialAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
+  barStyleAccessor?: BarStyleAccessor;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -42,7 +54,12 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   initialAnalysisStart,
   barColorOverride,
   barHighlightColorOverride,
+  windowParameters,
+  incomingInitialAnalysisStart,
+  ...docCountChartProps
 }) => {
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
     (time) => +time
@@ -61,14 +78,14 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     ) : null;
   }
 
-  const chartPoints: DocumentCountChartPoint[] = Object.entries(documentCountStats.buckets).map(
+  const chartPoints: LogRateHistogramItem[] = Object.entries(documentCountStats.buckets).map(
     ([time, value]) => ({
       time: +time,
       value,
     })
   );
 
-  let chartPointsSplit: DocumentCountChartPoint[] | undefined;
+  let chartPointsSplit: LogRateHistogramItem[] | undefined;
   if (documentCountStatsSplit?.buckets !== undefined) {
     chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
       time: +time,
@@ -84,6 +101,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
           <DocumentCountChart
+            dependencies={{ data, uiSettings, fieldFormats, charts }}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
             chartPointsSplit={chartPointsSplit}
@@ -95,6 +113,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             autoAnalysisStart={initialAnalysisStart}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            changePoint={documentCountStats.changePoint}
+            {...docCountChartProps}
           />
         </EuiFlexItem>
       )}

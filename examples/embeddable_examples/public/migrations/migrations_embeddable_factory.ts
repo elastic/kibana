@@ -15,7 +15,7 @@ import {
   EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { SimpleEmbeddable } from './migrations_embeddable';
-import { migration730 } from './migration.7.3.0';
+import { migrateToVersion2 } from './migration_definitions';
 
 export const SIMPLE_EMBEDDABLE = 'SIMPLE_EMBEDDABLE';
 
@@ -30,10 +30,11 @@ export class SimpleEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<SimpleEmbeddableInput>
 {
   public readonly type = SIMPLE_EMBEDDABLE;
+  public latestVersion = '2';
 
   // we need to provide migration function every time we change the interface of our state
   public readonly migrations = {
-    '7.3.0': migration730,
+    '2': migrateToVersion2,
   };
 
   public extract(state: EmbeddableStateWithType) {
@@ -61,7 +62,7 @@ export class SimpleEmbeddableFactoryDefinition
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.migrations.displayName', {
-      defaultMessage: 'hello world',
+      defaultMessage: 'simple migration embeddable',
     });
   }
 }

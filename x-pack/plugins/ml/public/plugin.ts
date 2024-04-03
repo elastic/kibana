@@ -13,12 +13,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, mergeMap } from 'rxjs';
+import { take } from 'rxjs';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -32,65 +32,86 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
-import {
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { MlSharedServices } from './application/services/get_shared_ml_services';
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSection } from './application/management';
+import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_feature';
+import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import {
+  initEnabledFeatures,
+  type MlFeatures,
+  ML_APP_ROUTE,
+  PLUGIN_ICON_SOLUTION,
+  PLUGIN_ID,
+  type ConfigSchema,
+  type ExperimentalFeatures,
+  initExperimentalFeatures,
+} from '../common/constants/app';
 import type { MlCapabilities } from './shared';
+import type { ElasticModels } from './application/services/elastic_models_service';
+import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  licensing: LicensingPluginStart;
-  share: SharePluginStart;
-  uiActions: UiActionsStart;
-  spaces?: SpacesPluginStart;
-  embeddable: EmbeddableStart;
-  maps?: MapsStartApi;
-  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  dataVisualizer: DataVisualizerPluginStart;
-  fieldFormats: FieldFormatsStart;
-  dashboard: DashboardStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
-  lens?: LensPublicStart;
-  cases?: CasesUiStart;
-  security: SecurityPluginStart;
+  contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
+  data: DataPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
+  dataVisualizer: DataVisualizerPluginStart;
+  embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsRegistry;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
+  maps?: MapsStartApi;
+  presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  security: SecurityPluginStart;
+  share: SharePluginStart;
+  spaces?: SpacesPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface MlSetupDependencies {
-  maps?: MapsSetupApi;
+  alerting?: AlertingSetup;
+  cases?: CasesPublicSetup;
+  dashboard: DashboardSetup;
+  embeddable: EmbeddableSetup;
+  fieldFormats: FieldFormatsSetup;
+  home?: HomePublicPluginSetup;
+  kibanaVersion: string;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  licenseManagement?: LicenseManagementUIPluginSetup;
-  home?: HomePublicPluginSetup;
-  embeddable: EmbeddableSetup;
-  uiActions: UiActionsSetup;
-  kibanaVersion: string;
+  maps?: MapsSetupApi;
   share: SharePluginSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
-  alerting?: AlertingSetup;
+  uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
-  fieldFormats: FieldFormatsSetup;
-  dashboard: DashboardSetup;
-  cases?: CasesUiSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -100,9 +121,30 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  private sharedMlServices: MlSharedServices | undefined;
 
-  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+  private isServerless: boolean = false;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: false,
+  };
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    initEnabledFeatures(this.enabledFeatures, initializerContext.config.get());
+    initExperimentalFeatures(this.experimentalFeatures, initializerContext.config.get());
+  }
+
+  setup(
+    core: MlCoreSetup,
+    pluginsSetup: MlSetupDependencies
+  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+    this.sharedMlServices = getMlSharedServices(core.http);
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -110,40 +152,45 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       }),
       order: 5000,
       euiIconType: PLUGIN_ICON_SOLUTION,
-      appRoute: '/app/ml',
+      appRoute: ML_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
           {
+            cases: pluginsStart.cases,
             charts: pluginsStart.charts,
-            data: pluginsStart.data,
-            unifiedSearch: pluginsStart.unifiedSearch,
+            contentManagement: pluginsStart.contentManagement,
             dashboard: pluginsStart.dashboard,
-            share: pluginsStart.share,
-            security: pluginsStart.security,
+            data: pluginsStart.data,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            dataVisualizer: pluginsStart.dataVisualizer,
+            embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+            fieldFormats: pluginsStart.fieldFormats,
+            home: pluginsSetup.home,
+            kibanaVersion: this.initializerContext.env.packageInfo.version,
+            lens: pluginsStart.lens,
+            licenseManagement: pluginsSetup.licenseManagement,
             licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
-            licenseManagement: pluginsSetup.licenseManagement,
-            home: pluginsSetup.home,
-            embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
-            uiActions: pluginsStart.uiActions,
-            kibanaVersion,
-            triggersActionsUi: pluginsStart.triggersActionsUi,
-            dataVisualizer: pluginsStart.dataVisualizer,
-            usageCollection: pluginsSetup.usageCollection,
-            fieldFormats: pluginsStart.fieldFormats,
-            lens: pluginsStart.lens,
-            cases: pluginsStart.cases,
+            presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
+            security: pluginsStart.security,
+            share: pluginsStart.share,
+            triggersActionsUi: pluginsStart.triggersActionsUi,
+            uiActions: pluginsStart.uiActions,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            usageCollection: pluginsSetup.usageCollection,
           },
-          params
+          params,
+          this.isServerless,
+          this.enabledFeatures,
+          this.experimentalFeatures
         );
       },
     });
@@ -153,83 +200,112 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(pluginsSetup.management, core, {
-        usageCollection: pluginsSetup.usageCollection,
-      }).enable();
+      registerManagementSection(
+        pluginsSetup.management,
+        core,
+        {
+          usageCollection: pluginsSetup.usageCollection,
+        },
+        this.isServerless,
+        this.enabledFeatures
+      ).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe(async (license) => {
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
-      const [coreStart, pluginStart] = await core.getStartServices();
-      const { capabilities } = coreStart.application;
+    licensing
+      .pipe(
+        mergeMap(async (license) => {
+          const mlEnabled = isMlEnabled(license);
+          const fullLicense = isFullLicense(license);
+          const [coreStart, pluginStart] = await core.getStartServices();
+          const { capabilities } = coreStart.application;
+          const mlCapabilities = capabilities.ml as MlCapabilities;
 
-      if (mlEnabled) {
-        // add ML to home page
-        if (pluginsSetup.home) {
-          registerFeature(pluginsSetup.home);
-        }
-      } else {
-        // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
-        }));
-      }
+          // register various ML plugin features which require a full license
+          // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
+          if (mlEnabled) {
+            // add ML to home page
+            if (pluginsSetup.home) {
+              registerHomeFeature(pluginsSetup.home);
+            }
 
-      // register various ML plugin features which require a full license
-      // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const {
-        registerEmbeddables,
-        registerMlUiActions,
-        registerSearchLinks,
-        registerMlAlerts,
-        registerMapExtension,
-        registerCasesAttachments,
-      } = await import('./register_helper');
+            const {
+              registerEmbeddables,
+              registerMlUiActions,
+              registerSearchLinks,
+              registerMlAlerts,
+              registerMapExtension,
+              registerCasesAttachments,
+            } = await import('./register_helper');
+            registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
 
-      if (pluginsSetup.maps) {
-        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
-        const canGetJobs = capabilities.ml?.canGetJobs === true;
-        const canCreateJobs = capabilities.ml?.canCreateJob === true;
-        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
-      }
+            if (
+              pluginsSetup.triggersActionsUi &&
+              ((fullLicense && mlCapabilities.canUseMlAlerts && mlCapabilities.canGetJobs) ||
+                // Register rules for basic license to show them in the UI as disabled
+                !fullLicense)
+            ) {
+              registerMlAlerts(
+                pluginsSetup.triggersActionsUi,
+                core.getStartServices,
+                mlCapabilities,
+                pluginsSetup.alerting
+              );
+            }
 
-      if (mlEnabled) {
-        registerSearchLinks(this.appUpdater$, fullLicense, capabilities.ml as MlCapabilities);
+            if (fullLicense) {
+              registerMlUiActions(pluginsSetup.uiActions, core);
 
-        if (fullLicense) {
-          registerEmbeddables(pluginsSetup.embeddable, core);
-          registerMlUiActions(pluginsSetup.uiActions, core);
+              if (this.enabledFeatures.ad) {
+                registerEmbeddables(pluginsSetup.embeddable, core);
 
-          if (pluginsSetup.cases) {
-            registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                if (pluginsSetup.cases) {
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                }
+
+                if (pluginsSetup.maps) {
+                  // Pass canGetJobs as minimum permission to show anomalies card in maps layers
+                  await registerMapExtension(pluginsSetup.maps, core, {
+                    canGetJobs: mlCapabilities.canGetJobs,
+                    canCreateJobs: mlCapabilities.canCreateJob,
+                  });
+                }
+              }
+            }
+          } else {
+            // if ml is disabled in elasticsearch, disable ML in kibana
+            this.appUpdater$.next(() => ({
+              status: AppStatus.inaccessible,
+            }));
           }
-
-          const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
-          if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {
-            registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
-          }
-        }
-      }
-    });
+        })
+      )
+      .subscribe();
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices.elasticModels,
     };
   }
 
-  start(core: CoreStart, deps: MlStartDependencies) {
+  start(
+    core: CoreStart,
+    deps: MlStartDependencies
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    elasticModels?: ElasticModels;
+    mlApi?: MlApiServices;
+  } {
     setDependencyCache({
       docLinks: core.docLinks!,
-      basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
-      lens: deps.lens,
     });
 
     return {
       locator: this.locator,
+      elasticModels: this.sharedMlServices?.elasticModels,
+      mlApi: this.sharedMlServices?.mlApiServices,
     };
   }
 

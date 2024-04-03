@@ -17,17 +17,19 @@ import { createWriteStream } from 'fs';
 const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
 import { LoggingSystem, config } from '..';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 let system: LoggingSystem;
 beforeEach(() => {
-  mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
+  mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+  jest.spyOn(process, 'uptime').mockReturnValue(10);
   system = new LoggingSystem();
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
   mockGetFlattenedObject.mockClear();

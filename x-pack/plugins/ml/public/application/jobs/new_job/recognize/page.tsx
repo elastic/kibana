@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, Fragment, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,20 +26,22 @@ import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import {
+import type {
   DatafeedResponse,
   JobOverride,
   JobResponse,
   KibanaObject,
+  KibanaObjects,
   KibanaObjectResponse,
   ModuleJob,
 } from '../../../../../common/types/modules';
 import { CreateResultCallout } from './components/create_result_callout';
-import { KibanaObjects } from './components/kibana_objects';
+import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
-import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
-import { TimeRange } from '../common/components';
-import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import type { JobSettingsFormValues } from './components/job_settings_form';
+import { JobSettingsForm } from './components/job_settings_form';
+import type { TimeRange } from '../common/components';
+import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
@@ -49,10 +52,6 @@ export interface ModuleJobUI extends ModuleJob {
 }
 
 export type KibanaObjectUi = KibanaObject & KibanaObjectResponse;
-
-export interface KibanaObjects {
-  [objectType: string]: KibanaObjectUi[];
-}
 
 interface PageProps {
   moduleId: string;
@@ -111,6 +110,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     try {
       const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
+      setKibanaObjects(response.kibana);
 
       setSaveState(SAVE_STATE.NOT_SAVED);
 
@@ -236,21 +236,22 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         );
       } catch (e) {
         setSaveState(SAVE_STATE.FAILED);
-        // eslint-disable-next-line no-console
-        console.error('Error setting up module', e);
         const { toasts } = notifications;
-        toasts.addDanger({
+        toasts.addError(e, {
           title: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningTitle', {
             defaultMessage: 'Error setting up module {moduleId}',
             values: { moduleId },
           }),
-          text: i18n.translate('xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription', {
-            defaultMessage:
-              'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
-            values: {
-              count: jobs.length,
-            },
-          }),
+          toastMessage: i18n.translate(
+            'xpack.ml.newJob.recognize.moduleSetupFailedWarningDescription',
+            {
+              defaultMessage:
+                'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+              values: {
+                count: jobs.length,
+              },
+            }
+          ),
         });
       }
     },
@@ -319,7 +320,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
       {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
 
-      <EuiFlexGroup wrap={true} gutterSize="m">
+      <EuiFlexGroup wrap={true} gutterSize="m" data-test-subj="mlPageJobWizard recognizer">
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiTitle size="s">
@@ -365,7 +366,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
               <EuiPanel grow={false} hasShadow={false} hasBorder>
                 {Object.keys(kibanaObjects).map((objectType, i) => (
                   <Fragment key={objectType}>
-                    <KibanaObjects
+                    <KibanaObjectList
                       objectType={objectType}
                       kibanaObjects={kibanaObjects[objectType]}
                       isSaving={saveState === SAVE_STATE.SAVING}

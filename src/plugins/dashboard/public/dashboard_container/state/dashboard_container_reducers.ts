@@ -7,6 +7,7 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import {
   DashboardReduxState,
@@ -20,13 +21,6 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   // Content Reducers
   // ------------------------------------------------------------------------------
-  setControlGroupState: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerInput['controlGroupInput']>
-  ) => {
-    state.explicitInput.controlGroupInput = action.payload;
-  },
-
   setPanels: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput['panels']>
@@ -89,6 +83,11 @@ export const dashboardContainerReducers = {
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerInput['viewMode']>
   ) => {
+    // Managed Dashboards cannot be put into edit mode.
+    if (state.componentState.managed) {
+      state.explicitInput.viewMode = ViewMode.VIEW;
+      return;
+    }
     state.explicitInput.viewMode = action.payload;
   },
 
@@ -101,6 +100,13 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardContainerInput['title']>
   ) => {
     state.explicitInput.title = action.payload;
+  },
+
+  setManaged: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardPublicState['managed']>
+  ) => {
+    state.componentState.managed = action.payload;
   },
 
   // ------------------------------------------------------------------------------
@@ -118,6 +124,10 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardPublicState['lastSavedInput']>
   ) => {
     state.componentState.lastSavedInput = action.payload;
+
+    // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
+    // been serialized into the SO.
+    state.componentState.hasRunClientsideMigrations = false;
   },
 
   /**
@@ -221,6 +231,9 @@ export const dashboardContainerReducers = {
 
   setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
     state.componentState.highlightPanelId = action.payload;
+  },
+  setFocusedPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.focusedPanelId = action.payload;
   },
 
   setAnimatePanelTransforms: (

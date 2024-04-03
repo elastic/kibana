@@ -235,7 +235,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
       );
@@ -250,7 +250,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       });
 
       expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
-      expect(client.update).toHaveBeenCalledTimes(1);
+      expect(client.index).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({ id, type, attributes, namespaces: [namespace] })
       );

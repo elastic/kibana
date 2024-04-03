@@ -13,8 +13,8 @@ tags:
 
 # Build args passed to Dockerfile ARGs
 args:
-  BASE_IMAGE: 'redhat/ubi/ubi8'
-  BASE_TAG: '8.6'
+  BASE_IMAGE: 'redhat/ubi/ubi9'
+  BASE_TAG: '9.3'
 
 # Docker image labels
 labels:
@@ -48,6 +48,14 @@ resources:
 
 # List of project maintainers
 maintainers:
+  - email: 'jon@elastic.co'
+    name: 'Jonathan Budzenski'
+    username: 'jbudz'
+    cht_member: false
+  - email: 'brad.white@elastic.co'
+    name: 'Brad White'
+    username: 'brad.white'
+    cht_member: false
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'

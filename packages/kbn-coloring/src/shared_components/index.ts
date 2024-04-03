@@ -21,3 +21,5 @@ export const CustomizablePaletteLazy = React.lazy(() => import('./coloring'));
  * a predefined fallback and error boundary.
  */
 export const CustomizablePalette = withSuspense(CustomizablePaletteLazy);
+
+export * from './color_mapping';

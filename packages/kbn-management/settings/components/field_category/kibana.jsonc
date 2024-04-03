@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/management-settings-components-field-category",
+  "owner": "@elastic/kibana-management"
+}

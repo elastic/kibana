@@ -7,14 +7,17 @@
 
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
+import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
-import {
-  createMockConfigSchema,
-  createMockPluginSetup,
-  createMockPluginStart,
-} from './test_helpers';
+import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -29,6 +32,8 @@ describe('Reporting Plugin', () => {
   let plugin: ReportingPlugin;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
@@ -79,5 +84,63 @@ describe('Reporting Plugin', () => {
       ]
     `);
     expect(logger.error).toHaveBeenCalledTimes(2);
+  });
+
+  describe('config and export types registration', () => {
+    jest.mock('@kbn/reporting-server/export_types_registry');
+    ExportTypesRegistry.prototype.getAll = jest.fn(() => []); // code breaks if getAll returns undefined
+    let registerSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      registerSpy = jest.spyOn(ExportTypesRegistry.prototype, 'register');
+      pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+      pluginStart = await createMockPluginStart(coreStart, configSchema);
+      plugin = new ReportingPlugin(initContext);
+    });
+
+    it('expect all report types to be in registry', async () => {
+      // check the spy function
+      expect(registerSpy).toHaveBeenCalledTimes(5);
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE_V2 }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PNG_REPORT_TYPE_V2 }));
+    });
+
+    it('expect image report types not to be in registry if disabled', async () => {
+      jest.clearAllMocks();
+
+      configSchema = createMockConfigSchema({
+        export_types: {
+          csv: { enabled: true },
+          pdf: { enabled: false },
+          png: { enabled: false },
+        },
+      });
+
+      initContext = coreMock.createPluginInitializerContext(configSchema);
+      coreSetup = coreMock.createSetup(configSchema);
+      coreStart = coreMock.createStart();
+      pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+      pluginStart = await createMockPluginStart(coreStart, configSchema);
+      plugin = new ReportingPlugin(initContext);
+
+      // check the spy function was called with CSV
+      expect(registerSpy).toHaveBeenCalledTimes(2);
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
+      expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
+
+      // check the spy function was NOT called with anything else
+      expect(registerSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: PDF_REPORT_TYPE })
+      );
+      expect(registerSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: PDF_REPORT_TYPE_V2 })
+      );
+      expect(registerSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: PNG_REPORT_TYPE_V2 })
+      );
+    });
   });
 });

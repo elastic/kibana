@@ -7,7 +7,9 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { NavigationKibanaDependencies, NavigationServices } from '../types';
+import useObservable from 'react-use/lib/useObservable';
+
+import { NavigationKibanaDependencies, NavigationServices } from './types';
 
 const Context = React.createContext<NavigationServices | null>(null);
 
@@ -25,26 +27,22 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const { core, serverless } = dependencies;
+  const { core, activeNodes$ } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
+  const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
 
   const value: NavigationServices = {
     basePath,
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
-    navLinks$: chrome.navLinks.getNavLinks$(),
     navigateToUrl,
     navIsOpen: true,
-    onProjectNavigationChange: serverless.setNavigation,
-    activeNodes$: serverless.getActiveNavigationNodes$(),
+    activeNodes$,
+    isSideNavCollapsed,
   };
 
-  return (
-    <Context.Provider {...{ value }} {...dependencies}>
-      {children}
-    </Context.Provider>
-  );
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 /**

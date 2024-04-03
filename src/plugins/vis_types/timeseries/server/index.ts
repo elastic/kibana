@@ -8,7 +8,6 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { VisTypeTimeseriesConfig, config as configSchema } from '../config';
-import { VisTypeTimeseriesPlugin } from './plugin';
 
 export type { VisTypeTimeseriesSetup } from './plugin';
 
@@ -21,7 +20,8 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   schema: configSchema,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { VisTypeTimeseriesPlugin } = await import('./plugin');
   return new VisTypeTimeseriesPlugin(initializerContext);
 }
 

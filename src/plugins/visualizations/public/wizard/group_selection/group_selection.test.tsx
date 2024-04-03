@@ -11,6 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
 import { DocLinksStart } from '@kbn/core/public';
+import { VisParams } from '../../../common';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {
@@ -37,8 +38,10 @@ describe('GroupSelection', () => {
     {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
-      aliasApp: 'aliasApp',
-      aliasPath: '#/aliasApp',
+      alias: {
+        app: 'aliasApp',
+        path: '#/aliasApp',
+      },
       description: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
@@ -49,15 +52,17 @@ describe('GroupSelection', () => {
       description: 'Vis alias with promotion',
       stage: 'production',
       group: VisGroups.PROMOTED,
-      aliasApp: 'anotherApp',
-      aliasPath: '#/anotherUrl',
+      alias: {
+        app: 'anotherApp',
+        path: '#/anotherUrl',
+      },
       promotion: true,
     } as unknown,
   ] as BaseVisType[];
 
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
-      get<T>(id: string): BaseVisType<T> {
+      get<T extends VisParams>(id: string): BaseVisType<T> {
         return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
       all: () => {

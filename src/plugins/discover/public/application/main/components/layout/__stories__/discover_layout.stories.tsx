@@ -15,9 +15,6 @@ import { getDataViewMock } from '../../../../../__mocks__/__storybook_mocks__/ge
 import { withDiscoverServices } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 import { getDocumentsLayoutProps, getPlainRecordLayoutProps } from './get_layout_props';
 import { DiscoverLayout, DiscoverLayoutProps } from '../discover_layout';
-import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
-
-setHeaderActionMenuMounter(() => void 0);
 
 const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
   const [state, setState] = useState({});
@@ -68,7 +65,7 @@ storiesOf('components/layout/DiscoverLayout', module).add(
 );
 
 storiesOf('components/layout/DiscoverLayout', module).add(
-  'SQL view',
+  'ES|QL view',
   withDiscoverServices(() => {
     const props = getPlainRecordLayoutProps(getDataViewMock(false));
     return (

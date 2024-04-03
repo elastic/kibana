@@ -7,15 +7,16 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { MonitoringCollectionPlugin } from './plugin';
 import { configSchema } from './config';
 
 export type { MonitoringCollectionConfig } from './config';
 
 export type { MonitoringCollectionSetup, MetricResult, Metric } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new MonitoringCollectionPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { MonitoringCollectionPlugin } = await import('./plugin');
+  return new MonitoringCollectionPlugin(initContext);
+};
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
 };

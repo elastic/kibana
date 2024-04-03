@@ -35,7 +35,7 @@ export function initIndexingRoutes({
 }) {
   router.versioned
     .post({
-      path: `/${INDEX_SOURCE_API_PATH}`,
+      path: INDEX_SOURCE_API_PATH,
       access: 'internal',
       options: {
         body: {

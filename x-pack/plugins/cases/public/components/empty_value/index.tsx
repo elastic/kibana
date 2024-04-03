@@ -7,25 +7,24 @@
 
 import { get, isString } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as i18n from './translations';
 
-const EmptyWrapper = styled.span`
-  color: ${(props) => props.theme.eui.euiColorMediumShade};
+const emptyWrapperCss = css`
+  color: ${euiThemeVars.euiColorMediumShade};
 `;
-
-EmptyWrapper.displayName = 'EmptyWrapper';
 
 export const getEmptyValue = () => '—';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
-export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
-export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
+export const getEmptyCellValue = () => <span css={emptyWrapperCss}>{getEmptyValue()}</span>;
+export const getEmptyStringTag = () => <span css={emptyWrapperCss}>{getEmptyString()}</span>;
 
 export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   if (item == null) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   } else if (isString(item) && item === '') {
     return getEmptyStringTag();
   } else {
@@ -40,7 +39,7 @@ export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
 
 export const getOrEmptyTagFromValue = (value: string | number | null | undefined): JSX.Element => {
   if (value == null) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   } else if (value === '') {
     return getEmptyStringTag();
   } else {

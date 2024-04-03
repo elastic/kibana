@@ -20,6 +20,14 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import {
+  AssetCriticalitySelector,
+  AssetCriticalityTitle,
+} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
@@ -44,7 +52,7 @@ import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import {
   useDeepEqualSelector,
@@ -63,7 +71,8 @@ import { getCriteriaFromUsersType } from '../../../../common/components/ml/crite
 import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -73,7 +82,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -102,7 +111,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -168,13 +178,21 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
+  const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
+  const privileges = useAssetCriticalityPrivileges(entity.name);
+  const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
+  const criticality = useAssetCriticalityData({
+    entity,
+    enabled: canReadAssetCriticality,
+  });
+
   return (
     <>
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -188,6 +206,16 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               }
               title={detailName}
             />
+
+            {canReadAssetCriticality && (
+              <>
+                <EuiHorizontalRule margin="m" />
+                <AssetCriticalityTitle />
+                <EuiSpacer size="s" />
+                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                <EuiHorizontalRule margin="m" />
+              </>
+            )}
 
             <AnomalyTableProvider
               criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
@@ -241,7 +269,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               navTabs={navTabsUsersDetails(
                 detailName,
                 hasMlUserPermissions(capabilities),
-                isPlatinumOrTrialLicense
+                hasEntityAnalyticsCapability
               )}
             />
             <EuiSpacer />
@@ -262,7 +290,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

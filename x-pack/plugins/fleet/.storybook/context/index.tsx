@@ -13,8 +13,11 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
+import type { PluginsServiceStart, SecurityServiceStart } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
@@ -76,6 +79,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
         languageClientsUiComponents: {},
       },
       customBranding: getCustomBranding(),
+      dashboard: {} as unknown as DashboardStart,
       docLinks: getDocLinks(),
       http: getHttp(),
       i18n: {
@@ -89,13 +93,25 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       settings: getSettings(),
       theme: {
         theme$: EMPTY,
+        getTheme: () => ({ darkMode: false }),
       },
+      security: {} as unknown as SecurityServiceStart,
+      plugins: {} as unknown as PluginsServiceStart,
       authz: {
         fleet: {
           all: true,
           setup: true,
           readEnrollmentTokens: true,
+
+          // subfeatures
+          allAgents: true,
+          readAgents: true,
+          allSettings: true,
+          readSettings: true,
           readAgentPolicies: true,
+          allAgentPolicies: true,
+          addAgents: true,
+          addFleetServers: true,
         },
         integrations: {
           readPackageInfo: true,

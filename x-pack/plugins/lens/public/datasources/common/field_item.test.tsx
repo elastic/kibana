@@ -23,14 +23,14 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { FieldIcon, FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
+import { FieldIcon } from '@kbn/field-utils';
+import { FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
 }));
 
-const clickField = async (wrapper: ReactWrapper, field: string) => {
+const clickField = async (wrapper: ReactWrapper, field?: string) => {
   await act(async () => {
     await wrapper
       .find(`[data-test-subj="lnsFieldListPanelField-${field}"] .kbnFieldButton__button`)
@@ -90,14 +90,14 @@ describe('Lens Field Item', () => {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestampLabel',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
-          displayName: 'bytesLabel',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -139,7 +139,8 @@ describe('Lens Field Item', () => {
         },
         documentField,
       ],
-    } as IndexPattern;
+      isTimeBased: jest.fn(),
+    } as unknown as IndexPattern;
 
     defaultProps = {
       indexPattern,
@@ -152,7 +153,7 @@ describe('Lens Field Item', () => {
       filters: [],
       field: {
         name: 'bytes',
-        displayName: 'bytesLabel',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -187,7 +188,7 @@ describe('Lens Field Item', () => {
     // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
     // which can't be seen, but shows in the text content
     expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toContain(
-      'bytesLabel'
+      'bytes'
     );
   });
 
@@ -258,7 +259,7 @@ describe('Lens Field Item', () => {
 
     const field = {
       name: 'test',
-      displayName: 'testLabel',
+      displayName: 'test',
       type: 'string',
       aggregatable: true,
       searchable: true,
@@ -420,7 +421,7 @@ describe('Lens Field Item', () => {
       field: documentField,
     });
 
-    await clickField(wrapper, DOCUMENT_FIELD_NAME);
+    await clickField(wrapper, documentField.name);
 
     await wrapper.update();
 

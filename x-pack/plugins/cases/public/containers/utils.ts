@@ -11,31 +11,39 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
-import type { Configuration, Configurations } from '../../common/types/domain';
-import { ConfigurationRt, ConfigurationsRt } from '../../common/types/domain';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import type {
-  UserActions,
-  CasePatchRequest,
-  CaseResolveResponse,
-  SingleCaseMetricsResponse,
-  User,
-  CaseUserActionStatsResponse,
-  Case,
-  Cases,
-} from '../../common/api';
+import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
 import {
+  AttachmentType,
   CaseRt,
   CasesRt,
-  throwErrors,
+  ConfigurationRt,
+  ConfigurationsRt,
   UserActionsRt,
-  CommentType,
+} from '../../common/types/domain';
+import type {
+  CasePatchRequest,
+  CaseResolveResponse,
+  CaseUserActionStatsResponse,
+  SingleCaseMetricsResponse,
+} from '../../common/types/api';
+import {
   CaseResolveResponseRt,
-  SingleCaseMetricsResponseRt,
   CaseUserActionStatsResponseRt,
-} from '../../common/api';
+  SingleCaseMetricsResponseRt,
+} from '../../common/types/api';
+import type {
+  Case,
+  Cases,
+  Configuration,
+  Configurations,
+  User,
+  UserActions,
+} from '../../common/types/domain';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import { throwErrors } from '../../common/api';
 import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
+import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -112,7 +120,7 @@ export const createUpdateSuccessToaster = (
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === CommentType.alert
+    (comment) => comment.type === AttachmentType.alert
   );
 
   const toast: ToastInputFields = {
@@ -140,12 +148,11 @@ export const createUpdateSuccessToaster = (
 export const constructAssigneesFilter = (
   assignees: FilterOptions['assignees']
 ): { assignees?: string | string[] } =>
-  assignees === null || assignees.length > 0
+  assignees.length > 0
     ? {
-        assignees:
-          assignees?.map((assignee) =>
-            assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
-          ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+        assignees: assignees?.map((assignee) =>
+          assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+        ) ?? [NO_ASSIGNEES_FILTERING_KEYWORD],
       }
     : {};
 
@@ -161,6 +168,43 @@ export const constructReportersFilter = (reporters: User[]) => {
             return reporter.username ?? '';
           })
           .filter((reporterID) => !isEmpty(reporterID)),
+      }
+    : {};
+};
+
+export const constructCustomFieldsFilter = (
+  optionKeysByCustomFieldKey: FilterOptions['customFields']
+) => {
+  if (!optionKeysByCustomFieldKey || Object.keys(optionKeysByCustomFieldKey).length === 0) {
+    return {};
+  }
+
+  const valuesByCustomFieldKey: {
+    [key in string]: Array<CustomFieldFactoryFilterOption['value']>;
+  } = {};
+
+  for (const [customFieldKey, customField] of Object.entries(optionKeysByCustomFieldKey)) {
+    const { type, options: selectedOptions } = customField;
+    if (customFieldsBuilder[type]) {
+      const { filterOptions: customFieldFilterOptionsConfig = [] } = customFieldsBuilder[type]();
+      const values = selectedOptions
+        .map((selectedOption) => {
+          const filterOptionConfig = customFieldFilterOptionsConfig.find(
+            (filterOption) => filterOption.key === selectedOption
+          );
+          return filterOptionConfig ? filterOptionConfig.value : undefined;
+        })
+        .filter((option) => option !== undefined) as Array<CustomFieldFactoryFilterOption['value']>;
+
+      if (values.length > 0) {
+        valuesByCustomFieldKey[customFieldKey] = values;
+      }
+    }
+  }
+
+  return Object.keys(valuesByCustomFieldKey).length
+    ? {
+        customFields: valuesByCustomFieldKey,
       }
     : {};
 };

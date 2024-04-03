@@ -6,64 +6,110 @@
  */
 
 import * as rt from 'io-ts';
+import {
+  dateRt,
+  inRangeFromStringRt,
+  datemathStringRt,
+  createLiteralValueFromUndefinedRT,
+} from '@kbn/io-ts-utils';
 
-export const assetTypeRT = rt.union([
-  rt.literal('k8s.pod'),
-  rt.literal('k8s.cluster'),
-  rt.literal('k8s.node'),
-]);
+export const assetTypeRT = rt.keyof({
+  'k8s.pod': null,
+  'k8s.cluster': null,
+  'k8s.node': null,
+});
 
 export type AssetType = rt.TypeOf<typeof assetTypeRT>;
 
-export type AssetKind = 'unknown' | 'node';
-export type AssetStatus =
-  | 'CREATING'
-  | 'ACTIVE'
-  | 'DELETING'
-  | 'FAILED'
-  | 'UPDATING'
-  | 'PENDING'
-  | 'UNKNOWN';
-export type CloudProviderName = 'aws' | 'gcp' | 'azure' | 'other' | 'unknown' | 'none';
+export const assetKindRT = rt.keyof({
+  cluster: null,
+  host: null,
+  pod: null,
+  container: null,
+  service: null,
+});
 
-interface WithTimestamp {
-  '@timestamp': string;
-}
-export interface ECSDocument extends WithTimestamp {
-  'kubernetes.namespace'?: string;
-  'kubernetes.pod.name'?: string;
-  'kubernetes.pod.uid'?: string;
-  'kubernetes.pod.start_time'?: Date;
-  'kubernetes.node.name'?: string;
-  'kubernetes.node.start_time'?: Date;
+export type AssetKind = rt.TypeOf<typeof assetKindRT>;
 
-  'orchestrator.api_version'?: string;
-  'orchestrator.namespace'?: string;
-  'orchestrator.organization'?: string;
-  'orchestrator.type'?: string;
-  'orchestrator.cluster.id'?: string;
-  'orchestrator.cluster.name'?: string;
-  'orchestrator.cluster.url'?: string;
-  'orchestrator.cluster.version'?: string;
+export const assetStatusRT = rt.keyof({
+  CREATING: null,
+  ACTIVE: null,
+  DELETING: null,
+  FAILED: null,
+  UPDATING: null,
+  PENDING: null,
+  UNKNOWN: null,
+});
 
-  'cloud.provider'?: CloudProviderName;
-  'cloud.region'?: string;
-  'cloud.service.name'?: string;
-}
+export type AssetStatus = rt.TypeOf<typeof assetStatusRT>;
 
-export interface Asset extends ECSDocument {
-  'asset.collection_version'?: string;
-  'asset.ean': string;
-  'asset.id': string;
-  'asset.kind'?: AssetKind;
-  'asset.name'?: string;
-  'asset.type': AssetType;
-  'asset.status'?: AssetStatus;
-  'asset.parents'?: string | string[];
-  'asset.children'?: string | string[];
-  'asset.references'?: string | string[];
-  'asset.namespace'?: string;
-}
+// https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals
+export const cloudProviderNameRT = rt.keyof({
+  aws: null,
+  gcp: null,
+  azure: null,
+  other: null,
+  unknown: null,
+  none: null,
+});
+
+export type CloudProviderName = rt.TypeOf<typeof cloudProviderNameRT>;
+
+const withTimestampRT = rt.type({
+  '@timestamp': rt.string,
+});
+
+export type WithTimestamp = rt.TypeOf<typeof withTimestampRT>;
+
+export const ECSDocumentRT = rt.intersection([
+  withTimestampRT,
+  rt.partial({
+    'kubernetes.namespace': rt.string,
+    'kubernetes.pod.name': rt.string,
+    'kubernetes.pod.uid': rt.string,
+    'kubernetes.pod.start_time': rt.string,
+    'kubernetes.node.name': rt.string,
+    'kubernetes.node.start_time': rt.string,
+    'orchestrator.api_version': rt.string,
+    'orchestrator.namespace': rt.string,
+    'orchestrator.organization': rt.string,
+    'orchestrator.type': rt.string,
+    'orchestrator.cluster.id': rt.string,
+    'orchestrator.cluster.name': rt.string,
+    'orchestrator.cluster.url': rt.string,
+    'orchestrator.cluster.version': rt.string,
+    'cloud.provider': cloudProviderNameRT,
+    'cloud.instance.id': rt.string,
+    'cloud.region': rt.string,
+    'cloud.service.name': rt.string,
+    'service.environment': rt.string,
+  }),
+]);
+
+export type ECSDocument = rt.TypeOf<typeof ECSDocumentRT>;
+
+export const assetRT = rt.intersection([
+  ECSDocumentRT,
+  rt.type({
+    'asset.ean': rt.string,
+    'asset.id': rt.string,
+    'asset.kind': assetKindRT,
+  }),
+  // mixed required and optional require separate hashes combined via intersection
+  // https://github.com/gcanti/io-ts/blob/master/index.md#mixing-required-and-optional-props
+  rt.partial({
+    'asset.collection_version': rt.string,
+    'asset.name': rt.string,
+    'asset.type': assetTypeRT,
+    'asset.status': assetStatusRT,
+    'asset.parents': rt.union([rt.string, rt.array(rt.string)]),
+    'asset.children': rt.union([rt.string, rt.array(rt.string)]),
+    'asset.references': rt.union([rt.string, rt.array(rt.string)]),
+    'asset.namespace': rt.string,
+  }),
+]);
+
+export type Asset = rt.TypeOf<typeof assetRT>;
 
 export type AssetWithoutTimestamp = Omit<Asset, '@timestamp'>;
 
@@ -119,17 +165,27 @@ export interface K8sCluster extends WithTimestamp {
   };
 }
 
-export interface AssetFilters {
-  type?: AssetType | AssetType[];
-  kind?: AssetKind;
-  ean?: string | string[];
-  id?: string;
-  typeLike?: string;
-  eanLike?: string;
-  collectionVersion?: number | 'latest' | 'all';
-  from?: string;
-  to?: string;
-}
+export const assetFiltersSingleKindRT = rt.exact(
+  rt.partial({
+    type: rt.union([assetTypeRT, rt.array(assetTypeRT)]),
+    ean: rt.union([rt.string, rt.array(rt.string)]),
+    id: rt.string,
+    parentEan: rt.string,
+    ['cloud.provider']: rt.string,
+    ['cloud.region']: rt.string,
+    ['orchestrator.cluster.name']: rt.string,
+  })
+);
+
+export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
+
+const supportedKindRT = rt.union([rt.literal('host'), rt.literal('service')]);
+export const assetFiltersRT = rt.intersection([
+  assetFiltersSingleKindRT,
+  rt.partial({ kind: rt.union([supportedKindRT, rt.array(supportedKindRT)]) }),
+]);
+
+export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
 
 export const relationRT = rt.union([
   rt.literal('ancestors'),
@@ -142,3 +198,101 @@ export type RelationField = keyof Pick<
   Asset,
   'asset.children' | 'asset.parents' | 'asset.references'
 >;
+
+export const sizeRT = rt.union([
+  inRangeFromStringRt(1, 100),
+  createLiteralValueFromUndefinedRT(10),
+]);
+export const assetDateRT = rt.union([dateRt, datemathStringRt]);
+
+/**
+ * Hosts
+ */
+export const getHostAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
+export const getHostAssetsResponseRT = rt.type({
+  hosts: rt.array(assetRT),
+});
+export type GetHostAssetsResponse = rt.TypeOf<typeof getHostAssetsResponseRT>;
+
+/**
+ * Containers
+ */
+export const getContainerAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetContainerAssetsQueryOptions = rt.TypeOf<typeof getContainerAssetsQueryOptionsRT>;
+export const getContainerAssetsResponseRT = rt.type({
+  containers: rt.array(assetRT),
+});
+export type GetContainerAssetsResponse = rt.TypeOf<typeof getContainerAssetsResponseRT>;
+
+/**
+ * Services
+ */
+export const getServiceAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    from: assetDateRT,
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+
+export type GetServiceAssetsQueryOptions = rt.TypeOf<typeof getServiceAssetsQueryOptionsRT>;
+export const getServiceAssetsResponseRT = rt.type({
+  services: rt.array(assetRT),
+});
+export type GetServiceAssetsResponse = rt.TypeOf<typeof getServiceAssetsResponseRT>;
+
+/**
+ * Pods
+ */
+export const getPodAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetPodAssetsQueryOptions = rt.TypeOf<typeof getPodAssetsQueryOptionsRT>;
+export const getPodAssetsResponseRT = rt.type({
+  pods: rt.array(assetRT),
+});
+export type GetPodAssetsResponse = rt.TypeOf<typeof getPodAssetsResponseRT>;
+
+/**
+ * Assets
+ */
+export const getAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersRT,
+  }),
+]);
+export type GetAssetsQueryOptions = rt.TypeOf<typeof getAssetsQueryOptionsRT>;
+export const getAssetsResponseRT = rt.type({
+  assets: rt.array(assetRT),
+});
+export type GetAssetsResponse = rt.TypeOf<typeof getAssetsResponseRT>;

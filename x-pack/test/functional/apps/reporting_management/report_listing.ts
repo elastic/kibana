@@ -6,25 +6,34 @@
  */
 
 import expect from '@kbn/expect';
-import { REPORT_TABLE_ID } from '@kbn/reporting-plugin/common/constants';
+import { REPORT_TABLE_ID } from '@kbn/reporting-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'reporting']);
+  const pageObjects = getPageObjects(['common', 'reporting', 'settings', 'console']);
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
 
   describe('Listing of Reports', function () {
+    const kbnArchive =
+      'x-pack/test/functional/fixtures/kbn_archiver/reporting/view_in_console_index_pattern.json';
+
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin', // to access stack management
         'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
       ]);
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(kbnArchive);
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(kbnArchive);
     });
 
     beforeEach(async () => {
@@ -119,12 +128,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "actions": "",
             "createdAt": "2021-07-19 @ 06:38 PM",
             "report": "[Flights] Global Flight Dashboard",
-            "status": "Done, warnings detected",
-          },
-          Object {
-            "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PM",
-            "report": "[Flights] Global Flight Dashboard",
             "status": "Done",
           },
           Object {
@@ -139,8 +142,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             "report": "[Flights] Global Flight Dashboard",
             "status": "Failed",
           },
+          Object {
+            "actions": "",
+            "createdAt": "2020-04-21 @ 07:01 PM",
+            "report": "[Logs] File Type Scatter Plot",
+            "status": "Done",
+          },
         ]
       `);
+    });
+
+    it('Exposes an action to see the ES query in console', async () => {
+      const csvReportTitle = 'Discover search [2021-07-19T11:44:48.670-07:00]';
+      await pageObjects.reporting.openReportFlyout(csvReportTitle);
+
+      // Open "Actions" menu inside the flyout
+      await testSubjects.click('reportInfoFlyoutActionsButton');
+
+      expect(await find.existsByCssSelector('.euiContextMenuPanel')).to.eql(true);
+      const contextMenu = await find.byClassName('euiContextMenuPanel');
+      const contextMenuText = await contextMenu.getVisibleText();
+
+      expect(contextMenuText).to.contain('Inspect query in Console');
+
+      await testSubjects.click('reportInfoFlyoutOpenInConsoleButton');
+
+      await pageObjects.common.waitUntilUrlIncludes('dev_tools#/console');
+
+      await retry.try(async () => {
+        const actualRequest = await pageObjects.console.getRequest();
+        expect(actualRequest.trim()).to.contain(
+          '# These are the queries used when exporting data for\n# the CSV report'
+        );
+        expect(actualRequest).to.contain('POST /_search');
+      });
     });
   });
 };

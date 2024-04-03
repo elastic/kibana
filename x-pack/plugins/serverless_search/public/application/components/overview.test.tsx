@@ -5,12 +5,40 @@
  * 2.0.
  */
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { render, core } from '../../test/test_utils';
 import { ElasticsearchOverview as Overview } from './overview';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
+
 describe('<Overview />', () => {
   beforeEach(() => {
-    core.http.fetch.mockResolvedValueOnce({ apiKeys: [] });
+    core.http.fetch.mockImplementation((url) => {
+      let fetchedUrl: string;
+      if (typeof url === 'string') {
+        fetchedUrl = url;
+      }
+
+      return new Promise((resolve, reject) => {
+        switch (fetchedUrl) {
+          case '/internal/serverless_search/api_keys':
+            resolve({ apiKeys: [] });
+            return;
+          case '/internal/serverless_search/connectors':
+            resolve({});
+            return;
+          default:
+            return reject(`unknown path requested ${fetchedUrl}`);
+        }
+      });
+    });
+    const pathname = '/app/elasticsearch';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({
+      pathname,
+    }));
   });
 
   test('renders without throwing an error', () => {
@@ -33,7 +61,11 @@ describe('<Overview />', () => {
   });
   test('api key', () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { name: 'Store your API key and Cloud ID' })).toBeDefined();
+    expect(getByRole('heading', { level: 2, name: 'API Key' })).toBeDefined();
+  });
+  test('cloud id', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Copy your connection details' })).toBeDefined();
   });
   test('configure client', () => {
     const { getByRole } = render(<Overview />);
@@ -51,8 +83,12 @@ describe('<Overview />', () => {
     const { getByRole } = render(<Overview />);
     expect(getByRole('heading', { name: 'Build your first search query' })).toBeDefined();
   });
+  test('transform data', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Transform and enrich your data' })).toBeDefined();
+  });
   test("what's next?", () => {
     const { getByRole } = render(<Overview />);
-    expect(getByRole('heading', { name: "What's next?" })).toBeDefined();
+    expect(getByRole('heading', { name: 'Do more with your data' })).toBeDefined();
   });
 });

@@ -6,14 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const apmConfigSchema = schema.object(
+export type ApmConfigSchema = TypeOf<typeof apmConfigSchema>;
+
+const apmReusableConfigSchema = schema.object(
   {
     active: schema.maybe(schema.boolean()),
     serverUrl: schema.maybe(schema.uri()),
     secretToken: schema.maybe(schema.string()),
-    globalLabels: schema.object({}, { unknowns: 'allow' }),
+    apiKey: schema.maybe(schema.string()),
+    environment: schema.maybe(schema.string()),
+    globalLabels: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   },
   { unknowns: 'allow' }
 );
+
+export const apmConfigSchema = apmReusableConfigSchema.extends({
+  servicesOverrides: schema.maybe(schema.recordOf(schema.string(), apmReusableConfigSchema)),
+  redactUsers: schema.maybe(schema.boolean({ defaultValue: true })),
+});

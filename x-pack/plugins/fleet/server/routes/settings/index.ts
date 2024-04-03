@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { SETTINGS_API_ROUTES } from '../../constants';
@@ -65,24 +66,32 @@ export const putSettingsHandler: FleetRequestHandler<
 };
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
-      validate: GetSettingsRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getSettingsHandler
-  );
-  router.put(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetSettingsRequestSchema },
+      },
+      getSettingsHandler
+    );
+  router.versioned
+    .put({
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
-      validate: PutSettingsRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    putSettingsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PutSettingsRequestSchema },
+      },
+      putSettingsHandler
+    );
 };

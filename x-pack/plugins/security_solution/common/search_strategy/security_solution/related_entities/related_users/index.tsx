@@ -7,7 +7,6 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { RiskSeverity, Inspect, Maybe } from '../../..';
-import type { RequestBasicOptions } from '../..';
 import type { BucketItem } from '../../cti';
 
 export interface RelatedUser {
@@ -31,12 +30,5 @@ interface IPItems {
 export interface HostsRelatedUsersStrategyResponse extends IEsSearchResponse {
   totalCount: number;
   relatedUsers: RelatedUser[];
-  inspect?: Maybe<Inspect>;
-}
-
-export interface HostsRelatedUsersRequestOptions extends Partial<RequestBasicOptions> {
-  hostName: string;
-  skip?: boolean;
-  from: string;
   inspect?: Maybe<Inspect>;
 }

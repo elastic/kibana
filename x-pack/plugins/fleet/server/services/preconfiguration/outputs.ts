@@ -5,11 +5,21 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
-import type { PreconfiguredOutput, Output, NewOutput } from '../../../common/types';
+import type {
+  PreconfiguredOutput,
+  Output,
+  NewOutput,
+  OutputSecret,
+  KafkaOutput,
+  NewLogstashOutput,
+  NewRemoteElasticsearchOutput,
+} from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
@@ -30,6 +40,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             id: DEFAULT_OUTPUT_ID,
             hosts: config?.agents.elasticsearch.hosts,
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
+            ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
             is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
@@ -81,7 +92,7 @@ export async function createOrUpdatePreconfiguredOutputs(
         ca_sha256: outputData.ca_sha256 ?? null,
         ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
         ssl: outputData.ssl ?? null,
-      };
+      } as NewOutput;
 
       if (!data.hosts || data.hosts.length === 0) {
         data.hosts = outputService.getDefaultESHosts();
@@ -98,23 +109,107 @@ export async function createOrUpdatePreconfiguredOutputs(
       }
 
       const isUpdateWithNewData =
-        existingOutput && isPreconfiguredOutputDifferentFromCurrent(existingOutput, data);
+        existingOutput && (await isPreconfiguredOutputDifferentFromCurrent(existingOutput, data));
 
-      if (isCreate) {
-        logger.debug(`Creating output ${output.id}`);
-        await outputService.create(soClient, esClient, data, { id, fromPreconfiguration: true });
-      } else if (isUpdateWithNewData) {
-        logger.debug(`Updating output ${output.id}`);
-        await outputService.update(soClient, esClient, id, data, { fromPreconfiguration: true });
-        // Bump revision of all policies using that output
-        if (outputData.is_default || outputData.is_default_monitoring) {
-          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+      if (isCreate || isUpdateWithNewData) {
+        const secretHashes = await hashSecrets(output);
+
+        if (isCreate) {
+          logger.debug(`Creating preconfigured output ${output.id}`);
+          await outputService.create(soClient, esClient, data, {
+            id,
+            fromPreconfiguration: true,
+            secretHashes,
+          });
+        } else if (isUpdateWithNewData) {
+          logger.debug(`Updating preconfigured output ${output.id}`);
+          await outputService.update(soClient, esClient, id, data, {
+            fromPreconfiguration: true,
+            secretHashes,
+          });
+          // Bump revision of all policies using that output
+          if (outputData.is_default || outputData.is_default_monitoring) {
+            await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+          } else {
+            await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+          }
         }
       }
     })
   );
+}
+
+// Values recommended by NodeJS documentation
+const keyLength = 64;
+const saltLength = 16;
+
+// N=2^14 (16 MiB), r=8 (1024 bytes), p=5
+const scryptParams = {
+  cost: 16384,
+  blockSize: 8,
+  parallelization: 5,
+};
+
+export async function hashSecret(secret: string) {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(saltLength).toString('hex');
+    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
+
+async function verifySecret(hash: string, secret: string) {
+  return new Promise((resolve, reject) => {
+    const [salt, key] = hash.split(':');
+    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey));
+    });
+  });
+}
+
+async function hashSecrets(output: PreconfiguredOutput) {
+  if (output.type === 'kafka') {
+    const kafkaOutput = output as KafkaOutput;
+    if (typeof kafkaOutput.secrets?.password === 'string') {
+      const password = await hashSecret(kafkaOutput.secrets?.password);
+      return {
+        password,
+      };
+    }
+    if (typeof kafkaOutput.secrets?.ssl?.key === 'string') {
+      const key = await hashSecret(kafkaOutput.secrets?.ssl?.key);
+      return {
+        ssl: {
+          key,
+        },
+      };
+    }
+  }
+  if (output.type === 'logstash') {
+    const logstashOutput = output as NewLogstashOutput;
+    if (typeof logstashOutput.secrets?.ssl?.key === 'string') {
+      const key = await hashSecret(logstashOutput.secrets?.ssl?.key);
+      return {
+        ssl: {
+          key,
+        },
+      };
+    }
+  }
+  if (output.type === 'remote_elasticsearch') {
+    const remoteESOutput = output as NewRemoteElasticsearchOutput;
+    if (typeof remoteESOutput.secrets?.service_token === 'string') {
+      const serviceToken = await hashSecret(remoteESOutput.secrets?.service_token);
+      return {
+        service_token: serviceToken,
+      };
+    }
+  }
+
+  return undefined;
 }
 
 export async function cleanPreconfiguredOutputs(
@@ -164,10 +259,109 @@ export async function cleanPreconfiguredOutputs(
   }
 }
 
-function isPreconfiguredOutputDifferentFromCurrent(
+const hasHash = (secret?: OutputSecret): secret is { id: string; hash: string } => {
+  return !!secret && typeof secret !== 'string' && !!secret.hash;
+};
+
+async function isSecretDifferent(
+  preconfiguredValue: OutputSecret | undefined,
+  existingSecret: OutputSecret | undefined
+): Promise<boolean> {
+  if (!existingSecret && preconfiguredValue) {
+    return true;
+  }
+
+  if (!preconfiguredValue && existingSecret) {
+    return true;
+  }
+
+  if (!preconfiguredValue && !existingSecret) {
+    return false;
+  }
+
+  if (hasHash(existingSecret) && typeof preconfiguredValue === 'string') {
+    // verifying the has tells us if the value has changed
+    const hashIsVerified = await verifySecret(existingSecret.hash, preconfiguredValue!);
+
+    return !hashIsVerified;
+  } else {
+    // if there is no hash then the safest thing to do is assume the value has changed
+    return true;
+  }
+}
+
+async function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
-): boolean {
+): Promise<boolean> {
+  const kafkaFieldsAreDifferent = async (): Promise<boolean> => {
+    if (existingOutput.type !== 'kafka' || preconfiguredOutput.type !== 'kafka') {
+      return false;
+    }
+
+    const passwordHashIsDifferent = await isSecretDifferent(
+      preconfiguredOutput.secrets?.password,
+      existingOutput.secrets?.password
+    );
+
+    const sslKeyHashIsDifferent = await isSecretDifferent(
+      preconfiguredOutput.secrets?.ssl?.key,
+      existingOutput.secrets?.ssl?.key
+    );
+
+    return (
+      isDifferent(existingOutput.client_id, preconfiguredOutput.client_id) ||
+      isDifferent(existingOutput.version, preconfiguredOutput.version) ||
+      isDifferent(existingOutput.key, preconfiguredOutput.key) ||
+      isDifferent(existingOutput.compression, preconfiguredOutput.compression) ||
+      isDifferent(existingOutput.compression_level, preconfiguredOutput.compression_level) ||
+      isDifferent(existingOutput.auth_type, preconfiguredOutput.auth_type) ||
+      isDifferent(existingOutput.connection_type, preconfiguredOutput.connection_type) ||
+      isDifferent(existingOutput.username, preconfiguredOutput.username) ||
+      isDifferent(existingOutput.password, preconfiguredOutput.password) ||
+      isDifferent(existingOutput.sasl, preconfiguredOutput.sasl) ||
+      isDifferent(existingOutput.partition, preconfiguredOutput.partition) ||
+      isDifferent(existingOutput.random, preconfiguredOutput.random) ||
+      isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
+      isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
+      isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
+      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
+      isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
+      isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
+      isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||
+      isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks) ||
+      passwordHashIsDifferent ||
+      sslKeyHashIsDifferent
+    );
+  };
+
+  const logstashFieldsAreDifferent = async (): Promise<boolean> => {
+    if (existingOutput.type !== 'logstash' || preconfiguredOutput.type !== 'logstash') {
+      return false;
+    }
+    const sslKeyHashIsDifferent = await isSecretDifferent(
+      preconfiguredOutput.secrets?.ssl?.key,
+      existingOutput.secrets?.ssl?.key
+    );
+
+    return sslKeyHashIsDifferent;
+  };
+
+  const remoteESFieldsAreDifferent = async (): Promise<boolean> => {
+    if (
+      existingOutput.type !== 'remote_elasticsearch' ||
+      preconfiguredOutput.type !== 'remote_elasticsearch'
+    ) {
+      return false;
+    }
+    const serviceTokenIsDifferent = await isSecretDifferent(
+      preconfiguredOutput.secrets?.service_token,
+      existingOutput.secrets?.service_token
+    );
+
+    return serviceTokenIsDifferent;
+  };
+
   return (
     !existingOutput.is_preconfigured ||
     isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
@@ -191,6 +385,12 @@ function isPreconfiguredOutputDifferentFromCurrent(
     ) ||
     isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
     isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id) ||
-    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? [])
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
+    (preconfiguredOutput.preset &&
+      isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||
+    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal) ||
+    (await kafkaFieldsAreDifferent()) ||
+    (await logstashFieldsAreDifferent()) ||
+    (await remoteESFieldsAreDifferent())
   );
 }

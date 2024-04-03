@@ -11,10 +11,12 @@ properties:
     description: The type of connector.
     enum:
       - .slack
-    example: .slack
+    examples:
+      - .slack
   name:
     type: string
     description: The display name for the connector.
-    example: my-connector
+    examples:
+      - my-connector
   secrets:
     $ref: 'secrets_properties_slack_webhook.yaml'

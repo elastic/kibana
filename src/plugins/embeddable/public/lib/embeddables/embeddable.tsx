@@ -10,13 +10,23 @@ import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import {
+  EmbeddableAppContext,
+  EmbeddableError,
+  EmbeddableOutput,
+  IEmbeddable,
+  LegacyEmbeddableAPI,
+} from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
+import {
+  CommonLegacyEmbeddable,
+  legacyEmbeddableToApi,
+} from './compatibility/legacy_embeddable_to_api';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';
@@ -53,6 +63,8 @@ export abstract class Embeddable<
   private readonly outputSubject = new Rx.ReplaySubject<TEmbeddableOutput>(1);
   private readonly input$ = this.inputSubject.asObservable();
   private readonly output$ = this.outputSubject.asObservable();
+
+  private readonly initializationFinished = new Rx.Subject<void>();
 
   protected renderComplete = new RenderCompleteDispatcher();
 
@@ -94,13 +106,93 @@ export abstract class Embeddable<
         this.onResetInput(newInput);
       });
     }
-
     this.getOutput$()
       .pipe(
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
+
+    const { api, destroyAPI } = legacyEmbeddableToApi(this as unknown as CommonLegacyEmbeddable);
+    this.destroyAPI = destroyAPI;
+    ({
+      uuid: this.uuid,
+      disableTriggers: this.disableTriggers,
+      onEdit: this.onEdit,
+      viewMode: this.viewMode,
+      dataViews: this.dataViews,
+      parentApi: this.parentApi,
+      panelTitle: this.panelTitle,
+      query$: this.query$,
+      dataLoading: this.dataLoading,
+      filters$: this.filters$,
+      blockingError: this.blockingError,
+      onPhaseChange: this.onPhaseChange,
+      setPanelTitle: this.setPanelTitle,
+      linkToLibrary: this.linkToLibrary,
+      hidePanelTitle: this.hidePanelTitle,
+      timeRange$: this.timeRange$,
+      isEditingEnabled: this.isEditingEnabled,
+      panelDescription: this.panelDescription,
+      canLinkToLibrary: this.canLinkToLibrary,
+      disabledActionIds: this.disabledActionIds,
+      unlinkFromLibrary: this.unlinkFromLibrary,
+      setHidePanelTitle: this.setHidePanelTitle,
+      defaultPanelTitle: this.defaultPanelTitle,
+      setTimeRange: this.setTimeRange,
+      getTypeDisplayName: this.getTypeDisplayName,
+      setPanelDescription: this.setPanelDescription,
+      canUnlinkFromLibrary: this.canUnlinkFromLibrary,
+      isCompatibleWithUnifiedSearch: this.isCompatibleWithUnifiedSearch,
+      savedObjectId: this.savedObjectId,
+    } = api);
+
+    setTimeout(() => {
+      // after the constructor has finished, we initialize this embeddable if it isn't delayed
+      if (!this.deferEmbeddableLoad) this.initializationFinished.complete();
+    }, 0);
+  }
+
+  /**
+   * Assign compatibility API directly to the Embeddable instance.
+   */
+  private destroyAPI;
+  public uuid: LegacyEmbeddableAPI['uuid'];
+  public disableTriggers: LegacyEmbeddableAPI['disableTriggers'];
+  public onEdit: LegacyEmbeddableAPI['onEdit'];
+  public viewMode: LegacyEmbeddableAPI['viewMode'];
+  public parentApi: LegacyEmbeddableAPI['parentApi'];
+  public dataViews: LegacyEmbeddableAPI['dataViews'];
+  public query$: LegacyEmbeddableAPI['query$'];
+  public panelTitle: LegacyEmbeddableAPI['panelTitle'];
+  public dataLoading: LegacyEmbeddableAPI['dataLoading'];
+  public filters$: LegacyEmbeddableAPI['filters$'];
+  public onPhaseChange: LegacyEmbeddableAPI['onPhaseChange'];
+  public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
+  public blockingError: LegacyEmbeddableAPI['blockingError'];
+  public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];
+  public timeRange$: LegacyEmbeddableAPI['timeRange$'];
+  public hidePanelTitle: LegacyEmbeddableAPI['hidePanelTitle'];
+  public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
+  public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
+  public panelDescription: LegacyEmbeddableAPI['panelDescription'];
+  public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
+  public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
+  public setTimeRange: LegacyEmbeddableAPI['setTimeRange'];
+  public defaultPanelTitle: LegacyEmbeddableAPI['defaultPanelTitle'];
+  public setHidePanelTitle: LegacyEmbeddableAPI['setHidePanelTitle'];
+  public getTypeDisplayName: LegacyEmbeddableAPI['getTypeDisplayName'];
+  public setPanelDescription: LegacyEmbeddableAPI['setPanelDescription'];
+  public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
+  public isCompatibleWithUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithUnifiedSearch'];
+  public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
+
+  public getEditHref(): string | undefined {
+    return this.getOutput().editUrl ?? undefined;
+  }
+
+  public getAppContext(): EmbeddableAppContext | undefined {
+    return this.parent?.getAppContext();
   }
 
   public reportsEmbeddableLoad() {
@@ -174,7 +266,7 @@ export abstract class Embeddable<
 
   public getExplicitInput() {
     const root = this.getRoot();
-    if (root.getIsContainer()) {
+    if (root?.getIsContainer?.()) {
       return (
         (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
       );
@@ -249,6 +341,7 @@ export abstract class Embeddable<
 
     this.inputSubject.complete();
     this.outputSubject.complete();
+    this.destroyAPI();
 
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
@@ -256,14 +349,26 @@ export abstract class Embeddable<
     return;
   }
 
+  public async untilInitializationFinished(): Promise<void> {
+    return new Promise((resolve) => {
+      this.initializationFinished.subscribe({
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+  }
+
   /**
    * communicate to the parent embeddable that this embeddable's initialization is finished.
    * This only applies to embeddables which defer their loading state with deferEmbeddableLoad.
    */
   protected setInitializationFinished() {
+    if (!this.deferEmbeddableLoad) return;
     if (this.deferEmbeddableLoad && this.parent?.isContainer) {
       this.parent.setChildLoaded(this);
     }
+    this.initializationFinished.complete();
   }
 
   public updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {

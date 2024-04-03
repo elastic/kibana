@@ -1,0 +1,30 @@
+title: Timeslice Metric Percentile Metric
+required:
+  - name
+  - aggregation
+  - field
+  - percentile
+type: object
+properties:
+  name:
+    description: The name of the metric. Only valid options are A-Z
+    type: string
+    example: A
+    pattern: "^[A-Z]$"
+  aggregation:
+    description: The aggregation type of the metric. Only valid option is "percentile"
+    type: string
+    example: percentile
+    enum: [percentile]
+  field:
+    description: The field of the metric.
+    type: string
+    example: processor.processed
+  percentile:
+    description: The percentile value.
+    type: number
+    example: 95
+  filter:
+    description: The filter to apply to the metric.
+    type: string
+    example: 'processor.outcome: "success"'

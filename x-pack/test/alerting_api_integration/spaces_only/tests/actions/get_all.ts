@@ -115,15 +115,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
         {
-          connector_type_id: 'test.system-action',
-          id: 'system-connector-test.system-action',
-          is_deprecated: false,
-          is_preconfigured: false,
-          is_system_action: true,
-          name: 'System action: test.system-action',
-          referenced_by_count: 0,
-        },
-        {
           id: 'custom-system-abc-connector',
           is_preconfigured: true,
           is_deprecated: false,
@@ -233,15 +224,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.slack',
           name: 'Slack#xyz',
-          referenced_by_count: 0,
-        },
-        {
-          connector_type_id: 'test.system-action',
-          id: 'system-connector-test.system-action',
-          is_deprecated: false,
-          is_preconfigured: false,
-          is_system_action: true,
-          name: 'System action: test.system-action',
           referenced_by_count: 0,
         },
         {
@@ -368,15 +350,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             actionTypeId: '.slack',
             isSystemAction: false,
             name: 'Slack#xyz',
-            referencedByCount: 0,
-          },
-          {
-            actionTypeId: 'test.system-action',
-            id: 'system-connector-test.system-action',
-            isDeprecated: false,
-            isPreconfigured: false,
-            isSystemAction: true,
-            name: 'System action: test.system-action',
             referencedByCount: 0,
           },
           {

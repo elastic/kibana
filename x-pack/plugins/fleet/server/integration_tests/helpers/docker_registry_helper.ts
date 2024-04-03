@@ -8,7 +8,7 @@
 import type { ChildProcess } from 'child_process';
 
 import * as Rx from 'rxjs';
-import { filter, take, map, tap } from 'rxjs/operators';
+import { filter, take, map, tap } from 'rxjs';
 import execa from 'execa';
 
 import { observeLines } from '@kbn/stdio-dev-helpers';
@@ -106,7 +106,7 @@ export function useDockerRegistry() {
   beforeAll(async () => {
     jest.setTimeout(BEFORE_SETUP_TIMEOUT);
     await pRetry(() => pullDockerImage(), {
-      retries: 3,
+      retries: 5,
     });
 
     await pRetry(() => startDockerRegistryServer(), {

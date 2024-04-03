@@ -6,78 +6,72 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-
-import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CaseStatuses } from '../../../common/types/domain';
 import { StatusFilter } from './status_filter';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import * as i18n from './translations';
 
-const stats = {
-  [StatusAll]: 0,
-  [CaseStatuses.open]: 2,
-  [CaseStatuses['in-progress']]: 5,
-  [CaseStatuses.closed]: 7,
+const LABELS = {
+  closed: i18n.STATUS_CLOSED,
+  open: i18n.STATUS_OPEN,
+  inProgress: i18n.STATUS_IN_PROGRESS,
 };
 
-describe('StatusFilter', () => {
-  const onStatusChanged = jest.fn();
+// FLAKY: https://github.com/elastic/kibana/issues/177334
+describe.skip('StatusFilter', () => {
+  const onChange = jest.fn();
   const defaultProps = {
-    selectedStatus: CaseStatuses.open,
-    onStatusChanged,
-    stats,
+    selectedOptionKeys: [],
+    countClosedCases: 7,
+    countInProgressCases: 5,
+    countOpenCases: 2,
+    onChange,
   };
 
-  it('should render', () => {
-    const wrapper = mount(<StatusFilter {...defaultProps} />);
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    expect(wrapper.find('[data-test-subj="case-status-filter"]').exists()).toBeTruthy();
+  it('should render', async () => {
+    render(<StatusFilter {...defaultProps} />);
+
+    expect(screen.getByTestId('options-filter-popover-button-status')).toBeInTheDocument();
+    expect(screen.getByTestId('options-filter-popover-button-status')).not.toBeDisabled();
+
+    userEvent.click(screen.getByRole('button', { name: 'Status' }));
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.closed })).toBeInTheDocument();
+    expect(screen.getAllByRole('option').length).toBe(3);
   });
 
   it('should call onStatusChanged when changing status to open', async () => {
-    const wrapper = mount(<StatusFilter {...defaultProps} />);
+    render(<StatusFilter {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-    wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
+    userEvent.click(screen.getByRole('button', { name: 'Status' }));
+    await waitForEuiPopoverOpen();
+    userEvent.click(screen.getByRole('option', { name: LABELS.open }));
+
     await waitFor(() => {
-      expect(onStatusChanged).toBeCalledWith('open');
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'status',
+        selectedOptionKeys: [CaseStatuses.open],
+      });
     });
   });
 
-  it('should call onStatusChanged when changing status to in-progress', async () => {
-    const wrapper = mount(<StatusFilter {...defaultProps} />);
+  it('should not render hidden statuses', async () => {
+    render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
 
-    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-    wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
-    await waitFor(() => {
-      expect(onStatusChanged).toBeCalledWith('in-progress');
-    });
-  });
+    userEvent.click(screen.getByRole('button', { name: 'Status' }));
+    await waitForEuiPopoverOpen();
 
-  it('should call onStatusChanged when changing status to closed', async () => {
-    const wrapper = mount(<StatusFilter {...defaultProps} />);
-
-    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-    wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
-    await waitFor(() => {
-      expect(onStatusChanged).toBeCalledWith('closed');
-    });
-  });
-
-  it('should not render hidden statuses', () => {
-    const wrapper = mount(
-      <StatusFilter {...defaultProps} hiddenStatuses={[StatusAll, CaseStatuses.closed]} />
-    );
-
-    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-
-    expect(wrapper.find(`[data-test-subj="case-status-filter-all"]`).exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="case-status-filter-closed"]').exists()).toBeFalsy();
-
-    expect(wrapper.find('button[data-test-subj="case-status-filter-open"]').exists()).toBeTruthy();
-
-    expect(
-      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').exists()
-    ).toBeTruthy();
+    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
   });
 });

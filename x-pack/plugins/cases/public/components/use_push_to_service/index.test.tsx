@@ -12,14 +12,14 @@ import '../../common/mock/match_media';
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
 import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
-import type { CaseConnector } from '../../../common/api';
-import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { actionLicenses } from '../../containers/mock';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import type { CaseConnector } from '../../../common/types/domain';
 
 jest.mock('../../containers/use_get_action_license', () => {
   return {

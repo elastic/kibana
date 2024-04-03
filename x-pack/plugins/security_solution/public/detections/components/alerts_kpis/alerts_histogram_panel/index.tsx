@@ -14,6 +14,7 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { sumBy } from 'lodash';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -37,6 +38,8 @@ import {
   formatAlertsData,
   getAlertsHistogramQuery,
   showInitialLoadingSpinner,
+  createGenericSubtitle,
+  createEmbeddedDataSubtitle,
 } from './helpers';
 import { AlertsHistogram } from './alerts_histogram';
 import * as i18n from './translations';
@@ -55,6 +58,7 @@ import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_alert_histogram_count';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -366,6 +370,27 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
+    const { responses, loading } = useVisualizationResponse({
+      visualizationId,
+    });
+    const embeddedDataLoaded = !loading && !isEmpty(responses);
+    const aggregationBucketsCount = useMemo(
+      () =>
+        loading
+          ? 0
+          : sumBy(responses, (responseItem) =>
+              sumBy(Object.values(responseItem.aggregations ?? {}), 'buckets.length')
+            ),
+      [loading, responses]
+    );
+
+    const embeddedDataAvailable = !!aggregationBucketsCount;
+    const showsEmbeddedData = showHistogram && isChartEmbeddablesEnabled;
+
+    const subtitle = showsEmbeddedData
+      ? createEmbeddedDataSubtitle(embeddedDataLoaded, embeddedDataAvailable, totalAlerts)
+      : createGenericSubtitle(isInitialLoading, showTotalAlertsCount, totalAlerts);
+
     return (
       <InspectButtonContainer show={!isInitialLoading && showHistogram}>
         <KpiPanel
@@ -385,7 +410,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             toggleStatus={showHistogram}
             toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
-            subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
+            subtitle={subtitle}
             isInspectDisabled={isInspectDisabled}
           >
             <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">

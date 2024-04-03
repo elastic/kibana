@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Boom } from '@hapi/boom';
 import pMap from 'p-map';
 import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { CasesDeleteRequest } from '../../../common/api';
-import { CasesDeleteRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
+import type { CasesDeleteRequest } from '../../../common/types/api';
+import { CasesDeleteRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -20,7 +20,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { createCaseError } from '../../common/error';
+import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createFileEntities, deleteFiles } from '../files';
@@ -46,13 +46,13 @@ export async function deleteCases(
 
     for (const theCase of cases.saved_objects) {
       // bulkGet can return an error.
-      if (theCase.error != null) {
-        throw createCaseError({
-          message: `Failed to delete cases ids: ${JSON.stringify(ids)}: ${theCase.error.error}`,
-          error: new Boom(theCase.error.message, { statusCode: theCase.error.statusCode }),
-          logger,
-        });
+      if (isSOError(theCase)) {
+        throw createCaseErrorFromSOError(
+          theCase.error,
+          `Failed to delete cases ids: ${JSON.stringify(ids)}`
+        );
       }
+
       entities.set(theCase.id, { id: theCase.id, owner: theCase.attributes.owner });
     }
 

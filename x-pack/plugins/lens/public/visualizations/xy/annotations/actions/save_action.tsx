@@ -18,7 +18,7 @@ import {
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -28,7 +28,11 @@ import type {
   StateSetter,
 } from '../../../../types';
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
-import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
+import {
+  getAnnotationLayerTitle,
+  getGroupMetadataFromAnnotationLayer,
+  isByReferenceAnnotationsLayer,
+} from '../../visualization_helpers';
 
 type ModalOnSaveProps = SavedObjectOnSaveProps & { newTags: string[]; closeModal: () => void };
 
@@ -194,7 +198,7 @@ export const onSave = async ({
 }) => {
   const shouldStop = await shouldStopBecauseDuplicateTitle(
     newTitle,
-    isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : '',
+    getAnnotationLayerTitle(layer),
     newCopyOnSave,
     onTitleDuplicate,
     isTitleDuplicateConfirmed,
@@ -326,6 +330,8 @@ export const getSaveLayerAction = ({
     ),
     execute: async (domElement) => {
       if (domElement) {
+        const metadata = getGroupMetadataFromAnnotationLayer(layer);
+
         render(
           <KibanaThemeProvider theme$={kibanaTheme.theme$}>
             <I18nProvider>
@@ -345,9 +351,7 @@ export const getSaveLayerAction = ({
                     goToAnnotationLibrary,
                   });
                 }}
-                title={neverSaved ? '' : layer.__lastSaved.title}
-                description={neverSaved ? '' : layer.__lastSaved.description}
-                tags={neverSaved ? [] : layer.__lastSaved.tags}
+                {...metadata}
                 showCopyOnSave={!neverSaved}
               />
             </I18nProvider>

@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 
-import type { LogLevel } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { LOG_LEVELS } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { LOG_LEVELS } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { LogLevelIndicator } from '../../indicators/log_level_indicator';
 import { MultiselectFilter } from '../multiselect_filter';
 

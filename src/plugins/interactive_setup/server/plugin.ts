@@ -18,12 +18,12 @@ import type {
 } from '@kbn/core/server';
 import { getDataPath } from '@kbn/utils';
 
-import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
 import { VerificationService } from './verification_service';
+import { ElasticsearchConnectionStatus } from '../common';
 
 // List of the Elasticsearch hosts Kibana uses by default.
 const DEFAULT_ELASTICSEARCH_HOSTS = [

@@ -21,16 +21,14 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
+import { requiredOptional } from '@kbn/zod-helpers';
+import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
-import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
-import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -39,7 +37,9 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
-import { severityOptions } from '../../../components/rules/step_about_rule/data';
+import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -53,7 +53,7 @@ export const getStepsData = ({
   rule,
   detailsView = false,
 }: {
-  rule: Rule;
+  rule: RuleResponse;
   detailsView?: boolean;
 }): GetStepsData => {
   const defineRuleData: DefineStepRule = getDefineStepsData(rule);
@@ -72,39 +72,55 @@ export const getStepsData = ({
 };
 
 export const getActionsStepsData = (
-  rule: Omit<Rule, 'actions'> & {
-    actions: RuleAlertAction[];
+  rule: Omit<RuleResponse, 'actions'> & {
+    actions: RuleAction[];
     response_actions?: ResponseAction[];
   }
 ): ActionsStepRule => {
   const { enabled, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
-    actions: actions?.map(transformRuleToAlertAction),
+    actions: actions?.map((action) => transformRuleToAlertAction(action)),
     responseActions: responseActions?.map(transformRuleToAlertResponseAction),
-    kibanaSiemAppUrl: meta?.kibana_siem_app_url,
+    kibanaSiemAppUrl:
+      typeof meta?.kibana_siem_app_url === 'string' ? meta.kibana_siem_app_url : undefined,
     enabled,
   };
 };
 
+export const getMachineLearningJobId = (rule: RuleResponse): string[] | undefined => {
+  if (rule.type === 'machine_learning') {
+    return typeof rule.machine_learning_job_id === 'string'
+      ? [rule.machine_learning_job_id]
+      : rule.machine_learning_job_id;
+  }
+  return undefined;
+};
+
 /* eslint-disable complexity */
-export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
+export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
   ruleType: rule.type,
-  anomalyThreshold: rule.anomaly_threshold ?? 50,
-  machineLearningJobId: rule.machine_learning_job_id ?? [],
-  index: rule.index ?? [],
-  dataViewId: rule.data_view_id,
-  threatIndex: rule.threat_index ?? [],
+  anomalyThreshold: 'anomaly_threshold' in rule ? rule.anomaly_threshold : 50,
+  machineLearningJobId: getMachineLearningJobId(rule) || [],
+  index: ('index' in rule && rule.index) || [],
+  dataViewId: 'data_view_id' in rule ? rule.data_view_id : undefined,
+  threatIndex: ('threat_index' in rule && rule.threat_index) || [],
   threatQueryBar: {
-    query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
-    filters: (rule.threat_filters ?? []) as Filter[],
+    query: {
+      query: ('threat_query' in rule && rule.threat_query) || '',
+      language: ('threat_language' in rule && rule.threat_language) || '',
+    },
+    filters: (('threat_filters' in rule && rule.threat_filters) || []) as Filter[],
     saved_id: null,
   },
-  threatMapping: rule.threat_mapping ?? [],
+  threatMapping: ('threat_mapping' in rule && rule.threat_mapping) || [],
   queryBar: {
-    query: { query: rule.query ?? '', language: rule.language ?? '' },
-    filters: (rule.filters ?? []) as Filter[],
-    saved_id: rule.saved_id ?? null,
+    query: {
+      query: ('query' in rule && rule.query) || '',
+      language: ('language' in rule && rule.language) || '',
+    },
+    filters: (('filters' in rule && rule.filters) || []) as Filter[],
+    saved_id: ('saved_id' in rule && rule.saved_id) || null,
   },
   relatedIntegrations: rule.related_integrations ?? [],
   requiredFields: rule.required_fields ?? [],
@@ -113,9 +129,9 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     title: rule.timeline_title ?? null,
   },
   threshold: {
-    field: normalizeThresholdField(rule.threshold?.field),
-    value: `${rule.threshold?.value || 100}`,
-    ...(rule.threshold?.cardinality?.length
+    field: normalizeThresholdField('threshold' in rule ? rule.threshold?.field : undefined),
+    value: `${('threshold' in rule && rule.threshold?.value) || 100}`,
+    ...('threshold' in rule && rule.threshold?.cardinality?.length
       ? {
           cardinality: {
             field: [`${rule.threshold.cardinality[0].field}`],
@@ -125,26 +141,47 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
       : {}),
   },
   eqlOptions: {
-    timestampField: rule.timestamp_field,
-    eventCategoryField: rule.event_category_override,
-    tiebreakerField: rule.tiebreaker_field,
+    timestampField: 'timestamp_field' in rule ? rule.timestamp_field : undefined,
+    eventCategoryField:
+      'event_category_override' in rule ? rule.event_category_override : undefined,
+    tiebreakerField: 'tiebreaker_field' in rule ? rule.tiebreaker_field : undefined,
   },
-  dataSourceType: rule.data_view_id ? DataSourceType.DataView : DataSourceType.IndexPatterns,
-  newTermsFields: rule.new_terms_fields ?? [],
-  historyWindowSize: rule.history_window_start
-    ? convertHistoryStartToSize(rule.history_window_start)
-    : '7d',
+  dataSourceType:
+    'data_view_id' in rule && rule.data_view_id
+      ? DataSourceType.DataView
+      : DataSourceType.IndexPatterns,
+  newTermsFields: ('new_terms_fields' in rule && rule.new_terms_fields) || [],
+  historyWindowSize:
+    'history_window_start' in rule && rule.history_window_start
+      ? convertHistoryStartToSize(rule.history_window_start)
+      : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields: rule.alert_suppression?.group_by ?? [],
-  groupByRadioSelection: rule.alert_suppression?.duration
-    ? GroupByOptions.PerTimePeriod
-    : GroupByOptions.PerRuleExecution,
-  groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
+  groupByFields:
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'group_by' in rule.alert_suppression &&
+      rule.alert_suppression.group_by) ||
+    [],
+  groupByRadioSelection:
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+      ? GroupByOptions.PerTimePeriod
+      : GroupByOptions.PerRuleExecution,
+  groupByDuration: ('alert_suppression' in rule && rule.alert_suppression?.duration) || {
+    value: 5,
+    unit: 'm',
+  },
   suppressionMissingFields:
-    rule.alert_suppression?.missing_fields_strategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'missing_fields_strategy' in rule.alert_suppression &&
+      rule.alert_suppression.missing_fields_strategy) ||
+    DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: Boolean(
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+  ),
 });
 
-const convertHistoryStartToSize = (relativeTime: string) => {
+export const convertHistoryStartToSize = (relativeTime: string) => {
   if (relativeTime.startsWith('now-')) {
     return relativeTime.substring(4);
   } else {
@@ -152,7 +189,7 @@ const convertHistoryStartToSize = (relativeTime: string) => {
   }
 };
 
-export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
+export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
   const { interval, from } = rule;
   const fromHumanizedValue = getHumanizedDuration(from, interval);
 
@@ -184,7 +221,7 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   }
 };
 
-export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
+export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {
   const { name, description, note } = determineDetailsValue(rule, detailsView);
   const {
     author,
@@ -200,10 +237,12 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     severity,
     false_positives: falsePositives,
     risk_score: riskScore,
+    investigation_fields: investigationFields,
     tags,
     threat,
-    threat_indicator_path: threatIndicatorPath,
   } = rule;
+  const threatIndicatorPath =
+    'threat_indicator_path' in rule ? rule.threat_indicator_path : undefined;
 
   return {
     author,
@@ -226,10 +265,11 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     tags,
     riskScore: {
       value: riskScore,
-      mapping: riskScoreMapping,
+      mapping: requiredOptional(riskScoreMapping),
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
+    investigationFields: investigationFields?.field_names ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
   };
@@ -254,9 +294,9 @@ export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMa
 };
 
 export const determineDetailsValue = (
-  rule: Rule,
+  rule: RuleResponse,
   detailsView: boolean
-): Pick<Rule, 'name' | 'description' | 'note'> => {
+): Pick<RuleResponse, 'name' | 'description' | 'note'> => {
   const { name, description, note } = rule;
   if (detailsView) {
     return { name: '', description: '', note: '' };
@@ -265,7 +305,7 @@ export const determineDetailsValue = (
   return { name, description, note: note ?? '' };
 };
 
-export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
+export const getModifiedAboutDetailsData = (rule: RuleResponse): AboutStepRuleDetails => ({
   note: rule.note ?? '',
   description: rule.description,
   setup: rule.setup ?? '',
@@ -343,6 +383,7 @@ const commonRuleParamsKeys = [
   'name',
   'description',
   'false_positives',
+  'investigation_fields',
   'rule_id',
   'max_signals',
   'risk_score',
@@ -356,6 +397,7 @@ const commonRuleParamsKeys = [
   'version',
 ];
 const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id', 'response_actions'];
+const esqlRuleParams = ['filters', 'language', 'query', 'response_actions'];
 const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
 const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
@@ -376,6 +418,8 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
       return machineLearningRuleParams;
     case 'threshold':
       return thresholdRuleParams;
+    case 'esql':
+      return esqlRuleParams;
     case 'new_terms':
     case 'threat_match':
     case 'query':

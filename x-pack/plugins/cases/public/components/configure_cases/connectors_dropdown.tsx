@@ -6,13 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
-import styled from 'styled-components';
+import type { EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiIconTip,
+  EuiSuperSelect,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
-import { useKibana } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 
 export interface Props {
@@ -26,27 +33,19 @@ export interface Props {
 
 const ICON_SIZE = 'm';
 
-const EuiIconExtended = styled(EuiIcon)`
-  margin-right: 13px;
-  margin-bottom: 0 !important;
-`;
-
-const AddNewConnectorOption = styled.span`
-  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-  font-weight: ${(props) => props.theme.eui.euiFontWeightMedium};
-  line-height: ${(props) => props.theme.eui.euiSizeL};
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
+        <EuiIcon
+          css={css`
+            margin-right: 13px;
+            margin-bottom: 0 !important;
+          `}
+          type="minusInCircle"
+          size={ICON_SIZE}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <span data-test-subj={`dropdown-connector-no-connector`}>{i18n.NO_CONNECTOR}</span>
@@ -56,16 +55,25 @@ const noConnectorOption = {
   'data-test-subj': 'dropdown-connector-no-connector',
 };
 
-const addNewConnector = {
+const addNewConnector = (euiTheme: EuiThemeComputed<{}>) => ({
   value: 'add-connector',
-  inputDisplay: <AddNewConnectorOption>{i18n.ADD_NEW_CONNECTOR}</AddNewConnectorOption>,
-  'data-test-subj': 'dropdown-connector-add-connector',
-};
+  inputDisplay: (
+    <span
+      css={css`
+        font-size: ${euiTheme.font.scale.xs};
+        font-weight: ${euiTheme.font.weight.medium};
+        line-height: ${euiTheme.size.l};
 
-const StyledEuiIconTip = euiStyled(EuiIconTip)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS}
-  margin-bottom: 0 !important;
-`;
+        &:hover {
+          text-decoration: underline;
+        }
+      `}
+    >
+      {i18n.ADD_NEW_CONNECTOR}
+    </span>
+  ),
+  'data-test-subj': 'dropdown-connector-add-connector',
+});
 
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
@@ -76,6 +84,9 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   appendAddConnectorButton = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
+  const { actions } = useApplicationCapabilities();
+  const canSave = actions.crud;
+  const { euiTheme } = useEuiTheme();
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
@@ -86,7 +97,11 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
             inputDisplay: (
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIconExtended
+                  <EuiIcon
+                    css={css`
+                      margin-right: ${euiTheme.size.m};
+                      margin-bottom: 0 !important;
+                    `}
                     type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
                     size={ICON_SIZE}
                   />
@@ -99,7 +114,11 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 </EuiFlexItem>
                 {isDeprecatedConnector(connector) && (
                   <EuiFlexItem grow={false}>
-                    <StyledEuiIconTip
+                    <EuiIconTip
+                      css={css`
+                        margin-left: ${euiTheme.size.s}
+                        margin-bottom: 0 !important;
+                      `}
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
                       type="warning"
@@ -117,8 +136,8 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       [noConnectorOption]
     );
 
-    if (appendAddConnectorButton) {
-      return [...connectorsFormatted, addNewConnector];
+    if (appendAddConnectorButton && canSave) {
+      return [...connectorsFormatted, addNewConnector(euiTheme)];
     }
 
     return connectorsFormatted;

@@ -55,7 +55,7 @@ type ExecutionLog = IExecutionLog | IConnectorsExecutionLog;
 export interface EventLogDataGrid {
   columns: EuiDataGridColumn[];
   logs: ExecutionLog[];
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   sortingColumns: EuiDataGridSorting['columns'];
   visibleColumns: string[];
   dateFormat: string;
@@ -66,6 +66,7 @@ export interface EventLogDataGrid {
   onFlyoutOpen?: (runLog: IExecutionLog) => void;
   setVisibleColumns: (visibleColumns: string[]) => void;
   setSortingColumns: (sortingColumns: EuiDataGridSorting['columns']) => void;
+  getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
 export const numTriggeredActionsDisplay = i18n.translate(
@@ -167,6 +168,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
     onChangeItemsPerPage,
     onChangePage,
     onFlyoutOpen,
+    getRuleDetailsRoute,
   } = props;
 
   const { euiTheme } = useEuiTheme();
@@ -343,6 +345,7 @@ export const EventLogDataGrid = (props: EventLogDataGrid) => {
             ruleId={ruleId}
             spaceIds={spaceIds}
             useExecutionStatus={isRuleUsingExecutionStatus}
+            getRuleDetailsRoute={getRuleDetailsRoute}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

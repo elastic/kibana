@@ -22,6 +22,10 @@ export const STEP_THREE_TITLE = i18n.translate('xpack.cases.create.stepThreeTitl
   defaultMessage: 'External Connector Fields',
 });
 
+export const ADDITIONAL_FIELDS = i18n.translate('xpack.cases.create.additionalFields', {
+  defaultMessage: 'Additional fields',
+});
+
 export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLabel', {
   defaultMessage: 'Sync alert status with case status',
 });

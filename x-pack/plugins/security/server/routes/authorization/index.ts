@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { definePrivilegesRoutes } from './privileges';
 import { resetSessionPageRoutes } from './reset_session_page';
 import { defineRolesRoutes } from './roles';
 import { defineShareSavedObjectPermissionRoutes } from './spaces';
+import type { RouteDefinitionParams } from '..';
 
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
-  defineRolesRoutes(params);
-  definePrivilegesRoutes(params);
+  // The reset session endpoint is registered with httpResources and should remain public in serverless
   resetSessionPageRoutes(params);
-  defineShareSavedObjectPermissionRoutes(params);
+
+  // By default, in the serverless environment privileges and permissions are managed internally and only
+  // exposed to users and administrators via control plane UI, however, we will allow these routes to be registered
+  // behind a feature flag for development & design of Custom Roles
+  if (params.buildFlavor !== 'serverless' || params.config.roleManagementEnabled) {
+    definePrivilegesRoutes(params);
+    defineRolesRoutes(params);
+  }
+
+  // Shared object permission routes are not currently available in serverless.
+  if (params.buildFlavor !== 'serverless') {
+    defineShareSavedObjectPermissionRoutes(params);
+  }
 }

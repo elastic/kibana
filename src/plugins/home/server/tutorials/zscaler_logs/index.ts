@@ -39,7 +39,7 @@ export function zscalerLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zscaler.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/zscaler.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/zscaler.svg'),
     artifacts: {
       dashboards: [],
       application: {

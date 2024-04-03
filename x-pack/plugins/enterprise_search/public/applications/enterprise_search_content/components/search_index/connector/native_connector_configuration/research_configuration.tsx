@@ -11,7 +11,7 @@ import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorDefinition } from '../types';
+import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
 
 interface ResearchConfigurationProps {
   nativeConnector: ConnectorDefinition;
@@ -44,17 +44,19 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={externalDocsUrl}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
-              {
-                defaultMessage: '{name} documentation',
-                values: { name },
-              }
-            )}
-          </EuiLink>
-        </EuiFlexItem>
+        {externalDocsUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink target="_blank" href={externalDocsUrl}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
+                {
+                  defaultMessage: '{name} documentation',
+                  values: { name },
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

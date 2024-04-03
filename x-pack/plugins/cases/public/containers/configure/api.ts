@@ -7,17 +7,26 @@
 
 import { isEmpty } from 'lodash/fp';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../common/types/api';
-import type { Configuration, Configurations } from '../../../common/types/domain';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type {
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
+  CreateConfigureResponse,
+  GetConfigureResponse,
+  UpdateConfigureResponse,
+} from '../../../common/types/api';
+import type {
+  ActionConnector,
+  ActionTypeConnector,
+  Configuration,
+} from '../../../common/types/domain';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
-import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
 import { getCaseConfigurationDetailsUrl } from '../../../common/api';
 import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
-import type { ApiProps } from '../types';
+import type { ApiProps, CasesConfigurationUI } from '../types';
 import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
-import type { CaseConfigure } from './types';
 
 export const getSupportedActionConnectors = async ({
   signal,
@@ -32,18 +41,23 @@ export const getSupportedActionConnectors = async ({
 
 export const getCaseConfigure = async ({
   signal,
-  owner,
-}: ApiProps & { owner: string[] }): Promise<CaseConfigure | null> => {
-  const response = await KibanaServices.get().http.fetch<Configurations>(CASE_CONFIGURE_URL, {
+}: ApiProps): Promise<CasesConfigurationUI[] | null> => {
+  const response = await KibanaServices.get().http.fetch<GetConfigureResponse>(CASE_CONFIGURE_URL, {
     method: 'GET',
     signal,
-    query: { ...(owner.length > 0 ? { owner } : {}) },
   });
 
   if (!isEmpty(response)) {
     const decodedConfigs = decodeCaseConfigurationsResponse(response);
     if (Array.isArray(decodedConfigs) && decodedConfigs.length > 0) {
-      return convertToCamelCase<Configuration, CaseConfigure>(decodedConfigs[0]);
+      return decodedConfigs.map((decodedConfig) => {
+        const configuration = convertToCamelCase<
+          GetConfigureResponse[number],
+          SnakeToCamelCase<GetConfigureResponse[number]>
+        >(decodedConfig);
+
+        return convertConfigureResponseToCasesConfigure(configuration);
+      });
     }
   }
 
@@ -51,31 +65,42 @@ export const getCaseConfigure = async ({
 };
 
 export const postCaseConfigure = async (
-  caseConfiguration: ConfigurationRequest,
-  signal: AbortSignal
-): Promise<CaseConfigure> => {
-  const response = await KibanaServices.get().http.fetch<Configuration>(CASE_CONFIGURE_URL, {
-    method: 'POST',
-    body: JSON.stringify(caseConfiguration),
-    signal,
-  });
-  return convertToCamelCase<Configuration, CaseConfigure>(decodeCaseConfigureResponse(response));
+  caseConfiguration: ConfigurationRequest
+): Promise<CasesConfigurationUI> => {
+  const response = await KibanaServices.get().http.fetch<CreateConfigureResponse>(
+    CASE_CONFIGURE_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(caseConfiguration),
+    }
+  );
+
+  const configuration = convertToCamelCase<
+    CreateConfigureResponse,
+    SnakeToCamelCase<CreateConfigureResponse>
+  >(decodeCaseConfigureResponse(response));
+
+  return convertConfigureResponseToCasesConfigure(configuration);
 };
 
 export const patchCaseConfigure = async (
   id: string,
-  caseConfiguration: ConfigurationPatchRequest,
-  signal: AbortSignal
-): Promise<CaseConfigure> => {
-  const response = await KibanaServices.get().http.fetch<Configuration>(
+  caseConfiguration: ConfigurationPatchRequest
+): Promise<CasesConfigurationUI> => {
+  const response = await KibanaServices.get().http.fetch<UpdateConfigureResponse>(
     getCaseConfigurationDetailsUrl(id),
     {
       method: 'PATCH',
       body: JSON.stringify(caseConfiguration),
-      signal,
     }
   );
-  return convertToCamelCase<Configuration, CaseConfigure>(decodeCaseConfigureResponse(response));
+
+  const configuration = convertToCamelCase<
+    UpdateConfigureResponse,
+    SnakeToCamelCase<UpdateConfigureResponse>
+  >(decodeCaseConfigureResponse(response));
+
+  return convertConfigureResponseToCasesConfigure(configuration);
 };
 
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
@@ -85,4 +110,12 @@ export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionType
   );
 
   return convertArrayToCamelCase(response) as ActionTypeConnector[];
+};
+
+const convertConfigureResponseToCasesConfigure = (
+  configuration: SnakeToCamelCase<Configuration>
+): CasesConfigurationUI => {
+  const { id, version, mappings, customFields, closureType, connector, owner } = configuration;
+
+  return { id, version, mappings, customFields, closureType, connector, owner };
 };

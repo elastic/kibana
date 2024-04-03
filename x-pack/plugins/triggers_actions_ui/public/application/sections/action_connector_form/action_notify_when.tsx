@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +27,7 @@ import {
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { RuleNotifyWhenType, RuleAction, NotifyWhenSelectOptions } from '../../../types';
+import { RuleNotifyWhenType, NotifyWhenSelectOptions } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
@@ -136,7 +136,7 @@ interface ActionNotifyWhenProps {
   onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
   onSummaryChange: (summary: boolean) => void;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
@@ -144,7 +144,7 @@ interface ActionNotifyWhenProps {
 }
 
 export const ActionNotifyWhen = ({
-  hasSummary,
+  hasAlertsMappings,
   frequency = DEFAULT_FREQUENCY,
   throttle,
   throttleUnit,
@@ -308,7 +308,7 @@ export const ActionNotifyWhen = ({
         <EuiFlexItem>
           <EuiSuperSelect
             fullWidth
-            prepend={hasSummary ? summaryOrPerRuleSelect : <></>}
+            prepend={hasAlertsMappings ? summaryOrPerRuleSelect : <></>}
             data-test-subj="notifyWhenSelect"
             options={notifyWhenOptions}
             valueOfSelected={notifyWhenValue}

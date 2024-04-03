@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import type { ShouldIncrementRevision } from './bulk_edit';
 import {
   PartialRule,
   RawRule,
@@ -18,12 +17,12 @@ import {
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration } from '../../../common/parse_duration';
+import { parseDuration, getRuleCircuitBreakerErrorMessage, AlertDelay } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { NormalizedAlertAction, RulesClientContext } from '../types';
+import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '../types';
 import {
   validateActions,
   extractReferences,
@@ -34,6 +33,16 @@ import {
   createNewAPIKeySet,
   migrateLegacyActions,
 } from '../lib';
+import {
+  validateScheduleLimit,
+  ValidateScheduleLimitResult,
+} from '../../application/rule/methods/get_schedule_frequency';
+import { validateSystemActions } from '../../lib/validate_system_actions';
+import { transformRawActionsToDomainActions } from '../../application/rule/transforms';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { transformRawActionsToDomainSystemActions } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
+
+type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -42,12 +51,14 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     tags: string[];
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
+    systemActions?: NormalizedSystemAction[];
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
+    alertDelay?: AlertDelay;
   };
   allowMissingConnectorSecrets?: boolean;
-  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
@@ -75,16 +86,47 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   try {
     alertSavedObject =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
       `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
     // Still attempt to load the object using SOC
-    alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
+  }
+
+  const {
+    attributes: { enabled, schedule, name },
+  } = alertSavedObject;
+
+  let validationPayload: ValidateScheduleLimitResult = null;
+  if (enabled && schedule.interval !== data.schedule.interval) {
+    validationPayload = await validateScheduleLimit({
+      context,
+      prevInterval: alertSavedObject.attributes.schedule?.interval,
+      updatedInterval: data.schedule.interval,
+    });
+  }
+
+  if (validationPayload) {
+    throw Boom.badRequest(
+      getRuleCircuitBreakerErrorMessage({
+        name,
+        interval: validationPayload.interval,
+        intervalAvailable: validationPayload.intervalAvailable,
+        action: 'update',
+      })
+    );
   }
 
   try {
@@ -98,7 +140,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -109,7 +151,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -181,13 +223,33 @@ async function updateAlert<Params extends RuleTypeParams>(
   currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
-
+  const { actions: genAction, systemActions: genSystemActions } = await addGeneratedActionValues(
+    initialData.actions,
+    initialData.systemActions,
+    context
+  );
+  const data = {
+    ...initialData,
+    actions: genAction,
+    systemActions: genSystemActions,
+  };
+  const actionsClient = await context.getActionsClient();
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+  try {
+    validateActionsSchema(data.actions, data.systemActions);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating actions - ${error.message}`);
+  }
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
+  await validateSystemActions({
+    actionsClient,
+    connectorAdapterRegistry: context.connectorAdapterRegistry,
+    systemActions: data.systemActions,
+  });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
@@ -200,12 +262,13 @@ async function updateAlert<Params extends RuleTypeParams>(
     );
   }
 
+  const allActions = [...data.actions, ...(data.systemActions ?? [])];
   // Extract saved object references for this rule
   const {
     references,
     params: updatedParams,
-    actions,
-  } = await extractReferences(context, ruleType, data.actions, validatedAlertTypeParams);
+    actions: actionsWithRefs,
+  } = await extractReferences(context, ruleType, allActions, validatedAlertTypeParams);
 
   const username = await context.getUserName();
 
@@ -228,12 +291,13 @@ async function updateAlert<Params extends RuleTypeParams>(
     : currentRule.attributes.revision;
 
   let updatedObject: SavedObject<RawRule>;
+  const { systemActions, ...restData } = data;
   const createAttributes = updateMeta(context, {
     ...attributes,
-    ...data,
+    ...restData,
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
-    actions,
+    actions: actionsWithRefs,
     notifyWhen,
     revision,
     updatedBy: username,
@@ -248,7 +312,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   try {
     updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       createAttributes,
       {
         id,
@@ -282,8 +346,7 @@ async function updateAlert<Params extends RuleTypeParams>(
       `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );
   }
-
-  return getPartialRuleFromRaw(
+  const rules = getPartialRuleFromRaw<Params>(
     context,
     id,
     ruleType,
@@ -292,4 +355,47 @@ async function updateAlert<Params extends RuleTypeParams>(
     false,
     true
   );
+
+  return {
+    ...rules,
+    actions: transformRawActionsToDomainActions({
+      ruleId: id,
+      references: updatedObject.references,
+      actions: updatedObject.attributes.actions,
+      omitGeneratedValues: false,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    }),
+    systemActions: transformRawActionsToDomainSystemActions({
+      ruleId: id,
+      references: updatedObject.references,
+      actions: updatedObject.attributes.actions,
+      omitGeneratedValues: false,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    }),
+  };
 }
+
+/**
+ * This is a temporary validation to ensure that actions
+ * contain the expected properties. When the method is migrated to
+ * use a schema for validation, like the create_rule method, the
+ * function should be deleted in favor of the schema validation.
+ */
+const validateActionsSchema = (
+  actions: NormalizedAlertAction[],
+  systemActions: NormalizedSystemAction[]
+) => {
+  for (const action of actions) {
+    if (!action.group) {
+      // Simulating kbn-schema error message
+      throw new Error('[actions.0.group]: expected value of type [string] but got [undefined]');
+    }
+  }
+
+  for (const systemAction of systemActions) {
+    if ('group' in systemAction || 'frequency' in systemAction || 'alertsFilter' in systemAction) {
+      // Simulating kbn-schema error message
+      throw new Error('definition for this key is missing');
+    }
+  }
+};

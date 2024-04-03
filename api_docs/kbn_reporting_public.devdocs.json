@@ -1,0 +1,1919 @@
+{
+  "id": "@kbn/reporting-public",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.Job",
+        "type": "Class",
+        "tags": [],
+        "label": "Job",
+        "description": [],
+        "path": "packages/kbn-reporting/public/job.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.payload",
+            "type": "Object",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "{ spaceId?: string | undefined; isDeprecated?: boolean | undefined; title: string; version: string; layout?: { id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; browserTimezone: string; pagingStrategy?: ",
+              "CsvPagingStrategy",
+              " | undefined; }"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.objectType",
+            "type": "string",
+            "tags": [],
+            "label": "objectType",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.browserTimezone",
+            "type": "string",
+            "tags": [],
+            "label": "browserTimezone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.layout",
+            "type": "Object",
+            "tags": [],
+            "label": "layout",
+            "description": [],
+            "signature": [
+              "{ id?: ",
+              {
+                "pluginId": "screenshotting",
+                "scope": "common",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
+              },
+              " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.pagingStrategy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pagingStrategy",
+            "description": [],
+            "signature": [
+              "CsvPagingStrategy",
+              " | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.jobtype",
+            "type": "string",
+            "tags": [],
+            "label": "jobtype",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.created_by",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "created_by",
+            "description": [],
+            "signature": [
+              "string | false"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.started_at",
+            "type": "string",
+            "tags": [],
+            "label": "started_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.completed_at",
+            "type": "string",
+            "tags": [],
+            "label": "completed_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/reporting-common",
+                "scope": "common",
+                "docId": "kibKbnReportingCommonPluginApi",
+                "section": "def-common.JOB_STATUS",
+                "text": "JOB_STATUS"
+              }
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.attempts",
+            "type": "number",
+            "tags": [],
+            "label": "attempts",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.max_attempts",
+            "type": "number",
+            "tags": [],
+            "label": "max_attempts",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.timeout",
+            "type": "number",
+            "tags": [],
+            "label": "timeout",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.kibana_name",
+            "type": "string",
+            "tags": [],
+            "label": "kibana_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.kibana_id",
+            "type": "string",
+            "tags": [],
+            "label": "kibana_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.content_type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content_type",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.csv_contains_formulas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "csv_contains_formulas",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.max_size_reached",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "max_size_reached",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "TaskRunMetrics",
+              " | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.error_code",
+            "type": "string",
+            "tags": [],
+            "label": "error_code",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.locatorParams",
+            "type": "Array",
+            "tags": [],
+            "label": "locatorParams",
+            "description": [],
+            "signature": [
+              "LocatorParams",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">[] | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.queue_time_ms",
+            "type": "number",
+            "tags": [],
+            "label": "queue_time_ms",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.execution_time_ms",
+            "type": "number",
+            "tags": [],
+            "label": "execution_time_ms",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.Job.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "report",
+                "description": [],
+                "signature": [
+                  "ReportApiJSON"
+                ],
+                "path": "packages/kbn-reporting/public/job.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.isSearch",
+            "type": "Function",
+            "tags": [],
+            "label": "isSearch",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getStatusMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "getStatusMessage",
+            "description": [],
+            "signature": [
+              "() => JSX.Element | null"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.prettyStatus",
+            "type": "string",
+            "tags": [],
+            "label": "prettyStatus",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.canLinkToKibanaApp",
+            "type": "boolean",
+            "tags": [],
+            "label": "canLinkToKibanaApp",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.isDownloadReady",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDownloadReady",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.prettyJobTypeName",
+            "type": "string",
+            "tags": [],
+            "label": "prettyJobTypeName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.prettyTimeout",
+            "type": "string",
+            "tags": [],
+            "label": "prettyTimeout",
+            "description": [],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getCreatedAtDate",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreatedAtDate",
+            "description": [
+              "\nReturns a user friendly version of the report job creation date"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getCreatedBy",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreatedBy",
+            "description": [
+              "\nReturns a user friendly version of the user that created the report job"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getCreatedAtLabel",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreatedAtLabel",
+            "description": [],
+            "signature": [
+              "() => string | JSX.Element"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getError",
+            "type": "Function",
+            "tags": [],
+            "label": "getError",
+            "description": [],
+            "signature": [
+              "() => string[] | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getDeprecatedMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeprecatedMessage",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getWarnings",
+            "type": "Function",
+            "tags": [],
+            "label": "getWarnings",
+            "description": [],
+            "signature": [
+              "() => JSX.Element | undefined"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.getPrettyStatusTimestamp",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrettyStatusTimestamp",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.ReportingAPIClient",
+        "type": "Class",
+        "tags": [
+          "implements"
+        ],
+        "label": "ReportingAPIClient",
+        "description": [
+          "\nClient class for interacting with Reporting APIs"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-public",
+            "scope": "public",
+            "docId": "kibKbnReportingPublicPluginApi",
+            "section": "def-public.ReportingAPIClient",
+            "text": "ReportingAPIClient"
+          },
+          " implements IReportingAPI"
+        ],
+        "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "uiSettings",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-ui-settings-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                    "section": "def-common.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getKibanaAppHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaAppHref",
+            "description": [],
+            "signature": [
+              "(job: ",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.Job",
+                "text": "Job"
+              },
+              ") => string"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getKibanaAppHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "job",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-public",
+                    "scope": "public",
+                    "docId": "kibKbnReportingPublicPluginApi",
+                    "section": "def-public.Job",
+                    "text": "Job"
+                  }
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getReportURL",
+            "type": "Function",
+            "tags": [],
+            "label": "getReportURL",
+            "description": [
+              "\nGet the internal URL"
+            ],
+            "signature": [
+              "(jobId: string) => string"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getReportURL.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.downloadReport",
+            "type": "Function",
+            "tags": [],
+            "label": "downloadReport",
+            "description": [],
+            "signature": [
+              "(jobId: string) => void"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.downloadReport.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.deleteReport",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteReport",
+            "description": [],
+            "signature": [
+              "(jobId: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.deleteReport.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "(page?: number, jobIds?: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.Job",
+                "text": "Job"
+              },
+              "[]>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.list.$1",
+                "type": "number",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.list.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "jobIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.total",
+            "type": "Function",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "signature": [
+              "() => Promise<number>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getError",
+            "type": "Function",
+            "tags": [],
+            "label": "getError",
+            "description": [],
+            "signature": [
+              "(jobId: string) => Promise<string>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getInfo",
+            "description": [],
+            "signature": [
+              "(jobId: string) => Promise<",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.Job",
+                "text": "Job"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getInfo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.findForJobIds",
+            "type": "Function",
+            "tags": [],
+            "label": "findForJobIds",
+            "description": [],
+            "signature": [
+              "(jobIds: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.Job",
+                "text": "Job"
+              },
+              "[]>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.findForJobIds.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "jobIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getReportingPublicJobPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getReportingPublicJobPath",
+            "description": [
+              "\nReturns a string for the public API endpoint used to automate the generation of reports\nThis string must be shown when the user selects the option to view/copy the POST URL"
+            ],
+            "signature": [
+              "(exportType: string, jobParams: ",
+              "BaseParams",
+              ") => string"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getReportingPublicJobPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "exportType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getReportingPublicJobPath.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "jobParams",
+                "description": [],
+                "signature": [
+                  "BaseParams"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.createReportingJob",
+            "type": "Function",
+            "tags": [],
+            "label": "createReportingJob",
+            "description": [
+              "\nCalls the internal API to generate a report job on-demand"
+            ],
+            "signature": [
+              "(exportType: string, jobParams: ",
+              "BaseParams",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.Job",
+                "text": "Job"
+              },
+              " | undefined>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.createReportingJob.$1",
+                "type": "string",
+                "tags": [],
+                "label": "exportType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.createReportingJob.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "jobParams",
+                "description": [],
+                "signature": [
+                  "BaseParams"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.createImmediateReport",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "createImmediateReport",
+            "description": [],
+            "signature": [
+              "(baseParams: ",
+              "BaseParams",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpResponse",
+                "text": "HttpResponse"
+              },
+              "<unknown>>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.createImmediateReport.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "baseParams",
+                "description": [],
+                "signature": [
+                  "BaseParams"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getDecoratedJobParams",
+            "type": "Function",
+            "tags": [],
+            "label": "getDecoratedJobParams",
+            "description": [],
+            "signature": [
+              "<T extends AppParams>(baseParams: T) => ",
+              "BaseParams"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getDecoratedJobParams.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "baseParams",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getManagementLink",
+            "type": "Function",
+            "tags": [],
+            "label": "getManagementLink",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getDownloadLink",
+            "type": "Function",
+            "tags": [],
+            "label": "getDownloadLink",
+            "description": [],
+            "signature": [
+              "(jobId: string) => string"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getDownloadLink.$1",
+                "type": "string",
+                "tags": [],
+                "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getServerBasePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getServerBasePath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.verifyBrowser",
+            "type": "Function",
+            "tags": [],
+            "label": "verifyBrowser",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "DiagnoseResponse",
+              ">"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.verifyScreenCapture",
+            "type": "Function",
+            "tags": [],
+            "label": "verifyScreenCapture",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "DiagnoseResponse",
+              ">"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.migrateReportingIndicesIlmPolicy",
+            "type": "Function",
+            "tags": [],
+            "label": "migrateReportingIndicesIlmPolicy",
+            "description": [],
+            "signature": [
+              "() => Promise<unknown>"
+            ],
+            "path": "packages/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.checkLicense",
+        "type": "Function",
+        "tags": [],
+        "label": "checkLicense",
+        "description": [],
+        "signature": [
+          "(checkResults: ",
+          "LicenseCheck",
+          ") => ",
+          "LicenseCheckResults"
+        ],
+        "path": "packages/kbn-reporting/public/license_check.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.checkLicense.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "checkResults",
+            "description": [],
+            "signature": [
+              "LicenseCheck"
+            ],
+            "path": "packages/kbn-reporting/public/license_check.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.InternalApiClientProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "InternalApiClientProvider",
+        "description": [],
+        "signature": [
+          "({ apiClient, http, children }: React.PropsWithChildren<{ apiClient: ",
+          {
+            "pluginId": "@kbn/reporting-public",
+            "scope": "public",
+            "docId": "kibKbnReportingPublicPluginApi",
+            "section": "def-public.ReportingAPIClient",
+            "text": "ReportingAPIClient"
+          },
+          "; http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }>) => JSX.Element"
+        ],
+        "path": "packages/kbn-reporting/public/context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.InternalApiClientProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ apiClient, http, children }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ apiClient: ",
+              {
+                "pluginId": "@kbn/reporting-public",
+                "scope": "public",
+                "docId": "kibKbnReportingPublicPluginApi",
+                "section": "def-public.ReportingAPIClient",
+                "text": "ReportingAPIClient"
+              },
+              "; http: ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              },
+              "; }>"
+            ],
+            "path": "packages/kbn-reporting/public/context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.jobCompletionNotifications",
+        "type": "Function",
+        "tags": [],
+        "label": "jobCompletionNotifications",
+        "description": [],
+        "signature": [
+          "() => { getPendingJobIds: () => string[]; addPendingJobId: (jobId: string) => void; setPendingJobIds: (jobIds: string[]) => void; }"
+        ],
+        "path": "packages/kbn-reporting/public/job_completion_notifications.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.useCheckIlmPolicyStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "useCheckIlmPolicyStatus",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "esUiShared",
+            "scope": "public",
+            "docId": "kibEsUiSharedPluginApi",
+            "section": "def-public.UseRequestResponse",
+            "text": "UseRequestResponse"
+          },
+          "<",
+          "IlmPolicyStatusResponse",
+          ", Error>"
+        ],
+        "path": "packages/kbn-reporting/public/hooks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.useInternalApiClient",
+        "type": "Function",
+        "tags": [],
+        "label": "useInternalApiClient",
+        "description": [],
+        "signature": [
+          "() => ContextValue"
+        ],
+        "path": "packages/kbn-reporting/public/context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.useKibana",
+        "type": "Function",
+        "tags": [],
+        "label": "useKibana",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "kibanaReact",
+            "scope": "public",
+            "docId": "kibKibanaReactPluginApi",
+            "section": "def-public.KibanaReactContextValue",
+            "text": "KibanaReactContextValue"
+          },
+          "<Partial<",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreStart",
+            "text": "CoreStart"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/reporting-public",
+            "scope": "public",
+            "docId": "kibKbnReportingPublicPluginApi",
+            "section": "def-public.KibanaContext",
+            "text": "KibanaContext"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-reporting/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.ClientConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientConfigType",
+        "description": [],
+        "path": "packages/kbn-reporting/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.csv",
+            "type": "Object",
+            "tags": [],
+            "label": "csv",
+            "description": [],
+            "signature": [
+              "{ enablePanelActionDownload: boolean; scroll: { duration: string; size: number; }; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.poll",
+            "type": "Object",
+            "tags": [],
+            "label": "poll",
+            "description": [],
+            "signature": [
+              "{ jobsRefresh: { interval: number; intervalErrorMultiplier: number; }; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.export_types",
+            "type": "Object",
+            "tags": [],
+            "label": "export_types",
+            "description": [],
+            "signature": [
+              "{ pdf: { enabled: boolean; }; png: { enabled: boolean; }; csv: { enabled: boolean; }; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.statefulSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "statefulSettings",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.KibanaContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaContext",
+        "description": [],
+        "path": "packages/kbn-reporting/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "packages/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              }
+            ],
+            "path": "packages/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-common.DocLinksStart",
+                "text": "DocLinksStart"
+              }
+            ],
+            "path": "packages/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "packages/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "packages/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

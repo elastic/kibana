@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type CasesCommon = ProvidedType<typeof CasesCommonServiceProvider>;
@@ -51,19 +50,38 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async assertRadioGroupValue(testSubject: string, expectedValue: string) {
+      await retry.waitFor(
+        `assertRadioGroupValue: Expected the radio group ${testSubject} to exists`,
+        async () => {
+          return await testSubjects.exists(testSubject);
+        }
+      );
+
       const assertRadioGroupValue = await testSubjects.find(testSubject);
-      const input = await assertRadioGroupValue.findByCssSelector(':checked');
-      const selectedOptionId = await input.getAttribute('id');
-      expect(selectedOptionId).to.eql(
-        expectedValue,
-        `Expected the radio group value to equal "${expectedValue}" (got "${selectedOptionId}")`
+
+      await retry.waitFor(
+        `assertRadioGroupValue: Expected the radio group value to equal "${expectedValue}"`,
+        async () => {
+          const input = await assertRadioGroupValue.findByCssSelector(':checked');
+          const selectedOptionId = await input.getAttribute('id');
+          return selectedOptionId === expectedValue;
+        }
       );
     },
 
     async selectRadioGroupValue(testSubject: string, value: string) {
+      await retry.waitFor(
+        `selectRadioGroupValue: Expected the radio group ${testSubject} to exists`,
+        async () => {
+          return await testSubjects.exists(testSubject);
+        }
+      );
+
       const radioGroup = await testSubjects.find(testSubject);
+
       const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
       await label.click();
+      await header.waitUntilLoadingHasFinished();
       await this.assertRadioGroupValue(testSubject, value);
     },
 
@@ -76,9 +94,8 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async expectToasterToContain(content: string) {
-      const toast = await toasts.getToastElement(1);
+      const toast = await toasts.getElementByIndex(1);
       expect(await toast.getVisibleText()).to.contain(content);
-      await toasts.dismissAllToasts();
     },
 
     async assertCaseModalVisible(expectVisible = true) {

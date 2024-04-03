@@ -35,7 +35,13 @@ exports[`ManageData render 1`] = `
         className="kbnOverviewDataManage__item"
         key="security"
       >
-        <RedirectAppLinks>
+        <RedirectAppLinks
+          coreStart={
+            Object {
+              "application": undefined,
+            }
+          }
+        >
           <Synopsis
             description="Control who has access and what tasks they can perform."
             iconType="securityApp"
@@ -52,7 +58,13 @@ exports[`ManageData render 1`] = `
         className="kbnOverviewDataManage__item"
         key="monitoring"
       >
-        <RedirectAppLinks>
+        <RedirectAppLinks
+          coreStart={
+            Object {
+              "application": undefined,
+            }
+          }
+        >
           <Synopsis
             description="Track the real-time health and performance of your deployment."
             iconType="monitoringApp"
@@ -69,7 +81,13 @@ exports[`ManageData render 1`] = `
         className="kbnOverviewDataManage__item"
         key="snapshot_restore"
       >
-        <RedirectAppLinks>
+        <RedirectAppLinks
+          coreStart={
+            Object {
+              "application": undefined,
+            }
+          }
+        >
           <Synopsis
             description="Save snapshots to a backup repository, and restore to recover index and cluster state."
             iconType="storage"
@@ -86,7 +104,13 @@ exports[`ManageData render 1`] = `
         className="kbnOverviewDataManage__item"
         key="index_lifecycle_management"
       >
-        <RedirectAppLinks>
+        <RedirectAppLinks
+          coreStart={
+            Object {
+              "application": undefined,
+            }
+          }
+        >
           <Synopsis
             description="Define lifecycle policies to automatically perform operations as an index ages."
             iconType="indexSettings"

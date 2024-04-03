@@ -1,0 +1,53 @@
+{{~#if $ref~}}
+  {{referenceName}}
+  {{~#if nullable}}.nullable(){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if (eq type "object")}}
+  z.object({
+    {{#each properties}}
+      {{#if description}}
+      /** 
+      * {{{description}}} 
+      */
+      {{/if}}
+      {{@key}}: {{> zod_query_item requiredBool=(includes ../required @key)}},
+    {{/each}}
+  })
+{{~/if~}}
+
+{{~#if (eq type "array")}}
+  ArrayFromString({{~> zod_schema_item items ~}})
+  {{~#if minItems}}.min({{minItems}}){{/if~}}
+  {{~#if maxItems}}.max({{maxItems}}){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if (eq type "boolean")}}
+  BooleanFromString
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if (eq type "string")}}
+{{> zod_schema_item}}
+{{~/if~}}
+
+{{~#if (eq type "integer")}}
+  z.coerce.number().int()
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}
+
+{{~#if (eq type "number")}}
+  z.coerce.number()
+  {{~#if minimum includeZero=true}}.min({{minimum}}){{/if~}}
+  {{~#if maximum includeZero=true}}.max({{maximum}}){{/if~}}
+  {{~#if (eq requiredBool false)}}.optional(){{/if~}}
+  {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
+{{~/if~}}

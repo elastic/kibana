@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -48,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
 
       const jobInfo = await supertest
-        .get('/api/reporting/jobs/info/kraz4j94154g0763b583rc37')
+        .get(INTERNAL_ROUTES.JOBS.INFO_PREFIX + '/kraz4j94154g0763b583rc37')
         .auth('test_user', 'changeme');
 
       expect(jobInfo.body.output.warnings).to.eql([

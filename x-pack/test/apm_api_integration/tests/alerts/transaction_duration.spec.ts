@@ -5,40 +5,47 @@
  * 2.0.
  */
 
-import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_duration/register_transaction_duration_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
-  createIndexConnector,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-} from './alerting_api_helper';
-import {
-  waitForRuleStatus,
-  waitForDocumentInIndex,
-  waitForAlertInIndex,
-} from './wait_for_rule_status';
+  ApmAlertFields,
+  createIndexConnector,
+  getIndexAction,
+} from './helpers/alerting_api_helper';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
+import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
+import { waitForActiveRule } from './helpers/wait_for_active_rule';
+import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-
   const supertest = getService('supertest');
   const es = getService('es');
+  const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
-
   const synthtraceEsClient = getService('synthtraceEsClient');
 
+  const ruleParams = {
+    threshold: 3000,
+    windowSize: 5,
+    windowUnit: 'm',
+    transactionType: 'request',
+    serviceName: 'opbeans-java',
+    environment: 'production',
+    aggregationType: AggregationType.Avg,
+    groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
+  };
+
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    let ruleId: string;
-    let actionId: string | undefined;
-
-    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
-    const ALERT_ACTION_INDEX_NAME = 'alert-action-transaction-duration';
-
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -61,98 +68,99 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return synthtraceEsClient.index(events);
     });
 
     after(async () => {
       await synthtraceEsClient.clean();
-      await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
-      await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME]);
-      await es.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-      });
-      await es.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
-      });
     });
 
-    describe('create alert with transaction.name group by', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176996
+    describe.skip('create rule for opbeans-java without kql filter', () => {
+      let ruleId: string;
+      let actionId: string;
+      let alerts: ApmAlertFields[];
+
       before(async () => {
-        actionId = await createIndexConnector({
-          supertest,
-          name: 'Transation duration API test',
-          indexName: ALERT_ACTION_INDEX_NAME,
+        actionId = await createIndexConnector({ supertest, name: 'Transation duration' });
+        const indexAction = getIndexAction({
+          actionId,
+          actionVariables: transactionDurationActionVariables,
         });
+
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionDuration,
-          name: 'Apm transaction duration',
+          name: 'Apm transaction duration without kql filter',
           params: {
-            threshold: 3000,
-            windowSize: 5,
-            windowUnit: 'm',
-            transactionType: 'request',
-            serviceName: 'opbeans-java',
-            environment: 'production',
-            aggregationType: AggregationType.Avg,
-            groupBy: [
-              'service.name',
-              'service.environment',
-              'transaction.type',
-              'transaction.name',
-            ],
+            ...ruleParams,
           },
-          actions: [
-            {
-              group: 'threshold_met',
-              id: actionId,
-              params: {
-                documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
-              },
-              frequency: {
-                notify_when: 'onActionGroupChange',
-                throttle: null,
-                summary: false,
-              },
-            },
-          ],
+          actions: [indexAction],
         });
-        expect(createdRule.id).to.not.eql(undefined);
         ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId });
+      });
+
+      after(async () => {
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('checks if rule is active', async () => {
-        const executionStatus = await waitForRuleStatus({
-          id: ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
-        expect(executionStatus.status).to.be('active');
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        expect(ruleStatus).to.be('active');
       });
 
-      it('returns correct message', async () => {
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME,
+      describe('action variables', () => {
+        let results: Array<Record<string, string>>;
+
+        before(async () => {
+          results = await waitForIndexConnectorResults({ es });
         });
 
-        expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java`);
+        it('populates the action connector index with every action variable', async () => {
+          expect(results.length).to.be(1);
+          expect(Object.keys(results[0]).sort()).to.eql([
+            'alertDetailsUrl',
+            'environment',
+            'interval',
+            'reason',
+            'serviceName',
+            'threshold',
+            'transactionName',
+            'transactionType',
+            'triggerValue',
+            'viewInAppUrl',
+          ]);
+        });
+
+        it('populates the document with the correct values', async () => {
+          expect(omit(results[0], 'alertDetailsUrl')).to.eql({
+            environment: 'production',
+            interval: '5 mins',
+            reason:
+              'Avg. latency is 5.0 s in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 3.0 s.',
+            serviceName: 'opbeans-java',
+            transactionType: 'request',
+            transactionName: 'tx-java',
+            threshold: '3000',
+            triggerValue: '5,000 ms',
+            viewInAppUrl:
+              'http://mockedPublicBaseUrl/app/apm/services/opbeans-java?transactionType=request&environment=production',
+          });
+        });
+      });
+
+      it('produces an alert for opbeans-java with the correct reason', async () => {
+        expect(alerts[0]['kibana.alert.reason']).to.be(
+          'Avg. latency is 5.0 s in the last 5 mins for service: opbeans-java, env: production, type: request, name: tx-java. Alert when > 3.0 s.'
+        );
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const resp = await waitForAlertInIndex({
-          es,
-          indexName: APM_ALERTS_INDEX,
-          ruleId,
-        });
-
-        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
-        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
-        expect(resp.hits.hits[0]._source).property('transaction.type', 'request');
-        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
+        expect(alerts[0]).property('service.name', 'opbeans-java');
+        expect(alerts[0]).property('service.environment', 'production');
+        expect(alerts[0]).property('transaction.type', 'request');
+        expect(alerts[0]).property('transaction.name', 'tx-java');
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
@@ -177,6 +185,79 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'opbeans-node',
         });
         expect(serviceTabAlertCount).to.be(0);
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/177061
+    describe.skip('create rule for opbeans-node using kql filter', () => {
+      let ruleId: string;
+      let alerts: ApmAlertFields[];
+
+      beforeEach(async () => {
+        const createdRule = await createApmRule({
+          supertest,
+          ruleTypeId: ApmRuleType.TransactionDuration,
+          name: 'Apm transaction duration with kql filter',
+          params: {
+            searchConfiguration: {
+              query: {
+                query:
+                  'service.name: opbeans-node and transaction.type: request and service.environment: production',
+                language: 'kuery',
+              },
+            },
+            ...ruleParams,
+          },
+          actions: [],
+        });
+        ruleId = createdRule.id;
+        alerts = await waitForAlertsForRule({ es, ruleId });
+      });
+
+      afterEach(async () => {
+        await cleanupRuleAndAlertState({ es, supertest, logger });
+      });
+
+      it('checks if rule is active', async () => {
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
+        expect(ruleStatus).to.be('active');
+      });
+
+      it('produces an alert for opbeans-node with the correct reason', async () => {
+        expect(alerts[0]['kibana.alert.reason']).to.be(
+          'Avg. latency is 4.0 s in the last 5 mins for service: opbeans-node, env: production, type: request, name: tx-node. Alert when > 3.0 s.'
+        );
+      });
+
+      it('indexes alert document with all group-by fields', async () => {
+        expect(alerts[0]).property('service.name', 'opbeans-node');
+        expect(alerts[0]).property('service.environment', 'production');
+        expect(alerts[0]).property('transaction.type', 'request');
+        expect(alerts[0]).property('transaction.name', 'tx-node');
+      });
+
+      it('shows alert count=1 for opbeans-node on service inventory', async () => {
+        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
+        expect(serviceInventoryAlertCounts).to.eql({
+          'opbeans-node': 1,
+          'opbeans-java': 0,
+        });
+      });
+
+      it('shows alert count=0 in opbeans-java service', async () => {
+        const serviceTabAlertCount = await fetchServiceTabAlertCount({
+          apmApiClient,
+          serviceName: 'opbeans-java',
+        });
+        expect(serviceTabAlertCount).to.be(0);
+      });
+
+      it('shows alert count=1 in opbeans-node service', async () => {
+        const serviceTabAlertCount = await fetchServiceTabAlertCount({
+          apmApiClient,
+          serviceName: 'opbeans-node',
+        });
+        expect(serviceTabAlertCount).to.be(1);
       });
     });
   });

@@ -7,15 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { FC } from 'react';
+import React from 'react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageTemplate,
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,
@@ -29,63 +30,60 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
+const aboutPanelContentStyle = css({
+  '.euiFilePicker__icon': {
+    width: euiThemeVars.euiSizeXXL,
+    height: euiThemeVars.euiSizeXXL,
+  },
+});
+
 export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
   return (
-    <EuiPageBody
-      paddingSize="none"
-      panelled={false}
-      restrictWidth={1000}
-      data-test-subj="dataVisualizerPageFileUpload"
-    >
-      <EuiPageContent hasShadow={false} hasBorder>
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={true}>
-            <WelcomeContent hasPermissionToImport={hasPermissionToImport} />
+    <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileUpload">
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem grow={true}>
+          <WelcomeContent hasPermissionToImport={hasPermissionToImport} />
 
-            <EuiHorizontalRule margin="l" />
+          <EuiHorizontalRule margin="l" />
 
-            <div style={{ textAlign: 'center' }}>
-              <EuiFilePicker
-                id="filePicker"
-                initialPromptText={i18n.translate(
-                  'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-                  {
-                    defaultMessage: 'Select or drag and drop a file',
-                  }
-                )}
-                onChange={(files) => onFilePickerChange(files)}
-                className="file-datavisualizer-file-picker"
-              />
-            </div>
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageContent>
-    </EuiPageBody>
+          <div css={{ textAlign: 'center' }}>
+            <EuiFilePicker
+              id="filePicker"
+              fullWidth
+              initialPromptText={i18n.translate(
+                'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+                {
+                  defaultMessage: 'Select or drag and drop a file',
+                }
+              )}
+              onChange={(files) => onFilePickerChange(files)}
+              css={aboutPanelContentStyle}
+            />
+          </div>
+          <EuiSpacer size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageTemplate.Section>
   );
 };
 
 export const LoadingPanel: FC = () => {
   return (
-    <EuiPage restrictWidth={400} data-test-subj="dataVisualizerPageFileLoading">
-      <EuiPageBody>
-        <EuiPageContent className="file-datavisualizer-about-panel__content" paddingSize="l">
-          <div style={{ textAlign: 'center' }}>
-            <EuiTitle size="s">
-              <h1 role="alert">
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.aboutPanel.analyzingDataTitle"
-                  defaultMessage="Analyzing data"
-                />
-              </h1>
-            </EuiTitle>
-
-            <EuiSpacer size="l" />
-
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileLoading">
+      <EuiPageTemplate.EmptyPrompt
+        title={
+          <EuiTitle size="s">
+            <h1 role="alert">
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.aboutPanel.analyzingDataTitle"
+                defaultMessage="Analyzing data"
+              />
+            </h1>
+          </EuiTitle>
+        }
+      >
+        <EuiLoadingSpinner size="xl" />
+      </EuiPageTemplate.EmptyPrompt>
+    </EuiPageTemplate.Section>
   );
 };

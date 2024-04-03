@@ -8,7 +8,7 @@
 
 import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 
 import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import {
@@ -116,6 +116,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
+  isStrictReadonly(key: string) {
+    return this.isDeclared(key) && Boolean(this.cache[key].readonlyMode === 'strict');
+  }
+
   getUpdate$() {
     return this.update$.asObservable();
   }
@@ -124,11 +128,27 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.updateErrors$.asObservable();
   }
 
+  async validateValue(key: string, value: unknown) {
+    try {
+      const resp = await this.api.validate(key, value);
+      const isValid = resp.valid;
+      return isValid
+        ? { successfulValidation: true, valid: true }
+        : { successfulValidation: true, valid: false, errorMessage: resp.errorMessage };
+    } catch (error) {
+      this.updateErrors$.next(error);
+      return { successfulValidation: false };
+    }
+  }
+
   protected assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
       throw new Error(
         `Unable to update "${key}" because its value is overridden by the Kibana server`
       );
+    }
+    if (this.isStrictReadonly(key)) {
+      throw new Error(`Unable to update "${key}" because this setting is not in the allowlist.`);
     }
   }
 

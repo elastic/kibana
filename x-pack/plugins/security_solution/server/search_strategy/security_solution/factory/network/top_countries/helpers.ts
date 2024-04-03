@@ -8,10 +8,10 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
 import type {
   NetworkTopCountriesBuckets,
   NetworkTopCountriesEdges,
-  NetworkTopCountriesRequestOptions,
   FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy/security_solution/network';
 import { getOppositeField } from '../helpers';

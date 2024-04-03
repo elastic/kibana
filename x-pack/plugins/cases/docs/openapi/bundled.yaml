@@ -1,19 +1,21 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Cases
   description: OpenAPI schema for Cases endpoints
-  version: '0.1'
+  version: '0.2'
   contact:
     name: Cases Team
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: /
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: cases
     description: Case APIs enable you to open and track issues.
-servers:
-  - url: http://localhost:5601
-    description: local
 paths:
   /api/cases:
     post:
@@ -50,8 +52,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes one or more cases in the default space.
       operationId: deleteCaseDefaultSpace
@@ -71,8 +71,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates one or more cases in the default space.
       operationId: updateCaseDefaultSpace
@@ -108,10 +106,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases in the default space.
@@ -147,6 +141,7 @@ paths:
                 properties:
                   cases:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/case_response_properties'
                   count_closed_cases:
@@ -170,10 +165,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/alerts/{alertId}:
     get:
       summary: Returns the cases associated with a specific alert in the default space.
@@ -193,6 +184,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
                   properties:
@@ -202,7 +194,7 @@ paths:
                     title:
                       type: string
                       description: The case title.
-                example:
+                examples:
                   - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                     title: security_case
         '401':
@@ -211,10 +203,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601s
   /api/cases/configure:
     get:
       summary: Retrieves external connection details, such as the closure type and default connector for cases in the default space.
@@ -237,52 +225,98 @@ paths:
                   properties:
                     closure_type:
                       $ref: '#/components/schemas/closure_types'
+                    customFields:
+                      type: array
+                      x-technical-preview: true
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: |
+                              A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+                            type: string
+                            minLength: 1
+                            maxLength: 36
+                          label:
+                            description: The custom field label that is displayed in the case.
+                            type: string
+                            minLength: 1
+                            maxLength: 50
+                          required:
+                            description: |
+                              Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                            type: boolean
+                          type:
+                            description: The type of the custom field.
+                            type: string
+                            enum:
+                              - text
+                              - toggle
                     connector:
                       type: object
                       properties:
                         fields:
                           description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                          nullable: true
-                          type: object
+                          type:
+                            - object
+                            - 'null'
                         id:
                           description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                           type: string
-                          example: none
+                          examples:
+                            - none
                         name:
                           description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
                           type: string
-                          example: none
+                          examples:
+                            - none
                         type:
                           $ref: '#/components/schemas/connector_types'
                     created_at:
                       type: string
                       format: date-time
-                      example: '2022-06-01T17:07:17.767Z'
+                      examples:
+                        - '2022-06-01T17:07:17.767Z'
                     created_by:
                       type: object
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
-                          type: string
-                          example: null
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         full_name:
-                          type: string
-                          example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         profile_uid:
                           type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                          examples:
+                            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - elastic
                     error:
-                      type: string
-                      nullable: true
-                      example: null
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - null
                     id:
                       type: string
-                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                      examples:
+                        - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                     mappings:
                       type: array
                       items:
@@ -290,52 +324,71 @@ paths:
                         properties:
                           action_type:
                             type: string
-                            example: overwrite
+                            examples:
+                              - overwrite
                           source:
                             type: string
-                            example: title
+                            examples:
+                              - title
                           target:
                             type: string
-                            example: summary
+                            examples:
+                              - summary
                     owner:
                       $ref: '#/components/schemas/owners'
                     updated_at:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       format: date-time
-                      nullable: true
-                      example: '2022-06-01T19:58:48.169Z'
+                      examples:
+                        - '2022-06-01T19:58:48.169Z'
                     updated_by:
-                      type: object
+                      type:
+                        - object
+                        - 'null'
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
-                          type: string
-                          example: null
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         full_name:
-                          type: string
-                          example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         profile_uid:
                           type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                      nullable: true
+                          examples:
+                            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - elastic
                     version:
                       type: string
-                      example: WzIwNzMsMV0=
+                      examples:
+                        - WzIwNzMsMV0=
+              examples:
+                getConfigurationResponse:
+                  $ref: '#/components/examples/get_case_configuration_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     post:
-      summary: Sets external connection details, such as the closure type and default connector for cases in the default space.
+      summary: Creates a case specific configuration that includes external connection details and custom fields.
       operationId: setCaseConfigurationDefaultSpace
       description: |
         You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.
@@ -361,52 +414,98 @@ paths:
                 properties:
                   closure_type:
                     $ref: '#/components/schemas/closure_types'
+                  customFields:
+                    type: array
+                    x-technical-preview: true
+                    description: Custom fields configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          description: |
+                            A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+                          type: string
+                          minLength: 1
+                          maxLength: 36
+                        label:
+                          description: The custom field label that is displayed in the case.
+                          type: string
+                          minLength: 1
+                          maxLength: 50
+                        required:
+                          description: |
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                          type: boolean
+                        type:
+                          description: The type of the custom field.
+                          type: string
+                          enum:
+                            - text
+                            - toggle
                   connector:
                     type: object
                     properties:
                       fields:
                         description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                        nullable: true
-                        type: object
+                        type:
+                          - object
+                          - 'null'
                       id:
                         description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                         type: string
-                        example: none
+                        examples:
+                          - none
                       name:
                         description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
                         type: string
-                        example: none
+                        examples:
+                          - none
                       type:
                         $ref: '#/components/schemas/connector_types'
                   created_at:
                     type: string
                     format: date-time
-                    example: '2022-06-01T17:07:17.767Z'
+                    examples:
+                      - '2022-06-01T17:07:17.767Z'
                   created_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
-                        type: string
-                        example: null
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       full_name:
-                        type: string
-                        example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       profile_uid:
                         type: string
-                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
                   error:
-                    type: string
-                    nullable: true
-                    example: null
+                    type:
+                      - string
+                      - 'null'
+                    examples:
+                      - null
                   id:
                     type: string
-                    example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    examples:
+                      - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                   mappings:
                     type: array
                     items:
@@ -414,42 +513,60 @@ paths:
                       properties:
                         action_type:
                           type: string
-                          example: overwrite
+                          examples:
+                            - overwrite
                         source:
                           type: string
-                          example: title
+                          examples:
+                            - title
                         target:
                           type: string
-                          example: summary
+                          examples:
+                            - summary
                   owner:
                     $ref: '#/components/schemas/owners'
                   updated_at:
-                    type: string
+                    type:
+                      - string
+                      - 'null'
                     format: date-time
-                    nullable: true
-                    example: '2022-06-01T19:58:48.169Z'
+                    examples:
+                      - '2022-06-01T19:58:48.169Z'
                   updated_by:
-                    type: object
+                    type:
+                      - object
+                      - 'null'
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
-                        type: string
-                        example: null
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       full_name:
-                        type: string
-                        example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       profile_uid:
                         type: string
-                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    nullable: true
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
                   version:
                     type: string
-                    example: WzIwNzMsMV0=
+                    examples:
+                      - WzIwNzMsMV0=
               examples:
                 setCaseConfigResponse:
                   $ref: '#/components/examples/set_case_configuration_response'
@@ -459,10 +576,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/configure/{configurationId}:
     patch:
       summary: Updates external connection details, such as the closure type and default connector for cases in the default space.
@@ -479,117 +592,181 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/update_case_configuration_request'
+            examples:
+              updateCaseConfigurationRequest:
+                $ref: '#/components/examples/update_case_configuration_request'
       responses:
         '200':
           description: Indicates a successful call.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    closure_type:
-                      $ref: '#/components/schemas/closure_types'
-                    connector:
+                type: object
+                properties:
+                  closure_type:
+                    $ref: '#/components/schemas/closure_types'
+                  customFields:
+                    type: array
+                    x-technical-preview: true
+                    description: Custom fields configuration details.
+                    items:
                       type: object
                       properties:
-                        fields:
-                          description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                          nullable: true
-                          type: object
-                        id:
-                          description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                        key:
+                          description: |
+                            A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
                           type: string
-                          example: none
-                        name:
-                          description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                          minLength: 1
+                          maxLength: 36
+                        label:
+                          description: The custom field label that is displayed in the case.
                           type: string
-                          example: none
+                          minLength: 1
+                          maxLength: 50
+                        required:
+                          description: |
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                          type: boolean
                         type:
-                          $ref: '#/components/schemas/connector_types'
-                    created_at:
-                      type: string
-                      format: date-time
-                      example: '2022-06-01T17:07:17.767Z'
-                    created_by:
+                          description: The type of the custom field.
+                          type: string
+                          enum:
+                            - text
+                            - toggle
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+                        type:
+                          - object
+                          - 'null'
+                      id:
+                        description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                        type: string
+                        examples:
+                          - none
+                      name:
+                        description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                        type: string
+                        examples:
+                          - none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    examples:
+                      - '2022-06-01T17:07:17.767Z'
+                  created_by:
+                    type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
+                    properties:
+                      email:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      full_name:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      profile_uid:
+                        type: string
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
+                  error:
+                    type:
+                      - string
+                      - 'null'
+                    examples:
+                      - null
+                  id:
+                    type: string
+                    examples:
+                      - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                  mappings:
+                    type: array
+                    items:
                       type: object
                       properties:
-                        email:
+                        action_type:
                           type: string
-                          example: null
-                          nullable: true
-                        full_name:
+                          examples:
+                            - overwrite
+                        source:
                           type: string
-                          example: null
-                          nullable: true
-                        username:
+                          examples:
+                            - title
+                        target:
                           type: string
-                          example: elastic
-                          nullable: true
-                        profile_uid:
-                          type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    error:
-                      type: string
-                      nullable: true
-                      example: null
-                    id:
-                      type: string
-                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
-                    mappings:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          action_type:
-                            type: string
-                            example: overwrite
-                          source:
-                            type: string
-                            example: title
-                          target:
-                            type: string
-                            example: summary
-                    owner:
-                      $ref: '#/components/schemas/owners'
-                    updated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                      example: '2022-06-01T19:58:48.169Z'
-                    updated_by:
-                      type: object
-                      properties:
-                        email:
-                          type: string
-                          example: null
-                          nullable: true
-                        full_name:
-                          type: string
-                          example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
-                        profile_uid:
-                          type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                      nullable: true
-                    version:
-                      type: string
-                      example: WzIwNzMsMV0=
+                          examples:
+                            - summary
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  updated_at:
+                    type:
+                      - string
+                      - 'null'
+                    format: date-time
+                    examples:
+                      - '2022-06-01T19:58:48.169Z'
+                  updated_by:
+                    type:
+                      - object
+                      - 'null'
+                    required:
+                      - email
+                      - full_name
+                      - username
+                    properties:
+                      email:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      full_name:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      profile_uid:
+                        type: string
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
+                  version:
+                    type: string
+                    examples:
+                      - WzIwNzMsMV0=
+              examples:
+                updateCaseConfigurationResponse:
+                  $ref: '#/components/examples/update_case_configuration_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/reporters:
     get:
       summary: Returns information about the users who opened cases in the default space.
@@ -607,24 +784,36 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: object
+                  required:
+                    - email
+                    - full_name
+                    - username
                   properties:
                     email:
-                      type: string
-                      example: null
-                      nullable: true
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - null
                     full_name:
-                      type: string
-                      example: null
-                      nullable: true
-                    username:
-                      type: string
-                      example: elastic
-                      nullable: true
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - null
                     profile_uid:
                       type: string
-                      example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      examples:
+                        - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                    username:
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - elastic
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
@@ -634,10 +823,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/status:
     get:
       summary: Returns the number of cases that are open, closed, and in progress in the default space.
@@ -663,19 +848,12 @@ paths:
                     type: integer
                   count_open_cases:
                     type: integer
-              examples:
-                getStatusResponse:
-                  $ref: '#/components/examples/get_status_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags in the default space.
@@ -693,6 +871,7 @@ paths:
             application/json:
               schema:
                 type: array
+                maxItems: 10000
                 items:
                   type: string
               examples:
@@ -704,10 +883,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}:
     get:
       summary: Retrieves information about a case in the default space.
@@ -727,18 +902,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/case_response_properties'
               examples:
-                getCaseResponse:
+                getDefaultCaseResponse:
                   $ref: '#/components/examples/get_case_response'
+                getDefaultObservabilityCaseReponse:
+                  $ref: '#/components/examples/get_case_observability_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/alerts:
     get:
       summary: Gets all alerts attached to a case in the default space.
@@ -768,10 +941,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case in the default space.
@@ -808,8 +977,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes all comments and alerts from a case in the default space.
       operationId: deleteCaseCommentsDefaultSpace
@@ -829,8 +996,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates a comment or alert in a case in the default space.
       operationId: updateCaseCommentDefaultSpace
@@ -866,8 +1031,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves all the comments from a case in the default space.
       operationId: getAllCaseCommentsDefaultSpace
@@ -891,10 +1054,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Deletes a comment or alert from a case in the default space.
@@ -916,8 +1075,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a comment from a case in the default space.
       operationId: getCaseCommentDefaultSpace
@@ -946,10 +1103,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Pushes a case in the default space to an external service.
@@ -966,8 +1119,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              nullable: true
+              type:
+                - object
+                - 'null'
       responses:
         '200':
           description: Indicates a successful call.
@@ -984,10 +1138,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/user_actions:
     get:
       summary: Returns all user activity for a case in the default space.
@@ -1008,19 +1158,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/user_actions_response_properties'
-              examples:
-                getCaseActivityResponse:
-                  $ref: '#/components/examples/get_case_activity_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/{caseId}/user_actions/_find:
     get:
       summary: Finds user activity for a case in the default space.
@@ -1051,6 +1194,7 @@ paths:
                     type: integer
                   userActions:
                     type: array
+                    maxItems: 10000
                     items:
                       $ref: '#/components/schemas/user_actions_find_response_properties'
               examples:
@@ -1062,10 +1206,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors in the default space.
@@ -1116,10 +1256,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
       summary: Creates a case.
@@ -1156,8 +1292,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes one or more cases.
       operationId: deleteCase
@@ -1178,8 +1312,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates one or more cases.
       operationId: updateCase
@@ -1216,10 +1348,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases.
@@ -1279,10 +1407,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/alerts/{alertId}:
     get:
       summary: Returns the cases associated with a specific alert.
@@ -1312,7 +1436,7 @@ paths:
                     title:
                       type: string
                       description: The case title.
-                example:
+                examples:
                   - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                     title: security_case
         '401':
@@ -1321,10 +1445,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure:
     get:
       summary: Retrieves external connection details, such as the closure type and default connector for cases.
@@ -1348,52 +1468,98 @@ paths:
                   properties:
                     closure_type:
                       $ref: '#/components/schemas/closure_types'
+                    customFields:
+                      type: array
+                      x-technical-preview: true
+                      description: Custom fields configuration details.
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            description: |
+                              A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+                            type: string
+                            minLength: 1
+                            maxLength: 36
+                          label:
+                            description: The custom field label that is displayed in the case.
+                            type: string
+                            minLength: 1
+                            maxLength: 50
+                          required:
+                            description: |
+                              Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                            type: boolean
+                          type:
+                            description: The type of the custom field.
+                            type: string
+                            enum:
+                              - text
+                              - toggle
                     connector:
                       type: object
                       properties:
                         fields:
                           description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                          nullable: true
-                          type: object
+                          type:
+                            - object
+                            - 'null'
                         id:
                           description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                           type: string
-                          example: none
+                          examples:
+                            - none
                         name:
                           description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
                           type: string
-                          example: none
+                          examples:
+                            - none
                         type:
                           $ref: '#/components/schemas/connector_types'
                     created_at:
                       type: string
                       format: date-time
-                      example: '2022-06-01T17:07:17.767Z'
+                      examples:
+                        - '2022-06-01T17:07:17.767Z'
                     created_by:
                       type: object
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
-                          type: string
-                          example: null
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         full_name:
-                          type: string
-                          example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         profile_uid:
                           type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                          examples:
+                            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - elastic
                     error:
-                      type: string
-                      nullable: true
-                      example: null
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - null
                     id:
                       type: string
-                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                      examples:
+                        - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                     mappings:
                       type: array
                       items:
@@ -1401,52 +1567,71 @@ paths:
                         properties:
                           action_type:
                             type: string
-                            example: overwrite
+                            examples:
+                              - overwrite
                           source:
                             type: string
-                            example: title
+                            examples:
+                              - title
                           target:
                             type: string
-                            example: summary
+                            examples:
+                              - summary
                     owner:
                       $ref: '#/components/schemas/owners'
                     updated_at:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       format: date-time
-                      nullable: true
-                      example: '2022-06-01T19:58:48.169Z'
+                      examples:
+                        - '2022-06-01T19:58:48.169Z'
                     updated_by:
-                      type: object
+                      type:
+                        - object
+                        - 'null'
+                      required:
+                        - email
+                        - full_name
+                        - username
                       properties:
                         email:
-                          type: string
-                          example: null
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         full_name:
-                          type: string
-                          example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - null
                         profile_uid:
                           type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                      nullable: true
+                          examples:
+                            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          examples:
+                            - elastic
                     version:
                       type: string
-                      example: WzIwNzMsMV0=
+                      examples:
+                        - WzIwNzMsMV0=
+              examples:
+                getConfigurationResponse:
+                  $ref: '#/components/examples/get_case_configuration_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     post:
-      summary: Sets external connection details, such as the closure type and default connector for cases.
+      summary: Creates a case specific configuration that includes external connection details and custom fields.
       operationId: setCaseConfiguration
       description: |
         You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.
@@ -1473,52 +1658,98 @@ paths:
                 properties:
                   closure_type:
                     $ref: '#/components/schemas/closure_types'
+                  customFields:
+                    type: array
+                    x-technical-preview: true
+                    description: Custom fields configuration details.
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          description: |
+                            A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+                          type: string
+                          minLength: 1
+                          maxLength: 36
+                        label:
+                          description: The custom field label that is displayed in the case.
+                          type: string
+                          minLength: 1
+                          maxLength: 50
+                        required:
+                          description: |
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                          type: boolean
+                        type:
+                          description: The type of the custom field.
+                          type: string
+                          enum:
+                            - text
+                            - toggle
                   connector:
                     type: object
                     properties:
                       fields:
                         description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                        nullable: true
-                        type: object
+                        type:
+                          - object
+                          - 'null'
                       id:
                         description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                         type: string
-                        example: none
+                        examples:
+                          - none
                       name:
                         description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
                         type: string
-                        example: none
+                        examples:
+                          - none
                       type:
                         $ref: '#/components/schemas/connector_types'
                   created_at:
                     type: string
                     format: date-time
-                    example: '2022-06-01T17:07:17.767Z'
+                    examples:
+                      - '2022-06-01T17:07:17.767Z'
                   created_by:
                     type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
-                        type: string
-                        example: null
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       full_name:
-                        type: string
-                        example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       profile_uid:
                         type: string
-                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
                   error:
-                    type: string
-                    nullable: true
-                    example: null
+                    type:
+                      - string
+                      - 'null'
+                    examples:
+                      - null
                   id:
                     type: string
-                    example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    examples:
+                      - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
                   mappings:
                     type: array
                     items:
@@ -1526,42 +1757,60 @@ paths:
                       properties:
                         action_type:
                           type: string
-                          example: overwrite
+                          examples:
+                            - overwrite
                         source:
                           type: string
-                          example: title
+                          examples:
+                            - title
                         target:
                           type: string
-                          example: summary
+                          examples:
+                            - summary
                   owner:
                     $ref: '#/components/schemas/owners'
                   updated_at:
-                    type: string
+                    type:
+                      - string
+                      - 'null'
                     format: date-time
-                    nullable: true
-                    example: '2022-06-01T19:58:48.169Z'
+                    examples:
+                      - '2022-06-01T19:58:48.169Z'
                   updated_by:
-                    type: object
+                    type:
+                      - object
+                      - 'null'
+                    required:
+                      - email
+                      - full_name
+                      - username
                     properties:
                       email:
-                        type: string
-                        example: null
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       full_name:
-                        type: string
-                        example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
                       profile_uid:
                         type: string
-                        example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    nullable: true
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
                   version:
                     type: string
-                    example: WzIwNzMsMV0=
+                    examples:
+                      - WzIwNzMsMV0=
               examples:
                 setCaseConfigResponse:
                   $ref: '#/components/examples/set_case_configuration_response'
@@ -1571,10 +1820,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/{configurationId}:
     patch:
       summary: Updates external connection details, such as the closure type and default connector for cases.
@@ -1592,117 +1837,181 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/update_case_configuration_request'
+            examples:
+              updateCaseConfigurationRequest:
+                $ref: '#/components/examples/update_case_configuration_request'
       responses:
         '200':
           description: Indicates a successful call.
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    closure_type:
-                      $ref: '#/components/schemas/closure_types'
-                    connector:
+                type: object
+                properties:
+                  closure_type:
+                    $ref: '#/components/schemas/closure_types'
+                  customFields:
+                    type: array
+                    x-technical-preview: true
+                    description: Custom fields configuration details.
+                    items:
                       type: object
                       properties:
-                        fields:
-                          description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                          nullable: true
-                          type: object
-                        id:
-                          description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                        key:
+                          description: |
+                            A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
                           type: string
-                          example: none
-                        name:
-                          description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                          minLength: 1
+                          maxLength: 36
+                        label:
+                          description: The custom field label that is displayed in the case.
                           type: string
-                          example: none
+                          minLength: 1
+                          maxLength: 50
+                        required:
+                          description: |
+                            Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                          type: boolean
                         type:
-                          $ref: '#/components/schemas/connector_types'
-                    created_at:
-                      type: string
-                      format: date-time
-                      example: '2022-06-01T17:07:17.767Z'
-                    created_by:
+                          description: The type of the custom field.
+                          type: string
+                          enum:
+                            - text
+                            - toggle
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+                        type:
+                          - object
+                          - 'null'
+                      id:
+                        description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+                        type: string
+                        examples:
+                          - none
+                      name:
+                        description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+                        type: string
+                        examples:
+                          - none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    examples:
+                      - '2022-06-01T17:07:17.767Z'
+                  created_by:
+                    type: object
+                    required:
+                      - email
+                      - full_name
+                      - username
+                    properties:
+                      email:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      full_name:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      profile_uid:
+                        type: string
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
+                  error:
+                    type:
+                      - string
+                      - 'null'
+                    examples:
+                      - null
+                  id:
+                    type: string
+                    examples:
+                      - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                  mappings:
+                    type: array
+                    items:
                       type: object
                       properties:
-                        email:
+                        action_type:
                           type: string
-                          example: null
-                          nullable: true
-                        full_name:
+                          examples:
+                            - overwrite
+                        source:
                           type: string
-                          example: null
-                          nullable: true
-                        username:
+                          examples:
+                            - title
+                        target:
                           type: string
-                          example: elastic
-                          nullable: true
-                        profile_uid:
-                          type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    error:
-                      type: string
-                      nullable: true
-                      example: null
-                    id:
-                      type: string
-                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
-                    mappings:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          action_type:
-                            type: string
-                            example: overwrite
-                          source:
-                            type: string
-                            example: title
-                          target:
-                            type: string
-                            example: summary
-                    owner:
-                      $ref: '#/components/schemas/owners'
-                    updated_at:
-                      type: string
-                      format: date-time
-                      nullable: true
-                      example: '2022-06-01T19:58:48.169Z'
-                    updated_by:
-                      type: object
-                      properties:
-                        email:
-                          type: string
-                          example: null
-                          nullable: true
-                        full_name:
-                          type: string
-                          example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
-                        profile_uid:
-                          type: string
-                          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                      nullable: true
-                    version:
-                      type: string
-                      example: WzIwNzMsMV0=
+                          examples:
+                            - summary
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  updated_at:
+                    type:
+                      - string
+                      - 'null'
+                    format: date-time
+                    examples:
+                      - '2022-06-01T19:58:48.169Z'
+                  updated_by:
+                    type:
+                      - object
+                      - 'null'
+                    required:
+                      - email
+                      - full_name
+                      - username
+                    properties:
+                      email:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      full_name:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      profile_uid:
+                        type: string
+                        examples:
+                          - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - elastic
+                  version:
+                    type: string
+                    examples:
+                      - WzIwNzMsMV0=
+              examples:
+                updateCaseConfigurationResponse:
+                  $ref: '#/components/examples/update_case_configuration_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors.
@@ -1754,10 +2063,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/reporters:
     get:
       summary: Returns information about the users who opened cases.
@@ -1778,22 +2083,33 @@ paths:
                 type: array
                 items:
                   type: object
+                  required:
+                    - email
+                    - full_name
+                    - username
                   properties:
                     email:
-                      type: string
-                      example: null
-                      nullable: true
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - null
                     full_name:
-                      type: string
-                      example: null
-                      nullable: true
-                    username:
-                      type: string
-                      example: elastic
-                      nullable: true
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - null
                     profile_uid:
                       type: string
-                      example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      examples:
+                        - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                    username:
+                      type:
+                        - string
+                        - 'null'
+                      examples:
+                        - elastic
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
@@ -1803,10 +2119,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/status:
     get:
       summary: Returns the number of cases that are open, closed, and in progress.
@@ -1833,19 +2145,12 @@ paths:
                     type: integer
                   count_open_cases:
                     type: integer
-              examples:
-                getStatusResponse:
-                  $ref: '#/components/examples/get_status_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags.
@@ -1875,10 +2180,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}:
     get:
       summary: Retrieves information about a case.
@@ -1901,16 +2202,14 @@ paths:
               examples:
                 getCaseResponse:
                   $ref: '#/components/examples/get_case_response'
+                getObservabilityCaseReponse:
+                  $ref: '#/components/examples/get_case_observability_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/alerts:
     get:
       summary: Gets all alerts attached to a case.
@@ -1941,10 +2240,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case.
@@ -1982,8 +2277,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes all comments and alerts from a case.
       operationId: deleteCaseComments
@@ -2004,8 +2297,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     patch:
       summary: Updates a comment or alert in a case.
       operationId: updateCaseComment
@@ -2042,8 +2333,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves all the comments from a case.
       operationId: getAllCaseComments
@@ -2068,10 +2357,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments/_find:
     get:
       summary: Retrieves all the user comments from a case.
@@ -2099,10 +2384,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
     delete:
       summary: Deletes a comment or alert from a case.
@@ -2125,8 +2406,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a comment from a case.
       operationId: getCaseComment
@@ -2156,10 +2435,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push:
     post:
       summary: Pushes a case to an external service.
@@ -2177,8 +2452,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              nullable: true
+              type:
+                - object
+                - 'null'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2195,10 +2471,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/user_actions:
     get:
       summary: Returns all user activity for a case.
@@ -2220,19 +2492,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/user_actions_response_properties'
-              examples:
-                getCaseActivityResponse:
-                  $ref: '#/components/examples/get_case_activity_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/user_actions/_find:
     get:
       summary: Finds user activity for a case.
@@ -2245,7 +2510,6 @@ paths:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/page_index'
-          example: '1'
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/user_action_types'
@@ -2276,10 +2540,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -2288,7 +2548,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     kbn_xsrf:
       schema:
@@ -2309,7 +2570,8 @@ components:
           type: string
           minItems: 1
           maxItems: 100
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+        examples:
+          - - d4e7abb0-b462-11ec-9a8d-698504725a43
     assignees:
       in: query
       name: assignees
@@ -2333,7 +2595,8 @@ components:
             items:
               type: string
             maxItems: 100
-      example: my-category
+            examples:
+              - - my-category
     defaultSearchOperator:
       in: query
       name: defaultSearchOperator
@@ -2341,15 +2604,17 @@ components:
       schema:
         type: string
         default: OR
-      example: OR
+        examples:
+          - OR
     from:
       in: query
       name: from
       description: |
-        [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.
       schema:
         type: string
-        example: now-1d
+        examples:
+          - now-1d
     owner:
       in: query
       name: owner
@@ -2361,7 +2626,8 @@ components:
           - type: array
             items:
               $ref: '#/components/schemas/owners'
-      example: cases
+            examples:
+              - - cases
     page_index:
       in: query
       name: page
@@ -2370,6 +2636,8 @@ components:
       schema:
         type: integer
         default: 1
+        examples:
+          - 1
     page_size:
       in: query
       name: perPage
@@ -2390,7 +2658,8 @@ components:
             items:
               type: string
             maxItems: 100
-      example: elastic
+            examples:
+              - - elastic
     search:
       in: query
       name: search
@@ -2427,8 +2696,14 @@ components:
         enum:
           - createdAt
           - updatedAt
+          - closedAt
+          - title
+          - category
+          - status
+          - severity
         default: createdAt
-      example: updatedAt
+        examples:
+          - updatedAt
     sort_order:
       in: query
       name: sortOrder
@@ -2450,7 +2725,8 @@ components:
           - closed
           - in-progress
           - open
-      example: open
+        examples:
+          - open
     tags:
       in: query
       name: tags
@@ -2462,15 +2738,17 @@ components:
             items:
               type: string
             maxItems: 100
-      example: tag-1
+            examples:
+              - - tag-1
     to:
       in: query
       name: to
       description: |
-        [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+        Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
       schema:
         type: string
-      example: now+1d
+        examples:
+          - now+1d
     alert_id:
       in: path
       name: alertId
@@ -2478,7 +2756,8 @@ components:
       required: true
       schema:
         type: string
-        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
+        examples:
+          - 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
     configuration_id:
       in: path
       name: configurationId
@@ -2486,7 +2765,8 @@ components:
       required: true
       schema:
         type: string
-        example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
+        examples:
+          - 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
     case_id:
       in: path
       name: caseId
@@ -2494,7 +2774,8 @@ components:
       required: true
       schema:
         type: string
-        example: 9c235210-6834-11ea-a78c-6ffb38a34414
+        examples:
+          - 9c235210-6834-11ea-a78c-6ffb38a34414
     includeComments:
       in: query
       name: includeComments
@@ -2511,7 +2792,8 @@ components:
       required: true
       schema:
         type: string
-        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+        examples:
+          - 71ec1870-725b-11ea-a0b2-c51ea50a58e2
     connector_id:
       in: path
       name: connectorId
@@ -2519,7 +2801,8 @@ components:
       required: true
       schema:
         type: string
-        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+        examples:
+          - abed3a70-71bd-11ea-a0b2-c51ea50a58e2
     user_action_types:
       in: query
       name: types
@@ -2544,7 +2827,8 @@ components:
             - tags
             - title
             - user
-      example: create_case
+        examples:
+          - - create_case
     space_id:
       in: path
       name: spaceId
@@ -2552,12 +2836,15 @@ components:
       required: true
       schema:
         type: string
-        example: default
+        examples:
+          - default
   schemas:
     assignees:
-      type: array
+      type:
+        - array
+        - 'null'
       description: An array containing users that are assigned to the case.
-      nullable: true
+      maxItems: 10
       items:
         type: object
         required:
@@ -2566,7 +2853,8 @@ components:
           uid:
             type: string
             description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
-            example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+            examples:
+              - u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
     connector_properties_none:
       title: Create or update case request properties for no connector
       required:
@@ -2579,21 +2867,26 @@ components:
       properties:
         fields:
           description: An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.
-          nullable: true
-          type: string
-          example: null
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
         id:
           description: The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
           type: string
-          example: none
+          examples:
+            - none
         name:
           description: The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
           type: string
-          example: none
+          examples:
+            - none
         type:
           description: The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.
           type: string
-          example: .none
+          examples:
+            - .none
           enum:
             - .none
     connector_properties_cases_webhook:
@@ -2607,9 +2900,11 @@ components:
       type: object
       properties:
         fields:
-          type: string
-          nullable: true
-          example: null
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2619,7 +2914,8 @@ components:
         type:
           description: The type of connector.
           type: string
-          example: .cases-webhook
+          examples:
+            - .cases-webhook
           enum:
             - .cases-webhook
     connector_properties_jira:
@@ -2642,16 +2938,19 @@ components:
           properties:
             issueType:
               description: The type of issue.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             parent:
               description: The key of the parent issue, when the issue type is sub-task.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             priority:
               description: The priority of the issue.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2661,7 +2960,8 @@ components:
         type:
           description: The type of connector.
           type: string
-          example: .jira
+          examples:
+            - .jira
           enum:
             - .jira
     connector_properties_resilient:
@@ -2676,8 +2976,9 @@ components:
       properties:
         fields:
           description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-          type: object
-          nullable: true
+          type:
+            - object
+            - 'null'
           required:
             - issueTypes
             - severityCode
@@ -2699,7 +3000,8 @@ components:
         type:
           description: The type of connector.
           type: string
-          example: .resilient
+          examples:
+            - .resilient
           enum:
             - .resilient
     connector_properties_servicenow:
@@ -2724,24 +3026,29 @@ components:
           properties:
             category:
               description: The category of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             impact:
               description: The effect an incident had on business.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             severity:
               description: The severity of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             subcategory:
               description: The subcategory of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             urgency:
               description: The extent to which the incident resolution can be delayed.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2751,7 +3058,8 @@ components:
         type:
           description: The type of connector.
           type: string
-          example: .servicenow
+          examples:
+            - .servicenow
           enum:
             - .servicenow
     connector_properties_servicenow_sir:
@@ -2778,32 +3086,39 @@ components:
           properties:
             category:
               description: The category of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             destIp:
               description: Indicates whether cases will send a comma-separated list of destination IPs.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             malwareHash:
               description: Indicates whether cases will send a comma-separated list of malware hashes.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             malwareUrl:
               description: Indicates whether cases will send a comma-separated list of malware URLs.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             priority:
               description: The priority of the issue.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             sourceIp:
               description: Indicates whether cases will send a comma-separated list of source IPs.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             subcategory:
               description: The subcategory of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2813,7 +3128,8 @@ components:
         type:
           description: The type of connector.
           type: string
-          example: .servicenow-sir
+          examples:
+            - .servicenow-sir
           enum:
             - .servicenow-sir
     connector_properties_swimlane:
@@ -2834,8 +3150,9 @@ components:
           properties:
             caseId:
               description: The case identifier for Swimlane connectors.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2845,7 +3162,8 @@ components:
         type:
           description: The type of connector.
           type: string
-          example: .swimlane
+          examples:
+            - .swimlane
           enum:
             - .swimlane
     owners:
@@ -2856,7 +3174,8 @@ components:
         - cases
         - observability
         - securitySolution
-      example: cases
+      examples:
+        - cases
     settings:
       type: object
       description: An object that contains the case settings.
@@ -2866,7 +3185,8 @@ components:
         syncAlerts:
           description: Turns alert syncing on or off.
           type: boolean
-          example: true
+          examples:
+            - true
     severity_property:
       type: string
       description: The severity of the case.
@@ -2917,33 +3237,76 @@ components:
             type: string
             maxLength: 256
         category:
-          description: Category for the case. It could be a word or a phrase to categorize the case.
+          description: A word or phrase that categorizes the case.
           type: string
           maxLength: 50
         title:
           description: A title for the case.
           type: string
           maxLength: 160
+        customFields:
+          type: array
+          description: |
+            Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+          x-technical-preview: true
+          minItems: 0
+          maxItems: 10
+          items:
+            type: object
+            required:
+              - key
+              - type
+              - value
+            properties:
+              key:
+                description: |
+                  The unique identifier for the custom field. The key value must exist in the case configuration settings.
+                type: string
+              type:
+                description: |
+                  The custom field type. It must match the type specified in the case configuration settings.
+                type: string
+                enum:
+                  - text
+                  - toggle
+              value:
+                description: |
+                  The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
+                oneOf:
+                  - type:
+                      - string
+                      - 'null'
+                    minLength: 1
+                    maxLength: 160
+                  - type: boolean
     case_response_closed_by_properties:
       title: Case response properties for closed_by
-      type: object
-      nullable: true
+      type:
+        - object
+        - 'null'
       properties:
         email:
-          type: string
-          example: null
-          nullable: true
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
         full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
         profile_uid:
           type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+          examples:
+            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          examples:
+            - elastic
       required:
         - email
         - full_name
@@ -2955,174 +3318,154 @@ components:
         - type
       properties:
         alertId:
-          type: string
-          example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+          type: array
+          items:
+            type: string
+            examples:
+              - a6e12ac4-7bce-457b-84f6-d7ce8deb8446
         created_at:
           type: string
           format: date-time
-          example: '2022-03-24T02:31:03.210Z'
+          examples:
+            - '2023-11-06T19:29:38.424Z'
         created_by:
           type: object
+          required:
+            - email
+            - full_name
+            - username
           properties:
             email:
-              type: string
-              example: null
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             full_name:
-              type: string
-              example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             profile_uid:
               type: string
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              examples:
+                - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              examples:
+                - elastic
         id:
           type: string
-          example: 73362370-ab1a-11ec-985f-97e55adae8b9
+          examples:
+            - 73362370-ab1a-11ec-985f-97e55adae8b9
         index:
-          type: string
-          example: .internal.alerts-security.alerts-default-000001
+          type: array
+          items:
+            type: string
+            examples:
+              - .internal.alerts-security.alerts-default-000001
         owner:
           $ref: '#/components/schemas/owners'
         pushed_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          example: null
-          nullable: true
+          examples:
+            - null
         pushed_by:
-          type: object
+          type:
+            - object
+            - 'null'
+          required:
+            - email
+            - full_name
+            - username
           properties:
             email:
-              type: string
-              example: null
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             full_name:
-              type: string
-              example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             profile_uid:
               type: string
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-          nullable: true
+              examples:
+                - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              examples:
+                - elastic
         rule:
           type: object
           properties:
             id:
               description: The rule identifier.
               type: string
-              example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+              examples:
+                - 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
               description: The rule name.
               type: string
-              example: security_rule
+              examples:
+                - security_rule
         type:
           type: string
-          example: alert
+          examples:
+            - alert
           enum:
             - alert
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          example: null
         updated_by:
-          type: object
+          type:
+            - object
+            - 'null'
+          required:
+            - email
+            - full_name
+            - username
           properties:
             email:
-              type: string
-              example: null
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             full_name:
-              type: string
-              example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             profile_uid:
               type: string
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              examples:
+                - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              examples:
+                - elastic
         version:
           type: string
-          example: WzMwNDgsMV0=
-    case_response_created_by_properties:
-      title: Case response properties for created_by
-      type: object
-      properties:
-        email:
-          type: string
-          example: null
-          nullable: true
-        full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
-        profile_uid:
-          type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-      required:
-        - email
-        - full_name
-        - username
-    case_response_pushed_by_properties:
-      title: Case response properties for pushed_by
-      type: object
-      nullable: true
-      properties:
-        email:
-          type: string
-          example: null
-          nullable: true
-        full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
-        profile_uid:
-          type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-      required:
-        - email
-        - full_name
-        - username
-    case_response_updated_by_properties:
-      title: Case response properties for updated_by
-      type: object
-      nullable: true
-      properties:
-        email:
-          type: string
-          example: null
-          nullable: true
-        full_name:
-          type: string
-          example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
-        profile_uid:
-          type: string
-          example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-      required:
-        - email
-        - full_name
-        - username
+          examples:
+            - WzMwNDgsMV0=
     user_comment_response_properties:
       title: Case response properties for user comments
       type: object
@@ -3131,43 +3474,147 @@ components:
       properties:
         comment:
           type: string
-          example: A new comment.
+          examples:
+            - A new comment.
         created_at:
           type: string
           format: date-time
-          example: '2022-05-13T09:16:17.416Z'
+          examples:
+            - '2022-05-13T09:16:17.416Z'
         created_by:
           $ref: '#/components/schemas/case_response_created_by_properties'
         id:
           type: string
-          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          examples:
+            - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         owner:
           $ref: '#/components/schemas/owners'
         pushed_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
-          example: null
+          examples:
+            - null
         pushed_by:
           $ref: '#/components/schemas/case_response_pushed_by_properties'
         type:
           type: string
-          example: user
+          examples:
+            - user
           enum:
             - user
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
-          example: null
+          examples:
+            - null
         updated_by:
           $ref: '#/components/schemas/case_response_updated_by_properties'
         version:
           type: string
-          example: WzIwNDMxLDFd
-    external_service:
+          examples:
+            - WzIwNDMxLDFd
+    case_response_created_by_properties:
+      title: Case response properties for created_by
       type: object
-      nullable: true
+      properties:
+        email:
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
+        full_name:
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
+        profile_uid:
+          type: string
+          examples:
+            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          examples:
+            - elastic
+      required:
+        - email
+        - full_name
+        - username
+    case_response_pushed_by_properties:
+      title: Case response properties for pushed_by
+      type:
+        - object
+        - 'null'
+      properties:
+        email:
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
+        full_name:
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
+        profile_uid:
+          type: string
+          examples:
+            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          examples:
+            - elastic
+      required:
+        - email
+        - full_name
+        - username
+    case_response_updated_by_properties:
+      title: Case response properties for updated_by
+      type:
+        - object
+        - 'null'
+      properties:
+        email:
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
+        full_name:
+          type:
+            - string
+            - 'null'
+          examples:
+            - null
+        profile_uid:
+          type: string
+          examples:
+            - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          examples:
+            - elastic
+      required:
+        - email
+        - full_name
+        - username
+    external_service:
+      type:
+        - object
+        - 'null'
       properties:
         connector_id:
           type: string
@@ -3183,24 +3630,32 @@ components:
           type: string
           format: date-time
         pushed_by:
-          type: object
+          type:
+            - object
+            - 'null'
           properties:
             email:
-              type: string
-              example: null
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             full_name:
-              type: string
-              example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             profile_uid:
               type: string
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-          nullable: true
+              examples:
+                - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              examples:
+                - elastic
     status:
       type: string
       description: The status of the case.
@@ -3236,26 +3691,34 @@ components:
       properties:
         assignees:
           $ref: '#/components/schemas/assignees'
+        category:
+          type:
+            - string
+            - 'null'
+          description: The case category.
         closed_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
         closed_by:
           $ref: '#/components/schemas/case_response_closed_by_properties'
         comments:
           title: Case response properties for comments
           description: An array of comment objects for the case.
           type: array
+          maxItems: 10000
           items:
-            discriminator:
-              propertyName: type
             oneOf:
               - $ref: '#/components/schemas/alert_comment_response_properties'
               - $ref: '#/components/schemas/user_comment_response_properties'
+            discriminator:
+              propertyName: type
+              mapping:
+                alert: '#/components/schemas/alert_comment_response_properties'
+                user: '#/components/schemas/user_comment_response_properties'
         connector:
           title: Case response properties for connectors
-          discriminator:
-            propertyName: type
           oneOf:
             - $ref: '#/components/schemas/connector_properties_none'
             - $ref: '#/components/schemas/connector_properties_cases_webhook'
@@ -3264,26 +3727,69 @@ components:
             - $ref: '#/components/schemas/connector_properties_servicenow'
             - $ref: '#/components/schemas/connector_properties_servicenow_sir'
             - $ref: '#/components/schemas/connector_properties_swimlane'
+          discriminator:
+            propertyName: type
+            mapping:
+              .none: '#/components/schemas/connector_properties_none'
+              .cases-webhook: '#/components/schemas/connector_properties_cases_webhook'
+              .jira: '#/components/schemas/connector_properties_jira'
+              .resilient: '#/components/schemas/connector_properties_resilient'
+              .servicenow: '#/components/schemas/connector_properties_servicenow'
+              .servicenow-sir: '#/components/schemas/connector_properties_servicenow_sir'
+              .swimlane: '#/components/schemas/connector_properties_swimlane'
         created_at:
           type: string
           format: date-time
-          example: '2022-05-13T09:16:17.416Z'
+          examples:
+            - '2022-05-13T09:16:17.416Z'
         created_by:
           $ref: '#/components/schemas/case_response_created_by_properties'
+        customFields:
+          type: array
+          description: Custom field values for the case.
+          x-technical-preview: true
+          items:
+            type: object
+            properties:
+              key:
+                description: |
+                  The unique identifier for the custom field. The key value must exist in the case configuration settings.
+                type: string
+              type:
+                description: |
+                  The custom field type. It must match the type specified in the case configuration settings.
+                type: string
+                enum:
+                  - text
+                  - toggle
+              value:
+                description: |
+                  The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
+                oneOf:
+                  - type:
+                      - string
+                      - 'null'
+                    minLength: 1
+                    maxLength: 160
+                  - type: boolean
         description:
           type: string
-          example: A case description.
+          examples:
+            - A case description.
         duration:
-          type: integer
+          type:
+            - integer
+            - 'null'
           description: |
             The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
-          nullable: true
-          example: 120
+          examples:
+            - 120
         external_service:
           $ref: '#/components/schemas/external_service'
         id:
           type: string
-          example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+          examples:
+            - 66b9aa00-94fa-11ea-9f74-e7e108796192
         owner:
           $ref: '#/components/schemas/owners'
         settings:
@@ -3296,38 +3802,45 @@ components:
           type: array
           items:
             type: string
-          example:
-            - tag-1
+          examples:
+            - - tag-1
         title:
           type: string
-          example: Case title 1
+          examples:
+            - Case title 1
         totalAlerts:
           type: integer
-          example: 0
+          examples:
+            - 0
         totalComment:
           type: integer
-          example: 0
+          examples:
+            - 0
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
         updated_by:
           $ref: '#/components/schemas/case_response_updated_by_properties'
         version:
           type: string
-          example: WzUzMiwxXQ==
+          examples:
+            - WzUzMiwxXQ==
     4xx_response:
       type: object
       title: Unsuccessful cases API response
       properties:
         error:
           type: string
-          example: Unauthorized
+          examples:
+            - Unauthorized
         message:
           type: string
         statusCode:
           type: integer
-          example: 401
+          examples:
+            - 401
     update_case_request:
       title: Update case request
       description: The update case API request body varies depending on the type of connector.
@@ -3348,6 +3861,10 @@ components:
             properties:
               assignees:
                 $ref: '#/components/schemas/assignees'
+              category:
+                description: A word or phrase that categorizes the case.
+                type: string
+                maxLength: 50
               connector:
                 oneOf:
                   - $ref: '#/components/schemas/connector_properties_none'
@@ -3357,6 +3874,41 @@ components:
                   - $ref: '#/components/schemas/connector_properties_servicenow'
                   - $ref: '#/components/schemas/connector_properties_servicenow_sir'
                   - $ref: '#/components/schemas/connector_properties_swimlane'
+              customFields:
+                type: array
+                description: |
+                  Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+                x-technical-preview: true
+                minItems: 0
+                maxItems: 10
+                items:
+                  type: object
+                  required:
+                    - key
+                    - type
+                    - value
+                  properties:
+                    key:
+                      description: |
+                        The unique identifier for the custom field. The key value must exist in the case configuration settings.
+                      type: string
+                    type:
+                      description: |
+                        The custom field type. It must match the type specified in the case configuration settings.
+                      type: string
+                      enum:
+                        - text
+                        - toggle
+                    value:
+                      description: |
+                        The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
+                      oneOf:
+                        - type:
+                            - string
+                            - 'null'
+                          minLength: 1
+                          maxLength: 160
+                        - type: boolean
               description:
                 description: An updated description for the case.
                 type: string
@@ -3377,10 +3929,6 @@ components:
                 items:
                   type: string
                   maxLength: 256
-              category:
-                description: Category for the case. It could be a word or a phrase to categorize the case.
-                type: string
-                maxLength: 50
               title:
                 description: A title for the case.
                 type: string
@@ -3392,38 +3940,16 @@ components:
       type: string
       description: The fields to perform the `simple_query_string` parsed query against.
       enum:
-        - closed_by.username
-        - closed_by.full_name
-        - closed_by.email
-        - closed_by.profile_uid
-        - created_by.username
-        - created_by.full_name
-        - created_by.email
-        - created_by.profile_uid
         - description
-        - connector.name
-        - connector.type
-        - external_service.pushed_by.username
-        - external_service.pushed_by.full_name
-        - external_service.pushed_by.email
-        - external_service.pushed_by.profile_uid
-        - external_service.connector_name
-        - external_service.external_id
-        - external_service.external_title
-        - external_service.external_url
         - title
-        - title.keyword
-        - updated_by.username
-        - updated_by.full_name
-        - updated_by.email
-        - updated_by.profile_uid
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
       enum:
         - close-by-pushing
         - close-by-user
-      example: close-by-user
+      examples:
+        - close-by-user
     connector_types:
       type: string
       description: The type of connector.
@@ -3435,7 +3961,8 @@ components:
         - .servicenow
         - .servicenow-sir
         - .swimlane
-      example: .none
+      examples:
+        - .none
     set_case_configuration_request:
       title: Set case configuration request
       description: External connection details, such as the closure type and default connector for cases.
@@ -3453,16 +3980,19 @@ components:
           properties:
             fields:
               description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-              nullable: true
-              type: object
+              type:
+                - object
+                - 'null'
             id:
               description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
               type: string
-              example: none
+              examples:
+                - none
             name:
               description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
               type: string
-              example: none
+              examples:
+                - none
             type:
               $ref: '#/components/schemas/connector_types'
           required:
@@ -3470,18 +4000,43 @@ components:
             - id
             - name
             - type
+        customFields:
+          type: array
+          description: Custom fields case configuration.
+          x-technical-preview: true
+          minItems: 0
+          maxItems: 10
+          items:
+            type: object
+            required:
+              - key
+              - label
+              - required
+              - type
+            properties:
+              key:
+                description: |
+                  A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+                type: string
+                minLength: 1
+                maxLength: 36
+              label:
+                description: The custom field label that is displayed in the case.
+                type: string
+                minLength: 1
+                maxLength: 50
+              required:
+                description: |
+                  Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                type: boolean
+              type:
+                description: The type of the custom field.
+                type: string
+                enum:
+                  - text
+                  - toggle
         owner:
           $ref: '#/components/schemas/owners'
-        settings:
-          description: An object that contains the case settings.
-          type: object
-          properties:
-            syncAlerts:
-              description: Turns alert syncing on or off.
-              type: boolean
-              example: true
-          required:
-            - syncAlerts
     update_case_configuration_request:
       title: Update case configuration request
       description: External connection details, such as the closure type and default connector for cases.
@@ -3497,16 +4052,19 @@ components:
           properties:
             fields:
               description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-              nullable: true
-              type: object
+              type:
+                - object
+                - 'null'
             id:
               description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
               type: string
-              example: none
+              examples:
+                - none
             name:
               description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
               type: string
-              example: none
+              examples:
+                - none
             type:
               $ref: '#/components/schemas/connector_types'
           required:
@@ -3514,11 +4072,45 @@ components:
             - id
             - name
             - type
+        customFields:
+          type: array
+          description: Custom fields case configuration.
+          x-technical-preview: true
+          items:
+            type: object
+            required:
+              - key
+              - label
+              - required
+              - type
+            properties:
+              key:
+                description: |
+                  A unique key for the custom field. Must be lower case and composed only of a-z, 0-9, '_', and '-' characters. It is used in API calls to refer to a specific custom field.
+                type: string
+                minLength: 1
+                maxLength: 36
+              label:
+                description: The custom field label that is displayed in the case.
+                type: string
+                minLength: 1
+                maxLength: 50
+              required:
+                description: |
+                  Indicates whether the field is required. If `false`, the custom field can be set to null or omitted when a case is created or updated.
+                type: boolean
+              type:
+                description: The type of the custom field.
+                type: string
+                enum:
+                  - text
+                  - toggle
         version:
           description: |
             The version of the connector. To retrieve the version value, use the get configuration API.
           type: string
-          example: WzIwMiwxXQ==
+          examples:
+            - WzIwMiwxXQ==
     alert_response_properties:
       type: object
       properties:
@@ -3531,42 +4123,6 @@ components:
         index:
           description: The alert index.
           type: string
-    alert_identifiers:
-      title: Alert identifiers
-      description: |
-        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      oneOf:
-        - type: string
-        - type: array
-          items:
-            type: string
-      x-technical-preview: true
-      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
-    alert_indices:
-      title: Alert indices
-      description: |
-        The alert indices. It is required only when `type` is `alert`.  If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      oneOf:
-        - type: string
-        - type: array
-          items:
-            type: string
-      x-technical-preview: true
-    rule:
-      title: Alerting rule
-      description: |
-        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      type: object
-      x-technical-preview: true
-      properties:
-        id:
-          description: The rule identifier.
-          type: string
-          example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-        name:
-          description: The rule name.
-          type: string
-          example: security_rule
     add_alert_comment_request_properties:
       title: Add case comment request properties for alerts
       required:
@@ -3589,7 +4145,8 @@ components:
         type:
           description: The type of comment.
           type: string
-          example: alert
+          examples:
+            - alert
           enum:
             - alert
     add_user_comment_request_properties:
@@ -3601,27 +4158,73 @@ components:
           description: The new comment. It is required only when `type` is `user`.
           type: string
           maxLength: 30000
-          example: A new comment.
+          examples:
+            - A new comment.
         owner:
           $ref: '#/components/schemas/owners'
         type:
           type: string
           description: The type of comment.
-          example: user
+          examples:
+            - user
           enum:
             - user
       required:
         - comment
         - owner
         - type
+    alert_identifiers:
+      title: Alert identifiers
+      description: |
+        The alert identifiers. It is required only when `type` is `alert`. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; `index` must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          maxItems: 1000
+      x-technical-preview: true
+      examples:
+        - 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+    alert_indices:
+      title: Alert indices
+      description: |
+        The alert indices. It is required only when `type` is `alert`. If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the `alertId` array.  This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          maxItems: 1000
+      x-technical-preview: true
+    rule:
+      title: Alerting rule
+      description: |
+        The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      type: object
+      x-technical-preview: true
+      properties:
+        id:
+          description: The rule identifier.
+          type: string
+          examples:
+            - 94d80550-aaf4-11ec-985f-97e55adae8b9
+        name:
+          description: The rule name.
+          type: string
+          examples:
+            - security_rule
     add_case_comment_request:
       title: Add case comment request
       description: The add comment to case API request body varies depending on whether you are adding an alert or a comment.
-      discriminator:
-        propertyName: type
       oneOf:
         - $ref: '#/components/schemas/add_alert_comment_request_properties'
         - $ref: '#/components/schemas/add_user_comment_request_properties'
+      discriminator:
+        propertyName: type
+        mapping:
+          alert: '#/components/schemas/add_alert_comment_request_properties'
+          user: '#/components/schemas/add_user_comment_request_properties'
     update_alert_comment_request_properties:
       title: Update case comment request properties for alerts
       description: Defines properties for case comment requests when type is alert.
@@ -3641,7 +4244,8 @@ components:
           type: string
           description: |
             The identifier for the comment. To retrieve comment IDs, use the get comments API.
-          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          examples:
+            - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         index:
           $ref: '#/components/schemas/alert_indices'
         owner:
@@ -3653,12 +4257,14 @@ components:
           type: string
           enum:
             - alert
-          example: alert
+          examples:
+            - alert
         version:
           description: |
             The current comment version. To retrieve version values, use the get comments API.
           type: string
-          example: Wzk1LDFd
+          examples:
+            - Wzk1LDFd
     update_user_comment_request_properties:
       title: Update case comment request properties for user comments
       description: Defines properties for case comment requests when type is user.
@@ -3668,12 +4274,14 @@ components:
           description: The new comment. It is required only when `type` is `user`.
           type: string
           maxLength: 30000
-          example: A new comment.
+          examples:
+            - A new comment.
         id:
           type: string
           description: |
             The identifier for the comment. To retrieve comment IDs, use the get comments API.
-          example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+          examples:
+            - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         owner:
           $ref: '#/components/schemas/owners'
         type:
@@ -3681,12 +4289,14 @@ components:
           description: The type of comment.
           enum:
             - user
-          example: user
+          examples:
+            - user
         version:
           description: |
             The current comment version. To retrieve version values, use the get comments API.
           type: string
-          example: Wzk1LDFd
+          examples:
+            - Wzk1LDFd
       required:
         - comment
         - id
@@ -3696,11 +4306,14 @@ components:
     update_case_comment_request:
       title: Update case comment request
       description: The update case comment API request body varies depending on whether you are updating an alert or a comment.
-      discriminator:
-        propertyName: type
       oneOf:
         - $ref: '#/components/schemas/update_alert_comment_request_properties'
         - $ref: '#/components/schemas/update_user_comment_request_properties'
+      discriminator:
+        propertyName: type
+        mapping:
+          alert: '#/components/schemas/update_alert_comment_request_properties'
+          user: '#/components/schemas/update_user_comment_request_properties'
     actions:
       type: string
       enum:
@@ -3709,7 +4322,8 @@ components:
         - delete
         - push_to_service
         - update
-      example: create
+      examples:
+        - create
     payload_alert_comment:
       type: object
       properties:
@@ -3719,14 +4333,16 @@ components:
             alertId:
               oneOf:
                 - type: string
-                  example: 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
+                  examples:
+                    - 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
                 - type: array
                   items:
                     type: string
             index:
               oneOf:
                 - type: string
-                  example: .alerts-observability.logs.alerts-default
+                  examples:
+                    - .alerts-observability.logs.alerts-default
                 - type: array
                   items:
                     type: string
@@ -3738,11 +4354,13 @@ components:
                 id:
                   description: The rule identifier.
                   type: string
-                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+                  examples:
+                    - 94d80550-aaf4-11ec-985f-97e55adae8b9
                 name:
                   description: The rule name.
                   type: string
-                  example: security_rule
+                  examples:
+                    - security_rule
             type:
               type: string
               enum:
@@ -3759,9 +4377,11 @@ components:
           type: object
           properties:
             fields:
-              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-              nullable: true
-              type: object
+              description: |
+                An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+              type:
+                - object
+                - 'null'
               properties:
                 caseId:
                   description: The case identifier for Swimlane connectors.
@@ -3771,8 +4391,9 @@ components:
                   type: string
                 destIp:
                   description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 impact:
                   description: The effect an incident had on business for ServiceNow ITSM connectors.
                   type: string
@@ -3786,12 +4407,14 @@ components:
                     type: string
                 malwareHash:
                   description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 malwareUrl:
                   description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 parent:
                   description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                   type: string
@@ -3806,23 +4429,27 @@ components:
                   type: string
                 sourceIp:
                   description: Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 subcategory:
                   description: The subcategory of the incident for ServiceNow ITSM connectors.
                   type: string
                 urgency:
                   description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                   type: string
-              example: null
+              examples:
+                - null
             id:
               description: The identifier for the connector. To create a case without a connector, use `none`.
               type: string
-              example: none
+              examples:
+                - none
             name:
               description: The name of the connector. To create a case without a connector, use `none`.
               type: string
-              example: none
+              examples:
+                - none
             type:
               $ref: '#/components/schemas/connector_types'
     payload_create_case:
@@ -3834,9 +4461,11 @@ components:
           type: object
           properties:
             fields:
-              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-              nullable: true
-              type: object
+              description: |
+                An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+              type:
+                - object
+                - 'null'
               properties:
                 caseId:
                   description: The case identifier for Swimlane connectors.
@@ -3846,8 +4475,9 @@ components:
                   type: string
                 destIp:
                   description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 impact:
                   description: The effect an incident had on business for ServiceNow ITSM connectors.
                   type: string
@@ -3861,12 +4491,14 @@ components:
                     type: string
                 malwareHash:
                   description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 malwareUrl:
                   description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 parent:
                   description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                   type: string
@@ -3881,23 +4513,27 @@ components:
                   type: string
                 sourceIp:
                   description: Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 subcategory:
                   description: The subcategory of the incident for ServiceNow ITSM connectors.
                   type: string
                 urgency:
                   description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
                   type: string
-              example: null
+              examples:
+                - null
             id:
               description: The identifier for the connector. To create a case without a connector, use `none`.
               type: string
-              example: none
+              examples:
+                - none
             name:
               description: The name of the connector. To create a case without a connector, use `none`.
               type: string
-              example: none
+              examples:
+                - none
             type:
               $ref: '#/components/schemas/connector_types'
         description:
@@ -3914,14 +4550,15 @@ components:
           type: array
           items:
             type: string
-            example:
-              - tag-1
+          examples:
+            - - tag-1
         title:
           type: string
     payload_delete:
-      type: object
+      type:
+        - object
+        - 'null'
       description: If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable.
-      nullable: true
     payload_description:
       type: object
       properties:
@@ -3954,8 +4591,8 @@ components:
           type: array
           items:
             type: string
-          example:
-            - tag-1
+          examples:
+            - - tag-1
     payload_title:
       type: object
       properties:
@@ -3991,7 +4628,8 @@ components:
         - status
         - settings
         - severity
-      example: create_case
+      examples:
+        - create_case
     user_actions_response_properties:
       type: object
       required:
@@ -4009,36 +4647,48 @@ components:
           $ref: '#/components/schemas/actions'
         action_id:
           type: string
-          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+          examples:
+            - 22fd3e30-03b1-11ed-920c-974bfa104448
         case_id:
           type: string
-          example: 22df07d0-03b1-11ed-920c-974bfa104448
+          examples:
+            - 22df07d0-03b1-11ed-920c-974bfa104448
         comment_id:
-          type: string
-          nullable: true
-          example: 578608d0-03b1-11ed-920c-974bfa104448
+          type:
+            - string
+            - 'null'
+          examples:
+            - 578608d0-03b1-11ed-920c-974bfa104448
         created_at:
           type: string
           format: date-time
-          example: '2022-05-13T09:16:17.416Z'
+          examples:
+            - '2022-05-13T09:16:17.416Z'
         created_by:
           type: object
           properties:
             email:
-              type: string
-              example: null
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             full_name:
-              type: string
-              example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             profile_uid:
               type: string
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              examples:
+                - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              examples:
+                - elastic
           required:
             - email
             - full_name
@@ -4078,38 +4728,49 @@ components:
         action:
           $ref: '#/components/schemas/actions'
         comment_id:
-          type: string
-          nullable: true
-          example: 578608d0-03b1-11ed-920c-974bfa104448
+          type:
+            - string
+            - 'null'
+          examples:
+            - 578608d0-03b1-11ed-920c-974bfa104448
         created_at:
           type: string
           format: date-time
-          example: '2022-05-13T09:16:17.416Z'
+          examples:
+            - '2022-05-13T09:16:17.416Z'
         created_by:
           type: object
           properties:
             email:
-              type: string
-              example: null
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             full_name:
-              type: string
-              example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
             profile_uid:
               type: string
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+              examples:
+                - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              examples:
+                - elastic
           required:
             - email
             - full_name
             - username
         id:
           type: string
-          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+          examples:
+            - 22fd3e30-03b1-11ed-920c-974bfa104448
         owner:
           $ref: '#/components/schemas/owners'
         payload:
@@ -4129,7 +4790,8 @@ components:
             - $ref: '#/components/schemas/payload_user_comment'
         version:
           type: string
-          example: WzM1ODg4LDFd
+          examples:
+            - WzM1ODg4LDFd
         type:
           type: string
           description: The type of action.
@@ -4145,7 +4807,8 @@ components:
             - status
             - settings
             - severity
-          example: create_case
+          examples:
+            - create_case
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
@@ -4165,6 +4828,10 @@ components:
         settings:
           syncAlerts: true
         owner: cases
+        customFields:
+          - type: text
+            key: d312efda-ec2b-42ec-9e2c-84981795c581
+            value: My field value
     create_case_response:
       summary: The create case API returns a JSON object that contains details about the case.
       value:
@@ -4172,24 +4839,32 @@ components:
         totalAlerts: 0
         id: 66b9aa00-94fa-11ea-9f74-e7e108796192
         version: WzUzMiwxXQ==
-        totalComment: 1
+        totalComment: 0
         title: Case title 1
         tags:
           - tag 1
         assignees: []
         description: A case description.
         settings:
-          syncAlerts: false
+          syncAlerts: true
         owner: cases
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: My field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: null
         duration: null
         severity: low
         closed_at: null
         closed_by: null
-        created_at: '2022-03-24T00:37:03.906Z'
+        created_at: '2022-10-13T15:33:50.604Z'
         created_by:
           username: elastic
           full_name: null
           email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         status: open
         updated_at: null
         updated_by: null
@@ -4221,6 +4896,13 @@ components:
               - tag-1
             settings:
               syncAlerts: true
+            customFields:
+              - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+                type: toggle
+                value: false
+              - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                type: text
+                value: My new field value
     update_case_response:
       summary: This is an example response when the case description, tags, and connector were updated.
       value:
@@ -4240,18 +4922,28 @@ components:
           severity: low
           closed_at: null
           closed_by: null
-          created_at: '2022-05-13T09:16:17.416Z'
+          created_at: '2023-10-13T09:16:17.416Z'
           created_by:
             email: null
             full_name: null
             username: elastic
+            profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           status: open
-          updated_at: '2022-05-13T09:48:33.043Z'
+          updated_at: '2023-10-13T09:48:33.043Z'
           updated_by:
             email: null
             full_name: null
             username: elastic
+            profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           assignees: []
+          category: null
+          customFields:
+            - key: d312efda-ec2b-42ec-9e2c-84981795c581
+              type: text
+              value: My new field value
+            - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+              type: toggle
+              value: false
           connector:
             id: 131d4448-abe0-4789-939d-8ef60680b498
             name: My connector
@@ -4267,7 +4959,7 @@ components:
               email: null
               username: elastic
             external_url: https://hms.atlassian.net/browse/IS-4
-            pushed_at: '2022-05-13T09:20:40.672Z'
+            pushed_at: '2023-10-13T09:20:40.672Z'
             connector_id: 05da469f-1fde-4058-99a3-91e4807e2de8
             external_id: '10003'
             connector_name: Jira
@@ -4290,22 +4982,32 @@ components:
             settings:
               syncAlerts: true
             owner: cases
+            customFields:
+              - type: text
+                key: d312efda-ec2b-42ec-9e2c-84981795c581
+                value: My field value
+              - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+                type: toggle
+                value: null
             duration: null
             severity: low
             closed_at: null
             closed_by: null
-            created_at: '2022-05-12T00:16:36.371Z'
+            created_at: '2023-10-12T00:16:36.371Z'
             created_by:
               email: null
               full_name: null
               username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             status: open
-            updated_at: '2022-05-12T00:27:58.162Z'
+            updated_at: '2023-10-12T00:27:58.162Z'
             updated_by:
               email: null
               full_name: null
               username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             assignees: []
+            category: null
             connector:
               id: none
               name: none
@@ -4315,6 +5017,32 @@ components:
         count_open_cases: 1
         count_in_progress_cases: 0
         count_closed_cases: 0
+    get_case_configuration_response:
+      summary: Get the case configuration.
+      value:
+        - id: 856ee650-6c82-11ee-a20a-6164169afa58
+          closure_type: close-by-user
+          customFields:
+            - key: d312efda-ec2b-42ec-9e2c-84981795c581
+              label: my-text-field
+              required: false
+              type: text
+          owner: cases
+          created_at: '2023-06-01T17:07:17.767Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          updated_at: null
+          updated_by: null
+          connector:
+            id: none
+            name: none
+            type: .none
+            fields: null
+          mappings: []
+          version: WzUxLDRd
+          error: null
     set_case_configuration_request:
       summary: Set the closure type and default connector for Stack Management cases.
       value:
@@ -4325,16 +5053,27 @@ components:
           type: .jira
           fields: null
         closure_type: close-by-user
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            required: false
+            type: text
     set_case_configuration_response:
-      summary: This is an example response when the case configuration was updated.
+      summary: This is an example response for case settings.
       value:
         closure_type: close-by-user
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            required: false
+            type: text
         owner: cases
-        created_at: '2022-06-01T17:07:17.767Z'
+        created_at: '2023-10-01T17:07:17.767Z'
         created_by:
           username: elastic
           email: null,
           full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         updated_at: null
         updated_by: null
         connector:
@@ -4355,24 +5094,80 @@ components:
         version: WzIwNzMsMV0=
         error: null
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+    update_case_configuration_request:
+      summary: Update the case settings.
+      value:
+        version: WzExOSw0XQ==
+        connector:
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+          fields: null
+        closure_type: close-by-user
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            required: true
+            type: text
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            label: my-toggle
+            required: false
+            type: toggle
+    update_case_configuration_response:
+      summary: This is an example response when the case configuration was updated.
+      value:
+        closure_type: close-by-user
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            label: my-text-field
+            required: true
+            type: text
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            label: my-toggle
+            required: false
+            type: toggle
+        owner: cases
+        created_at: '2023-10-01T17:07:17.767Z'
+        created_by:
+          username: elastic
+          email: null,
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        updated_at: '2023-10-19T00:52:42.401Z'
+        updated_by:
+          username: elastic
+          full_name: null
+          email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        connector:
+          id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+          name: my-jira-connector
+          type: .jira
+          fields: null
+        mappings:
+          - source: title
+            target: summary
+            action_type: overwrite
+          - source: description
+            target: description
+            action_type: overwrite
+          - source: comments
+            target: comments
+            action_type: append
+        version: zEzNSw1XQ==
+        error: null
+        id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
     get_reporters_response:
-      summary: A list of three users that opened cases
+      summary: A list of two users that opened cases
       value:
         - username: elastic
           full_name: null
           email: null
-        - username: user1
-          full_name: User 1
-          email: user1@elastic.co
-        - username: user2
-          full_name: User 2
-          email: user2@elastic.co
-    get_status_response:
-      summary: Get the number of cases in each state.
-      value:
-        count_open_cases: 27
-        count_in_progress_cases: 50
-        count_closed_cases: 198
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        - username: jdoe
+          full_name: Jane Doe
+          email: jdoe@example.com
+          profile_uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
     get_tags_response:
       summary: A list of tags that are used in cases
       value:
@@ -4391,11 +5186,12 @@ components:
             type: user
             owner: cases
             comment: A new comment
-            created_at: '2022-07-13T15:40:32.335Z'
+            created_at: '2023-10-13T15:40:32.335Z'
             created_by:
               email: null
               full_name: null
               username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             pushed_at: null
             pushed_by: null
             updated_at: null
@@ -4408,22 +5204,32 @@ components:
         settings:
           syncAlerts: true
         owner: cases
+        category: null
+        customFields:
+          - type: text
+            key: d312efda-ec2b-42ec-9e2c-84981795c581
+            value: My field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: null
         description: A case description
         duration: null
         severity: low
         closed_at: null
         closed_by: null
-        created_at: '2022-07-13T15:33:50.604Z'
+        created_at: '2023-10-13T15:33:50.604Z'
         created_by:
           username: elastic
           email: null
           full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         status: open
-        updated_at: '2022-07-13T15:40:32.335Z'
+        updated_at: '2023-10-13T15:40:32.335Z'
         updated_by:
           full_name: null
           email: null
           username: elastic
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         assignees:
           - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         connector:
@@ -4432,6 +5238,84 @@ components:
           type: .none
           fields: null
         external_service: null
+    get_case_observability_response:
+      summary: Retrieves information about an Observability case including its alerts and comments.
+      value:
+        description: An Observability case description.
+        owner: observability
+        settings:
+          syncAlerts: false
+        tags:
+          - observability
+          - tag 1
+        title: Observability case title 1
+        category: null
+        customFields: []
+        assignees:
+          - uid: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+        connector:
+          id: none
+          type: .none
+          fields: null
+          name: none
+        severity: low
+        status: in-progress
+        duration: null
+        closed_at: null
+        closed_by: null
+        created_at: '2023-11-06T19:29:04.086Z'
+        created_by:
+          username: elastic
+          full_name: null
+          email: null
+        updated_at: '2023-11-06T19:47:55.662Z'
+        updated_by:
+          username: elastic
+          full_name: null
+          email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        external_service: null
+        id: c3ff7550-def1-4e90-b6bc-c9969a4a09b1
+        version: WzI0NywyXQ==
+        totalComment: 1
+        totalAlerts: 1
+        comments:
+          - alertId:
+              - a6e12ac4-7bce-457b-84f6-d7ce8deb8446
+            index:
+              - .internal.alerts-observability.logs.alerts-default-000001
+            type: alert
+            rule:
+              id: 03e4eb87-62ca-4e5d-9570-3d7625e9669d
+              name: Observability rule
+            owner: observability
+            created_at: '2023-11-06T19:29:38.424Z'
+            created_by:
+              email: null
+              full_name: null
+              username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
+            id: 59d438d0-79a9-4864-8d4b-e63adacebf6e
+            version: WzY3LDJd
+          - comment: The first comment.
+            type: user
+            owner: observability
+            created_at: '2023-11-06T19:29:57.812Z'
+            created_by:
+              email: null
+              full_name: null
+              username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
+            id: d99342d3-3aa3-4b80-90ec-a702607604f5
+            version: WzcyLDJd
     get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
@@ -4453,7 +5337,7 @@ components:
             type: user
             owner: cases
             comment: A new comment.
-            created_at: '2022-06-02T00:49:47.716Z'
+            created_at: '2022-10-02T00:49:47.716Z'
             created_by:
               username: elastic
               email: null
@@ -4466,6 +5350,15 @@ components:
         tags:
           - tag 1
         description: A case description.
+        category: null
+        assignees: []
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: Field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: true
         settings:
           syncAlerts: false
         owner: cases
@@ -4478,12 +5371,14 @@ components:
           username: elastic
           full_name: null
           email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         status: open
         updated_at: '2022-06-03T00:49:47.716Z'
         updated_by:
           username: elastic
           email: null
           full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         connector:
           id: none
           name: none
@@ -4507,18 +5402,20 @@ components:
             comment: An updated comment.
             type: user
             owner: cases
-            created_at: '2022-03-24T00:37:10.832Z'
+            created_at: '2023-10-24T00:37:10.832Z'
             created_by:
               username: elastic
               full_name: null
               email: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             pushed_at: null
             pushed_by: null
-            updated_at: '2022-03-24T01:27:06.210Z'
+            updated_at: '2023-10-24T01:27:06.210Z'
             updated_by:
               username: elastic
               full_name: null
               email: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         totalAlerts: 0
         id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
         version: WzIwNjM2LDFd
@@ -4530,21 +5427,32 @@ components:
         settings:
           syncAlerts: false
         owner: cases
+        category: null
+        assignees: []
+        customFields:
+          - key: d312efda-ec2b-42ec-9e2c-84981795c581
+            type: text
+            value: My new field value
+          - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+            type: toggle
+            value: false
         duration: null
         severity: low
         closed_at: null
         closed_by: null
-        created_at: '2022-03-24T00:37:03.906Z'
+        created_at: '2023-10-24T00:37:03.906Z'
         created_by:
           username: elastic
           full_name: null
           email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         status: open
-        updated_at: '2022-03-24T01:27:06.210Z'
+        updated_at: '2023-10-24T01:27:06.210Z'
         updated_by:
           username: elastic
           full_name: null
           email: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         connector:
           id: none
           name: none
@@ -4559,11 +5467,12 @@ components:
         type: user
         owner: cases
         comment: A new comment
-        created_at: '2022-07-07T19:32:13.104Z'
+        created_at: '2023-10-07T19:32:13.104Z'
         created_by:
           email: null
           full_name: null
           username: elastic
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         pushed_at: null
         pushed_by: null
         updated_at: null
@@ -4617,122 +5526,58 @@ components:
           external_title: ES-554
           external_url: https://cases.jira.com
           connector_id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
-    get_case_activity_response:
-      summary: Retrieves all activity for a case
-      value:
-        - action_id: b4cd0770-07c9-11ed-a5fd-47154cb8767e
-          action: create
-          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
-          comment_id: 578608d0-03b1-11ed-920c-974bfa104448
-          created_at: '2022-07-20T01:17:22.150Z'
-          created_by:
-            username: elastic
-            email: null
-            full_name: null
-          owner: cases
-          payload:
-            assignees: null
-            connector:
-              name: none
-              type: .none
-              fields: null
-              id: none
-            description: test
-            tags:
-              - mine
-            title: test-case
-            owner: cases
-            settings:
-              syncAlerts: false
-            severity: low
-            status: open
-            type: create_case
-          type: comment
-        - action_id: 57af14a0-03b1-11ed-920c-974bfa104448
-          action: create
-          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
-          comment_id: 578608d0-03b1-11ed-920c-974bfa104448
-          created_at: '2022-07-14T20:12:53.354Z'
-          created_by:
-            username: elastic
-            email: null
-            full_name: null
-          owner: cases
-          payload:
-            comment: A new comment
-            owner: cases
-            type: user
-          type: comment
-        - action_id: 573c6980-6123-11ed-aa41-81a0a61fe447
-          action: add
-          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
-          comment_id: null
-          created_at: '2022-07-20T01:10:28.238Z'
-          created_by:
-            username: elastic
-            email: null
-            full_name: null
-            profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-          owner: cases
-          payload:
-            assignees:
-              uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-          type: assignees
-        - action_id: fff460e0-07c9-11ed-a5fd-47154cb8767e
-          action: delete
-          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
-          comment_id: null
-          created_at: '2022-07-20T01:19:28.238Z'
-          created_by:
-            username: elastic
-            email: null
-            full_name: null
-          owner: cases
-          payload: null
-          type: delete_case
     find_case_activity_response:
       summary: Retrieves all activity for a case
       value:
         page: 1
         perPage: 20
-        total: 4
+        total: 3
         userActions:
           - id: b4cd0770-07c9-11ed-a5fd-47154cb8767e
             action: create
-            comment_id: 578608d0-03b1-11ed-920c-974bfa104448
-            created_at: '2022-07-20T01:17:22.150Z'
+            comment_id: null
+            created_at: '2023-10-20T01:17:22.150Z'
             created_by:
               username: elastic
               email: null
               full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             owner: cases
             payload:
-              assignees: null
+              assignees: []
               connector:
                 name: none
                 type: .none
                 fields: null
                 id: none
-              description: test
+              description: A case description.
               tags:
-                - mine
-              title: test-case
+                - tag 1
+              title: Case title 1
               owner: cases
               settings:
                 syncAlerts: false
               severity: low
               status: open
-              type: create_case
+              category: null
+              customFields:
+                - key: d312efda-ec2b-42ec-9e2c-84981795c581
+                  type: text
+                  value: My field value
+                - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+                  type: toggle
+                  value: null
             version: WzM1ODg4LDFd
-            type: comment
+            type: create_case
           - id: 57af14a0-03b1-11ed-920c-974bfa104448
             action: create
             comment_id: 578608d0-03b1-11ed-920c-974bfa104448
-            created_at: '2022-07-14T20:12:53.354Z'
+            created_at: '2023-10-14T20:12:53.354Z'
             created_by:
               username: elastic
               email: null
               full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             owner: cases
             payload:
               comment: A new comment
@@ -4743,7 +5588,7 @@ components:
           - id: 573c6980-6123-11ed-aa41-81a0a61fe447
             action: add
             comment_id: null
-            created_at: '2022-07-20T01:10:28.238Z'
+            created_at: '2023-10-20T01:10:28.238Z'
             created_by:
               username: elastic
               email: null
@@ -4768,6 +5613,3 @@ components:
           isPreconfigured: false
           isDeprecated: false
           referencedByCount: 0
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

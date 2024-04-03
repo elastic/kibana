@@ -7,19 +7,13 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getVulnerabilitiesTrends } from './get_vulnerabilities_trend';
-import type { CnvmDashboardData } from '../../../common/types';
+import type { CnvmDashboardData } from '../../../common/types_old';
 import { VULNERABILITIES_DASHBOARD_ROUTE_PATH } from '../../../common/constants';
-import { getSafeVulnerabilitiesQueryFilter } from '../../../common/utils/get_safe_vulnerabilities_query_filter';
 import { CspRouter } from '../../types';
 import { getVulnerabilitiesStatistics } from './get_vulnerabilities_statistics';
 import { getTopVulnerableResources } from './get_top_vulnerable_resources';
 import { getTopPatchableVulnerabilities } from './get_top_patchable_vulnerabilities';
 import { getTopVulnerabilities } from './get_top_vulnerabilities';
-
-export interface KeyDocCount<TKey = string> {
-  key: TKey;
-  doc_count: number;
-}
 
 export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void =>
   router.get(
@@ -36,8 +30,6 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
       try {
         const esClient = cspContext.esClient.asCurrentUser;
 
-        const query = getSafeVulnerabilitiesQueryFilter();
-
         const [
           cnvmStatistics,
           vulnTrends,
@@ -45,11 +37,11 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
           topPatchableVulnerabilities,
           topVulnerabilities,
         ] = await Promise.all([
-          getVulnerabilitiesStatistics(esClient, query),
+          getVulnerabilitiesStatistics(esClient),
           getVulnerabilitiesTrends(esClient),
-          getTopVulnerableResources(esClient, query),
-          getTopPatchableVulnerabilities(esClient, query),
-          getTopVulnerabilities(esClient, query),
+          getTopVulnerableResources(esClient),
+          getTopPatchableVulnerabilities(esClient),
+          getTopVulnerabilities(esClient),
         ]);
 
         const body: CnvmDashboardData = {
@@ -69,7 +61,7 @@ export const defineGetVulnerabilitiesDashboardRoute = (router: CspRouter): void 
 
         return response.customError({
           body: { message: error.message },
-          statusCode: error.statusCode,
+          statusCode: 500,
         });
       }
     }

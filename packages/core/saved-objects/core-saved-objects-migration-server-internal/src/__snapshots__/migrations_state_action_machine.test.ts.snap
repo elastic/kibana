@@ -5,10 +5,6 @@ Object {
   "debug": Array [
     Array [
       "[.my-so-index] INIT RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] INIT -> LEGACY_REINDEX. took: 0ms.",
@@ -25,6 +21,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -142,7 +141,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -159,6 +171,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -189,22 +202,6 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
-                "_meta": Object {
-                  "indexTypesMap": Object {
-                    ".kibana": Array [
-                      "typeA",
-                      "typeB",
-                      "typeC",
-                    ],
-                    ".kibana_cases": Array [
-                      "typeD",
-                      "typeE",
-                    ],
-                    ".kibana_task_manager": Array [
-                      "task",
-                    ],
-                  },
-                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -230,10 +227,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_REINDEX RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_REINDEX -> LEGACY_DELETE. took: 0ms.",
@@ -250,6 +243,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -367,7 +363,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -384,6 +393,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -418,22 +428,6 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
-                "_meta": Object {
-                  "indexTypesMap": Object {
-                    ".kibana": Array [
-                      "typeA",
-                      "typeB",
-                      "typeC",
-                    ],
-                    ".kibana_cases": Array [
-                      "typeD",
-                      "typeE",
-                    ],
-                    ".kibana_task_manager": Array [
-                      "task",
-                    ],
-                  },
-                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -459,10 +453,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> LEGACY_DELETE. took: 0ms.",
@@ -479,6 +469,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -596,7 +589,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -613,6 +619,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -651,22 +658,6 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
-                "_meta": Object {
-                  "indexTypesMap": Object {
-                    ".kibana": Array [
-                      "typeA",
-                      "typeB",
-                      "typeC",
-                    ],
-                    ".kibana_cases": Array [
-                      "typeD",
-                      "typeE",
-                    ],
-                    ".kibana_task_manager": Array [
-                      "task",
-                    ],
-                  },
-                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -692,10 +683,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> DONE. took: 0ms.",
@@ -712,6 +699,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -829,7 +819,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -846,6 +849,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -888,22 +892,6 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
-                "_meta": Object {
-                  "indexTypesMap": Object {
-                    ".kibana": Array [
-                      "typeA",
-                      "typeB",
-                      "typeC",
-                    ],
-                    ".kibana_cases": Array [
-                      "typeD",
-                      "typeE",
-                    ],
-                    ".kibana_task_manager": Array [
-                      "task",
-                    ],
-                  },
-                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -955,10 +943,6 @@ Object {
   "debug": Array [
     Array [
       "[.my-so-index] INIT RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] INIT -> LEGACY_DELETE. took: 0ms.",
@@ -981,6 +965,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -1098,7 +1085,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -1115,6 +1115,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -1150,22 +1151,6 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
-                "_meta": Object {
-                  "indexTypesMap": Object {
-                    ".kibana": Array [
-                      "typeA",
-                      "typeB",
-                      "typeC",
-                    ],
-                    ".kibana_cases": Array [
-                      "typeD",
-                      "typeE",
-                    ],
-                    ".kibana_task_manager": Array [
-                      "task",
-                    ],
-                  },
-                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",
@@ -1191,10 +1176,6 @@ Object {
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE RESPONSE",
-      Object {
-        "_tag": "Right",
-        "right": "response",
-      },
     ],
     Array [
       "[.my-so-index] LEGACY_DELETE -> FATAL. took: 0ms.",
@@ -1217,6 +1198,9 @@ Object {
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "esCapabilities": Object {
+                "serverless": false,
+              },
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -1334,7 +1318,20 @@ Object {
                   ],
                 },
               },
+              "hashToVersionMap": Object {
+                "task|someHash": "10.1.0",
+                "typeA|someHash": "10.1.0",
+                "typeB|someHash": "10.1.0",
+                "typeC|someHash": "10.1.0",
+                "typeD|someHash": "10.1.0",
+                "typeE|someHash": "10.1.0",
+              },
               "indexPrefix": ".my-so-index",
+              "indexTypes": Array [
+                "typeA",
+                "typeB",
+                "typeC",
+              ],
               "indexTypesMap": Object {
                 ".kibana": Array [
                   "typeA",
@@ -1351,6 +1348,7 @@ Object {
               },
               "kibanaVersion": "7.11.0",
               "knownTypes": Array [],
+              "latestMappingsVersions": Object {},
               "legacyIndex": ".my-so-index",
               "logs": Array [
                 Object {
@@ -1390,22 +1388,6 @@ Object {
               "retryCount": 0,
               "retryDelay": 0,
               "targetIndexMappings": Object {
-                "_meta": Object {
-                  "indexTypesMap": Object {
-                    ".kibana": Array [
-                      "typeA",
-                      "typeB",
-                      "typeC",
-                    ],
-                    ".kibana_cases": Array [
-                      "typeD",
-                      "typeE",
-                    ],
-                    ".kibana_task_manager": Array [
-                      "task",
-                    ],
-                  },
-                },
                 "properties": Object {},
               },
               "tempIndex": ".my-so-index_7.11.0_reindex_temp",

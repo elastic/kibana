@@ -6,7 +6,10 @@
     "id": "securitySolution",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "securitySolution"],
+    "configPath": [
+      "xpack",
+      "securitySolution"
+    ],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -14,21 +17,23 @@
       "cloud",
       "cloudDefend",
       "cloudSecurityPosture",
+      "contentManagement",
       "dashboard",
       "data",
       "dataViews",
       "discover",
       "ecsDataQualityDashboard",
+      "elasticAssistant",
       "embeddable",
       "eventLog",
       "features",
       "fieldFormats",
-      "guidedOnboarding",
       "inspector",
       "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
+      "navigation",
       "ruleRegistry",
       "sessionView",
       "spaces",
@@ -40,8 +45,15 @@
       "unifiedSearch",
       "files",
       "controls",
+      "dataViewEditor",
       "savedObjectsManagement",
-      "stackConnectors"
+      "expressions",
+      "stackConnectors",
+      "discover",
+      "notifications",
+      "savedObjects",
+      "savedSearch",
+      "unifiedDocViewer",
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -56,7 +68,8 @@
       "telemetry",
       "dataViewFieldEditor",
       "osquery",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -66,9 +79,10 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch",
-      "cloudChat"
+      "unifiedSearch"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

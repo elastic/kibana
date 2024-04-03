@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState, type FC } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useState, type FC } from 'react';
 
-import {
-  formatDate,
-  EuiPanel,
-  EuiBasicTable,
-  EuiBasicTableProps,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiBasicTableProps } from '@elastic/eui';
+import { formatDate, EuiPanel, EuiBasicTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+
 import { euiLightVars as theme } from '@kbn/ui-theme';
-
 import { i18n } from '@kbn/i18n';
 
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
-import { isGetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/type_guards';
-import { TransformMessage } from '../../../../../../common/types/messages';
+import type { TransformMessage } from '../../../../../../common/types/messages';
 
-import { useApi } from '../../../../hooks/use_api';
 import { JobIcon } from '../../../../components/job_icon';
-import { useRefreshTransformList } from '../../../../common';
+import { useGetTransformAuditMessages, useRefreshTransformList } from '../../../../hooks';
 
 interface ExpandedRowMessagesPaneProps {
   transformId: string;
@@ -37,11 +31,7 @@ interface Sorting {
 }
 
 export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [msgCount, setMsgCount] = useState<number>(0);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const { showNodeInfo } = useEnabledFeatures();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -52,58 +42,24 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     },
   });
 
-  const api = useApi();
+  const {
+    isLoading,
+    error,
+    data = { messages: [], total: 0 },
+  } = useGetTransformAuditMessages(transformId, sorting.sort.field, sorting.sort.direction);
+  const { messages, total } = data;
+  const errorMessage =
+    error !== null
+      ? i18n.translate('xpack.transform.transformList.transformDetails.messagesPane.errorMessage', {
+          defaultMessage: 'Messages could not be loaded',
+        })
+      : '';
 
-  const getMessagesFactory = (
-    sortField: keyof TransformMessage = 'timestamp',
-    sortDirection: 'asc' | 'desc' = 'desc'
-  ) => {
-    let concurrentLoads = 0;
-
-    return async function getMessages() {
-      concurrentLoads++;
-
-      if (concurrentLoads > 1) {
-        return;
-      }
-
-      setIsLoading(true);
-      const messagesResp = await api.getTransformAuditMessages(
-        transformId,
-        sortField,
-        sortDirection
-      );
-
-      if (!isGetTransformsAuditMessagesResponseSchema(messagesResp)) {
-        setIsLoading(false);
-        setErrorMessage(
-          i18n.translate(
-            'xpack.transform.transformList.transformDetails.messagesPane.errorMessage',
-            {
-              defaultMessage: 'Messages could not be loaded',
-            }
-          )
-        );
-        return;
-      }
-
-      setIsLoading(false);
-      setMessages(messagesResp.messages);
-      setMsgCount(messagesResp.total);
-
-      concurrentLoads--;
-
-      if (concurrentLoads > 0) {
-        concurrentLoads = 0;
-        getMessages();
-      }
-    };
-  };
-  const { refresh: refreshMessage } = useRefreshTransformList({ onRefresh: getMessagesFactory() });
+  const refreshTransformList = useRefreshTransformList();
 
   const columns = [
     {
-      name: refreshMessage ? (
+      name: refreshTransformList ? (
         <EuiToolTip
           content={i18n.translate('xpack.transform.transformList.refreshLabel', {
             defaultMessage: 'Refresh',
@@ -113,7 +69,7 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
             // TODO: Replace this with ML's blurButtonOnClick when it's moved to a shared package
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
               (e.currentTarget as HTMLButtonElement).blur();
-              refreshMessage();
+              refreshTransformList();
             }}
             iconType="refresh"
             aria-label={i18n.translate('xpack.transform.transformList.refreshAriaLabel', {
@@ -138,16 +94,20 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
       render: (timestamp: number) => formatDate(timestamp, TIME_FORMAT),
       sortable: true,
     },
-    {
-      field: 'node_name',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.messagesPane.nodeLabel',
-        {
-          defaultMessage: 'Node',
-        }
-      ),
-      sortable: true,
-    },
+    ...(showNodeInfo
+      ? [
+          {
+            field: 'node_name',
+            name: i18n.translate(
+              'xpack.transform.transformList.transformDetails.messagesPane.nodeLabel',
+              {
+                defaultMessage: 'Node',
+              }
+            ),
+            sortable: true,
+          },
+        ]
+      : []),
     {
       field: 'message',
       name: i18n.translate(
@@ -156,13 +116,13 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
           defaultMessage: 'Message',
         }
       ),
-      width: '50%',
+      width: showNodeInfo ? '50%' : '70%',
     },
   ];
 
   const getPageOfMessages = ({ index, size }: { index: number; size: number }) => {
     let list = messages;
-    if (msgCount <= DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
+    if (total <= DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
       const sortField = sorting.sort.field ?? 'timestamp';
       list = messages.sort((a: TransformMessage, b: TransformMessage) => {
         const prev = a[sortField] as any;
@@ -192,12 +152,6 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
     setPageSize(size);
     if (sort) {
       setSorting({ sort });
-
-      // Since we only show 500 messages, if user wants oldest messages first
-      // we need to make sure we fetch them from elasticsearch
-      if (msgCount > DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
-        getMessagesFactory(sort.field, sort.direction)();
-      }
     }
   };
 

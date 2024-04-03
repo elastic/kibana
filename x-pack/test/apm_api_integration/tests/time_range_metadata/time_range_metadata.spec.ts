@@ -11,19 +11,21 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  getTransactionEvents,
-  subtractDateDifference,
-  overwriteSynthPipelineWithSummaryFieldDeleteTransform,
-} from './generate_data';
+  addObserverVersionTransform,
+  ApmSynthtraceEsClient,
+  deleteSummaryFieldTransform,
+} from '@kbn/apm-synthtrace';
+import { Readable, pipeline } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
-
-  const esClient = getService('es');
+  const es = getService('es');
+  const log = getService('log');
 
   const start = moment('2022-01-01T00:00:00.000Z');
   const end = moment('2022-01-02T00:00:00.000Z').subtract(1, 'millisecond');
@@ -76,63 +78,76 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177541
   registry.when(
     'Time range metadata when generating summary data',
     { config: 'basic', archives: [] },
     () => {
       describe('data loaded with and without summary field', () => {
-        const localStart = moment('2023-04-28T00:00:00.000Z');
-        const localEnd = moment('2023-04-28T06:00:00.000Z');
+        const withoutSummaryFieldStart = moment('2023-04-28T00:00:00.000Z');
+        const withoutSummaryFieldEnd = moment(withoutSummaryFieldStart).add(2, 'hours');
+
+        const withSummaryFieldStart = moment(withoutSummaryFieldEnd);
+        const withSummaryFieldEnd = moment(withoutSummaryFieldEnd).add(2, 'hours');
+
         before(async () => {
-          const regularData = getTransactionEvents(localStart, localEnd);
-          await synthtraceEsClient.index([...regularData]);
-          const { previousStart, previousEnd } = subtractDateDifference(localStart, localEnd);
-          const previousDataWithoutSummaryField = getTransactionEvents(previousStart, previousEnd);
-          synthtraceEsClient.pipeline(
-            overwriteSynthPipelineWithSummaryFieldDeleteTransform({
-              synthtraceEsClient,
-            })
-          );
-          await synthtraceEsClient.index([...previousDataWithoutSummaryField]);
+          await getTransactionEvents({
+            start: withoutSummaryFieldStart,
+            end: withoutSummaryFieldEnd,
+            isLegacy: true,
+            synthtrace: synthtraceEsClient,
+            logger: log,
+          });
+
+          await getTransactionEvents({
+            start: withSummaryFieldStart,
+            end: withSummaryFieldEnd,
+            isLegacy: false,
+            synthtrace: synthtraceEsClient,
+            logger: log,
+          });
         });
+
         after(() => {
-          synthtraceEsClient.clean();
-          synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline());
+          return synthtraceEsClient.clean();
         });
+
         describe('Values for hasDurationSummaryField for transaction metrics', () => {
           it('returns true when summary field is available both inside and outside the range', async () => {
             const response = await getTimeRangeMedata({
-              start: moment(localStart).add(3, 'hours'),
-              end: moment(localEnd),
+              start: moment(withSummaryFieldStart).add(1, 'hour'),
+              end: moment(withSummaryFieldEnd),
             });
 
             expect(
               response.sources.filter(
                 (source) =>
                   source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField === true
+                  source.hasDurationSummaryField
               ).length
             ).to.eql(3);
           });
+
           it('returns false when summary field is available inside but not outside the range', async () => {
             const response = await getTimeRangeMedata({
-              start: moment(localStart).subtract(30, 'minutes'),
-              end: moment(localEnd),
+              start: moment(withSummaryFieldStart).subtract(30, 'minutes'),
+              end: moment(withSummaryFieldEnd),
             });
 
             expect(
               response.sources.filter(
                 (source) =>
                   source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField === false
+                  !source.hasDurationSummaryField
               ).length
-            ).to.eql(3);
+            ).to.eql(2);
           });
         });
       });
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177601
   registry.when(
     'Time range metadata when generating data',
     { config: 'basic', archives: [] },
@@ -386,7 +401,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('when service metrics are only available in the current time range', () => {
         before(async () => {
-          await esClient.deleteByQuery({
+          await es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {
@@ -436,7 +451,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('after deleting a specific data set', () => {
         before(async () => {
-          await esClient.deleteByQuery({
+          await es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {
@@ -480,7 +495,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: false,
-              hasDurationSummaryField: false,
+              hasDurationSummaryField: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
@@ -492,7 +507,75 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => {
+        return synthtraceEsClient.clean();
+      });
     }
   );
+}
+
+function getTransactionEvents({
+  start,
+  end,
+  synthtrace,
+  logger,
+  isLegacy = false,
+}: {
+  start: Moment;
+  end: Moment;
+  synthtrace: ApmSynthtraceEsClient;
+  logger: ToolingLog;
+  isLegacy?: boolean;
+}) {
+  const serviceName = 'synth-go';
+  const transactionName = 'GET /api/product/list';
+  const GO_PROD_RATE = 15;
+  const GO_PROD_ERROR_RATE = 5;
+
+  const serviceGoProdInstance = apm
+    .service({ name: serviceName, environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+
+  const events = [
+    timerange(start, end)
+      .interval('1m')
+      .rate(GO_PROD_RATE)
+      .generator((timestamp) =>
+        serviceGoProdInstance
+          .transaction({ transactionName })
+          .timestamp(timestamp)
+          .duration(1000)
+          .success()
+      ),
+
+    timerange(start, end)
+      .interval('1m')
+      .rate(GO_PROD_ERROR_RATE)
+      .generator((timestamp) =>
+        serviceGoProdInstance
+          .transaction({ transactionName })
+          .duration(1000)
+          .timestamp(timestamp)
+          .failure()
+      ),
+  ];
+
+  const apmPipeline = (base: Readable) => {
+    const defaultPipeline = synthtrace.getDefaultPipeline()(
+      base
+    ) as unknown as NodeJS.ReadableStream;
+
+    return pipeline(
+      defaultPipeline,
+      addObserverVersionTransform('8.5.0'),
+      deleteSummaryFieldTransform(),
+      (err) => {
+        if (err) {
+          logger.error(err);
+        }
+      }
+    );
+  };
+
+  return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
 }

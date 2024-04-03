@@ -39,7 +39,15 @@
               "\nInformation about Kibana package (version, build number etc.)."
             ],
             "signature": [
-              "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildDate: Date; readonly dist: boolean; }"
+              "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildShaShort: string; readonly buildDate: Date; readonly buildFlavor: ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.BuildFlavor",
+                "text": "BuildFlavor"
+              },
+              "; readonly dist: boolean; }"
             ],
             "path": "packages/kbn-config/src/env.ts",
             "deprecated": false,
@@ -66,6 +74,39 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/config",
+        "id": "def-common.getConfigFromFiles",
+        "type": "Function",
+        "tags": [],
+        "label": "getConfigFromFiles",
+        "description": [],
+        "signature": [
+          "(configFiles: readonly string[]) => Record<string, any>"
+        ],
+        "path": "packages/kbn-config/src/raw/read_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-common.getConfigFromFiles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "configFiles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/kbn-config/src/raw/read_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/config",
         "id": "def-common.hasConfigPathIntersection",
@@ -958,6 +999,17 @@
           },
           {
             "parentPluginId": "@kbn/config",
+            "id": "def-common.PackageInfo.buildShaShort",
+            "type": "string",
+            "tags": [],
+            "label": "buildShaShort",
+            "description": [],
+            "path": "packages/kbn-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
             "id": "def-common.PackageInfo.buildDate",
             "type": "Object",
             "tags": [],
@@ -965,6 +1017,20 @@
             "description": [],
             "signature": [
               "Date"
+            ],
+            "path": "packages/kbn-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-common.PackageInfo.buildFlavor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buildFlavor",
+            "description": [],
+            "signature": [
+              "\"serverless\" | \"traditional\""
             ],
             "path": "packages/kbn-config/src/types.ts",
             "deprecated": false,
@@ -1033,6 +1099,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config",
+        "id": "def-common.BuildFlavor",
+        "type": "Type",
+        "tags": [],
+        "label": "BuildFlavor",
+        "description": [],
+        "signature": [
+          "\"serverless\" | \"traditional\""
+        ],
+        "path": "packages/kbn-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

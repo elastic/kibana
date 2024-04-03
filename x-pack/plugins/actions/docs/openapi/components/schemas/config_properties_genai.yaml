@@ -1,10 +1,10 @@
-title: Connector request properties for a generative AI connector
+title: Connector request properties for an OpenAI connector
 description: Defines properties for connectors when type is `.gen-ai`.
-type: object
-properties:
-    apiProvider:
-        type: string
-        description: The OpenAI API provider.
-    apiUrl:
-        type: string
-        description: The OpenAI API endpoint.
+oneOf:
+  - $ref: 'config_properties_genai_azure.yaml'
+  - $ref: 'config_properties_genai_openai.yaml'
+discriminator:
+  propertyName: apiProvider
+  mapping:
+    Azure OpenAI: 'config_properties_genai_azure.yaml'
+    OpenAI: 'config_properties_genai_openai.yaml'

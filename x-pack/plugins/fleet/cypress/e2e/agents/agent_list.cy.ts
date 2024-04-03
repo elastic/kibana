@@ -13,6 +13,10 @@ import { deleteFleetServerDocs, deleteAgentDocs, cleanupAgentPolicies } from '..
 import type { CreateAgentPolicyRequest } from '../../../common/types';
 import { setUISettings } from '../../tasks/ui_settings';
 
+import { API_VERSIONS } from '../../../common/constants';
+import { request } from '../../tasks/common';
+import { login } from '../../tasks/login';
+
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
   createAgentDoc('agent-2', 'policy-2', 'error', kibanaVersion),
@@ -63,10 +67,10 @@ const POLICIES: Array<CreateAgentPolicyRequest['body']> = [
 ];
 
 function createAgentPolicy(body: CreateAgentPolicyRequest['body']) {
-  cy.request({
+  request({
     method: 'POST',
     url: '/api/fleet/agent_policies',
-    headers: { 'kbn-xsrf': 'xx' },
+    headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     body,
   });
 }
@@ -99,11 +103,13 @@ describe('View agents list', () => {
     }
   });
   after(() => {
-    deleteFleetServerDocs();
-    deleteAgentDocs();
+    deleteFleetServerDocs(true);
+    deleteAgentDocs(true);
     cleanupAgentPolicies();
   });
   beforeEach(() => {
+    login();
+
     cy.intercept('/api/fleet/agents/setup', {
       isReady: true,
       missing_optional_features: [],
@@ -159,9 +165,9 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
-      cy.get('button').contains('Agent policy 1');
-      cy.get('button').contains('Agent policy 2');
-      cy.get('button').contains('Agent policy 3');
+      cy.get('li').contains('Agent policy 1');
+      cy.get('li').contains('Agent policy 2');
+      cy.get('li').contains('Agent policy 3');
     });
 
     it('should filter on single policy (no results)', () => {
@@ -169,7 +175,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
-      cy.get('button').contains('Agent policy 4').click();
+      cy.get('li').contains('Agent policy 4').click();
 
       assertTableIsEmpty();
     });
@@ -179,7 +185,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
-      cy.get('button').contains('Agent policy 1').click();
+      cy.get('li').contains('Agent policy 1').click();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 2);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
@@ -190,8 +196,8 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
-      cy.get('button').contains('Agent policy 1').click();
-      cy.get('button').contains('Agent policy 2').click();
+      cy.get('li').contains('Agent policy 1').click();
+      cy.get('li').contains('Agent policy 2').click();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 3);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
@@ -202,10 +208,10 @@ describe('View agents list', () => {
   describe('Agent status filter', () => {
     const clearFilters = () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
-      cy.get('button').contains('Healthy').click();
-      cy.get('button').contains('Unhealthy').click();
-      cy.get('button').contains('Updating').click();
-      cy.get('button').contains('Offline').click();
+      cy.get('li').contains('Healthy').click();
+      cy.get('li').contains('Unhealthy').click();
+      cy.get('li').contains('Updating').click();
+      cy.get('li').contains('Offline').click();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
       cy.wait('@getAgents');
     };
@@ -214,7 +220,7 @@ describe('View agents list', () => {
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('button').contains('Healthy').click();
+      cy.get('li').contains('Healthy').click();
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
@@ -226,7 +232,7 @@ describe('View agents list', () => {
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('button').contains('Unhealthy').click();
+      cy.get('li').contains('Unhealthy').click();
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(1);
@@ -239,7 +245,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('button').contains('Inactive').click();
+      cy.get('li').contains('Inactive').click();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
     });
@@ -250,8 +256,8 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('button').contains('Healthy').click();
-      cy.get('button').contains('Unhealthy').click();
+      cy.get('li').contains('Healthy').click();
+      cy.get('li').contains('Unhealthy').click();
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
@@ -264,7 +270,7 @@ describe('View agents list', () => {
     it('should allow to filter on one tag (tag1)', () => {
       cy.visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
-      cy.get('button').contains('tag1').click();
+      cy.get('li').contains('tag1').click();
 
       assertTableContainsNAgents(2);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-3');
@@ -274,8 +280,8 @@ describe('View agents list', () => {
     it('should allow to filter on multiple tag (tag1, tag2)', () => {
       cy.visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
-      cy.get('button').contains('tag1').click();
-      cy.get('button').contains('tag2').click();
+      cy.get('li').contains('tag1').click();
+      cy.get('li').contains('tag2').click();
       cy.wait('@getAgents');
 
       assertTableContainsNAgents(4);
@@ -288,8 +294,8 @@ describe('View agents list', () => {
     it('should allow to clear filters', () => {
       cy.visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
-      cy.get('button').contains('tag1').click();
-      cy.get('button').contains('tag2').click();
+      cy.get('li').contains('tag1').click();
+      cy.get('li').contains('tag2').click();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
 
       assertTableContainsNAgents(4);
@@ -305,7 +311,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
-      cy.get('button').contains('Agent policy 3').click();
+      cy.get('li').contains('Agent policy 3').click();
       assertTableContainsNAgents(15);
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
@@ -339,7 +345,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
-      cy.get('button').contains('Agent policy 3').click();
+      cy.get('li').contains('Agent policy 3').click();
       assertTableContainsNAgents(15);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
       // Trigger a bulk upgrade
@@ -356,7 +362,7 @@ describe('View agents list', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
-      cy.get('button').contains('Agent policy 3').click();
+      cy.get('li').contains('Agent policy 3').click();
       cy.wait('@getAgents');
       assertTableContainsNAgents(15);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
@@ -367,10 +373,9 @@ describe('View agents list', () => {
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
       cy.wait('@getAgents');
       assertTableIsEmpty();
-      cy.pause();
       // Select new policy is filters
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
-      cy.get('button').contains('Agent policy 4').click();
+      cy.get('li').contains('Agent policy 4').click();
       cy.wait('@getAgents');
       assertTableContainsNAgents(15);
 

@@ -18,7 +18,7 @@ export const fetchAnalyticsCollections = async (
 ): Promise<AnalyticsCollection[]> => {
   try {
     const collections = await client.asCurrentUser.searchApplication.getBehavioralAnalytics({
-      name: query,
+      name: [query],
     });
 
     return Object.keys(collections).map((value) => {

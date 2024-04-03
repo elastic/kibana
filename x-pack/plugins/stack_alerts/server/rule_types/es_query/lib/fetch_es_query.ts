@@ -12,11 +12,11 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { ES_QUERY_ID } from '../constants';
-import { getSearchParams } from './get_search_params';
+import { getParsedQuery } from '../util';
 
 export interface FetchEsQueryOpts {
   ruleId: string;
@@ -30,6 +30,8 @@ export interface FetchEsQueryOpts {
     logger: Logger;
   };
   alertLimit?: number;
+  dateStart: string;
+  dateEnd: string;
 }
 
 /**
@@ -44,17 +46,20 @@ export async function fetchEsQuery({
   timestamp,
   services,
   alertLimit,
+  dateStart,
+  dateEnd,
 }: FetchEsQueryOpts) {
   const { scopedClusterClient, logger } = services;
   const esClient = scopedClusterClient.asCurrentUser;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
   const {
+    query,
+    fields,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    parsedQuery: { query, fields, runtime_mappings, _source },
-    dateStart,
-    dateEnd,
-  } = getSearchParams(params);
+    runtime_mappings,
+    _source,
+  } = getParsedQuery(params);
 
   const filter =
     timestamp && params.excludeHitsFromPreviousRun
@@ -105,6 +110,7 @@ export async function fetchEsQuery({
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
+      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -135,9 +141,9 @@ export async function fetchEsQuery({
       isGroupAgg,
       esResult: searchResult,
       resultLimit: alertLimit,
+      sourceFieldsParams: params.sourceFields,
     }),
-    dateStart,
-    dateEnd,
     link,
+    index: params.index,
   };
 }

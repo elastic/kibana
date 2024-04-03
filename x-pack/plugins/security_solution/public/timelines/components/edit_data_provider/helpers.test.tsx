@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataProviderType } from '../../../../common/types/timeline/api';
+import { DataProviderType } from '../../../../common/api/timeline';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {
@@ -118,6 +118,7 @@ describe('helpers', () => {
             },
           ],
         },
+        { label: 'process', options: [{ label: 'process.args' }] },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
         {
           label: 'user',

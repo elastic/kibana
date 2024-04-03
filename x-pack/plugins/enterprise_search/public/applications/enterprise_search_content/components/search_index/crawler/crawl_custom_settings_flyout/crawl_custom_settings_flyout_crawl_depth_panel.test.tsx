@@ -33,7 +33,12 @@ describe('CrawlCustomSettingsFlyoutCrawlDepthPanel', () => {
   });
 
   it('allows the user to set max crawl depth', () => {
-    const wrapper = shallow(<CrawlCustomSettingsFlyoutCrawlDepthPanel />);
+    const wrapper = shallow(
+      <CrawlCustomSettingsFlyoutCrawlDepthPanel
+        maxCrawlDepth={MOCK_VALUES.maxCrawlDepth}
+        onSelectMaxCrawlDepth={MOCK_ACTIONS.onSelectMaxCrawlDepth}
+      />
+    );
     const crawlDepthField = wrapper.find(EuiFieldNumber);
 
     expect(crawlDepthField.prop('value')).toEqual(5);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../common/api';
+import { SwimlaneConnectorType } from '../../../common/types/domain';
 
 export const connector = {
   id: '123',

@@ -12,7 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type { GaugeExpressionFunctionDefinition } from '@kbn/expression-gauge-plugin/common';
+import type {
+  GaugeExpressionFunctionDefinition,
+  GaugeShape,
+} from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
@@ -20,7 +23,13 @@ import {
   getMinValue,
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
-import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
+import {
+  IconChartGaugeSemiCircle,
+  IconChartGaugeCircle,
+  IconChartGaugeArc,
+  IconChartHorizontalBullet,
+  IconChartVerticalBullet,
+} from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
@@ -30,9 +39,10 @@ import type {
   Suggestion,
   UserMessage,
   Visualization,
+  VisualizationType,
 } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState, gaugeTitlesByType } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
@@ -54,20 +64,46 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 
-export const CHART_NAMES = {
-  horizontalBullet: {
+export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
+  [GaugeShapes.HORIZONTAL_BULLET]: {
+    id: GaugeShapes.HORIZONTAL_BULLET,
     icon: IconChartHorizontalBullet,
-    label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
-      defaultMessage: 'Gauge horizontal',
-    }),
+    label: gaugeTitlesByType.horizontalBullet,
     groupLabel: groupLabelForGauge,
+    showExperimentalBadge: true,
+    sortOrder: 10,
   },
-  verticalBullet: {
+  [GaugeShapes.VERTICAL_BULLET]: {
+    id: GaugeShapes.VERTICAL_BULLET,
     icon: IconChartVerticalBullet,
-    label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
-      defaultMessage: 'Gauge vertical',
-    }),
+    label: gaugeTitlesByType.verticalBullet,
     groupLabel: groupLabelForGauge,
+    showExperimentalBadge: true,
+    sortOrder: 10,
+  },
+  [GaugeShapes.SEMI_CIRCLE]: {
+    id: GaugeShapes.SEMI_CIRCLE,
+    icon: IconChartGaugeSemiCircle,
+    label: gaugeTitlesByType.semiCircle,
+    groupLabel: groupLabelForGauge,
+    showExperimentalBadge: true,
+    sortOrder: 9,
+  },
+  [GaugeShapes.ARC]: {
+    id: GaugeShapes.ARC,
+    icon: IconChartGaugeArc,
+    label: gaugeTitlesByType.arc,
+    groupLabel: groupLabelForGauge,
+    showExperimentalBadge: true,
+    sortOrder: 8,
+  },
+  [GaugeShapes.CIRCLE]: {
+    id: GaugeShapes.CIRCLE,
+    icon: IconChartGaugeCircle,
+    label: gaugeTitlesByType.circle,
+    groupLabel: groupLabelForGauge,
+    showExperimentalBadge: true,
+    sortOrder: 7,
   },
 };
 
@@ -168,21 +204,15 @@ const toExpression = (
 
 export const getGaugeVisualization = ({
   paletteService,
-  theme,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
 
   visualizationTypes: [
-    {
-      ...CHART_NAMES.horizontalBullet,
-      id: GaugeShapes.HORIZONTAL_BULLET,
-      showExperimentalBadge: true,
-    },
-    {
-      ...CHART_NAMES.verticalBullet,
-      id: GaugeShapes.VERTICAL_BULLET,
-      showExperimentalBadge: true,
-    },
+    CHART_NAMES[GaugeShapes.HORIZONTAL_BULLET],
+    CHART_NAMES[GaugeShapes.VERTICAL_BULLET],
+    CHART_NAMES[GaugeShapes.SEMI_CIRCLE],
+    CHART_NAMES[GaugeShapes.ARC],
+    CHART_NAMES[GaugeShapes.CIRCLE],
   ],
   getVisualizationTypeId(state) {
     return state.shape;
@@ -202,19 +232,13 @@ export const getGaugeVisualization = ({
   },
 
   getDescription(state) {
-    if (state.shape === GaugeShapes.HORIZONTAL_BULLET) {
-      return CHART_NAMES.horizontalBullet;
-    }
-    return CHART_NAMES.verticalBullet;
+    return CHART_NAMES[state.shape];
   },
 
   switchVisualizationType: (visualizationTypeId, state) => {
     return {
       ...state,
-      shape:
-        visualizationTypeId === GaugeShapes.HORIZONTAL_BULLET
-          ? GaugeShapes.HORIZONTAL_BULLET
-          : GaugeShapes.VERTICAL_BULLET,
+      shape: visualizationTypeId as GaugeShape,
     };
   },
 
@@ -224,7 +248,7 @@ export const getGaugeVisualization = ({
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,
-        palette: mainPalette,
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
         ticksPosition: 'auto',
         labelMajorMode: 'auto',
       }
@@ -353,6 +377,12 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_goalDimensionPanel',
         },
       ],
+    };
+  },
+
+  getDisplayOptions() {
+    return {
+      noPadding: true,
     };
   },
 

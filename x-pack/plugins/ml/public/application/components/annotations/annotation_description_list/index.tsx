@@ -16,7 +16,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
-import { Annotation } from '../../../../../common/types/annotations';
+import type { Annotation } from '../../../../../common/types/annotations';
 
 interface Props {
   annotation: Annotation;
@@ -116,6 +116,7 @@ export const AnnotationDescriptionList = ({ annotation, detectorDescription }: P
       data-test-subj={'mlAnnotationDescriptionList'}
       className="ml-annotation-description-list"
       type="column"
+      columnWidths={[3, 7]}
       listItems={listItems}
     />
   );

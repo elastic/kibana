@@ -20,8 +20,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  registry.when('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
-    describe('When there is no data', () => {
+  // FLAKY: https://github.com/elastic/kibana/pull/177039
+  registry.when.skip('Diagnostics: Indices', { config: 'basic', archives: [] }, () => {
+    describe.skip('When there is no data', () => {
       it('returns empty response`', async () => {
         const { status, body } = await apmApiClient.adminUser({
           endpoint: 'GET /internal/apm/diagnostics',
@@ -33,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('When data is ingested', () => {
+    describe.skip('When data is ingested', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -61,12 +62,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(status).to.be(200);
-        expect(body.validIndices.length).to.be.greaterThan(0);
+        expect(body.validIndices?.length).to.be.greaterThan(0);
         expect(body.invalidIndices).to.eql([]);
       });
     });
 
-    describe('When data is ingested without the necessary index templates', () => {
+    describe.skip('When data is ingested without the necessary index templates', () => {
       before(async () => {
         await es.indices.deleteDataStream({ name: 'traces-apm-*' });
         await es.indices.deleteIndexTemplate({ name: ['traces-apm'] });
@@ -102,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(status).to.be(200);
-        expect(body.validIndices.length).to.be.greaterThan(0);
+        expect(body.validIndices?.length).to.be.greaterThan(0);
         expect(body.invalidIndices).to.eql([
           {
             isValid: false,
@@ -114,7 +115,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('ingest pipelines', () => {
+    describe.skip('ingest pipelines', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -140,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await synthtraceEsClient.clean();
       });
 
-      describe('an ingest pipeline is removed', () => {
+      describe.skip('an ingest pipeline is removed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',
@@ -158,10 +159,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(status).to.be(200);
-          expect(body.validIndices.length).to.be.greaterThan(0);
-          expect(body.invalidIndices.length).to.be(1);
+          expect(body.validIndices?.length).to.be.greaterThan(0);
+          expect(body.invalidIndices?.length).to.be(1);
 
-          expect(omit(body.invalidIndices[0], 'index')).to.eql({
+          expect(omit(body.invalidIndices?.[0], 'index')).to.eql({
             isValid: false,
             fieldMappings: { isValid: true },
             ingestPipeline: { isValid: false },
@@ -170,7 +171,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('an ingest pipeline is changed', () => {
+      describe.skip('an ingest pipeline is changed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',
@@ -187,9 +188,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(status).to.be(200);
-          expect(body.validIndices.length).to.be.greaterThan(0);
-          expect(body.invalidIndices.length).to.be(1);
-          expect(omit(body.invalidIndices[0], 'index')).to.eql({
+          expect(body.validIndices?.length).to.be.greaterThan(0);
+          expect(body.invalidIndices?.length).to.be(1);
+          expect(omit(body.invalidIndices?.[0], 'index')).to.eql({
             isValid: false,
             fieldMappings: { isValid: true },
             ingestPipeline: { isValid: false, id: 'logs-default-pipeline' },

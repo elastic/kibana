@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BETA = i18n.translate('xpack.kubernetesSecurity.beta', {
-  defaultMessage: 'Beta',
-});
-
 export const SEARCH_GROUP_CLUSTER = i18n.translate('xpack.kubernetesSecurity.searchGroup.cluster', {
   defaultMessage: 'Cluster',
 });
@@ -51,6 +47,12 @@ export const TREE_NAVIGATION_LOADING = i18n.translate(
   'xpack.kubernetesSecurity.treeNavigation.loading',
   {
     defaultMessage: 'Loading',
+  }
+);
+export const TREE_NAVIGATION_EMPTY = i18n.translate(
+  'xpack.kubernetesSecurity.treeNavigation.empty',
+  {
+    defaultMessage: 'No data available',
   }
 );
 export const TREE_NAVIGATION_SHOW_MORE = (name: string) =>

@@ -11,16 +11,18 @@ import userEvent from '@testing-library/user-event';
 
 import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
-import { BASE_CONVERSATIONS, Conversation } from '../../../..';
+import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { Prompt } from '../../types';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
 import { useAssistantContext } from '../../../assistant_context';
+import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
 
 const BASE_CONVERSATION: Conversation = {
-  ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
+  ...WELCOME_CONVERSATION,
   apiConfig: {
+    connectorId: '123',
     defaultSystemPromptId: mockSystemPrompt.id,
   },
 };
@@ -59,6 +61,11 @@ jest.mock('../../use_conversation', () => {
 });
 
 describe('SystemPrompt', () => {
+  const editingSystemPromptId = undefined;
+  const isSettingsModalVisible = false;
+  const onSystemPromptSelectionChange = jest.fn();
+  const setIsSettingsModalVisible = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -75,7 +82,15 @@ describe('SystemPrompt', () => {
     const conversation = undefined;
 
     beforeEach(() => {
-      render(<SystemPrompt conversation={conversation} />);
+      render(
+        <SystemPrompt
+          conversation={conversation}
+          editingSystemPromptId={editingSystemPromptId}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+        />
+      );
     });
 
     it('renders the system prompt select', () => {
@@ -97,7 +112,15 @@ describe('SystemPrompt', () => {
 
   describe('when conversation is NOT null', () => {
     beforeEach(() => {
-      render(<SystemPrompt conversation={BASE_CONVERSATION} />);
+      render(
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={BASE_CONVERSATION.id}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+        />
+      );
     });
 
     it('does NOT render the system prompt select', () => {
@@ -117,13 +140,20 @@ describe('SystemPrompt', () => {
     });
   });
 
-  describe('when a new prompt is saved', () => {
+  // TODO: To be implemented as part of the global settings tests instead of within the SystemPrompt component
+  describe.skip('when a new prompt is saved', () => {
     it('should save new prompt correctly', async () => {
       const customPromptName = 'custom prompt';
       const customPromptText = 'custom prompt text';
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -163,7 +193,13 @@ describe('SystemPrompt', () => {
       const customPromptText = 'custom prompt text';
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -217,7 +253,13 @@ describe('SystemPrompt', () => {
       const customPromptText = 'custom prompt text';
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -278,7 +320,13 @@ describe('SystemPrompt', () => {
     it('should save new prompt correctly when prompt is removed from selected conversation', async () => {
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -325,14 +373,18 @@ describe('SystemPrompt', () => {
     it('should save new prompt correctly when prompt is removed from a conversation and linked to another conversation in a single transaction', async () => {
       const secondMockConversation: Conversation = {
         id: 'second',
+        category: 'assistant',
         apiConfig: {
+          connectorId: '123',
           defaultSystemPromptId: undefined,
         },
+        title: 'second',
         messages: [],
+        replacements: {},
       };
       const localMockConversations: Record<string, Conversation> = {
         [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
-        [secondMockConversation.id]: secondMockConversation,
+        [secondMockConversation.title]: secondMockConversation,
       };
 
       const localMockUseAssistantContext = {
@@ -349,7 +401,13 @@ describe('SystemPrompt', () => {
 
       render(
         <TestProviders>
-          <SystemPrompt conversation={BASE_CONVERSATION} />
+          <SystemPrompt
+            conversation={BASE_CONVERSATION}
+            editingSystemPromptId={editingSystemPromptId}
+            isSettingsModalVisible={isSettingsModalVisible}
+            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+            setIsSettingsModalVisible={setIsSettingsModalVisible}
+          />
         </TestProviders>
       );
       userEvent.click(screen.getByTestId('edit'));
@@ -398,9 +456,10 @@ describe('SystemPrompt', () => {
             defaultSystemPromptId: undefined,
           }),
         }),
-        [secondMockConversation.id]: {
+        [secondMockConversation.title]: {
           ...secondMockConversation,
           apiConfig: {
+            connectorId: '123',
             defaultSystemPromptId: mockSystemPrompt.id,
           },
         },
@@ -411,7 +470,13 @@ describe('SystemPrompt', () => {
   it('shows the system prompt select when the edit button is clicked', () => {
     render(
       <TestProviders>
-        <SystemPrompt conversation={BASE_CONVERSATION} />
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={BASE_CONVERSATION.id}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+        />
       </TestProviders>
     );
 
@@ -420,22 +485,16 @@ describe('SystemPrompt', () => {
     expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
   });
 
-  it('clears the selected system prompt when the clear button is clicked', () => {
-    const apiConfig = {
-      apiConfig: { defaultSystemPromptId: undefined },
-      conversationId: 'Default',
-    };
-    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
-
-    userEvent.click(screen.getByTestId('clear'));
-
-    expect(mockUseConversation.setApiConfig).toHaveBeenCalledWith(apiConfig);
-  });
-
   it('shows the system prompt select when system prompt text is clicked', () => {
     render(
       <TestProviders>
-        <SystemPrompt conversation={BASE_CONVERSATION} />
+        <SystemPrompt
+          conversation={BASE_CONVERSATION}
+          editingSystemPromptId={BASE_CONVERSATION.id}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+        />
       </TestProviders>
     );
 

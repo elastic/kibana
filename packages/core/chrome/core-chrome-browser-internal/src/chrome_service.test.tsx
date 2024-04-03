@@ -10,10 +10,11 @@ import { registerAnalyticsContextProviderMock } from './chrome_service.test.mock
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { App, PublicAppInfo } from '@kbn/core-application-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -36,15 +37,18 @@ class FakeApp implements App {
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
-(window as any).localStorage = {
-  setItem: (key: string, value: string) => store.set(String(key), String(value)),
-  getItem: (key: string) => store.get(String(key)),
-  removeItem: (key: string) => store.delete(String(key)),
-};
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    setItem: (key: string, value: string) => store.set(String(key), String(value)),
+    getItem: (key: string) => store.get(String(key)),
+    removeItem: (key: string) => store.delete(String(key)),
+  },
+  writable: true,
+});
 
-function defaultStartDeps(availableApps?: App[]) {
+function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const deps = {
-    application: applicationServiceMock.createInternalStartContract(),
+    application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
@@ -72,6 +76,7 @@ function defaultStartTestOptions({
   return {
     browserSupportsCsp,
     kibanaVersion,
+    coreContext: coreContextMock.create(),
   };
 }
 
@@ -80,7 +85,10 @@ async function start({
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
-  const service = new ChromeService(options);
+  const service = new ChromeService({
+    ...options,
+    coreContext: options.coreContext ?? coreContextMock.create(),
+  });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -144,17 +152,17 @@ describe('start', () => {
     const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
     service.stop();
     await expect(promise).resolves.toMatchInlineSnapshot(`
-            Array [
-              Array [
-                "kbnBody",
-                "kbnBody--classicLayout",
-                "kbnBody--noHeaderBanner",
-                "kbnBody--chromeHidden",
-                "kbnVersion-1-2-3",
-              ],
-            ]
-          `);
+      Array [
+        Array [
+          "kbnBody",
+          "kbnBody--noHeaderBanner",
+          "kbnBody--chromeHidden",
+          "kbnVersion-1-2-3",
+        ],
+      ]
+    `);
   });
+
   it('strips off "snapshot" from the kibana version if present', async () => {
     const { chrome, service } = await start({
       options: { browserSupportsCsp: false, kibanaVersion: '8.0.0-SnAPshot' },
@@ -162,16 +170,15 @@ describe('start', () => {
     const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
     service.stop();
     await expect(promise).resolves.toMatchInlineSnapshot(`
-            Array [
-              Array [
-                "kbnBody",
-                "kbnBody--classicLayout",
-                "kbnBody--noHeaderBanner",
-                "kbnBody--chromeHidden",
-                "kbnVersion-8-0-0",
-              ],
-            ]
-          `);
+      Array [
+        Array [
+          "kbnBody",
+          "kbnBody--noHeaderBanner",
+          "kbnBody--chromeHidden",
+          "kbnVersion-8-0-0",
+        ],
+      ]
+    `);
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {
@@ -189,7 +196,7 @@ describe('start', () => {
     expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
   });
 
-  describe('getComponent', () => {
+  describe('getHeaderComponent', () => {
     it('returns a renderable React component', async () => {
       const { chrome } = await start();
 
@@ -198,22 +205,10 @@ describe('start', () => {
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
     });
 
-    it('renders the default project side navigation', async () => {
-      const { chrome } = await start();
-
-      chrome.setChromeStyle('project');
-
-      const component = mount(chrome.getHeaderComponent());
-
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
-      expect(projectHeader.length).toBe(1);
-
-      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
-      expect(defaultProjectSideNav.length).toBe(1);
-    });
-
     it('renders the custom project side navigation', async () => {
-      const { chrome } = await start();
+      const { chrome } = await start({
+        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
+      });
 
       const MyNav = function MyNav() {
         return <div data-test-subj="customProjectSideNav">HELLO</div>;
@@ -231,6 +226,17 @@ describe('start', () => {
 
       const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
       expect(customProjectSideNav.text()).toBe('HELLO');
+    });
+
+    it('renders chromeless header', async () => {
+      const { chrome } = await start({ startDeps: defaultStartDeps() });
+
+      chrome.setIsVisible(false);
+
+      const component = mount(chrome.getHeaderComponent());
+
+      const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
+      expect(chromeless.length).toBe(1);
     });
   });
 
@@ -320,6 +326,24 @@ describe('start', () => {
                         false,
                       ]
                   `);
+    });
+
+    it('change visibility when EUI component in full screen', async () => {
+      const body = document.body;
+      const startDeps = defaultStartDeps([new FakeApp('foo')], 'foo');
+      const { chrome } = await start({ startDeps });
+
+      // Chrome is initially visible
+      let isVisible = await Rx.lastValueFrom(chrome.getIsVisible$().pipe(Rx.take(1)));
+      expect(isVisible).toBe(true);
+
+      // Add EUI class that should hide the chrome
+      body.classList.add('euiDataGrid__restrictBody');
+      await new Promise((resolve) => setTimeout(resolve)); // wait next tick
+
+      // Chrome should be hidden
+      isVisible = await Rx.lastValueFrom(chrome.getIsVisible$().pipe(Rx.take(1)));
+      expect(isVisible).toBe(false);
     });
   });
 

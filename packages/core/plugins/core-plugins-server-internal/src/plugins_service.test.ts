@@ -25,7 +25,7 @@ import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config, PluginsConfigType } from './plugins_config';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 
@@ -76,6 +76,7 @@ const createPlugin = (
     requiredPlugins = [],
     requiredBundles = [],
     optionalPlugins = [],
+    runtimePluginDependencies = [],
     kibanaVersion = '7.0.0',
     configPath = [path],
     server = true,
@@ -88,6 +89,7 @@ const createPlugin = (
     requiredPlugins?: string[];
     requiredBundles?: string[];
     optionalPlugins?: string[];
+    runtimePluginDependencies?: string[];
     kibanaVersion?: string;
     configPath?: ConfigPath;
     server?: boolean;
@@ -105,6 +107,7 @@ const createPlugin = (
       requiredPlugins,
       requiredBundles,
       optionalPlugins,
+      runtimePluginDependencies,
       server,
       owner: {
         name: 'Core',
@@ -459,40 +462,10 @@ describe('PluginsService', () => {
       expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Plugin \\"explicitly-disabled-plugin-preboot\\" is disabled.",
+            "The following plugins are disabled: \\"explicitly-disabled-plugin-preboot,explicitly-disabled-plugin-standard,another-explicitly-disabled-plugin-preboot,another-explicitly-disabled-plugin-standard\\".",
           ],
           Array [
-            "Plugin \\"explicitly-disabled-plugin-standard\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-required-deps-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-standard]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-standard]",
-          ],
-          Array [
-            "Plugin \\"another-explicitly-disabled-plugin-preboot\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"another-explicitly-disabled-plugin-standard\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-standard]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-nested-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-nested-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-standard]",
+            "Plugins \\"plugin-with-missing-required-deps-preboot,plugin-with-missing-required-deps-standard,plugin-with-disabled-transitive-dep-preboot,plugin-with-disabled-transitive-dep-standard,plugin-with-disabled-nested-transitive-dep-preboot,plugin-with-disabled-nested-transitive-dep-standard,plugin-with-missing-nested-dep-preboot,plugin-with-missing-nested-dep-standard\\" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot,missing-plugin-standard,another-explicitly-disabled-plugin-preboot,another-explicitly-disabled-plugin-standard,plugin-with-disabled-transitive-dep-preboot,plugin-with-disabled-transitive-dep-standard,plugin-with-missing-required-deps-preboot,plugin-with-missing-required-deps-standard].",
           ],
         ]
       `);
@@ -535,12 +508,12 @@ describe('PluginsService', () => {
         await pluginsService.preboot(prebootDeps);
 
         expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
-        Array [
           Array [
-            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot]",
-          ],
-        ]
-      `);
+            Array [
+              "Plugins \\"plugin-with-missing-required-deps-preboot\\" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot].",
+            ],
+          ]
+        `);
       });
     });
 
@@ -1018,6 +991,7 @@ describe('PluginsService', () => {
         requiredPlugins: [],
         requiredBundles: [],
         optionalPlugins: [],
+        runtimePluginDependencies: [],
       },
     ];
 
@@ -1191,8 +1165,10 @@ describe('PluginsService', () => {
   });
 
   describe('plugin initialization', () => {
+    let prebootPlugins: PluginWrapper[];
+    let standardPlugins: PluginWrapper[];
     beforeEach(() => {
-      const prebootPlugins = [
+      prebootPlugins = [
         createPlugin('plugin-1-preboot', {
           type: PluginType.preboot,
           path: 'path-1-preboot',
@@ -1204,7 +1180,7 @@ describe('PluginsService', () => {
           version: 'version-2',
         }),
       ];
-      const standardPlugins = [
+      standardPlugins = [
         createPlugin('plugin-1-standard', {
           path: 'path-1-standard',
           version: 'version-1',

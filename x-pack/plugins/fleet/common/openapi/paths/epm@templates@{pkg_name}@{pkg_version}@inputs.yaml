@@ -1,0 +1,37 @@
+get:
+  summary: Get inputs template
+  tags:
+    - Elastic Package Manager (EPM)
+  responses:
+    '400':
+      $ref: ../components/responses/error.yaml
+    '200':
+      description: OK
+  operationId: get-inputs-template
+  security:
+    - basicAuth: []
+parameters:
+  - schema:
+      type: string
+    name: pkgName
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: pkgVersion
+    in: path
+    required: true
+  - schema:
+      type: string
+      enum:
+        - json
+        - yaml
+        - yml
+    name: format
+    description: 'Format of response - json or yaml'
+    in: query
+  - schema:
+      type: boolean
+    name: prerelease
+    description: 'Specify if version is prerelease'
+    in: query

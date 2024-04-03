@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { CaseStatuses } from '@kbn/cases-plugin/common';
+import type { CaseStatuses } from '@kbn/cases-components';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -87,7 +87,7 @@ export const CasesTable = React.memo(() => {
             />
             <EuiSpacer size="m" />
             <EuiButton data-test-subj="allCasesButton" onClick={navigateToCases}>
-              {i18n.VIEW_RECENT_CASES}
+              {i18n.VIEW_ALL_CASES}
             </EuiButton>
           </>
         )}

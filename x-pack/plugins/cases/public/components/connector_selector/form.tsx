@@ -8,12 +8,12 @@
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import type { ActionConnector } from '../../../common/api';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
@@ -24,12 +24,6 @@ interface ConnectorSelectorProps {
   isLoading: boolean;
   handleChange?: (newValue: string) => void;
 }
-
-const EuiFormRowWrapper = styled(EuiFormRow)`
-  .euiFormErrorText {
-    display: none;
-  }
-`;
 
 export const ConnectorSelector = ({
   connectors,
@@ -52,7 +46,12 @@ export const ConnectorSelector = ({
   );
 
   return (
-    <EuiFormRowWrapper
+    <EuiFormRow
+      css={css`
+        .euiFormErrorText {
+          display: none;
+        }
+      `}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
@@ -69,7 +68,7 @@ export const ConnectorSelector = ({
         onChange={onChange}
         selectedConnector={isEmpty(field.value) ? 'none' : field.value}
       />
-    </EuiFormRowWrapper>
+    </EuiFormRow>
   );
 };
 ConnectorSelector.displayName = 'ConnectorSelector';

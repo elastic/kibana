@@ -66,6 +66,7 @@ export function searchHitToAgent(
     unenrollment_started_at: hit._source?.unenrollment_started_at,
     upgraded_at: hit._source?.upgraded_at,
     upgrade_started_at: hit._source?.upgrade_started_at,
+    upgrade_details: hit._source?.upgrade_details,
     access_api_key_id: hit._source?.access_api_key_id,
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,
@@ -91,6 +92,7 @@ export function searchHitToAgent(
     // key-value pairs
     user_provided_metadata: hit._source?.user_provided_metadata!,
     local_metadata: hit._source?.local_metadata!,
+    unhealthy_reason: hit._source?.unhealthy_reason,
   };
 
   if (!hit.fields?.status?.length) {

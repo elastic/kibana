@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import { from, of } from 'rxjs';
-import { isEmpty } from 'lodash';
 import { isValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
-import { ReadOperations, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import {
+  ReadOperations,
+  PluginStartContract as AlertingStart,
+  AlertingAuthorizationEntity,
+} from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '../../common/search_strategy';
-import { IRuleDataService } from '..';
-import { Dataset } from '../rule_data_plugin_service/index_options';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
 import { getSpacesFilter, getAuthzFilter } from '../lib';
@@ -29,13 +31,13 @@ export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
   rawResponse: {} as RuleRegistrySearchResponse['rawResponse'],
 };
 
-const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
-
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
+
+// these are deprecated types should never show up in any alert table
+const EXCLUDED_RULE_TYPE_IDS = ['siem.notifications'];
 
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
-  ruleDataService: IRuleDataService,
   alerting: AlertingStart,
   logger: Logger,
   security?: SecurityPluginSetup,
@@ -57,44 +59,45 @@ export const ruleRegistrySearchStrategyProvider = (
           `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
         );
       }
+      request.featureIds.forEach((featureId) => {
+        if (!isValidFeatureId(featureId)) {
+          logger.warn(
+            `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
+          );
+        }
+      });
 
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
-      const getAsync = async () => {
+      const getAsync = async (featureIds: string[]) => {
         const [space, authorization] = await Promise.all([
           getActiveSpace(),
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
         let authzFilter;
-
-        if (!siemRequest) {
+        const fIds = new Set(featureIds);
+        if (!siemRequest && featureIds.length > 0) {
           authzFilter = (await getAuthzFilter(
             authorization,
-            ReadOperations.Find
+            ReadOperations.Find,
+            fIds
           )) as estypes.QueryDslQueryContainer;
         }
-        return { space, authzFilter };
-      };
-      return from(getAsync()).pipe(
-        mergeMap(({ space, authzFilter }) => {
-          const indices: string[] = request.featureIds.reduce((accum: string[], featureId) => {
-            if (!isValidFeatureId(featureId)) {
-              logger.warn(
-                `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
-              );
-              return accum;
-            }
-            const alertIndexInfo = ruleDataService.findIndexByFeature(featureId, Dataset.alerts);
-            if (alertIndexInfo) {
-              accum.push(
-                featureId === 'siem'
-                  ? `${alertIndexInfo.baseName}-${space?.id ?? ''}*`
-                  : `${alertIndexInfo.baseName}*`
-              );
-            }
-            return accum;
-          }, []);
 
+        const authorizedRuleTypes =
+          featureIds.length > 0
+            ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
+            : [];
+
+        return { space, authzFilter, authorizedRuleTypes };
+      };
+      return from(getAsync(request.featureIds)).pipe(
+        mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
+          const allRuleTypes = authorizedRuleTypes.map((art: { id: string }) => art.id);
+          const ruleTypes = (allRuleTypes ?? []).filter(
+            (ruleTypeId: string) => !EXCLUDED_RULE_TYPE_IDS.includes(ruleTypeId)
+          );
+          const indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }
@@ -118,10 +121,22 @@ export const ruleRegistrySearchStrategyProvider = (
               ? { ids: request.query?.ids }
               : {
                   bool: {
+                    ...request.query?.bool,
                     filter,
                   },
                 }),
           };
+          let fields = request?.fields ?? [];
+          fields.push({ field: 'kibana.alert.*', include_unmapped: false });
+
+          if (siemRequest) {
+            fields.push({ field: 'signal.*', include_unmapped: false });
+            fields = fields.concat(buildAlertFieldsRequest([], false));
+          } else {
+            // only for o11y solutions
+            fields.push({ field: '*', include_unmapped: true });
+          }
+
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           params = {
             allow_no_indices: true,
@@ -129,8 +144,7 @@ export const ruleRegistrySearchStrategyProvider = (
             ignore_unavailable: true,
             body: {
               _source: false,
-              // TODO the fields need to come from the request
-              fields: !isEmpty(request?.fields) ? request?.fields : EMPTY_FIELDS,
+              fields,
               sort,
               size,
               from: request.pagination ? request.pagination.pageIndex * size : 0,

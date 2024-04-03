@@ -1,0 +1,7 @@
+E
+
+
+Euler’s number.
+```esql
+ROW E()
+```

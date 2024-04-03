@@ -9,9 +9,9 @@ import { mapValues } from 'lodash';
 import type {
   FieldsDiff,
   FieldsDiffAlgorithmsFor,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
-import type { ThreeVersionsOf } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { MissingVersion } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+  ThreeVersionsOf,
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const calculateFieldsDiffFor = <TObject extends object>(
   ruleVersions: ThreeVersionsOf<TObject>,

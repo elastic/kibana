@@ -27,14 +27,7 @@ function isKibanaPastPreboot(response?: Response, body?: StatusResponse) {
   if (!response?.headers.get('content-type')?.includes('application/json')) {
     return false;
   }
-
-  return (
-    // Status endpoint may require authentication after `preboot` stage.
-    response?.status === 401 ||
-    // We're only interested in the availability of the critical core services.
-    (body?.status?.core?.elasticsearch?.level === 'available' &&
-      body?.status?.core?.savedObjects?.level === 'available')
-  );
+  return body?.status?.overall?.level === 'available';
 }
 
 export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {

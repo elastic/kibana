@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useRouteResolver } from './use_resolver';
-import { MlLicenseInfo } from '../../../common/license/ml_license';
+import type { MlLicenseInfo } from '../../../common/license/ml_license';
 
 jest.mock('../contexts/kibana');
 jest.mock('../capabilities/check_capabilities');

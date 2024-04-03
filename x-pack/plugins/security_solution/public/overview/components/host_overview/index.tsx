@@ -10,12 +10,11 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import {
   DefaultFieldRenderer,
@@ -36,10 +35,10 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useRiskScore } from '../../../explore/containers/risk_score';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
-import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
+import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { RiskScoreDocTooltip } from '../common';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -84,25 +83,16 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const darkMode = useDarkMode();
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
     );
-    const { from, to } = useGlobalTime();
 
-    const timerange = useMemo(
-      () => ({
-        from,
-        to,
-      }),
-      [from, to]
-    );
-    const { data: hostRisk, isLicenseValid } = useRiskScore({
+    const { data: hostRisk, isAuthorized } = useRiskScore({
       filterQuery,
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
-      timerange,
     });
 
     const getDefaultRenderer = useCallback(
@@ -138,15 +128,25 @@ export const HostOverview = React.memo<HostSummaryProps>(
         },
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.HOST_RISK_CLASSIFICATION}
-              riskScoreEntity={RiskScoreEntity.host}
-            />
+            <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <RiskScoreHeaderTitle
+                  title={i18n.HOST_RISK_LEVEL}
+                  riskScoreEntity={RiskScoreEntity.host}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
           description: (
             <>
               {hostRiskData ? (
-                <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+                <RiskScoreLevel
+                  severity={hostRiskData.host.risk.calculated_level}
+                  hideBackgroundColor
+                />
               ) : (
                 getEmptyTagValue()
               )}
@@ -297,7 +297,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
-        {isLicenseValid && (
+        {isAuthorized && (
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}

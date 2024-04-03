@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "7e90faa23359be329585e2d224ab6fdbaad5caec4a267c08e415f54a4fb193be",
-    "index": ".internal.alerts-security.alerts-default-000001",
+    "index": ".alerts-security.alerts-default",
     "source": {
       "@timestamp": "2023-02-15T09:32:36.998Z",
       "Endpoint": {

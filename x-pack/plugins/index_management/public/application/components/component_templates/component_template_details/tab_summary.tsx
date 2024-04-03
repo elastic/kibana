@@ -19,6 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import { getLifecycleValue } from '../../../lib/data_streams';
 import { ComponentTemplateDeserialized } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
@@ -27,13 +28,15 @@ interface Props {
   showCallToAction?: boolean;
 }
 
+const INFINITE_AS_ICON = true;
+
 export const TabSummary: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
   showCallToAction,
 }) => {
   const { getUrlForApp } = useComponentTemplatesContext();
 
-  const { version, _meta, _kbnMeta } = componentTemplateDetails;
+  const { version, _meta, _kbnMeta, template } = componentTemplateDetails;
 
   const { usedBy } = _kbnMeta;
   const templateIsInUse = usedBy.length > 0;
@@ -114,6 +117,20 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                   </li>
                 ))}
               </ul>
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        {template.lifecycle && (
+          <>
+            <EuiDescriptionListTitle data-test-subj="dataRetentionTitle">
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateDetails.summaryTab.dataRetentionDescriptionListTitle"
+                defaultMessage="Data retention"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getLifecycleValue(template.lifecycle, INFINITE_AS_ICON)}
             </EuiDescriptionListDescription>
           </>
         )}

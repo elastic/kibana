@@ -6,9 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { IndexLifecycleManagementServerPlugin } from './plugin';
 
 export { config } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) =>
-  new IndexLifecycleManagementServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { IndexLifecycleManagementServerPlugin } = await import('./plugin');
+  return new IndexLifecycleManagementServerPlugin(ctx);
+};

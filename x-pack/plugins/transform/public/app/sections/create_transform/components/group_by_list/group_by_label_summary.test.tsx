@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { GroupByLabelSummary } from './group_by_label_summary';
 
@@ -26,9 +27,9 @@ describe('Transform: <GroupByLabelSummary />', () => {
       optionsDataId: 'the-options-data-id',
     };
 
-    const wrapper = shallow(<GroupByLabelSummary {...props} />);
+    const { container } = render(<GroupByLabelSummary {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-options-data-id');
   });
 
   test('Histogram aggregation', () => {
@@ -44,9 +45,9 @@ describe('Transform: <GroupByLabelSummary />', () => {
       optionsDataId: 'the-options-data-id',
     };
 
-    const wrapper = shallow(<GroupByLabelSummary {...props} />);
+    const { container } = render(<GroupByLabelSummary {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-options-data-id');
   });
 
   test('Terms aggregation', () => {
@@ -61,8 +62,8 @@ describe('Transform: <GroupByLabelSummary />', () => {
       optionsDataId: 'the-options-data-id',
     };
 
-    const wrapper = shallow(<GroupByLabelSummary {...props} />);
+    const { container } = render(<GroupByLabelSummary {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-options-data-id');
   });
 });

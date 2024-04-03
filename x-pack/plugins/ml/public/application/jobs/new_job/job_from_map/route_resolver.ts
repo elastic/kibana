@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
-import type { Query } from '@kbn/es-query';
-import type { Filter } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import { QuickGeoJobCreator } from './quick_create_job';
 
-import { getDefaultQuery } from '../utils/new_job_utils';
+import { getDefaultQuery, getRisonValue } from '../utils/new_job_utils';
 
 interface Dependencies {
+  dataViews: DataViewsContract;
   kibanaConfig: IUiSettingsClient;
   timeFilter: TimefilterContract;
   dashboardService: DashboardStart;
@@ -24,68 +23,35 @@ interface Dependencies {
 }
 export async function resolver(
   deps: Dependencies,
-  dashboard: string,
-  dataViewId: string,
-  embeddable: string,
-  geoField: string,
-  splitField: string,
+  dashboardRisonString: string,
+  dataViewIdRisonString: string,
+  embeddableRisonString: string,
+  geoFieldRisonString: string,
+  splitFieldRisonString: string,
   fromRisonString: string,
   toRisonString: string,
-  layer?: string
+  layerRisonString?: string
 ) {
-  const { kibanaConfig, timeFilter, dashboardService, mlApiServices } = deps;
-  let decodedDashboard;
-  let decodedEmbeddable;
-  let decodedLayer;
-  let splitFieldDecoded;
-  let dvId;
+  const { dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices } = deps;
+  const defaultLayer = { query: getDefaultQuery(), filters: [] };
 
-  try {
-    dvId = rison.decode(dataViewId) as string;
-  } catch (error) {
-    dvId = '';
-  }
+  const dashboard = getRisonValue<typeof defaultLayer>(dashboardRisonString, defaultLayer);
+  const embeddable = getRisonValue<typeof defaultLayer>(embeddableRisonString, defaultLayer);
 
-  try {
-    decodedDashboard = rison.decode(dashboard) as { query: Query; filters: Filter[] };
-  } catch (error) {
-    decodedDashboard = { query: getDefaultQuery(), filters: [] };
-  }
+  const layer =
+    layerRisonString !== undefined
+      ? getRisonValue<typeof defaultLayer>(layerRisonString, defaultLayer)
+      : defaultLayer;
 
-  try {
-    decodedEmbeddable = rison.decode(embeddable) as { query: Query; filters: Filter[] };
-  } catch (error) {
-    decodedEmbeddable = { query: getDefaultQuery(), filters: [] };
-  }
+  const geoField = getRisonValue<string>(geoFieldRisonString, '');
+  const splitField = getRisonValue<string | null>(splitFieldRisonString, null);
+  const dataViewId = getRisonValue<string>(dataViewIdRisonString, '');
 
-  if (layer) {
-    try {
-      decodedLayer = rison.decode(layer) as { query: Query };
-    } catch (error) {
-      decodedLayer = { query: getDefaultQuery(), filters: [] };
-    }
-  }
-
-  try {
-    splitFieldDecoded = rison.decode(splitField) as string;
-  } catch (error) {
-    splitFieldDecoded = null;
-  }
-
-  let from: string;
-  let to: string;
-  try {
-    from = rison.decode(fromRisonString) as string;
-  } catch (error) {
-    from = '';
-  }
-  try {
-    to = rison.decode(toRisonString) as string;
-  } catch (error) {
-    to = '';
-  }
+  const from = getRisonValue<string>(fromRisonString, '');
+  const to = getRisonValue<string>(toRisonString, '');
 
   const jobCreator = new QuickGeoJobCreator(
+    dataViews,
     kibanaConfig,
     timeFilter,
     dashboardService,
@@ -93,15 +59,15 @@ export async function resolver(
   );
 
   await jobCreator.createAndStashGeoJob(
-    dvId,
+    dataViewId,
     from,
     to,
-    decodedDashboard.query,
-    decodedDashboard.filters,
-    decodedEmbeddable.query,
-    decodedEmbeddable.filters,
+    dashboard.query,
+    dashboard.filters,
+    embeddable.query,
+    embeddable.filters,
     geoField,
-    splitFieldDecoded,
-    decodedLayer?.query
+    splitField,
+    layer?.query
   );
 }

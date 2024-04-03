@@ -62,7 +62,12 @@ export const registerUpdateRoute = (
       });
       const { type, id } = req.params;
       const { attributes, version, references, upsert } = req.body;
-      const options: SavedObjectsUpdateOptions = { version, references, upsert };
+      const options: SavedObjectsUpdateOptions = {
+        version,
+        references,
+        upsert,
+        migrationVersionCompatibility: 'raw' as const,
+      };
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});

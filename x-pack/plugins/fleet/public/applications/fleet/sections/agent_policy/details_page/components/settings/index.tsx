@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { pick } from 'lodash';
 import {
@@ -22,7 +21,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../../../types';
 import {
-  useLink,
   useStartServices,
   useAuthz,
   sendUpdateAgentPolicy,
@@ -69,8 +67,6 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();
-    const history = useHistory();
-    const { getPath } = useLink();
     const hasFleetAllPrivileges = useAuthz().fleet.all;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
@@ -173,9 +169,6 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
           validation={validation}
           isEditing={true}
-          onDelete={() => {
-            history.push(getPath('policies_list'));
-          }}
         />
 
         {hasChanges ? (
@@ -194,7 +187,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        color="ghost"
+                        color="text"
                         onClick={() => {
                           setAgentPolicy({ ...originalAgentPolicy });
                           setHasChanges(false);
@@ -211,7 +204,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         <DevtoolsRequestFlyoutButton
                           isDisabled={isLoading || Object.keys(validation).length > 0}
                           btnProps={{
-                            color: 'ghost',
+                            color: 'text',
                           }}
                           description={i18n.translate(
                             'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',

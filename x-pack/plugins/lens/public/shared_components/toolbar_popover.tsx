@@ -7,8 +7,8 @@
 
 import './toolbar_popover.scss';
 import React, { useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { EuiFlexItem, EuiPopover, EuiPopoverTitle, IconType } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
@@ -35,7 +35,7 @@ export interface ToolbarPopoverProps {
   /**
    * Button group position
    */
-  groupPosition?: ToolbarButtonProps['groupPosition'];
+  groupPosition?: ToolbarButtonProps<'iconButton'>['groupPosition'];
   buttonDataTestSubj?: string;
   panelClassName?: string;
   handleClose?: () => void;
@@ -63,18 +63,17 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
         aria-label={title}
         button={
           <ToolbarButton
-            fontWeight="normal"
+            as={'iconButton'}
+            iconType={iconType}
             onClick={() => {
               setOpen(!open);
             }}
-            title={title}
-            hasArrow={false}
+            label={title}
+            aria-label={title}
             isDisabled={isDisabled}
             groupPosition={groupPosition}
-            dataTestSubj={buttonDataTestSubj}
-          >
-            <EuiIcon type={iconType} />
-          </ToolbarButton>
+            data-test-subj={buttonDataTestSubj}
+          />
         }
         isOpen={open}
         closePopover={() => {

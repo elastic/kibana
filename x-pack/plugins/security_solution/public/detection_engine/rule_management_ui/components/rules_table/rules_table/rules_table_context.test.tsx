@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { Rule, RulesSnoozeSettingsMap } from '../../../../rule_management/logic';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import { useFetchRulesSnoozeSettings } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import type { RulesTableState } from './rules_table_context';
 import { RulesTableContextProvider, useRulesTableContext } from './rules_table_context';
 import {
@@ -26,7 +26,7 @@ import { useRulesTableSavedState } from './use_rules_table_saved_state';
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../rule_management/logic/use_find_rules');
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
-jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings');
+jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query');
 jest.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext({
@@ -48,7 +48,7 @@ function renderUseRulesTableContext({
     isRefetching: false,
     isError: rules instanceof Error,
   });
-  (useFetchRulesSnoozeSettings as jest.Mock).mockReturnValue({
+  (useFetchRulesSnoozeSettingsQuery as jest.Mock).mockReturnValue({
     data: rulesSnoozeSettings instanceof Error ? undefined : rulesSnoozeSettings,
     isError: rulesSnoozeSettings instanceof Error,
   });

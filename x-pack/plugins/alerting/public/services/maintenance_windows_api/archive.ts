@@ -4,16 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-
-import { MaintenanceWindow } from '../../pages/maintenance_windows/types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { MaintenanceWindowResponse } from '../../../common/routes/maintenance_window/response';
+import type { MaintenanceWindow } from '../../../common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
-
-const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({ r_rule: rRule, ...rest }) => ({
-  ...rest,
-  rRule,
-});
+import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
 
 export async function archiveMaintenanceWindow({
   http,
@@ -24,12 +19,12 @@ export async function archiveMaintenanceWindow({
   maintenanceWindowId: string;
   archive: boolean;
 }): Promise<MaintenanceWindow> {
-  const res = await http.post<AsApiContract<MaintenanceWindow>>(
+  const res = await http.post<MaintenanceWindowResponse>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/${encodeURIComponent(
       maintenanceWindowId
     )}/_archive`,
     { body: JSON.stringify({ archive }) }
   );
 
-  return rewriteBodyRes(res);
+  return transformMaintenanceWindowResponse(res);
 }

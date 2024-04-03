@@ -7,9 +7,11 @@
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
+import { HttpFetchQuery } from '@kbn/core/public';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import * as i18n from '../translations';
+import { INTERNAL_API_VERSION } from '../helpers';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
@@ -19,8 +21,16 @@ export interface UseStats {
   loading: boolean;
 }
 
-export const useStats = (pattern: string): UseStats => {
-  const { httpFetch } = useDataQualityContext();
+export const useStats = ({
+  endDate,
+  pattern,
+  startDate,
+}: {
+  endDate?: string | null;
+  pattern: string;
+  startDate?: string | null;
+}): UseStats => {
+  const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -31,12 +41,23 @@ export const useStats = (pattern: string): UseStats => {
     async function fetchData() {
       try {
         const encodedIndexName = encodeURIComponent(`${pattern}`);
+        const query: HttpFetchQuery = { isILMAvailable };
+        if (!isILMAvailable) {
+          if (startDate) {
+            query.startDate = startDate;
+          }
+          if (endDate) {
+            query.endDate = endDate;
+          }
+        }
 
         const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
           `${STATS_ENDPOINT}/${encodedIndexName}`,
           {
+            version: INTERNAL_API_VERSION,
             method: 'GET',
             signal: abortController.signal,
+            query,
           }
         );
 
@@ -59,7 +80,7 @@ export const useStats = (pattern: string): UseStats => {
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, pattern, setError]);
+  }, [endDate, httpFetch, isILMAvailable, pattern, setError, startDate]);
 
   return { stats, error, loading };
 };

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import type { CaseUI } from '../../../../common';
-import { CaseStatuses, StatusAll } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 import type { AppMockRenderer } from '../../../common/mock';
 import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
@@ -25,6 +25,7 @@ import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
 jest.mock('../../../common/use_cases_toast');
+jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../containers/use_create_attachments');
 // dummy mock, will call onRowclick when rendering
 jest.mock('./all_cases_selector_modal', () => {
@@ -71,8 +72,6 @@ describe('use cases add to existing case modal hook', () => {
           persistableStateAttachmentTypeRegistry,
           owner: ['test'],
           permissions: allCasesPermissions(),
-          appId: 'test',
-          appTitle: 'jest',
           basePath: '/jest',
           dispatch,
           features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
@@ -116,7 +115,7 @@ describe('use cases add to existing case modal hook', () => {
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: expect.objectContaining({
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          hiddenStatuses: [CaseStatuses.closed],
         }),
       })
     );

@@ -14,6 +14,7 @@ import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
 import { SavedObjectInfoService } from './saved_object_info';
 import { IndexPatternsService } from './index_patterns';
 import { BsearchService } from './bsearch';
+import { ConsoleProvider } from './console';
 
 export const services = {
   ...commonFunctionalServices,
@@ -24,4 +25,5 @@ export const services = {
   savedObjectInfo: SavedObjectInfoService,
   indexPatterns: IndexPatternsService,
   bsearch: BsearchService,
+  console: ConsoleProvider,
 };

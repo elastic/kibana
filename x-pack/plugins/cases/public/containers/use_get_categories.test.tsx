@@ -20,7 +20,6 @@ describe('useGetCategories', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('calls getCategories api', async () => {

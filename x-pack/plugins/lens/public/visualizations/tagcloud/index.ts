@@ -19,7 +19,7 @@ export class TagcloudVisualization {
     editorFrame.registerVisualization(async () => {
       const { getTagcloudVisualization } = await import('../../async_services');
       const palettes = await charts.palettes.getPalettes();
-      return getTagcloudVisualization({ paletteService: palettes, theme: core.theme });
+      return getTagcloudVisualization({ paletteService: palettes, kibanaTheme: core.theme });
     });
   }
 }

@@ -1342,6 +1342,28 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.HttpSetup.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
+              }
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.HttpSetup.anonymousPaths",
             "type": "Object",
             "tags": [],
@@ -1870,6 +1892,19 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.IBasePath.assetsHrefBase",
+            "type": "string",
+            "tags": [],
+            "label": "assetsHrefBase",
+            "description": [
+              "\nHref (hypertext reference) intended to be used as the base for constructing\nother hrefs to static assets."
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-common.IBasePath.publicBaseUrl",
             "type": "string",
             "tags": [],
@@ -2149,6 +2184,56 @@
             "path": "packages/core/http/core-http-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-browser",
+        "id": "def-common.IStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStaticAssets",
+        "description": [
+          "\nAPIs for creating hrefs to static assets.\n"
+        ],
+        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-common.IStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
+            ],
+            "signature": [
+              "(assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-common.IStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -1517,14 +1517,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -1574,14 +1566,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -1599,7 +1583,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"left\" | \"right\" | \"bottom\""
+          "\"right\" | \"left\" | \"top\" | \"bottom\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -2521,14 +2505,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -2578,14 +2554,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -2633,7 +2601,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"left\" | \"right\" | \"bottom\""
+          "\"right\" | \"left\" | \"top\" | \"bottom\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,

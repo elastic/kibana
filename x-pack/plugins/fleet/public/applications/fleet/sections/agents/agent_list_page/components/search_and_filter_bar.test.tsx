@@ -45,13 +45,14 @@ describe('SearchAndFilterBar', () => {
   it('should show no Actions button when no agent is selected', async () => {
     const selectedAgents: Agent[] = [];
     const props: any = {
-      totalAgents: 10,
+      nAgentsInTable: 10,
       totalInactiveAgents: 2,
+      totalManagedAgentIds: [],
       selectionMode: 'manual',
       currentQuery: '',
       selectedAgents,
       refreshAgents: () => undefined,
-      visibleAgents: [],
+      agentsOnCurrentPage: [],
       tags: [],
       agentPolicies: [],
       selectedStatus: [],
@@ -77,13 +78,14 @@ describe('SearchAndFilterBar', () => {
       },
     ];
     const props: any = {
-      totalAgents: 10,
+      nAgentsInTable: 10,
       totalInactiveAgents: 2,
+      totalManagedAgentIds: [],
       selectionMode: 'manual',
       currentQuery: '',
       selectedAgents,
       refreshAgents: () => undefined,
-      visibleAgents: [],
+      agentsOnCurrentPage: [],
       tags: [],
       agentPolicies: [],
       selectedStatus: [],
@@ -97,13 +99,14 @@ describe('SearchAndFilterBar', () => {
 
   it('should show an Actions button when agents selected in query mode', async () => {
     const props: any = {
-      totalAgents: 10,
+      nAgentsInTable: 10,
       totalInactiveAgents: 2,
+      totalManagedAgentIds: [],
       selectionMode: 'query',
       currentQuery: '',
       selectedAgents: [],
       refreshAgents: () => undefined,
-      visibleAgents: [],
+      agentsOnCurrentPage: [],
       tags: [],
       agentPolicies: [],
       selectedStatus: [],

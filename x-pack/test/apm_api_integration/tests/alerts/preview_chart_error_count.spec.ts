@@ -11,6 +11,7 @@ import {
   ERROR_GROUP_ID,
 } from '@kbn/apm-plugin/common/es_fields/apm';
 import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateErrorData } from './generate_data';
@@ -34,6 +35,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
+  const getOptionsWithFilterQuery = () => ({
+    params: {
+      query: {
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+        interval: '5m',
+        searchConfiguration: JSON.stringify({
+          query: {
+            query: 'service.name: synth-go',
+            language: 'kuery',
+          },
+        }),
+        serviceName: undefined,
+        errorGroupingKey: undefined,
+        environment: 'ENVIRONMENT_ALL',
+      },
+    },
+  });
+
   registry.when(`without data loaded`, { config: 'basic', archives: [] }, () => {
     it('error_count (without data)', async () => {
       const options = getOptions();
@@ -49,13 +69,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/172769
     describe('error_count', () => {
-      before(async () => {
+      beforeEach(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      afterEach(() => synthtraceEsClient.clean());
 
       it('with data', async () => {
         const options = getOptions();
@@ -80,7 +101,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
               serviceName: 'synth-go',
-              errorGroupingKey: '98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+              errorGroupingKey: `${getErrorGroupingKey('Error 1')}`,
               environment: 'ENVIRONMENT_ALL',
               interval: '5m',
             },
@@ -167,11 +188,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -182,7 +203,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptions().params.query,
-              errorGroupingKey: 'cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+              errorGroupingKey: `${getErrorGroupingKey('Error 0')}`,
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
             },
           },
@@ -202,7 +223,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);
@@ -263,19 +284,271 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }))
         ).to.eql([
           {
-            name: 'synth-go_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-java_production_98b75903135eac35ad42419bd3b45cf8b4270c61cbd0ede0f7e8c8a9ac9fdb03',
+            name: `synth-java_production_${getErrorGroupingKey('Error 1')}`,
             y: 250,
           },
           {
-            name: 'synth-go_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
           {
-            name: 'synth-java_production_cf676a2665c3c548caaab78db6d23af63aed81bff4360a5b9873c07443aee78c',
+            name: `synth-java_production_${getErrorGroupingKey('Error 0')}`,
+            y: 125,
+          },
+        ]);
+      });
+    });
+  });
+
+  registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176975
+    describe('error_count', () => {
+      before(async () => {
+        await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
+        await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      it('with data', async () => {
+        const options = getOptionsWithFilterQuery();
+
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+          ...options,
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.errorCountChartPreview.series.some((item: PreviewChartResponseItem) =>
+            item.data.some((coordinate) => coordinate.x && coordinate.y)
+          )
+        ).to.equal(true);
+      });
+
+      it('with error grouping key in filter query', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptionsWithFilterQuery().params.query,
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
+                    'Error 1'
+                  )}`,
+                  language: 'kuery',
+                },
+              }),
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+          ...options,
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production', y: 250 }]);
+      });
+
+      it('with no group by parameter', async () => {
+        const options = getOptionsWithFilterQuery();
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(1);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production', y: 375 }]);
+      });
+
+      it('with default group by fields', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptionsWithFilterQuery().params.query,
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(1);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production', y: 375 }]);
+      });
+
+      it('with group by on error grouping key', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptionsWithFilterQuery().params.query,
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(2);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          {
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
+            y: 250,
+          },
+          {
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
+            y: 125,
+          },
+        ]);
+      });
+
+      it('with group by on error grouping key and filter on error grouping key', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptionsWithFilterQuery().params.query,
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: `service.name: synth-go and error.grouping_key: ${getErrorGroupingKey(
+                    'Error 0'
+                  )}`,
+                  language: 'kuery',
+                },
+              }),
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.errorCountChartPreview.series.length).to.equal(1);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          {
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
+            y: 125,
+          },
+        ]);
+      });
+
+      it('with empty filter query', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptionsWithFilterQuery().params.query,
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+              }),
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          { name: 'synth-go_production', y: 375 },
+          { name: 'synth-java_production', y: 375 },
+        ]);
+      });
+
+      it('with empty filter query and group by on error grouping key', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptionsWithFilterQuery().params.query,
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+              }),
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, ERROR_GROUP_ID],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.errorCountChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          {
+            name: `synth-go_production_${getErrorGroupingKey('Error 1')}`,
+            y: 250,
+          },
+          {
+            name: `synth-java_production_${getErrorGroupingKey('Error 1')}`,
+            y: 250,
+          },
+          {
+            name: `synth-go_production_${getErrorGroupingKey('Error 0')}`,
+            y: 125,
+          },
+          {
+            name: `synth-java_production_${getErrorGroupingKey('Error 0')}`,
             y: 125,
           },
         ]);

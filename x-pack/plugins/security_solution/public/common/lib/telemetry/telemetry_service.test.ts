@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { coreMock } from '@kbn/core/server/mocks';
-import { telemetryEvents } from './telemetry_events';
+import { telemetryEvents } from './events/telemetry_events';
 
 import { TelemetryService } from './telemetry_service';
-import { TelemetryEventTypes } from './types';
+import { TelemetryEventTypes } from './constants';
 
 describe('TelemetryService', () => {
   let service: TelemetryService;
@@ -49,6 +49,9 @@ describe('TelemetryService', () => {
       expect(telemetry).toHaveProperty('reportAlertsGroupingChanged');
       expect(telemetry).toHaveProperty('reportAlertsGroupingToggled');
       expect(telemetry).toHaveProperty('reportAlertsGroupingTakeAction');
+
+      expect(telemetry).toHaveProperty('reportDetailsFlyoutOpened');
+      expect(telemetry).toHaveProperty('reportDetailsFlyoutTabClicked');
     });
   });
 

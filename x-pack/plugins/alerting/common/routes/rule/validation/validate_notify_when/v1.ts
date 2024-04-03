@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ruleNotifyWhenV1, RuleNotifyWhenV1 } from '../../rule_response';
+import { ruleNotifyWhenV1, RuleNotifyWhenV1 } from '../../common';
 
 export function validateNotifyWhen(notifyWhen: string) {
   if (Object.values(ruleNotifyWhenV1).includes(notifyWhen as RuleNotifyWhenV1)) {

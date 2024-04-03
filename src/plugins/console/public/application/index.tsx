@@ -16,9 +16,9 @@ import {
   CoreTheme,
   DocLinksStart,
 } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '../shared_imports';
 import {
   createStorage,
   createHistory,
@@ -27,6 +27,7 @@ import {
   setStorage,
 } from '../services';
 import { createUsageTracker } from '../services/tracker';
+import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
@@ -42,9 +43,10 @@ export interface BootDependencies {
   theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
+  isMonacoEnabled: boolean;
 }
 
-export function renderApp({
+export async function renderApp({
   I18nContext,
   notifications,
   docLinkVersion,
@@ -54,10 +56,12 @@ export function renderApp({
   theme$,
   docLinks,
   autocompleteInfo,
+  isMonacoEnabled,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
+  await loadActiveApi(http);
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',
@@ -73,7 +77,7 @@ export function renderApp({
 
   render(
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <ServicesContextProvider
           value={{
             docLinkVersion,
@@ -90,6 +94,9 @@ export function renderApp({
               autocompleteInfo,
             },
             theme$,
+            config: {
+              isMonacoEnabled,
+            },
           }}
         >
           <RequestContextProvider>

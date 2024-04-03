@@ -24,7 +24,7 @@ export function Instruction({
   variantId,
   isCloudEnabled,
 }) {
-  const { tutorialService, http, uiSettings, getBasePath, kibanaVersion } = getServices();
+  const { tutorialService, http, theme, getBasePath, kibanaVersion } = getServices();
 
   let pre;
   if (textPre) {
@@ -67,6 +67,8 @@ export function Instruction({
     );
   }
 
+  const darkTheme = theme?.getTheme().darkMode ?? false;
+
   return (
     <div>
       {pre}
@@ -78,7 +80,7 @@ export function Instruction({
           <EuiErrorBoundary>
             <LazyCustomComponent
               basePath={getBasePath()}
-              isDarkTheme={uiSettings.get('theme:darkMode')}
+              isDarkTheme={darkTheme}
               http={http}
               variantId={variantId}
               isCloudEnabled={isCloudEnabled}

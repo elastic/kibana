@@ -137,7 +137,7 @@
             "label": "humanFriendlyMessage",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "packages/kbn-reporting/common/errors.ts",
             "deprecated": false,
@@ -593,7 +593,7 @@
             "label": "humanFriendlyMessage",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "packages/kbn-reporting/common/errors.ts",
             "deprecated": false,
@@ -879,7 +879,7 @@
             "label": "humanFriendlyMessage",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "packages/kbn-reporting/common/errors.ts",
             "deprecated": false,
@@ -892,6 +892,39 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.buildKibanaPath",
+        "type": "Function",
+        "tags": [],
+        "label": "buildKibanaPath",
+        "description": [],
+        "signature": [
+          "({ basePath, appPath, spaceId }: Args) => string"
+        ],
+        "path": "packages/kbn-reporting/common/build_kibana_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.buildKibanaPath.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ basePath, appPath, spaceId }",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "packages/kbn-reporting/common/build_kibana_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.byteSizeValueToNumber",
@@ -1010,31 +1043,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.CsvMetrics",
-        "type": "Interface",
-        "tags": [],
-        "label": "CsvMetrics",
-        "description": [],
-        "path": "packages/kbn-reporting/common/metrics.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.CsvMetrics.rows",
-            "type": "number",
-            "tags": [],
-            "label": "rows",
-            "description": [],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.ReportingError",
         "type": "Interface",
         "tags": [],
@@ -1064,191 +1072,227 @@
           }
         ],
         "initialIsOpen": false
-      },
+      }
+    ],
+    "enums": [
       {
         "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.TaskRunMetrics",
-        "type": "Interface",
+        "id": "def-common.JOB_STATUS",
+        "type": "Enum",
         "tags": [],
-        "label": "TaskRunMetrics",
+        "label": "JOB_STATUS",
         "description": [],
-        "path": "packages/kbn-reporting/common/metrics.ts",
+        "path": "packages/kbn-reporting/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunMetrics.csv",
-            "type": "Object",
-            "tags": [],
-            "label": "csv",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.CsvMetrics",
-                "text": "CsvMetrics"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunMetrics.png",
-            "type": "Object",
-            "tags": [],
-            "label": "png",
-            "description": [],
-            "signature": [
-              "PerformanceMetrics",
-              " | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunMetrics.pdf",
-            "type": "Object",
-            "tags": [],
-            "label": "pdf",
-            "description": [],
-            "signature": [
-              "PdfScreenshotMetrics",
-              " | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.TaskRunResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "TaskRunResult",
-        "description": [],
-        "path": "packages/kbn-reporting/common/metrics.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunResult.content_type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "content_type",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunResult.csv_contains_formulas",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "csv_contains_formulas",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunResult.max_size_reached",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "max_size_reached",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunResult.warnings",
-            "type": "Array",
-            "tags": [],
-            "label": "warnings",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunResult.metrics",
-            "type": "Object",
-            "tags": [],
-            "label": "metrics",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.TaskRunMetrics",
-                "text": "TaskRunMetrics"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.TaskRunResult.error_code",
-            "type": "string",
-            "tags": [],
-            "label": "error_code",
-            "description": [
-              "\nWhen running a report task we may finish with warnings that were triggered\nby an error. We can pass the error code via the task run result to the\ntask runner so that it can be recorded for telemetry.\n\nAlternatively, this field can be populated in the event that the task does\nnot complete in the task runner's error handler."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-reporting/common/metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/reporting-common",
-        "id": "def-common.CSV_REPORTING_ACTION",
-        "type": "string",
+        "id": "def-common.ALLOWED_JOB_CONTENT_TYPES",
+        "type": "Array",
         "tags": [],
-        "label": "CSV_REPORTING_ACTION",
+        "label": "ALLOWED_JOB_CONTENT_TYPES",
         "description": [],
         "signature": [
-          "\"downloadCsvReport\""
+          "string[]"
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.ILM_POLICY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ILM_POLICY_NAME",
+        "description": [],
+        "signature": [
+          "\"kibana-reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY",
+        "description": [],
+        "signature": [
+          "\"xpack.reporting.jobCompletionNotifications\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_BASIC",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_BASIC",
+        "description": [],
+        "signature": [
+          "\"basic\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_CLOUD_STANDARD",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_CLOUD_STANDARD",
+        "description": [],
+        "signature": [
+          "\"standard\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_ENTERPRISE",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_ENTERPRISE",
+        "description": [],
+        "signature": [
+          "\"enterprise\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_GOLD",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_GOLD",
+        "description": [],
+        "signature": [
+          "\"gold\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_PLATINUM",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_PLATINUM",
+        "description": [],
+        "signature": [
+          "\"platinum\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_TRIAL",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_TRIAL",
+        "description": [],
+        "signature": [
+          "\"trial\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORT_TABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "REPORT_TABLE_ID",
+        "description": [],
+        "signature": [
+          "\"reportJobListing\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORT_TABLE_ROW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "REPORT_TABLE_ROW_ID",
+        "description": [],
+        "signature": [
+          "\"reportJobRow\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_MANAGEMENT_HOME",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_MANAGEMENT_HOME",
+        "description": [],
+        "signature": [
+          "\"/app/management/insightsAndAlerting/reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_REDIRECT_APP",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_REDIRECT_APP",
+        "description": [],
+        "signature": [
+          "\"/app/reportingRedirect\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_REDIRECT_LOCATOR_STORE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_REDIRECT_LOCATOR_STORE_KEY",
+        "description": [],
+        "signature": [
+          "\"__REPORTING_REDIRECT_LOCATOR_STORE_KEY__\""
         ],
         "path": "packages/kbn-reporting/common/constants.ts",
         "deprecated": false,
@@ -1301,6 +1345,247 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.INTERNAL_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "INTERNAL_ROUTES",
+        "description": [],
+        "path": "packages/kbn-reporting/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.MIGRATE",
+            "type": "Object",
+            "tags": [],
+            "label": "MIGRATE",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY",
+                "type": "string",
+                "tags": [],
+                "label": "MIGRATE_ILM_POLICY",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS",
+                "type": "string",
+                "tags": [],
+                "label": "GET_ILM_POLICY_STATUS",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.DIAGNOSE",
+            "type": "Object",
+            "tags": [],
+            "label": "DIAGNOSE",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.DIAGNOSE.BROWSER",
+                "type": "string",
+                "tags": [],
+                "label": "BROWSER",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.DIAGNOSE.SCREENSHOT",
+                "type": "string",
+                "tags": [],
+                "label": "SCREENSHOT",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.JOBS",
+            "type": "Object",
+            "tags": [],
+            "label": "JOBS",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.COUNT",
+                "type": "string",
+                "tags": [],
+                "label": "COUNT",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.LIST",
+                "type": "string",
+                "tags": [],
+                "label": "LIST",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.INFO_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "INFO_PREFIX",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.DELETE_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DELETE_PREFIX",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DOWNLOAD_PREFIX",
+                "description": [],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.DOWNLOAD_CSV",
+            "type": "string",
+            "tags": [],
+            "label": "DOWNLOAD_CSV",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.GENERATE_PREFIX",
+            "type": "string",
+            "tags": [],
+            "label": "GENERATE_PREFIX",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.PUBLIC_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "PUBLIC_ROUTES",
+        "description": [],
+        "path": "packages/kbn-reporting/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PUBLIC_ROUTES.GENERATE_PREFIX",
+            "type": "string",
+            "tags": [],
+            "label": "GENERATE_PREFIX",
+            "description": [
+              "/**\n   * Public endpoint for POST URL strings and automated report generation\n   * exportTypeId is added to the final path\n   */"
+            ],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PUBLIC_ROUTES.JOBS",
+            "type": "Object",
+            "tags": [],
+            "label": "JOBS",
+            "description": [],
+            "path": "packages/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DOWNLOAD_PREFIX",
+                "description": [
+                  "/**\n     * Public endpoint used by Watcher and automated report downloads\n     * jobId is added to the final path\n     */"
+                ],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.PUBLIC_ROUTES.JOBS.DELETE_PREFIX",
+                "type": "string",
+                "tags": [],
+                "label": "DELETE_PREFIX",
+                "description": [
+                  "/**\n     * Public endpoint potentially used to delete a report after download in automation\n     * jobId is added to the final path\n     */"
+                ],
+                "path": "packages/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

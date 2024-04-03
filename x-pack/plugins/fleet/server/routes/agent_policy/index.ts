@@ -7,6 +7,8 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
@@ -38,134 +40,182 @@ import {
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List - Fleet Server needs access to run setup
-  router.get(
-    {
+  router.versioned
+    .get({
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
-      validate: GetAgentPoliciesRequestSchema,
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
-    },
-    getAgentPoliciesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetAgentPoliciesRequestSchema },
+      },
+      getAgentPoliciesHandler
+    );
 
   // Bulk GET
-  router.post(
-    {
+  router.versioned
+    .post({
       path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
-      validate: BulkGetAgentPoliciesRequestSchema,
       fleetAuthz: {
         fleet: { readAgentPolicies: true },
       },
-    },
-    bulkGetAgentPoliciesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: BulkGetAgentPoliciesRequestSchema },
+      },
+      bulkGetAgentPoliciesHandler
+    );
 
   // Get one
-  router.get(
-    {
+  router.versioned
+    .get({
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
-      validate: GetOneAgentPolicyRequestSchema,
-      fleetAuthz: {
-        fleet: { all: true },
+      fleetAuthz: (authz) => {
+        //  Allow to retrieve agent policies metadata (no full) for user with only read agents permissions
+        return authz.fleet.readAgentPolicies || authz.fleet.readAgents;
       },
-    },
-    getOneAgentPolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOneAgentPolicyRequestSchema },
+      },
+      getOneAgentPolicyHandler
+    );
 
   // Create
-  router.post(
-    {
+  router.versioned
+    .post({
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
-      validate: CreateAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
-    },
-    createAgentPolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: CreateAgentPolicyRequestSchema },
+      },
+      createAgentPolicyHandler
+    );
 
   // Update
-  router.put(
-    {
+  router.versioned
+    .put({
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
-      validate: UpdateAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
-    },
-    updateAgentPolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: UpdateAgentPolicyRequestSchema },
+      },
+      updateAgentPolicyHandler
+    );
 
   // Copy
-  router.post(
-    {
+  router.versioned
+    .post({
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
-      validate: CopyAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
-    },
-    copyAgentPolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: CopyAgentPolicyRequestSchema },
+      },
+      copyAgentPolicyHandler
+    );
 
   // Delete
-  router.post(
-    {
+  router.versioned
+    .post({
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgentPolicies: true },
       },
-    },
-    deleteAgentPoliciesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeleteAgentPolicyRequestSchema },
+      },
+      deleteAgentPoliciesHandler
+    );
 
   // Get one full agent policy
-  router.get(
-    {
+  router.versioned
+    .get({
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
-      validate: GetFullAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
-    },
-    getFullAgentPolicy
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetFullAgentPolicyRequestSchema },
+      },
+      getFullAgentPolicy
+    );
 
   // Download one full agent policy
-  router.get(
-    {
+  router.versioned
+    .get({
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
-      validate: GetFullAgentPolicyRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
-    },
-    downloadFullAgentPolicy
-  );
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetFullAgentPolicyRequestSchema },
+      },
+      downloadFullAgentPolicy
+    );
 
   // Get agent manifest
-  router.get(
-    {
+  router.versioned
+    .get({
       path: K8S_API_ROUTES.K8S_INFO_PATTERN,
-      validate: GetK8sManifestRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
-    },
-    getK8sManifest
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetK8sManifestRequestSchema },
+      },
+      getK8sManifest
+    );
 
   // Download agent manifest
-  router.get(
-    {
+  router.versioned
+    .get({
       path: K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN,
-      validate: GetK8sManifestRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readAgentPolicies: true },
       },
-    },
-    downloadK8sManifest
-  );
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetK8sManifestRequestSchema },
+      },
+      downloadK8sManifest
+    );
 };

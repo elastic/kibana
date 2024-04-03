@@ -5,52 +5,64 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
-import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
-import { ClientConfigType } from '../plugin';
-import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
-import { KibanaContextProvider } from '../shared_imports';
+
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { ClientConfigType } from '@kbn/reporting-public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  InternalApiClientProvider,
+  ReportingAPIClient,
+  KibanaContext,
+} from '@kbn/reporting-public';
 import { ReportListing } from '.';
+import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
 export async function mountManagementSection(
-  coreSetup: CoreSetup,
   coreStart: CoreStart,
-  license$: Observable<ILicense>,
-  pollConfig: ClientConfigType['poll'],
+  license$: LicensingPluginStart['license$'],
+  dataService: DataPublicPluginStart,
+  shareService: SharePluginStart,
+  config: ClientConfigType,
   apiClient: ReportingAPIClient,
-  urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
 ) {
+  const services: KibanaContext = {
+    http: coreStart.http,
+    application: coreStart.application,
+    uiSettings: coreStart.uiSettings,
+    docLinks: coreStart.docLinks,
+    data: dataService,
+    share: shareService,
+  };
+
   render(
-    <I18nProvider>
-      <KibanaContextProvider
-        services={{
-          http: coreSetup.http,
-          application: coreStart.application,
-          uiSettings: coreStart.uiSettings,
-          docLinks: coreStart.docLinks,
-        }}
-      >
-        <InternalApiClientProvider apiClient={apiClient}>
-          <IlmPolicyStatusContextProvider>
-            <ReportListing
-              toasts={coreSetup.notifications.toasts}
-              license$={license$}
-              pollConfig={pollConfig}
-              redirect={coreStart.application.navigateToApp}
-              navigateToUrl={coreStart.application.navigateToUrl}
-              urlService={urlService}
-            />
-          </IlmPolicyStatusContextProvider>
-        </InternalApiClientProvider>
-      </KibanaContextProvider>
-    </I18nProvider>,
+    <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <InternalApiClientProvider apiClient={apiClient} http={services.http}>
+            <PolicyStatusContextProvider config={config}>
+              <ReportListing
+                apiClient={apiClient}
+                toasts={coreStart.notifications.toasts}
+                license$={license$}
+                config={config}
+                redirect={coreStart.application.navigateToApp}
+                navigateToUrl={coreStart.application.navigateToUrl}
+                urlService={shareService.url}
+              />
+            </PolicyStatusContextProvider>
+          </InternalApiClientProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </KibanaThemeProvider>,
     params.element
   );
 

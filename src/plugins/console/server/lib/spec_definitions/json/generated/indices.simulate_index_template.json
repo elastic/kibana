@@ -1,9 +1,16 @@
 {
   "indices.simulate_index_template": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "create": "__flag__",
-      "cause": "",
-      "master_timeout": "",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "include_defaults": "__flag__"
     },
     "methods": [
@@ -12,6 +19,10 @@
     "patterns": [
       "_index_template/_simulate_index/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-simulate-index.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

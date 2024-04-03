@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { Spaces, Superuser } from '../../../scenarios';
-import { getUrlPrefix, getEventLog, getTestRuleData, TaskManagerDoc } from '../../../../common/lib';
+import {
+  getUrlPrefix,
+  getEventLog,
+  getTestRuleData,
+  TaskManagerDoc,
+  ObjectRemover,
+} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,13 +26,19 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/140973
-  describe.skip('telemetry', () => {
-    const alwaysFiringRuleId: { [key: string]: string } = {};
+  describe('test telemetry', () => {
+    const objectRemover = new ObjectRemover(supertest);
+    const esQueryRuleId: { [key: string]: string } = {};
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
+    });
+
+    afterEach(() => objectRemover.removeAll());
+
+    after(async () => {
+      await esTestIndexTool.destroy();
     });
 
     async function createConnector(opts: { name: string; space: string; connectorTypeId: string }) {
@@ -42,6 +54,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           secrets: {},
         })
         .expect(200);
+      objectRemover.add(space, createdConnector.id, 'connector', 'actions');
       return createdConnector.id;
     }
 
@@ -52,7 +65,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         .set('kbn-xsrf', 'foo')
         .auth(Superuser.username, Superuser.password)
         .send(getTestRuleData(ruleOverwrites));
-      expect(ruleResponse.status).to.eql(200);
+      expect(ruleResponse.status).to.equal(200);
+      objectRemover.add(space, ruleResponse.body.id, 'rule', 'alerting');
       return ruleResponse.body.id;
     }
 
@@ -69,125 +83,101 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           space: space.id,
           connectorTypeId: 'test.throw',
         });
+        // excluded connector
         await createConnector({
           name: 'unused connector',
           space: space.id,
           connectorTypeId: 'test.excluded',
         });
-        await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: 'test.noop',
-            schedule: { interval: '30s' },
-            throttle: '1s',
-            params: {},
-            actions: [
-              {
-                id: noopConnectorId,
-                group: 'default',
-                params: {},
-              },
-            ],
-          },
-        });
-        await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: 'test.onlyContextVariables',
-            schedule: { interval: '10s' },
-            throttle: '10m',
-            params: {},
-            actions: [
-              {
-                id: failingConnectorId,
-                group: 'default',
-                params: {},
-              },
-            ],
-          },
-        });
-        await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: 'test.throw',
-            schedule: { interval: '1m' },
-            throttle: '30s',
-            params: {},
-            actions: [
-              {
-                id: noopConnectorId,
-                group: 'default',
-                params: {},
-              },
-            ],
-          },
-        });
 
-        alwaysFiringRuleId[space.id] = await createRule({
+        await createRule({
           space: space.id,
           ruleOverwrites: {
-            rule_type_id: 'example.always-firing',
-            schedule: { interval: '3s' },
+            rule_type_id: 'test.patternFiring',
+            schedule: { interval: '1h' },
             throttle: null,
-            notify_when: 'onActiveAlert',
-            params: {},
+            params: {
+              pattern: { instance: [true] },
+            },
             actions: [
               {
                 id: noopConnectorId,
-                group: 'small',
+                group: 'default',
                 params: {},
               },
               {
                 id: 'my-slack1',
-                group: 'medium',
+                group: 'default',
                 params: {},
               },
               {
                 id: failingConnectorId,
-                group: 'large',
+                group: 'default',
                 params: {},
               },
             ],
           },
         });
-
+        // disabled rule
         await createRule({
           space: space.id,
           ruleOverwrites: {
             rule_type_id: 'test.noop',
-            schedule: { interval: '5m' },
+            schedule: { interval: '1h' },
             throttle: null,
             enabled: false,
             params: {},
             actions: [],
           },
         });
-
+        // throwing rule
         await createRule({
           space: space.id,
           ruleOverwrites: {
-            rule_type_id: 'test.multipleSearches',
-            schedule: { interval: '40s' },
-            throttle: '1m',
-            params: { numSearches: 2, delay: `2s` },
-            actions: [],
-          },
-        });
-
-        await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: 'test.cumulative-firing',
-            schedule: { interval: '61s' },
-            throttle: '2s',
-            notify_when: 'onActiveAlert',
+            rule_type_id: 'test.throw',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {},
             actions: [
               {
-                id: failingConnectorId,
+                id: noopConnectorId,
                 group: 'default',
                 params: {},
               },
             ],
+          },
+        });
+        // ES search rule
+        await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: 'test.multipleSearches',
+            schedule: { interval: '1h' },
+            throttle: '1s',
+            params: { numSearches: 2, delay: `2s` },
+            actions: [],
+          },
+        });
+        // ES query rule
+        esQueryRuleId[space.id] = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: '.es-query',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              size: 100,
+              timeWindowSize: 5,
+              timeWindowUnit: 'm',
+              thresholdComparator: '>',
+              threshold: [0],
+              searchType: 'esqlQuery',
+              esqlQuery: {
+                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              },
+              timeField: 'date_epoch_millis',
+            },
+            actions: [],
           },
         });
       }
@@ -245,53 +235,56 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       );
 
       expect(
-        telemetry.count_connector_types_by_action_run_outcome_per_day['test.throw'].failure
-      ).to.greaterThan(0);
+        telemetry.count_connector_types_by_action_run_outcome_per_day['test.throw'].failure > 0
+      ).to.be(true);
     }
 
     function verifyAlertingTelemetry(telemetry: any) {
       logger.info(`alerting telemetry - ${JSON.stringify(telemetry)}`);
       // total number of enabled rules
-      expect(telemetry.count_active_total).to.equal(18);
+      expect(telemetry.count_active_total).to.equal(12);
 
       // total number of disabled rules
       expect(telemetry.count_disabled_total).to.equal(3);
 
       // total number of rules broken down by rule type
-      expect(telemetry.count_by_type.test__noop).to.equal(6);
-      expect(telemetry.count_by_type['example__always-firing']).to.equal(3);
-      expect(telemetry.count_by_type['test__cumulative-firing']).to.equal(3);
+      expect(telemetry.count_by_type.test__noop).to.equal(3);
+      expect(telemetry.count_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_by_type.test__multipleSearches).to.equal(3);
-      expect(telemetry.count_by_type.test__onlyContextVariables).to.equal(3);
       expect(telemetry.count_by_type.test__throw).to.equal(3);
+      expect(telemetry.count_by_type['__es-query']).to.equal(3);
+      expect(telemetry.count_by_type['__es-query_es_query']).to.equal(0);
+      expect(telemetry.count_by_type['__es-query_search_source']).to.equal(0);
+      expect(telemetry.count_by_type['__es-query_esql_query']).to.equal(3);
 
       // total number of enabled rules broken down by rule type
-      expect(telemetry.count_active_by_type['example__always-firing']).to.equal(3);
-      expect(telemetry.count_active_by_type['test__cumulative-firing']).to.equal(3);
+      expect(telemetry.count_active_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_active_by_type.test__multipleSearches).to.equal(3);
-      expect(telemetry.count_active_by_type.test__noop).to.equal(3);
-      expect(telemetry.count_active_by_type.test__onlyContextVariables).to.equal(3);
       expect(telemetry.count_active_by_type.test__throw).to.equal(3);
+      expect(telemetry.count_active_by_type['__es-query']).to.equal(3);
+      expect(telemetry.count_active_by_type['__es-query_es_query']).to.equal(0);
+      expect(telemetry.count_active_by_type['__es-query_search_source']).to.equal(0);
+      expect(telemetry.count_active_by_type['__es-query_esql_query']).to.equal(3);
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
-      expect(telemetry.throttle_time.avg).to.equal('115.5s');
-      expect(telemetry.throttle_time.max).to.equal('600s');
+      expect(telemetry.throttle_time.avg).to.equal('0.3333333333333333s');
+      expect(telemetry.throttle_time.max).to.equal('1s');
       expect(telemetry.throttle_time_number_s.min).to.equal(0);
-      expect(telemetry.throttle_time_number_s.avg).to.equal(115.5);
-      expect(telemetry.throttle_time_number_s.max).to.equal(600);
+      expect(telemetry.throttle_time_number_s.avg).to.equal(0.3333333333333333);
+      expect(telemetry.throttle_time_number_s.max).to.equal(1);
 
       // schedule interval stats
-      expect(telemetry.schedule_time.min).to.equal('3s');
-      expect(telemetry.schedule_time.avg).to.equal('72s');
-      expect(telemetry.schedule_time.max).to.equal('300s');
-      expect(telemetry.schedule_time_number_s.min).to.equal(3);
-      expect(telemetry.schedule_time_number_s.avg).to.equal(72);
-      expect(telemetry.schedule_time_number_s.max).to.equal(300);
+      expect(telemetry.schedule_time.min).to.equal('3600s');
+      expect(telemetry.schedule_time.avg).to.equal('3600s');
+      expect(telemetry.schedule_time.max).to.equal('3600s');
+      expect(telemetry.schedule_time_number_s.min).to.equal(3600);
+      expect(telemetry.schedule_time_number_s.avg).to.equal(3600);
+      expect(telemetry.schedule_time_number_s.max).to.equal(3600);
 
       // attached connectors stats
       expect(telemetry.connectors_per_alert.min).to.equal(0);
-      expect(telemetry.connectors_per_alert.avg).to.equal(1);
+      expect(telemetry.connectors_per_alert.avg).to.equal(0.8);
       expect(telemetry.connectors_per_alert.max).to.equal(3);
 
       // number of spaces with rules
@@ -299,48 +292,30 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // number of rule executions - just checking for non-zero as we can't set an exact number
       // each rule should have had a chance to execute once
-      expect(telemetry.count_rules_executions_per_day >= 21).to.be(true);
+      expect(telemetry.count_rules_executions_per_day > 0).to.be(true);
 
       // number of rule executions broken down by rule type
-      expect(telemetry.count_by_type['example__always-firing'] >= 3).to.be(true);
-      expect(telemetry.count_by_type.test__onlyContextVariables >= 3).to.be(true);
-      expect(telemetry.count_by_type['test__cumulative-firing'] >= 3).to.be(true);
+      expect(telemetry.count_by_type.test__patternFiring >= 3).to.be(true);
       expect(telemetry.count_by_type.test__noop >= 3).to.be(true);
       expect(telemetry.count_by_type.test__multipleSearches >= 3).to.be(true);
       expect(telemetry.count_by_type.test__throw >= 3).to.be(true);
+      expect(telemetry.count_by_type['__es-query'] >= 3).to.be(true);
 
       // average execution time - just checking for non-zero as we can't set an exact number
       expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
 
       // average execution time broken down by rule type
-      expect(telemetry.avg_execution_time_by_type_per_day['example__always-firing'] > 0).to.be(
-        true
-      );
-      expect(telemetry.avg_execution_time_by_type_per_day.test__onlyContextVariables > 0).to.be(
-        true
-      );
-      expect(telemetry.avg_execution_time_by_type_per_day['test__cumulative-firing'] > 0).to.be(
-        true
-      );
-      expect(telemetry.avg_execution_time_by_type_per_day.test__noop > 0).to.be(true);
+      expect(telemetry.avg_execution_time_by_type_per_day.test__patternFiring > 0).to.be(true);
       expect(telemetry.avg_execution_time_by_type_per_day.test__multipleSearches > 0).to.be(true);
       expect(telemetry.avg_execution_time_by_type_per_day.test__throw > 0).to.be(true);
+      expect(telemetry.avg_execution_time_by_type_per_day['__es-query'] > 0).to.be(true);
 
       // average es search time - just checking for non-zero as we can't set an exact number
       expect(telemetry.avg_es_search_duration_per_day > 0).to.be(true);
 
       // average es search time broken down by rule type, most of these rule types don't perform ES queries
-      expect(
-        telemetry.avg_es_search_duration_by_type_per_day['example__always-firing'] === 0
-      ).to.be(true);
-      expect(
-        telemetry.avg_es_search_duration_by_type_per_day.test__onlyContextVariables === 0
-      ).to.be(true);
-      expect(
-        telemetry.avg_es_search_duration_by_type_per_day['test__cumulative-firing'] === 0
-      ).to.be(true);
-      expect(telemetry.avg_es_search_duration_by_type_per_day.test__noop === 0).to.be(true);
-      expect(telemetry.avg_es_search_duration_by_type_per_day.test__throw === 0).to.be(true);
+      expect(telemetry.avg_es_search_duration_by_type_per_day.test__patternFiring).to.equal(0);
+      expect(telemetry.avg_es_search_duration_by_type_per_day.test__throw).to.equal(0);
 
       // rule type that performs ES search
       expect(telemetry.avg_es_search_duration_by_type_per_day.test__multipleSearches > 0).to.be(
@@ -351,17 +326,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.avg_total_search_duration_per_day > 0).to.be(true);
 
       // average total search time broken down by rule type, most of these rule types don't perform ES queries
-      expect(
-        telemetry.avg_total_search_duration_by_type_per_day['example__always-firing'] === 0
-      ).to.be(true);
-      expect(
-        telemetry.avg_total_search_duration_by_type_per_day.test__onlyContextVariables === 0
-      ).to.be(true);
-      expect(
-        telemetry.avg_total_search_duration_by_type_per_day['test__cumulative-firing'] === 0
-      ).to.be(true);
-      expect(telemetry.avg_total_search_duration_by_type_per_day.test__noop === 0).to.be(true);
-      expect(telemetry.avg_total_search_duration_by_type_per_day.test__throw === 0).to.be(true);
+      expect(telemetry.avg_total_search_duration_by_type_per_day.test__patternFiring).to.equal(0);
+      expect(telemetry.avg_total_search_duration_by_type_per_day.test__throw).to.equal(0);
 
       // rule type that performs ES search
       expect(telemetry.avg_total_search_duration_by_type_per_day.test__multipleSearches > 0).to.be(
@@ -391,32 +357,20 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       // percentile calculations for number of scheduled actions
       expect(telemetry.percentile_num_generated_actions_per_day.p50 >= 0).to.be(true);
       expect(telemetry.percentile_num_generated_actions_per_day.p90 >= 0).to.be(true);
-      expect(telemetry.percentile_num_generated_actions_per_day.p99).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_generated_actions_per_day.p99 > 0).to.be(true);
 
       // percentile calculations by rule type. most of these rule types don't schedule actions so they should all be 0
-      expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p50['example__always-firing']
-      ).to.equal(0);
-      expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p90['example__always-firing']
-      ).to.equal(0);
-      expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p99['example__always-firing']
-      ).to.equal(0);
+      // but this rule type does schedule actions so should be least 1 action scheduled
 
       expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__onlyContextVariables
-      ).to.equal(0);
+        telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__patternFiring > 0
+      ).to.be(true);
       expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__onlyContextVariables
-      ).to.equal(0);
+        telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__patternFiring > 0
+      ).to.be(true);
       expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__onlyContextVariables
-      ).to.equal(0);
-
-      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__noop).to.equal(0);
-      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__noop).to.equal(0);
-      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__noop).to.equal(0);
+        telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__patternFiring > 0
+      ).to.be(true);
 
       expect(telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__throw).to.equal(
         0
@@ -438,46 +392,33 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__multipleSearches
       ).to.equal(0);
 
-      // this rule type does schedule actions so should be least 1 action scheduled
-      expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p50['test__cumulative-firing']
-      ).to.be.greaterThan(0);
-      expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p90['test__cumulative-firing']
-      ).to.be.greaterThan(0);
-      expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p99['test__cumulative-firing']
-      ).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p50['__es-query']).to.equal(
+        0
+      );
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p90['__es-query']).to.equal(
+        0
+      );
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p99['__es-query']).to.equal(
+        0
+      );
 
       // percentile calculations for number of alerts
       expect(telemetry.percentile_num_alerts_per_day.p50 >= 0).to.be(true);
       expect(telemetry.percentile_num_alerts_per_day.p90 >= 0).to.be(true);
-      expect(telemetry.percentile_num_alerts_per_day.p99).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_alerts_per_day.p99 > 0).to.be(true);
 
       // percentile calculations by rule type. most of these rule types don't generate alerts so they should all be 0
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p50['example__always-firing']
-      ).to.equal(0);
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p90['example__always-firing']
-      ).to.equal(0);
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p99['example__always-firing']
-      ).to.equal(0);
+      // but this rule type does generate alerts so should be least 1 alert
 
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p50.test__onlyContextVariables
-      ).to.equal(0);
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p90.test__onlyContextVariables
-      ).to.equal(0);
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p99.test__onlyContextVariables
-      ).to.equal(0);
-
-      expect(telemetry.percentile_num_alerts_by_type_per_day.p50.test__noop).to.equal(0);
-      expect(telemetry.percentile_num_alerts_by_type_per_day.p90.test__noop).to.equal(0);
-      expect(telemetry.percentile_num_alerts_by_type_per_day.p99.test__noop).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p50.test__patternFiring > 0).to.be(
+        true
+      );
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p90.test__patternFiring > 0).to.be(
+        true
+      );
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p99.test__patternFiring > 0).to.be(
+        true
+      );
 
       expect(telemetry.percentile_num_alerts_by_type_per_day.p50.test__throw).to.equal(0);
       expect(telemetry.percentile_num_alerts_by_type_per_day.p90.test__throw).to.equal(0);
@@ -493,45 +434,34 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         0
       );
 
-      // this rule type does generate alerts so should be least 1 alert
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p50['test__cumulative-firing']
-      ).to.be.greaterThan(0);
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p90['test__cumulative-firing']
-      ).to.be.greaterThan(0);
-      expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing']
-      ).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p50['__es-query']).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p90['__es-query']).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p99['__es-query']).to.equal(0);
 
       // rules grouped by execution status
-      expect(telemetry.count_rules_by_execution_status).to.eql({
-        success: 15,
-        error: 3,
-        warning: 0,
-      });
-      // number of rules that has tags
-      expect(telemetry.count_rules_with_tags).to.be(21);
-      // rules grouped by notify when
-      expect(telemetry.count_rules_by_notify_when).to.eql({
-        on_action_group_change: 0,
-        on_active_alert: 6,
-        on_throttle_interval: 15,
-      });
-      // rules snoozed
-      expect(telemetry.count_rules_snoozed).to.be(0);
-      // rules muted
-      expect(telemetry.count_rules_muted).to.be(0);
-      // rules with muted alerts
-      expect(telemetry.count_rules_with_muted_alerts).to.be(0);
-      // Connector types grouped by consumers
-      expect(telemetry.count_connector_types_by_consumers).to.eql({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        alertsFixture: { test__noop: 9, test__throw: 9, __slack: 3 },
-      });
+      expect(telemetry.count_rules_by_execution_status.success > 0).to.be(true);
+      expect(telemetry.count_rules_by_execution_status.error > 0).to.be(true);
+      expect(telemetry.count_rules_by_execution_status.warning).to.equal(0);
 
-      expect(telemetry.count_rules_by_execution_status_per_day.failure).to.greaterThan(0);
-      expect(telemetry.count_rules_by_execution_status_per_day.success).to.greaterThan(0);
+      // number of rules that has tags
+      expect(telemetry.count_rules_with_tags).to.equal(15);
+      // rules grouped by notify when
+      expect(telemetry.count_rules_by_notify_when.on_action_group_change).to.equal(0);
+      expect(telemetry.count_rules_by_notify_when.on_active_alert).to.equal(0);
+      expect(telemetry.count_rules_by_notify_when.on_throttle_interval).to.equal(15);
+      // rules snoozed
+      expect(telemetry.count_rules_snoozed).to.equal(0);
+      // rules muted
+      expect(telemetry.count_rules_muted).to.equal(0);
+      // rules with muted alerts
+      expect(telemetry.count_rules_with_muted_alerts).to.equal(0);
+      // Connector types grouped by consumers
+      expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__noop).to.equal(6);
+      expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__throw).to.equal(3);
+      expect(telemetry.count_connector_types_by_consumers.alertsFixture.__slack).to.equal(3);
+
+      expect(telemetry.count_rules_by_execution_status_per_day.failure > 0).to.be(true);
+      expect(telemetry.count_rules_by_execution_status_per_day.success > 0).to.be(true);
     }
 
     it('should retrieve telemetry data in the expected format', async () => {
@@ -541,11 +471,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       await retry.try(async () => {
         return await getEventLog({
           getService,
-          spaceId: Spaces[0].id,
+          spaceId: Spaces[2].id,
           type: 'alert',
-          id: alwaysFiringRuleId[Spaces[0].id],
+          id: esQueryRuleId[Spaces[2].id],
           provider: 'alerting',
-          actions: new Map([['execute', { gte: 10 }]]),
+          actions: new Map([['execute', { gte: 1 }]]),
         });
       });
 
@@ -566,9 +496,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         const taskState = telemetryTask!._source!.task?.state;
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
-        expect(actionsTelemetry.runs).to.equal(2);
-        expect(actionsTelemetry.count_total).to.equal(20);
+        expect(actionsTelemetry.runs > 0).to.be(true);
+        expect(actionsTelemetry.count_total).to.equal(21);
       });
+
+      verifyActionsTelemetry(actionsTelemetry);
 
       // request alerting telemetry task to run
       await supertest
@@ -587,11 +519,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         const taskState = telemetryTask!._source!.task?.state;
         expect(taskState).not.to.be(undefined);
         alertingTelemetry = JSON.parse(taskState!);
-        expect(alertingTelemetry.runs).to.equal(2);
-        expect(alertingTelemetry.count_total).to.equal(21);
+        expect(alertingTelemetry.runs > 0).to.be(true);
+        expect(alertingTelemetry.count_total).to.equal(15);
       });
 
-      verifyActionsTelemetry(actionsTelemetry);
       verifyAlertingTelemetry(alertingTelemetry);
     });
   });

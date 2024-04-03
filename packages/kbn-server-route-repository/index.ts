@@ -11,6 +11,8 @@ export { formatRequest } from './src/format_request';
 export { parseEndpoint } from './src/parse_endpoint';
 export { decodeRequestParams } from './src/decode_request_params';
 export { routeValidationObject } from './src/route_validation_object';
+export { registerRoutes } from './src/register_routes';
+
 export type {
   RouteRepositoryClient,
   ReturnOf,

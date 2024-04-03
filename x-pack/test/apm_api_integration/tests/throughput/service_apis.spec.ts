@@ -47,10 +47,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ? {
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 }
               : {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
                 }),
           },
         },
@@ -107,6 +109,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            sortField: 'throughput',
+            sortDirection: 'desc',
           },
         },
       }),
@@ -137,6 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
   let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177535
   registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;

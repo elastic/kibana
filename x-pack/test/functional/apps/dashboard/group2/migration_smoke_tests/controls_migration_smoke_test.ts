@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
 
-  const { common, settings, savedObjects, dashboard, dashboardControls } = getPageObjects([
-    'common',
+  const { settings, savedObjects, dashboard, dashboardControls } = getPageObjects([
     'settings',
     'dashboard',
     'savedObjects',
@@ -56,8 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render all panels on the dashboard', async () => {
-      await dashboardControls.enableControlsLab();
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('[8.0.0] Controls Dashboard');
 
       // dashboard should load properly

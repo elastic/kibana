@@ -7,10 +7,12 @@
 
 import { get } from 'lodash';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { TaskManagerPlugin } from './plugin';
 import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
-export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { TaskManagerPlugin } = await import('./plugin');
+  return new TaskManagerPlugin(initContext);
+};
 
 export type {
   TaskInstance,
@@ -21,7 +23,7 @@ export type {
   IntervalSchedule,
 } from './task';
 
-export { TaskStatus } from './task';
+export { TaskStatus, TaskPriority } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
@@ -29,8 +31,14 @@ export { asInterval } from './lib/intervals';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,
+  throwRetryableError,
   isEphemeralTaskRejectedDueToCapacityError,
+  createTaskRunError,
+  TaskErrorSource,
 } from './task_running';
+
+export type { DecoratedError } from './task_running';
+
 export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 export {

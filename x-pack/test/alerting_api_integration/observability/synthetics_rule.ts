@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
 import { TlsTranslations } from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
@@ -36,10 +36,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates rule when settings are configured', async () => {
       await supertest
-        .post(API_URLS.DYNAMIC_SETTINGS)
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
-          heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
+          heartbeatIndices: 'heartbeat-*',
           certExpirationThreshold: 30,
           certAgeThreshold: 730,
           defaultConnectors: testActions.slice(0, 2),
@@ -76,10 +76,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('updates rules when settings are updated', async () => {
       await supertest
-        .post(API_URLS.DYNAMIC_SETTINGS)
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
-          heartbeatIndices: 'heartbeat-8*,heartbeat-7*',
+          heartbeatIndices: 'heartbeat-*',
           certExpirationThreshold: 30,
           certAgeThreshold: 730,
           defaultConnectors: testActions,
@@ -122,8 +122,10 @@ const compareRules = (rule1: SanitizedRule, rule2: SanitizedRule) => {
 
 const getActionById = (rule: SanitizedRule, id: string) => {
   const actions = rule.actions.filter((action) => action.id === id);
-  const recoveredAction = actions.find((action) => action.group === 'recovered');
-  const firingAction = actions.find((action) => action.group !== 'recovered');
+  const recoveredAction = actions.find(
+    (action) => 'group' in action && action.group === 'recovered'
+  );
+  const firingAction = actions.find((action) => 'group' in action && action.group !== 'recovered');
   return {
     recoveredAction: omit(recoveredAction, ['uuid']),
     firingAction: omit(firingAction, ['uuid']),
@@ -136,7 +138,7 @@ const statusRule = {
   consumer: 'uptime',
   alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
   tags: ['SYNTHETICS_DEFAULT_ALERT'],
-  name: 'Synthetics status internal alert',
+  name: 'Synthetics status internal rule',
   enabled: true,
   throttle: null,
   apiKeyOwner: 'elastic',
@@ -344,7 +346,7 @@ const tlsRule = {
   consumer: 'uptime',
   alertTypeId: 'xpack.synthetics.alerts.tls',
   tags: ['SYNTHETICS_DEFAULT_ALERT'],
-  name: 'Synthetics internal TLS alert',
+  name: 'Synthetics internal TLS rule',
   enabled: true,
   throttle: null,
   apiKeyOwner: 'elastic',

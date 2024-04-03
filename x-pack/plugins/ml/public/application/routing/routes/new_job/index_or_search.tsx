@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
+import type { MlRoute, PageProps } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { NavigateToPageButton } from '../../components/navigate_to_page_button';
 
 enum MODE {
   NEW_JOB,
@@ -23,6 +29,7 @@ enum MODE {
 interface IndexOrSearchPageProps extends PageProps {
   nextStepPath: string;
   mode: MODE;
+  extraButtons?: React.ReactNode;
 }
 
 const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
@@ -45,10 +52,10 @@ const getDataVisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string)
   },
 ];
 
-const getExplainLogRateSpikesBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+const getLogRateAnalysisBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('EXPLAIN_LOG_RATE_SPIKES', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('LOG_RATE_ANALYSIS', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDataViewLabel', {
       defaultMessage: 'Select Data View',
@@ -103,35 +110,59 @@ export const dataVizIndexOrSearchRouteFactory = (
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
-      deps={deps}
-      mode={MODE.DATAVISUALIZER}
-    />
-  ),
+  render: (props, deps) => {
+    const button = (
+      <NavigateToPageButton
+        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
+        title={
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
+            defaultMessage="Use ES|QL"
+          />
+        }
+      />
+    );
+    return (
+      <PageWrapper
+        {...props}
+        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
+        deps={deps}
+        mode={MODE.DATAVISUALIZER}
+        extraButtons={button}
+      />
+    );
+  },
   breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
-export const explainLogRateSpikesIndexOrSearchRouteFactory = (
+export const logRateAnalysisIndexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  id: 'data_view_explain_log_rate_spikes',
-  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
+  id: 'data_view_log_rate_analysis',
+  path: createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT),
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath={createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES)}
+      nextStepPath={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS)}
       deps={deps}
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getExplainLogRateSpikesBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
+});
+
+/**
+ * @deprecated since 8.10, kept here to redirect old bookmarks.
+ */
+export const explainLogRateSpikesIndexOrSearchRouteFactory = (): MlRoute => ({
+  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
+  render: () => <Redirect to={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT)} />,
+  // no breadcrumbs since it's just a redirect
+  breadcrumbs: [],
 });
 
 export const logCategorizationIndexOrSearchRouteFactory = (
@@ -174,7 +205,7 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
+const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode, extraButtons }) => {
   const {
     services: {
       http: { basePath },
@@ -196,7 +227,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   );
   return (
     <PageLoader context={context}>
-      <Page {...{ nextStepPath }} />
+      <Page {...{ nextStepPath, extraButtons }} />
     </PageLoader>
   );
 };

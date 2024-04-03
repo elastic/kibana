@@ -31,6 +31,34 @@ privileges to use {ml-features}. Refer to
 NOTE: There are limitations in {ml-features} that affect {kib}. For more 
 information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
 
+[discrete]
+[[data-drift-view]]
+== Data drift
+
+preview::[]
+
+You can find the data drift view in **{ml-app}** > *{data-viz}* in {kib}. 
+The data drift view shows you the differences in each field for two 
+different time ranges in a given {data-source}. The view helps you to visualize 
+the changes in your data over time and enables you to understand its behavior 
+better.
+
+[role="screenshot"]
+image::user/ml/images/ml-data-drift.png[Data drift view in {kib}]
+
+Select a {data-source} that you want to analyze, then select a time range for 
+the reference and the comparison data in the appearing histogram chart. You can 
+adjust the time range for both the reference and the comparison data by moving 
+the respective brushes. When you finished setting the time ranges, click 
+*Run analysis*. 
+
+You can decide whether you want to see all the fields in the {data-source} or 
+only the ones that contains drifted data. The analysis results table displays 
+the fields, their types, if drift is detected, the p-value that indicates how 
+significant the detected change is, the reference and comparison distribution, 
+and the comparison chart. You can expand the results for a particular field by 
+clicking the arrow icon at the beginning of the field's row. 
+
 --
 
 [[xpack-ml-anomalies]]
@@ -117,27 +145,25 @@ AIOps Labs is a part of {ml-app} in {kib} which provides features that use
 advanced statistical methods to help you interpret your data and its behavior.
 
 [discrete]
-[[explain-log-rate-spikes]]
-=== Explain log rate spikes
+[[log-rate-analysis]]
+=== Log rate analysis
 
-preview::[]
+Log rate analysis is a feature that uses advanced statistical methods to 
+identify reasons for increases or decreases in log rates. It makes it easy to 
+find and investigate causes of unusual spikes or drops by using the analysis 
+workflow view. Examine the histogram chart of the log rates for a given 
+{data-source}, and find the reason behind a particular change possibly in 
+millions of log events across multiple fields and values.
 
-Explain log rate spikes is a feature that uses advanced statistical methods to 
-identify reasons for increases in log rates. It makes it easy to find and 
-investigate causes of unusual spikes by using the analysis workflow view. 
-Examine the histogram chart of the log rates for a given {data-source}, and find 
-the reason behind a particular change possibly in millions of log events across 
-multiple fields and values.
-
-You can find explain log rate spikes under **{ml-app}** > **AIOps Labs** where 
+You can find log rate analysis under **{ml-app}** > **AIOps Labs** where 
 you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
-image::user/ml/images/ml-explain-log-rate-before.png[Log event histogram chart]
+image::user/ml/images/ml-log-rate-analysis-before.png[Log event histogram chart]
 
-Select a spike in the log event histogram chart to start the analysis. It 
+Select a spike or drop in the log event histogram chart to start the analysis. It 
 identifies statistically significant field-value combinations that contribute to 
-the spike and displays them in a table. You can optionally choose to summarize 
+the spike or drop and displays them in a table. You can optionally choose to summarize 
 the results into groups. The table also shows an indicator of the level of 
 impact and a sparkline showing the shape of the impact in the chart. Hovering 
 over a row displays the impact on the histogram chart in more detail. You can 
@@ -153,7 +179,7 @@ analyzed data. You can move the brushes to redefine both the baseline and the
 deviation and rerun the analysis with the modified values.
 
 [role="screenshot"]
-image::user/ml/images/ml-explain-log-rate.png[Log rate spike explained]
+image::user/ml/images/ml-log-rate-analysis.png[Log rate spike explained]
 
 
 [discrete]
@@ -205,7 +231,7 @@ image::user/ml/images/ml-change-point-detection.png[Change point detection UI]
 Select a function and a metric field, then pick a date range to start detecting 
 change points in the defined range. Optionally, you can split the data by a 
 field. If the cardinality of the split field exceeds 10,000, then only the first 
-10,000, sorted by document count, are analyzed. You can configure a maximum of 6  
+10,000, sorted by document count, are analyzed. You can configure a maximum of 6 
 combinations of a function applied to a metric field, partitioned by a split 
 field to identify change points.
 
@@ -223,3 +249,11 @@ point type selector to filter the results by specific types of change points.
 
 [role="screenshot"]
 image::user/ml/images/ml-change-point-detection-selected.png[Selected change points]
+
+
+You can attach change point charts to a dashboard or a case by using the context 
+menu. If the split field is selected, you can either select specific charts 
+(partitions) or set the maximum number of top change points to plot. It's 
+possible to preserve the applied time range or use the time bound from the page 
+date picker. You can also add or edit change point charts directly from the 
+**Dashboard** app.

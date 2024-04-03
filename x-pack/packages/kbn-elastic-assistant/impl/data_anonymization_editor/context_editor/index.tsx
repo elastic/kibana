@@ -7,7 +7,7 @@
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
@@ -16,11 +16,6 @@ import * as i18n from './translations';
 import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './types';
 
 export const DEFAULT_PAGE_SIZE = 10;
-
-const pagination = {
-  initialPageSize: DEFAULT_PAGE_SIZE,
-  pageSizeOptions: [5, DEFAULT_PAGE_SIZE, 25, 50],
-};
 
 const defaultSort: SortConfig = {
   sort: {
@@ -33,7 +28,9 @@ export interface Props {
   allow: string[];
   allowReplacement: string[];
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
+  onReset?: () => void;
   rawData: Record<string, string[]> | null;
+  pageSize?: number;
 }
 
 const search: EuiSearchBarProps = {
@@ -58,18 +55,29 @@ const ContextEditorComponent: React.FC<Props> = ({
   allow,
   allowReplacement,
   onListUpdated,
+  onReset,
   rawData,
+  pageSize = DEFAULT_PAGE_SIZE,
 }) => {
+  const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
     () => ({
       selectable: () => true,
-      onSelectionChange: (newSelection) => setSelection(newSelection),
-      initialSelected: [],
+      onSelectionChange: (newSelection) => {
+        if (isAllSelected.current === true) {
+          // If passed every possible row (including non-visible ones), EuiInMemoryTable
+          // will fire `onSelectionChange` with only the visible rows - we need to
+          // ignore this call when that happens and continue to pass all rows
+          isAllSelected.current = false;
+        } else {
+          setSelection(newSelection);
+        }
+      },
+      selected,
     }),
-    []
+    [selected]
   );
-  const tableRef = useRef<EuiInMemoryTable<ContextEditorRow> | null>(null);
 
   const columns = useMemo(() => getColumns({ onListUpdated, rawData }), [onListUpdated, rawData]);
 
@@ -84,22 +92,29 @@ const ContextEditorComponent: React.FC<Props> = ({
   );
 
   const onSelectAll = useCallback(() => {
-    tableRef.current?.setSelection(rows); // updates selection in the EuiInMemoryTable
-
-    setTimeout(() => setSelection(rows), 0); // updates selection in the component state
+    isAllSelected.current = true;
+    setSelection(rows);
   }, [rows]);
+
+  const pagination = useMemo(() => {
+    return {
+      initialPageSize: pageSize,
+      pageSizeOptions: [5, DEFAULT_PAGE_SIZE, 25, 50],
+    };
+  }, [pageSize]);
 
   const toolbar = useMemo(
     () => (
       <Toolbar
         onListUpdated={onListUpdated}
         onlyDefaults={rawData == null}
+        onReset={onReset}
         onSelectAll={onSelectAll}
         selected={selected}
         totalFields={rows.length}
       />
     ),
-    [onListUpdated, onSelectAll, rawData, rows.length, selected]
+    [onListUpdated, onReset, onSelectAll, rawData, rows, selected]
   );
 
   return (
@@ -113,7 +128,6 @@ const ContextEditorComponent: React.FC<Props> = ({
       itemId={FIELDS.FIELD}
       items={rows}
       pagination={pagination}
-      ref={tableRef}
       search={search}
       selection={selectionValue}
       sorting={defaultSort}

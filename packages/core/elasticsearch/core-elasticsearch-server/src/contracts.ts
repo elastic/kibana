@@ -126,6 +126,24 @@ export interface ElasticsearchServiceStart {
     type: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
   ) => ICustomClusterClient;
+
+  /**
+   * Returns the capabilities for the default cluster.
+   */
+  getCapabilities: () => ElasticsearchCapabilities;
+}
+
+/**
+ * Represent the capabilities supported by a given ES cluster.
+ *
+ * @public
+ */
+export interface ElasticsearchCapabilities {
+  /**
+   * Indicates whether we're connected to a serverless version of elasticsearch.
+   * Required because some options aren't working for serverless and code needs to have the info to react accordingly.
+   */
+  serverless: boolean;
 }
 
 /**

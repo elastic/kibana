@@ -6,7 +6,8 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { combineLatest, from, Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, from, of, Subject } from 'rxjs';
 import {
   catchError,
   debounceTime,
@@ -18,21 +19,21 @@ import {
   startWith,
   switchMap,
   tap,
-} from 'rxjs/operators';
-import { CoreStart } from '@kbn/core/public';
+} from 'rxjs';
+import type { CoreStart } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { TimeBuckets } from '../../application/util/time_buckets';
-import { MlStartDependencies } from '../../plugin';
+import { TimeBuckets } from '@kbn/ml-time-buckets';
+import type { MlStartDependencies } from '../../plugin';
+import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,
   SWIMLANE_TYPE,
-  SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
+import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import {
+import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
@@ -50,8 +51,7 @@ export function useSwimlaneInputResolver(
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number,
   fromPage: number,
-  renderCallbacks: {
-    onRenderComplete: () => void;
+  reportingCallbacks: {
     onLoading: () => void;
     onError: (error: Error) => void;
   }
@@ -131,7 +131,7 @@ export function useSwimlaneInputResolver(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         tap(() => {
-          renderCallbacks.onLoading();
+          reportingCallbacks.onLoading();
         }),
         switchMap(([explorerJobs, input, bucketInterval, fromPageInput, perPageFromState]) => {
           if (!explorerJobs) {
@@ -246,17 +246,10 @@ export function useSwimlaneInputResolver(
 
   useEffect(() => {
     if (error) {
-      renderCallbacks.onError(error);
+      reportingCallbacks.onError(error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
-
-  useEffect(() => {
-    if (swimlaneData) {
-      renderCallbacks.onRenderComplete();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [swimlaneData]);
 
   return [
     swimlaneType,

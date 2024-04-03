@@ -138,7 +138,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
               placeholder={i18n.translate(
                 'xpack.ingestPipelines.pipelineEditor.typeField.typeFieldComboboxPlaceholder',
                 {
-                  defaultMessage: 'Type and then hit "ENTER"',
+                  defaultMessage: 'Start typing or select a processor',
                 }
               )}
               options={processorOptions}

@@ -99,6 +99,7 @@ describe('Detections Usage and Metrics', () => {
               updated_on: '2021-03-23T17:15:59.634Z',
               has_legacy_notification: false,
               has_notification: false,
+              has_legacy_investigation_field: false,
             },
           ],
           detection_rule_usage: {
@@ -112,6 +113,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
             },
             elastic_total: {
               alerts: 3400,
@@ -122,6 +124,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
             },
           },
         },
@@ -163,6 +166,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
             },
             query: {
               alerts: 800,
@@ -173,6 +177,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
             },
           },
         },
@@ -217,6 +222,7 @@ describe('Detections Usage and Metrics', () => {
               updated_on: '2021-03-23T17:15:59.634Z',
               has_legacy_notification: false,
               has_notification: false,
+              has_legacy_investigation_field: false,
             },
           ],
           detection_rule_usage: {
@@ -230,6 +236,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
             },
             query: {
               alerts: 0,
@@ -240,6 +247,7 @@ describe('Detections Usage and Metrics', () => {
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
               notifications_disabled: 0,
+              legacy_investigation_fields: 0,
             },
           },
         },

@@ -7,3 +7,4 @@
 
 export const PLUGIN_ID = 'securitySolutionServerless';
 export const PLUGIN_NAME = 'securitySolutionServerless';
+export const SECURITY_PROJECT_TYPE = 'security';

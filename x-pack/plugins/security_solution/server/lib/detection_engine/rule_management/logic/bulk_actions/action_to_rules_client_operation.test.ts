@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 describe('bulkEditActionToRulesClientOperation', () => {
   test('should transform tags bulk edit actions correctly', () => {
     expect(
-      bulkEditActionToRulesClientOperation({ type: BulkActionEditType.add_tags, value: ['test'] })
+      bulkEditActionToRulesClientOperation({
+        type: BulkActionEditTypeEnum.add_tags,
+        value: ['test'],
+      })
     ).toEqual([
       {
         field: 'tags',
@@ -22,7 +25,7 @@ describe('bulkEditActionToRulesClientOperation', () => {
   });
 
   expect(
-    bulkEditActionToRulesClientOperation({ type: BulkActionEditType.set_tags, value: ['test'] })
+    bulkEditActionToRulesClientOperation({ type: BulkActionEditTypeEnum.set_tags, value: ['test'] })
   ).toEqual([
     {
       field: 'tags',
@@ -32,7 +35,10 @@ describe('bulkEditActionToRulesClientOperation', () => {
   ]);
 
   expect(
-    bulkEditActionToRulesClientOperation({ type: BulkActionEditType.delete_tags, value: ['test'] })
+    bulkEditActionToRulesClientOperation({
+      type: BulkActionEditTypeEnum.delete_tags,
+      value: ['test'],
+    })
   ).toEqual([
     {
       field: 'tags',
@@ -44,7 +50,7 @@ describe('bulkEditActionToRulesClientOperation', () => {
   test('should transform schedule bulk edit correctly', () => {
     expect(
       bulkEditActionToRulesClientOperation({
-        type: BulkActionEditType.set_schedule,
+        type: BulkActionEditTypeEnum.set_schedule,
         value: {
           interval: '100m',
           lookback: '10m',

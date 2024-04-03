@@ -1,0 +1,178 @@
+{
+  "id": "apmDataAccess",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "apmDataAccess",
+        "id": "def-server.APMDataAccessConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "APMDataAccessConfig",
+        "description": [],
+        "signature": [
+          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/apm_data_access/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmDataAccess",
+        "id": "def-server.APMIndices",
+        "type": "Type",
+        "tags": [],
+        "label": "APMIndices",
+        "description": [],
+        "signature": [
+          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/apm_data_access/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "apmDataAccess",
+      "id": "def-server.ApmDataAccessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ApmDataAccessPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "apmDataAccess",
+          "id": "def-server.ApmDataAccessPluginSetup.apmIndicesFromConfigFile",
+          "type": "Object",
+          "tags": [],
+          "label": "apmIndicesFromConfigFile",
+          "description": [],
+          "signature": [
+            "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+          ],
+          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "apmDataAccess",
+          "id": "def-server.ApmDataAccessPluginSetup.getApmIndices",
+          "type": "Function",
+          "tags": [],
+          "label": "getApmIndices",
+          "description": [],
+          "signature": [
+            "(soClient: ",
+            {
+              "pluginId": "@kbn/core-saved-objects-api-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+              "section": "def-common.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
+            },
+            ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+          ],
+          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "apmDataAccess",
+              "id": "def-server.ApmDataAccessPluginSetup.getApmIndices.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "soClient",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-saved-objects-api-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                  "section": "def-common.SavedObjectsClientContract",
+                  "text": "SavedObjectsClientContract"
+                }
+              ],
+              "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "apmDataAccess",
+      "id": "def-server.ApmDataAccessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ApmDataAccessPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "apmDataAccess",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"apmDataAccess\""
+        ],
+        "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmDataAccess",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"apmDataAccess\""
+        ],
+        "path": "x-pack/plugins/observability_solution/apm_data_access/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

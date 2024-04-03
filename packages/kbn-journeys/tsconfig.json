@@ -17,6 +17,10 @@
     "@kbn/tooling-log",
     "@kbn/repo-info",
     "@kbn/std",
+    "@kbn/test-subj-selector",
+    "@kbn/core-http-common",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
   ],
   "exclude": [
     "target/**/*",

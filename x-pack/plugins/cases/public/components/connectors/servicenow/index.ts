@@ -8,8 +8,11 @@
 import { lazy } from 'react';
 
 import type { CaseConnector } from '../types';
-import type { ServiceNowITSMFieldsType, ServiceNowSIRFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
+import type {
+  ServiceNowITSMFieldsType,
+  ServiceNowSIRFieldsType,
+} from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
 export const getServiceNowITSMCaseConnector = (): CaseConnector<ServiceNowITSMFieldsType> => ({

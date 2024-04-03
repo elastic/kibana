@@ -9,7 +9,8 @@
     "browser": true,
     "configPath": ["xpack", "securitySolutionEss"],
     "requiredPlugins": [
-      "securitySolution"
+      "securitySolution",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloudExperiments",

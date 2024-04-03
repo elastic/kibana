@@ -11,7 +11,7 @@ import { useLicense } from '../../../../../../hooks/use_license';
 import type { LicenseService } from '../../../../services';
 import type { AgentPolicy } from '../../../../types';
 
-import { useOutputOptions } from './hooks';
+import { useOutputOptions, useFleetServerHostsOptions } from './hooks';
 
 jest.mock('../../../../../../hooks/use_license');
 
@@ -95,6 +95,93 @@ const mockApiCallsWithLogstashOutputs = (http: MockedFleetStartServices['http'])
   });
 };
 
+const mockApiCallsWithRemoteESOutputs = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/outputs') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'remote1',
+              name: 'Remote1',
+              type: 'remote_elasticsearch',
+              is_default: false,
+              is_default_monitoring: false,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
+const mockApiCallsWithInternalOutputs = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/outputs') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'default-output',
+              name: 'Default',
+              type: 'elasticsearch',
+              is_default: true,
+              is_default_monitoring: true,
+            },
+            {
+              id: 'internal-output',
+              name: 'Internal',
+              type: 'elasticsearch',
+              is_default: false,
+              is_default_monitoring: false,
+              is_internal: true,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
+const mockApiCallsWithInternalFleetServerHost = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/fleet_server_hosts') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'default-host',
+              name: 'Default',
+              is_default: true,
+            },
+            {
+              id: 'internal-output',
+              name: 'Internal',
+              is_default: false,
+              is_internal: true,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
 describe('useOutputOptions', () => {
   it('should generate enabled options if the licence is platinium', async () => {
     const testRenderer = createFleetTestRendererMock();
@@ -130,7 +217,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -157,7 +244,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -184,7 +271,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -258,7 +345,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -285,7 +372,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -312,7 +399,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -441,7 +528,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
                 values={
                   Object {
@@ -473,7 +560,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <FormattedMessage
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -503,6 +590,103 @@ describe('useOutputOptions', () => {
           "disabled": false,
           "inputDisplay": "Logstash 1",
           "value": "logstash1",
+        },
+      ]
+    `);
+  });
+
+  it('should enable remote es output for data and monitoring output', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => true,
+    } as unknown as LicenseService);
+    mockApiCallsWithRemoteESOutputs(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useOutputOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.dataOutputOptions.length).toEqual(2);
+    expect(result.current.dataOutputOptions[1].value).toEqual('remote1');
+    expect(result.current.monitoringOutputOptions.length).toEqual(2);
+    expect(result.current.monitoringOutputOptions[1].value).toEqual('remote1');
+  });
+
+  it('should not enable internal outputs', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => true,
+    } as unknown as LicenseService);
+    mockApiCallsWithInternalOutputs(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useOutputOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default",
+          "value": "default-output",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
+        },
+      ]
+    `);
+    expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": undefined,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default",
+          "value": "default-output",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
+        },
+      ]
+    `);
+  });
+});
+
+describe('useFleetServerHostsOptions', () => {
+  it('should not enable internal fleet server hosts', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockApiCallsWithInternalFleetServerHost(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useFleetServerHostsOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.fleetServerHostsOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": undefined,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
         },
       ]
     `);

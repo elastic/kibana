@@ -1,0 +1,33 @@
+# This pipeline serves as the entry point for your service's quality gates definitions. When
+# properly configured, it will be invoked automatically as part of the automated
+# promotion process once a new version was rolled out in one of the various cloud stages.
+#
+# The updated environment is provided via ENVIRONMENT variable. The seedling
+# step will branch and execute pipeline snippets at the following location:
+# pipeline.tests-qa.yaml
+# pipeline.tests-staging.yaml
+# pipeline.tests-production.yaml
+#
+# Docs: https://docs.elastic.dev/serverless/qualitygates
+
+agents:
+  cpu: 2
+  ephemeralStorage: "20G"
+  memory: "8G"
+
+env:
+  SKIP_NODE_SETUP: true
+  TEAM_CHANNEL: "#kibana-mission-control"
+  ENVIRONMENT: ${ENVIRONMENT?}
+
+steps:
+  - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
+    env:
+      QG_PIPELINE_LOCATION: ".buildkite/pipelines/quality-gates"
+    command: "make -C /agent run-environment-tests" # will trigger https://buildkite.com/elastic/kibana-tests
+    agents:
+      image: "docker.elastic.co/ci-agent-images/quality-gate-seedling:0.0.2"
+
+notify:
+  - slack: "${TEAM_CHANNEL?}"
+    if: build.branch == "main" && build.state == "failed"

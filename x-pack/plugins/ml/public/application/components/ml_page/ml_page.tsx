@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -28,7 +29,7 @@ import { useDocTitle } from '../../routing/use_doc_title';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
@@ -56,21 +57,11 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       mlServices: { httpService },
     },
   } = useMlKibana();
+  const { showMLNavMenu } = useEnabledFeatures();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
-
-  const navMenuEnabled = useMemo(
-    () => isADEnabled && isDFAEnabled && isNLPEnabled,
-    [isADEnabled, isDFAEnabled, isNLPEnabled]
-  );
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -138,7 +129,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         data-test-subj={'mlApp'}
         restrictWidth={false}
         solutionNav={
-          navMenuEnabled
+          showMLNavMenu
             ? {
                 name: i18n.translate('xpack.ml.plugin.title', {
                   defaultMessage: 'Machine Learning',

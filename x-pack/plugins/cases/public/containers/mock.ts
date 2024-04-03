@@ -6,45 +6,47 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import type { ActionLicense, CaseUI, CasesStatus, UserActionUI, CommentUI } from './types';
+import type {
+  UserActionAction,
+  CommentUserAction,
+  UserAction,
+  UserActions,
+  UserActionType,
+  Case,
+  Cases,
+  CaseConnector,
+  Attachment,
+} from '../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  UserActionActions,
+  UserActionTypes,
+  ConnectorTypes,
+  AttachmentType,
+  ExternalReferenceStorageType,
+  CustomFieldTypes,
+} from '../../common/types/domain';
+import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
 
 import type {
   ResolvedCase,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
-  AlertComment,
+  AlertAttachmentUI,
   CasesMetrics,
-  ExternalReferenceComment,
-  PersistableComment,
+  ExternalReferenceAttachmentUI,
+  PersistableStateAttachmentUI,
   FindCaseUserActions,
   CaseUsers,
   CaseUserActionsStats,
   CasesFindResponseUI,
   CasesUI,
+  AttachmentUI,
+  CaseUICustomField,
+  CasesConfigurationUICustomField,
 } from '../../common/ui/types';
-import type {
-  CaseConnector,
-  Case,
-  CasesFindResponse,
-  Cases,
-  CasesStatusResponse,
-  UserAction,
-  UserActions,
-  Comment,
-  ActionCategory,
-  UserActionTypes,
-  UserActionWithResponse,
-  CommentUserAction,
-} from '../../common/api';
-import {
-  Actions,
-  ActionTypes,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-  CaseSeverity,
-  ExternalReferenceStorageType,
-} from '../../common/api';
+import { CaseMetricsFeature } from '../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
@@ -53,6 +55,11 @@ import type {
   AttachmentViewObject,
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
+import type {
+  CasesFindResponse,
+  CasesStatusResponse,
+  UserActionWithResponse,
+} from '../../common/types/api';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -76,9 +83,9 @@ export const elasticUser = {
 export const tags: string[] = ['coke', 'pepsi'];
 export const categories: string[] = ['snickers', 'twix'];
 
-export const basicComment: CommentUI = {
+export const basicComment: AttachmentUI = {
   comment: 'Solve this fast!',
-  type: CommentType.user,
+  type: AttachmentType.user,
   id: basicCommentId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -90,10 +97,10 @@ export const basicComment: CommentUI = {
   version: 'WzQ3LDFc',
 };
 
-export const alertComment: AlertComment = {
+export const alertComment: AlertAttachmentUI = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
-  type: CommentType.alert,
+  type: AttachmentType.alert,
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -109,10 +116,10 @@ export const alertComment: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const alertCommentWithIndices: AlertComment = {
+export const alertCommentWithIndices: AlertAttachmentUI = {
   alertId: 'alert-id-1',
   index: '.alerts-matchme.alerts',
-  type: CommentType.alert,
+  type: AttachmentType.alert,
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -128,9 +135,9 @@ export const alertCommentWithIndices: AlertComment = {
   version: 'WzQ3LDFc',
 };
 
-export const hostIsolationComment = (overrides?: Record<string, unknown>): CommentUI => {
+export const hostIsolationComment = (overrides?: Record<string, unknown>): AttachmentUI => {
   return {
-    type: CommentType.actions,
+    type: AttachmentType.actions,
     comment: 'I just isolated the host!',
     id: 'isolate-comment-id',
     actions: {
@@ -154,9 +161,9 @@ export const hostIsolationComment = (overrides?: Record<string, unknown>): Comme
   };
 };
 
-export const hostReleaseComment: () => CommentUI = () => {
+export const hostReleaseComment: () => AttachmentUI = () => {
   return {
-    type: CommentType.actions,
+    type: AttachmentType.actions,
     comment: 'I just released the host!',
     id: 'isolate-comment-id',
     actions: {
@@ -179,8 +186,8 @@ export const hostReleaseComment: () => CommentUI = () => {
   };
 };
 
-export const externalReferenceAttachment: ExternalReferenceComment = {
-  type: CommentType.externalReference,
+export const externalReferenceAttachment: ExternalReferenceAttachmentUI = {
+  type: AttachmentType.externalReference,
   id: 'external-reference-comment-id',
   externalReferenceId: 'my-id',
   externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
@@ -196,8 +203,8 @@ export const externalReferenceAttachment: ExternalReferenceComment = {
   version: 'WzQ3LDFc',
 };
 
-export const persistableStateAttachment: PersistableComment = {
-  type: CommentType.persistableState,
+export const persistableStateAttachment: PersistableStateAttachmentUI = {
+  type: AttachmentType.persistableState,
   id: 'persistable-state-comment-id',
   persistableStateAttachmentState: { test_foo: 'foo' },
   persistableStateAttachmentTypeId: '.test',
@@ -243,6 +250,7 @@ export const basicCase: CaseUI = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
+  customFields: [],
 };
 
 export const basicFileMock: FileJSON = {
@@ -257,6 +265,11 @@ export const basicFileMock: FileJSON = {
   fileKind: '',
   status: 'READY',
   extension: 'png',
+  hash: {
+    md5: 'md5',
+    sha1: 'sha1',
+    sha256: 'sha256',
+  },
 };
 
 export const caseWithAlerts = {
@@ -287,14 +300,14 @@ export const basicResolvedCase: ResolvedCase = {
 };
 
 export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
-  'alerts.count',
-  'alerts.users',
-  'alerts.hosts',
-  'actions.isolateHost',
-  'connectors',
+  CaseMetricsFeature.ALERTS_COUNT,
+  CaseMetricsFeature.ALERTS_USERS,
+  CaseMetricsFeature.ALERTS_HOSTS,
+  CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
+  CaseMetricsFeature.CONNECTORS,
 ];
 
-export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = [CaseMetricsFeature.LIFESPAN];
 
 export const basicCaseMetrics: SingleCaseMetrics = {
   alerts: {
@@ -360,6 +373,7 @@ export const mockCase: CaseUI = {
   },
   assignees: [],
   category: null,
+  customFields: [],
 };
 
 export const basicCasePost: CaseUI = {
@@ -368,7 +382,7 @@ export const basicCasePost: CaseUI = {
   updatedBy: null,
 };
 
-export const basicCommentPatch: CommentUI = {
+export const basicCommentPatch: AttachmentUI = {
   ...basicComment,
   updatedAt: basicUpdatedAt,
   updatedBy: {
@@ -473,9 +487,9 @@ export const elasticUserSnake = {
   email: 'leslie.knope@elastic.co',
 };
 
-export const basicCommentSnake: Comment = {
+export const basicCommentSnake: Attachment = {
   comment: 'Solve this fast!',
-  type: CommentType.user,
+  type: AttachmentType.user,
   id: basicCommentId,
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
@@ -487,8 +501,8 @@ export const basicCommentSnake: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const externalReferenceAttachmentSnake: Comment = {
-  type: CommentType.externalReference,
+export const externalReferenceAttachmentSnake: Attachment = {
+  type: AttachmentType.externalReference,
   id: 'external-reference-comment-id',
   externalReferenceId: 'my-id',
   externalReferenceMetadata: { test_foo: 'foo' },
@@ -504,8 +518,8 @@ export const externalReferenceAttachmentSnake: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const persistableStateAttachmentSnake: Comment = {
-  type: CommentType.persistableState,
+export const persistableStateAttachmentSnake: Attachment = {
+  type: AttachmentType.persistableState,
   id: 'persistable-state-comment-id',
   persistableStateAttachmentState: { test_foo: 'foo' },
   persistableStateAttachmentTypeId: '.test',
@@ -533,6 +547,7 @@ export const basicCaseSnake: Case = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
+  customFields: [],
 } as Case;
 
 export const caseWithAlertsSnake = {
@@ -614,8 +629,8 @@ export const allCasesSnake: CasesFindResponse = {
 };
 
 export const getUserAction = (
-  type: UserActionTypes,
-  action: ActionCategory,
+  type: UserActionType,
+  action: UserActionAction,
   overrides?: Record<string, unknown>
 ): UserActionUI => {
   const commonProperties = {
@@ -636,29 +651,33 @@ export const getUserAction = (
   };
 
   switch (type) {
-    case ActionTypes.comment:
+    case UserActionTypes.comment:
       return {
         ...commonProperties,
-        type: ActionTypes.comment,
+        type: UserActionTypes.comment,
         payload: {
-          comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+          comment: {
+            comment: 'a comment',
+            type: AttachmentType.user,
+            owner: SECURITY_SOLUTION_OWNER,
+          },
         },
         commentId: basicCommentId,
         ...overrides,
       };
-    case ActionTypes.connector:
+    case UserActionTypes.connector:
       return {
         ...commonProperties,
-        type: ActionTypes.connector,
+        type: UserActionTypes.connector,
         payload: {
           connector: { ...getJiraConnector() },
         },
         ...overrides,
       };
-    case ActionTypes.create_case:
+    case UserActionTypes.create_case:
       return {
         ...commonProperties,
-        type: ActionTypes.create_case,
+        type: UserActionTypes.create_case,
         payload: {
           description: 'a desc',
           connector: { ...getJiraConnector() },
@@ -672,68 +691,77 @@ export const getUserAction = (
         },
         ...overrides,
       };
-    case ActionTypes.delete_case:
+    case UserActionTypes.delete_case:
       return {
         ...commonProperties,
-        type: ActionTypes.delete_case,
+        type: UserActionTypes.delete_case,
         payload: {},
         ...overrides,
       };
-    case ActionTypes.description:
+    case UserActionTypes.description:
       return {
         ...commonProperties,
-        type: ActionTypes.description,
+        type: UserActionTypes.description,
         payload: { description: 'a desc' },
         ...overrides,
       };
-    case ActionTypes.pushed:
+    case UserActionTypes.pushed:
       return {
         ...commonProperties,
         createdAt: basicPushedAt,
-        type: ActionTypes.pushed,
+        type: UserActionTypes.pushed,
         payload: {
           externalService,
         },
         ...overrides,
       };
-    case ActionTypes.settings:
+    case UserActionTypes.settings:
       return {
         ...commonProperties,
-        type: ActionTypes.settings,
+        type: UserActionTypes.settings,
         payload: { settings: { syncAlerts: true } },
         ...overrides,
       };
-    case ActionTypes.status:
+    case UserActionTypes.status:
       return {
         ...commonProperties,
-        type: ActionTypes.status,
+        type: UserActionTypes.status,
         payload: { status: CaseStatuses.open },
         ...overrides,
       };
-    case ActionTypes.tags:
+    case UserActionTypes.tags:
       return {
         ...commonProperties,
-        type: ActionTypes.tags,
+        type: UserActionTypes.tags,
         payload: { tags: ['a tag'] },
         ...overrides,
       };
-    case ActionTypes.title:
+    case UserActionTypes.title:
       return {
         ...commonProperties,
-        type: ActionTypes.title,
+        type: UserActionTypes.title,
         payload: { title: 'a title' },
         ...overrides,
       };
-    case ActionTypes.assignees:
+    case UserActionTypes.assignees:
       return {
         ...commonProperties,
-        type: ActionTypes.assignees,
+        type: UserActionTypes.assignees,
         payload: {
           assignees: [
             // These values map to uids in x-pack/plugins/cases/public/containers/user_profiles/api.mock.ts
             { uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' },
             { uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0' },
           ],
+        },
+        ...overrides,
+      };
+    case UserActionTypes.customFields:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.customFields,
+        payload: {
+          customFields: customFieldsMock,
         },
         ...overrides,
       };
@@ -747,8 +775,8 @@ export const getUserAction = (
 };
 
 export const getUserActionSnake = (
-  type: UserActionTypes,
-  action: ActionCategory,
+  type: UserActionType,
+  action: UserActionAction,
   overrides?: Record<string, unknown>
 ): UserAction => {
   return {
@@ -757,13 +785,13 @@ export const getUserActionSnake = (
 };
 
 export const caseUserActionsSnake: UserActions = [
-  getUserActionSnake('description', Actions.create),
-  getUserActionSnake('comment', Actions.create),
-  getUserActionSnake('description', Actions.update),
+  getUserActionSnake('description', UserActionActions.create),
+  getUserActionSnake('comment', UserActionActions.create),
+  getUserActionSnake('description', UserActionActions.update),
 ];
 
 export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
-  getUserActionSnake('description', Actions.create),
+  getUserActionSnake('description', UserActionActions.create),
   {
     created_at: basicCreatedAt,
     created_by: elasticUserSnake,
@@ -774,7 +802,7 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
     id: 'create-comment-id',
     payload: {
       comment: {
-        type: CommentType.externalReference,
+        type: AttachmentType.externalReference,
         externalReferenceId: 'my-id',
         externalReferenceMetadata: { test_foo: 'foo' },
         externalReferenceAttachmentTypeId: '.test',
@@ -794,7 +822,7 @@ export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
     id: 'create-comment-id',
     payload: {
       comment: {
-        type: CommentType.persistableState,
+        type: AttachmentType.persistableState,
         persistableStateAttachmentState: { test_foo: 'foo' },
         persistableStateAttachmentTypeId: '.test',
         owner: SECURITY_SOLUTION_OWNER,
@@ -819,13 +847,13 @@ export const jiraFields = { fields: { issueType: '10006', priority: null, parent
 export const getAlertUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
   id: 'alert-action-id',
   commentId: 'alert-comment-id',
-  type: ActionTypes.comment,
+  type: UserActionTypes.comment,
   payload: {
     comment: {
-      type: CommentType.alert,
+      type: AttachmentType.alert,
       alertId: 'alert-id-1',
       index: 'index-id-1',
       owner: SECURITY_SOLUTION_OWNER,
@@ -841,13 +869,13 @@ export const getAlertUserAction = (
 export const getMultipleAlertsUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
   id: 'alert-action-id',
   commentId: 'alert-comment-id',
-  type: ActionTypes.comment,
+  type: UserActionTypes.comment,
   payload: {
     comment: {
-      type: CommentType.alert,
+      type: AttachmentType.alert,
       alertId: ['alert-id-1', 'alert-id-2'],
       index: ['index-id-1', 'index-id-2'],
       owner: SECURITY_SOLUTION_OWNER,
@@ -863,13 +891,13 @@ export const getMultipleAlertsUserAction = (
 export const getHostIsolationUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
   id: 'isolate-action-id',
-  type: ActionTypes.comment,
+  type: UserActionTypes.comment,
   commentId: 'isolate-comment-id',
   payload: {
     comment: {
-      type: CommentType.actions,
+      type: AttachmentType.actions,
       comment: 'a comment',
       actions: { targets: [], type: 'test' },
       owner: SECURITY_SOLUTION_OWNER,
@@ -879,13 +907,13 @@ export const getHostIsolationUserAction = (
 });
 
 export const caseUserActions: UserActionUI[] = [
-  getUserAction('description', Actions.create),
-  getUserAction('comment', Actions.create),
-  getUserAction('description', Actions.update),
+  getUserAction('description', UserActionActions.create),
+  getUserAction('comment', UserActionActions.create),
+  getUserAction('description', UserActionActions.update),
 ];
 
 export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
-  getUserAction('description', Actions.create),
+  getUserAction('description', UserActionActions.create),
   {
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
@@ -896,7 +924,7 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
     id: 'create-comment-id',
     payload: {
       comment: {
-        type: CommentType.externalReference,
+        type: AttachmentType.externalReference,
         externalReferenceId: 'my-id',
         externalReferenceMetadata: { test_foo: 'foo' },
         externalReferenceAttachmentTypeId: '.test',
@@ -916,7 +944,7 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
     id: 'create-comment-id',
     payload: {
       comment: {
-        type: CommentType.persistableState,
+        type: AttachmentType.persistableState,
         persistableStateAttachmentState: { test_foo: 'foo' },
         persistableStateAttachmentTypeId: '.test',
         owner: SECURITY_SOLUTION_OWNER,
@@ -956,13 +984,13 @@ export const basicCaseClosed: CaseUI = {
 export const getExternalReferenceUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
   id: 'external-reference-action-id',
-  type: ActionTypes.comment,
+  type: UserActionTypes.comment,
   commentId: 'external-reference-comment-id',
   payload: {
     comment: {
-      type: CommentType.externalReference,
+      type: AttachmentType.externalReference,
       externalReferenceId: 'my-id',
       externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
       externalReferenceAttachmentTypeId: '.test',
@@ -989,13 +1017,13 @@ export const getExternalReferenceAttachment = (
 export const getPersistableStateUserAction = (
   overrides?: Record<string, unknown>
 ): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(ActionTypes.comment, Actions.create),
+  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
   id: 'persistable-state-action-id',
-  type: ActionTypes.comment,
+  type: UserActionTypes.comment,
   commentId: 'persistable-state-comment-id',
   payload: {
     comment: {
-      type: CommentType.persistableState,
+      type: AttachmentType.persistableState,
       persistableStateAttachmentState: { test_foo: 'foo' },
       persistableStateAttachmentTypeId: '.test',
       owner: SECURITY_SOLUTION_OWNER,
@@ -1123,3 +1151,29 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
     ],
   };
 };
+
+export const customFieldsMock: CaseUICustomField[] = [
+  { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: 'My text test value 1' },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
+];
+
+export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
+  {
+    type: CustomFieldTypes.TEXT,
+    key: 'test_key_1',
+    label: 'My test label 1',
+    required: true,
+    defaultValue: 'My default value',
+  },
+  {
+    type: CustomFieldTypes.TOGGLE,
+    key: 'test_key_2',
+    label: 'My test label 2',
+    required: true,
+    defaultValue: true,
+  },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
+];

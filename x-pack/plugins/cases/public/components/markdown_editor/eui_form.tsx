@@ -6,9 +6,16 @@
  */
 
 import React, { forwardRef, useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../../common/translations';
@@ -17,6 +24,7 @@ import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 
+/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook<string>;
@@ -30,12 +38,6 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   disabledUiPlugins?: string[];
   initialValue?: string;
 };
-
-const BottomContentWrapper = styled(EuiFlexGroup)`
-  ${({ theme }) => `
-    padding: ${theme.eui.euiSizeM} 0;
-  `}
-`;
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
@@ -60,6 +62,7 @@ export const MarkdownEditorForm = React.memo(
         sessionKey: draftStorageKey,
         initialValue,
       });
+      const { euiTheme } = useEuiTheme();
 
       const conflictWarningText = i18n.VERSION_CONFLICT_WARNING(
         id === 'description' ? id : 'comment'
@@ -98,7 +101,12 @@ export const MarkdownEditorForm = React.memo(
             />
           </EuiFormRow>
           {bottomRightContent && (
-            <BottomContentWrapper justifyContent={'flexEnd'}>
+            <EuiFlexGroup
+              css={css`
+                padding: ${euiTheme.size.m} 0;
+              `}
+              justifyContent={'flexEnd'}
+            >
               <EuiFlexItem grow={false}>
                 <EuiText color="danger" size="s">
                   {hasConflicts && conflictWarningText}
@@ -106,7 +114,7 @@ export const MarkdownEditorForm = React.memo(
                 <EuiSpacer size="s" />
                 {bottomRightContent}
               </EuiFlexItem>
-            </BottomContentWrapper>
+            </EuiFlexGroup>
           )}
         </CommentEditorContext.Provider>
       );

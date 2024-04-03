@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
@@ -17,6 +17,8 @@ import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
 import { getInstalledSavedQueriesMap } from './utils';
+import type { FindSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
+import { findSavedQueryRequestQuerySchema } from '../../../common/api/saved_query/find_saved_query_route';
 
 export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -30,14 +32,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object({
-              page: schema.number({ defaultValue: 1 }),
-              pageSize: schema.maybe(schema.number()),
-              sort: schema.string({ defaultValue: 'id' }),
-              sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-                defaultValue: 'desc',
-              }),
-            }),
+            query: buildRouteValidation<
+              typeof findSavedQueryRequestQuerySchema,
+              FindSavedQueryRequestQuerySchema
+            >(findSavedQueryRequestQuerySchema),
           },
         },
       },
@@ -48,10 +46,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         try {
           const savedQueries = await savedObjectsClient.find<SavedQuerySavedObject>({
             type: savedQuerySavedObjectType,
-            page: request.query.page,
+            page: request.query.page || 1,
             perPage: request.query.pageSize,
-            sortField: request.query.sort,
-            sortOrder: request.query.sortOrder,
+            sortField: request.query.sort || 'id',
+            sortOrder: request.query.sortOrder || 'desc',
           });
 
           const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
@@ -75,6 +73,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
                 description,
                 id,
                 interval,
+                timeout,
                 platform,
                 query,
                 removed,
@@ -96,6 +95,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
                 version,
                 ecs_mapping: ecsMapping,
                 interval,
+                timeout,
                 platform,
                 query,
                 updated_at: updatedAt,

@@ -16,6 +16,11 @@ import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
 import {
+  generateManageOrgMembersNavCard,
+  manageOrgMembersNavCardName,
+  SideNavComponent,
+} from './navigation';
+import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
   ServerlessPluginStart,
@@ -49,30 +54,61 @@ export class ServerlessPlugin
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
     const { developer } = this.config;
-    const { management } = dependencies;
 
     if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
+        order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
 
     core.chrome.setChromeStyle('project');
-    management.setIsSidebarEnabled(false);
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
+    const { cloud } = dependencies;
+
+    if (cloud.serverless.projectName) {
+      project.setProjectName(cloud.serverless.projectName);
+    }
+    project.setCloudUrls(cloud);
+
+    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
+    const navigationTreeUi$ = project.getNavigationTreeUi$();
 
     return {
-      setSideNavComponent: (sideNavigationComponent) =>
+      setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      setNavigation: (projectNavigation) => project.setNavigation(projectNavigation),
+      initNavigation: (id, navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+        project.initNavigation(id, navigationTree$);
+        project.setSideNavComponent(() => (
+          <SideNavComponent
+            navProps={{
+              navigationTree$: navigationTreeUi$,
+              dataTestSubj,
+              panelContentProvider,
+            }}
+            deps={{
+              core,
+              activeNodes$: activeNavigationNodes$,
+            }}
+          />
+        ));
+      },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
-      getActiveNavigationNodes$: () =>
-        (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$(),
+      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
+        if (!roleManagementEnabled) return extendCardNavDefinitions;
+
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
+        if (extendCardNavDefinitions) {
+          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
+          return extendCardNavDefinitions;
+        }
+        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+      },
     };
   }
 

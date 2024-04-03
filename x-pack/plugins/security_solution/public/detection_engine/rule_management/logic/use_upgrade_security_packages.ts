@@ -38,10 +38,11 @@ export const useUpgradeSecurityPackages = () => {
       // Make sure fleet is initialized first
       await context.services.fleet?.isInitialized();
 
-      // Always install the latest package if in dev env or snapshot build
+      // Install the latest prerelease if in non-production non-serverless environments
       const prerelease =
-        KibanaServices.getKibanaVersion().includes('-SNAPSHOT') ||
-        KibanaServices.getKibanaBranch() === 'main';
+        KibanaServices.getBuildFlavor() === 'traditional' &&
+        (KibanaServices.getKibanaVersion().includes('-SNAPSHOT') ||
+          KibanaServices.getKibanaBranch() === 'main');
 
       const prebuiltRulesPackageVersion = KibanaServices.getPrebuiltRulesPackageVersion();
       // ignore the response for now since we aren't notifying the user

@@ -30,7 +30,7 @@
         "label": "HttpResourcesMock",
         "description": [],
         "signature": [
-          "{ start: jest.MockInstance<void, []>; setup: jest.MockInstance<{ createRegistrar: (router: ",
+          "{ start: jest.MockInstance<void, [], unknown>; setup: jest.MockInstance<{ createRegistrar: (router: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -56,7 +56,7 @@
           },
           "; }, [deps: ",
           "SetupDeps",
-          "]>; stop: jest.MockInstance<void, []>; preboot: jest.MockInstance<{ createRegistrar: (router: ",
+          "], unknown>; stop: jest.MockInstance<void, [], unknown>; preboot: jest.MockInstance<{ createRegistrar: (router: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -82,7 +82,7 @@
           },
           "; }, [deps: ",
           "PrebootDeps",
-          "]>; } & ",
+          "], unknown>; } & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -181,7 +181,7 @@
                 "section": "def-common.HttpResources",
                 "text": "HttpResources"
               },
-              ">, []>; }"
+              ">, [], any>; }"
             ],
             "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
@@ -205,7 +205,7 @@
                 "section": "def-common.HttpResources",
                 "text": "HttpResources"
               },
-              ">, []>; }"
+              ">, [], any>; }"
             ],
             "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
@@ -237,7 +237,7 @@
                 "section": "def-common.HttpResourcesRenderOptions",
                 "text": "HttpResourcesRenderOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
@@ -269,7 +269,7 @@
                 "section": "def-common.HttpResourcesRenderOptions",
                 "text": "HttpResourcesRenderOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
@@ -301,7 +301,7 @@
                 "section": "def-common.HttpResourcesResponseOptions",
                 "text": "HttpResourcesResponseOptions"
               },
-              "]> & ((options: ",
+              "], unknown> & ((options: ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
@@ -333,7 +333,7 @@
                 "section": "def-common.HttpResourcesResponseOptions",
                 "text": "HttpResourcesResponseOptions"
               },
-              "]> & ((options: ",
+              "], unknown> & ((options: ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
@@ -365,7 +365,7 @@
                 "section": "def-common.HttpResourcesResponseOptions",
                 "text": "HttpResourcesResponseOptions"
               },
-              "]> & ((options: ",
+              "], unknown> & ((options: ",
               {
                 "pluginId": "@kbn/core-http-resources-server",
                 "scope": "common",
@@ -417,7 +417,7 @@
                 "section": "def-common.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | undefined> | undefined]> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              " | undefined; } | undefined> | undefined], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
               {
@@ -479,7 +479,7 @@
                 "section": "def-common.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | undefined> | undefined]> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              " | undefined; } | undefined> | undefined], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
               {
@@ -521,7 +521,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              "<any> | undefined]> & ((options?: ",
+              "<any> | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -553,7 +553,7 @@
                 "section": "def-common.RedirectResponseOptions",
                 "text": "RedirectResponseOptions"
               },
-              "]> & ((options: ",
+              "], unknown> & ((options: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -562,6 +562,38 @@
                 "text": "RedirectResponseOptions"
               },
               ") => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>); notModified: jest.MockInstance<",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>, [options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<any>], unknown> & ((options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<any>) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -585,7 +617,7 @@
                 "section": "def-common.ErrorHttpResponseOptions",
                 "text": "ErrorHttpResponseOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -617,7 +649,7 @@
                 "section": "def-common.ErrorHttpResponseOptions",
                 "text": "ErrorHttpResponseOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -649,7 +681,7 @@
                 "section": "def-common.ErrorHttpResponseOptions",
                 "text": "ErrorHttpResponseOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -681,7 +713,7 @@
                 "section": "def-common.ErrorHttpResponseOptions",
                 "text": "ErrorHttpResponseOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -713,7 +745,7 @@
                 "section": "def-common.ErrorHttpResponseOptions",
                 "text": "ErrorHttpResponseOptions"
               },
-              " | undefined]> & ((options?: ",
+              " | undefined], unknown> & ((options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -755,7 +787,7 @@
                 "section": "def-common.ResponseError",
                 "text": "ResponseError"
               },
-              ">]> & ((options: ",
+              ">], unknown> & ((options: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -807,7 +839,7 @@
                 "section": "def-common.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | undefined>]> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              " | undefined; } | undefined>], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
               {
@@ -859,7 +891,7 @@
                 "section": "def-common.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | undefined>]> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              " | undefined; } | undefined>], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
               {

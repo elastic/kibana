@@ -30,7 +30,7 @@ describe('updateRuleApiKeyRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_update_api_key"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_update_api_key"`);
 
     rulesClient.updateApiKey.mockResolvedValueOnce();
 

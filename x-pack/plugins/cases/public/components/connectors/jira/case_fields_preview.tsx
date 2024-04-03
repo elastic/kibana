@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import * as i18n from './translations';
 
-import type { JiraFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
+import type { JiraFieldsType } from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsPreviewProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';

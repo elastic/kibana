@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -20,9 +21,11 @@ import { HelpMenu } from '../components/help_menu';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
+import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -45,21 +48,29 @@ export const ChangePointDetectionPage: FC = () => {
         <ChangePointDetection
           dataView={dataView}
           savedSearch={savedSearch}
+          showFrozenDataTierChoice={showNodeInfo}
           appDependencies={{
             ...pick(services, [
+              'analytics',
               'application',
-              'data',
-              'executionContext',
+              'cases',
               'charts',
+              'data',
+              'embeddable',
+              'executionContext',
               'fieldFormats',
               'http',
+              'i18n',
+              'lens',
               'notifications',
+              'presentationUtil',
               'share',
               'storage',
+              'theme',
+              'uiActions',
               'uiSettings',
               'unifiedSearch',
-              'theme',
-              'lens',
+              'usageCollection',
             ]),
             fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
           }}

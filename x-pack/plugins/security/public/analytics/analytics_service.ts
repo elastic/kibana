@@ -6,18 +6,17 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { filter } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+import { filter, switchMap, throttleTime } from 'rxjs';
 
 import type {
   AnalyticsServiceSetup as CoreAnalyticsServiceSetup,
   HttpSetup,
   HttpStart,
 } from '@kbn/core/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
-import type { AuthenticationServiceSetup } from '..';
-import type { SecurityLicense } from '../../common';
 import { registerUserContext } from './register_user_context';
+import type { SecurityLicense } from '../../common';
 
 interface AnalyticsServiceSetupParams {
   securityLicense: SecurityLicense;
@@ -58,15 +57,16 @@ export class AnalyticsService {
     this.securityFeaturesSubscription = this.securityLicense.features$
       .pipe(
         filter(({ allowLogin }) => allowLogin),
-        throttleTime(5000)
+        throttleTime(5000),
+        switchMap(async () => {
+          try {
+            await AnalyticsService.recordAuthTypeAnalytics(http);
+          } catch {
+            // do nothing
+          }
+        })
       )
-      .subscribe(async () => {
-        try {
-          await AnalyticsService.recordAuthTypeAnalytics(http);
-        } catch {
-          // do nothing
-        }
-      });
+      .subscribe();
   }
 
   public stop() {

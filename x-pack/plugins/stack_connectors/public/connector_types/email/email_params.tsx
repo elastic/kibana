@@ -11,8 +11,8 @@ import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
+  TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../types';
 
@@ -30,6 +30,7 @@ export const EmailParamsFields = ({
   onBlur = noop,
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
+  ruleTypeId,
 }: ActionParamsProps<EmailActionParams>) => {
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
@@ -60,6 +61,7 @@ export const EmailParamsFields = ({
   const isCCInvalid: boolean = errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
+
   return (
     <>
       <EuiFormRow

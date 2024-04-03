@@ -12,10 +12,11 @@ import classnames from 'classnames';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
-import { FieldIcon, getFieldIconProps } from '../field_icon';
-import { fieldNameWildcardMatcher } from '../../utils/field_name_wildcard_matcher';
 import './field_item_button.scss';
+
+const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
 
 /**
  * Props of FieldItemButton component
@@ -29,7 +30,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
   flush?: FieldButtonProps['flush'];
-  dragHandle?: FieldButtonProps['dragHandle'];
+  withDragIcon?: boolean;
   getCustomFieldType?: GetCustomFieldType<T>;
   dataTestSubj?: string;
   size?: FieldButtonProps['size'];
@@ -53,6 +54,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param getCustomFieldType
  * @param dataTestSubj
  * @param size
+ * @param withDragIcon
  * @param onClick
  * @param shouldAlwaysShowAction
  * @param buttonAddFieldToWorkspaceProps
@@ -74,6 +76,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   getCustomFieldType,
   dataTestSubj,
   size,
+  withDragIcon,
   onClick,
   shouldAlwaysShowAction,
   buttonAddFieldToWorkspaceProps,
@@ -105,6 +108,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       [`unifiedFieldListItemButton--${type}`]: type,
       [`unifiedFieldListItemButton--exists`]: !isEmpty,
       [`unifiedFieldListItemButton--missing`]: isEmpty,
+      [`unifiedFieldListItemButton--withDragIcon`]: Boolean(withDragIcon),
     },
     className
   );
@@ -175,7 +179,10 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
         </EuiToolTip>
       );
 
-  const conflictInfoIcon = field.type === 'conflict' ? <FieldConflictInfoIcon /> : null;
+  const conflictInfoIcon =
+    field.type === 'conflict' ? (
+      <FieldConflictInfoIcon conflictDescriptions={field.conflictDescriptions} />
+    ) : null;
 
   return (
     <FieldButton
@@ -193,10 +200,19 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           },
         }),
       }}
-      fieldIcon={<FieldIcon {...iconProps} />}
+      fieldIcon={
+        <div className="unifiedFieldListItemButton__fieldIconContainer">
+          <div className="unifiedFieldListItemButton__fieldIcon">
+            <FieldIcon {...iconProps} />
+          </div>
+          {withDragIcon && (
+            <div className="unifiedFieldListItemButton__fieldIconDrag">{DRAG_ICON}</div>
+          )}
+        </div>
+      }
       fieldName={
         <EuiHighlight
-          search={getSearchHighlight(displayName, fieldSearchHighlight)}
+          search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}
           title={title}
           data-test-subj={`field-${field.name}`}
         >
@@ -211,36 +227,35 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   );
 }
 
-function FieldConflictInfoIcon() {
+function FieldConflictInfoIcon({
+  conflictDescriptions,
+}: {
+  conflictDescriptions?: Record<string, string[]>;
+}) {
+  const types = conflictDescriptions ? Object.keys(conflictDescriptions) : [];
   return (
     <EuiToolTip
       position="bottom"
-      content={i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictDescription', {
-        defaultMessage:
-          'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
-          'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+      title={i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictTitle', {
+        defaultMessage: 'Mapping Conflict',
       })}
+      content={
+        types.length
+          ? i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictWithTypesDescription', {
+              defaultMessage:
+                'This field is defined as several types ({types}) across the indices that match this pattern. You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+              values: {
+                types: types.join(', '),
+              },
+            })
+          : i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictDescription', {
+              defaultMessage:
+                'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
+                'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+            })
+      }
     >
-      <EuiIcon
-        tabIndex={0}
-        type="warning"
-        title={i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictTitle', {
-          defaultMessage: 'Mapping Conflict',
-        })}
-        size="s"
-      />
+      <EuiIcon tabIndex={0} type="warning" size="s" />
     </EuiToolTip>
   );
-}
-
-function getSearchHighlight(displayName: string, fieldSearchHighlight?: string): string {
-  const searchHighlight = fieldSearchHighlight || '';
-  if (
-    searchHighlight.includes('*') &&
-    fieldNameWildcardMatcher({ name: displayName }, searchHighlight)
-  ) {
-    return displayName;
-  }
-
-  return searchHighlight;
 }

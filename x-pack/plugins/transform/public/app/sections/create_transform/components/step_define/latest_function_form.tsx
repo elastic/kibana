@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
 import { useAppDependencies } from '../../../../app_dependencies';
-import { LatestFunctionService } from './hooks/use_latest_function_config';
+import type { LatestFunctionService } from './hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
   copyToClipboard: string;

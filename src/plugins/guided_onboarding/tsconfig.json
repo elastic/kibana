@@ -13,6 +13,8 @@
     "@kbn/i18n-react",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
     "@kbn/core-http-browser",

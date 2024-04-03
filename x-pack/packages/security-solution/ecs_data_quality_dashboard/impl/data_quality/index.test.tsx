@@ -11,6 +11,9 @@ import React from 'react';
 
 import { TestProviders } from './mock/test_providers/test_providers';
 import { DataQualityPanel } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+
+const { toasts } = notificationServiceMock.createSetupContract();
 
 describe('DataQualityPanel', () => {
   describe('when ILM phases are provided', () => {
@@ -20,7 +23,6 @@ describe('DataQualityPanel', () => {
       render(
         <TestProviders>
           <DataQualityPanel
-            addSuccessToast={jest.fn()}
             canUserCreateAndReadCases={jest.fn()}
             defaultBytesFormat={''}
             defaultNumberFormat={''}
@@ -28,11 +30,14 @@ describe('DataQualityPanel', () => {
             httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
             isAssistantEnabled={true}
+            isILMAvailable={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
+            toasts={toasts}
           />
         </TestProviders>
       );
@@ -54,7 +59,6 @@ describe('DataQualityPanel', () => {
       render(
         <TestProviders>
           <DataQualityPanel
-            addSuccessToast={jest.fn()}
             canUserCreateAndReadCases={jest.fn()}
             defaultBytesFormat={''}
             defaultNumberFormat={''}
@@ -62,11 +66,14 @@ describe('DataQualityPanel', () => {
             httpFetch={jest.fn()}
             ilmPhases={ilmPhases}
             isAssistantEnabled={true}
+            isILMAvailable={true}
             lastChecked={''}
             openCreateCaseFlyout={jest.fn()}
             patterns={[]}
+            reportDataQualityIndexChecked={jest.fn()}
             setLastChecked={jest.fn()}
             baseTheme={DARK_THEME}
+            toasts={toasts}
           />
         </TestProviders>
       );

@@ -80,7 +80,7 @@ describe('Integration', () => {
           });
         }
       }
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
       const { cursor } = testToRun;
       senseEditor.update(editorValue, true).then(() => {
         senseEditor.getCoreEditor().moveCursorToPosition(cursor);
@@ -196,7 +196,7 @@ describe('Integration', () => {
     endpoints: {
       _search: {
         methods: ['GET', 'POST'],
-        patterns: ['{indices}/_search', '_search'],
+        patterns: ['{index}/_search', '_search'],
         data_autocomplete_rules: {
           query: {
             match_all: {},
@@ -948,6 +948,8 @@ describe('Integration', () => {
         autoCompleteSet: [
           tt('field1.1.1', { f: 1 }, 'string'),
           tt('field1.1.2', { f: 1 }, 'string'),
+          tt('field2.1.1', { f: 1 }, 'string'),
+          tt('field2.1.2', { f: 1 }, 'string'),
         ],
       },
       {
@@ -956,6 +958,8 @@ describe('Integration', () => {
         autoCompleteSet: [
           { name: 'field1.1.1', meta: 'string' },
           { name: 'field1.1.2', meta: 'string' },
+          { name: 'field2.1.1', meta: 'string' },
+          { name: 'field2.1.2', meta: 'string' },
         ],
       },
     ]
@@ -981,7 +985,7 @@ describe('Integration', () => {
       {
         name: 'Cursor rows after request end',
         cursor: { lineNumber: 5, column: 1 },
-        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'],
         prefixToAdd: '',
         suffixToAdd: ' ',
       },
@@ -996,7 +1000,7 @@ describe('Integration', () => {
   const CLUSTER_KB = {
     endpoints: {
       _search: {
-        patterns: ['_search', '{indices}/_search'],
+        patterns: ['_search', '{index}/_search'],
         url_params: {
           search_type: ['count', 'query_then_fetch'],
           scroll: '10m',

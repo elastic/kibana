@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FIELD_FORMAT_IDS, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useMlKibana } from './kibana_context';
 
 /**
@@ -16,16 +17,24 @@ const defaultParam: Record<string, FieldFormatParams> = {
     inputFormat: 'milliseconds',
     outputFormat: 'humanizePrecise',
   },
+  [FIELD_FORMAT_IDS.NUMBER]: {
+    pattern: '00.00',
+  },
 };
+
+export const getFieldFormatterProvider =
+  (fieldFormats: FieldFormatsRegistry) =>
+  (fieldType: FIELD_FORMAT_IDS, params?: FieldFormatParams) => {
+    const fieldFormatter = fieldFormats.deserialize({
+      id: fieldType,
+      params: params ?? defaultParam[fieldType],
+    });
+    return fieldFormatter.convert.bind(fieldFormatter);
+  };
 
 export function useFieldFormatter(fieldType: FIELD_FORMAT_IDS) {
   const {
     services: { fieldFormats },
   } = useMlKibana();
-
-  const fieldFormatter = fieldFormats.deserialize({
-    id: fieldType,
-    params: defaultParam[fieldType],
-  });
-  return fieldFormatter.convert.bind(fieldFormatter);
+  return getFieldFormatterProvider(fieldFormats)(fieldType);
 }

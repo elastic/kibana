@@ -6,107 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { ComponentSelector, css, CSSObject, SerializedStyles } from '@emotion/react';
-import { ArrayCSSInterpolation } from '@emotion/serialize';
-import { Property } from 'csstype';
-
+import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 
-export const codeEditorMonacoStyles = () => css`
-   {
-    animation: none !important; // Removes textarea EUI blue underline animation from EUI
-  }
-`;
-
-export const codeEditorStyles = () => css`
-   {
+export const styles = {
+  container: css`
     position: relative;
     height: 100%;
-  }
-`;
-
-export const codeEditorPlaceholderContainerStyles = (subduedText: string) => css`
-   {
-    color: ${subduedText};
-    width: max-content;
-    pointer-events: none;
-  }
-`;
-
-export const codeEditorKeyboardHintStyles = (levels: {
-  content: Property.ZIndex;
-  mask: Property.ZIndex;
-  toast: Property.ZIndex;
-  modal: Property.ZIndex;
-  navigation: Property.ZIndex;
-  menu: Property.ZIndex;
-  header: Property.ZIndex;
-  flyout: Property.ZIndex;
-  maskBelowHeader: Property.ZIndex;
-}) =>
-  css`
-     {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-
-      &:focus {
-        z-index: ${levels.mask};
-      }
-
-      &--isInactive {
-        display: none;
-      }
-    }
-  `;
-
-export const codeEditorControlsStyles = (
-  size: {
-    base: string;
-    xxs: string;
-    xs: string;
-    s: string;
-    m: string;
-    l: string;
-    xl: string;
-    xxl: string;
-    xxxl: string;
-    xxxxl: string;
-  },
-  base:
-    | string
-    | number
-    | boolean
-    | ComponentSelector
-    | SerializedStyles
-    | CSSObject
-    | ArrayCSSInterpolation
-    | null
-    | undefined
-) => css`
-   {
-    top: ${size.xs};
-    right: ${base};
-    position: absolute;
-    z-index: 1000;
-  }
-`;
-
-export const codeEditorFullScreenStyles = () => css`
-   {
+  `,
+  fullscreenContainer: css`
     position: absolute;
     left: 0;
     top: 0;
-  }
-`;
-
-export const codeEditorControlsWithinFullScreenStyles = (size: string) => css`
-  top: ${size};
-  right: ${size};
-}`;
+  `,
+  keyboardHint: (euiTheme: EuiThemeComputed) => css`
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    &:focus {
+      z-index: ${euiTheme.levels.mask};
+    }
+  `,
+  controls: {
+    base: (euiTheme: EuiThemeComputed) => css`
+      position: absolute;
+      top: ${euiTheme.size.xs};
+      right: ${euiTheme.size.base};
+      z-index: ${euiTheme.levels.menu};
+    `,
+    fullscreen: (euiTheme: EuiThemeComputed) => css`
+      top: ${euiTheme.size.l};
+      right: ${euiTheme.size.l};
+    `,
+  },
+};
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
@@ -125,62 +62,62 @@ export function createTheme(
         foreground: euiTheme.euiColorDarkestShade,
         background: euiTheme.euiFormBackgroundColor,
       },
-      { token: 'invalid', foreground: euiTheme.euiColorAccent },
+      { token: 'invalid', foreground: euiTheme.euiColorAccentText },
       { token: 'emphasis', fontStyle: 'italic' },
       { token: 'strong', fontStyle: 'bold' },
 
-      { token: 'variable', foreground: euiTheme.euiColorPrimary },
-      { token: 'variable.predefined', foreground: euiTheme.euiColorSuccess },
-      { token: 'constant', foreground: euiTheme.euiColorAccent },
-      { token: 'comment', foreground: euiTheme.euiColorMediumShade },
-      { token: 'number', foreground: euiTheme.euiColorAccent },
-      { token: 'number.hex', foreground: euiTheme.euiColorAccent },
-      { token: 'regexp', foreground: euiTheme.euiColorDanger },
-      { token: 'annotation', foreground: euiTheme.euiColorMediumShade },
-      { token: 'type', foreground: euiTheme.euiColorVis0 },
+      { token: 'variable', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'variable.predefined', foreground: euiTheme.euiColorSuccessText },
+      { token: 'constant', foreground: euiTheme.euiColorAccentText },
+      { token: 'comment', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'number', foreground: euiTheme.euiColorAccentText },
+      { token: 'number.hex', foreground: euiTheme.euiColorAccentText },
+      { token: 'regexp', foreground: euiTheme.euiColorDangerText },
+      { token: 'annotation', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'type', foreground: euiTheme.euiColorSuccessText },
 
       { token: 'delimiter', foreground: euiTheme.euiTextSubduedColor },
       { token: 'delimiter.html', foreground: euiTheme.euiColorDarkShade },
-      { token: 'delimiter.xml', foreground: euiTheme.euiColorPrimary },
+      { token: 'delimiter.xml', foreground: euiTheme.euiColorPrimaryText },
 
-      { token: 'tag', foreground: euiTheme.euiColorDanger },
-      { token: 'tag.id.jade', foreground: euiTheme.euiColorPrimary },
-      { token: 'tag.class.jade', foreground: euiTheme.euiColorPrimary },
-      { token: 'meta.scss', foreground: euiTheme.euiColorAccent },
-      { token: 'metatag', foreground: euiTheme.euiColorSuccess },
-      { token: 'metatag.content.html', foreground: euiTheme.euiColorDanger },
-      { token: 'metatag.html', foreground: euiTheme.euiColorMediumShade },
-      { token: 'metatag.xml', foreground: euiTheme.euiColorMediumShade },
+      { token: 'tag', foreground: euiTheme.euiColorDangerText },
+      { token: 'tag.id.jade', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'tag.class.jade', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'meta.scss', foreground: euiTheme.euiColorAccentText },
+      { token: 'metatag', foreground: euiTheme.euiColorSuccessText },
+      { token: 'metatag.content.html', foreground: euiTheme.euiColorDangerText },
+      { token: 'metatag.html', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'metatag.xml', foreground: euiTheme.euiTextSubduedColor },
       { token: 'metatag.php', fontStyle: 'bold' },
 
-      { token: 'key', foreground: euiTheme.euiColorWarning },
-      { token: 'string.key.json', foreground: euiTheme.euiColorDanger },
-      { token: 'string.value.json', foreground: euiTheme.euiColorPrimary },
+      { token: 'key', foreground: euiTheme.euiColorWarningText },
+      { token: 'string.key.json', foreground: euiTheme.euiColorDangerText },
+      { token: 'string.value.json', foreground: euiTheme.euiColorPrimaryText },
 
-      { token: 'attribute.name', foreground: euiTheme.euiColorDanger },
-      { token: 'attribute.name.css', foreground: euiTheme.euiColorSuccess },
-      { token: 'attribute.value', foreground: euiTheme.euiColorPrimary },
-      { token: 'attribute.value.number', foreground: euiTheme.euiColorWarning },
-      { token: 'attribute.value.unit', foreground: euiTheme.euiColorWarning },
-      { token: 'attribute.value.html', foreground: euiTheme.euiColorPrimary },
-      { token: 'attribute.value.xml', foreground: euiTheme.euiColorPrimary },
+      { token: 'attribute.name', foreground: euiTheme.euiColorDangerText },
+      { token: 'attribute.name.css', foreground: euiTheme.euiColorSuccessText },
+      { token: 'attribute.value', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'attribute.value.number', foreground: euiTheme.euiColorWarningText },
+      { token: 'attribute.value.unit', foreground: euiTheme.euiColorWarningText },
+      { token: 'attribute.value.html', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'attribute.value.xml', foreground: euiTheme.euiColorPrimaryText },
 
-      { token: 'string', foreground: euiTheme.euiColorDanger },
-      { token: 'string.html', foreground: euiTheme.euiColorPrimary },
-      { token: 'string.sql', foreground: euiTheme.euiColorDanger },
-      { token: 'string.yaml', foreground: euiTheme.euiColorPrimary },
+      { token: 'string', foreground: euiTheme.euiColorDangerText },
+      { token: 'string.html', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'string.sql', foreground: euiTheme.euiColorDangerText },
+      { token: 'string.yaml', foreground: euiTheme.euiColorPrimaryText },
 
-      { token: 'keyword', foreground: euiTheme.euiColorPrimary },
-      { token: 'keyword.json', foreground: euiTheme.euiColorPrimary },
-      { token: 'keyword.flow', foreground: euiTheme.euiColorWarning },
-      { token: 'keyword.flow.scss', foreground: euiTheme.euiColorPrimary },
+      { token: 'keyword', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'keyword.json', foreground: euiTheme.euiColorPrimaryText },
+      { token: 'keyword.flow', foreground: euiTheme.euiColorWarningText },
+      { token: 'keyword.flow.scss', foreground: euiTheme.euiColorPrimaryText },
       // Monaco editor supports strikethrough font style only starting from 0.32.0.
-      { token: 'keyword.deprecated', foreground: euiTheme.euiColorAccent },
+      { token: 'keyword.deprecated', foreground: euiTheme.euiColorAccentText },
 
       { token: 'operator.scss', foreground: euiTheme.euiColorDarkShade },
-      { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },
-      { token: 'operator.swift', foreground: euiTheme.euiColorMediumShade },
-      { token: 'predefined.sql', foreground: euiTheme.euiColorMediumShade },
+      { token: 'operator.sql', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'operator.swift', foreground: euiTheme.euiTextSubduedColor },
+      { token: 'predefined.sql', foreground: euiTheme.euiTextSubduedColor },
 
       { token: 'text', foreground: euiTheme.euiTitleColor },
       { token: 'label', foreground: euiTheme.euiColorVis9 },
@@ -190,15 +127,19 @@ export function createTheme(
       'editor.background': backgroundColor ?? euiTheme.euiFormBackgroundColor,
       'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
       'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
-      'editorIndentGuide.background': euiTheme.euiColorLightShade,
+      'editorIndentGuide.background1': euiTheme.euiColorLightShade,
       'editor.selectionBackground': selectionBackgroundColor,
       'editorWidget.border': euiTheme.euiColorLightShade,
       'editorWidget.background': euiTheme.euiColorLightestShade,
       'editorCursor.foreground': euiTheme.euiColorDarkestShade,
+      'editorSuggestWidget.selectedForeground': euiTheme.euiColorDarkestShade,
+      'editorSuggestWidget.focusHighlightForeground': euiTheme.euiColorPrimary,
       'editorSuggestWidget.selectedBackground': euiTheme.euiColorLightShade,
       'list.hoverBackground': euiTheme.euiColorLightShade,
       'list.highlightForeground': euiTheme.euiColorPrimary,
       'editor.lineHighlightBorder': euiTheme.euiColorLightestShade,
+      'editorHoverWidget.foreground': euiTheme.euiColorDarkestShade,
+      'editorHoverWidget.background': euiTheme.euiFormBackgroundColor,
     },
   };
 }

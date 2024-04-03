@@ -7,19 +7,20 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor, within, fireEvent } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   alertComment,
   basicCase,
   connectorsMock,
+  customFieldsConfigurationMock,
+  customFieldsMock,
   getCaseUsersMockResponse,
   getUserAction,
 } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
-import { ConnectorTypes } from '../../../../common/api/connectors';
 import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
@@ -33,11 +34,15 @@ import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../mocks';
-import { ActionTypes } from '../../../../common/api';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
+import { CaseMetricsFeature } from '../../../../common/types/api';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -54,11 +59,16 @@ jest.mock('../../../containers/use_get_categories');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/use_get_case_connectors');
 jest.mock('../../../containers/use_get_case_users');
+jest.mock('../../../containers/use_replace_custom_field');
 jest.mock('../use_on_update_field');
 jest.mock('../../../common/use_cases_features');
+jest.mock('../../../containers/configure/use_get_case_configuration');
+jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 (useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
+(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: {} });
+(useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -117,12 +127,14 @@ const caseProps = {
 
 const caseUsers = getCaseUsersMockResponse();
 const useGetCasesFeaturesRes = {
-  metricsFeatures: ['alerts.count'],
+  metricsFeatures: [CaseMetricsFeature.ALERTS_COUNT],
   pushToServiceAuthorized: true,
   caseAssignmentAuthorized: true,
   isAlertsEnabled: true,
   isSyncAlertsEnabled: true,
 };
+
+const replaceCustomField = jest.fn();
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
@@ -133,9 +145,19 @@ const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
 
 describe('Case View Page activity tab', () => {
+  let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+  const basicLicense = licensingMock.createLicense({
+    license: { type: 'basic' },
+  });
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   beforeAll(() => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -154,15 +176,41 @@ describe('Case View Page activity tab', () => {
       isLoading: false,
       useOnUpdateField: jest.fn,
     });
-  });
-  let appMockRender: AppMockRenderer;
+    useReplaceCustomFieldMock.mockImplementation(() => ({
+      isUpdatingCustomField: false,
+      isError: false,
+      mutate: replaceCustomField,
+    }));
 
-  const platinumLicense = licensingMock.createLicense({
-    license: { type: 'platinum' },
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
   });
 
-  const basicLicense = licensingMock.createLicense({
-    license: { type: 'basic' },
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   beforeEach(() => {
@@ -177,12 +225,18 @@ describe('Case View Page activity tab', () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
     appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-status-action-button')).toBeInTheDocument();
+    const caseViewActivity = await screen.findByTestId('case-view-activity');
+    expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
+    expect(
+      await within(caseViewActivity).findByTestId('case-view-status-action-button')
+    ).toBeInTheDocument();
+
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
+
+    const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
+    expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('connector-edit-header')).toBeInTheDocument();
 
     await waitForComponentToUpdate();
   });
@@ -214,11 +268,7 @@ describe('Case View Page activity tab', () => {
     });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+
     expect(screen.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
 
     await waitForComponentToUpdate();
@@ -231,11 +281,7 @@ describe('Case View Page activity tab', () => {
     });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+
     expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
 
     await waitForComponentToUpdate();
@@ -314,6 +360,36 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
+  it('should call useReplaceCustomField correctly', async () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+      },
+    });
+    appMockRender.render(
+      <CaseViewActivity
+        {...caseProps}
+        caseData={{
+          ...caseProps.caseData,
+          customFields: [customFieldsMock[1]],
+        }}
+      />
+    );
+
+    userEvent.click(await screen.findByRole('switch'));
+
+    await waitFor(() => {
+      expect(replaceCustomField).toHaveBeenCalledWith({
+        caseId: caseData.id,
+        caseVersion: caseData.version,
+        customFieldId: customFieldsMock[1].key,
+        customFieldValue: false,
+      });
+    });
+
+    expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
+  });
+
   describe('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -325,13 +401,12 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    it('should show all filter as active', async () => {
+    it('should call user action hooks correctly when filtering for all', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
         caseData.id,
@@ -348,25 +423,14 @@ describe('Case View Page activity tab', () => {
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
     });
 
-    it('should call user action hooks correctly when filtering for all', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
-
-      expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
-    });
-
-    it('should show comment filter as active', async () => {
+    it('should call user action hooks correctly when filtering for comments', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
       const lastPageForComment = Math.ceil(
         userActionsStats.totalComments / userActivityQueryParams.perPage
       );
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -381,28 +445,6 @@ describe('Case View Page activity tab', () => {
       );
     });
 
-    it('should call user action hooks correctly when filtering for comments', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
-
-      expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
-      expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
-    });
-
-    it('should show history as active filter correctly', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
-
-      expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} active filters`));
-      expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-      expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
-    });
-
     it('should call user action hooks correctly when filtering for history', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
@@ -410,8 +452,7 @@ describe('Case View Page activity tab', () => {
         userActionsStats.totalOtherActions / userActivityQueryParams.perPage
       );
 
-      expect(await screen.findByTestId('user-actions-activity-bar'));
-      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
+      userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
 
       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -425,123 +466,9 @@ describe('Case View Page activity tab', () => {
         true
       );
     });
-
-    it('should render by desc sort order', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-      const sortSelect = await screen.findByTestId('user-actions-sort-select');
-
-      fireEvent.change(sortSelect, { target: { value: 'desc' } });
-
-      await waitFor(() => {
-        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-          caseData.id,
-          { type: 'all', sortOrder: 'desc', page: 3, perPage: 10 },
-          true
-        );
-
-        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-          caseData.id,
-          { type: 'all', sortOrder: 'desc', page: 1, perPage: 10 },
-          true
-        );
-      });
-    });
   });
 
   describe('Case users', () => {
-    describe('Participants', () => {
-      it('should render the participants correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const participantsSection = within(
-          await screen.findByTestId('case-view-user-list-participants')
-        );
-
-        expect(await participantsSection.findByText('Participant 1')).toBeInTheDocument();
-        expect(
-          await participantsSection.findByText('participant_2@elastic.co')
-        ).toBeInTheDocument();
-        expect(await participantsSection.findByText('participant_3')).toBeInTheDocument();
-        expect(await participantsSection.findByText('P4')).toBeInTheDocument();
-        expect(await participantsSection.findByText('Participant 5')).toBeInTheDocument();
-      });
-
-      it('should render Unknown users correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const participantsSection = within(
-          await screen.findByTestId('case-view-user-list-participants')
-        );
-
-        expect(await participantsSection.findByText('Unknown')).toBeInTheDocument();
-      });
-
-      it('should render assignees in the participants section', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const participantsSection = within(
-          await screen.findByTestId('case-view-user-list-participants')
-        );
-
-        expect(await participantsSection.findByText('Unknown')).toBeInTheDocument();
-        expect(await participantsSection.findByText('Fuzzy Marten')).toBeInTheDocument();
-        expect(await participantsSection.findByText('elastic')).toBeInTheDocument();
-        expect(await participantsSection.findByText('Misty Mackerel')).toBeInTheDocument();
-      });
-    });
-
-    describe('Reporter', () => {
-      it('should render the reporter correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter 1')).toBeInTheDocument();
-        expect(await reporterSection.findByText('R1')).toBeInTheDocument();
-      });
-
-      it('should render a reporter without uid correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: {
-            ...caseUsers,
-            reporter: {
-              user: {
-                email: 'reporter_no_uid@elastic.co',
-                full_name: 'Reporter No UID',
-                username: 'reporter_no_uid',
-              },
-            },
-          },
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Reporter No UID')).toBeInTheDocument();
-      });
-
-      it('fallbacks to the caseData reporter correctly', async () => {
-        useGetCaseUsersMock.mockReturnValue({
-          isLoading: false,
-          data: null,
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-        const reporterSection = within(await screen.findByTestId('case-view-user-list-reporter'));
-
-        expect(await reporterSection.findByText('Leslie Knope')).toBeInTheDocument();
-      });
-    });
-
     describe('Assignees', () => {
       it('should render assignees in the participants section', async () => {
         appMockRender = createAppMockRenderer({ license: platinumLicense });
@@ -566,43 +493,12 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/151981
-    describe.skip('User actions', () => {
-      it('renders the description correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const description = within(await screen.findByTestId('description'));
-
-        expect(await description.findByText(caseData.description)).toBeInTheDocument();
-      });
-
-      it('renders edit description user action correctly', async () => {
-        useFindCaseUserActionsMock.mockReturnValue({
-          ...defaultUseFindCaseUserActions,
-          data: {
-            userActions: [
-              getUserAction('description', 'create'),
-              getUserAction('description', 'update'),
-            ],
-          },
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const userActions = within((await screen.findAllByTestId('user-actions-list'))[1]);
-
-        expect(
-          userActions.getByTestId('description-update-action-description-update')
-        ).toBeInTheDocument();
-      });
-
+    describe('User actions', () => {
       it('renders the unassigned users correctly', async () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
-            userActions: [getUserAction(ActionTypes.assignees, 'delete')],
+            userActions: [getUserAction(UserActionTypes.assignees, 'delete')],
           },
         });
 
@@ -620,7 +516,7 @@ describe('Case View Page activity tab', () => {
           ...defaultUseFindCaseUserActions,
           data: {
             userActions: [
-              getUserAction(ActionTypes.assignees, 'add', {
+              getUserAction(UserActionTypes.assignees, 'add', {
                 payload: {
                   assignees: [
                     { uid: 'not-valid' },

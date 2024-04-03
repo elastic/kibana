@@ -25,26 +25,34 @@ required:
 properties:
   assignees:
     $ref: 'assignees.yaml'
+  category:
+    type:
+      - "string"
+      - "null"
+    description: The case category.
   closed_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
   closed_by:
     $ref: 'case_response_closed_by_properties.yaml'
   comments:
     title: Case response properties for comments
     description: An array of comment objects for the case.
     type: array
+    maxItems: 10000
     items:
-      discriminator:
-        propertyName: type
       oneOf:
         - $ref: 'alert_comment_response_properties.yaml'
         - $ref: 'user_comment_response_properties.yaml'
+      discriminator:
+        propertyName: type
+        mapping:
+          alert: 'alert_comment_response_properties.yaml'
+          user: 'user_comment_response_properties.yaml'
   connector:
     title: Case response properties for connectors
-    discriminator:
-      propertyName: type
     oneOf:
       - $ref: 'connector_properties_none.yaml'
       - $ref: 'connector_properties_cases_webhook.yaml'
@@ -53,29 +61,52 @@ properties:
       - $ref: 'connector_properties_servicenow.yaml'
       - $ref: 'connector_properties_servicenow_sir.yaml'
       - $ref: 'connector_properties_swimlane.yaml'
+    discriminator:
+      propertyName: type
+      mapping:
+        .none: 'connector_properties_none.yaml'
+        .cases-webhook: 'connector_properties_cases_webhook.yaml'
+        .jira: 'connector_properties_jira.yaml'
+        .resilient: 'connector_properties_resilient.yaml'
+        .servicenow: 'connector_properties_servicenow.yaml'
+        .servicenow-sir: 'connector_properties_servicenow_sir.yaml'
+        .swimlane: 'connector_properties_swimlane.yaml'
   created_at:
     type: string
     format: date-time
-    example: '2022-05-13T09:16:17.416Z'
+    examples:
+      - '2022-05-13T09:16:17.416Z'
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
+  customFields:
+    type: array
+    description: Custom field values for the case.
+    x-technical-preview: true
+    items:
+      type: object
+      properties:
+        $ref: 'case_customfields.yaml'
   description:
     type: string
-    example: A case description.
+    examples:
+      - A case description.
   duration:
-    type: integer
+    type:
+      - "integer"
+      - "null"
     description: >
       The elapsed time from the creation of the case to its closure (in seconds).
       If the case has not been closed, the duration is set to null. If the case
       was closed after less than half a second, the duration is rounded down to
       zero.
-    nullable: true
-    example: 120
+    examples:
+      - 120
   external_service:
     $ref: 'external_service.yaml'
   id:
     type: string
-    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+    examples:
+      - 66b9aa00-94fa-11ea-9f74-e7e108796192
   owner:
     $ref: 'owners.yaml'
   settings:
@@ -88,23 +119,28 @@ properties:
     type: array
     items:
       type: string
-    example:
-      - tag-1
+    examples:
+      - [tag-1]
   title:
     type: string
-    example: Case title 1
+    examples:
+      - Case title 1
   totalAlerts:
     type: integer
-    example: 0
+    examples:
+      - 0
   totalComment:
     type: integer
-    example: 0
+    examples:
+      - 0
   updated_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
   updated_by:
     $ref: 'case_response_updated_by_properties.yaml'
   version:
     type: string
-    example: WzUzMiwxXQ==
+    examples:
+      - WzUzMiwxXQ==

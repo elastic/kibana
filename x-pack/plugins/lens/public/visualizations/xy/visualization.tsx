@@ -13,20 +13,20 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import {
-  EventAnnotationServiceType,
-  getAnnotationAccessor,
-} from '@kbn/event-annotation-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
-import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { getColorsFromMapping } from '@kbn/coloring';
+import useObservable from 'react-use/lib/useObservable';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -34,6 +34,7 @@ import {
   isOperationFromTheSameGroup,
   nonNullable,
   renewIDs,
+  getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
@@ -41,7 +42,11 @@ import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
 } from './xy_config_panel/dimension_editor';
-import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
+import {
+  ReferenceLayerHeader,
+  AnnotationsLayerHeader,
+  LayerHeaderContent,
+} from './xy_config_panel/layer_header';
 import type {
   Visualization,
   FramePublicAPI,
@@ -64,6 +69,8 @@ import {
   injectReferences,
   isHorizontalChart,
   isPersistedState,
+  annotationLayerHasUnsavedChanges,
+  isHorizontalSeries,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -80,11 +87,11 @@ import {
   setAnnotationsDimension,
   getUniqueLabels,
   onAnnotationDrop,
-  isDateHistogram,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
+  getAnnotationLayerTitle,
   getAnnotationsLayers,
   getAxisName,
   getDataLayers,
@@ -102,6 +109,7 @@ import {
   newLayerState,
   supportedDataLayer,
   validateLayersForDimension,
+  isTimeChart,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
@@ -113,6 +121,7 @@ import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const XY_ID = 'lnsXY';
 
@@ -241,11 +250,15 @@ export const getXyVisualization = ({
 
   getDescription,
 
-  switchVisualizationType(seriesType: string, state: State) {
+  switchVisualizationType(seriesType: string, state: State, layerId?: string) {
     return {
       ...state,
       preferredSeriesType: seriesType as SeriesType,
-      layers: state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
+      layers: layerId
+        ? state.layers.map((layer) =>
+            layer.layerId === layerId ? { ...layer, seriesType: seriesType as SeriesType } : layer
+          )
+        : state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
     };
   },
 
@@ -256,7 +269,7 @@ export const getXyVisualization = ({
   initialize(
     addNewLayer,
     state,
-    _mainPalette?,
+    mainPalette?,
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
@@ -278,6 +291,9 @@ export const getXyVisualization = ({
             seriesType: defaultSeriesType,
             showGridlines: false,
             layerType: LayerTypes.DATA,
+            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+            colorMapping:
+              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
           },
         ],
       }
@@ -329,7 +345,7 @@ export const getXyVisualization = ({
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     if (layer && isByReferenceAnnotationsLayer(layer)) {
-      return { title: `Delete "${layer.__lastSaved.title}"` };
+      return { title: `Delete "${getAnnotationLayerTitle(layer)}"` };
     }
   },
 
@@ -418,6 +434,22 @@ export const getXyVisualization = ({
         }
       ).length < 2;
 
+    const canUseColorMapping = layer.colorMapping ? true : false;
+    let colors: string[] = [];
+    if (canUseColorMapping) {
+      kibanaTheme.theme$
+        .subscribe({
+          next(theme) {
+            colors = getColorsFromMapping(theme.darkMode, layer.colorMapping);
+          },
+        })
+        .unsubscribe();
+    } else {
+      colors = paletteService
+        .get(dataLayer.palette?.name || 'default')
+        .getCategoricalColors(10, dataLayer.palette?.params);
+    }
+
     return {
       groups: [
         {
@@ -449,11 +481,7 @@ export const getXyVisualization = ({
                 {
                   columnId: dataLayer.splitAccessor,
                   triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
-                  palette: dataLayer.collapseFn
-                    ? undefined
-                    : paletteService
-                        .get(dataLayer.palette?.name || 'default')
-                        .getCategoricalColors(10, dataLayer.palette?.params),
+                  palette: dataLayer.collapseFn ? undefined : colors,
                 },
               ]
             : [],
@@ -463,6 +491,7 @@ export const getXyVisualization = ({
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
           enableDimensionEditor: true,
+          isBreakdownDimension: true,
         },
       ],
     };
@@ -470,7 +499,13 @@ export const getXyVisualization = ({
 
   getMainPalette: (state) => {
     if (!state || state.layers.length === 0) return;
-    return getFirstDataLayer(state.layers)?.palette;
+    const firstDataLayer = getFirstDataLayer(state.layers);
+
+    return firstDataLayer?.colorMapping
+      ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
+      : firstDataLayer?.palette
+      ? { type: 'legacyPalette', value: firstDataLayer.palette }
+      : undefined;
   },
 
   getDropProps(dropProps) {
@@ -620,15 +655,36 @@ export const getXyVisualization = ({
       <LayerHeaderContent
         {...otherProps}
         onChangeIndexPattern={(indexPatternId) => {
-          // TODO: should it trigger an action as in the datasource?
           onChangeIndexPattern(indexPatternId);
         }}
       />
     );
   },
 
-  LayerHeaderComponent(props) {
-    return <LayerHeader {...props} />;
+  isSubtypeCompatible(subtype1, subtype2) {
+    return (
+      (isHorizontalSeries(subtype1 as SeriesType) && isHorizontalSeries(subtype2 as SeriesType)) ||
+      (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
+    );
+  },
+
+  getCustomLayerHeader(props) {
+    const layer = props.state.layers.find((l) => l.layerId === props.layerId);
+    if (!layer) {
+      return undefined;
+    }
+    if (isReferenceLayer(layer)) {
+      return <ReferenceLayerHeader />;
+    }
+    if (isAnnotationsLayer(layer)) {
+      return (
+        <AnnotationsLayerHeader
+          title={getAnnotationLayerTitle(layer)}
+          hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
+        />
+      );
+    }
+    return undefined;
   },
 
   ToolbarComponent(props) {
@@ -642,13 +698,15 @@ export const getXyVisualization = ({
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
+
+    const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} />
+      <DataDimensionEditor {...allProps} darkMode={darkMode} />
     );
 
     return dimensionEditor;
@@ -716,7 +774,7 @@ export const getXyVisualization = ({
     const annotationLayers = getAnnotationsLayers(state.layers);
     const errors: UserMessage[] = [];
 
-    const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
+    const hasDateHistogram = isTimeChart(getDataLayers(state.layers), frame);
 
     annotationLayers.forEach((layer) => {
       layer.annotations.forEach((annotation) => {
@@ -941,6 +999,15 @@ export const getXyVisualization = ({
   getVisualizationInfo(state, frame) {
     return getVisualizationInfo(state, frame, paletteService, fieldFormats);
   },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    const dataLayers = getDataLayers(state.layers);
+    const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
+    return dataLayers.flatMap((l) => {
+      const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
+      return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
+    });
+  },
 });
 
 const getMappedAccessors = ({
@@ -1123,7 +1190,10 @@ function getNotifiableFeatures(
   fieldFormats: FieldFormatsStart
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
-    (layer) => layer.ignoreGlobalFilters
+    (layer) =>
+      layer.ignoreGlobalFilters &&
+      // If all annotations are manual, do not report it
+      layer.annotations.some((annotation) => annotation.type !== 'manual')
   );
   if (!annotationsWithIgnoreFlag.length) {
     return [];

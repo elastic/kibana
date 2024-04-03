@@ -1,0 +1,1483 @@
+{
+  "id": "@kbn/search-api-panels",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.CloudDetailsPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "CloudDetailsPanel",
+        "description": [],
+        "signature": [
+          "({ cloudId, elasticsearchUrl, isPanelLeft, overviewPanelProps, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.CloudDetailsPanelProps",
+            "text": "CloudDetailsPanelProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.CloudDetailsPanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  cloudId,\n  elasticsearchUrl = ELASTICSEARCH_URL_PLACEHOLDER,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.CloudDetailsPanelProps",
+                "text": "CloudDetailsPanelProps"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.CodeBox",
+        "type": "Function",
+        "tags": [],
+        "label": "CodeBox",
+        "description": [],
+        "signature": [
+          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, }: React.PropsWithChildren<CodeBoxProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/code_box.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.CodeBox.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<CodeBoxProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/code_box.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.getConsoleRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "getConsoleRequest",
+        "description": [],
+        "signature": [
+          "(code: keyof ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ", args?: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinitionSnippetArguments",
+            "text": "LanguageDefinitionSnippetArguments"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "packages/kbn-search-api-panels/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getConsoleRequest.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "keyof ",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinition",
+                "text": "LanguageDefinition"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getConsoleRequest.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinitionSnippetArguments",
+                "text": "LanguageDefinitionSnippetArguments"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.getLanguageDefinitionCodeSnippet",
+        "type": "Function",
+        "tags": [],
+        "label": "getLanguageDefinitionCodeSnippet",
+        "description": [],
+        "signature": [
+          "(language: Partial<",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ">, key: keyof ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinition",
+            "text": "LanguageDefinition"
+          },
+          ", args: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.LanguageDefinitionSnippetArguments",
+            "text": "LanguageDefinitionSnippetArguments"
+          },
+          ") => string"
+        ],
+        "path": "packages/kbn-search-api-panels/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getLanguageDefinitionCodeSnippet.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinition",
+                "text": "LanguageDefinition"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getLanguageDefinitionCodeSnippet.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof ",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinition",
+                "text": "LanguageDefinition"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.getLanguageDefinitionCodeSnippet.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.LanguageDefinitionSnippetArguments",
+                "text": "LanguageDefinitionSnippetArguments"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.GithubLink",
+        "type": "Function",
+        "tags": [],
+        "label": "GithubLink",
+        "description": [],
+        "signature": [
+          "({ assetBasePath, label, href }: React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/github_link.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.GithubLink.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ assetBasePath, label, href }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/github_link.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.IngestData",
+        "type": "Function",
+        "tags": [],
+        "label": "IngestData",
+        "description": [],
+        "signature": [
+          "({ codeSnippet, selectedLanguage, setSelectedLanguage, docLinks, assetBasePath, application, consolePlugin, sharePlugin, languages, consoleRequest, additionalIngestionPanel, }: React.PropsWithChildren<IngestDataProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.IngestData.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  codeSnippet,\n  selectedLanguage,\n  setSelectedLanguage,\n  docLinks,\n  assetBasePath,\n  application,\n  consolePlugin,\n  sharePlugin,\n  languages,\n  consoleRequest,\n  additionalIngestionPanel,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<IngestDataProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.IngestionsPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "IngestionsPanel",
+        "description": [],
+        "signature": [
+          "({ additionalIngestionPanel, docLinks, assetBasePath, }: React.PropsWithChildren<IngestionPanelProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.IngestionsPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  additionalIngestionPanel,\n  docLinks,\n  assetBasePath,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<IngestionPanelProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.InstallClientPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "InstallClientPanel",
+        "description": [],
+        "signature": [
+          "({ codeSnippet, consoleRequest, language, languages, setSelectedLanguage, assetBasePath, application, sharePlugin, isPanelLeft, overviewPanelProps, }: React.PropsWithChildren<InstallClientProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/install_client.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.InstallClientPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  codeSnippet,\n  consoleRequest,\n  language,\n  languages,\n  setSelectedLanguage,\n  assetBasePath,\n  application,\n  sharePlugin,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<InstallClientProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/install_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.LanguageClientPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageClientPanel",
+        "description": [],
+        "signature": [
+          "({ language, setSelectedLanguage, isSelectedLanguage, assetBasePath, src, }: React.PropsWithChildren<SelectClientProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageClientPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  language,\n  setSelectedLanguage,\n  isSelectedLanguage,\n  assetBasePath,\n  src,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<SelectClientProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.OverviewPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "OverviewPanel",
+        "description": [],
+        "signature": [
+          "({ children, description, leftPanelContent, links, rightPanelContent, title, overviewPanelProps, }: React.PropsWithChildren<OverviewPanelProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.OverviewPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  description,\n  leftPanelContent,\n  links,\n  rightPanelContent,\n  title,\n  overviewPanelProps,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<OverviewPanelProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.PipelinePanel",
+        "type": "Function",
+        "tags": [],
+        "label": "PipelinePanel",
+        "description": [],
+        "signature": [
+          "({ clusterImage, cutImage, reporterImage, }: React.PropsWithChildren<PipelinePanelProps>) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.PipelinePanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  clusterImage,\n  cutImage,\n  reporterImage,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<PipelinePanelProps>"
+            ],
+            "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.SelectClientPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "SelectClientPanel",
+        "description": [],
+        "signature": [
+          "({ docLinks, children, isPanelLeft, overviewPanelProps, callout, application, consolePlugin, sharePlugin, }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.SelectClientPanelProps",
+            "text": "SelectClientPanelProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  docLinks,\n  children,\n  isPanelLeft = true,\n  overviewPanelProps,\n  callout,\n  application,\n  consolePlugin,\n  sharePlugin,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.SelectClientPanelProps",
+                "text": "SelectClientPanelProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.TryInConsoleButton",
+        "type": "Function",
+        "tags": [],
+        "label": "TryInConsoleButton",
+        "description": [],
+        "signature": [
+          "({ request, application, consolePlugin, sharePlugin, content, showIcon, link, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.TryInConsoleButtonProps",
+            "text": "TryInConsoleButtonProps"
+          },
+          ") => JSX.Element | null"
+        ],
+        "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content,\n  showIcon = true,\n  link = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.TryInConsoleButtonProps",
+                "text": "TryInConsoleButtonProps"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.WelcomeBanner",
+        "type": "Function",
+        "tags": [],
+        "label": "WelcomeBanner",
+        "description": [],
+        "signature": [
+          "({ user, assetBasePath, image, showDescription, }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "common",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-common.WelcomeBannerProps",
+            "text": "WelcomeBannerProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.WelcomeBanner.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  user,\n  assetBasePath,\n  image,\n  showDescription = true,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.WelcomeBannerProps",
+                "text": "WelcomeBannerProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-search-api-panels/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.CloudDetailsPanelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudDetailsPanelProps",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.CloudDetailsPanelProps.cloudId",
+            "type": "string",
+            "tags": [],
+            "label": "cloudId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.CloudDetailsPanelProps.elasticsearchUrl",
+            "type": "string",
+            "tags": [],
+            "label": "elasticsearchUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.CloudDetailsPanelProps.isPanelLeft",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPanelLeft",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.CloudDetailsPanelProps.overviewPanelProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overviewPanelProps",
+            "description": [],
+            "signature": [
+              "Partial<(",
+              "DisambiguateSet",
+              "<",
+              "_EuiPanelButtonlike",
+              ", ",
+              "_EuiPanelDivlike",
+              "> & ",
+              "_EuiPanelDivlike",
+              ") | (",
+              "DisambiguateSet",
+              "<",
+              "_EuiPanelDivlike",
+              ", ",
+              "_EuiPanelButtonlike",
+              "> & ",
+              "_EuiPanelButtonlike",
+              ")> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.LanguageDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "LanguageDefinition",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "common",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-common.Languages",
+                "text": "Languages"
+              }
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.iconType",
+            "type": "string",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.docLink",
+            "type": "string",
+            "tags": [],
+            "label": "docLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.configureClient",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "configureClient",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.ingestData",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestData",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.ingestDataIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestDataIndex",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.installClient",
+            "type": "string",
+            "tags": [],
+            "label": "installClient",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.buildSearchQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buildSearchQuery",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.testConnection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "testConnection",
+            "description": [],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.advancedConfig",
+            "type": "string",
+            "tags": [],
+            "label": "advancedConfig",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.apiReference",
+            "type": "string",
+            "tags": [],
+            "label": "apiReference",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.basicConfig",
+            "type": "string",
+            "tags": [],
+            "label": "basicConfig",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.github",
+            "type": "Object",
+            "tags": [],
+            "label": "github",
+            "description": [],
+            "signature": [
+              "{ link: string; label: string; } | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinition.languageStyling",
+            "type": "string",
+            "tags": [],
+            "label": "languageStyling",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.LanguageDefinitionSnippetArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "LanguageDefinitionSnippetArguments",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.apiKey",
+            "type": "string",
+            "tags": [],
+            "label": "apiKey",
+            "description": [],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.cloudId",
+            "type": "string",
+            "tags": [],
+            "label": "cloudId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.ingestPipeline",
+            "type": "string",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
+            "type": "Object",
+            "tags": [],
+            "label": "extraIngestDocumentValues",
+            "description": [],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.SelectClientPanelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelectClientPanelProps",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              "{ elasticsearchClients: string; kibanaRunApiInConsole: string; }"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.isPanelLeft",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPanelLeft",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.overviewPanelProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overviewPanelProps",
+            "description": [],
+            "signature": [
+              "Partial<(",
+              "DisambiguateSet",
+              "<",
+              "_EuiPanelButtonlike",
+              ", ",
+              "_EuiPanelDivlike",
+              "> & ",
+              "_EuiPanelDivlike",
+              ") | (",
+              "DisambiguateSet",
+              "<",
+              "_EuiPanelDivlike",
+              ", ",
+              "_EuiPanelButtonlike",
+              "> & ",
+              "_EuiPanelButtonlike",
+              ")> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.callout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "callout",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.consolePlugin",
+            "type": "Object",
+            "tags": [],
+            "label": "consolePlugin",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.ConsolePluginStart",
+                "text": "ConsolePluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.sharePlugin",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sharePlugin",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.TryInConsoleButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TryInConsoleButtonProps",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.request",
+            "type": "string",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ApplicationStart",
+                "text": "ApplicationStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.consolePlugin",
+            "type": "Object",
+            "tags": [],
+            "label": "consolePlugin",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.ConsolePluginStart",
+                "text": "ConsolePluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.sharePlugin",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sharePlugin",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.content",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.showIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showIcon",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.TryInConsoleButtonProps.link",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "link",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.WelcomeBannerProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "WelcomeBannerProps",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.WelcomeBannerProps.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.WelcomeBannerProps.assetBasePath",
+            "type": "string",
+            "tags": [],
+            "label": "assetBasePath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.WelcomeBannerProps.image",
+            "type": "string",
+            "tags": [],
+            "label": "image",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.WelcomeBannerProps.showDescription",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showDescription",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.Languages",
+        "type": "Enum",
+        "tags": [],
+        "label": "Languages",
+        "description": [],
+        "path": "packages/kbn-search-api-panels/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

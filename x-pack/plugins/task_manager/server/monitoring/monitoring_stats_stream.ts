@@ -6,7 +6,7 @@
  */
 
 import { merge, of, Observable } from 'rxjs';
-import { map, scan } from 'rxjs/operators';
+import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
 import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
@@ -37,13 +37,11 @@ import {
 
 import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
-import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-
-export type { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 
 export interface MonitoringStats {
   last_update: string;
@@ -57,6 +55,7 @@ export interface MonitoringStats {
 }
 
 export enum HealthStatus {
+  Uninitialized = 'uninitialized',
   OK = 'OK',
   Warning = 'warn',
   Error = 'error',

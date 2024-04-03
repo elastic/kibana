@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body as MonitorFields;
+      return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {
@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
       monitors = _monitors;
     });
 
-    describe('get many monitors', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/169753
+    describe.skip('get many monitors', () => {
       it('without params', async () => {
         const [mon1, mon2] = await Promise.all(monitors.map(saveMonitor));
 
@@ -82,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         expect(foundMonitors.map((fm) => omit(fm, 'updated_at', 'created_at'))).eql(
-          expected.map(({ attributes }: any) => attributes)
+          expected.map((expectedMon) => omit(expectedMon, 'updated_at', 'created_at'))
         );
       });
 

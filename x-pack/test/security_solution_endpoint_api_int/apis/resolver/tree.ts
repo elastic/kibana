@@ -16,9 +16,11 @@ import {
   Tree,
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Options, GeneratedTrees } from '../../services/resolver';
 import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
+import { HEADERS } from '../../headers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -45,7 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('Resolver tree', () => {
+  describe('Resolver tree', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
@@ -59,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return the correct ancestor nodes for the tree', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -84,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should handle an invalid id', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -104,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return a subset of the ancestors', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -130,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return ancestors without the ancestry array', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -158,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
         ).toISOString();
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -185,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
         const bottomMostDescendant = Array.from(tree.childrenLevels[1].values())[0].id;
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -221,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
         const rightNode = level0Nodes[2].id;
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -252,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not return any nodes when the search index does not have any data', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,
@@ -274,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns all descendants for the origin without using the ancestry field', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 2,
@@ -303,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns all descendants for the origin using the ancestry field', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             // should be ignored when using the ancestry array
@@ -333,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should handle an invalid id', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 100,
@@ -356,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
         const childID = Array.from(tree.childrenLevels[0].values())[0].id;
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 1,
@@ -389,7 +393,7 @@ export default function ({ getService }: FtrProviderContext) {
         const rightNodeID = level0Nodes[2].id;
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 6,
             descendantLevels: 0,
@@ -422,7 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(originGrandparent).to.not.be('');
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 2,
             descendantLevels: 0,
@@ -459,7 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(originGrandparent).to.not.be('');
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 6,
             descendantLevels: 1,
@@ -495,7 +499,7 @@ export default function ({ getService }: FtrProviderContext) {
         ).toISOString();
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 5,
@@ -524,7 +528,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns all descendants and ancestors without the ancestry field and they should have the name field', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 10,
@@ -562,7 +566,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns all descendants and ancestors without the ancestry field', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 10,
@@ -600,7 +604,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns all descendants and ancestors with the ancestry field', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             descendantLevels: 10,
@@ -638,7 +642,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns an empty response when limits are zero', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             descendantLevels: 0,

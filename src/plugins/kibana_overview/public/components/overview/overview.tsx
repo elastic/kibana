@@ -8,6 +8,7 @@
 
 import { snakeCase } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -27,10 +28,6 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
-import {
   RedirectAppLinksContainer as RedirectAppLinks,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
@@ -40,6 +37,7 @@ import {
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -67,14 +65,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     docLinks,
     dataViews,
     share,
-    uiSettings,
     application,
     chrome,
     dataViewEditor,
     customBranding,
+    theme,
   } = services;
   const addBasePath = http.basePath.prepend;
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const currentTheme = useObservable(theme.theme$, { darkMode: false });
 
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
@@ -148,7 +146,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
               }}
               image={addBasePath(
                 `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
-                  IS_DARK_THEME ? 'dark' : 'light'
+                  currentTheme.darkMode ? 'dark' : 'light'
                 }.svg`
               )}
               title={app.title}
@@ -162,7 +160,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   };
 
   // Dashboard and discover are displayed in larger cards
-  const mainApps = ['dashboard', 'discover'];
+  const mainApps = ['dashboards', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   const onDataViewCreated = () => {
@@ -200,7 +198,24 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         },
       },
       dataViewEditor,
+      share,
     };
+
+    const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+    const AnalyticsNoDataPageKibanaProvider = withSuspense(
+      React.lazy(() =>
+        importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+          return { default: NoDataProvider };
+        })
+      )
+    );
+    const AnalyticsNoDataPage = withSuspense(
+      React.lazy(() =>
+        importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+          return { default: NoDataPage };
+        })
+      )
+    );
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>

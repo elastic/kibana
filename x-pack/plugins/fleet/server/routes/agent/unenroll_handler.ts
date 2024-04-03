@@ -55,6 +55,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
       revoke: request.body?.revoke,
       force: request.body?.force,
       batchSize: request.body?.batchSize,
+      showInactive: request.body?.includeInactive,
     });
 
     return response.ok({ body: { actionId: results.actionId } });

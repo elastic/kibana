@@ -66,7 +66,6 @@ describe('helpers', () => {
       const message: Message = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
-        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
         selectedPromptContexts: {
           [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
@@ -89,7 +88,6 @@ User prompt text`);
       const message: Message = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
-        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
         selectedPromptContexts: {
           [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
@@ -111,7 +109,6 @@ User prompt text`);
       const message: Message = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: false,
-        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
         selectedPromptContexts: {
           [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
@@ -131,7 +128,6 @@ User prompt text`);
       const message: Message = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
-        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
         selectedPromptContexts: {
           [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
@@ -146,7 +142,6 @@ User prompt text`);
       const message: Message = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
-        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
         selectedPromptContexts: {},
         selectedSystemPrompt: mockSystemPrompt,
@@ -156,8 +151,6 @@ User prompt text`);
     });
 
     describe('when there is data to anonymize', () => {
-      const onNewReplacements = jest.fn();
-
       const mockPromptContextWithDataToAnonymize: SelectedPromptContext = {
         allow: ['field1', 'field2'],
         allowReplacement: ['field1', 'field2'],
@@ -169,11 +162,10 @@ User prompt text`);
       };
 
       it('invokes `onNewReplacements` with the expected replacements', async () => {
-        await getCombinedMessage({
+        const message = await getCombinedMessage({
           currentReplacements: {},
           getAnonymizedValue: mockGetAnonymizedValue,
           isNewChat: true,
-          onNewReplacements,
           promptText: 'User prompt text',
           selectedPromptContexts: {
             [mockPromptContextWithDataToAnonymize.promptContextId]:
@@ -182,7 +174,7 @@ User prompt text`);
           selectedSystemPrompt: mockSystemPrompt,
         });
 
-        expect(onNewReplacements).toBeCalledWith({
+        expect(message.replacements).toEqual({
           elzoof: 'foozle',
           oof: 'foo',
           rab: 'bar',
@@ -197,7 +189,6 @@ User prompt text`);
           currentReplacements: {},
           getAnonymizedValue: mockGetAnonymizedValue,
           isNewChat,
-          onNewReplacements: jest.fn(),
           promptText: 'User prompt text',
           selectedPromptContexts: {},
           selectedSystemPrompt: mockSystemPrompt,

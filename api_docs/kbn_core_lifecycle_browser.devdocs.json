@@ -319,6 +319,50 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "{@link PluginsServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-common.PluginsServiceSetup",
+                "text": "PluginsServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "{@link SecurityServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.getStartServices",
             "type": "Function",
             "tags": [],
@@ -562,16 +606,8 @@
                 "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/plugin.ts"
-              },
-              {
                 "plugin": "home",
                 "path": "src/plugins/home/public/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/public/search/expressions/kibana_context.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -582,36 +618,8 @@
                 "path": "src/plugins/unified_search/public/types.ts"
               },
               {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/dashboards/dashboards_service.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/datasources/form_based/form_based.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
               },
               {
                 "plugin": "fileUpload",
@@ -628,6 +636,14 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/mount_management_section.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
               },
               {
                 "plugin": "discover",
@@ -821,8 +837,52 @@
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceStart",
-                "text": "ThemeServiceStart"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "{@link PluginsServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-contracts-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
+                "section": "def-common.PluginsServiceStart",
+                "text": "PluginsServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [
+              "{@link SecurityServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityBrowserPluginApi",
+                "section": "def-common.SecurityServiceStart",
+                "text": "SecurityServiceStart"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

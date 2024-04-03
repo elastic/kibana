@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
-import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
-export const categorizationFieldExamplesSchema = {
+export const categorizationFieldValidationSchema = {
   indexPatternTitle: schema.string(),
   query: schema.any(),
   size: schema.number(),
@@ -70,15 +70,12 @@ export const deleteJobsSchema = schema.object({
   /** List of job IDs. */
   jobIds: schema.arrayOf(schema.string()),
   deleteUserAnnotations: schema.maybe(schema.boolean()),
+  deleteAlertingRules: schema.maybe(schema.boolean()),
 });
 
 export const optionalJobIdsSchema = schema.object({
   /** Optional list of job IDs. */
   jobIds: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-export const jobsWithTimerangeSchema = schema.object({
-  dateFormatTz: schema.maybe(schema.string()),
 });
 
 export const lookBackProgressSchema = {

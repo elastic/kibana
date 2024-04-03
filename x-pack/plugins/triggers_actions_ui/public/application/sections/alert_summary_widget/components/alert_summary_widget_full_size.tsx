@@ -18,6 +18,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartProps } from '../types';
@@ -40,13 +41,18 @@ export const AlertSummaryWidgetFullSize = ({
   hideChart,
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
-    theme,
+    ...(theme ? [theme] : []),
     {
       chartPaddings: {
         top: 7,
       },
     },
   ];
+  const chartData = activeAlerts.map((alert) => alert.doc_count);
+  const domain = {
+    max: Math.max(...chartData) * 1.1, // add 10% headroom
+    min: Math.min(...chartData) * 0.9, // add 10% floor
+  };
 
   return (
     <EuiPanel
@@ -75,6 +81,7 @@ export const AlertSummaryWidgetFullSize = ({
               theme={chartTheme}
               baseTheme={baseTheme}
               onBrushEnd={onBrushEnd}
+              locale={i18n.getLocale()}
             />
             <Axis
               id="bottom"
@@ -84,7 +91,7 @@ export const AlertSummaryWidgetFullSize = ({
                 visible: true,
               }}
               style={{
-                tickLine: { size: 0.0001, padding: 4 },
+                tickLine: { size: 0, padding: 4 },
                 tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
               }}
             />
@@ -94,6 +101,7 @@ export const AlertSummaryWidgetFullSize = ({
               gridLine={{ visible: true }}
               integersOnly
               ticks={4}
+              domain={domain}
             />
             <Axis
               id="right"

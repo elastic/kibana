@@ -34,7 +34,7 @@ import {
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../../../sources/es_search_source';
-import { IESSource } from '../../../sources/es_source';
+import { hasESSourceMethod, isESVectorTileSource } from '../../../sources/es_source';
 import { InnerJoin } from '../../../joins/inner_join';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
@@ -75,6 +75,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
     const isSourceLoading = super.isLayerLoading(zoom);
     return isSourceLoading ? true : this._isLoadingJoins();
   }
@@ -87,10 +91,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     // Add filter to narrow bounds to features with matching join keys
     let joinKeyFilter;
-    if (this.getSource().isESSource()) {
+    const source = this.getSource();
+    if (hasESSourceMethod(source, 'getIndexPattern')) {
       const { join, joinPropertiesMap } = this._getJoinResults();
       if (join && joinPropertiesMap) {
-        const indexPattern = await (this.getSource() as IESSource).getIndexPattern();
+        const indexPattern = await source.getIndexPattern();
         const joinField = getField(indexPattern, join.getLeftField().getName());
         joinKeyFilter = buildPhrasesFilter(
           joinField,
@@ -116,7 +121,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
-    if (!this.getSource().isESSource()) {
+    if (!isESVectorTileSource(this.getSource())) {
       return feature.id;
     }
 
@@ -126,7 +131,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
-    if (!this.getSource().isESSource()) {
+    if (!isESVectorTileSource(this.getSource())) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
         icon: this.getCurrentStyle().getIcon(false),
@@ -139,7 +144,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // TODO ES MVT specific - move to es_tiled_vector_layer implementation
     //
     if (this.getSource().getType() === SOURCE_TYPES.ES_GEO_GRID) {
-      const { docCount } = getAggsMeta(this._getMetaFromTiles());
+      const { docCount } = getAggsMeta(this._getTileMetaFeatures());
       return docCount === 0
         ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT
         : {
@@ -159,7 +164,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
 
     const { totalFeaturesCount, tilesWithFeatures, tilesWithTrimmedResults } = getHitsMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       maxResultWindow
     );
 
@@ -224,47 +229,51 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
-      await this._syncMaxResultWindow(syncContext);
-    }
-    await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
-    await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
-    await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
-
-    let maxLineWidth = 0;
-    const lineWidth = this.getCurrentStyle()
-      .getAllStyleProperties()
-      .find((styleProperty) => {
-        return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
-      });
-    if (lineWidth) {
-      if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
-        maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
-      } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
-        maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+    try {
+      if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
+        await this._syncMaxResultWindow(syncContext);
       }
-    }
-    const buffer = Math.ceil(3.5 * maxLineWidth);
+      await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
-    await syncMvtSourceData({
-      buffer,
-      hasLabels: this.getCurrentStyle().hasLabels(),
-      layerId: this.getId(),
-      layerName: await this.getDisplayName(),
-      prevDataRequest: this.getSourceDataRequest(),
-      requestMeta: await this._getVectorSourceRequestMeta(
-        syncContext.isForceRefresh,
-        syncContext.dataFilters,
-        this.getSource(),
-        this.getCurrentStyle(),
-        syncContext.isFeatureEditorOpenForLayer
-      ),
-      source: this.getSource() as IMvtVectorSource,
-      syncContext,
-    });
+      let maxLineWidth = 0;
+      const lineWidth = this.getCurrentStyle()
+        .getAllStyleProperties()
+        .find((styleProperty) => {
+          return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
+        });
+      if (lineWidth) {
+        if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
+          maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
+        } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
+          maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+        }
+      }
+      const buffer = Math.ceil(3.5 * maxLineWidth);
 
-    if (this.hasJoins()) {
-      await this._syncJoins(syncContext, this.getCurrentStyle());
+      await syncMvtSourceData({
+        buffer,
+        hasLabels: this.getCurrentStyle().hasLabels(),
+        layerId: this.getId(),
+        layerName: await this.getDisplayName(),
+        prevDataRequest: this.getSourceDataRequest(),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          this.getSource(),
+          this.getCurrentStyle(),
+          syncContext.isFeatureEditorOpenForLayer
+        ),
+        source: this.getSource() as IMvtVectorSource,
+        syncContext,
+      });
+
+      if (this.hasJoins()) {
+        await this._syncJoins(syncContext, this.getCurrentStyle());
+      }
+    } catch (error) {
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
     }
   }
 
@@ -336,7 +345,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // When there are no join results, return a filter that hides all features
     // work around for 'match' with empty array not filtering out features
     // This filter always returns false because features will never have `__kbn_never_prop__` property
-    const hideAllFilter = ['has', '__kbn_never_prop__'];
+    const hideAllFilter = ['has', '__kbn_never_prop__'] as FilterSpecification;
 
     if (!joinPropertiesMap) {
       return hideAllFilter;
@@ -540,7 +549,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const { joinPropertiesMap } = this._getJoinResults();
     return await pluckStyleMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       joinPropertiesMap,
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()

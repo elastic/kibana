@@ -32,7 +32,7 @@ export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_
 
 export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
 
-export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker'));
+export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
 
 export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
@@ -41,6 +41,24 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
+
+const LazyDashboardDrilldownOptionsComponent = React.lazy(() =>
+  import('./dashboard_drilldown_options/dashboard_drilldown_options').then(
+    ({ DashboardDrilldownOptionsComponent }) => ({
+      default: DashboardDrilldownOptionsComponent,
+    })
+  )
+);
+
+export const DashboardDrilldownOptionsComponent = withSuspense(
+  LazyDashboardDrilldownOptionsComponent,
+  null
+);
+
+export {
+  type DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+} from './dashboard_drilldown_options/types';
 
 export { FloatingActions } from './floating_actions/floating_actions';
 

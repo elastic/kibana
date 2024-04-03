@@ -36,9 +36,9 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 import { SearchBarProps } from './types';
 
-const NoMatchesMessage = (props: { basePathUrl: string; darkMode: boolean }) => (
-  <PopoverPlaceholder darkMode={props.darkMode} basePath={props.basePathUrl} />
-);
+const NoMatchesMessage = (props: { basePathUrl: string }) => {
+  return <PopoverPlaceholder basePath={props.basePathUrl} />;
+};
 
 const EmptyMessage = () => (
   <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
@@ -268,7 +268,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   if (chromeStyle === 'project' && !isVisible) {
     return (
-      <EuiButtonIcon
+      <EuiHeaderSectionItemButton
         aria-label={i18nStrings.showSearchAriaText}
         buttonRef={visibilityButtonRef}
         color="text"
@@ -351,7 +351,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
-        buttonRef: setButtonRef,
+        popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={

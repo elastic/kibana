@@ -16,6 +16,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 
+import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,7 +28,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';
 
 describe('_disable_legacy_url_aliases', () => {
   const spacesSavedObjects = createSpaces();
@@ -65,7 +65,7 @@ describe('_disable_legacy_url_aliases', () => {
     });
 
     initDisableLegacyUrlAliasesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

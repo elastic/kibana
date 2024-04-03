@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
@@ -43,12 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const testDataList = [
@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
         resetRetentionPolicy: false,
+        retentionPolicyAvailable: false,
         transformRetentionPolicyField: 'order_date',
         transformRetentionPolicyMaxAge: '1d',
         numFailureRetries: '0',
@@ -84,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
         resetRetentionPolicy: true,
+        retentionPolicyAvailable: true,
         numFailureRetries: '7',
         expected: {
           messageText: 'updated transform.',
@@ -172,15 +174,19 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           await transform.testExecution.logTestStep('should update the transform retention policy');
-          await transform.editFlyout.clickTransformEditRetentionPolicySettings(
-            !testData.resetRetentionPolicy
-          );
 
+          await transform.editFlyout.assertTransformEditFlyoutRetentionPolicySwitchEnabled(
+            testData.retentionPolicyAvailable
+          );
           if (
-            !testData.resetRetentionPolicy &&
+            testData.retentionPolicyAvailable &&
             testData?.transformRetentionPolicyField &&
             testData?.transformRetentionPolicyMaxAge
           ) {
+            await transform.editFlyout.clickTransformEditRetentionPolicySettings(
+              !testData.resetRetentionPolicy
+            );
+
             await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(
               true
             );
@@ -242,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.table.assertTransformExpandedRowJson(
             'retention_policy',
-            !testData.resetRetentionPolicy
+            testData.retentionPolicyAvailable
           );
           await transform.table.assertTransformExpandedRowJson('updated description');
           await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);

@@ -44,6 +44,7 @@ interface RenderRuleNameProps {
   isButton?: boolean;
   onClick?: () => void;
   linkValue: string | null | undefined;
+  openInNewTab?: boolean;
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
@@ -61,6 +62,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   isButton,
   onClick,
   linkValue,
+  openInNewTab = false,
   truncate,
   title,
   value,
@@ -76,9 +78,10 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getRuleDetailsUrl(ruleId ?? '', search),
+        openInNewTab,
       });
     },
-    [navigateToApp, ruleId, search]
+    [navigateToApp, ruleId, search, openInNewTab]
   );
 
   const href = useMemo(
@@ -121,16 +124,22 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           {title ?? value}
         </Component>
       );
-    } else if (children) {
+    } else if (openInNewTab) {
       return (
-        <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="goToRuleDetails">
-          {children}
+        <LinkAnchor
+          onClick={goToRuleDetails}
+          href={href}
+          data-test-subj="goToRuleDetails"
+          target="_blank"
+          external={false}
+        >
+          {children ?? content}
         </LinkAnchor>
       );
     } else {
       return (
         <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="ruleName">
-          {content}
+          {children ?? content}
         </LinkAnchor>
       );
     }
@@ -146,6 +155,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     title,
     truncate,
     value,
+    openInNewTab,
   ]);
 
   if (isString(value) && ruleName.length > 0 && ruleId != null) {

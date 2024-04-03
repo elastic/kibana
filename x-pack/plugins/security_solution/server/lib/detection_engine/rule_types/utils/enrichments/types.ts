@@ -6,12 +6,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 import type { RuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 
@@ -26,7 +28,6 @@ export type EnrichmentFunction = <T extends BaseFieldsLatest>(
   e: EventsForEnrichment<T>
 ) => EventsForEnrichment<T>;
 
-//
 export interface EventsMapByEnrichments {
   [id: string]: EnrichmentFunction[];
 }
@@ -47,11 +48,6 @@ interface BasedEnrichParamters<T extends BaseFieldsLatest> {
   events: Array<EventsForEnrichment<T>>;
 }
 
-interface SingleMappingField {
-  eventField: string;
-  enrichmentField: string;
-}
-
 export type GetEventValue = <T extends BaseFieldsLatest>(
   events: EventsForEnrichment<T>,
   path: string
@@ -59,9 +55,10 @@ export type GetEventValue = <T extends BaseFieldsLatest>(
 
 export type GetFieldValue = (events: EnrichmentType, path: string) => string | undefined;
 
-export type MakeSingleFieldMatchQuery = <T extends BaseFieldsLatest>(params: {
+export type MakeSingleFieldMatchQuery = (params: {
   values: string[];
   searchByField: string;
+  extraFilters?: QueryDslQueryContainer[];
 }) => Filter;
 
 export type SearchEnrichments = (params: {
@@ -75,27 +72,47 @@ export type SearchEnrichments = (params: {
 export type GetIsRiskScoreAvailable = (params: {
   spaceId: string;
   services: RuleServices;
+  isNewRiskScoreModuleInstalled: boolean;
 }) => Promise<boolean>;
 
+export type IsIndexExist = (params: { services: RuleServices; index: string }) => Promise<boolean>;
+
 export type CreateRiskEnrichment = <T extends BaseFieldsLatest>(
+  params: BasedEnrichParamters<T> & {
+    spaceId: string;
+    isNewRiskScoreModuleInstalled: boolean;
+  }
+) => Promise<EventsMapByEnrichments>;
+
+export type CreateCriticalityEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
   }
 ) => Promise<EventsMapByEnrichments>;
 
+export type CreateEnrichmentFunction = (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+
 export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     name: string;
     index: string[];
-    mappingField: SingleMappingField;
+    mappingField: {
+      /** The field on events which contains the value we'll use to build a query. */
+      eventField: string;
+      /** Used in a `match` query to find documents that match the values of `eventField`. */
+      enrichmentField: string;
+    };
+    /** Specifies which fields should be returned when querying the enrichment index. */
     enrichmentResponseFields: string[];
-    createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+    createEnrichmentFunction: CreateEnrichmentFunction;
+    extraFilters?: QueryDslQueryContainer[];
   }
 ) => Promise<EventsMapByEnrichments>;
 
 export type EnrichEventsFunction = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     spaceId: string;
+    experimentalFeatures?: ExperimentalFeatures;
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
@@ -106,7 +123,8 @@ export type CreateEnrichEventsFunction = (params: {
 
 export type EnrichEvents = <T extends BaseFieldsLatest>(
   alerts: Array<EventsForEnrichment<T>>,
-  params: { spaceId: string }
+  params: { spaceId: string },
+  experimentalFeatures?: ExperimentalFeatures
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
 interface Risk {

@@ -22,6 +22,8 @@ export const mockDataQualityCheckResult: Record<string, DataQualityCheckResult> 
       '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2),\n`theory` (1) |\n\n',
     ],
     pattern: 'auditbeat-*',
+    sameFamily: 0,
+    checkedAt: 1706526408000,
   },
   'auditbeat-7.9.3-2023.02.13-000001': {
     docsCount: 2438,
@@ -37,5 +39,7 @@ export const mockDataQualityCheckResult: Record<string, DataQualityCheckResult> 
       '\n#### Incompatible field mappings - auditbeat-7.9.3-2023.02.13-000001\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| error.message | `match_only_text` | `text` `same family` |\n| error.stack_trace | `wildcard` | `keyword` `same family` |\n| http.request.body.content | `wildcard` | `keyword` `same family` |\n| http.response.body.content | `wildcard` | `keyword` `same family` |\n| message | `match_only_text` | `text` `same family` |\n| process.command_line | `wildcard` | `keyword` `same family` |\n| process.parent.command_line | `wildcard` | `keyword` `same family` |\n| registry.data.strings | `wildcard` | `keyword` `same family` |\n| url.full | `wildcard` | `keyword` `same family` |\n| url.original | `wildcard` | `keyword` `same family` |\n| url.path | `wildcard` | `keyword` `same family` |\n\n#### Incompatible field values - auditbeat-7.9.3-2023.02.13-000001\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.kind | `alert`, `enrichment`, `event`, `metric`, `state`, `pipeline_error`, `signal` | `error` (7) |\n\n',
     ],
     pattern: 'auditbeat-*',
+    sameFamily: 0,
+    checkedAt: 1706526408000,
   },
 };

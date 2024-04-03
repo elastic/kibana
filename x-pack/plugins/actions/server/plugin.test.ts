@@ -15,6 +15,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import { ActionsConfig } from './config';
 import {
@@ -23,7 +24,12 @@ import {
   ActionsPluginsStart,
   PluginSetupContract,
 } from './plugin';
-import { AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  AlertHistoryEsIndexConnectorId,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -50,6 +56,9 @@ function getConfig(overrides = {}) {
     maxResponseContentLength: new ByteSizeValue(1000000),
     responseTimeout: moment.duration('60s'),
     enableFooterInEmail: true,
+    microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+    microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+    microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     ...overrides,
   };
 }
@@ -72,6 +81,9 @@ describe('Actions Plugin', () => {
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
+        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -237,7 +249,7 @@ describe('Actions Plugin', () => {
          * that got set up on start (step 3).
          */
         // @ts-expect-error: inMemoryConnectors can be accessed
-        expect(actionsContextHandler.getActionsClient().inMemoryConnectors).toEqual([
+        expect(actionsContextHandler.getActionsClient().context.inMemoryConnectors).toEqual([
           {
             id: 'preconfiguredServerLog',
             actionTypeId: '.server-log',
@@ -348,6 +360,163 @@ describe('Actions Plugin', () => {
         expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
       });
     });
+
+    describe('setEnabledConnectorTypes (works only on serverless)', () => {
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+          serverless: serverlessPluginMock.createSetupContract(),
+        };
+      }
+
+      it('should set connector type enabled', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.slack',
+          name: 'Slack',
+          minimumLicenseRequired: 'gold',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['.server-log']);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
+      });
+
+      it('should set all the connector types enabled when null or ["*"] passed', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.index',
+          name: 'Index',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes(['*']);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
+        expect(pluginStart.isActionTypeEnabled('.index')).toBeTruthy();
+      });
+
+      it('should set all the connector types disabled when [] passed', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        const coreStart = coreMock.createStart();
+        const pluginsStart = {
+          licensing: licensingMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+        };
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.registerType({
+          id: '.index',
+          name: 'Index',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        });
+        pluginSetup.setEnabledConnectorTypes([]);
+        expect(pluginStart.isActionTypeEnabled('.server-log')).toBeFalsy();
+        expect(pluginStart.isActionTypeEnabled('.index')).toBeFalsy();
+      });
+
+      it('should throw if the enabledActionTypes is already set by the config', async () => {
+        setup({ ...getConfig(), enabledActionTypes: ['.email'] });
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(() => pluginSetup.setEnabledConnectorTypes(['.index'])).toThrow(
+          "Enabled connector types can be set only if they haven't already been set in the config"
+        );
+      });
+    });
   });
 
   describe('start()', () => {
@@ -376,6 +545,9 @@ describe('Actions Plugin', () => {
         maxResponseContentLength: new ByteSizeValue(1000000),
         responseTimeout: moment.duration(60000),
         enableFooterInEmail: true,
+        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -394,6 +566,41 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         eventLog: eventLogMock.createStart(),
       };
+    });
+
+    it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
+      const pluginSetup = await plugin.setup(coreSetup, {
+        ...pluginsSetup,
+        encryptedSavedObjects: {
+          ...pluginsSetup.encryptedSavedObjects,
+          canEncrypt: true,
+        },
+        serverless: serverlessPluginMock.createSetupContract(),
+      });
+
+      pluginSetup.registerType({
+        id: '.server-log',
+        name: 'Server log',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
+
+      await expect(async () =>
+        plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"non-existing\\" is not registered."`
+      );
     });
 
     describe('getActionsClientWithRequest()', () => {
@@ -524,7 +731,7 @@ describe('Actions Plugin', () => {
       });
 
       describe('System actions', () => {
-        it('should handle system actions', async () => {
+        it('should set system actions correctly', async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -572,6 +779,45 @@ describe('Actions Plugin', () => {
             },
           ]);
           expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.cases')).toBe(true);
+        });
+
+        it('should throw if a system action type is set in preconfigured connectors', async () => {
+          setup(
+            getConfig({
+              preconfigured: {
+                preconfiguredServerLog: {
+                  actionTypeId: 'test.system-action',
+                  name: 'preconfigured-system-action',
+                  config: {},
+                  secrets: {},
+                },
+              },
+            })
+          );
+
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+          pluginSetup.registerType({
+            id: 'test.system-action',
+            name: 'Test',
+            minimumLicenseRequired: 'platinum',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
+            },
+            isSystemActionType: true,
+            executor,
+          });
+
+          await expect(async () =>
+            plugin.start(coreStart, pluginsStart)
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Setting system action types in preconfigured connectors are not allowed"`
+          );
         });
       });
     });
@@ -648,6 +894,54 @@ describe('Actions Plugin', () => {
           },
         });
         expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
+      });
+    });
+
+    describe('isSystemActionConnector()', () => {
+      it('should return true if the connector is a system connector', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        expect(pluginStart.isSystemActionConnector('system-connector-.cases')).toBe(true);
+      });
+
+      it('should return false if the connector is not a system connector', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        expect(pluginStart.isSystemActionConnector('preconfiguredServerLog')).toBe(false);
       });
     });
   });

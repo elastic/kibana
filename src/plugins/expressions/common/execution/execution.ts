@@ -26,7 +26,7 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
 import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
@@ -420,18 +420,20 @@ export class Execution<
             : of(resolvedArgs);
 
           return args$.pipe(
-            tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
+            tap((args) => this.execution.params.debug && Object.assign(head.debug ?? {}, { args })),
             switchMap((args) => this.invokeFunction(fn, input, args)),
             this.execution.params.partial ? identity : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
+            tap(
+              (output) => this.execution.params.debug && Object.assign(head.debug ?? {}, { output })
+            ),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
             catchError((rawError) => {
               const error = createError(rawError);
               error.error.message = `[${fnName}] > ${error.error.message}`;
 
               if (this.execution.params.debug) {
-                Object.assign(head.debug, { error, rawError, success: false });
+                Object.assign(head.debug ?? {}, { error, rawError, success: false });
               }
 
               return of(error);
@@ -440,7 +442,7 @@ export class Execution<
         }),
         finalize(() => {
           if (this.execution.params.debug) {
-            Object.assign(head.debug, { duration: now() - timeStart });
+            Object.assign(head.debug ?? {}, { duration: now() - timeStart });
           }
         })
       );

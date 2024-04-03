@@ -11,7 +11,13 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import {
+  ActionsConfig,
+  AllowedHosts,
+  EnabledActionTypes,
+  CustomHostSettings,
+  DEFAULT_QUEUED_MAX,
+} from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, SSLSettings } from './types';
@@ -41,7 +47,9 @@ export interface ActionsConfigurationUtilities {
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
-  getMicrosoftGraphApiUrl: () => undefined | string;
+  getMicrosoftGraphApiUrl: () => string;
+  getMicrosoftGraphApiScope: () => string;
+  getMicrosoftExchangeUrl: () => string;
   getMaxAttempts: ({
     actionTypeMaxAttempts,
     actionTypeId,
@@ -54,6 +62,7 @@ export interface ActionsConfigurationUtilities {
     options?: ValidateEmailAddressesOptions
   ): string | undefined;
   enableFooterInEmail: () => boolean;
+  getMaxQueued: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -120,8 +129,16 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
   };
 }
 
-function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | string {
+function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): string {
   return config.microsoftGraphApiUrl;
+}
+
+function getMicrosoftGraphApiScopeFromConfig(config: ActionsConfig): string {
+  return config.microsoftGraphApiScope;
+}
+
+function getMicrosoftExchangeUrlFromConfig(config: ActionsConfig): string {
+  return config.microsoftExchangeUrl;
 }
 
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
@@ -202,6 +219,8 @@ export function getActionsConfigurationUtilities(
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
+    getMicrosoftGraphApiScope: () => getMicrosoftGraphApiScopeFromConfig(config),
+    getMicrosoftExchangeUrl: () => getMicrosoftExchangeUrlFromConfig(config),
     validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
       validatedEmailCurried(addresses, options),
     getMaxAttempts: ({ actionTypeMaxAttempts, actionTypeId }) => {
@@ -217,5 +236,6 @@ export function getActionsConfigurationUtilities(
       );
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
+    getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
   };
 }

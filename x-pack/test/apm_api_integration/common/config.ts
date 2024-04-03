@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  ApmUsername,
-  APM_TEST_PASSWORD,
-} from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
+import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
@@ -40,7 +37,7 @@ async function getApmApiClient({
 }) {
   const url = format({
     ...kibanaServer,
-    auth: `${username}:${APM_TEST_PASSWORD}`,
+    auth: `${username}:${kbnTestConfig.getUrlParts().password}`,
   });
 
   return createApmApiClient(supertest(url));

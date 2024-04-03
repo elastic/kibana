@@ -656,6 +656,61 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.getFrequentlyChangingActionsForTrigger",
+            "type": "Function",
+            "tags": [],
+            "label": "getFrequentlyChangingActionsForTrigger",
+            "description": [],
+            "signature": [
+              "(triggerId: string, context: object) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]"
+            ],
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.getFrequentlyChangingActionsForTrigger.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.getFrequentlyChangingActionsForTrigger.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "object"
+                ],
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.executeTriggerActions",
             "type": "Function",
             "tags": [
@@ -684,6 +739,10 @@
               },
               {
                 "plugin": "discover",
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
+              },
+              {
+                "plugin": "discover",
                 "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
               },
               {
@@ -696,7 +755,7 @@
               },
               {
                 "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+                "path": "src/plugins/embeddable/public/tests/helpers.ts"
               },
               {
                 "plugin": "embeddable",
@@ -1269,6 +1328,109 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.Action.subscribeToCompatibilityChanges",
+            "type": "Function",
+            "tags": [],
+            "label": "subscribeToCompatibilityChanges",
+            "description": [
+              "\nAllows this action to call a method when its compatibility changes."
+            ],
+            "signature": [
+              "((context: Context, onChange: (isCompatible: boolean, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<Context>) => void) => ",
+              "Subscription",
+              " | undefined) | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.Action.subscribeToCompatibilityChanges.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.Action.subscribeToCompatibilityChanges.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(isCompatible: boolean, action: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Action",
+                    "text": "Action"
+                  },
+                  "<Context>) => void"
+                ],
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a subscription that can be used to unsubscribe from the changes."
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.Action.couldBecomeCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "couldBecomeCompatible",
+            "description": [
+              "\nDetermines if action could become compatible given the context. If present,\nit should be much more lenient than `isCompatible` and return true if there\nis any chance that `isCompatible` could return true in the future."
+            ],
+            "signature": [
+              "((context: Context) => boolean) | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.Action.couldBecomeCompatible.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.Action.disabled",
             "type": "CompoundType",
             "tags": [],
@@ -1543,6 +1705,109 @@
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges",
+            "type": "Function",
+            "tags": [],
+            "label": "subscribeToCompatibilityChanges",
+            "description": [
+              "\nAllows this action to call a method when its compatibility changes."
+            ],
+            "signature": [
+              "((context: Context, onChange: (isCompatible: boolean, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<Context>) => void) => ",
+              "Subscription",
+              " | undefined) | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(isCompatible: boolean, action: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.Action",
+                    "text": "Action"
+                  },
+                  "<Context>) => void"
+                ],
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a subscription that can be used to unsubscribe from the changes."
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionDefinition.couldBecomeCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "couldBecomeCompatible",
+            "description": [
+              "\nDetermines if action could become compatible given the context. If present,\nit should be much more lenient than `isCompatible` and return true if there\nis any chance that `isCompatible` could return true in the future."
+            ],
+            "signature": [
+              "((context: Context) => boolean) | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.ActionDefinition.couldBecomeCompatible.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "Context"
+                ],
+                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1624,74 +1889,6 @@
               }
             ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.CategorizeFieldContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "CategorizeFieldContext",
-        "description": [],
-        "path": "src/plugins/ui_actions/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.CategorizeFieldContext.field",
-            "type": "Object",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              }
-            ],
-            "path": "src/plugins/ui_actions/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.CategorizeFieldContext.dataView",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              }
-            ],
-            "path": "src/plugins/ui_actions/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.CategorizeFieldContext.originatingApp",
-            "type": "string",
-            "tags": [],
-            "label": "originatingApp",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1961,56 +2158,6 @@
       },
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.RowClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "RowClickContext",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.RowClickContext.embeddable",
-            "type": "Unknown",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.RowClickContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ rowIndex: number; table: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              "; columns?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
         "id": "def-public.Trigger",
         "type": "Interface",
         "tags": [],
@@ -2217,7 +2364,7 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
@@ -2232,6 +2379,27 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.textBasedColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "textBasedColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[] | undefined"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
@@ -2278,21 +2446,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.ACTION_CATEGORIZE_FIELD",
-        "type": "string",
-        "tags": [],
-        "label": "ACTION_CATEGORIZE_FIELD",
-        "description": [],
-        "signature": [
-          "\"ACTION_CATEGORIZE_FIELD\""
-        ],
-        "path": "src/plugins/ui_actions/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "uiActions",
         "id": "def-public.ACTION_VISUALIZE_FIELD",
@@ -2364,15 +2517,30 @@
       },
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.CATEGORIZE_FIELD_TRIGGER",
-        "type": "string",
+        "id": "def-public.FrequentCompatibilityChangeAction",
+        "type": "Type",
         "tags": [],
-        "label": "CATEGORIZE_FIELD_TRIGGER",
+        "label": "FrequentCompatibilityChangeAction",
         "description": [],
         "signature": [
-          "\"CATEGORIZE_FIELD_TRIGGER\""
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<Context> & Required<Pick<",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<Context>, \"subscribeToCompatibilityChanges\" | \"couldBecomeCompatible\">>"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2416,6 +2584,37 @@
       },
       {
         "parentPluginId": "uiActions",
+        "id": "def-public.RowClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RowClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { rowIndex: number; table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; columns?: string[] | undefined; }; }"
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
         "id": "def-public.VISUALIZE_FIELD_TRIGGER",
         "type": "string",
         "tags": [],
@@ -2448,53 +2647,6 @@
     "objects": [
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.categorizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "categorizeFieldTrigger",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.categorizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.categorizeFieldTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.categorizeFieldTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/categorize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
         "id": "def-public.rowClickTrigger",
         "type": "Object",
         "tags": [],
@@ -2518,13 +2670,10 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2532,13 +2681,10 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.rowClickTrigger.description",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2643,21 +2789,21 @@
     ],
     "setup": {
       "parentPluginId": "uiActions",
-      "id": "def-public.UiActionsSetup",
+      "id": "def-public.UiActionsPublicSetup",
       "type": "Type",
       "tags": [],
-      "label": "UiActionsSetup",
+      "label": "UiActionsPublicSetup",
       "description": [],
       "signature": [
-        "{ readonly addTriggerAction: (triggerId: string, action: ",
+        "{ readonly registerTrigger: (trigger: ",
         {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
+          "pluginId": "@kbn/ui-actions-browser",
+          "scope": "common",
+          "docId": "kibKbnUiActionsBrowserPluginApi",
+          "section": "def-common.Trigger",
+          "text": "Trigger"
         },
-        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+        ") => void; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2673,15 +2819,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
-          "pluginId": "@kbn/ui-actions-browser",
-          "scope": "common",
-          "docId": "kibKbnUiActionsBrowserPluginApi",
-          "section": "def-common.Trigger",
-          "text": "Trigger"
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
         },
-        ") => void; readonly unregisterAction: (actionId: string) => void; }"
+        "<any>) => void; }"
       ],
       "path": "src/plugins/ui_actions/public/plugin.ts",
       "deprecated": false,
@@ -2691,21 +2837,23 @@
     },
     "start": {
       "parentPluginId": "uiActions",
-      "id": "def-public.UiActionsStart",
+      "id": "def-public.UiActionsPublicStart",
       "type": "Type",
       "tags": [],
-      "label": "UiActionsStart",
+      "label": "UiActionsPublicStart",
       "description": [],
       "signature": [
-        "{ readonly addTriggerAction: (triggerId: string, action: ",
+        "{ readonly registerTrigger: (trigger: ",
         {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.ActionDefinition",
-          "text": "ActionDefinition"
+          "pluginId": "@kbn/ui-actions-browser",
+          "scope": "common",
+          "docId": "kibKbnUiActionsBrowserPluginApi",
+          "section": "def-common.Trigger",
+          "text": "Trigger"
         },
-        "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+        ") => void; readonly getTrigger: (triggerId: string) => ",
+        "TriggerContract",
+        "<object>; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2721,17 +2869,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerTrigger: (trigger: ",
+        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
-          "pluginId": "@kbn/ui-actions-browser",
-          "scope": "common",
-          "docId": "kibKbnUiActionsBrowserPluginApi",
-          "section": "def-common.Trigger",
-          "text": "Trigger"
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
         },
-        ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-        "TriggerContract",
-        "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+        "<any>) => void; readonly getAction: (id: string) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2755,7 +2901,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.FrequentCompatibilityChangeAction",
+          "text": "FrequentCompatibilityChangeAction"
+        },
+        "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
         {
           "pluginId": "uiActions",
           "scope": "public",

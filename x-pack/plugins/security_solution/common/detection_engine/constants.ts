@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+
 export enum RULE_PREVIEW_INVOCATION_COUNT {
   HOUR = 12,
   DAY = 24,
@@ -32,3 +34,14 @@ export const PREBUILT_RULES_PACKAGE_NAME = 'security_detection_engine';
  * Rule signature id (`rule.rule_id`) of the prebuilt "Endpoint Security" rule.
  */
 export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
+
+export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY = 'suppress' as const;
+
+export const MINIMUM_LICENSE_FOR_SUPPRESSION = 'platinum' as const;
+
+export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
+  'threshold',
+  'saved_query',
+  'query',
+  'threat_match',
+];

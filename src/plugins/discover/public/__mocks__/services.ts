@@ -11,7 +11,13 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { chromeServiceMock, coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import {
+  chromeServiceMock,
+  coreMock,
+  docLinksServiceMock,
+  scopedHistoryMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -22,7 +28,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
   SEARCH_ON_PAGE_LOAD_SETTING,
-} from '../../common';
+} from '@kbn/discover-utils';
 import {
   UI_SETTINGS,
   calculateBounds,
@@ -37,6 +43,7 @@ import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { urlTrackerMock } from './url_tracker.mock';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -133,9 +140,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ...uiSettingsMock,
   };
 
-  const theme = {
-    theme$: of({ darkMode: false }),
-  };
+  const theme = themeServiceMock.createSetupContract({ darkMode: false });
 
   corePluginMock.theme = theme;
 
@@ -143,12 +148,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
     chrome: chromeServiceMock.createStartContract(),
-    history: () => ({
+    history: {
       location: {
         search: '',
       },
       listen: jest.fn(),
-    }),
+    },
+    getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
     docLinks: docLinksServiceMock.createStartContract(),
     capabilities: {
@@ -221,9 +227,12 @@ export function createDiscoverServicesMock(): DiscoverServices {
       useUrl: jest.fn(() => ''),
       navigate: jest.fn(),
       getUrl: jest.fn(() => Promise.resolve('')),
+      getRedirectUrl: jest.fn(() => ''),
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
+    urlTracker: urlTrackerMock,
+    setHeaderActionMenu: jest.fn(),
   } as unknown as DiscoverServices;
 }
 

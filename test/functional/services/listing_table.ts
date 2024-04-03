@@ -10,7 +10,12 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 type AppName = keyof typeof PREFIX_MAP;
-const PREFIX_MAP = { visualize: 'vis', dashboard: 'dashboard', map: 'map' };
+const PREFIX_MAP = {
+  visualize: 'vis',
+  dashboard: 'dashboard',
+  map: 'map',
+  eventAnnotation: 'eventAnnotation',
+};
 
 export class ListingTableService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -18,7 +23,6 @@ export class ListingTableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
@@ -39,12 +43,18 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Set search input value on landing page
+   */
+  public async setSearchFilterValue(value: string) {
+    const searchFilter = await this.getSearchFilter();
+    searchFilter.type(value);
+  }
+
+  /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    const searchFilter = await this.getSearchFilter();
-    await searchFilter.clearValue();
-    await searchFilter.click();
+    this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -59,9 +69,14 @@ export class ListingTableService extends FtrService {
 
   private async getAllSelectableItemsNamesOnCurrentPage(): Promise<string[]> {
     const visualizationNames = [];
-    const links = await this.find.allByCssSelector('.euiTableRow-isSelectable .euiLink');
-    for (let i = 0; i < links.length; i++) {
-      visualizationNames.push(await links[i].getVisibleText());
+    // TODO - use .euiTableRow-isSelectable when it's working again (https://github.com/elastic/eui/issues/7515)
+    const rows = await this.find.allByCssSelector('.euiTableRow');
+    for (let i = 0; i < rows.length; i++) {
+      const checkbox = await rows[i].findByCssSelector('.euiCheckbox__input');
+      if (await checkbox.isEnabled()) {
+        const link = await rows[i].findByCssSelector('.euiLink');
+        visualizationNames.push(await link.getVisibleText());
+      }
     }
     this.log.debug(`Found ${visualizationNames.length} selectable visualizations on current page`);
     return visualizationNames;
@@ -78,7 +93,6 @@ export class ListingTableService extends FtrService {
       } else {
         throw new Error('Waiting');
       }
-      await this.header.waitUntilLoadingHasFinished();
     });
   }
 
@@ -149,12 +163,55 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Open the inspect flyout
+   */
+  public async inspectVisualization(index: number = 0) {
+    const inspectButtons = await this.testSubjects.findAll('inspect-action');
+    await inspectButtons[index].click();
+  }
+
+  public async inspectorFieldsReadonly() {
+    const disabledValues = await Promise.all([
+      this.testSubjects.getAttribute('nameInput', 'readonly'),
+      this.testSubjects.getAttribute('descriptionInput', 'readonly'),
+    ]);
+
+    return disabledValues.every((value) => value === 'true');
+  }
+
+  public async closeInspector() {
+    await this.testSubjects.click('closeFlyoutButton');
+  }
+
+  /**
+   * Edit Visualization title and description in the flyout
+   */
+  public async editVisualizationDetails(
+    { title, description }: { title?: string; description?: string } = {},
+    shouldSave: boolean = true
+  ) {
+    if (title) {
+      await this.testSubjects.setValue('nameInput', title);
+    }
+    if (description) {
+      await this.testSubjects.setValue('descriptionInput', description);
+    }
+    if (shouldSave) {
+      await this.retry.try(async () => {
+        await this.testSubjects.click('saveButton');
+        await this.testSubjects.missingOrFail('flyoutTitle');
+      });
+    }
+  }
+
+  /**
    * Returns items count on landing page
    */
-  public async expectItemsCount(appName: AppName, count: number) {
+  public async expectItemsCount(appName: AppName, count: number, findTimeout?: number) {
     await this.retry.try(async () => {
       const elements = await this.find.allByCssSelector(
-        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`
+        `[data-test-subj^="${PREFIX_MAP[appName]}ListingTitleLink"]`,
+        findTimeout ?? 10000
       );
       expect(elements.length).to.equal(count);
     });

@@ -18,7 +18,11 @@ export const textBasedLanguagedEditorStyles = (
   editorHeight: number,
   isCodeEditorExpanded: boolean,
   hasErrors: boolean,
-  isCodeEditorExpandedFocused: boolean
+  hasWarning: boolean,
+  isCodeEditorExpandedFocused: boolean,
+  hasReference: boolean,
+  editorIsInline: boolean,
+  historyIsOpen: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -31,7 +35,9 @@ export const textBasedLanguagedEditorStyles = (
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
-      borderTopLeftRadius: isCodeEditorExpanded ? 0 : '6px',
+      borderLeft: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderTopLeftRadius: isCodeEditorExpanded ? 0 : euiTheme.border.radius.medium,
       borderBottom: isCodeEditorExpanded
         ? 'none'
         : isCompactFocused
@@ -40,18 +46,18 @@ export const textBasedLanguagedEditorStyles = (
     },
     resizableContainer: {
       display: 'flex',
-      width: isCodeEditorExpanded ? '100%' : 'calc(100% - 80px)',
+      width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 80 : 40}px)`,
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
-      borderTopLeftRadius: '6px',
-      borderBottomLeftRadius: '6px',
+      borderTopLeftRadius: euiTheme.border.radius.medium,
+      borderBottomLeftRadius: euiTheme.border.radius.medium,
       borderBottomWidth: hasErrors ? '2px' : '1px',
       borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
     },
     linesBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
       zIndex: 1,
-      right: hasErrors ? '60px' : '12px',
+      right: hasErrors || hasWarning ? '60px' : '12px',
       top: '50%',
       transform: 'translate(0, -50%)',
     },
@@ -63,7 +69,8 @@ export const textBasedLanguagedEditorStyles = (
       transform: 'translate(0, -50%)',
     },
     bottomContainer: {
-      border: euiTheme.border.thin,
+      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       borderTop:
         isCodeEditorExpanded && !isCodeEditorExpandedFocused
           ? hasErrors
@@ -73,29 +80,43 @@ export const textBasedLanguagedEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: euiTheme.size.xs,
-      paddingBottom: euiTheme.size.xs,
+      paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      borderBottomLeftRadius: '6px',
-      borderBottomRightRadius: '6px',
+      borderBottomLeftRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
+      borderBottomRightRadius: editorIsInline || historyIsOpen ? 0 : euiTheme.border.radius.medium,
+    },
+    historyContainer: {
+      border: euiTheme.border.thin,
+      borderTop: `2px solid ${euiTheme.colors.lightShade}`,
+      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.lightestShade,
+      width: 'calc(100% + 2px)',
+      position: 'relative' as 'relative', // cast string to type 'relative',
+      marginTop: 0,
+      marginLeft: 0,
+      marginBottom: 0,
+      borderBottomLeftRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
+      borderBottomRightRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
     },
     topContainer: {
-      border: euiTheme.border.thin,
-      borderTopLeftRadius: '6px',
-      borderTopRightRadius: '6px',
+      border: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderTopLeftRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
+      borderTopRightRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: euiTheme.size.xs,
-      paddingBottom: euiTheme.size.xs,
+      paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,
-      marginTop: euiTheme.size.s,
+      marginTop: editorIsInline ? 0 : euiTheme.size.s,
     },
     dragResizeContainer: {
       width: '100%',

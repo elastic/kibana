@@ -6,17 +6,15 @@
  */
 
 import type { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
-import type {
-  CtiEventEnrichmentRequestOptions,
-  CtiEventEnrichmentStrategyResponse,
-} from '../../../../../common/search_strategy/security_solution/cti';
+import { isRunningResponse } from '@kbn/data-plugin/common';
+import type { EventEnrichmentRequestOptionsInput } from '../../../../../common/api/search_strategy';
+import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy/security_solution/cti';
 import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';
 
-type GetEventEnrichmentProps = CtiEventEnrichmentRequestOptions & {
+type GetEventEnrichmentProps = Omit<EventEnrichmentRequestOptionsInput, 'factoryQueryType'> & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
@@ -29,7 +27,7 @@ export const getEventEnrichment = ({
   timerange,
   signal,
 }: GetEventEnrichmentProps): Observable<CtiEventEnrichmentStrategyResponse> =>
-  data.search.search<CtiEventEnrichmentRequestOptions, CtiEventEnrichmentStrategyResponse>(
+  data.search.search<EventEnrichmentRequestOptionsInput, CtiEventEnrichmentStrategyResponse>(
     {
       defaultIndex,
       eventFields,
@@ -46,6 +44,4 @@ export const getEventEnrichment = ({
 export const getEventEnrichmentComplete = (
   props: GetEventEnrichmentProps
 ): Observable<CtiEventEnrichmentStrategyResponse> =>
-  getEventEnrichment(props).pipe(
-    filter((response) => isErrorResponse(response) || isCompleteResponse(response))
-  );
+  getEventEnrichment(props).pipe(filter((response) => !isRunningResponse(response)));

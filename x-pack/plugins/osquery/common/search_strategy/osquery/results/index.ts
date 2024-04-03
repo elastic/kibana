@@ -21,5 +21,6 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
 export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
   actionId: string;
   agentId?: string;
+  startDate?: string;
   sort: SortField[];
 }

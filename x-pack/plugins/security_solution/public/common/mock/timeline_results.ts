@@ -9,16 +9,16 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/types/timeline/api';
+import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import type { TimelineModel } from '../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import type { TimelineModel } from '../../timelines/store/model';
+import { timelineDefaults } from '../../timelines/store/defaults';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -1947,6 +1947,11 @@ const mockTimelineModelColumns: TimelineModel['columns'] = [
     id: 'user.name',
     initialWidth: 180,
   },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'kibana.alert.workflow_assignee_ids',
+    initialWidth: 180,
+  },
 ];
 export const mockTimelineModel: TimelineModel = {
   activeTab: TimelineTabs.query,
@@ -2026,6 +2031,10 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
+  savedSearchId: null,
+  savedSearch: null,
+  isDataProviderVisible: false,
+  sampleSize: 500,
 };
 
 export const mockDataTableModel: DataTableModel = {
@@ -2205,6 +2214,11 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
+    savedSearchId: null,
+    savedSearch: null,
+    isDataProviderVisible: false,
+    sampleSize: 500,
+    rowHeight: 3,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

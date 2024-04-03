@@ -13,11 +13,7 @@ import { TimelineId } from '../../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import {
-  KibanaServices,
-  useKibana,
-  useGetUserCasesPermissions,
-} from '../../../../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
@@ -52,7 +48,7 @@ jest.mock(
   '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
   () => {
     return {
-      useHostIsolationStatus: jest.fn().mockReturnValue({
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
         loading: false,
         isIsolated: false,
         agentStatus: 'healthy',
@@ -70,12 +66,6 @@ jest.mock('../../../../../detections/components/user_info', () => ({
 }));
 
 jest.mock('../../../../../common/lib/kibana');
-const originalKibanaLib = jest.requireActual('../../../../../common/lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock(
   '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
@@ -132,6 +122,15 @@ describe('event details footer component', () => {
           query: jest.fn(),
         },
         cases: mockCasesContract(),
+        application: {
+          ...coreStartMock.application,
+          capabilities: {
+            ...coreStartMock.application.capabilities,
+            siem: {
+              crudEndpointExceptions: true,
+            },
+          },
+        },
       },
     });
   });

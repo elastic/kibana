@@ -114,9 +114,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await testSubjects.click('discoverQueryHits'); // to cancel out tooltips
         const actualInterval = await PageObjects.discover.getChartInterval();
 
-        const expectedInterval = 'Auto';
+        const expectedInterval = 'auto';
         expect(actualInterval).to.be(expectedInterval);
       });
 
@@ -126,6 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should reload the saved search with persisted query to show the initial hit count', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         // apply query some changes
         await queryBar.setQuery('test');
         await queryBar.submitQuery();
@@ -135,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // reset to persisted state
         await queryBar.clearQuery();
-        await PageObjects.discover.clickResetSavedSearchButton();
+        await PageObjects.discover.revertUnsavedChanges();
         const expectedHitCount = '14,004';
         await retry.try(async function () {
           expect(await queryBar.getQueryString()).to.be('');
@@ -168,7 +171,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show matches when time range is expanded', async () => {
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.try(async function () {
           expect(await PageObjects.discover.hasNoResults()).to.be(false);
           expect(await PageObjects.discover.getHitCountInt()).to.be.above(0);
@@ -297,10 +299,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('resizable layout panels', () => {
-      it('should allow resizing the layout panels', async () => {
+      it('should allow resizing the histogram layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
-        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelFixed');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelFlex');
         const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
@@ -313,37 +315,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(newTopPanelSize).to.be(topPanelSize + resizeDistance);
         expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
-    });
 
-    describe('URL state', () => {
-      it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-        const originalUrl = await browser.getCurrentUrl();
-        const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
-        await browser.get(newUrl);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          expect(await browser.getCurrentUrl()).to.be(originalUrl);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
-        });
-      });
-
-      it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const originalHash = await browser.execute<[], string>('return window.location.hash');
-        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-        const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
-        await browser.execute(`window.location.hash = "${newHash}"`);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          const currentHash = await browser.execute<[], string>('return window.location.hash');
-          expect(currentHash).to.be(originalHash);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
-        });
+      it('should allow resizing the sidebar layout panels', async () => {
+        const resizeDistance = 100;
+        const leftPanel = await testSubjects.find('discoverLayoutResizablePanelFixed');
+        const mainPanel = await testSubjects.find('discoverLayoutResizablePanelFlex');
+        const resizeButton = await testSubjects.find('discoverLayoutResizableButton');
+        const leftPanelSize = (await leftPanel.getPosition()).width;
+        const mainPanelSize = (await mainPanel.getPosition()).width;
+        await browser.dragAndDrop(
+          { location: resizeButton },
+          { location: { x: resizeDistance, y: 0 } }
+        );
+        const newLeftPanelSize = (await leftPanel.getPosition()).width;
+        const newMainPanelSize = (await mainPanel.getPosition()).width;
+        expect(newLeftPanelSize).to.be(leftPanelSize + resizeDistance);
+        expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
     });
   });

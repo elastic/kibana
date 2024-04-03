@@ -35,9 +35,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--csp.warnLegacyBrowsers=false',
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+
+        // add feature flags here
+        `--xpack.fleet.enableExperimental=${JSON.stringify([
+          'agentTamperProtectionEnabled',
+          'subfeaturePrivileges',
+        ])}`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),

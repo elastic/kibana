@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getFailedFindingsFromAggs, FailedFindingsBucket } from './get_grouped_findings_evaluation';
+import { getPostureStatsFromAggs, PostureStatsBucket } from './get_grouped_findings_evaluation';
 
-const resourceTypeBuckets: FailedFindingsBucket[] = [
+const resourceTypeBuckets: PostureStatsBucket[] = [
   {
     key: 'foo_type',
     doc_count: 41,
@@ -36,9 +36,9 @@ const resourceTypeBuckets: FailedFindingsBucket[] = [
   },
 ];
 
-describe('getFailedFindingsFromAggs', () => {
+describe('getPostureStatsFromAggs', () => {
   it('should return value matching ComplianceDashboardData["resourcesTypes"]', async () => {
-    const resourceTypes = getFailedFindingsFromAggs(resourceTypeBuckets);
+    const resourceTypes = getPostureStatsFromAggs(resourceTypeBuckets);
     expect(resourceTypes).toEqual([
       {
         name: 'foo_type',

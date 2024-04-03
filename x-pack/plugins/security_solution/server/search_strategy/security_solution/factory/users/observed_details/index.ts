@@ -12,16 +12,13 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildObservedUserDetailsQuery } from './query.observed_user_details.dsl';
 
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
-import type {
-  ObservedUserDetailsRequestOptions,
-  ObservedUserDetailsStrategyResponse,
-} from '../../../../../../common/search_strategy/security_solution/users/observed_details';
+import type { ObservedUserDetailsStrategyResponse } from '../../../../../../common/search_strategy/security_solution/users/observed_details';
 import { formatUserItem } from './helpers';
 
 export const observedUserDetails: SecuritySolutionFactory<UsersQueries.observedDetails> = {
-  buildDsl: (options: ObservedUserDetailsRequestOptions) => buildObservedUserDetailsQuery(options),
+  buildDsl: (options) => buildObservedUserDetailsQuery(options),
   parse: async (
-    options: ObservedUserDetailsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<ObservedUserDetailsStrategyResponse> => {
     const aggregations = response.rawResponse.aggregations;

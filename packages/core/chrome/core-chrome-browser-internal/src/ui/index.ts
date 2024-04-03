@@ -7,6 +7,6 @@
  */
 
 export { Header } from './header';
-export { ProjectHeader, SideNavigation as ProjectSideNavigation } from './project';
+export { ProjectHeader } from './project';
 export { LoadingIndicator } from './loading_indicator';
 export type { NavType } from './header';

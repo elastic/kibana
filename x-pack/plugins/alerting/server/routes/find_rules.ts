@@ -10,12 +10,7 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
-import {
-  RewriteRequestCase,
-  RewriteResponseCase,
-  verifyAccessAndContext,
-  rewriteRule,
-} from './lib';
+import { RewriteRequestCase, verifyAccessAndContext, rewriteRule } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -47,6 +42,7 @@ const querySchema = schema.object({
   ),
   fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
+  filter_consumers: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
@@ -56,21 +52,19 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   per_page: perPage,
   sort_field: sortField,
   sort_order: sortOrder,
+  filter_consumers: filterConsumers,
   ...rest
 }) => ({
   ...rest,
   defaultSearchOperator,
   perPage,
+  filterConsumers,
   ...(sortField ? { sortField } : {}),
   ...(sortOrder ? { sortOrder } : {}),
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
-  perPage,
-  data,
-  ...restOfResult
-}) => {
+const rewriteBodyRes = ({ perPage, data, ...restOfResult }: FindResult<RuleTypeParams>) => {
   return {
     ...restOfResult,
     per_page: perPage,

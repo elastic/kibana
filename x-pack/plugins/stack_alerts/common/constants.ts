@@ -5,4 +5,19 @@
  * 2.0.
  */
 
-export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+export const MAX_SELECTABLE_GROUP_BY_TERMS = 4;
+export const MAX_SELECTABLE_SOURCE_FIELDS = 5;
+
+const HOST_NAME = 'host.name';
+const HOST_HOSTNAME = 'host.hostname';
+const HOST_ID = 'host.id';
+const CONTAINER_ID = 'container.id';
+const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+
+export const validSourceFields = [
+  HOST_NAME,
+  HOST_HOSTNAME,
+  HOST_ID,
+  CONTAINER_ID,
+  KUBERNETES_POD_UID,
+];

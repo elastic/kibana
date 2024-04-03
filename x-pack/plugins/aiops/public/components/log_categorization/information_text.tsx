@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -57,7 +58,7 @@ export const InformationText: FC<Props> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logCategorization.emptyPromptTitle"
-                defaultMessage="Select a text field and click run categorization to start analysis"
+                defaultMessage="Select a text field and click run pattern analysis to start analysis"
               />
             </h2>
           }

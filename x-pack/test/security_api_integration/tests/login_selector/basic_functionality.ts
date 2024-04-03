@@ -10,7 +10,7 @@ import { readFileSync } from 'fs';
 import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
-import type { AuthenticationProvider } from '@kbn/security-plugin/common/model';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,

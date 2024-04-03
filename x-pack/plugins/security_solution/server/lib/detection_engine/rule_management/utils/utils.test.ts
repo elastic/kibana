@@ -11,8 +11,8 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 
-import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { requestContextMock } from '../../routes/__mocks__';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
@@ -26,6 +26,7 @@ import {
   getInvalidConnectors,
   swapActionIds,
   migrateLegacyActionsIds,
+  migrateLegacyInvestigationFields,
 } from './utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import type { PartialFilter } from '../../types';
@@ -1257,6 +1258,28 @@ describe('utils', () => {
           rule_id: 'rule-1',
         },
       ]);
+    });
+  });
+
+  describe('migrateLegacyInvestigationFields', () => {
+    test('should return undefined if value not set', () => {
+      const result = migrateLegacyInvestigationFields(undefined);
+      expect(result).toEqual(undefined);
+    });
+
+    test('should migrate array to object', () => {
+      const result = migrateLegacyInvestigationFields(['foo']);
+      expect(result).toEqual({ field_names: ['foo'] });
+    });
+
+    test('should migrate empty array to undefined', () => {
+      const result = migrateLegacyInvestigationFields([]);
+      expect(result).toEqual(undefined);
+    });
+
+    test('should not migrate if already intended type', () => {
+      const result = migrateLegacyInvestigationFields({ field_names: ['foo'] });
+      expect(result).toEqual({ field_names: ['foo'] });
     });
   });
 });

@@ -9,19 +9,28 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
-  const svlObltOverviewPage = getPageObject('svlObltOverviewPage');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
+  const SvlObltOnboardingStreamLogFilePage = getPageObject('SvlObltOnboardingStreamLogFilePage');
 
-  describe('landing page', function () {
-    it('has button to skip onboarding', async () => {
-      await svlObltNavigation.navigateToLandingPage();
-      await svlObltOnboardingPage.assertSkipButtonExists();
+  // FLAKY: https://github.com/elastic/kibana/issues/168037
+  describe.skip('landing page', function () {
+    before(async () => {
+      await svlCommonPage.login();
     });
 
-    it('skips onboarding', async () => {
-      await svlObltOnboardingPage.skipOnboarding();
-      await svlObltOverviewPage.assertPageHeaderExists();
-      await svlObltOverviewPage.assertAlertsSectionExists();
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
+    it('has quickstart badge', async () => {
+      await svlObltNavigation.navigateToLandingPage();
+      await svlObltOnboardingPage.assertQuickstartBadgeExists();
+    });
+
+    it('stream log files onboarding', async () => {
+      await svlObltOnboardingPage.goToStreamLogFiles();
+      await SvlObltOnboardingStreamLogFilePage.assertPageHeaderExists();
     });
   });
 }

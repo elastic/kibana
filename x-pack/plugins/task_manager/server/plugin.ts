@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
@@ -27,7 +27,7 @@ import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './tas
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute } from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
@@ -35,6 +35,8 @@ import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
+import { metricsStream, Metrics } from './metrics';
+import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 
 export interface TaskManagerSetupContract {
   /**
@@ -59,6 +61,7 @@ export type TaskManagerStartContract = Pick<
   | 'bulkEnable'
   | 'bulkDisable'
   | 'bulkSchedule'
+  | 'bulkUpdateState'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
@@ -82,9 +85,12 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private metrics$ = new Subject<Metrics>();
+  private resetMetrics$ = new Subject<boolean>();
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
+  private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -155,6 +161,12 @@ export class TaskManagerPlugin
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
+    metricsRoute({
+      router,
+      metrics$: this.metrics$,
+      resetMetrics$: this.resetMetrics$,
+      taskManagerId: this.taskManagerId,
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -167,7 +179,7 @@ export class TaskManagerPlugin
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
-          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          serviceStatus.level >= derivedStatus.level ? serviceStatus : derivedStatus
         )
       )
     );
@@ -229,6 +241,7 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
+      requestTimeouts: this.config.request_timeouts,
     });
 
     const managedConfiguration = createManagedConfiguration({
@@ -240,6 +253,10 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
+        logger: this.logger,
+        store: taskStore,
+      });
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -276,6 +293,13 @@ export class TaskManagerPlugin
       this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));
 
+    metricsStream({
+      config: this.config!,
+      reset$: this.resetMetrics$,
+      taskPollingLifecycle: this.taskPollingLifecycle,
+      taskManagerMetricsCollector: this.taskManagerMetricsCollector,
+    }).subscribe((metric) => this.metrics$.next(metric));
+
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
       taskStore,
@@ -303,6 +327,7 @@ export class TaskManagerPlugin
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
+      bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };
   }
 }

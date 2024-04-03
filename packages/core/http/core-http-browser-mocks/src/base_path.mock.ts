@@ -11,13 +11,15 @@ import type { IBasePath } from '@kbn/core-http-browser';
 const createBasePathMock = ({
   publicBaseUrl = '/',
   serverBasePath = '/',
-}: { publicBaseUrl?: string; serverBasePath?: string } = {}) => {
+  assetsHrefBase = '/',
+}: { publicBaseUrl?: string; serverBasePath?: string; assetsHrefBase?: string } = {}) => {
   const mock: jest.Mocked<IBasePath> = {
     prepend: jest.fn(),
     get: jest.fn(),
     remove: jest.fn(),
     publicBaseUrl,
     serverBasePath,
+    assetsHrefBase,
   };
 
   return mock;

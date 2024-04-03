@@ -6,20 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse, IEsSearchRequest } from '@kbn/data-plugin/public';
-import type { FactoryQueryTypes } from '../..';
+import type { IEsSearchResponse } from '@kbn/data-plugin/public';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
-import type { Inspect, Maybe, TimerangeInput } from '../../common';
-import type { RequestBasicOptions } from '..';
+import type { Inspect, Maybe } from '../../common';
 
-export enum CtiQueries {
-  eventEnrichment = 'eventEnrichment',
-  dataSource = 'dataSource',
-}
-
-export interface CtiEventEnrichmentRequestOptions extends RequestBasicOptions {
-  eventFields: Record<string, unknown>;
-}
+export { CtiQueries } from '../../../api/search_strategy';
 
 export type CtiEnrichment = Record<string, unknown[]>;
 export type EventFields = Record<string, unknown>;
@@ -43,12 +34,6 @@ export const validEventFields = Object.keys(EVENT_ENRICHMENT_INDICATOR_FIELD_MAP
 
 export const isValidEventField = (field: string): field is EventField =>
   validEventFields.includes(field as EventField);
-
-export interface CtiDataSourceRequestOptions extends IEsSearchRequest {
-  defaultIndex: string[];
-  factoryQueryType?: FactoryQueryTypes;
-  timerange?: TimerangeInput;
-}
 
 export interface BucketItem {
   key: string;

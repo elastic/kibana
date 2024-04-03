@@ -69,6 +69,4 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       data: this.data,
     };
   }
-
-  public async stop(): Promise<void> {}
 }

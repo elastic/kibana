@@ -10,7 +10,7 @@ Every project or plugin should have its own `FunctionalTestRunner` config file. 
 
 To get started copy and paste this example to `test/functional/config.js`:
 
-["source","js"]
+["source","js",subs="attributes"]
 -----------
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
@@ -64,7 +64,8 @@ export default async function ({ readConfigFile }) {
     }
 
     // more settings, like timeouts, mochaOpts, etc are
-    // defined in the config schema. See {kibana-blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
+    // defined in the config schema.
+    // See {kibana-blob}packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
   };
 }
 
@@ -80,5 +81,5 @@ node ../../kibana/scripts/functional_test_runner
 [discrete]
 === Using esArchiver
 
-We're working on documentation for this, but for now the best place to look is the original {kib-repo}/issues/10359[pull request].
+We're working on documentation for this, but for now the best place to look is the original {kib-repo}issues/10359[pull request].
 

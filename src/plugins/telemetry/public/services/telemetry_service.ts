@@ -8,11 +8,19 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import {
+  LastReportedRoute,
+  INTERNAL_VERSION,
+  OptInRoute,
+  FetchSnapshotTelemetry,
+  UserHasSeenNoticeRoute,
+} from '../../common/routes';
 import type { TelemetryPluginConfig } from '../plugin';
-import { getTelemetryChannelEndpoint } from '../../common/telemetry_config/get_telemetry_channel_endpoint';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import type {
   UnencryptedTelemetryPayload,
   EncryptedTelemetryPayload,
+  FetchLastReportedResponse,
 } from '../../common/types/latest';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
@@ -93,8 +101,7 @@ export class TelemetryService {
 
   /** Is the cluster allowed to change the opt-in/out status **/
   public getCanChangeOptInStatus = () => {
-    const allowChangingOptInStatus = this.config.allowChangingOptInStatus;
-    return allowChangingOptInStatus;
+    return this.config.allowChangingOptInStatus;
   };
 
   /** Retrieve the opt-in/out notification URL **/
@@ -156,17 +163,18 @@ export class TelemetryService {
   };
 
   public fetchLastReported = async (): Promise<number | undefined> => {
-    const response = await this.http.get<{ lastReported?: number }>(
-      '/api/telemetry/v2/last_reported'
+    const response = await this.http.get<FetchLastReportedResponse>(
+      LastReportedRoute,
+      INTERNAL_VERSION
     );
     return response?.lastReported;
   };
 
   public updateLastReported = async (): Promise<number | undefined> => {
-    return this.http.put('/api/telemetry/v2/last_reported');
+    return this.http.put(LastReportedRoute, INTERNAL_VERSION);
   };
 
-  /** Fetches an unencrypted telemetry payload so we can show it to the user **/
+  /** Fetches an unencrypted telemetry payload, so we can show it to the user **/
   public fetchExample = async (): Promise<UnencryptedTelemetryPayload> => {
     return await this.fetchTelemetry({ unencrypted: true, refreshCache: true });
   };
@@ -174,12 +182,14 @@ export class TelemetryService {
   /**
    * Fetches telemetry payload
    * @param unencrypted Default `false`. Whether the returned payload should be encrypted or not.
+   * @param refreshCache Default `false`. Set to `true` to force the regeneration of the telemetry report.
    */
   public fetchTelemetry = async <T = EncryptedTelemetryPayload | UnencryptedTelemetryPayload>({
     unencrypted = false,
     refreshCache = false,
   } = {}): Promise<T> => {
-    return this.http.post('/api/telemetry/v2/clusters/_stats', {
+    return this.http.post(FetchSnapshotTelemetry, {
+      ...INTERNAL_VERSION,
       body: JSON.stringify({ unencrypted, refreshCache }),
     });
   };
@@ -198,12 +208,10 @@ export class TelemetryService {
     try {
       // Report the option to the Kibana server to store the settings.
       // It returns the encrypted update to send to the telemetry cluster [{cluster_uuid, opt_in_status}]
-      const optInStatusPayload = await this.http.post<EncryptedTelemetryPayload>(
-        '/api/telemetry/v2/optIn',
-        {
-          body: JSON.stringify({ enabled: optedIn }),
-        }
-      );
+      const optInStatusPayload = await this.http.post<EncryptedTelemetryPayload>(OptInRoute, {
+        ...INTERNAL_VERSION,
+        body: JSON.stringify({ enabled: optedIn }),
+      });
       if (this.reportOptInStatusChange) {
         // Use the response to report about the change to the remote telemetry cluster.
         // If it's opt-out, this will be the last communication to the remote service.
@@ -231,7 +239,7 @@ export class TelemetryService {
    */
   public setUserHasSeenNotice = async (): Promise<void> => {
     try {
-      await this.http.put('/api/telemetry/v2/userHasSeenNotice');
+      await this.http.put(UserHasSeenNoticeRoute, INTERNAL_VERSION);
       this.userHasSeenOptedInNotice = true;
     } catch (error) {
       this.notifications.toasts.addError(error, {
@@ -248,7 +256,7 @@ export class TelemetryService {
 
   /**
    * Pushes the encrypted payload [{cluster_uuid, opt_in_status}] to the remote telemetry service
-   * @param optInPayload [{cluster_uuid, opt_in_status}] encrypted by the server into an array of strings
+   * @param optInStatusPayload [{cluster_uuid, opt_in_status}] encrypted by the server into an array of strings
    */
   private reportOptInStatus = async (
     optInStatusPayload: EncryptedTelemetryPayload

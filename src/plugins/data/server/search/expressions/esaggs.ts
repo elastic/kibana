@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { defer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import {
@@ -72,7 +72,7 @@ export function getFunctionDefinition({
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
-            disableShardWarnings: false,
+            disableWarningToasts: false,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
           })

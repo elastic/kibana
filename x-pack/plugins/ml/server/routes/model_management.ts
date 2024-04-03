@@ -14,13 +14,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 
 import { MemoryUsageService } from '../models/model_management';
 import { itemTypeLiterals } from './schemas/saved_objects';
 
-export function modelManagementRoutes({ router, routeGuard }: RouteInitialization) {
+export function modelManagementRoutes({
+  router,
+  routeGuard,
+  getEnabledFeatures,
+}: RouteInitialization) {
   /**
    * @apiGroup ModelManagement
    *
@@ -48,7 +52,7 @@ export function modelManagementRoutes({ router, routeGuard }: RouteInitializatio
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
         try {
-          const memoryUsageService = new MemoryUsageService(mlClient);
+          const memoryUsageService = new MemoryUsageService(mlClient, getEnabledFeatures());
           const result = await memoryUsageService.getNodesOverview();
           return response.ok({
             body: result,
@@ -95,7 +99,7 @@ export function modelManagementRoutes({ router, routeGuard }: RouteInitializatio
 
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, response, request }) => {
         try {
-          const memoryUsageService = new MemoryUsageService(mlClient);
+          const memoryUsageService = new MemoryUsageService(mlClient, getEnabledFeatures());
           return response.ok({
             body: await memoryUsageService.getMemorySizes(
               request.query.type,

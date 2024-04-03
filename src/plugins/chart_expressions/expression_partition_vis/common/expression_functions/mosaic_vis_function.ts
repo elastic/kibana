@@ -110,6 +110,10 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       help: strings.getAriaLabelHelp(),
       required: false,
     },
+    colorMapping: {
+      types: ['string'],
+      help: strings.getColorMappingHelp(),
+    },
   },
   fn(context, args, handlers) {
     const maxSupportedBuckets = 2;
@@ -146,6 +150,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
+      colorMapping: args.colorMapping,
     };
 
     if (handlers?.inspectorAdapters?.tables) {

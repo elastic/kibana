@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
-import { JobId } from '../../common/types/anomaly_detection_jobs';
-import { MlApiServices } from '../application/services/ml_api_service';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import useMountedState from 'react-use/lib/useMountedState';
+import { useMlKibana } from '../application/contexts/kibana';
+import type { JobId } from '../../common/types/anomaly_detection_jobs';
+import type { MlApiServices } from '../application/services/ml_api_service';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 
 interface JobSelection {
@@ -33,6 +37,8 @@ export interface JobSelectorControlProps {
    * Allows selecting all jobs, even those created afterward.
    */
   allowSelectAll?: boolean;
+  /** Adds an option to create a new anomaly detection job */
+  createJobUrl?: string;
   /**
    * Available options to select. By default suggest all existing jobs.
    */
@@ -47,8 +53,18 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   multiSelect = false,
   label,
   allowSelectAll = false,
+  createJobUrl,
   options: defaultOptions,
 }) => {
+  const {
+    services: {
+      notifications: { toasts },
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
+  const isMounted = useMountedState();
+
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const jobIds = useMemo(() => new Set(), []);
   const groupIds = useMemo(() => new Set(), []);
@@ -69,9 +85,12 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       jobIdOptions.forEach((v) => {
         jobIds.add(v);
       });
+
       groupIdOptions.forEach((v) => {
         groupIds.add(v);
       });
+
+      if (!isMounted()) return;
 
       setOptions([
         ...(allowSelectAll
@@ -91,11 +110,24 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
               },
             ]
           : []),
+
         {
           label: i18n.translate('xpack.ml.jobSelector.jobOptionsLabel', {
             defaultMessage: 'Jobs',
           }),
-          options: jobIdOptions.map((v) => ({ label: v })),
+          options: [
+            ...(createJobUrl
+              ? [
+                  {
+                    label: i18n.translate('xpack.ml.jobSelector.createNewLabel', {
+                      defaultMessage: '--- Create new ---',
+                    }),
+                    value: 'createNew',
+                  },
+                ]
+              : []),
+            ...jobIdOptions.map((v) => ({ label: v })),
+          ],
         },
         ...(multiSelect
           ? [
@@ -109,16 +141,37 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
           : []),
       ]);
     } catch (e) {
-      // TODO add error handling
+      toasts.addError(e, {
+        title: i18n.translate('xpack.ml.jobSelector.fetchJobErrorTitle', {
+          defaultMessage: 'Failed to load anomaly detection jobs',
+        }),
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adJobsApiService]);
+  }, [
+    adJobsApiService,
+    allowSelectAll,
+    createJobUrl,
+    groupIds,
+    isMounted,
+    jobIds,
+    multiSelect,
+    toasts,
+  ]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
-    ((selectionUpdate) => {
+    (async (selectionUpdate) => {
       if (selectionUpdate.some((selectedOption) => selectedOption.value === ALL_JOBS_SELECTION)) {
         onChange({ jobIds: [ALL_JOBS_SELECTION] });
+        return;
+      }
+
+      if (
+        !!createJobUrl &&
+        selectionUpdate.some((selectedOption) => selectedOption.value === 'createNew')
+      ) {
+        // Redirect to the job wizard page
+        await navigateToUrl(createJobUrl);
         return;
       }
 
@@ -138,14 +191,14 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
     }) as Exclude<EuiComboBoxProps<string>['onChange'], undefined>,
-    [jobIds, groupIds, defaultOptions]
+    [jobIds, groupIds, defaultOptions, createJobUrl]
   );
 
   useEffect(() => {
     if (defaultOptions) return;
     fetchOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [createJobUrl]);
 
   return (
     <EuiFormRow

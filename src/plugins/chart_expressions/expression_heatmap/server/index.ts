@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionHeatmapPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ExpressionHeatmapPlugin } = await import('./plugin');
   return new ExpressionHeatmapPlugin();
 }

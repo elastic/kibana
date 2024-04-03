@@ -39,7 +39,7 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-microsoft.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/microsoft.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/microsoft.svg'),
     artifacts: {
       dashboards: [
         {
@@ -55,7 +55,7 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/microsoft_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/microsoft_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

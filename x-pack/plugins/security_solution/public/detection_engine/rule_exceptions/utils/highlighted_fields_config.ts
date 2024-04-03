@@ -18,3 +18,7 @@ export const getKibanaAlertIdField = (id: string) => `kibana.alert.${id}`;
 export const EVENT_CATEGORY = 'event.category';
 export const EVENT_CODE = 'event.code';
 export const KIBANA_ALERT_RULE_TYPE = 'kibana.alert.rule.type';
+export const AGENT_ID = 'agent.id';
+export const AGENT_TYPE = 'agent.type';
+export const KIBANA_ALERT_RULE_UUID = 'kibana.alert.rule.uuid';
+export const ENDPOINT_ALERT = 'endpoint';

@@ -1,0 +1,22 @@
+---
+id: kibDevReactKibanaContext
+slug: /kibana-dev-docs/react-context
+title: React Contexts in Kibana
+description: Kibana uses React Context to manage several global states.  This is a collection of packages supporting those states.
+tags: ['kibana', 'dev','shared-ux', 'react', 'context']
+date: 2023-07-25
+---
+
+## Description
+
+Kibana uses React Context to manage several global states.  Those states have been divided into several reusable components in relevant packages.
+
+![Architecture Diagram](./assets/diagram.png)
+
+- `KibanaRootContextProvider` - A root context provider for Kibana.  This is the top level context provider that wraps the entire application.  It is responsible for initializing all of the other contexts and providing them to the application.
+- `KibanaRenderContextProvider` - A render context provider for Kibana.  This context is designed to be used with ad-hoc renders of React components, (usually with `ReactDOM.render`).
+- `KibanaThemeContextProvider` - A theme context provider for Kibana.  A corollary to EUI's `EuiThemeProvider`, it uses Kibana services to ensure the EUI Theme is customized correctly.
+
+## Deprecated Context Providers
+
+- `KibanaStyledComponentsThemeProvider` - A styled components theme provider for Kibana.  This package is supplied for compatibility with legacy code, but should not be used in new code.

@@ -5,21 +5,42 @@
  * 2.0.
  */
 
-import { AppFeatureKey, type AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductLine, SecurityProductTier } from '../config';
 
-type PliAppFeatures = Readonly<
-  Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<AppFeatureKeys>>>>
+type PliProductFeatures = Readonly<
+  Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<ProductFeatureKeys>>>>
 >;
 
-export const PLI_APP_FEATURES: PliAppFeatures = {
+export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
   security: {
-    essentials: [],
-    complete: [AppFeatureKey.advancedInsights, AppFeatureKey.casesConnectors],
+    essentials: [
+      ProductFeatureKey.endpointHostManagement,
+      ProductFeatureKey.endpointPolicyManagement,
+    ],
+    complete: [
+      ProductFeatureKey.advancedInsights,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.investigationGuide,
+      ProductFeatureKey.threatIntelligence,
+      ProductFeatureKey.casesConnectors,
+      ProductFeatureKey.externalRuleActions,
+    ],
   },
   endpoint: {
-    essentials: [AppFeatureKey.endpointExceptions],
-    complete: [AppFeatureKey.endpointResponseActions],
+    essentials: [
+      ProductFeatureKey.endpointPolicyProtections,
+      ProductFeatureKey.endpointArtifactManagement,
+      ProductFeatureKey.endpointExceptions,
+    ],
+    complete: [
+      ProductFeatureKey.endpointResponseActions,
+      ProductFeatureKey.osqueryAutomatedResponseActions,
+      ProductFeatureKey.endpointAgentTamperProtection,
+      ProductFeatureKey.endpointExceptions,
+      ProductFeatureKey.endpointProtectionUpdates,
+    ],
   },
   cloud: {
     essentials: [],

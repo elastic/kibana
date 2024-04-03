@@ -24,8 +24,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_background';
 
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
-// `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
+// `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
 
+/**
+ * Props for ProgressControlProps
+ */
 interface ProgressControlProps {
   isBrushCleared: boolean;
   progress: number;
@@ -35,19 +38,31 @@ interface ProgressControlProps {
   onReset: () => void;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
+  runAnalysisDisabled?: boolean;
 }
 
-export const ProgressControls: FC<ProgressControlProps> = ({
-  children,
-  isBrushCleared,
-  progress,
-  progressMessage,
-  onRefresh,
-  onCancel,
-  onReset,
-  isRunning,
-  shouldRerunAnalysis,
-}) => {
+/**
+ * ProgressControls React Component
+ * Component with ability to Run & cancel analysis
+ * by default uses `Baseline` and `Deviation` for the badge name
+ *
+ * @param props ProgressControls component props
+ * @returns The ProgressControls component.
+ */
+export const ProgressControls: FC<ProgressControlProps> = (props) => {
+  const {
+    children,
+    isBrushCleared,
+    progress,
+    progressMessage,
+    onRefresh,
+    onCancel,
+    onReset,
+    isRunning,
+    shouldRerunAnalysis,
+    runAnalysisDisabled = false,
+  } = props;
+
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };
@@ -57,6 +72,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
+            disabled={runAnalysisDisabled}
             data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
             size="s"
             onClick={onRefresh}

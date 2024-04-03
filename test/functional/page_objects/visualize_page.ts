@@ -42,6 +42,7 @@ export class VisualizePageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly toasts = this.ctx.getService('toasts');
 
   index = {
     LOGSTASH_TIME_BASED: 'logstash-*',
@@ -156,7 +157,7 @@ export class VisualizePageObject extends FtrService {
     await this.waitForVisualizationSelectPage();
   }
 
-  public async navigateToLensFromAnotherVisulization() {
+  public async navigateToLensFromAnotherVisualization() {
     const button = await this.testSubjects.find('visualizeEditInLensButton');
     await button.click();
   }
@@ -170,6 +171,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisType(type: string) {
+    // checking for the existence of the control gives the UI more time to bind a click handler
+    // see https://github.com/elastic/kibana/issues/89958
+    if (!(await this.hasVisType(type))) {
+      throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
+    }
     await this.testSubjects.click(`visType-${type}`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -393,7 +399,7 @@ export class VisualizePageObject extends FtrService {
 
     // Confirm that the Visualization has actually been saved
     await this.testSubjects.existOrFail('saveVisualizationSuccess');
-    const message = await this.common.closeToast();
+    const message = await this.toasts.getTitleAndDismiss();
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForSaveModalToClose();
 

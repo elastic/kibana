@@ -7,8 +7,9 @@
 
 import { isString } from 'lodash';
 import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { GetCaseUsersResponse, User, UserWithProfileInfo } from '../../../common/api';
-import { decodeOrThrow, GetCaseUsersResponseRt } from '../../../common/api';
+import type { GetCaseUsersResponse } from '../../../common/types/api';
+import { GetCaseUsersResponseRt } from '../../../common/types/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -16,6 +17,7 @@ import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import type { GetUsersRequest } from './types';
 import { getUserProfiles } from '../cases/utils';
+import type { User, UserWithProfileInfo } from '../../../common/types/domain';
 
 export const getUsers = async (
   { caseId }: GetUsersRequest,

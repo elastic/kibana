@@ -12,22 +12,54 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ToolbarButton } from './toolbar_button';
 
 describe('<ToolbarButton />', () => {
-  test('is rendered - default', () => {
-    const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={() => 'click'} />);
-    expect(component.render()).toMatchSnapshot();
+  describe('standard', () => {
+    test('is rendered - default', () => {
+      const component = mountWithIntl(
+        <ToolbarButton label="Create chart" onClick={() => 'click'} />
+      );
+      expect(component.render()).toMatchSnapshot();
+    });
+
+    test('is rendered - primary', () => {
+      const component = mountWithIntl(
+        <ToolbarButton type="primary" label="Create chart" onClick={() => 'click'} />
+      );
+      expect(component.render()).toMatchSnapshot();
+    });
+
+    test('is rendered - text wth icon', () => {
+      const component = mountWithIntl(
+        <ToolbarButton
+          type="primary"
+          iconType="plusInCircle"
+          label="Create chart"
+          onClick={() => 'click'}
+        />
+      );
+      expect(component.render()).toMatchSnapshot();
+    });
+
+    test('accepts an onClick handler', () => {
+      const mockHandler = jest.fn();
+      const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={mockHandler} />);
+      component.find('button').simulate('click');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    test('accepts an onBlur handler', () => {
+      const mockHandler = jest.fn();
+      const component = mountWithIntl(<ToolbarButton label="Create chart" onBlur={mockHandler} />);
+      component.find('button').simulate('blur');
+      expect(mockHandler).toHaveBeenCalled();
+    });
   });
 
-  test('is rendered - primary', () => {
-    const component = mountWithIntl(
-      <ToolbarButton type="primary" label="Create chart" onClick={() => 'click'} />
-    );
-    expect(component.render()).toMatchSnapshot();
-  });
-
-  test('accepts an onClick handler', () => {
-    const mockHandler = jest.fn();
-    const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={mockHandler} />);
-    component.find('button').simulate('click');
-    expect(mockHandler).toHaveBeenCalled();
+  describe('iconButton', () => {
+    test('is rendered - default', () => {
+      const component = mountWithIntl(
+        <ToolbarButton as="iconButton" iconType="launch" onClick={jest.fn()} />
+      );
+      expect(component.render()).toMatchSnapshot();
+    });
   });
 });

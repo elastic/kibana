@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, from, map } from 'rxjs';
 
 import type {
   DocLinksStart,
@@ -16,9 +15,9 @@ import type {
   Toast,
 } from '@kbn/core/public';
 
+import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 import type { SecurityCheckupState } from '../../common/types';
 import type { ConfigType } from '../config';
-import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 
 interface SetupDeps {
   http: HttpSetup;

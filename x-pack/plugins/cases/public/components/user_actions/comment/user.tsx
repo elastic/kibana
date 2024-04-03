@@ -7,10 +7,11 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 
-import type { CommentResponseUserType } from '../../../../common/api';
+import type { UserCommentAttachment } from '../../../../common/types/domain';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionMarkdown } from '../markdown_form';
@@ -31,20 +32,24 @@ type BuilderArgs = Pick<
   | 'handleDeleteComment'
   | 'userProfiles'
   | 'appId'
+  | 'euiTheme'
 > & {
-  comment: SnakeToCamelCase<CommentResponseUserType>;
+  comment: SnakeToCamelCase<UserCommentAttachment>;
   caseId: string;
   outlined: boolean;
   isEdit: boolean;
   isLoading: boolean;
 };
 
-const MyEuiCommentFooter = styled(EuiText)`
-  ${({ theme }) => `
-    border-top: ${theme.eui.euiBorderThin};
-    padding: ${theme.eui.euiSizeS};
-  `}
-`;
+const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
+  if (!euiTheme) {
+    return css``;
+  }
+  return css`
+    border-top: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.s};
+  `;
+};
 
 const hasDraftComment = (
   applicationId = '',
@@ -52,7 +57,7 @@ const hasDraftComment = (
   commentId: string,
   comment: string
 ): boolean => {
-  const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
+  const draftStorageKey = getMarkdownEditorStorageKey({ appId: applicationId, caseId, commentId });
 
   const sessionValue = sessionStorage.getItem(draftStorageKey);
 
@@ -68,13 +73,12 @@ export const createUserAttachmentUserActionBuilder = ({
   isLoading,
   commentRefs,
   caseId,
+  euiTheme,
   handleManageMarkdownEditId,
   handleSaveComment,
   handleManageQuote,
   handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
   build: () => [
     {
       username: <HoverableUsernameResolver user={comment.createdBy} userProfiles={userProfiles} />,
@@ -104,11 +108,11 @@ export const createUserAttachmentUserActionBuilder = ({
             })}
           />
           {!isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment) ? (
-            <MyEuiCommentFooter>
+            <EuiText css={getCommentFooterCss(euiTheme)}>
               <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
                 {i18n.UNSAVED_DRAFT_COMMENT}
               </EuiText>
-            </MyEuiCommentFooter>
+            </EuiText>
           ) : (
             ''
           )}

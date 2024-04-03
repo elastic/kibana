@@ -1,7 +1,10 @@
 {
   "ml.delete_trained_model": {
     "url_params": {
-      "timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "force": "__flag__"
     },
     "methods": [
@@ -10,6 +13,10 @@
     "patterns": [
       "_ml/trained_models/{model_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-trained-models.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-trained-models.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -17,7 +17,7 @@ const basePath = core.http.basePath.get(request);
 To have access to your plugin config, you _should_:
 
 * Declare plugin-specific `configPath` (will fallback to plugin `id`
-if not specified) in {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+if not specified) in your plugin definition.
 * Export schema validation for the config from plugin's main file. Schema is
 mandatory. If a plugin reads from the config without schema declaration,
 `ConfigService` will throw an error.
@@ -35,7 +35,7 @@ export type MyPluginConfigType = TypeOf<typeof config.schema>;
 
 * Read config value exposed via `PluginInitializerContext`:
 
-*my_plugin/server/index.ts*
+*my_plugin/server/plugin.ts*
 [source,typescript]
 ----
 import type { PluginInitializerContext } from '@kbn/core/server';
@@ -209,6 +209,25 @@ export const config = {
       schema.string({ defaultValue: 'Free hugs' }),
       schema.never()
     ),
+  }),
+};
+----
+
+For Serverless vs. Traditional configuration, you are encouraged to use the `offeringBasedSchema` helper:
+
+[source,js]
+----
+import { schema, offeringBasedSchema } from '@kbn/config-schema'
+
+export const config = {
+  schema: schema.object({
+    // Enabled by default in Dev mode
+    enabled: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+
+    // Setting only allowed in the Serverless offering
+    plansForWorldPeace: offeringBasedSchema({ 
+      serverless: schema.string({ defaultValue: 'Free hugs' }),
+    }),
   }),
 };
 ----

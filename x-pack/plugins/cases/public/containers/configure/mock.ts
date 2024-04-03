@@ -7,9 +7,11 @@
 
 import type { ConfigurationRequest } from '../../../common/types/api';
 import type { Configuration } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { CaseConfigure, CaseConnectorMapping } from './types';
+import type { CaseConnectorMapping } from './types';
+import type { CasesConfigurationUI } from '../types';
+import { customFieldsConfigurationMock } from '../mock';
 
 export const mappings: CaseConnectorMapping[] = [
   {
@@ -29,7 +31,7 @@ export const mappings: CaseConnectorMapping[] = [
   },
 ];
 
-export const caseConfigurationResposeMock: Configuration = {
+export const caseConfigurationResponseMock: Configuration = {
   id: '123',
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
@@ -46,9 +48,10 @@ export const caseConfigurationResposeMock: Configuration = {
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   owner: SECURITY_SOLUTION_OWNER,
   version: 'WzHJ12',
+  customFields: customFieldsConfigurationMock,
 };
 
-export const caseConfigurationMock: ConfigurationRequest = {
+export const caseConfigurationRequest: ConfigurationRequest = {
   connector: {
     id: '123',
     name: 'My connector',
@@ -59,10 +62,8 @@ export const caseConfigurationMock: ConfigurationRequest = {
   closure_type: 'close-by-user',
 };
 
-export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
+export const casesConfigurationsMock: CasesConfigurationUI = {
   id: '123',
-  createdAt: '2020-04-06T13:03:18.657Z',
-  createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   connector: {
     id: '123',
     name: 'My connector',
@@ -70,10 +71,8 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
     fields: null,
   },
   closureType: 'close-by-pushing',
-  error: null,
   mappings: [],
-  updatedAt: '2020-04-06T14:03:18.657Z',
-  updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
-  owner: SECURITY_SOLUTION_OWNER,
+  customFields: customFieldsConfigurationMock,
+  owner: 'securitySolution',
 };

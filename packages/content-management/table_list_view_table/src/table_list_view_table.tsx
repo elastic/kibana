@@ -27,7 +27,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
-import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
+import type {
+  OpenContentEditorParams,
+  SavedObjectsReference,
+} from '@kbn/content-management-content-editor';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import {
   Table,
@@ -37,7 +41,7 @@ import {
   UpdatedAtField,
 } from './components';
 import { useServices } from './services';
-import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
+import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
@@ -83,17 +87,14 @@ export interface TableListViewTableProps<
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
-  onClickTitle?: (item: T) => void;
+  getOnClickTitle?: (item: T) => (() => void) | undefined;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   /**
    * Edit action onClick handler. Edit action not provided when property is not provided
    */
   editItem?(item: T): void;
-  /**
-   * Handler to set edit action visiblity per item.
-   */
-  showEditActionForItem?(item: T): boolean;
+
   /**
    * Name for the column containing the "title" value.
    */
@@ -108,6 +109,7 @@ export interface TableListViewTableProps<
   contentEditor?: ContentEditorConfig;
 
   tableCaption: string;
+  /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
@@ -115,6 +117,12 @@ export interface TableListViewTableProps<
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
   items: T[];
+  /**
+   * Flag to indicate if there aren't any item when **no filteres are applied**.
+   * When there are no item we render an empty prompt.
+   * Default to `undefined` to indicate that we don't know yet if there are items or not.
+   */
+  hasNoItems: boolean | undefined;
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -131,17 +139,6 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableSort: {
     field: SortColumnField;
     direction: Direction;
-  };
-}
-
-export interface UserContentCommonSchema {
-  id: string;
-  updatedAt: string;
-  references: SavedObjectsReference[];
-  type: string;
-  attributes: {
-    title: string;
-    description?: string;
   };
 }
 
@@ -257,10 +254,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   findItems,
   createItem,
   editItem,
-  showEditActionForItem,
   deleteItems,
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   id: listingId = 'userContent',
   contentEditor = { enabled: false },
   titleColumnName,
@@ -273,15 +269,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     setPageDataTestSubject(`${entityName}LandingPage`);
   }, [entityName, setPageDataTestSubject]);
 
-  if (!getDetailViewLink && !onClickTitle) {
+  if (!getDetailViewLink && !getOnClickTitle) {
     throw new Error(
-      `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
-    );
-  }
-
-  if (getDetailViewLink && onClickTitle) {
-    throw new Error(
-      `[TableListView] Either "getDetailViewLink" or "onClickTitle" can be provided. Not both.`
+      `[TableListView] One o["getDetailViewLink" or "getOnClickTitle"] prop must be provided.`
     );
   }
 
@@ -293,6 +283,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
+
   /**
    * The "onTableSearchChange()" handler has an async behavior. We want to be able to discard
    * previsous search changes and only handle the last one. For that we keep a counter of the changes.
@@ -335,9 +326,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialState = useMemo<State<T>>(
     () => ({
       items: [],
+      hasNoItems: undefined,
       totalItems: 0,
       hasInitialFetchReturned: false,
-      isFetchingItems: false,
+      isFetchingItems: true,
       isDeletingItems: false,
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
@@ -364,6 +356,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasInitialFetchReturned,
     isFetchingItems,
     items,
+    hasNoItems,
     fetchError,
     showDeleteModal,
     isDeletingItems,
@@ -374,8 +367,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     tableSort,
   } = state;
 
-  const hasQuery = searchQuery.text !== '';
-  const hasNoItems = hasInitialFetchReturned && items.length === 0 && !hasQuery;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -443,6 +434,29 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     items,
   });
 
+  const tableItemsRowActions = useMemo(() => {
+    return items.reduce<TableItemsRowActions>((acc, item) => {
+      const ret = {
+        ...acc,
+        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
+      };
+
+      if (item.managed) {
+        ret[item.id] = {
+          edit: {
+            enabled: false,
+            reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
+              defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+            }),
+          },
+          ...ret[item.id],
+        };
+      }
+
+      return ret;
+    }, {});
+  }, [items, rowItemActions]);
+
   const inspectItem = useCallback(
     (item: T) => {
       const tags = getTagIdsFromReferences(item.references).map((_id) => {
@@ -458,6 +472,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...contentEditor,
+        isReadonly:
+          contentEditor.isReadonly || tableItemsRowActions[item.id]?.edit?.enabled === false,
+        readonlyReason: tableItemsRowActions[item.id]?.edit?.reason,
         onSave:
           contentEditor.onSave &&
           (async (args) => {
@@ -468,7 +485,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           }),
       });
     },
-    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, fetchItems]
+    [
+      getTagIdsFromReferences,
+      openContentEditor,
+      entityName,
+      contentEditor,
+      tableItemsRowActions,
+      fetchItems,
+    ]
   );
 
   const tableColumns = useMemo(() => {
@@ -487,7 +511,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               id={listingId}
               item={record}
               getDetailViewLink={getDetailViewLink}
-              onClickTitle={onClickTitle}
+              getOnClickTitle={getOnClickTitle}
               onClickTag={(tag, withModifierKey) => {
                 if (withModifierKey) {
                   addOrRemoveExcludeTagFilter(tag);
@@ -542,9 +566,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
+          available: (item) => Boolean(tableItemsRowActions[item.id]?.edit?.enabled),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
+          'data-test-subj': `edit-action`,
         });
       }
 
@@ -567,9 +592,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'inspect',
+          icon: 'iInCircle',
           type: 'icon',
           onClick: inspectItem,
+          'data-test-subj': `inspect-action`,
         });
       }
 
@@ -588,16 +614,16 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     customTableColumn,
     hasUpdatedAtMetadata,
     editItem,
+    contentEditor.enabled,
     listingId,
     getDetailViewLink,
-    onClickTitle,
+    getOnClickTitle,
     searchQuery.text,
-    addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
+    addOrRemoveIncludeTagFilter,
     DateFormatterComp,
-    contentEditor,
+    tableItemsRowActions,
     inspectItem,
-    showEditActionForItem,
   ]);
 
   const itemsById = useMemo(() => {
@@ -607,15 +633,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const selectedItems = useMemo(() => {
     return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
-
-  const tableItemsRowActions = useMemo(() => {
-    return items.reduce<TableItemsRowActions>((acc, item) => {
-      return {
-        ...acc,
-        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
-      };
-    }, {});
-  }, [items, rowItemActions]);
 
   // ------------
   // Callbacks
@@ -857,17 +874,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(
-    () => {
-      // Do not call fetchItems on dependency changes when initial fetch does not load any items
-      // to avoid flashing between empty table and no items view
-      if (!hasNoItems) {
-        fetchItems();
-      }
-    },
-    300,
-    [fetchItems, refreshListBouncer]
-  );
+  useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
 
   useEffect(() => {
     if (!urlStateEnabled) {
@@ -946,7 +953,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   if (!showFetchError && hasNoItems) {
     return (
-      <PageTemplate panelled isEmptyState={true}>
+      <PageTemplate isEmptyState={true}>
         <KibanaPageTemplate.Section
           aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
         >

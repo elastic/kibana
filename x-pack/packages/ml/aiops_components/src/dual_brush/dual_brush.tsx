@@ -6,15 +6,15 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, type FC } from 'react';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
-import { getSnappedWindowParameters } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import { getSnappedWindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
 import './dual_brush.scss';
 
@@ -54,25 +54,49 @@ const BRUSH_MARGIN = 4;
 const BRUSH_HANDLE_SIZE = 4;
 const BRUSH_HANDLE_ROUNDED_CORNER = 2;
 
+/**
+ * Props for the DualBrush React Component
+ */
 interface DualBrushProps {
+  /**
+   * Min and max numeric timestamps for the two brushes
+   */
   windowParameters: WindowParameters;
+  /**
+   * Min timestamp for x domain
+   */
   min: number;
+  /**
+   * Max timestamp for x domain
+   */
   max: number;
+  /**
+   * Callback function whenever the brush changes
+   */
   onChange?: (windowParameters: WindowParameters, windowPxParameters: WindowParameters) => void;
+  /**
+   * Margin left
+   */
   marginLeft: number;
+  /**
+   * Nearest timestamps to snap to the brushes to
+   */
   snapTimestamps?: number[];
+  /**
+   * Width
+   */
   width: number;
 }
 
-export function DualBrush({
-  windowParameters,
-  min,
-  max,
-  onChange,
-  marginLeft,
-  snapTimestamps,
-  width,
-}: DualBrushProps) {
+/**
+ * DualBrush React Component
+ * Dual brush component that overlays the document count chart
+ *
+ * @param props DualBrushProps component props
+ * @returns The DualBrush component.
+ */
+export const DualBrush: FC<DualBrushProps> = (props) => {
+  const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
 
@@ -334,4 +358,4 @@ export function DualBrush({
       )}
     </>
   );
-}
+};

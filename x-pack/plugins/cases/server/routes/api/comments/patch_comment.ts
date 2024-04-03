@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-import { CommentPatchRequestRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import { AttachmentPatchRequestRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const patchCommentRoute = createCasesRoute({
   method: 'patch',
@@ -22,16 +23,17 @@ export const patchCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = decodeWithExcessOrThrow(CommentPatchRequestRt)(request.body);
+      const query = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(request.body);
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+      const res: caseDomainV1.Case = await client.attachments.update({
+        caseID: request.params.case_id,
+        updateRequest: query,
+      });
 
       return response.ok({
-        body: await client.attachments.update({
-          caseID: request.params.case_id,
-          updateRequest: query,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

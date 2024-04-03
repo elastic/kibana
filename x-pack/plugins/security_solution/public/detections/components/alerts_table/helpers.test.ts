@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
@@ -545,7 +545,7 @@ describe('helpers', () => {
           range: {
             '@timestamp': {
               gte: '2020-10-29T21:06:10.192Z',
-              lt: '2020-10-29T21:07:38.774Z',
+              lte: '2020-10-29T21:07:38.774Z',
               format: 'strict_date_optional_time',
             },
           },
@@ -557,7 +557,7 @@ describe('helpers', () => {
             key: '@timestamp',
             params: {
               gte: from,
-              lt: to,
+              lte: to,
               format: 'strict_date_optional_time',
             },
           },

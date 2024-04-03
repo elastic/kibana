@@ -36,12 +36,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const spaces = getService('spaces');
   const elasticChart = getService('elasticChart');
+  const toasts = getService('toasts');
 
   const createDrilldown = async () => {
     await PageObjects.dashboard.gotoDashboardEditMode(
       dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
     );
-    await PageObjects.common.clearAllToasts(); // toasts get in the way of bottom "Create drilldown" button in flyout
+    await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
     await dashboardPanelActions.openContextMenu();
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     controls: Array<{ field: string; type: string }>
   ) => {
     await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-    await PageObjects.common.clearAllToasts(); // toasts get in the way of bottom "Save and close" button in create control flyout
+    await toasts.dismissAll(); // toasts get in the way of bottom "Save and close" button in create control flyout
 
     for (const control of controls) {
       await PageObjects.dashboardControls.createControl({
@@ -129,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
         await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.preserveCrossAppState();
         await elasticChart.setNewChartUiDebugFlag();
 
@@ -312,8 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
           await PageObjects.dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
           await PageObjects.dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
-          await PageObjects.dashboard.clickQuickSave();
           await PageObjects.dashboard.waitForRenderComplete();
+          await PageObjects.dashboard.clickQuickSave();
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           /** Destination Dashboard */
           await createControls(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, [
@@ -399,7 +401,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Actually use copied dashboards in a new space:
 
-        await PageObjects.common.navigateToApp('dashboard', {
+        await PageObjects.common.navigateToApp('dashboards', {
           basePath: `/s/${destinationSpaceId}`,
         });
         await PageObjects.dashboard.preserveCrossAppState();

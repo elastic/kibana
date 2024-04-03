@@ -17,19 +17,21 @@ import type {
   Configuration,
   ConfigurationAttributes,
   Configurations,
+  ConnectorMappings,
 } from '../../../common/types/domain';
 import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
+  ConnectorMappingResponse,
   GetConfigurationFindRequest,
 } from '../../../common/types/api';
 import {
   ConfigurationPatchRequestRt,
   ConfigurationRequestRt,
   GetConfigurationFindRequestRt,
+  FindActionConnectorResponseRt,
 } from '../../../common/types/api';
-import type { ConnectorMappings, ConnectorMappingResponse } from '../../../common/api';
-import { FindActionConnectorResponseRt, decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import {
   MAX_CONCURRENT_SEARCHES,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
@@ -44,8 +46,9 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
+import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
  * Defines the internal helper functions.
@@ -65,7 +68,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<Configurations>;
+  get(params?: GetConfigurationFindRequest): Promise<Configurations>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -116,7 +119,7 @@ export const createConfigurationSubClient = (
   casesInternalClient: CasesClientInternal
 ): ConfigureSubClient => {
   return Object.freeze({
-    get: (params: GetConfigurationFindRequest) => get(params, clientArgs, casesInternalClient),
+    get: (params?: GetConfigurationFindRequest) => get(params, clientArgs, casesInternalClient),
     getConnectors: () => getConnectors(clientArgs),
     update: (configurationId: string, configuration: ConfigurationPatchRequest) =>
       update(configurationId, configuration, clientArgs, casesInternalClient),
@@ -126,7 +129,7 @@ export const createConfigurationSubClient = (
 };
 
 export async function get(
-  params: GetConfigurationFindRequest,
+  params: GetConfigurationFindRequest = {},
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<Configurations> {
@@ -248,11 +251,18 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
+    validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
+
     const { version, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
       configurationId,
+    });
+
+    validateCustomFieldTypesInRequest({
+      requestCustomFields: request.customFields,
+      originalCustomFields: configuration.attributes.customFields,
     });
 
     await authorization.ensureAuthorized({
@@ -337,7 +347,7 @@ export async function update(
   }
 }
 
-async function create(
+export async function create(
   configRequest: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
@@ -353,6 +363,10 @@ async function create(
   try {
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
+
+    validateDuplicatedCustomFieldKeysInRequest({
+      requestCustomFields: validatedConfigurationRequest.customFields,
+    });
 
     let error = null;
 
@@ -426,6 +440,7 @@ async function create(
       unsecuredSavedObjectsClient,
       attributes: {
         ...validatedConfigurationRequest,
+        customFields: validatedConfigurationRequest.customFields ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

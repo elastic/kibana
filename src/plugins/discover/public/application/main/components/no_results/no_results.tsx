@@ -10,10 +10,14 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings';
 import { NoResultsSuggestions } from './no_results_suggestions';
+import type { DiscoverStateContainer } from '../../services/discover_state';
+import { useDataState } from '../../hooks/use_data_state';
 import './_no_results.scss';
 
 export interface DiscoverNoResultsProps {
+  stateContainer: DiscoverStateContainer;
   isTimeBased?: boolean;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
@@ -22,12 +26,20 @@ export interface DiscoverNoResultsProps {
 }
 
 export function DiscoverNoResults({
+  stateContainer,
   isTimeBased,
   query,
   filters,
   dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
+  const { documents$ } = stateContainer.dataState.data$;
+  const interceptedWarnings = useDataState(documents$).interceptedWarnings;
+
+  if (interceptedWarnings?.length) {
+    return <SearchResponseWarningsEmptyPrompt warnings={interceptedWarnings} />;
+  }
+
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>

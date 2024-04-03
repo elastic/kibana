@@ -14,11 +14,23 @@ import {
   asNotificationExecutionSource,
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
+import { actionsConfigMock } from './actions_config.mock';
 
 const mockTaskManager = taskManagerMock.createStart();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const mockActionsConfig = actionsConfigMock.create();
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockTaskManager.aggregate.mockResolvedValue({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    aggregations: {},
+  });
+  mockActionsConfig.getMaxQueued.mockReturnValue(10);
+});
 
 describe('bulkExecute()', () => {
   test.each([
@@ -42,6 +54,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
 
       internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
@@ -154,6 +167,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
 
       internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
@@ -278,6 +292,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
 
       internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
@@ -426,6 +441,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
       await expect(
         executeFn(internalSavedObjectsRepository, [
@@ -468,6 +484,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
       mockedConnectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
         throw new Error('Fail');
@@ -512,7 +529,7 @@ describe('bulkExecute()', () => {
           },
           {
             id: '456',
-            actionTypeId: 'not-in-allowlist',
+            actionTypeId: '.index',
             config: {},
             isPreconfigured: true,
             isDeprecated: false,
@@ -521,6 +538,7 @@ describe('bulkExecute()', () => {
             secrets: {},
           },
         ],
+        configurationUtilities: mockActionsConfig,
       });
       await expect(
         executeFn(internalSavedObjectsRepository, [
@@ -536,8 +554,61 @@ describe('bulkExecute()', () => {
           },
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"not-in-allowlist actions cannot be scheduled for unsecured actions execution"`
+        `".index actions cannot be scheduled for unsecured actions execution"`
       );
+    }
+  );
+
+  test.each([
+    [true, false],
+    [false, true],
+  ])(
+    'returns queuedActionsLimitError response when the max number of queued actions has been reached: %s, isSystemAction: %s',
+    async (isPreconfigured, isSystemAction) => {
+      mockTaskManager.aggregate.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 2, relation: 'eq' }, max_score: null, hits: [] },
+        aggregations: {},
+      });
+      mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
+      const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        inMemoryConnectors: [
+          {
+            id: '123',
+            actionTypeId: '.email',
+            config: {},
+            isPreconfigured,
+            isDeprecated: false,
+            isSystemAction,
+            name: 'x',
+            secrets: {},
+          },
+        ],
+        configurationUtilities: mockActionsConfig,
+      });
+
+      internalSavedObjectsRepository.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [],
+      });
+      expect(
+        await executeFn(internalSavedObjectsRepository, [
+          {
+            id: '123',
+            params: { baz: false },
+            source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
+          },
+        ])
+      ).toEqual({ errors: true, items: [{ id: '123', response: 'queuedActionsLimitError' }] });
+      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Array [],
+        ]
+      `);
     }
   );
 });

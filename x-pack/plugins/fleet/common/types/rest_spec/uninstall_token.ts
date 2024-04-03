@@ -12,6 +12,7 @@ import type { ListResult } from './common';
 export interface GetUninstallTokensMetadataRequest {
   query: {
     policyId?: string;
+    search?: string;
     perPage?: number;
     page?: number;
   };

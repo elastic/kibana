@@ -14,7 +14,7 @@ module.exports = {
   USES_STYLED_COMPONENTS: [
     /packages[\/\\]kbn-ui-shared-deps-(npm|src)[\/\\]/,
     /src[\/\\]plugins[\/\\](kibana_react)[\/\\]/,
-    /x-pack[\/\\]plugins[\/\\](apm|beats_management|cases|fleet|infra|lists|observability|observability_shared|exploratory_view|osquery|security_solution|timelines|synthetics|ux|uptime)[\/\\]/,
+    /x-pack[\/\\]plugins[\/\\](observability_solution\/apm|beats_management|fleet|observability_solution\/infra|lists|observability_solution\/observability|observability_solution\/observability_shared|observability_solution\/exploratory_view|observability_solution\/slo|security_solution|timelines|observability_solution\/synthetics|observability_solution\/ux|observability_solution\/uptime)[\/\\]/,
     /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
     /x-pack[\/\\]packages[\/\\]elastic_assistant[\/\\]/,
     /x-pack[\/\\]packages[\/\\]security-solution[\/\\]ecs_data_quality_dashboard[\/\\]/,

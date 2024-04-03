@@ -9,9 +9,12 @@ import type { Interception } from 'cypress/types/net-stubbing';
 
 import { CONFIRM_MODAL } from '../screens/navigation';
 import { SETTINGS } from '../screens/integrations';
+import { login } from '../tasks/login';
 
 describe('Install unverified package assets', () => {
   beforeEach(() => {
+    login();
+
     cy.intercept('POST', '/api/fleet/epm/packages/fleet_server/*', (req) => {
       if (!req.body.force) {
         return req.reply({

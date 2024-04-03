@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import sinon, { stub } from 'sinon';
 import { NotificationsStart } from '@kbn/core/public';
-import { coreMock, themeServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { JobSummary, ReportApiJSON } from '../../common/types';
-import { Job } from './job';
-import { ReportingAPIClient } from './reporting_api_client';
+import { coreMock, docLinksServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
+
+import { JobSummary, JobSummarySet } from '../types';
+import { Job, ReportingAPIClient } from '@kbn/reporting-public';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
-Object.defineProperty(window, 'sessionStorage', {
-  value: {
-    setItem: jest.fn(() => null),
-  },
-  writable: true,
-});
+/**
+ * A test class that subclasses the main class with testable
+ * methods that access private methods indirectly.
+ */
+class TestReportingNotifierStreamHandler extends ReportingNotifierStreamHandler {
+  public testFindChangedStatusJobs(previousPending: JobId[]) {
+    return this.findChangedStatusJobs(previousPending);
+  }
+
+  public testShowNotifications(jobs: JobSummarySet) {
+    return this.showNotifications(jobs);
+  }
+}
 
 const mockJobsFound: Job[] = [
   { id: 'job-source-mock1', status: 'completed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
@@ -34,11 +41,11 @@ jobQueueClientMock.getInfo = () =>
   Promise.resolve({ content: 'this is the completed report data' } as unknown as Job);
 jobQueueClientMock.getError = () => Promise.resolve('this is the failed report error');
 jobQueueClientMock.getManagementLink = () => '/#management';
-jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
+jobQueueClientMock.getReportURL = () => '/reporting/download/job-123';
 
-const mockShowDanger = stub();
-const mockShowSuccess = stub();
-const mockShowWarning = stub();
+const mockShowDanger = jest.fn();
+const mockShowSuccess = jest.fn();
+const mockShowWarning = jest.fn();
 const notificationsMock = {
   toasts: {
     addDanger: mockShowDanger,
@@ -52,11 +59,11 @@ const docLink = docLinksServiceMock.createStartContract();
 
 describe('stream handler', () => {
   afterEach(() => {
-    sinon.reset();
+    jest.resetAllMocks();
   });
 
   it('constructs', () => {
-    const sh = new ReportingNotifierStreamHandler(
+    const sh = new TestReportingNotifierStreamHandler(
       notificationsMock,
       jobQueueClientMock,
       theme,
@@ -67,13 +74,13 @@ describe('stream handler', () => {
 
   describe('findChangedStatusJobs', () => {
     it('finds no changed status jobs from empty', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      const findJobs = sh.findChangedStatusJobs([]);
+      const findJobs = sh.testFindChangedStatusJobs([]);
       findJobs.subscribe((data) => {
         expect(data).toEqual({ completed: [], failed: [] });
         done();
@@ -81,13 +88,13 @@ describe('stream handler', () => {
     });
 
     it('finds changed status jobs', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      const findJobs = sh.findChangedStatusJobs([
+      const findJobs = sh.testFindChangedStatusJobs([
         'job-source-mock1',
         'job-source-mock2',
         'job-source-mock3',
@@ -103,13 +110,13 @@ describe('stream handler', () => {
 
   describe('showNotifications', () => {
     it('show success', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      sh.showNotifications({
+      sh.testShowNotifications({
         completed: [
           {
             id: 'yas1',
@@ -120,22 +127,22 @@ describe('stream handler', () => {
         ],
         failed: [],
       }).subscribe(() => {
-        expect(mockShowDanger.callCount).toBe(0);
-        expect(mockShowSuccess.callCount).toBe(1);
-        expect(mockShowWarning.callCount).toBe(0);
-        expect(mockShowSuccess.args[0]).toMatchSnapshot();
+        expect(mockShowDanger).not.toBeCalled();
+        expect(mockShowSuccess).toBeCalledTimes(1);
+        expect(mockShowWarning).not.toBeCalled();
+        expect(mockShowSuccess.mock.calls).toMatchSnapshot();
         done();
       });
     });
 
     it('show max length warning', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      sh.showNotifications({
+      sh.testShowNotifications({
         completed: [
           {
             id: 'yas2',
@@ -147,22 +154,22 @@ describe('stream handler', () => {
         ],
         failed: [],
       }).subscribe(() => {
-        expect(mockShowDanger.callCount).toBe(0);
-        expect(mockShowSuccess.callCount).toBe(0);
-        expect(mockShowWarning.callCount).toBe(1);
-        expect(mockShowWarning.args[0]).toMatchSnapshot();
+        expect(mockShowDanger).not.toBeCalled();
+        expect(mockShowSuccess).not.toBeCalled();
+        expect(mockShowWarning).toBeCalledTimes(1);
+        expect(mockShowWarning.mock.calls).toMatchSnapshot();
         done();
       });
     });
 
     it('show csv formulas warning', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      sh.showNotifications({
+      sh.testShowNotifications({
         completed: [
           {
             id: 'yas3',
@@ -174,22 +181,22 @@ describe('stream handler', () => {
         ],
         failed: [],
       }).subscribe(() => {
-        expect(mockShowDanger.callCount).toBe(0);
-        expect(mockShowSuccess.callCount).toBe(0);
-        expect(mockShowWarning.callCount).toBe(1);
-        expect(mockShowWarning.args[0]).toMatchSnapshot();
+        expect(mockShowDanger).not.toBeCalled();
+        expect(mockShowSuccess).not.toBeCalled();
+        expect(mockShowWarning).toBeCalledTimes(1);
+        expect(mockShowWarning.mock.calls).toMatchSnapshot();
         done();
       });
     });
 
     it('show failed job toast', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      sh.showNotifications({
+      sh.testShowNotifications({
         completed: [],
         failed: [
           {
@@ -200,22 +207,22 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
       }).subscribe(() => {
-        expect(mockShowSuccess.callCount).toBe(0);
-        expect(mockShowWarning.callCount).toBe(0);
-        expect(mockShowDanger.callCount).toBe(1);
-        expect(mockShowDanger.args[0]).toMatchSnapshot();
+        expect(mockShowSuccess).not.toBeCalled();
+        expect(mockShowWarning).not.toBeCalled();
+        expect(mockShowDanger).toBeCalledTimes(1);
+        expect(mockShowDanger.mock.calls).toMatchSnapshot();
         done();
       });
     });
 
     it('show multiple toast', (done) => {
-      const sh = new ReportingNotifierStreamHandler(
+      const sh = new TestReportingNotifierStreamHandler(
         notificationsMock,
         jobQueueClientMock,
         theme,
         docLink
       );
-      sh.showNotifications({
+      sh.testShowNotifications({
         completed: [
           {
             id: 'yas8',
@@ -247,9 +254,9 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
       }).subscribe(() => {
-        expect(mockShowSuccess.callCount).toBe(1);
-        expect(mockShowWarning.callCount).toBe(2);
-        expect(mockShowDanger.callCount).toBe(1);
+        expect(mockShowSuccess).toBeCalledTimes(1);
+        expect(mockShowWarning).toBeCalledTimes(2);
+        expect(mockShowDanger).toBeCalledTimes(1);
         done();
       });
     });

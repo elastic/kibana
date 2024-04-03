@@ -10,11 +10,11 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Role } from '../../../../../../../common/model';
+import { FeatureTableExpandedRow } from './feature_table_expanded_row';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -350,5 +350,62 @@ describe('FeatureTableExpandedRow', () => {
 
     const object = wrapper.find('SubFeatureForm');
     expect(object.props()).toMatchObject({ disabled: false });
+  });
+
+  it('require all spaces enabled and allSpacesSelected is true: option is enabled for both feature and sub-features', () => {
+    // Create role with `all` privilege turned on.
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_require_all_spaces_for_feature_and_sub_features: ['all'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+    const feature = kibanaPrivileges.getSecuredFeature(
+      'with_require_all_spaces_for_feature_and_sub_features'
+    );
+
+    // Make sure we update `selectedFeaturePrivileges` when `onChange` is called.
+    const onChange = jest.fn((_, selectedFeaturePrivileges) => {
+      wrapper.setProps({ selectedFeaturePrivileges });
+    });
+
+    const wrapper = mountWithIntl(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={['all']}
+        onChange={onChange}
+        licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={true}
+      />
+    );
+
+    // Make sure sub-feature customization toggle is unchecked.
+    let customizeToggle = findTestSubject(wrapper, 'customizeSubFeaturePrivileges');
+    expect(customizeToggle.props()['aria-checked']).toBe(false);
+
+    // Click on the toggle to start customization.
+    act(() => {
+      customizeToggle.simulate('click');
+      wrapper.update();
+    });
+
+    // Make sure `onChange` is called with the expected arguments (all -> `minimal_all` + `cool_toggle_1`).
+    expect(onChange).toHaveBeenCalledWith('with_require_all_spaces_for_feature_and_sub_features', [
+      'minimal_all',
+      'cool_toggle_1',
+    ]);
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    // Make sure sub-feature customization toggle retained its checked state.
+    customizeToggle = findTestSubject(wrapper, 'customizeSubFeaturePrivileges');
+    expect(customizeToggle.props()['aria-checked']).toBe(true);
   });
 });

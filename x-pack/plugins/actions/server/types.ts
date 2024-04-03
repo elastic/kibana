@@ -15,7 +15,11 @@ import {
   CustomRequestHandlerContext,
   SavedObjectReference,
   Logger,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
+import { AnySchema } from 'joi';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
+import { ServiceParams } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -27,6 +31,7 @@ import { ActionsConfigurationUtilities } from './actions_config';
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
+export type GetUnsecuredServicesFunction = () => UnsecuredServices;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type ActionTypeConfig = Record<string, unknown>;
@@ -35,12 +40,19 @@ export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 import type { ActionExecutionSource } from './lib';
+import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 export type { ActionExecutionSource } from './lib';
 
 export { ActionExecutionSourceType } from './lib';
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
+  connectorTokenClient: ConnectorTokenClient;
+}
+
+export interface UnsecuredServices {
+  savedObjectsClient: ISavedObjectsRepository;
   scopedClusterClient: ElasticsearchClient;
   connectorTokenClient: ConnectorTokenClient;
 }
@@ -60,9 +72,13 @@ export interface ActionsPlugin {
 }
 
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
+export interface ActionTypeExecutorOptions<
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>,
+  Params
+> {
   actionId: string;
-  services: Services;
+  services: Services | UnsecuredServices;
   config: Config;
   secrets: Secrets;
   params: Params;
@@ -71,40 +87,37 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  request?: KibanaRequest;
 }
 
-export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
-  id: string;
-  actionTypeId: string;
-  name: string;
-  isMissingSecrets?: boolean;
-  config?: Config;
-  isPreconfigured: boolean;
-  isDeprecated: boolean;
-  isSystemAction: boolean;
-}
+export type ActionResult = Connector;
 
 export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
-> extends ActionResult<Config> {
+> extends ActionResult {
   secrets: Secrets;
+  config: Config;
 }
 
-export interface FindActionResult extends ActionResult {
-  referencedByCount: number;
-}
+export type FindActionResult = ConnectorWithExtraFindData;
 
 // signature of the action type executor function
-export type ExecutorType<Config, Secrets, Params, ResultData> = (
+export type ExecutorType<
+  Config extends Record<string, unknown>,
+  Secrets extends Record<string, unknown>,
+  Params,
+  ResultData
+> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-export interface ValidatorType<Type> {
+export interface ValidatorType<T> {
   schema: {
-    validate(value: unknown): Type;
+    validate(value: unknown): T;
+    getSchema?: () => AnySchema;
   };
-  customValidator?: (value: Type, validatorServices: ValidatorServices) => void;
+  customValidator?: (value: T, validatorServices: ValidatorServices) => void;
 }
 
 export interface ValidatorServices {
@@ -118,6 +131,7 @@ export interface ActionValidationService {
 }
 
 export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  logger: Logger,
   params: Params,
   variables: Record<string, unknown>,
   actionId?: string
@@ -141,16 +155,29 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  /**
+   * Additional Kibana privileges to be checked by the actions framework.
+   * Use it if you want to perform extra authorization checks based on a Kibana feature.
+   * For example, you can define the privileges a users needs to have to execute
+   * a Case or OsQuery system action.
+   *
+   * The list of the privileges follows the Kibana privileges format usually generated with `security.authz.actions.*.get(...)`.
+   *
+   * It only works with system actions and only when executing an action.
+   * For all other scenarios they will be ignored
+   */
+  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
 }
 
-export interface RawAction extends SavedObjectAttributes {
+export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -200,6 +227,11 @@ export interface ResponseSettings {
 
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
+  pfx?: Buffer;
+  cert?: Buffer;
+  key?: Buffer;
+  passphrase?: string;
+  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
@@ -210,3 +242,7 @@ export interface ConnectorToken extends SavedObjectAttributes {
   createdAt: string;
   updatedAt?: string;
 }
+
+// This unallowlist should only contain connector types that require a request or API key for
+// execution.
+export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];

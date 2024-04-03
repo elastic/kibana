@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { MonitorStatusTranslations } from '@kbn/synthetics-plugin/common/rules/legacy_uptime/translations';
+import { MonitorStatusTranslations } from '@kbn/uptime-plugin/common/rules/legacy_uptime/translations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { deleteUptimeSettingsObject } from '../../../../functional/apps/uptime';
 
@@ -73,7 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays relevant alert in list drawer', async () => {
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
 
       await testSubjects.click(`xpack.synthetics.monitorList.${monitorId}.expandMonitorDetail`);
       await pageObjects.header.waitUntilLoadingHasFinished();

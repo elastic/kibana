@@ -73,6 +73,7 @@ jest.mock('../services', () => ({
       update: mockUpdateContent,
       get: mockGetContent,
       search: mockFindContent,
+      mSearch: mockFindContent,
     },
   })),
 }));
@@ -358,10 +359,11 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            options: {
-              types: ['bazdoc', 'etc', 'visualization'],
-              searchFields: ['baz', 'bing', 'title^3', 'description'],
-            },
+            contentTypes: [
+              { contentTypeId: 'bazdoc' },
+              { contentTypeId: 'etc' },
+              { contentTypeId: 'visualization' },
+            ],
           },
         ],
       ]);
@@ -395,10 +397,12 @@ describe('saved_visualize_utils', () => {
       expect(mockFindContent.mock.calls).toMatchObject([
         [
           {
-            options: {
-              types: ['bazdoc', 'bar', 'visualization', 'foo'],
-              searchFields: ['baz', 'bing', 'barfield', 'foofield', 'title^3', 'description'],
-            },
+            contentTypes: [
+              { contentTypeId: 'bazdoc' },
+              { contentTypeId: 'bar' },
+              { contentTypeId: 'visualization' },
+              { contentTypeId: 'foo' },
+            ],
           },
         ],
       ]);
@@ -500,11 +504,13 @@ describe('saved_visualize_utils', () => {
           {
             id: 'wat',
             image: undefined,
+            editor: {
+              editUrl: '/edit/wat',
+            },
             readOnly: false,
             references: undefined,
             icon: undefined,
             savedObjectType: 'visualization',
-            editUrl: '/edit/wat',
             type: 'test',
             typeName: 'test',
             typeTitle: undefined,

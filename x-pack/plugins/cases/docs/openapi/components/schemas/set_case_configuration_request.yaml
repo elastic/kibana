@@ -18,15 +18,20 @@ properties:
       - id
       - name
       - type
+  customFields:
+    type: array
+    description: Custom fields case configuration.
+    x-technical-preview: true
+    minItems: 0
+    maxItems: 10
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - required
+        - type
+      properties:
+        $ref: 'case_configure_customfields.yaml'
   owner:
     $ref: 'owners.yaml'
-  settings:
-    description: An object that contains the case settings.
-    type: object
-    properties:
-      syncAlerts:
-        description: Turns alert syncing on or off.
-        type: boolean
-        example: true
-    required: 
-      - syncAlerts

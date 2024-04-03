@@ -57,9 +57,8 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      {
-        'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
-      },
+      'kbnSolutionNav__sidebar',
+      { 'kbnSolutionNav__sidebar--shrink': isSidebarShrunk },
       props.pageSideBarProps?.className,
       withSolutionNavStyles
     );
@@ -77,6 +76,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       ...props.pageSideBarProps,
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
+      hasEmbellish: !isSidebarShrunk,
     };
 
     return (

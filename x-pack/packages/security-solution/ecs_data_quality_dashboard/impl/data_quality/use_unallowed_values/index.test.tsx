@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
@@ -15,10 +15,26 @@ import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unall
 import { ERROR_LOADING_UNALLOWED_VALUES } from '../translations';
 import { EcsMetadata, UnallowedValueRequestItem } from '../types';
 import { useUnallowedValues, UseUnallowedValues } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockHttpFetch = jest.fn();
+const mockReportDataQualityIndexChecked = jest.fn();
+const mockReportDataQualityCheckAllClicked = jest.fn();
+const mockTelemetryEvents = {
+  reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
+};
+const { toasts } = notificationServiceMock.createSetupContract();
+
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch}>{children}</DataQualityProvider>
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={true}
+    toasts={toasts}
+  >
+    {children}
+  </DataQualityProvider>
 );
 
 const ecsMetadata = EcsFlat as unknown as Record<string, EcsMetadata>;

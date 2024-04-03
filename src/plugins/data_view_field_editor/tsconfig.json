@@ -26,6 +26,8 @@
     "@kbn/field-types",
     "@kbn/utility-types",
     "@kbn/config-schema",
+    "@kbn/react-kibana-mount",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

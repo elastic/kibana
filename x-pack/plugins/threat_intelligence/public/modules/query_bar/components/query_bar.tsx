@@ -6,19 +6,19 @@
  */
 
 import React, { useEffect, VFC } from 'react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useSecurityContext } from '../../../hooks/use_security_context';
-import { SecuritySolutionDataViewBase } from '../../../types';
 
 interface QueryBarProps {
-  indexPattern: SecuritySolutionDataViewBase;
   queries: Array<{
     id: string;
     refetch: VoidFunction;
     loading: boolean;
   }>;
+  sourcererDataView: DataViewSpec | undefined;
 }
 
-export const QueryBar: VFC<QueryBarProps> = ({ indexPattern, queries }) => {
+export const QueryBar: VFC<QueryBarProps> = ({ queries, sourcererDataView }) => {
   const { SiemSearchBar, registerQuery, deregisterQuery } = useSecurityContext();
 
   useEffect(() => {
@@ -27,5 +27,5 @@ export const QueryBar: VFC<QueryBarProps> = ({ indexPattern, queries }) => {
     return () => queries.forEach(deregisterQuery);
   }, [queries, deregisterQuery, registerQuery]);
 
-  return <SiemSearchBar id="global" indexPattern={indexPattern} />;
+  return <SiemSearchBar id="global" sourcererDataView={sourcererDataView} />;
 };

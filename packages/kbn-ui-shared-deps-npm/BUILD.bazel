@@ -24,6 +24,8 @@ SRCS = glob(
 
 # deps needed when importing this module from another location
 RUNTIME_DEPS = [
+  "@npm//babel-loader",
+  "@npm//@babel/plugin-proposal-optional-chaining",
   "@npm//loader-utils",
   "@npm//val-loader",
   "//packages/kbn-repo-info",
@@ -40,6 +42,7 @@ RUNTIME_DEPS = [
   "@npm//@elastic/numeral",
   "@npm//@emotion/cache",
   "@npm//@emotion/react",
+  "@npm//@hello-pangea/dnd",
   "@npm//@tanstack/react-query",
   "@npm//@tanstack/react-query-devtools",
   "@npm//classnames",
@@ -49,7 +52,6 @@ RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
   "@npm//react-ace",
-  "@npm//react-beautiful-dnd",
   "@npm//react-dom",
   "@npm//react-router-dom",
   "@npm//react-router-dom-v5-compat",
@@ -60,6 +62,11 @@ RUNTIME_DEPS = [
   "@npm//tslib",
   "@npm//uuid",
   "@npm//io-ts",
+  "@npm//@reduxjs/toolkit",
+  "@npm//redux",
+  "@npm//react-redux",
+  "@npm//immer",
+  "@npm//reselect"
 ]
 
 webpack_cli(
@@ -86,9 +93,11 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
+      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
+      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
   })
 )

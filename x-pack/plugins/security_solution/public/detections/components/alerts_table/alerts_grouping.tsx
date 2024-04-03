@@ -16,7 +16,7 @@ import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../common/api/detection_engine';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -76,8 +76,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
 
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
-      onGroupChange: (param: { groupByField: string; tableId: string }) => {
-        telemetry.reportAlertsGroupingChanged(param);
+      onGroupChange: ({ groupByField, tableId }: { groupByField: string; tableId: string }) => {
+        telemetry.reportAlertsGroupingChanged({ groupByField, tableId });
       },
       onGroupToggle: (param: {
         isOpen: boolean;
@@ -116,8 +116,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onOptionsChange,
     tracker: track,
   });
-
-  const groupInRedux = useDeepEqualSelector((state) => groupIdSelector()(state, props.tableId));
+  const groupId = useMemo(() => groupIdSelector(), []);
+  const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
   useEffect(() => {
     // only ever set to `none` - siem only handles group selector when `none` is selected
     if (isNoneGroup(selectedGroups)) {

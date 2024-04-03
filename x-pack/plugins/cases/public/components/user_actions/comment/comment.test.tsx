@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { Actions } from '../../../../common/api';
+import { UserActionActions } from '../../../../common/types/domain';
 import {
   alertComment,
   basicCase,
@@ -55,7 +55,7 @@ describe('createCommentUserActionBuilder', () => {
 
   describe('edits', () => {
     it('renders correctly when editing a comment', async () => {
-      const userAction = getUserAction('comment', Actions.update);
+      const userAction = getUserAction('comment', UserActionActions.update);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -74,7 +74,7 @@ describe('createCommentUserActionBuilder', () => {
 
   describe('deletions', () => {
     it('renders correctly when deleting a comment', async () => {
-      const userAction = getUserAction('comment', Actions.delete);
+      const userAction = getUserAction('comment', UserActionActions.delete);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -91,7 +91,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting a single alert', async () => {
-      const userAction = getAlertUserAction({ action: Actions.delete });
+      const userAction = getAlertUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -108,7 +108,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting multiple alerts', async () => {
-      const userAction = getMultipleAlertsUserAction({ action: Actions.delete });
+      const userAction = getMultipleAlertsUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -125,7 +125,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting an external reference attachment', async () => {
-      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -153,7 +153,7 @@ describe('createCommentUserActionBuilder', () => {
         getAttachmentRemovalObject,
       });
 
-      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
@@ -187,7 +187,7 @@ describe('createCommentUserActionBuilder', () => {
       const attachment = getExternalReferenceAttachment();
       externalReferenceAttachmentTypeRegistry.register(attachment);
 
-      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         externalReferenceAttachmentTypeRegistry,
@@ -205,7 +205,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly when deleting a persistable state attachment', async () => {
-      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -233,7 +233,7 @@ describe('createCommentUserActionBuilder', () => {
         getAttachmentRemovalObject,
       });
 
-      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
@@ -269,7 +269,7 @@ describe('createCommentUserActionBuilder', () => {
       const attachment = getPersistableStateAttachment();
       persistableStateAttachmentTypeRegistry.register(attachment);
 
-      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
@@ -289,7 +289,7 @@ describe('createCommentUserActionBuilder', () => {
 
   describe('user comments', () => {
     it('renders correctly a user comment', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -309,7 +309,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('deletes a user comment correctly', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -338,7 +338,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('edits a user comment correctly', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -369,7 +369,7 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('quotes a user comment correctly', async () => {
-      const userAction = getUserAction('comment', Actions.create, {
+      const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
@@ -587,28 +587,60 @@ describe('createCommentUserActionBuilder', () => {
     });
   });
 
-  it('renders correctly an action', async () => {
-    const userAction = getHostIsolationUserAction();
+  describe('Host isolation action', () => {
+    it('renders correctly an action', async () => {
+      const userAction = getHostIsolationUserAction();
 
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      caseData: {
-        ...builderArgs.caseData,
-        comments: [hostIsolationComment()],
-      },
-      userAction,
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [hostIsolationComment()],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
+      expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
+      expect(screen.getByText('host1')).toBeInTheDocument();
+      expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
     });
 
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
+    it('shows the correct username', async () => {
+      const createdBy = { profileUid: userProfiles[0].uid };
+      const userAction = getHostIsolationUserAction({
+        createdBy,
+      });
 
-    expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
-    expect(screen.getByText('host1')).toBeInTheDocument();
-    expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [hostIsolationComment({ createdBy })],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(
+        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
+      ).toBeInTheDocument();
+      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
+    });
   });
 
   describe('Attachment framework', () => {

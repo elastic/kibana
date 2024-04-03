@@ -8,7 +8,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
@@ -39,15 +42,16 @@ import type { AliasAction } from './actions';
  * retries. This way we get exponential back-off and logging for failed
  * actions.
  */
-export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000 };
 
 export interface RunResilientMigratorParams {
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
+  indexTypes: string[];
   indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
+  targetIndexMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
   preMigrationScript?: string;
   readyToReindex: WaitGroup<void>;
   doneReindexing: WaitGroup<void>;
@@ -60,6 +64,7 @@ export interface RunResilientMigratorParams {
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -72,8 +77,10 @@ export async function runResilientMigrator({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
+  indexTypes,
   indexTypesMap,
-  targetMappings,
+  targetIndexMappings,
+  hashToVersionMap,
   logger,
   preMigrationScript,
   readyToReindex,
@@ -86,13 +93,16 @@ export async function runResilientMigrator({
   migrationsConfig,
   typeRegistry,
   docLinks,
+  esCapabilities,
 }: RunResilientMigratorParams): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
     mustRelocateDocuments,
+    indexTypes,
     indexTypesMap,
-    targetMappings,
+    hashToVersionMap,
+    targetIndexMappings,
     preMigrationScript,
     coreMigrationVersionPerType,
     migrationVersionPerType,
@@ -101,18 +111,13 @@ export async function runResilientMigrator({
     typeRegistry,
     docLinks,
     logger,
+    esCapabilities,
   });
-  const migrationClient = client.child(MIGRATION_CLIENT_OPTIONS);
+
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(
-      migrationClient,
-      transformRawDocs,
-      readyToReindex,
-      doneReindexing,
-      updateRelocationAliases
-    ),
+    next: next(client, transformRawDocs, readyToReindex, doneReindexing, updateRelocationAliases),
     model,
     abort: async (state?: State) => {
       // At this point, we could reject this migrator's defers and unblock other migrators

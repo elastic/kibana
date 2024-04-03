@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { omit, pickBy, mapValues } from 'lodash';
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
   DataViewsContract,
-  getTime,
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
@@ -41,6 +39,8 @@ export interface FetchSearchSourceQueryOpts {
     share: SharePluginStart;
     dataViews: DataViewsContract;
   };
+  dateStart: string;
+  dateEnd: string;
 }
 
 export async function fetchSearchSourceQuery({
@@ -50,6 +50,8 @@ export async function fetchSearchSourceQuery({
   latestTimestamp,
   spacePrefix,
   services,
+  dateStart,
+  dateEnd,
 }: FetchSearchSourceQueryOpts) {
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -58,11 +60,13 @@ export async function fetchSearchSourceQuery({
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, dateStart, dateEnd } = updateSearchSource(
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
     initialSearchSource,
     index,
     params,
     latestTimestamp,
+    dateStart,
+    dateEnd,
     alertLimit
   );
 
@@ -81,15 +85,20 @@ export async function fetchSearchSourceQuery({
     index,
     dateStart,
     dateEnd,
-    spacePrefix
+    spacePrefix,
+    filterToExcludeHitsFromPreviousRun
   );
   return {
     link,
     numMatches: Number(searchResult.hits.total),
     searchResult,
-    parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
-    dateStart,
-    dateEnd,
+    parsedResults: parseAggregationResults({
+      isCountAgg,
+      isGroupAgg,
+      esResult: searchResult,
+      sourceFieldsParams: params.sourceFields,
+    }),
+    index: [index.name],
   };
 }
 
@@ -98,8 +107,10 @@ export function updateSearchSource(
   index: DataView,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
+  dateStart: string,
+  dateEnd: string,
   alertLimit?: number
-) {
+): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
   const isGroupAgg = isGroupAggregation(params.termField);
   const timeFieldName = params.timeField || index.timeFieldName;
 
@@ -109,30 +120,33 @@ export function updateSearchSource(
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
-  const timeRange = {
-    from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
-    to: 'now',
-  };
-  const timerangeFilter = getTime(index, timeRange);
-  const dateStart = timerangeFilter?.query.range[timeFieldName].gte;
-  const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
-  const filters = [timerangeFilter];
+  const field = index.fields.find((f) => f.name === timeFieldName);
+  const filters = [
+    buildRangeFilter(
+      field!,
+      { lte: dateEnd, gte: dateStart, format: 'strict_date_optional_time' },
+      index
+    ),
+  ];
 
+  let filterToExcludeHitsFromPreviousRun = null;
   if (params.excludeHitsFromPreviousRun) {
     if (latestTimestamp && latestTimestamp > dateStart) {
-      // add additional filter for documents with a timestamp greater then
+      // add additional filter for documents with a timestamp greater than
       // the timestamp of the previous run, so that those documents are not counted twice
-      const field = index.fields.find((f) => f.name === timeFieldName);
-      const addTimeRangeField = buildRangeFilter(
+      filterToExcludeHitsFromPreviousRun = buildRangeFilter(
         field!,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
         index
       );
-      filters.push(addTimeRangeField);
+      filters.push(filterToExcludeHitsFromPreviousRun);
     }
   }
 
   const searchSourceChild = searchSource.createChild();
+  if (!isGroupAgg) {
+    searchSourceChild.setField('trackTotalHits', true);
+  }
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [
     {
@@ -149,6 +163,7 @@ export function updateSearchSource(
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
+      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -162,21 +177,29 @@ export function updateSearchSource(
   );
   return {
     searchSource: searchSourceChild,
-    dateStart,
-    dateEnd,
+    filterToExcludeHitsFromPreviousRun,
   };
 }
 
-async function generateLink(
+export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
   dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
-  spacePrefix: string
+  spacePrefix: string,
+  filterToExcludeHitsFromPreviousRun: Filter | null
 ) {
-  const prevFilters = searchSource.getField('filter') as Filter[];
+  const prevFilters = [...((searchSource.getField('filter') as Filter[]) || [])];
+
+  if (filterToExcludeHitsFromPreviousRun) {
+    // Using the same additional filter as in the alert check above.
+    // We cannot simply pass `latestTimestamp` to `timeRange.from` Discover locator params
+    // as that would include `latestTimestamp` itself in the Discover results which would be wrong.
+    // Results should be after `latestTimestamp` and within `dateStart` and `dateEnd`.
+    prevFilters.push(filterToExcludeHitsFromPreviousRun);
+  }
 
   // make new adhoc data view
   const newDataView = await dataViews.create({
@@ -202,7 +225,11 @@ async function generateLink(
   return start + spacePrefix + '/app' + end;
 }
 
-function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
+export function updateFilterReferences(
+  filters: Filter[],
+  fromDataView: string,
+  toDataView: string | undefined
+) {
   return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
@@ -221,19 +248,5 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  const dataViewSpec = dataView.toSpec(false);
-
-  if (dataViewSpec.fieldAttrs) {
-    // remove `count` props
-    dataViewSpec.fieldAttrs = pickBy(
-      mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
-      (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
-    );
-
-    if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
-      dataViewSpec.fieldAttrs = undefined;
-    }
-  }
-
-  return dataViewSpec;
+  return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }

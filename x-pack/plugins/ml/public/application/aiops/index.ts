@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ExplainLogRateSpikesPage } from './explain_log_rate_spikes';
+export { LogRateAnalysisPage } from './log_rate_analysis';
 export { ChangePointDetectionPage } from './change_point_detection';

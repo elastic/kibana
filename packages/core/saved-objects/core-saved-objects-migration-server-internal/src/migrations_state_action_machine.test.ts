@@ -15,6 +15,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -38,12 +39,21 @@ describe('migrationsStateActionMachine', () => {
     kibanaVersion: '7.11.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
+    indexTypes: ['typeA', 'typeB', 'typeC'],
     indexTypesMap: {
       '.kibana': ['typeA', 'typeB', 'typeC'],
       '.kibana_task_manager': ['task'],
       '.kibana_cases': ['typeD', 'typeE'],
     },
-    targetMappings: { properties: {} },
+    hashToVersionMap: {
+      'typeA|someHash': '10.1.0',
+      'typeB|someHash': '10.1.0',
+      'typeC|someHash': '10.1.0',
+      'task|someHash': '10.1.0',
+      'typeD|someHash': '10.1.0',
+      'typeE|someHash': '10.1.0',
+    },
+    targetIndexMappings: { properties: {} },
     coreMigrationVersionPerType: {},
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
@@ -63,6 +73,7 @@ describe('migrationsStateActionMachine', () => {
     },
     typeRegistry,
     docLinks,
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
     logger: mockLogger.get(),
   });
 

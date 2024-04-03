@@ -71,3 +71,7 @@ export function isLoneWildcard({ value }: KqlWildcardNode) {
 export function hasLeadingWildcard(node: KqlWildcardNode) {
   return !isLoneWildcard(node) && node.value.startsWith(KQL_WILDCARD_SYMBOL);
 }
+
+export function toKqlExpression(node: KqlWildcardNode): string {
+  return toQueryStringQuery(node);
+}

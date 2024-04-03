@@ -7,8 +7,9 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { SearchConfigSchema } from '../../../../config';
 import {
   EqlSearchStrategyRequest,
@@ -27,15 +28,19 @@ export const eqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = esClient.asCurrentUser.eql;
-    await client.delete({ id });
+    return client.delete({ id });
   }
 
   return {
     cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
-      await cancelAsyncSearch(id, esClient);
+      try {
+        await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
 
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
@@ -77,12 +82,23 @@ export const eqlSearchStrategyProvider = (
               meta: true,
             });
 
-        return toEqlKibanaSearchResponse(response as TransportResult<EqlSearchResponse>);
+        return toEqlKibanaSearchResponse(
+          response as TransportResult<EqlSearchResponse>,
+          // do not return requestParams on polling calls
+          id ? undefined : (response as TransportResult<EqlSearchResponse>).meta?.request?.params
+        );
       };
 
       const cancel = async () => {
-        if (id) {
+        if (!id) return;
+        try {
           await cancelAsyncSearch(id, esClient);
+        } catch (e) {
+          // A 404 means either this search request does not exist, or that it is already cancelled
+          if (e.meta?.statusCode === 404) return;
+
+          // Log all other (unexpected) error messages
+          logger.error(`cancelEqlSearch error: ${e.message}`);
         }
       };
 

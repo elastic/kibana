@@ -43,7 +43,7 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/osquery.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/osquery.svg'),
     artifacts: {
       dashboards: [
         {

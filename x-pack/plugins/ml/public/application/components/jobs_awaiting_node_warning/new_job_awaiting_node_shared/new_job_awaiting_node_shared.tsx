@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
@@ -14,7 +15,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { mlApiServicesProvider } from '../../../services/ml_api_service';
 import { HttpService } from '../../../services/http_service';
-import { extractDeploymentId, CloudInfo } from '../../../services/ml_server_info';
+import type { CloudInfo } from '../../../services/ml_server_info';
+import { extractDeploymentId } from '../../../services/ml_server_info';
 
 interface Props {
   jobIds: string[];
@@ -107,7 +109,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarningShared.noMLNodesAvailableDescription"
-            defaultMessage="There {jobCount, plural, one {is} other {are}} {jobCount, plural, one {# job} other {# jobs}} waiting for machine learning nodes to start."
+            defaultMessage="{jobCount, plural, one {# job} other {# jobs}} will start after autoscaling has increased ML capacity. This may take several minutes."
             values={{
               jobCount: unassignedJobCount,
             }}

@@ -11,11 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import {
-  getExperimentalAllowedValues,
-  isValidExperimentalValue,
-} from '../common/experimental_features';
-const allowedExperimentalValues = getExperimentalAllowedValues();
+import { isValidExperimentalValue } from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -29,6 +25,8 @@ import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts'
 const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled_packages');
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
+const REGISTRY_SPEC_MAX_VERSION = '3.0';
+
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
@@ -41,8 +39,8 @@ export const config: PluginConfigDescriptor = {
     },
     internal: {
       fleetServerStandalone: true,
-      disableProxies: true,
       activeAgentsSoftLimit: true,
+      onlyAllowAgentUpgradeToKnownVersions: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
@@ -107,104 +105,172 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-  ],
-  schema: schema.object({
-    registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-    registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-    agents: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      elasticsearch: schema.object({
-        hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
-        ca_sha256: schema.maybe(schema.string()),
-      }),
-      fleet_server: schema.maybe(
-        schema.object({
-          hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
-        })
-      ),
-    }),
-    packages: PreconfiguredPackagesSchema,
-    agentPolicies: PreconfiguredAgentPoliciesSchema,
-    outputs: PreconfiguredOutputsSchema,
-    fleetServerHosts: PreconfiguredFleetServerHostsSchema,
-    proxies: PreconfiguredFleetProxiesSchema,
-    agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
-    setup: schema.maybe(
-      schema.object({
-        agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
-      })
-    ),
-    developer: schema.object({
-      maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
-      disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
-      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
-      bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
-      testSecretsIndex: schema.maybe(schema.string()),
-    }),
-    packageVerification: schema.object({
-      gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
-    }),
-    /**
-     * For internal use. A list of string values (comma delimited) that will enable experimental
-     * type of functionality that is not yet released.
-     *
-     * @example
-     * xpack.fleet.enableExperimental:
-     *   - feature1
-     *   - feature2
-     */
-    enableExperimental: schema.arrayOf(schema.string(), {
-      defaultValue: () => [],
-      validate(list) {
-        for (const key of list) {
-          if (!isValidExperimentalValue(key)) {
-            return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-              ', '
-            )}`;
-          }
+    // Log invalid experimental values
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
+        if (!isValidExperimentalValue(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            correctiveActions: {
+              manualSteps: [
+                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
         }
-      },
-    }),
-
-    internal: schema.maybe(
-      schema.object({
-        disableILMPolicies: schema.boolean({
-          defaultValue: false,
+      }
+    },
+  ],
+  schema: schema.object(
+    {
+      isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      agents: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        elasticsearch: schema.object({
+          hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+          ca_sha256: schema.maybe(schema.string()),
+          ca_trusted_fingerprint: schema.maybe(schema.string()),
         }),
-        disableProxies: schema.boolean({
-          defaultValue: false,
-        }),
-        fleetServerStandalone: schema.boolean({
-          defaultValue: false,
-        }),
-        activeAgentsSoftLimit: schema.maybe(
-          schema.number({
-            min: 0,
+        fleet_server: schema.maybe(
+          schema.object({
+            hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
           })
         ),
-      })
-    ),
-    enabled: schema.boolean({ defaultValue: true }),
-    /**
-     * The max size of the artifacts encoded_size sum in a batch when more than one (there is at least one artifact in a batch).
-     * @example
-     * artifact1.encoded_size = 400
-     * artifact2.encoded_size = 600
-     * artifact3.encoded_size = 1_200
-     * and
-     * createArtifactsBulkBatchSize: 1_000
-     * then
-     * batch1 = [artifact1, artifact2]
-     * batch2 = [artifact3]
-     */
-    createArtifactsBulkBatchSize: schema.maybe(
-      schema.number({
-        defaultValue: BULK_CREATE_MAX_ARTIFACTS_BYTES,
-        max: 4_000_000,
-        min: 400,
-      })
-    ),
-  }),
+      }),
+      packages: PreconfiguredPackagesSchema,
+      agentPolicies: PreconfiguredAgentPoliciesSchema,
+      outputs: PreconfiguredOutputsSchema,
+      fleetServerHosts: PreconfiguredFleetServerHostsSchema,
+      proxies: PreconfiguredFleetProxiesSchema,
+      agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+      setup: schema.maybe(
+        schema.object({
+          agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+          uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
+        })
+      ),
+      developer: schema.object({
+        maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
+        disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
+        allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
+        bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+        disableBundledPackagesCache: schema.boolean({
+          defaultValue: false,
+        }),
+      }),
+      packageVerification: schema.object({
+        gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
+      }),
+      /**
+       * For internal use. A list of string values (comma delimited) that will enable experimental
+       * type of functionality that is not yet released.
+       *
+       * @example
+       * xpack.fleet.enableExperimental:
+       *   - feature1
+       *   - feature2
+       */
+      enableExperimental: schema.arrayOf(schema.string(), {
+        defaultValue: () => [],
+      }),
+
+      internal: schema.maybe(
+        schema.object({
+          disableILMPolicies: schema.boolean({
+            defaultValue: false,
+          }),
+          fleetServerStandalone: schema.boolean({
+            defaultValue: false,
+          }),
+          onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
+            defaultValue: false,
+          }),
+          activeAgentsSoftLimit: schema.maybe(
+            schema.number({
+              min: 0,
+            })
+          ),
+          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+          registry: schema.object(
+            {
+              kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
+              excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
+              spec: schema.object(
+                {
+                  min: schema.maybe(schema.string()),
+                  max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+                },
+                {
+                  defaultValue: {
+                    max: REGISTRY_SPEC_MAX_VERSION,
+                  },
+                }
+              ),
+              capabilities: schema.arrayOf(
+                schema.oneOf([
+                  // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                  schema.literal('apm'),
+                  schema.literal('enterprise_search'),
+                  schema.literal('observability'),
+                  schema.literal('security'),
+                  schema.literal('serverless_search'),
+                  schema.literal('uptime'),
+                ]),
+                { defaultValue: [] }
+              ),
+            },
+            {
+              defaultValue: {
+                kibanaVersionCheckEnabled: true,
+                capabilities: [],
+                excludePackages: [],
+                spec: {
+                  max: REGISTRY_SPEC_MAX_VERSION,
+                },
+              },
+            }
+          ),
+        })
+      ),
+      enabled: schema.boolean({ defaultValue: true }),
+      /**
+       * The max size of the artifacts encoded_size sum in a batch when more than one (there is at least one artifact in a batch).
+       * @example
+       * artifact1.encoded_size = 400
+       * artifact2.encoded_size = 600
+       * artifact3.encoded_size = 1_200
+       * and
+       * createArtifactsBulkBatchSize: 1_000
+       * then
+       * batch1 = [artifact1, artifact2]
+       * batch2 = [artifact3]
+       */
+      createArtifactsBulkBatchSize: schema.maybe(
+        schema.number({
+          defaultValue: BULK_CREATE_MAX_ARTIFACTS_BYTES,
+          max: 4_000_000,
+          min: 400,
+        })
+      ),
+    },
+    {
+      validate: (configToValidate) => {
+        const hasDefaultPreconfiguredOuputs = configToValidate.outputs.some(
+          (o) => o.is_default || o.is_default_monitoring
+        );
+        const hasDefaulElasticsearchOutputDefined =
+          configToValidate.agents?.elasticsearch?.hosts?.length ?? 0 > 0;
+
+        if (hasDefaulElasticsearchOutputDefined && hasDefaultPreconfiguredOuputs) {
+          return 'xpack.fleet.agents.elasticsearch.hosts should not be used when defining default outputs in xpack.fleet.outputs, please remove it.';
+        }
+      },
+    }
+  ),
 };
 
 export type FleetConfigType = TypeOf<typeof config.schema>;

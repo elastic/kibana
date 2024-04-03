@@ -15,7 +15,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_farequote',
+  indexName: 'ft_farequote',
   queryEntityFieldNames: ['airline'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
@@ -70,16 +70,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.api.createAndRunDFAJob(dfaJobConfig);
+      await ml.api.createAndRunDFAJob(dfaJobConfig, 3 * 60 * 1000);
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.api.deleteIndices('user-farequote_small');
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     describe('run custom urls', function () {

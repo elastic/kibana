@@ -16,7 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/ecs",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/ui-theme",
@@ -24,5 +23,8 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/elastic-assistant",
     "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks",
   ]
 }

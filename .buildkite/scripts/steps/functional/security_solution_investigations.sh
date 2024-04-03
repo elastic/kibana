@@ -8,6 +8,11 @@ source .buildkite/scripts/steps/functional/common_cypress.sh
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Investigations Cypress Tests on Security Solution"
+echo "--- Investigations - Security Solution Cypress Tests"
 
-yarn --cwd x-pack/plugins/security_solution cypress:investigations:run
+cd x-pack/test/security_solution_cypress
+
+set +e
+BK_ANALYTICS_API_KEY=$(vault_get security-solution-ci sec-sol-cypress-bk-api-key)
+
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn cypress:investigations:run:ess; status=$?; yarn junit:merge || :; exit $status

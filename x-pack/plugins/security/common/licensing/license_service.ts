@@ -6,20 +6,10 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-
-import type { SecurityLicenseFeatures } from './license_features';
-
-export interface SecurityLicense {
-  isLicenseAvailable(): boolean;
-  isEnabled(): boolean;
-  getFeatures(): SecurityLicenseFeatures;
-  hasAtLeast(licenseType: LicenseType): boolean | undefined;
-  features$: Observable<SecurityLicenseFeatures>;
-}
-
+import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 interface SetupDeps {
   license$: Observable<ILicense>;
 }
@@ -37,6 +27,8 @@ export class SecurityLicenseService {
     return {
       license: Object.freeze({
         isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
+
+        getUnavailableReason: () => rawLicense?.getUnavailableReason(),
 
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
 

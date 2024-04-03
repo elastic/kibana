@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
-import { AuthorizationContext } from '../../../../lib/authorization';
-import { TransformListAction, TransformListRow } from '../../../../common';
+import React, { useCallback, useMemo } from 'react';
+import { useTransformCapabilities } from '../../../../hooks';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import {
   crateAlertRuleActionNameText,
   CreateAlertRuleActionName,
@@ -17,7 +17,7 @@ import { isContinuousTransform } from '../../../../../../common/types/transform'
 
 export type CreateAlertRuleAction = ReturnType<typeof useCreateAlertRuleAction>;
 export const useCreateAlertRuleAction = (forceDisable: boolean) => {
-  const { canCreateTransformAlerts } = useContext(AuthorizationContext).capabilities;
+  const { canCreateTransformAlerts } = useTransformCapabilities();
   const { setCreateAlertRule } = useAlertRuleFlyout();
 
   const clickHandler = useCallback(

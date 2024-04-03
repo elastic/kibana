@@ -7,13 +7,15 @@ content:
       properties:
         error:
           type: string
-          example: Unauthorized
+          examples:
+            - Unauthorized
           enum:
             - Unauthorized
         message:
           type: string 
         statusCode:
           type: integer
-          example: 401
+          examples:
+            - 401
           enum:
             - 401

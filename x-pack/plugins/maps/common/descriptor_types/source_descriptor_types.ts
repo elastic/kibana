@@ -9,6 +9,7 @@
 
 import { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
+import type { ESQLColumn } from '@kbn/es-types';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
@@ -35,6 +36,30 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS file id
   id: string;
   tooltipProperties: string[];
+};
+
+export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
+  /*
+   * Source UUID
+   */
+  id: string;
+  esql: string;
+  columns: ESQLColumn[];
+  dataViewId: string;
+  /*
+   * Date field used to narrow ES|QL requests by global time range
+   */
+  dateField?: string;
+  /*
+   * Geo field used to narrow ES|QL requests by
+   * 1. by visible map area
+   * 2. spatial filters drawn on map
+   */
+  geoField?: string;
+  narrowByGlobalSearch: boolean;
+  narrowByGlobalTime: boolean;
+  narrowByMapBounds: boolean;
+  applyForceRefresh: boolean;
 };
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
@@ -104,6 +129,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string;
   topHitsSize: number;
 };

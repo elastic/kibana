@@ -10,7 +10,6 @@ export * from './agent_enrollment_key_selection_step';
 export * from './agent_policy_selection_step';
 export * from './configure_standalone_agent_step';
 export * from './incoming_data_confirmation_step';
-export * from './install_cloud_formation_managed_agent_step';
 export * from './install_managed_agent_step';
 export * from './install_standalone_agent_step';
 export * from './installation_mode_selection_step';

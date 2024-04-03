@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-
 import {
   ConnectorStatus,
   DisplayType,
   FieldType,
-  FilteringPolicy,
-  FilteringRuleRule,
   FilteringValidationState,
   SyncStatus,
-} from '../../../../common/types/connectors';
-
-import {
-  ApiViewIndex,
   ConnectorViewIndex,
-  CrawlerViewIndex,
-  IngestionMethod,
   IngestionStatus,
-} from '../types';
+  IngestionMethod,
+} from '@kbn/search-connectors';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
+import { ApiViewIndex, CrawlerViewIndex } from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
@@ -44,6 +39,7 @@ export const apiIndex: ApiViewIndex = {
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: {
       foo: {
         default_value: '',
@@ -87,8 +83,8 @@ export const connectorIndex: ConnectorViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -111,8 +107,8 @@ export const connectorIndex: ConnectorViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -131,7 +127,9 @@ export const connectorIndex: ConnectorViewIndex = {
     last_access_control_sync_error: null,
     last_access_control_sync_scheduled_at: null,
     last_access_control_sync_status: SyncStatus.COMPLETED,
+    last_deleted_document_count: null,
     last_incremental_sync_scheduled_at: null,
+    last_indexed_document_count: null,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,
@@ -174,6 +172,7 @@ export const connectorIndex: ConnectorViewIndex = {
 export const crawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: {
       foo: {
         default_value: '',
@@ -217,8 +216,8 @@ export const crawlerIndex: CrawlerViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -241,8 +240,8 @@ export const crawlerIndex: CrawlerViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -261,7 +260,9 @@ export const crawlerIndex: CrawlerViewIndex = {
     last_access_control_sync_error: null,
     last_access_control_sync_scheduled_at: null,
     last_access_control_sync_status: SyncStatus.COMPLETED,
+    last_deleted_document_count: null,
     last_incremental_sync_scheduled_at: null,
+    last_indexed_document_count: null,
     last_seen: null,
     last_sync_error: null,
     last_sync_scheduled_at: null,

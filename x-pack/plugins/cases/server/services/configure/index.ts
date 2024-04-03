@@ -15,7 +15,7 @@ import type {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -83,7 +83,6 @@ export class CaseConfigureService {
   }: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<ConfigurationTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find all case configuration`);
-
       const findResp = await unsecuredSavedObjectsClient.find<ConfigurationPersistedAttributes>({
         ...options,
         // Get the latest configuration
@@ -120,6 +119,7 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to POST a new case configuration`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(attributes);
+
       const esConfigInfo = transformAttributesToESModel(decodedAttributes);
 
       const createdConfig =
@@ -149,6 +149,7 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(updatedAttributes);
+
       const esUpdateInfo = transformAttributesToESModel(decodedAttributes);
 
       const updatedConfiguration =
@@ -223,12 +224,16 @@ function transformToExternalModel(
   });
 
   const castedAttributes = configuration.attributes as ConfigurationTransformedAttributes;
+  const customFields = !configuration.attributes.customFields
+    ? []
+    : (configuration.attributes.customFields as ConfigurationTransformedAttributes['customFields']);
 
   return {
     ...configuration,
     attributes: {
       ...castedAttributes,
       connector,
+      customFields,
     },
   };
 }

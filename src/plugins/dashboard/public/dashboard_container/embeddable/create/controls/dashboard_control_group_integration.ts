@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { distinctUntilChanged, skip } from 'rxjs/operators';
+import { distinctUntilChanged, skip } from 'rxjs';
 
-import {
-  ControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
-import { DashboardContainer } from '../../dashboard_container';
 import { DashboardContainerInput } from '../../../../../common';
+import { DashboardContainer } from '../../dashboard_container';
 
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
@@ -37,40 +34,6 @@ type DashboardControlGroupCommonKeys = keyof Pick<
 
 export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
-  const isControlGroupInputEqual = () =>
-    persistableControlGroupInputIsEqual(
-      this.controlGroup!.getInput(),
-      this.getInput().controlGroupInput
-    );
-
-  // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
-  const controlGroupDiff: DiffChecks = {
-    panels: deepEqual,
-    controlStyle: deepEqual,
-    chainingSystem: deepEqual,
-    ignoreParentSettings: deepEqual,
-  };
-  this.integrationSubscriptions.add(
-    this.controlGroup
-      .getInput$()
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          distinctUntilDiffCheck<ControlGroupInput>(a, b, controlGroupDiff)
-        )
-      )
-      .subscribe(() => {
-        const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
-          this.controlGroup!.getInput();
-        if (!isControlGroupInputEqual()) {
-          this.dispatch.setControlGroupState({
-            panels,
-            controlStyle,
-            chainingSystem,
-            ignoreParentSettings,
-          });
-        }
-      })
-  );
 
   const compareAllFilters = (a?: Filter[], b?: Filter[]) =>
     compareFilters(a ?? [], b ?? [], COMPARE_ALL_OPTIONS);

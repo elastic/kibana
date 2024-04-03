@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { DataView } from '@kbn/data-plugin/common';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -20,29 +21,31 @@ import {
   RecordRawType,
 } from '../../services/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FetchStatus } from '../../../types';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { FetchStatus, SidebarToggleState } from '../../../types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { CoreTheme } from '@kbn/core/public';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const mountComponent = async ({
   hideChart = false,
   isPlainRecord = false,
+  isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
   storage,
 }: {
   hideChart?: boolean;
   isPlainRecord?: boolean;
+  isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
   storage?: Storage;
   savedSearch?: SavedSearch;
@@ -69,7 +72,7 @@ const mountComponent = async ({
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -79,18 +82,22 @@ const mountComponent = async ({
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$;
 
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   const savedSearchData$ = {
     main$,
     documents$,
     totalHits$,
     availableFields$,
   };
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.dataState.data$ = savedSearchData$;
+  const dataView = stateContainer.savedSearchState
+    .getState()
+    .searchSource.getField('index') as DataView;
   stateContainer.appState.update({
+    index: dataView?.id!,
     interval: 'auto',
     hideChart,
     columns: [],
@@ -98,24 +105,36 @@ const mountComponent = async ({
 
   const props: DiscoverMainContentProps = {
     isPlainRecord,
-    dataView: dataViewMock,
+    dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
+    isChartAvailable,
+    panelsToggle: (
+      <PanelsToggle
+        stateContainer={stateContainer}
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
+        }
+        isChartAvailable={undefined}
+        renderedFor="root"
+      />
+    ),
   };
 
-  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
-
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <KibanaThemeProvider theme$={coreTheme$}>
+    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+      <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverMainContent {...props} />
         </DiscoverMainProvider>
-      </KibanaThemeProvider>
-    </KibanaContextProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 
   await act(async () => {
@@ -129,12 +148,38 @@ describe('Discover main content component', () => {
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
       const component = await mountComponent();
+      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
+    });
+
+    it('should include DocumentViewModeToggle when isPlainRecord is true', async () => {
+      const component = await mountComponent({ isPlainRecord: true });
+      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
+    });
+
+    it('should show DocumentViewModeToggle for Field Statistics', async () => {
+      const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
-    it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
-      const component = await mountComponent({ isPlainRecord: true });
-      expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
+    it('should include PanelsToggle when chart is available', async () => {
+      const component = await mountComponent({ isChartAvailable: true });
+      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(EuiHorizontalRule).exists()).toBe(true);
+    });
+
+    it('should include PanelsToggle when chart is available and hidden', async () => {
+      const component = await mountComponent({ isChartAvailable: true, hideChart: true });
+      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
+    });
+
+    it('should include PanelsToggle when chart is not available', async () => {
+      const component = await mountComponent({ isChartAvailable: false });
+      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });
 

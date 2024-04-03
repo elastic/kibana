@@ -10,6 +10,8 @@ import { of } from 'rxjs';
 import { SearchSource, IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedSearchPublicPluginStart } from './plugin';
+import type { SavedSearchAttributeService } from './services/saved_searches';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {
@@ -29,7 +31,7 @@ const createEmptySearchSource = jest.fn(() => {
   return searchSource;
 });
 
-const savedSearchStartMock = () => ({
+const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
   get: jest.fn().mockImplementation(() => ({
     id: 'savedSearch',
     title: 'savedSearchTitle',
@@ -40,7 +42,25 @@ const savedSearchStartMock = () => ({
     searchSource: createEmptySearchSource(),
   })),
   save: jest.fn(),
-  find: jest.fn(),
+  byValue: {
+    attributeService: {
+      getInputAsRefType: jest.fn(),
+      getInputAsValueType: jest.fn(),
+      inputIsRefType: jest.fn(),
+      unwrapAttributes: jest.fn(() => ({
+        attributes: { id: 'savedSearch', title: 'savedSearchTitle' },
+      })),
+      wrapAttributes: jest.fn(),
+    } as unknown as SavedSearchAttributeService,
+    toSavedSearch: jest.fn((id, result) =>
+      Promise.resolve({
+        id,
+        title: result.attributes.title,
+        searchSource: createEmptySearchSource(),
+        managed: false,
+      })
+    ),
+  },
 });
 
 export const savedSearchPluginMock = {

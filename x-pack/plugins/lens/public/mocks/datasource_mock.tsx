@@ -12,7 +12,7 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
 };
 
 export function createMockDatasource(
-  id: string,
+  id = 'testDatasource',
   customPublicApi: Partial<DatasourcePublicAPI> = {}
 ): DatasourceMock {
   const publicAPIMock = {
@@ -44,12 +44,14 @@ export function createMockDatasource(
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => {}),
-    toExpression: jest.fn((_frame, _state, _indexPatterns, dateRange, nowInstant) => null),
+    toExpression: jest.fn(
+      (_frame, _state, _indexPatterns, dateRange, nowInstant) => 'datasource_expression'
+    ),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
-    getLayers: jest.fn((_state) => []),
+    getLayers: jest.fn((_state) => ['a']),
     uniqueLabels: jest.fn((_state, dataViews) => ({})),
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
@@ -62,7 +64,7 @@ export function createMockDatasource(
     getUserMessages: jest.fn((_state, _deps) => []),
     checkIntegrity: jest.fn((_state, _indexPatterns) => []),
     isTimeBased: jest.fn(),
-    isEqual: jest.fn(),
+    isEqual: jest.fn((a, b, c, d) => a === c),
     getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
@@ -76,7 +78,7 @@ export function createMockDatasource(
 }
 
 export function mockDatasourceMap() {
-  const datasource = createMockDatasource('testDatasource');
+  const datasource = createMockDatasource();
   datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
     {
       state: {},

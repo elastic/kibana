@@ -1214,18 +1214,6 @@
             "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
           },
@@ -1390,18 +1378,6 @@
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
           },
@@ -1416,6 +1392,18 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "upgradeAssistant",
@@ -1452,58 +1440,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/effects.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1586,14 +1522,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
           },
           {
             "plugin": "visualizations",
@@ -1686,18 +1614,6 @@
           {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_flyout.tsx"
           },
           {
             "plugin": "embeddable",
@@ -2152,11 +2068,23 @@
           },
           {
             "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/datasources/text_based/text_based_languages.tsx"
+          },
+          {
+            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
           },
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/save_modal_container.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
             "plugin": "lens",
@@ -2335,42 +2263,6 @@
             "path": "src/plugins/expressions/common/executor/executor.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/extract_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/extract_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/extract_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/query/filters/persistable_state.ts"
           },
@@ -2455,52 +2347,8 @@
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -2599,20 +2447,60 @@
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
           {
             "plugin": "maps",
@@ -2641,14 +2529,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
           {
             "plugin": "canvas",
@@ -2743,14 +2623,6 @@
             "path": "x-pack/plugins/global_search_providers/server/providers/saved_objects/map_object_to_result.test.ts"
           },
           {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/persistable_state.test.ts"
-          },
-          {
-            "plugin": "dataViews",
-            "path": "src/plugins/data_views/common/data_views/persistable_state.test.ts"
-          },
-          {
             "plugin": "expressions",
             "path": "src/plugins/expressions/common/executor/executor.test.ts"
           },
@@ -2761,14 +2633,6 @@
           {
             "plugin": "expressions",
             "path": "src/plugins/expressions/common/executor/executor.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/inject_references.test.ts"
           },
           {
             "plugin": "lens",
@@ -2789,86 +2653,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/share_action.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/xy_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/xy_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/metric_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/metric_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_data_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_data_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_reference_lines_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/layers/xy_reference_lines_layer.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
           }
         ],
         "initialIsOpen": false

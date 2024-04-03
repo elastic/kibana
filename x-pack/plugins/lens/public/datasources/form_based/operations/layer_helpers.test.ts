@@ -2577,7 +2577,6 @@ describe('state_helpers', () => {
           operationType: 'testReference',
           references: ['col1'],
         },
-        indexPattern,
         {
           col2: {
             label: 'Default label',
@@ -2586,7 +2585,8 @@ describe('state_helpers', () => {
             operationType: 'testReference',
             references: ['col1'],
           },
-        }
+        },
+        indexPattern
       );
     });
 

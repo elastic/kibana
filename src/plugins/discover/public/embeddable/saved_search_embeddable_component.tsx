@@ -8,14 +8,15 @@
 
 import React from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { DiscoverGridEmbeddable, DiscoverGridEmbeddableProps } from './saved_search_grid';
+import { DataLoadingState } from '@kbn/unified-data-table';
+import { DiscoverGridEmbeddable } from './saved_search_grid';
 import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
-import { DocTableEmbeddableProps } from '../components/doc_table/doc_table_embeddable';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
-import { SearchProps } from './saved_search_embeddable';
+import type { EmbeddableComponentSearchProps } from './types';
 
 interface SavedSearchEmbeddableComponentProps {
-  searchProps: SearchProps;
+  fetchedSampleSize: number;
+  searchProps: EmbeddableComponentSearchProps;
   useLegacyTable: boolean;
   query?: AggregateQuery | Query;
 }
@@ -24,6 +25,7 @@ const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
 export function SavedSearchEmbeddableComponent({
+  fetchedSampleSize,
   searchProps,
   useLegacyTable,
   query,
@@ -32,17 +34,18 @@ export function SavedSearchEmbeddableComponent({
     const isPlainRecord = isTextBasedQuery(query);
     return (
       <DiscoverDocTableEmbeddableMemoized
-        {...(searchProps as DocTableEmbeddableProps)}
+        {...searchProps}
+        sampleSizeState={fetchedSampleSize}
         isPlainRecord={isPlainRecord}
       />
     );
   }
   return (
     <DiscoverGridEmbeddableMemoized
-      {...(searchProps as DiscoverGridEmbeddableProps)}
-      showFullScreenButton={false}
+      {...searchProps}
+      sampleSizeState={fetchedSampleSize}
+      loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       query={query}
-      className="dscDiscoverGrid"
     />
   );
 }

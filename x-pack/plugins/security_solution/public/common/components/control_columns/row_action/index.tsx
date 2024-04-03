@@ -8,9 +8,13 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { dataTableActions } from '@kbn/securitysolution-data-table';
-import { RightPanelKey } from '../../../../flyout/right';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../lib/kibana';
+import { timelineActions } from '../../../../timelines/store';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -18,9 +22,9 @@ import type {
   ExpandedDetailType,
 } from '../../../../../common/types';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 type Props = EuiDataGridCellValueElementProps & {
@@ -66,11 +70,14 @@ const RowActionComponent = ({
   refetch,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-
-  const { openFlyout } = useExpandableFlyoutContext();
+  const { telemetry } = useKibana().services;
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
-  const isSecurityFlyoutEnabled = useIsExperimentalFeatureEnabled('securityFlyoutEnabled');
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+  const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
+    'expandableFlyoutInCreateRuleEnabled'
+  );
 
   const columnValues = useMemo(
     () =>
@@ -87,6 +94,13 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
+  let showExpandableFlyout: boolean;
+  if (tableId === TableId.rulePreview) {
+    showExpandableFlyout = isSecurityFlyoutEnabled && isExpandableFlyoutInCreateRuleEnabled;
+  } else {
+    showExpandableFlyout = isSecurityFlyoutEnabled;
+  }
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
@@ -96,10 +110,10 @@ const RowActionComponent = ({
       },
     };
 
-    if (isSecurityFlyoutEnabled) {
+    if (showExpandableFlyout) {
       openFlyout({
         right: {
-          id: RightPanelKey,
+          id: DocumentDetailsRightPanelKey,
           params: {
             id: eventId,
             indexName,
@@ -107,7 +121,24 @@ const RowActionComponent = ({
           },
         },
       });
-    } else {
+      telemetry.reportDetailsFlyoutOpened({
+        tableId,
+        panel: 'right',
+      });
+    }
+    // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+    // support of old flyout in cases page
+    else if (tableId === TableId.alertsOnCasePage) {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          id: TimelineId.casePage,
+        })
+      );
+    }
+    // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+    // support of old flyout
+    else {
       dispatch(
         dataTableActions.toggleDetailPanel({
           ...updatedExpandedDetail,
@@ -116,7 +147,7 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, isSecurityFlyoutEnabled, openFlyout, tabType, tableId]);
+  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 

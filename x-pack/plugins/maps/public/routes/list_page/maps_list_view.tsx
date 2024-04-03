@@ -10,9 +10,9 @@ import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list-view';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import type { MapItem } from '../../../common/content_management';
+import type { MapAttributes, MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
   getMapsCapabilities,
@@ -21,8 +21,9 @@ import {
   getNavigateToApp,
   getUiSettings,
   getUsageCollection,
+  getServerless,
 } from '../../kibana_services';
-import { mapsClient } from '../../content_management';
+import { getMapClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -54,7 +55,7 @@ const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
 };
 
 async function deleteMaps(items: Array<{ id: string }>) {
-  await Promise.all(items.map(({ id }) => mapsClient.delete(id)));
+  await Promise.all(items.map(({ id }) => getMapClient().delete(id)));
 }
 
 interface Props {
@@ -78,7 +79,11 @@ function MapsListViewComp({ history }: Props) {
   // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
   useEffect(() => {
     getCoreChrome().docTitle.change(APP_NAME);
-    getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    if (getServerless()) {
+      getServerless()!.setBreadcrumbs({ text: APP_NAME });
+    } else {
+      getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+    }
   }, []);
 
   const findMaps = useCallback(
@@ -92,7 +97,7 @@ function MapsListViewComp({ history }: Props) {
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
-      return mapsClient
+      return getMapClient<MapAttributes>()
         .search({
           text: searchTerm ? `${searchTerm}*` : undefined,
           limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
@@ -134,7 +139,9 @@ function MapsListViewComp({ history }: Props) {
         defaultMessage: 'maps',
       })}
       title={APP_NAME}
-      onClickTitle={({ id }) => history.push(getEditPath(id))}
+      getOnClickTitle={({ id }) =>
+        () =>
+          history.push(getEditPath(id))}
     />
   );
 }

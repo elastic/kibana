@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { flatMap } from 'lodash';
 import {
@@ -18,10 +18,22 @@ import {
   EuiCard,
   EuiText,
   EuiHorizontalRule,
+  EuiIcon,
 } from '@elastic/eui';
-import { CardsNavigationComponentProps, AppRegistrySections, Application, AppProps } from './types';
-import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
-import type { AppId } from './consts';
+import {
+  CardsNavigationComponentProps,
+  AppRegistrySections,
+  Application,
+  AppProps,
+  AppId,
+  AppDefinition,
+  CardNavExtensionDefinition,
+} from './types';
+import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
+
+type AggregatedCardNavDefinitions =
+  | NonNullable<CardsNavigationComponentProps['extendedCardNavigationDefinitions']>
+  | Record<AppId, AppDefinition>;
 
 // Retrieve the data we need from a given app from the management app registry
 const getDataFromManagementApp = (app: Application) => {
@@ -32,23 +44,47 @@ const getDataFromManagementApp = (app: Application) => {
   };
 };
 
-// Given a category and a list of apps, build an array of apps that belong to that category
-const getAppsForCategory = (category: string, filteredApps: { [key: string]: Application }) => {
-  return getAppIdsByCategory(category)
-    .map((appId: AppId) => {
-      if (!filteredApps[appId]) {
-        return null;
-      }
-
-      return {
-        ...getDataFromManagementApp(filteredApps[appId]),
-        ...appDefinitions[appId],
-      };
-    })
-    .filter(Boolean) as AppProps[];
+// Compose a list of app ids that belong to a given category
+export const getAppIdsByCategory = (
+  category: string,
+  appDefinitions: AggregatedCardNavDefinitions
+) => {
+  const appKeys = Object.keys(appDefinitions) as AppId[];
+  return appKeys.filter((appId: AppId) => {
+    return appDefinitions[appId].category === category;
+  });
 };
 
-const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: string[]) => {
+// Given a category and a list of apps, build an array of apps that belong to that category
+const getAppsForCategoryFactory =
+  (appDefinitions: AggregatedCardNavDefinitions) =>
+  (category: string, filteredApps: { [key: string]: Application }) => {
+    return getAppIdsByCategory(category, appDefinitions)
+      .map((appId: AppId) => {
+        if ((appDefinitions[appId] as CardNavExtensionDefinition).skipValidation) {
+          return {
+            id: appId,
+            ...appDefinitions[appId],
+          };
+        }
+
+        if (!filteredApps[appId]) {
+          return null;
+        }
+
+        return {
+          ...getDataFromManagementApp(filteredApps[appId]),
+          ...appDefinitions[appId],
+        };
+      })
+      .filter(Boolean) as AppProps[];
+  };
+
+const getEnabledAppsByCategory = (
+  sections: AppRegistrySections[],
+  cardNavigationDefintions: AggregatedCardNavDefinitions,
+  hideLinksTo: string[]
+) => {
   // Flatten all apps into a single array
   const flattenApps = flatMap(sections, (section) => section.apps)
     // Remove all apps that the consumer wants to disable.
@@ -62,6 +98,8 @@ const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: 
     {}
   );
 
+  const getAppsForCategory = getAppsForCategoryFactory(cardNavigationDefintions);
+
   // Build list of categories with apps that are enabled
   return [
     {
@@ -70,6 +108,20 @@ const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: 
         defaultMessage: 'Data',
       }),
       apps: getAppsForCategory(appCategories.DATA, filteredApps),
+    },
+    {
+      id: appCategories.ACCESS,
+      title: i18n.translate('management.landing.withCardNavigation.accessTitle', {
+        defaultMessage: 'Access',
+      }),
+      apps: getAppsForCategory(appCategories.ACCESS, filteredApps),
+    },
+    {
+      id: appCategories.ALERTS,
+      title: i18n.translate('management.landing.withCardNavigation.alertsTitle', {
+        defaultMessage: 'Alerts and insights',
+      }),
+      apps: getAppsForCategory(appCategories.ALERTS, filteredApps),
     },
     {
       id: appCategories.CONTENT,
@@ -94,8 +146,17 @@ export const CardsNavigation = ({
   appBasePath,
   onCardClick,
   hideLinksTo = [],
+  extendedCardNavigationDefinitions = {},
 }: CardsNavigationComponentProps) => {
-  const appsByCategory = getEnabledAppsByCategory(sections, hideLinksTo);
+  const cardNavigationDefintions = useMemo<AggregatedCardNavDefinitions>(
+    () => ({
+      ...defaultCardNavigationDefinitions,
+      ...extendedCardNavigationDefinitions,
+    }),
+    [extendedCardNavigationDefinitions]
+  );
+
+  const appsByCategory = getEnabledAppsByCategory(sections, cardNavigationDefintions, hideLinksTo);
 
   return (
     <EuiPageSection color="transparent" paddingSize="none">
@@ -105,7 +166,8 @@ export const CardsNavigation = ({
           defaultMessage: 'Management',
         })}
         description={i18n.translate('management.landing.withCardNavigation.pageDescription', {
-          defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
+          defaultMessage:
+            'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.',
         })}
       />
 
@@ -129,11 +191,15 @@ export const CardsNavigation = ({
                 <EuiCard
                   data-test-subj={`app-card-${app.id}`}
                   layout="horizontal"
-                  icon={app.icon}
+                  icon={<EuiIcon type={app.icon} size="l" color="text" />}
                   titleSize="xs"
                   title={app.title}
                   description={app.description}
-                  href={appBasePath + app.href}
+                  href={
+                    (app as CardNavExtensionDefinition).skipValidation
+                      ? app.href
+                      : appBasePath + app.href
+                  }
                   onClick={onCardClick}
                 />
               </EuiFlexItem>

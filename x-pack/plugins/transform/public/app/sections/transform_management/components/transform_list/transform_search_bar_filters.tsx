@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiBadge, SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,7 +17,7 @@ import {
   TRANSFORM_HEALTH,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
@@ -106,9 +107,12 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
       // filter other clauses, i.e. the mode and status filters
       if (c.type !== 'is' && Array.isArray(c.value)) {
         // the status value is an array of string(s) e.g. ['failed', 'stopped']
-        ts = transforms.filter((transform) => (c.value as Value[]).includes(transform.stats.state));
+        ts = transforms.filter(
+          (transform) => transform.stats && (c.value as Value[]).includes(transform.stats.state)
+        );
       } else {
         ts = transforms.filter((transform) => {
+          if (!transform.stats) return false;
           if (c.type === 'field' && c.field === 'health') {
             return transform.stats.health?.status === c.value;
           }

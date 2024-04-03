@@ -7,9 +7,10 @@
 
 import { each, map, some, uniq } from 'lodash';
 import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
+import { requiredOptional } from '@kbn/zod-helpers';
 import type { ResponseActionAlerts } from './types';
 import type { SetupPlugins } from '../../../plugin_contract';
-import type { RuleResponseOsqueryAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseOsqueryAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 export const osqueryResponseAction = (
   responseAction: RuleResponseOsqueryAction,
@@ -32,7 +33,7 @@ export const osqueryResponseAction = (
 
     return osqueryCreateActionService.create({
       ...rest,
-      queries,
+      queries: requiredOptional(queries),
       ecs_mapping: ecsMapping,
       saved_query_id: savedQueryId,
       agent_ids: agentIds,
@@ -43,7 +44,7 @@ export const osqueryResponseAction = (
     return osqueryCreateActionService.create(
       {
         ...rest,
-        queries,
+        queries: requiredOptional(queries),
         ecs_mapping: ecsMapping,
         saved_query_id: savedQueryId,
         agent_ids: alert.agent?.id ? [alert.agent.id] : [],

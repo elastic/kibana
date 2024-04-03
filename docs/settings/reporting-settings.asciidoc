@@ -6,8 +6,8 @@
 ++++
 
 :frontmatter-description: A reference of the reporting settings administrators configure in kibana.yml.
-:frontmatter-tags-products: [kibana] 
-:frontmatter-tags-content-type: [reference] 
+:frontmatter-tags-products: [kibana]
+:frontmatter-tags-content-type: [reference]
 :frontmatter-tags-user-goals: [configure]
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
@@ -203,26 +203,49 @@ The `file:` protocol is always denied, even if no network policy is configured.
 ==== CSV settings
 
 [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
-The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `10mb`.
+The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large
+exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `250mb`.
 
 [NOTE]
 ============
-Setting `xpack.reporting.csv.maxSizeBytes` much larger than the default 10 MB limit has the potential to negatively affect the
-performance of {kib} and your {es} cluster. There is no enforced maximum for this setting, but a reasonable maximum value depends
-on multiple factors:
+We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in
+external tools, but it's not intended for bulk export or to backup {es} data. If you need to export more than
+250 MB of CSV, rather than increasing `xpack.reporting.csv.maxSizeBytes`, please use filters to create multiple
+smaller reports, or extract the data you need directly from {es}.
 
-* The `http.max_content_length` setting in {es}.
-* Network proxies, which are often configured by default to block large requests with a 413 error.
-* The amount of memory available to the {kib} server, which limits the size of CSV data that must be held temporarily.
+The following deployment configurations may lead to failed report jobs or incomplete reports:
 
-For information about {kib} memory limits, see <<production, using {kib} in a production environment>>.
+* Any shard needed for search is unavailable.
+* Data is stored on slow storage tiers.
+* Network latency between nodes is high.
+* {ccs-cap} is used.
+
+To export large amounts of data we recommend using {es} APIs directly. See {ref}/point-in-time-api.html[Point
+in time API], or {ref}/sql-rest-format.html#_csv[SQL with CSV response data format].
 ============
 
 `xpack.reporting.csv.scroll.size`::
 Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
+[NOTE]
+============
+You may need to lower this setting if the default number of documents creates a strain on network resources.
+============
 
 `xpack.reporting.csv.scroll.duration`::
- Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Defaults to `30s`.
+Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Valid option is either `auto` or {time-units}[time], Defaults to `30s`.
+[NOTE]
+============
+If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as is possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
+============
+
+`xpack.reporting.csv.scroll.strategy`::
+Choose the API method used to page through data during CSV export. Valid options are `scroll` and `pit`. Defaults to `pit`.
+[NOTE]
+============
+Each method has its own unique limitations which are important to understand.
+* Scroll API: Search is limited to 500 shards at the very most. In cases where data shards are unavailable or time out, the export may return partial data.
+* PIT API: Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or datastreams. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
+============
 
 `xpack.reporting.csv.checkForFormulas`::
 Enables a check that warns you when there's a potential formula included in the output (=, -, +, and @ chars). See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
@@ -231,7 +254,10 @@ Enables a check that warns you when there's a potential formula included in the 
 Escape formula values in cells with a `'`. See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
 
 `xpack.reporting.csv.enablePanelActionDownload`::
-deprecated:[7.9.0,This setting has no effect.] Enables CSV export from a saved search on a dashboard. This action is available in the dashboard panel menu for the saved search. *NOTE*: This setting exists for backwards compatibility, but is unused and hardcoded to `true`. CSV export from a saved search on a dashboard is enabled when Reporting is enabled.
+deprecated:[8.14.0,This setting will be removed in an upcoming version of {kib}.] When `true`, this
+setting enables a deprecated feature which allows users to download a CSV export from a saved search
+panel on a dashboard. When `false`, users can generate regular CSV reports from a saved search panel on a
+dashboard and later download them in *Stack Management > Reporting*. Defaults to `false`.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`::
 Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.

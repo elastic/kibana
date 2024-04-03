@@ -7,16 +7,19 @@
  */
 
 import { chunk } from 'lodash';
+import { Key } from 'selenium-webdriver';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export interface TabbedGridData {
   columns: string[];
   rows: string[][];
 }
+
 interface SelectOptions {
   isAnchorRow?: boolean;
   rowIndex?: number;
+  columnIndex?: number;
   renderMoreRows?: boolean;
 }
 
@@ -93,6 +96,47 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
+  private async getCellActionButton(
+    rowIndex: number = 0,
+    columnIndex: number = 0,
+    selector: string
+  ): Promise<WebElementWrapper> {
+    let actionButton: WebElementWrapper | undefined;
+    await this.retry.try(async () => {
+      const cell = await this.getCellElement(rowIndex, columnIndex);
+      await cell.click();
+      actionButton = await cell.findByTestSubject(selector);
+      if (!actionButton) {
+        throw new Error(`Unable to find cell action button ${selector}`);
+      }
+    });
+    return actionButton!;
+  }
+
+  /**
+   * Clicks grid cell 'expand' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellExpandButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      columnIndex,
+      'euiDataGridCellExpandButton'
+    );
+    await actionButton.click();
+  }
+
+  /**
+   * Clicks grid cell 'filter for' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellFilterForButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterForButton');
+    await actionButton.click();
+  }
+
   /**
    * The same as getCellElement, but useful when multiple data grids are on the page.
    */
@@ -107,7 +151,7 @@ export class DataGridService extends FtrService {
 
   public async getFields(options?: SelectOptions) {
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await this.find.allByCssSelector(selector);
 
@@ -171,7 +215,7 @@ export class DataGridService extends FtrService {
     }
 
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await table.findAllByCssSelector(selector);
 
@@ -200,13 +244,14 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    options: SelectOptions = { isAnchorRow: false, rowIndex: 0, columnIndex: 0 }
   ): Promise<void> {
-    const row = await this.getRow(options);
+    const rowColumns = await this.getRow(options);
     const testSubj = options.isAnchorRow
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
-    const toggle = await row[0].findByTestSubject(testSubj);
+
+    const toggle = await rowColumns[options.columnIndex ?? 0].findByTestSubject(testSubj);
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
@@ -227,10 +272,23 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      const textContent = await cell.getAttribute('textContent');
-      textArr.push(textContent.trim());
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
     }
-    return Promise.resolve(textArr);
+    return textArr;
+  }
+
+  public async getControlColumnHeaderFields(): Promise<string[]> {
+    const result = await this.find.allByCssSelector(
+      '.euiDataGridHeaderCell--controlColumn > .euiDataGridHeaderCell__content'
+    );
+
+    const textArr = [];
+    for (const cell of result) {
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
+    }
+    return textArr;
   }
 
   public async getRowActions(
@@ -304,10 +362,78 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('gridEditFieldButton');
   }
 
+  public async clickGridSettings() {
+    await this.testSubjects.click('dataGridDisplaySelectorButton');
+  }
+
+  public async getCurrentRowHeightValue() {
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+    );
+    let value = '';
+    await this.retry.waitFor('row height value not to be empty', async () => {
+      // to prevent flakiness
+      const selectedButton = await buttonGroup.findByCssSelector(
+        '.euiButtonGroupButton-isSelected'
+      );
+      value = await selectedButton.getVisibleText();
+      return value !== '';
+    });
+    return value;
+  }
+
+  public async changeRowHeightValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+    );
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
+  public async getCurrentHeaderRowHeightValue() {
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
+    );
+    return (
+      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
+    ).getVisibleText();
+  }
+
+  public async changeHeaderRowHeightValue(newValue: string) {
+    const buttonGroup = await this.testSubjects.find(
+      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
+    );
+    const option = await buttonGroup.findByCssSelector(`[data-text="${newValue}"]`);
+    await option.click();
+  }
+
+  private async findSampleSizeInput() {
+    return await this.find.byCssSelector(
+      'input[type="number"][data-test-subj="unifiedDataTableSampleSizeInput"]'
+    );
+  }
+
+  public async getCurrentSampleSizeValue() {
+    const sampleSizeInput = await this.findSampleSizeInput();
+    return Number(await sampleSizeInput.getAttribute('value'));
+  }
+
+  public async changeSampleSizeValue(newValue: number) {
+    const sampleSizeInput = await this.findSampleSizeInput();
+    await sampleSizeInput.focus();
+    // replacing the input values with a new one
+    await sampleSizeInput.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      'a',
+    ]);
+    await sampleSizeInput.type(String(newValue));
+  }
+
   public async getDetailsRow(): Promise<WebElementWrapper> {
     const detailRows = await this.getDetailsRows();
     return detailRows[0];
   }
+
   public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);

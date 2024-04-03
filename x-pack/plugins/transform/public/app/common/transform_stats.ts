@@ -7,8 +7,8 @@
 
 import { TRANSFORM_STATE } from '../../../common/constants';
 
-import { TransformListRow } from './transform_list';
-import {
+import type { TransformListRow } from './transform_list';
+import type {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../common/api_schemas/transforms';
@@ -33,7 +33,9 @@ export function isCompletedBatchTransform(item: TransformItem) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch transform.
   return (
-    item.stats.checkpointing.last.checkpoint === 1 &&
+    item.stats &&
+    item.config &&
+    item.stats.checkpointing?.last.checkpoint === 1 &&
     item.config.sync === undefined &&
     item.stats.state === TRANSFORM_STATE.STOPPED
   );

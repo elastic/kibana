@@ -58,6 +58,7 @@ export type MainType =
   | 'rank_features'
   | 'shape'
   | 'search_as_you_type'
+  | 'sparse_vector'
   | 'date'
   | 'date_nanos'
   | 'geo_point'
@@ -86,7 +87,8 @@ export type NumericType =
   | 'double'
   | 'float'
   | 'half_float'
-  | 'scaled_float';
+  | 'scaled_float'
+  | 'unsigned_long';
 
 export type RangeType =
   | 'integer_range'

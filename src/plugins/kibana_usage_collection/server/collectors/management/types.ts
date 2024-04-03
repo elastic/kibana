@@ -34,7 +34,7 @@ export interface UsageStats {
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
-  'discover:enableSql': boolean;
+  'discover:enableESQL': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
@@ -46,7 +46,12 @@ export interface UsageStats {
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
+  'observability:enableInfrastructureProfilingIntegration': boolean;
+  'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
+  'observability:apmEnableTableSearchBar': boolean;
+  'observability:apmEnableServiceInventoryTableSearchBar': boolean;
+  'observability:logsExplorer:allowedDataViews': string[];
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -63,6 +68,9 @@ export interface UsageStats {
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableExpandableFlyout': boolean;
+  'securitySolution:enableAssetCriticality': boolean;
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
@@ -77,6 +85,7 @@ export interface UsageStats {
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
+  'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
   defaultColumns: string[];
@@ -135,7 +144,6 @@ export interface UsageStats {
   'labs:presentation:timeToPresent': boolean;
   'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
-  'labs:dashboard:dashboardControls': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
   isDefaultIndexMigrated: boolean;
@@ -149,7 +157,19 @@ export interface UsageStats {
   'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
+  'observability:apmEnableProfilingIntegration': boolean;
+  'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
   'visualization:visualize:legacyGaugeChartsLibrary': boolean;
+  'observability:profilingPerVCPUWattX86': number;
+  'observability:profilingPervCPUWattArm64': number;
+  'observability:profilingCo2PerKWH': number;
+  'observability:profilingDatacenterPUE': number;
+  'observability:profilingCostPervCPUPerHour': number;
+  'observability:profilingAWSCostDiscountRate': number;
+  'observability:profilingAzureCostDiscountRate': number;
+  'data_views:fields_excluded_data_tiers': string;
+  'observability:apmEnableTransactionProfiling': boolean;
+  'devTools:enablePersistentConsole': boolean;
 }

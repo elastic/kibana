@@ -38,7 +38,7 @@ export interface Props {
 
 const addButtonLabel = i18n.translate(
   'xpack.ingestPipelines.addProcessorFormOnFailureFlyout.addButtonLabel',
-  { defaultMessage: 'Add' }
+  { defaultMessage: 'Add processor' }
 );
 
 const cancelButtonLabel = i18n.translate(
@@ -50,12 +50,12 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
   return isOnFailure ? (
     <FormattedMessage
       id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureOnFailureTitle"
-      defaultMessage="Configure on-failure processor"
+      defaultMessage="Add on-failure processor"
     />
   ) : (
     <FormattedMessage
       id="xpack.ingestPipelines.settingsFormOnFailureFlyout.configureTitle"
-      defaultMessage="Configure processor"
+      defaultMessage="Add processor"
     />
   );
 };

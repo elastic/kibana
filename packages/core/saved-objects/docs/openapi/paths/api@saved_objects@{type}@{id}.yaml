@@ -1,0 +1,102 @@
+get:
+  summary: Retrieve a single Kibana saved object by identifier.
+  operationId: getSavedObject
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/parameters/saved_object_id.yaml'
+    - $ref: '../components/parameters/saved_object_type.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+
+post:
+  summary: Create Kibana saved objects.
+  operationId: createSavedObjectId
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/saved_object_id.yaml'
+    - $ref: '../components/parameters/saved_object_type.yaml'
+    - in: query
+      name: overwrite
+      description: If true, overwrites the document with the same identifier.
+      schema:
+        type: boolean
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - attributes
+          properties:
+            attributes:
+              $ref: '../components/schemas/attributes.yaml'
+            initialNamespaces:
+              $ref: '../components/schemas/initial_namespaces.yaml'
+            references:
+              $ref: '../components/schemas/initial_namespaces.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '409':
+      description: Indicates a conflict error.
+      content:
+         application/json:
+          schema:
+            type: object
+
+put:
+  summary: Update the attributes for Kibana saved objects.
+  operationId: updateSavedObject
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/saved_object_id.yaml'
+    - $ref: '../components/parameters/saved_object_type.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '404':
+      description: Indicates the object was not found.
+      content:
+         application/json:
+          schema:
+            type: object
+    '409':
+      description: Indicates a conflict error.
+      content:
+         application/json:
+          schema:
+            type: object

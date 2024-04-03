@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
+import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
 import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
 
@@ -36,19 +37,19 @@ const RuleExecutionStatusSelectorComponent = ({
 
   const selectableOptions: EuiSelectableOption[] = [
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.succeeded) || '',
-      data: { status: RuleExecutionStatus.succeeded },
-      checked: selectedStatus === RuleExecutionStatus.succeeded ? 'on' : undefined,
+      label: getCapitalizedStatusText(RuleExecutionStatusEnum.succeeded) || '',
+      data: { status: RuleExecutionStatusEnum.succeeded },
+      checked: selectedStatus === RuleExecutionStatusEnum.succeeded ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus['partial failure']) || '',
-      data: { status: RuleExecutionStatus['partial failure'] },
-      checked: selectedStatus === RuleExecutionStatus['partial failure'] ? 'on' : undefined,
+      label: getCapitalizedStatusText(RuleExecutionStatusEnum['partial failure']) || '',
+      data: { status: RuleExecutionStatusEnum['partial failure'] },
+      checked: selectedStatus === RuleExecutionStatusEnum['partial failure'] ? 'on' : undefined,
     },
     {
-      label: getCapitalizedStatusText(RuleExecutionStatus.failed) || '',
-      data: { status: RuleExecutionStatus.failed },
-      checked: selectedStatus === RuleExecutionStatus.failed ? 'on' : undefined,
+      label: getCapitalizedStatusText(RuleExecutionStatusEnum.failed) || '',
+      data: { status: RuleExecutionStatusEnum.failed },
+      checked: selectedStatus === RuleExecutionStatusEnum.failed ? 'on' : undefined,
     },
   ];
 

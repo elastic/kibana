@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { first, take } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { first, map, take } from 'rxjs';
 
 import {
   mockApplyDeprecations,
@@ -129,6 +129,23 @@ test("does not push new configs when reloading if config at path hasn't changed"
   rawConfig$.next({ key: 'value' });
 
   expect(valuesReceived).toEqual(['value']);
+});
+
+test("does push new configs when reloading when config at path hasn't changed if ignoreUnchanged is false", async () => {
+  const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+  await configService.setSchema('key', schema.string());
+
+  const valuesReceived: any[] = [];
+  configService.atPath('key', { ignoreUnchanged: false }).subscribe((value) => {
+    valuesReceived.push(value);
+  });
+
+  rawConfig$.next({ key: 'value' });
+
+  expect(valuesReceived).toEqual(['value', 'value']);
 });
 
 test('pushes new config when reloading and config at path has changed', async () => {
@@ -668,5 +685,45 @@ describe('getDeprecatedConfigPath$', () => {
     const deprecatedConfigPath$ = configService.getDeprecatedConfigPath$();
     const deprecatedConfigPath = await deprecatedConfigPath$.pipe(first()).toPromise();
     expect(deprecatedConfigPath).toEqual(mockedChangedPaths);
+  });
+});
+
+describe('Dynamic Overrides', () => {
+  let configService: ConfigService;
+
+  beforeEach(async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({ namespace1: { key: 'value' } });
+    const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+    configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('namespace1', schema.object({ key: schema.string() }));
+
+    expect(
+      await firstValueFrom(configService.getConfig$().pipe(map((cfg) => cfg.toRaw())))
+    ).toStrictEqual({ namespace1: { key: 'value' } });
+  });
+
+  test('throws validation error when attempted to set an override that has not been registered as dynamic', () => {
+    expect(() =>
+      configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' })
+    ).toThrowErrorMatchingInlineSnapshot(`"[namespace1.key]: not a valid dynamic option"`);
+  });
+
+  test('throws validation error when a registered as dynamic option is invalid', () => {
+    configService.addDynamicConfigPaths('namespace1', ['key']);
+    expect(() =>
+      configService.setDynamicConfigOverrides({ 'namespace1.key': 1 })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[config validation of [namespace1].key]: expected value of type [string] but got [number]"`
+    );
+  });
+
+  test('overrides the static settings with the dynamic ones', async () => {
+    configService.addDynamicConfigPaths('namespace1', ['key']);
+    configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' });
+
+    expect(
+      await firstValueFrom(configService.getConfig$().pipe(map((cfg) => cfg.toRaw())))
+    ).toStrictEqual({ namespace1: { key: 'another-value' } });
   });
 });

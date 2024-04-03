@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { ReactNode, useCallback, useState } from 'react';
+
 import {
   TableListViewTable,
   type TableListViewTableProps,
-  type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
@@ -30,13 +31,12 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'editItem'
   | 'deleteItems'
   | 'getDetailViewLink'
-  | 'onClickTitle'
+  | 'getOnClickTitle'
   | 'id'
   | 'rowItemActions'
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'showEditActionForItem'
 > & {
   title: string;
   description?: string;
@@ -65,7 +65,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   rowItemActions,
   id: listingId,
   contentEditor,
@@ -82,10 +82,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   const onFetchSuccess = useCallback(() => {
-    if (!hasInitialFetchReturned) {
-      setHasInitialFetchReturned(true);
-    }
-  }, [hasInitialFetchReturned]);
+    setHasInitialFetchReturned(true);
+  }, []);
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
@@ -116,7 +114,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           deleteItems={deleteItems}
           rowItemActions={rowItemActions}
           getDetailViewLink={getDetailViewLink}
-          onClickTitle={onClickTitle}
+          getOnClickTitle={getOnClickTitle}
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}

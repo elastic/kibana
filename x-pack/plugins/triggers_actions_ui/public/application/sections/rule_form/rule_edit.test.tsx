@@ -15,7 +15,8 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -101,9 +102,9 @@ describe('rule_edit', () => {
         defaultActionGroupId: 'testActionGroup',
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -186,15 +187,17 @@ describe('rule_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <RuleEdit
-        onClose={() => {}}
-        initialRule={rule}
-        onSave={() => {
-          return new Promise<void>(() => {});
-        }}
-        actionTypeRegistry={actionTypeRegistry}
-        ruleTypeRegistry={ruleTypeRegistry}
-      />
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleEdit
+          onClose={() => {}}
+          initialRule={rule}
+          onSave={() => {
+            return new Promise<void>(() => {});
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -219,9 +222,9 @@ describe('rule_edit', () => {
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
-    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Fail message'
-    );
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+      title: 'Fail message',
+    });
   });
 
   it('should pass in the config into `getRuleErrors`', async () => {

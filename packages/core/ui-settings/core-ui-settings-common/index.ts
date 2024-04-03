@@ -8,10 +8,12 @@
 
 export type {
   UiSettingsType,
+  ReadonlyModeType,
   DeprecationSettings,
   UiSettingsParams,
   UserProvidedValues,
   UiSettingsScope,
 } from './src/ui_settings';
+export { type DarkModeValue, parseDarkModeValue } from './src/dark_mode';
 
 export { TIMEZONE_OPTIONS } from './src/timezones';

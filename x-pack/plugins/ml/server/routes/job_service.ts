@@ -7,18 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
-  categorizationFieldExamplesSchema,
+  categorizationFieldValidationSchema,
   basicChartSchema,
   populationChartSchema,
   datafeedIdsSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
   optionalJobIdsSchema,
-  jobsWithTimerangeSchema,
   lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
@@ -29,10 +29,9 @@ import {
   deleteJobsSchema,
 } from './schemas/job_service_schema';
 
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
-import { categorizationExamplesProvider } from '../models/job_service/new_job';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
@@ -141,11 +140,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canDeleteJob'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { deleteJobs } = jobServiceProvider(client, mlClient);
-        const { jobIds, deleteUserAnnotations } = request.body;
-        const resp = await deleteJobs(jobIds, deleteUserAnnotations);
+        const alerting = await context.alerting;
+        const rulesClient = alerting?.getRulesClient();
+        const { deleteJobs } = jobServiceProvider(client, mlClient, rulesClient);
+
+        const { jobIds, deleteUserAnnotations, deleteAlertingRules } = request.body;
+
+        const resp = await deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules);
 
         return response.ok({
           body: resp,
@@ -386,13 +389,9 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .addVersion(
       {
         version: '1',
-        validate: {
-          request: {
-            body: jobsWithTimerangeSchema,
-          },
-        },
+        validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { jobsWithTimerange } = jobServiceProvider(client, mlClient);
           const resp = await jobsWithTimerange();
@@ -428,16 +427,16 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: jobIdSchema,
+            body: jobForCloningSchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { getJobForCloning } = jobServiceProvider(client, mlClient);
-          const { jobId } = request.body;
+          const { jobId, retainCreatedBy } = request.body;
 
-          const resp = await getJobForCloning(jobId);
+          const resp = await getJobForCloning(jobId, retainCreatedBy);
           return response.ok({
             body: resp,
           });
@@ -897,15 +896,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /internal/ml/jobs/categorization_field_examples Get categorization field examples
-   * @apiName ValidateCategoryExamples
-   * @apiDescription Validates category examples
+   * @api {post} /internal/ml/jobs/categorization_field_validation Get categorization field examples
+   * @apiName ValidateCategoryValidation
+   * @apiDescription Validates a field for categorization
    *
-   * @apiSchema (body) categorizationFieldExamplesSchema
+   * @apiSchema (body) categorizationFieldValidationSchema
    */
   router.versioned
     .post({
-      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       access: 'internal',
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -916,7 +915,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: schema.object(categorizationFieldExamplesSchema),
+            body: schema.object(categorizationFieldValidationSchema),
           },
         },
       },

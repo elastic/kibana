@@ -10,9 +10,7 @@ import Url from 'url';
 import { format } from 'util';
 
 import axios, { AxiosResponse } from 'axios';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Config } from '@kbn/test';
-import { KibanaServer } from '@kbn/ftr-common-functional-services';
+import { FtrService } from './ftr_context_provider';
 
 export interface Credentials {
   username: string;
@@ -22,12 +20,10 @@ export interface Credentials {
 function extractCookieValue(authResponse: AxiosResponse) {
   return authResponse.headers['set-cookie']?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
 }
-export class Auth {
-  constructor(
-    private readonly config: Config,
-    private readonly log: ToolingLog,
-    private readonly kibanaServer: KibanaServer
-  ) {}
+export class AuthService extends FtrService {
+  private readonly config = this.ctx.getService('config');
+  private readonly log = this.ctx.getService('log');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   public async login(credentials?: Credentials) {
     const baseUrl = new URL(
@@ -101,5 +97,9 @@ export class Auth {
 
   public isCloud() {
     return this.config.get('servers.kibana.hostname') !== 'localhost';
+  }
+
+  public isServerless() {
+    return !!this.config.get('serverless');
   }
 }

@@ -22,7 +22,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
   type RandomSamplerOption =
     | 'dvRandomSamplerOptionOnAutomatic'
     | 'dvRandomSamplerOptionOnManual'
-    | 'dvRandomSamplerOptionOff';
+    | 'dvRandomSamplerOptionOff'
+    | 'none';
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -47,7 +48,9 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.setRandomSamplingOption(randomSamplerOption);
+        if (randomSamplerOption !== 'none') {
+          await this.setRandomSamplingOption(randomSamplerOption);
+        }
         await await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });
     },
@@ -136,7 +139,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertDataVisualizerTableExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`dataVisualizerTable`);
+        await testSubjects.existOrFail(`~dataVisualizerTable-loaded`);
       });
     },
 

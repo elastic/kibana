@@ -11,14 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Location } from 'history';
 import { parse } from 'query-string';
 
-import {
-  EuiPageHeader,
-  EuiButtonEmpty,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiButtonEmpty, EuiButton, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
@@ -67,11 +60,13 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   }, [pipelineNameFromLocation, data]);
 
   const goToEditPipeline = (pipelineName: string) => {
-    history.push(getEditPath({ pipelineName }));
+    const encodedParam = encodeURIComponent(pipelineName);
+    history.push(getEditPath({ pipelineName: encodedParam }));
   };
 
   const goToClonePipeline = (clonedPipelineName: string) => {
-    history.push(getClonePath({ clonedPipelineName }));
+    const encodedParam = encodeURIComponent(clonedPipelineName);
+    history.push(getClonePath({ clonedPipelineName: encodedParam }));
   };
 
   const goHome = () => {
@@ -81,41 +76,38 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   if (error) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2 data-test-subj="pipelineLoadError">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.loadErrorTitle"
-                defaultMessage="Unable to load pipelines"
-              />
-            </h2>
-          }
-          body={<p>{error.message}</p>}
-          actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.loadPipelineReloadButton"
-                defaultMessage="Try again"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        color="danger"
+        iconType="warning"
+        title={
+          <h2 data-test-subj="pipelineLoadError">
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.loadErrorTitle"
+              defaultMessage="Unable to load pipelines"
+            />
+          </h2>
+        }
+        body={<p>{error.message}</p>}
+        actions={
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.loadPipelineReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading data-test-subj="sectionLoading">
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.loadingMessage"
-            defaultMessage="Loading pipelines..."
-          />
-        </SectionLoading>
-      </EuiPageContent>
+      <SectionLoading data-test-subj="sectionLoading">
+        <FormattedMessage
+          id="xpack.ingestPipelines.list.loadingMessage"
+          defaultMessage="Loading pipelines..."
+        />
+      </SectionLoading>
     );
   }
 

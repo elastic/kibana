@@ -15,12 +15,6 @@ xpack.observability.unsafe.alertDetails.metrics.enabled: true
 **[For Infrastructure rule types]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
 
 ```yaml
-xpack.observability.unsafe.alertDetails.logs.enabled: true
-```
-
-**[For Logs threshold rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
-
-```yaml
 xpack.observability.unsafe.alertDetails.uptime.enabled: true
 ```
 

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
-import {
+import type { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from './util';
 import { mlSavedObjectServiceFactory } from './service';
@@ -20,6 +21,31 @@ import { syncSavedObjectsFactory } from './sync';
 const SAVED_OBJECTS_SYNC_TASK_TYPE = 'ML:saved-objects-sync';
 const SAVED_OBJECTS_SYNC_TASK_ID = 'ML:saved-objects-sync-task';
 const SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT = '1h';
+
+/**
+ * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).
+ * This is required to support zero-downtime upgrades and rollbacks. See https://github.com/elastic/kibana/issues/155764.
+ *
+ * As you add a new schema version, don't forget to change latestTaskStateSchema variable to reference the latest schema.
+ * For example, changing stateSchemaByVersion[1].schema to stateSchemaByVersion[2].schema.
+ */
+const stateSchemaByVersion = {
+  1: {
+    // A task that was created < 8.10 will go through this "up" migration
+    // to ensure it matches the v1 schema.
+    up: (state: Record<string, unknown>) => ({
+      runs: state.runs || 0,
+      totalSavedObjectsSynced: state.totalSavedObjectsSynced || 0,
+    }),
+    schema: schema.object({
+      runs: schema.number(),
+      totalSavedObjectsSynced: schema.number(),
+    }),
+  },
+};
+
+const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export class SavedObjectsSyncService {
   private core: CoreStart | null = null;
@@ -41,13 +67,14 @@ export class SavedObjectsSyncService {
         description: "This task periodically syncs ML's saved objects",
         timeout: '1m',
         maxAttempts: 3,
+        stateSchemaByVersion,
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
               await isMlReady();
               const core = this.core;
-              const { state } = taskInstance;
+              const state = taskInstance.state as LatestTaskStateSchema;
 
               if (core === null || security === null || spacesEnabled === null) {
                 const error = 'dependencies not initialized';
@@ -84,11 +111,13 @@ export class SavedObjectsSyncService {
                   : 'No ML saved objects in need of synchronization'
               );
 
+              const updatedState: LatestTaskStateSchema = {
+                runs: state.runs + 1,
+                totalSavedObjectsSynced: state.totalSavedObjectsSynced + count,
+              };
+
               return {
-                state: {
-                  runs: (state.runs ?? 0) + 1,
-                  totalSavedObjectsSynced: (state.totalSavedObjectsSynced ?? 0) + count,
-                },
+                state: updatedState,
               };
             },
             cancel: async () => {
@@ -107,6 +136,10 @@ export class SavedObjectsSyncService {
     this.core = core;
     try {
       await taskManager.removeIfExists(SAVED_OBJECTS_SYNC_TASK_ID);
+      const state: LatestTaskStateSchema = {
+        runs: 0,
+        totalSavedObjectsSynced: 0,
+      };
       const taskInstance = await taskManager.ensureScheduled({
         id: SAVED_OBJECTS_SYNC_TASK_ID,
         taskType: SAVED_OBJECTS_SYNC_TASK_TYPE,
@@ -114,10 +147,7 @@ export class SavedObjectsSyncService {
           interval: SAVED_OBJECTS_SYNC_INTERVAL_DEFAULT,
         },
         params: {},
-        state: {
-          runs: 0,
-          totalSavedObjectsSynced: 0,
-        },
+        state,
         scope: ['ml'],
       });
 

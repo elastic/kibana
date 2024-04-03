@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 
 import {
@@ -35,8 +36,8 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
 
-import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
-import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
+import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
+import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import {
   TRANSFORM_FROZEN_TIER_PREFERENCE,
@@ -48,18 +49,18 @@ import {
   getIndexDevConsoleStatement,
   getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
-import {
-  getPreviewTransformRequestBody,
+import type {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
   PivotAggsConfig,
 } from '../../../../common';
+import { getPreviewTransformRequestBody } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useToastNotifications } from '../../../../app_dependencies';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
@@ -68,7 +69,7 @@ import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { SourceSearchBar } from '../source_search_bar';
 import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
-import { StepDefineExposedState } from './common';
+import type { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
@@ -77,6 +78,9 @@ import { PivotFunctionForm } from './pivot_function_form';
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 const advancedEditorsSidebarWidth = '220px';
+
+type PopulatedFields = Set<string>;
+const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
 
 export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
   <>
@@ -120,8 +124,22 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { transformConfigQuery } = stepDefineForm.searchBar.state;
   const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
+  const appDependencies = useAppDependencies();
+  const {
+    ml: { useFieldStatsFlyoutContext },
+  } = appDependencies;
+
+  const fieldStatsContext = useFieldStatsFlyoutContext();
   const indexPreviewProps = {
-    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs),
+    ...useIndexData(
+      dataView,
+      transformConfigQuery,
+      runtimeMappings,
+      timeRangeMs,
+      isPopulatedFields(fieldStatsContext?.populatedFields)
+        ? [...fieldStatsContext.populatedFields]
+        : []
+    ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };

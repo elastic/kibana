@@ -80,7 +80,8 @@ export const SimulateWatchResultsFlyout = ({
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
       return Object.keys(actions).map((actionKey) => {
         const actionStatus = actionStatuses.find((status) => status.id === actionKey);
-        const isConditionMet = executeResults.details?.result?.condition.met;
+        const isConditionMet = executeResults.details?.result?.condition?.met;
+
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
@@ -89,8 +90,8 @@ export const SimulateWatchResultsFlyout = ({
           actionReason: actionStatus && actionStatus.lastExecutionReason,
           actionStatus:
             (isConditionMet &&
-              executeResults.details.result.actions.find((action: any) => action.id === actionKey)
-                .status) ||
+              executeResults.details?.result?.actions.find((action: any) => action.id === actionKey)
+                ?.status) ||
             conditionNotMetActionStatus(actionModes[actionKey]),
         };
       });
@@ -204,7 +205,7 @@ export const SimulateWatchResultsFlyout = ({
 
   const { details } = executeResults;
 
-  const conditionMetStatus = (details?.result?.condition.met && (
+  const conditionMetStatus = (details?.result?.condition?.met && (
     <>
       <EuiIcon color="green" type="check" data-test-subj="conditionMetStatus" />{' '}
       <FormattedMessage
@@ -232,8 +233,12 @@ export const SimulateWatchResultsFlyout = ({
     >
       <EuiFlyoutHeader hasBorder>
         {flyoutTitle}
-        <EuiSpacer size="s" />
-        {conditionMetStatus}
+        {details?.result?.condition?.met != null && (
+          <>
+            <EuiSpacer size="s" />
+            {conditionMetStatus}
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

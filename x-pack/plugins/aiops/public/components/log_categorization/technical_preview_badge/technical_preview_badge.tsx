@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiBetaBadge } from '@elastic/eui';
 
@@ -21,7 +22,7 @@ export const TechnicalPreviewBadge: FC = () => {
       color="hollow"
       tooltipContent={i18n.translate('xpack.aiops.techPreviewBadge.tooltip', {
         defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
       })}
       tooltipPosition={'right'}
     />

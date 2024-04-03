@@ -8,10 +8,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageSection } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import {
@@ -51,24 +48,17 @@ export class FollowerIndexAdd extends PureComponent {
         {({ isLoading, error, remoteClusters }) => {
           if (isLoading) {
             return (
-              <EuiPageContent
-                verticalPosition="center"
-                horizontalPosition="center"
-                color="subdued"
-                data-test-subj="remoteClustersLoading"
-              >
-                <SectionLoading>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
-                    defaultMessage="Loading remote clusters…"
-                  />
-                </SectionLoading>
-              </EuiPageContent>
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
+                  defaultMessage="Loading remote clusters…"
+                />
+              </SectionLoading>
             );
           }
 
           return (
-            <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+            <EuiPageSection restrictWidth style={{ width: '100%' }}>
               <FollowerIndexPageTitle
                 title={
                   <FormattedMessage
@@ -91,7 +81,7 @@ export class FollowerIndexAdd extends PureComponent {
                   />
                 }
               />
-            </EuiPageContentBody>
+            </EuiPageSection>
           );
         }}
       </RemoteClustersProvider>

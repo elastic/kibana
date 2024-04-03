@@ -10,7 +10,7 @@ import { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_lis
 import * as reactTestingLibrary from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import { getMockListResponse } from '../../../test_utils';
 
 describe('Policy artifacts list', () => {

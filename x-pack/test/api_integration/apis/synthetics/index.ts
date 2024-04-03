@@ -16,6 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esDeleteAllIndices('synthetics*');
     });
 
+    loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./get_filters'));
     loadTestFile(require.resolve('./enable_default_alerting'));
     loadTestFile(require.resolve('./get_monitor'));
@@ -27,11 +28,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./delete_monitor'));
     loadTestFile(require.resolve('./delete_monitor_project'));
-    loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./add_edit_params'));
     loadTestFile(require.resolve('./add_monitor_project_private_location'));
     loadTestFile(require.resolve('./inspect_monitor'));
     loadTestFile(require.resolve('./test_now_monitor'));
+    loadTestFile(require.resolve('./suggestions'));
   });
 }

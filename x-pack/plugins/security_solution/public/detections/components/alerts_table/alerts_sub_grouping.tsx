@@ -19,7 +19,7 @@ import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useKibana } from '../../../common/lib/kibana';

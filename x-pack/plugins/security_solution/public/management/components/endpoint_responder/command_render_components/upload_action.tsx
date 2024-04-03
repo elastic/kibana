@@ -7,11 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import type {
-  ResponseActionUploadParameters,
   ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
-import type { UploadActionUIRequestBody } from '../../../../../common/endpoint/schema/actions';
+import type { UploadActionUIRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import { useSendUploadEndpointRequest } from '../../../hooks/response_actions/use_send_upload_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';

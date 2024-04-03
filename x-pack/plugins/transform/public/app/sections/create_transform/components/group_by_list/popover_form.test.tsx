@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -14,9 +14,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 const startMock = coreMock.createStart();
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 
-import { PIVOT_SUPPORTED_GROUP_BY_AGGS, PivotGroupByConfig } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { isIntervalValid, PopoverForm } from './popover_form';
 
@@ -101,7 +102,7 @@ describe('Transform: Group By <PopoverForm />', () => {
       appName: 'the-test-app',
     };
 
-    const wrapper = shallow(
+    const { getByDisplayValue } = render(
       <KibanaContextProvider services={services}>
         <PopoverForm
           defaultData={defaultData}
@@ -112,6 +113,7 @@ describe('Transform: Group By <PopoverForm />', () => {
       </KibanaContextProvider>
     );
 
-    expect(wrapper.find(PopoverForm)).toMatchSnapshot();
+    expect(getByDisplayValue('the-agg-name')).toBeInTheDocument();
+    expect(getByDisplayValue('1m')).toBeInTheDocument();
   });
 });

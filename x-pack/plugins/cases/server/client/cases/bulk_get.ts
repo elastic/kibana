@@ -7,23 +7,16 @@
 
 import { partition } from 'lodash';
 
-import type {
-  CasesBulkGetResponse,
-  CasesBulkGetRequest,
-  CaseAttributes,
-} from '../../../common/api';
-import {
-  CasesBulkGetRequestRt,
-  decodeWithExcessOrThrow,
-  CasesBulkGetResponseRt,
-} from '../../../common/api';
-import { createCaseError } from '../../common/error';
+import type { CaseAttributes } from '../../../common/types/domain';
+import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
+import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { createCaseError, generateCaseErrorResponse } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { SOWithErrors } from '../../common/types';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 
@@ -94,12 +87,7 @@ const constructErrors = (
   const errors: CasesBulkGetResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({
-      error: soError.error.error,
-      message: soError.error.message,
-      status: soError.error.statusCode,
-      caseId: soError.id,
-    });
+    errors.push({ ...generateCaseErrorResponse(soError.error), caseId: soError.id });
   }
 
   for (const theCase of unauthorizedCases) {

@@ -21,11 +21,9 @@ import {
   EuiFormRow,
   EuiLink,
   EuiLoadingLogo,
-  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
   EuiDelayRender,
   EuiScreenReaderOnly,
@@ -33,7 +31,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 
-import { Cluster } from '../../../../../common/lib';
+import { Cluster, ClusterPayload } from '../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 
 import { AppContext, Context } from '../../../app_context';
@@ -44,13 +42,12 @@ import { RequestFlyout } from './request_flyout';
 import { ConnectionMode } from './components';
 import {
   ClusterErrors,
-  convertCloudUrlToProxyConnection,
-  convertProxyConnectionToCloudUrl,
+  convertCloudRemoteAddressToProxyConnection,
   validateCluster,
-  isCloudUrlEnabled,
+  isCloudAdvancedOptionsEnabled,
 } from './validators';
 
-const defaultClusterValues: Cluster = {
+const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
   skipUnavailable: false,
@@ -64,14 +61,17 @@ const ERROR_TITLE_ID = 'removeClustersErrorTitle';
 const ERROR_LIST_ID = 'removeClustersErrorList';
 
 interface Props {
-  save: (cluster: Cluster) => void;
+  save: (cluster: ClusterPayload) => void;
   cancel?: () => void;
   isSaving?: boolean;
   saveError?: any;
   cluster?: Cluster;
 }
 
-export type FormFields = Cluster & { cloudUrl: string; cloudUrlEnabled: boolean };
+export type FormFields = ClusterPayload & {
+  cloudRemoteAddress?: string;
+  cloudAdvancedOptionsEnabled: boolean;
+};
 
 interface State {
   fields: FormFields;
@@ -101,8 +101,8 @@ export class RemoteClusterForm extends Component<Props, State> {
       {
         ...defaultClusterValues,
         mode: defaultMode,
-        cloudUrl: convertProxyConnectionToCloudUrl(cluster),
-        cloudUrlEnabled: isCloudEnabled && isCloudUrlEnabled(cluster),
+        cloudRemoteAddress: cluster?.proxyAddress || '',
+        cloudAdvancedOptionsEnabled: isCloudAdvancedOptionsEnabled(cluster),
       },
       cluster
     );
@@ -125,14 +125,33 @@ export class RemoteClusterForm extends Component<Props, State> {
   onFieldsChange = (changedFields: Partial<FormFields>) => {
     const { isCloudEnabled } = this.context;
 
-    // when cloudUrl changes, fill proxy address and server name
-    const { cloudUrl } = changedFields;
-    if (cloudUrl) {
-      const { proxyAddress, serverName } = convertCloudUrlToProxyConnection(cloudUrl);
+    // when cloud remote address changes, fill proxy address and server name
+    const { cloudRemoteAddress, cloudAdvancedOptionsEnabled } = changedFields;
+    if (cloudRemoteAddress) {
+      const { proxyAddress, serverName } =
+        convertCloudRemoteAddressToProxyConnection(cloudRemoteAddress);
+      // Only change the server name if the advanced options are not currently open
+      if (this.state.fields.cloudAdvancedOptionsEnabled) {
+        changedFields = {
+          ...changedFields,
+          proxyAddress,
+        };
+      } else {
+        changedFields = {
+          ...changedFields,
+          proxyAddress,
+          serverName,
+        };
+      }
+    }
+
+    // If we switch off the advanced options, revert the server name to
+    // the host name from the proxy address
+    if (cloudAdvancedOptionsEnabled === false) {
       changedFields = {
         ...changedFields,
-        proxyAddress,
-        serverName,
+        serverName: this.state.fields.proxyAddress?.split(':')[0],
+        proxySocketConnections: defaultClusterValues.proxySocketConnections,
       };
     }
 
@@ -148,7 +167,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     });
   };
 
-  getCluster(): Cluster {
+  getCluster(): ClusterPayload {
     const {
       fields: {
         name,
@@ -206,7 +225,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     this.onFieldsChange({ skipUnavailable });
   };
 
-  resetToDefault = (fieldName: keyof Cluster) => {
+  resetToDefault = (fieldName: keyof ClusterPayload) => {
     this.onFieldsChange({
       [fieldName]: defaultClusterValues[fieldName],
     });
@@ -302,86 +321,66 @@ export class RemoteClusterForm extends Component<Props, State> {
   }
 
   renderActions() {
-    const { isSaving, cancel } = this.props;
+    const { isSaving, cancel, cluster: isEditMode } = this.props;
     const { areErrorsVisible, isRequestVisible } = this.state;
-
-    if (isSaving) {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.actions.savingText"
-                defaultMessage="Saving"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    let cancelButton;
-
-    if (cancel) {
-      cancelButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="primary" onClick={cancel}>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      );
-    }
-
-    const isSaveDisabled = areErrorsVisible && this.hasErrors();
+    const isSaveDisabled = (areErrorsVisible && this.hasErrors()) || isSaving;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {cancel && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="primary" onClick={cancel}>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={this.toggleRequest}
+                data-test-subj="remoteClustersRequestButton"
+              >
+                {isRequestVisible ? (
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
+                    defaultMessage="Hide request"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
+                    defaultMessage="Show request"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="remoteClusterFormSaveButton"
-                color="success"
-                iconType="check"
+                color="primary"
                 onClick={this.save}
                 fill
                 isDisabled={isSaveDisabled}
+                isLoading={isSaving}
                 aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(
                   ERROR_LIST_ID
                 )}`}
               >
                 <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
-                  defaultMessage="Save"
+                  id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
+                  defaultMessage="{isEditMode, select, true{Save} other{Next}}"
+                  values={{
+                    isEditMode: Boolean(isEditMode),
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>
-
-            {cancelButton}
           </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.toggleRequest} data-test-subj="remoteClustersRequestButton">
-            {isRequestVisible ? (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
-                defaultMessage="Hide request"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
-                defaultMessage="Show request"
-              />
-            )}
-          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -438,13 +437,7 @@ export class RemoteClusterForm extends Component<Props, State> {
   renderErrors = () => {
     const {
       areErrorsVisible,
-      fieldsErrors: {
-        name: errorClusterName,
-        seeds: errorsSeeds,
-        proxyAddress: errorProxyAddress,
-        serverName: errorServerName,
-        cloudUrl: errorCloudUrl,
-      },
+      fieldsErrors: { name: errorClusterName, seeds: errorsSeeds, proxyAddress: errorProxyAddress },
     } = this.state;
 
     const hasErrors = this.hasErrors();
@@ -485,29 +478,6 @@ export class RemoteClusterForm extends Component<Props, State> {
       });
     }
 
-    if (errorServerName) {
-      errorExplanations.push({
-        key: 'serverNameExplanation',
-        field: i18n.translate(
-          'xpack.remoteClusters.remoteClusterForm.inputServerNameErrorMessage',
-          {
-            defaultMessage: 'The "Server name" field is invalid.',
-          }
-        ),
-        error: errorServerName,
-      });
-    }
-
-    if (errorCloudUrl) {
-      errorExplanations.push({
-        key: 'cloudUrlExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputcloudUrlErrorMessage', {
-          defaultMessage: 'The "Elasticsearch endpoint URL" field is invalid.',
-        }),
-        error: errorCloudUrl,
-      });
-    }
-
     const messagesToBeRendered = errorExplanations.length && (
       <EuiScreenReaderOnly>
         <dl id={this.generateId(ERROR_LIST_ID)} aria-labelledby={this.generateId(ERROR_TITLE_ID)}>
@@ -523,20 +493,20 @@ export class RemoteClusterForm extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
           title={
-            <h3 id={this.generateId(ERROR_TITLE_ID)}>
+            <span id={this.generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-                defaultMessage="Fix errors before continuing."
+                defaultMessage="Some fields require your attention."
               />
-            </h3>
+            </span>
           }
           color="danger"
-          iconType="cross"
+          iconType="error"
         />
         <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
+        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
       </Fragment>
     );
   };
@@ -549,6 +519,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     return (
       <Fragment>
         {this.renderSaveErrorFeedback()}
+        {this.renderErrors()}
 
         <EuiForm data-test-subj="remoteClusterForm">
           <EuiDescribedFormGroup
@@ -608,8 +579,6 @@ export class RemoteClusterForm extends Component<Props, State> {
 
           {this.renderSkipUnavailable()}
         </EuiForm>
-
-        {this.renderErrors()}
 
         <EuiSpacer size="l" />
 

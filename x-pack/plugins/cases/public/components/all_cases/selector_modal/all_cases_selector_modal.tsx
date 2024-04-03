@@ -13,30 +13,26 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { CaseUI, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import type { CaseStatuses } from '../../../../common/types/domain';
+import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 
 export interface AllCasesSelectorModalProps {
-  hiddenStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatuses[];
   onRowClick?: (theCase?: CaseUI) => void;
   onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
   onCreateCaseClicked?: () => void;
 }
 
-const Modal = styled(EuiModal)`
-  ${({ theme }) => `
-    min-width: ${theme.eui.euiBreakpoints.m};
-    max-width: ${theme.eui.euiBreakpoints.xl};
-  `}
-`;
-
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
   ({ hiddenStatuses, onRowClick, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
+    const { euiTheme } = useEuiTheme();
     const closeModal = useCallback(() => {
       onClose?.();
       setIsModalOpen(false);
@@ -55,7 +51,14 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     return isModalOpen ? (
       <>
         <ReactQueryDevtools initialIsOpen={false} />
-        <Modal onClose={closeModal} data-test-subj="all-cases-modal">
+        <EuiModal
+          onClose={closeModal}
+          data-test-subj="all-cases-modal"
+          css={css`
+            min-width: ${euiTheme.breakpoint.m}px;
+            max-width: ${euiTheme.breakpoint.xl}px;
+          `}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -75,7 +78,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiModalFooter>
-        </Modal>
+        </EuiModal>
       </>
     ) : null;
   }

@@ -7,26 +7,22 @@
 
 /* eslint-disable no-continue */
 
-/* eslint-disable react/display-name */
-
-import React, { memo, useMemo, Fragment } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBreadcrumb } from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiDescriptionList,
-  EuiHorizontalRule,
-  EuiTextColor,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiBreadcrumb, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiInMemoryTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { StyledPanel } from '../styles';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
-import { CopyablePanelField } from './copyable_panel_field';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -59,23 +55,21 @@ export const EventDetail = memo(function EventDetail({
   eventCategory: string;
 }) {
   const isEventLoading = useSelector((state: State) =>
-    selectors.isCurrentRelatedEventLoading(state.analyzer.analyzerById[id])
+    selectors.isCurrentRelatedEventLoading(state.analyzer[id])
   );
-  const isTreeLoading = useSelector((state: State) =>
-    selectors.isTreeLoading(state.analyzer.analyzerById[id])
-  );
+  const isTreeLoading = useSelector((state: State) => selectors.isTreeLoading(state.analyzer[id]));
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer.analyzerById[id])(nodeID))
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
   const nodeStatus = useSelector((state: State) =>
-    selectors.nodeDataStatus(state.analyzer.analyzerById[id])(nodeID)
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
 
   const isNodeDataLoading = nodeStatus === 'loading';
   const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector((state: State) =>
-    selectors.currentRelatedEventData(state.analyzer.analyzerById[id])
+    selectors.currentRelatedEventData(state.analyzer[id])
   );
 
   return isLoading ? (
@@ -101,6 +95,7 @@ export const EventDetail = memo(function EventDetail({
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
+// eslint-disable-next-line react/display-name
 const EventDetailContents = memo(function ({
   id,
   nodeID,
@@ -162,17 +157,19 @@ const EventDetailContents = memo(function ({
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
-      <EventDetailFields event={event} />
+      <EventDetailFields event={event} id={id} />
     </StyledPanel>
   );
 });
 
-function EventDetailFields({ event }: { event: SafeResolverEvent }) {
-  const sections = useMemo(() => {
-    const returnValue: Array<{
-      namespace: React.ReactNode;
-      descriptions: Array<{ title: React.ReactNode; description: React.ReactNode }>;
-    }> = [];
+interface EventDetailsTableView {
+  title: string;
+  description: string;
+}
+
+function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string }) {
+  const descriptions = useMemo(() => {
+    const returnValue: EventDetailsTableView[] = [];
     const expandedEventObject: object = expandDottedObject(event);
     for (const [key, value] of Object.entries(expandedEventObject)) {
       // ignore these keys
@@ -180,58 +177,76 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
         continue;
       }
 
-      const section = {
-        // Group the fields by their top-level namespace
-        namespace: <GeneratedText>{key}</GeneratedText>,
-        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
-          // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
-          const fieldName = [key, ...path].join('.');
+      const description = deepObjectEntries(value).map(([path, fieldValue]) => {
+        // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
+        const fieldName = [key, ...path].join('.');
 
-          return {
-            title: <GeneratedText>{fieldName}</GeneratedText>,
-            description: (
-              <CopyablePanelField
-                textToCopy={String(fieldValue)}
-                content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
-              />
-            ),
-          };
-        }),
-      };
-      returnValue.push(section);
+        return {
+          title: fieldName,
+          description: String(fieldValue),
+        };
+      });
+      returnValue.push(...description);
     }
     return returnValue;
   }, [event]);
-  return (
-    <>
-      {sections.map(({ namespace, descriptions }, index) => {
+
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
+      schema: true,
+    },
+  };
+  const columns: Array<EuiBasicTableColumn<EventDetailsTableView>> = [
+    {
+      field: 'title',
+      'data-test-subj': 'resolver:panel:event-detail:event-field-title',
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.eventDetail.fieldTitle"
+          defaultMessage="Field"
+        />
+      ),
+      width: 'fit-content(8em)',
+      sortable: true,
+      render(fieldName: string) {
+        return <GeneratedText>{fieldName}</GeneratedText>;
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.resolver.panel.eventDetail.valueTitle"
+          defaultMessage="Value"
+        />
+      ),
+      render(data: EventDetailsTableView) {
         return (
-          <Fragment key={index}>
-            {index === 0 ? null : <EuiSpacer size="m" />}
-            <EuiTitle size="xxxs">
-              <EuiTextColor color="subdued">
-                <StyledFlexTitle>
-                  {namespace}
-                  <TitleHr />
-                </StyledFlexTitle>
-              </EuiTextColor>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <StyledDescriptionList
-              type="column"
-              align="left"
-              titleProps={{
-                className: 'desc-title',
-                'data-test-subj': 'resolver:panel:event-detail:event-field-title',
-              }}
-              compressed
-              listItems={descriptions}
-            />
-            {index === sections.length - 1 ? null : <EuiSpacer size="m" />}
-          </Fragment>
+          <SecurityCellActions
+            data={{
+              field: data.title,
+              value: data.description,
+            }}
+            visibleCellActions={5}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            mode={CellActionsMode.HOVER_DOWN}
+            sourcererScopeId={getSourcererScopeId(id)}
+            metadata={{ scopeId: id }}
+          >
+            {data.description}
+          </SecurityCellActions>
         );
-      })}
-    </>
+      },
+    },
+  ];
+  return (
+    <EuiInMemoryTable<EventDetailsTableView>
+      items={descriptions}
+      columns={columns}
+      search={search}
+      pagination={true}
+      sorting
+    />
   );
 }
 
@@ -249,13 +264,10 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: State) =>
-    selectors.relatedEventCountOfTypeForNode(state.analyzer.analyzerById[id])(
-      nodeID,
-      breadcrumbEventCategory
-    )
+    selectors.relatedEventCountOfTypeForNode(state.analyzer[id])(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: State) =>
-    selectors.relatedEventTotalCount(state.analyzer.analyzerById[id])(nodeID)
+    selectors.relatedEventTotalCount(state.analyzer[id])(nodeID)
   );
   const nodesLinkNavProps = useLinkProps(id, {
     panelView: 'nodes',
@@ -334,30 +346,8 @@ function EventDetailBreadcrumbs({
   return <Breadcrumbs breadcrumbs={breadcrumbs} />;
 }
 
-const StyledDescriptionList = memo(styled(EuiDescriptionList)`
-  &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 8em;
-    overflow-wrap: break-word;
-  }
-  &.euiDescriptionList.euiDescriptionList--column dd.euiDescriptionList__description {
-    max-width: calc(100% - 8.5em);
-    overflow-wrap: break-word;
-  }
-`);
-
 // Also prevents horizontal scrollbars on long descriptive names
 const StyledDescriptiveName = memo(styled(EuiText)`
   padding-right: 1em;
   overflow-wrap: break-word;
 `);
-
-const StyledFlexTitle = memo(styled('h3')`
-  align-items: center;
-  display: flex;
-  flex-flow: row;
-  font-size: 1.2em;
-`);
-
-const TitleHr = memo(() => {
-  return <EuiHorizontalRule margin="none" size="half" />;
-});

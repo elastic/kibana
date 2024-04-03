@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { CaseConnector, ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
-import { ConfigurationRequest } from '@kbn/cases-plugin/common/types/api';
-import { Configuration } from '@kbn/cases-plugin/common/types/domain';
+import {
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
+} from '@kbn/cases-plugin/common/types/api';
+import {
+  CaseConnector,
+  Configuration,
+  Configurations,
+  ConnectorTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 
@@ -35,6 +42,7 @@ export const getConfigurationRequest = ({
     } as CaseConnector,
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
+    customFields: [],
     ...overrides,
   };
 };
@@ -46,6 +54,7 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
     mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
+    customFields: [],
     ...overwrite,
   };
 };
@@ -58,6 +67,49 @@ export const createConfiguration = async (
   headers: Record<string, unknown> = {}
 ): Promise<Configuration> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}`);
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: configuration } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+export const getConfiguration = async ({
+  supertest,
+  query = { owner: 'securitySolutionFixture' },
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<Configurations> => {
+  const { body: configuration } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .expect(expectedHttpCode);
+
+  return configuration;
+};
+
+export const updateConfiguration = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  id: string,
+  req: ConfigurationPatchRequest,
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
+  headers: Record<string, unknown> = {}
+): Promise<Configuration> => {
+  const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
 
   setupAuth({ apiCall, headers, auth });
 

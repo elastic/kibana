@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import type { FlattenSimpleInterpolation } from 'styled-components';
 import styled from 'styled-components';
 
+import { i18n } from '@kbn/i18n';
 import { useThemes } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
@@ -105,9 +106,9 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   const { euiTheme } = useEuiTheme();
   const emptyLabelStyle = useMemo(
     () => ({
-      color: euiTheme.colors.disabled,
+      color: euiTheme.colors.darkShade,
     }),
-    [euiTheme.colors.disabled]
+    [euiTheme.colors.darkShade]
   );
   const className = isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate';
 
@@ -199,6 +200,7 @@ export const DonutChart = ({
               theme={[donutTheme, theme]}
               baseTheme={baseTheme}
               onElementClick={onElementClicked}
+              locale={i18n.getLocale()}
             />
             <Partition
               id="donut-chart"

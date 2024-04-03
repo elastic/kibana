@@ -10,11 +10,9 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 
@@ -32,17 +30,25 @@ export const renderApp = async (
 ) => {
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
-  // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
+  // FIXME: use featureCatalogue.getFeatures$()
   const directories = featureCatalogue.get();
 
   // Filters solutions by available nav links
   const navLinksSubscription = chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = featureCatalogue
       .getSolutions()
-      .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
+      .filter(({ id }) =>
+        navLinks.find(
+          ({ visibleIn, category }) => visibleIn.includes('home') && category?.id === id
+        )
+      );
 
     render(
-      <RedirectAppLinks application={coreStart.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: coreStart.application,
+        }}
+      >
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
             <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>

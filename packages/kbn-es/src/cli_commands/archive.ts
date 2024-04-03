@@ -59,7 +59,11 @@ export const archive = {
       throw createCliError('you must provide a path to an ES tar file');
     }
 
-    const { installPath } = await cluster.installArchive(path, options);
+    const { installPath } = await cluster.installArchive(path, {
+      basePath: options.basePath,
+      installPath: options.installPath,
+      esArgs: options.esArgs,
+    });
     await cluster.run(installPath, {
       ...options,
       readyTimeout: parseTimeoutToMs(options.readyTimeout),

@@ -20,7 +20,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { useLink } from '../../../../../hooks';
+import { useAuthz, useLink } from '../../../../../hooks';
 import type { AgentPolicy, GetAgentStatusResponse } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
 import { AddAgentHelpPopover } from '../../../../../components';
@@ -53,6 +53,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   isAddAgentHelpPopoverOpen,
   setIsAddAgentHelpPopoverOpen,
 }) => {
+  const authz = useAuthz();
   const { getPath } = useLink();
   const history = useHistory();
 
@@ -69,7 +70,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   }
 
   const addAgentLink = (
-    <EuiLink onClick={addAgent}>
+    <EuiLink onClick={addAgent} data-test-subj="addAgentLink">
       {isFleetServerPolicy ? (
         <FormattedMessage
           id="xpack.fleet.policyDetails.addFleetServerButton"
@@ -121,7 +122,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                 agentPolicyId={(agentPolicy && agentPolicy.id) || ''}
                 showAgentText
               />
-            ) : agentPolicy?.is_managed ? (
+            ) : !authz.fleet.allAgents || agentPolicy?.is_managed ? (
               <LinkedAgentCount
                 count={0}
                 agentPolicyId={(agentPolicy && agentPolicy.id) || ''}

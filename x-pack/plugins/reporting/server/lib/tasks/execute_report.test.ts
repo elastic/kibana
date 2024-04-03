@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import { RunContext } from '@kbn/task-manager-plugin/server';
+import { ReportDocument } from '@kbn/reporting-common/types';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import type { ExportType, ReportingConfigType } from '@kbn/reporting-server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+
 import { ExecuteReportTask } from '.';
-import { ReportingCore } from '../..';
-import { ReportingConfigType } from '../../config';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import type { SavedReport } from '../store';
+import type { ReportingCore } from '../..';
+import { createMockReportingCore } from '../../test_helpers';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -31,7 +34,7 @@ describe('Execute Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": 1,
+        "maxAttempts": ${configType.capture.maxAttempts + 1},
         "maxConcurrency": 1,
         "timeout": "120s",
         "title": "Reporting: execute job",
@@ -73,7 +76,7 @@ describe('Execute Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": 1,
+        "maxAttempts": 2,
         "maxConcurrency": 0,
         "timeout": "55s",
         "title": "Reporting: execute job",
@@ -86,18 +89,27 @@ describe('Execute Report Task', () => {
     mockReporting.getExportTypesRegistry().register({
       id: 'noop',
       name: 'Noop',
-      createJobFnFactory: () => async () => new Promise(() => {}),
-      runTaskFnFactory: () => async () => new Promise(() => {}),
-      jobContentExtension: 'none',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: () => new Promise(() => {}),
+      jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
-    });
+    } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
-    task._claimJob = jest.fn(() =>
-      Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test',
+        jobtype: 'noop',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
+      .spyOn(task, '_claimJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'noop', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
@@ -113,15 +125,15 @@ describe('Execute Report Task', () => {
     setImmediate(() => {
       mockReporting.pluginStop();
     });
-    await taskPromise;
+    await taskPromise.catch(() => {});
 
-    expect(store.setReportFailed).toHaveBeenLastCalledWith(
+    expect(store.setReportError).toHaveBeenLastCalledWith(
       expect.objectContaining({
         _id: 'test',
       }),
       expect.objectContaining({
-        output: expect.objectContaining({
-          error_code: new KibanaShuttingDownError().code,
+        error: expect.objectContaining({
+          message: `ReportingError(code: ${new KibanaShuttingDownError().code})`,
         }),
       })
     );

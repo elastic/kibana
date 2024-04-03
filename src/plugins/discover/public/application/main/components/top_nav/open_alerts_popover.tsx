@@ -8,19 +8,30 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import type { Observable } from 'rxjs';
-import type { CoreTheme, I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  AlertConsumers,
+  ES_QUERY_ID,
+  RuleCreationValidConsumer,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
+import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
 
-const ALERT_TYPE_ID = '.es-query';
+const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.LOGS,
+  AlertConsumers.OBSERVABILITY,
+  STACK_ALERTS_FEATURE_ID,
+];
 
 interface AlertsPopoverProps {
   onClose: () => void;
@@ -28,11 +39,11 @@ interface AlertsPopoverProps {
   stateContainer: DiscoverStateContainer;
   savedQueryId?: string;
   adHocDataViews: DataView[];
-  I18nContext: I18nStart['Context'];
   services: DiscoverServices;
+  isPlainRecord?: boolean;
 }
 
-interface EsQueryAlertMetaData {
+interface EsQueryAlertMetaData extends RuleTypeMetaData {
   isManagementPage?: boolean;
   adHocDataViewList: DataView[];
 }
@@ -43,8 +54,13 @@ export function AlertsPopover({
   services,
   stateContainer,
   onClose: originalOnClose,
+  isPlainRecord,
 }: AlertsPopoverProps) {
   const dataView = stateContainer.internalState.getState().dataView;
+  const query = stateContainer.appState.getState().query;
+  const dateFields = dataView?.fields.getByType('date');
+  const timeField = dataView?.timeFieldName || dateFields?.[0]?.name;
+
   const { triggersActionsUi } = services;
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState(false);
   const onClose = useCallback(() => {
@@ -56,6 +72,13 @@ export function AlertsPopover({
    * Provides the default parameters used to initialize the new rule
    */
   const getParams = useCallback(() => {
+    if (isPlainRecord) {
+      return {
+        searchType: 'esqlQuery',
+        esqlQuery: query,
+        timeField,
+      };
+    }
     const savedQueryId = stateContainer.appState.getState().savedQuery;
     return {
       searchType: 'searchSource',
@@ -64,7 +87,7 @@ export function AlertsPopover({
         .searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [stateContainer]);
+  }, [isPlainRecord, stateContainer.appState, stateContainer.savedSearchState, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
@@ -86,21 +109,32 @@ export function AlertsPopover({
 
     return triggersActionsUi?.getAddRuleFlyout({
       metadata: discoverMetadata,
-      consumer: 'discover',
+      consumer: 'alerts',
       onClose: (_, metadata) => {
-        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onFinishFlyoutInteraction(metadata!);
         onClose();
       },
       onSave: async (metadata) => {
-        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onFinishFlyoutInteraction(metadata!);
       },
       canChangeTrigger: false,
-      ruleTypeId: ALERT_TYPE_ID,
+      ruleTypeId: ES_QUERY_ID,
       initialValues: { params: getParams() },
+      validConsumers: EsQueryValidConsumer,
+      useRuleProducer: true,
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
+      initialSelectedConsumer: AlertConsumers.LOGS,
     });
   }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
 
-  const hasTimeFieldName = Boolean(dataView?.timeFieldName);
+  const hasTimeFieldName: boolean = useMemo(() => {
+    if (!isPlainRecord) {
+      return Boolean(dataView?.timeFieldName);
+    } else {
+      return Boolean(timeField);
+    }
+  }, [dataView?.timeFieldName, isPlainRecord, timeField]);
+
   const panels = [
     {
       id: 'mainPanel',
@@ -133,7 +167,7 @@ export function AlertsPopover({
           ),
           icon: 'tableOfContents',
           href: services?.application?.getUrlForApp(
-            'management/insightsAndAlerting/triggersActions/alerts'
+            'management/insightsAndAlerting/triggersActions/rules'
           ),
           ['data-test-subj']: 'discoverManageAlertsButton',
         },
@@ -163,19 +197,17 @@ function closeAlertsPopover() {
 }
 
 export function openAlertsPopover({
-  I18nContext,
-  theme$,
   anchorElement,
   stateContainer,
   services,
   adHocDataViews,
+  isPlainRecord,
 }: {
-  I18nContext: I18nStart['Context'];
-  theme$: Observable<CoreTheme>;
   anchorElement: HTMLElement;
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
   adHocDataViews: DataView[];
+  isPlainRecord?: boolean;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -186,20 +218,18 @@ export function openAlertsPopover({
   document.body.appendChild(container);
 
   const element = (
-    <I18nContext>
+    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
-          <AlertsPopover
-            onClose={closeAlertsPopover}
-            anchorElement={anchorElement}
-            stateContainer={stateContainer}
-            adHocDataViews={adHocDataViews}
-            I18nContext={I18nContext}
-            services={services}
-          />
-        </KibanaThemeProvider>
+        <AlertsPopover
+          onClose={closeAlertsPopover}
+          anchorElement={anchorElement}
+          stateContainer={stateContainer}
+          adHocDataViews={adHocDataViews}
+          services={services}
+          isPlainRecord={isPlainRecord}
+        />
       </KibanaContextProvider>
-    </I18nContext>
+    </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
 }

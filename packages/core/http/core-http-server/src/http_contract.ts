@@ -20,6 +20,7 @@ import type {
   OnPreRoutingHandler,
 } from './lifecycle';
 import type { IBasePath } from './base_path';
+import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
@@ -217,7 +218,7 @@ export interface HttpServiceSetup<
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
    */
-  createCookieSessionStorageFactory: <T>(
+  createCookieSessionStorageFactory: <T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>
   ) => Promise<SessionStorageFactory<T>>;
 
@@ -286,6 +287,12 @@ export interface HttpServiceSetup<
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
 
   /**
    * The CSP config used for Kibana.
@@ -360,6 +367,12 @@ export interface HttpServiceStart {
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
 
   /**
    * Auth status.

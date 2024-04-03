@@ -16,7 +16,7 @@ import { SampleDataTab } from '@kbn/home-sample-data-tab';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
 import { getServices } from '../kibana_services';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { getTutorials } from '../load_tutorials';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -257,7 +257,7 @@ class TutorialDirectoryUi extends React.Component {
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
       >
-        {this.renderTabContent()}
+        <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }

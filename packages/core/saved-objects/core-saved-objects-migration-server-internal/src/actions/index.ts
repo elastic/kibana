@@ -108,7 +108,11 @@ import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
-import type { ActualMappingsIncomplete, ComparedMappingsChanged } from './check_target_mappings';
+import type {
+  IndexMappingsIncomplete,
+  RootFieldsChanged,
+  TypesChanged,
+} from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -134,6 +138,11 @@ export type { AliasNotFound, RemoveIndexNotAConcreteIndex };
 export interface IndexNotFound {
   type: 'index_not_found_exception';
   index: string;
+}
+
+export interface OperationNotSupported {
+  type: 'operation_not_supported';
+  operationName: string;
 }
 
 export interface WaitForReindexTaskFailure {
@@ -177,8 +186,10 @@ export interface ActionErrorTypeMap {
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
   es_response_too_large: EsResponseTooLargeError;
   synchronization_failed: SynchronizationFailed;
-  actual_mappings_incomplete: ActualMappingsIncomplete;
-  compared_mappings_changed: ComparedMappingsChanged;
+  index_mappings_incomplete: IndexMappingsIncomplete;
+  root_fields_changed: RootFieldsChanged;
+  types_changed: TypesChanged;
+  operation_not_supported: OperationNotSupported;
 }
 
 /**

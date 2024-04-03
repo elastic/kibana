@@ -18,7 +18,6 @@ import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 import { useDateFormat } from '../../hooks';
 import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
-import { ResizeObserver } from '@juggle/resize-observer';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -45,8 +44,6 @@ describe('SessionView component', () => {
         dispatchEvent: jest.fn(),
       })),
     });
-
-    global.ResizeObserver = ResizeObserver;
   });
 
   beforeEach(() => {
@@ -58,6 +55,7 @@ describe('SessionView component', () => {
           index={TEST_PROCESS_INDEX}
           sessionStartTime={TEST_SESSION_START_TIME}
           sessionEntityId="test-entity-id"
+          trackEvent={jest.fn()}
         />
       ));
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
@@ -214,28 +212,6 @@ describe('SessionView component', () => {
 
         await waitFor(() => {
           expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeTruthy();
-        });
-      });
-
-      it('should show tty player button as disabled, if session has no output', async () => {
-        mockedApi.mockImplementation(async (options) => {
-          // for some reason the typescript interface for options says its an object with a field called path.
-          // in reality options is a string (which equals the path...)
-          const path = String(options);
-
-          if (path === PROCESS_EVENTS_ROUTE) {
-            return sessionViewProcessEventsMock;
-          } else if (path === GET_TOTAL_IO_BYTES_ROUTE) {
-            return { total: 0 };
-          }
-
-          return { total: 0 };
-        });
-
-        render();
-
-        await waitFor(() => {
-          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeDisabled();
         });
       });
     });

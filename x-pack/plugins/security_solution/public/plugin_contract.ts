@@ -6,46 +6,65 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UpsellingService } from './common/lib/upsellings';
+import type { RouteProps } from 'react-router-dom';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
+import type { AppLinksSwitcher } from './common/links';
+import type { DeepLinksFormatter } from './common/links/deep_links';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
+import { ContractComponentsService } from './contract_components';
+import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export class PluginContract {
-  public isSidebarEnabled$: BehaviorSubject<boolean>;
-  public getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
+  public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
+  public onboardingPageService: OnboardingPageService;
+  public extraRoutes$: BehaviorSubject<RouteProps[]>;
+  public appLinksSwitcher: AppLinksSwitcher;
+  public deepLinksFormatter?: DeepLinksFormatter;
 
-  constructor() {
-    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.getStartedComponent$ = new BehaviorSubject<React.ComponentType | null>(null);
+  constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
+    this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
+    this.onboardingPageService = new OnboardingPageService();
+    this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
+    this.appLinksSwitcher = (appLinks) => appLinks;
   }
 
   public getStartServices(): ContractStartServices {
     return {
-      isSidebarEnabled$: this.isSidebarEnabled$.asObservable(),
-      getStartedComponent$: this.getStartedComponent$.asObservable(),
+      extraRoutes$: this.extraRoutes$.asObservable(),
+      getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
+      onboarding: this.onboardingPageService,
     };
   }
 
   public getSetupContract(): PluginSetup {
     return {
       resolver: lazyResolver,
-      upselling: this.upsellingService,
+      experimentalFeatures: { ...this.experimentalFeatures },
+      setAppLinksSwitcher: (appLinksSwitcher) => {
+        this.appLinksSwitcher = appLinksSwitcher;
+      },
+      setDeepLinksFormatter: (deepLinksFormatter) => {
+        this.deepLinksFormatter = deepLinksFormatter;
+      },
     };
   }
 
   public getStartContract(): PluginStart {
     return {
+      setOnboardingPageSettings: this.onboardingPageService,
       getNavLinks$: () => navLinks$,
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
-      setGetStartedPage: (getStartedComponent) => {
-        this.getStartedComponent$.next(getStartedComponent);
+      setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
+      setComponents: (components) => {
+        this.componentsService.setComponents(components);
       },
       getBreadcrumbsNav$: () => breadcrumbsNav$,
+      getUpselling: () => this.upsellingService,
     };
   }
 

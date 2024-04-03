@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split chart');
       await PageObjects.visEditor.clickBucket('Split chart');
       log.debug('Aggregation = Terms');
@@ -46,7 +45,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await initLineChart();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     afterEach(async () => {
@@ -242,7 +246,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('clickLineChart');
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
       });
 
       describe('parent pipeline', () => {

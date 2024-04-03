@@ -50,9 +50,10 @@ describe('legacy sync sagas', () => {
         term: 'A',
       },
       icon: {
-        class: 'a',
-        code: 'a',
+        id: 'a',
+        package: 'eui',
         label: '',
+        prevName: 'a',
       },
     } as WorkspaceNode);
     env.mockedDeps.getWorkspace()!.nodes.push({
@@ -62,9 +63,10 @@ describe('legacy sync sagas', () => {
         term: 'B',
       },
       icon: {
-        class: 'b',
-        code: 'b',
+        id: 'b',
+        package: 'eui',
         label: '',
+        prevName: 'b',
       },
     } as WorkspaceNode);
   });
@@ -107,17 +109,18 @@ describe('legacy sync sagas', () => {
         fieldProperties: {
           color: 'red',
           icon: {
-            class: 'x',
-            code: 'x',
+            id: 'x',
+            package: 'eui',
             label: '',
+            prevName: 'x',
           },
         },
       })
     );
     const workspace = env.mockedDeps.getWorkspace()!;
     expect(workspace.nodes[0].color).toEqual('red');
-    expect(workspace.nodes[0].icon.class).toEqual('x');
+    expect(workspace.nodes[0].icon.id).toEqual('x');
     expect(workspace.nodes[1].color).toEqual('pink');
-    expect(workspace.nodes[1].icon.class).toEqual('b');
+    expect(workspace.nodes[1].icon.id).toEqual('b');
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import {
@@ -15,16 +15,17 @@ import {
   getIncompatibleFieldsMarkdownComment,
   getIncompatibleFieldsMarkdownTablesComment,
   getIncompatibleMappings,
+  getIncompatibleMappingsFields,
   getIncompatibleValues,
+  getIncompatibleValuesFields,
+  getSameFamilyColor,
   showInvalidCallout,
 } from './helpers';
 import { EMPTY_STAT } from '../../../helpers';
 import {
   DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
-  INCOMPATIBLE_FIELDS_WITH,
   MAPPINGS_THAT_CONFLICT_WITH_ECS,
   PAGES_MAY_NOT_DISPLAY_EVENTS,
-  WHEN_AN_INCOMPATIBLE_FIELD,
 } from '../../index_properties/translations';
 import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { PartitionedFieldMetadata } from '../../../types';
@@ -32,18 +33,10 @@ import { PartitionedFieldMetadata } from '../../../types';
 describe('helpers', () => {
   describe('getIncompatibleFieldsMarkdownComment', () => {
     test('it returns the expected counts and ECS version', () => {
-      expect(
-        getIncompatibleFieldsMarkdownComment({
-          fieldsInSameFamily: 7,
-          incompatible: 11,
-        })
-      ).toEqual(`#### 11 incompatible fields, 7 fields with mappings in the same family
+      expect(getIncompatibleFieldsMarkdownComment(11)).toEqual(`#### 11 incompatible fields
 
 Fields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.
 
-${INCOMPATIBLE_FIELDS_WITH}
-
-${WHEN_AN_INCOMPATIBLE_FIELD}
 ${DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
 ${PAGES_MAY_NOT_DISPLAY_EVENTS}
 ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
@@ -64,6 +57,12 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
   describe('getIncompatibleColor', () => {
     test('it returns the expected color', () => {
       expect(getIncompatibleColor()).toEqual(euiThemeVars.euiColorDanger);
+    });
+  });
+
+  describe('getSameFamilyColor', () => {
+    test('it returns the expected color', () => {
+      expect(getSameFamilyColor()).toEqual(euiThemeVars.euiColorLightShade);
     });
   });
 
@@ -109,6 +108,19 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
 
     test('it filters-out ECS complaint fields', () => {
       expect(getIncompatibleMappings(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
+    });
+  });
+
+  describe('getIncompatibleMappingsFields', () => {
+    test('it (only) returns the fields where type !== indexFieldType', () => {
+      expect(getIncompatibleMappingsFields(mockPartitionedFieldMetadata.incompatible)).toEqual([
+        'host.name',
+        'source.ip',
+      ]);
+    });
+
+    test('it filters-out ECS complaint fields', () => {
+      expect(getIncompatibleMappingsFields(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
     });
   });
 
@@ -269,13 +281,25 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           ],
           hasEcsMetadata: true,
           isEcsCompliant: false,
-          isInSameFamily: true,
+          isInSameFamily: false,
         },
       ]);
     });
 
     test('it filters-out ECS complaint fields', () => {
       expect(getIncompatibleValues(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
+    });
+  });
+
+  describe('getIncompatibleValuesFields', () => {
+    test('it (only) returns the fields with indexInvalidValues', () => {
+      expect(getIncompatibleValuesFields(mockPartitionedFieldMetadata.incompatible)).toEqual([
+        'event.category',
+      ]);
+    });
+
+    test('it filters-out ECS complaint fields', () => {
+      expect(getIncompatibleValuesFields(mockPartitionedFieldMetadata.ecsCompliant)).toEqual([]);
     });
   });
 
@@ -322,6 +346,7 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           formatBytes,
           formatNumber,
           ilmPhase: 'unmanaged',
+          isILMAvailable: true,
           indexName: 'auditbeat-custom-index-1',
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
@@ -330,8 +355,8 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
       ).toEqual([
         '### auditbeat-custom-index-1\n',
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | `unmanaged` | 27.7KB |\n\n',
-        '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-        `#### 3 incompatible fields, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n${INCOMPATIBLE_FIELDS_WITH}\n\n${WHEN_AN_INCOMPATIBLE_FIELD}\n${DETECTION_ENGINE_RULES_MAY_NOT_MATCH}\n${PAGES_MAY_NOT_DISPLAY_EVENTS}\n${MAPPINGS_THAT_CONFLICT_WITH_ECS}\n`,
+        '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        `#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n${DETECTION_ENGINE_RULES_MAY_NOT_MATCH}\n${PAGES_MAY_NOT_DISPLAY_EVENTS}\n${MAPPINGS_THAT_CONFLICT_WITH_ECS}\n`,
         '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
       ]);
     });
@@ -349,6 +374,7 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
           formatNumber,
           ilmPhase: 'unmanaged',
           indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: true,
           partitionedFieldMetadata: emptyIncompatible,
           patternDocsCount: 57410,
           sizeInBytes: 28413,
@@ -356,7 +382,33 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
       ).toEqual([
         '### auditbeat-custom-index-1\n',
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ✅ | auditbeat-custom-index-1 | 4 (0.0%) | 0 | `unmanaged` | 27.7KB |\n\n',
-        '### **Incompatible fields** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        '### **Incompatible fields** `0` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        '\n\n\n',
+      ]);
+    });
+
+    test('it returns the expected comment when `isILMAvailable` is false', () => {
+      const emptyIncompatible: PartitionedFieldMetadata = {
+        ...mockPartitionedFieldMetadata,
+        incompatible: [], // <-- empty
+      };
+
+      expect(
+        getAllIncompatibleMarkdownComments({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: emptyIncompatible,
+          patternDocsCount: 57410,
+          sizeInBytes: 28413,
+        })
+      ).toEqual([
+        '### auditbeat-custom-index-1\n',
+        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ✅ | auditbeat-custom-index-1 | 4 (0.0%) | 0 | 27.7KB |\n\n',
+        '### **Incompatible fields** `0` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
         '\n\n\n',
       ]);
     });

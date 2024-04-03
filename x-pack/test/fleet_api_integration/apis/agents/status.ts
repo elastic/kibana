@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
@@ -230,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should work with deprecated api', async () => {
-      await supertest.get(`/api/fleet/agent-status`).expect(200);
+      await supertest.get(`/api/fleet/agent-status`).set('kbn-xsrf', 'xxxx').expect(200);
     });
 
     it('should work with adequate package privileges', async () => {
@@ -306,6 +307,38 @@ export default function ({ getService }: FtrProviderContext) {
           unenrolled: 1,
         },
       });
+    });
+
+    it('should get a list of agent policies by kuery', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=fleet-agents.status:healthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'TEST',
+          namespace: 'default',
+        })
+        .expect(200);
+    });
+
+    it('should return 200 also if the kuery does not have prefix fleet-agents', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=status:unhealthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+    });
+
+    it('with enableStrictKQLValidation should return 400 if passed kuery has non existing parameters', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=fleet-agents.non_existent_parameter:healthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
+    });
+
+    it('with enableStrictKQLValidation should return 400 if passed kuery is not correct', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery='test%3A'`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
     });
   });
 }

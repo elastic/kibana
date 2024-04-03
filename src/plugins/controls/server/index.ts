@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ControlsPlugin } from './plugin';
-
-export const plugin = () => new ControlsPlugin();
+export const plugin = async () => {
+  const { ControlsPlugin } = await import('./plugin');
+  return new ControlsPlugin();
+};
 
 export { initializeControlGroupTelemetry } from './control_group/control_group_telemetry';

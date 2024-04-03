@@ -32,22 +32,24 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldIcon } from '../field_icon';
 import {
+  type FieldTypeKnown,
   getFieldIconType,
-  getFieldTypeName,
   getFieldTypeDescription,
+  getFieldTypeName,
   isKnownFieldType,
   KNOWN_FIELD_TYPE_LIST,
-} from '../../utils/field_types';
-import type { FieldListItem, FieldTypeKnown, GetCustomFieldType } from '../../types';
+  FieldIcon,
+} from '@kbn/field-utils';
+import type { FieldListItem, GetCustomFieldType } from '../../types';
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
 const popoverTitleStyle = css`
   padding: ${EQUAL_HEIGHT_OFFSET}px 0;
 `;
 const filterButtonStyle = css`
-  .euiFilterButton__textShift {
+  &,
+  & .euiFilterButton__text {
     min-width: 0;
     line-height: 1;
   }
@@ -149,7 +151,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   return (
     <EuiPopover
       id="unifiedFieldTypeFilter"
-      panelClassName="euiFilterGroup__popoverPanel"
+      panelProps={{ css: { width: euiTheme.base * 18 } }}
       panelPaddingSize="none"
       anchorPosition="rightUp"
       display="block"

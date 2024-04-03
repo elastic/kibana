@@ -62,7 +62,21 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-table-list-view-table",
-    "@kbn/shared-ux-prompt-not-found"
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/content-management-content-editor",
+    "@kbn/serverless",
+    "@kbn/no-data-page-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/logging",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/shared-ux-utility",
+    "@kbn/managed-content-badge",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": ["target/**/*"]
 }

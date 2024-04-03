@@ -8,20 +8,16 @@ import React from 'react';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
-import { HeaderPage } from '../../../../common/components/header_page';
+import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
+import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 
-import * as i18n from './translations';
-
-const CoverageOverviewPageComponent = () => {
-  return (
-    <>
+export const CoverageOverviewPage = () => (
+  <>
+    <CoverageOverviewDashboardContextProvider>
       <SecuritySolutionPageWrapper data-test-subj="coverageOverviewPage">
-        <HeaderPage title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE} />
+        <CoverageOverviewDashboard />
       </SecuritySolutionPageWrapper>
-
-      <SpyRoute pageName={SecurityPageName.coverageOverview} />
-    </>
-  );
-};
-
-export const CoverageOverviewPage = React.memo(CoverageOverviewPageComponent);
+    </CoverageOverviewDashboardContextProvider>
+    <SpyRoute pageName={SecurityPageName.coverageOverview} />
+  </>
+);

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { SetStateAction, Dispatch } from 'react';
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 
@@ -35,6 +36,7 @@ import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 
 import * as i18n from '../../translations';
 
+// eslint-disable-next-line react/display-name
 export const ImportExceptionListFlyout = React.memo(
   ({
     handleRefresh,

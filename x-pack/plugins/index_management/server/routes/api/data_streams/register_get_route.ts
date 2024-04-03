@@ -8,61 +8,48 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import {
+  IndicesDataStream,
+  IndicesDataStreamsStatsDataStreamsStatsItem,
+  SecurityHasPrivilegesResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
-import { DataStreamFromEs } from '../../../../common/types';
+import { EnhancedDataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-
-interface PrivilegesFromEs {
-  username: string;
-  has_all_requested: boolean;
-  cluster: Record<string, boolean>;
-  index: Record<string, Record<string, boolean>>;
-  application: Record<string, boolean>;
-}
-
-interface StatsFromEs {
-  data_stream: string;
-  store_size: string;
-  store_size_bytes: number;
-  maximum_timestamp: number;
-}
 
 const enhanceDataStreams = ({
   dataStreams,
   dataStreamsStats,
   dataStreamsPrivileges,
 }: {
-  dataStreams: DataStreamFromEs[];
-  dataStreamsStats?: StatsFromEs[];
-  dataStreamsPrivileges?: PrivilegesFromEs;
-}): DataStreamFromEs[] => {
-  return dataStreams.map((dataStream: DataStreamFromEs) => {
-    let enhancedDataStream = { ...dataStream };
-
-    if (dataStreamsStats) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { store_size, store_size_bytes, maximum_timestamp } =
-        dataStreamsStats.find(
-          ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
-        ) || {};
-
-      enhancedDataStream = {
-        ...enhancedDataStream,
-        store_size,
-        store_size_bytes,
-        maximum_timestamp,
-      };
-    }
-
-    enhancedDataStream = {
-      ...enhancedDataStream,
+  dataStreams: IndicesDataStream[];
+  dataStreamsStats?: IndicesDataStreamsStatsDataStreamsStatsItem[];
+  dataStreamsPrivileges?: SecurityHasPrivilegesResponse;
+}): EnhancedDataStreamFromEs[] => {
+  return dataStreams.map((dataStream) => {
+    const enhancedDataStream: EnhancedDataStreamFromEs = {
+      ...dataStream,
       privileges: {
         delete_index: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].delete_index
           : true,
+        manage_data_stream_lifecycle: dataStreamsPrivileges
+          ? dataStreamsPrivileges.index[dataStream.name].manage_data_stream_lifecycle
+          : true,
       },
     };
+
+    if (dataStreamsStats) {
+      const currentDataStreamStats: IndicesDataStreamsStatsDataStreamsStatsItem | undefined =
+        dataStreamsStats.find(({ data_stream: statsName }) => statsName === dataStream.name);
+
+      if (currentDataStreamStats) {
+        enhancedDataStream.store_size = currentDataStreamStats.store_size;
+        enhancedDataStream.store_size_bytes = currentDataStreamStats.store_size_bytes;
+        enhancedDataStream.maximum_timestamp = currentDataStreamStats.maximum_timestamp;
+      }
+    }
 
     return enhancedDataStream;
   });
@@ -89,7 +76,7 @@ const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[])
       index: [
         {
           names,
-          privileges: ['delete_index'],
+          privileges: ['delete_index', 'manage_data_stream_lifecycle'],
         },
       ],
     },
@@ -125,11 +112,8 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         }
 
         const enhancedDataStreams = enhanceDataStreams({
-          // @ts-expect-error DataStreamFromEs conflicts with @elastic/elasticsearch IndicesGetDataStreamIndicesGetDataStreamItem
           dataStreams,
-          // @ts-expect-error StatsFromEs conflicts with @elastic/elasticsearch IndicesDataStreamsStatsDataStreamsStatsItem
           dataStreamsStats,
-          // @ts-expect-error PrivilegesFromEs conflicts with @elastic/elasticsearch ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
@@ -159,16 +143,14 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
+
           if (config.isSecurityEnabled()) {
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }
 
           const enhancedDataStreams = enhanceDataStreams({
-            // @ts-expect-error DataStreamFromEs conflicts with @elastic/elasticsearch IndicesGetDataStreamIndicesGetDataStreamItem
             dataStreams,
-            // @ts-expect-error StatsFromEs conflicts with @elastic/elasticsearch IndicesDataStreamsStatsDataStreamsStatsItem
             dataStreamsStats,
-            // @ts-expect-error PrivilegesFromEs conflicts with @elastic/elasticsearch ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);

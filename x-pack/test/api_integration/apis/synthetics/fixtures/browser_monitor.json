@@ -55,5 +55,6 @@
   "ssl.certificate_authorities": "",
   "ssl.supported_protocols": ["TLSv1.1", "TLSv1.2", "TLSv1.3"],
   "ssl.verification_mode": "full",
-  "revision": 1
+  "revision": 1,
+  "max_attempts": 2
 }

@@ -73,7 +73,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeTags,
   routeAuthRequired,
   validation = {},
-  kibanaRouteOptions = { xsrfRequired: true, access: 'public' },
+  kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },
   kibanaRequestState = {
     requestId: '123',
     requestUuid: '123e4567-e89b-12d3-a456-426614174000',
@@ -121,6 +121,7 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   ok: jest.fn(),
   accepted: jest.fn(),
   noContent: jest.fn(),
+  notModified: jest.fn(),
   custom: jest.fn(),
   redirected: jest.fn(),
   badRequest: jest.fn(),

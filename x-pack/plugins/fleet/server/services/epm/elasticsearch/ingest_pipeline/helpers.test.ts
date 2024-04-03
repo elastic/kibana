@@ -11,7 +11,7 @@ import path from 'path';
 import type { RegistryDataStream } from '../../../../types';
 
 import {
-  addCustomPipelineProcessor,
+  addCustomPipelineAndLocalRoutingRulesProcessor,
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
 } from './helpers';
@@ -142,9 +142,9 @@ test('getPipelineNameForInstallation gets correct name', () => {
   );
 });
 
-describe('addCustomPipelineProcessor', () => {
+describe('addCustomPipelineAndLocalRoutingRulesProcessor', () => {
   it('add custom pipeline processor at the end of the pipeline for yaml pipeline', () => {
-    const pipelineInstall = addCustomPipelineProcessor({
+    const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
       contentForInstallation: `
 processors:
   - set:
@@ -153,24 +153,21 @@ processors:
       `,
       extension: 'yml',
       nameForInstallation: 'logs-test-1.0.0',
-      customIngestPipelineNameForInstallation: 'logs-test@custom',
+      shouldInstallCustomPipelines: true,
     });
 
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(`
-      "---
+      "
       processors:
         - set:
             field: test
             value: toto
-        - pipeline:
-            name: logs-test@custom
-            ignore_missing_pipeline: true
-      "
+            "
     `);
   });
 
   it('add custom pipeline processor at the end of the pipeline for json pipeline', () => {
-    const pipelineInstall = addCustomPipelineProcessor({
+    const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
       contentForInstallation: `{
         "processors": [
           {
@@ -183,11 +180,111 @@ processors:
       }`,
       extension: 'json',
       nameForInstallation: 'logs-test-1.0.0',
-      customIngestPipelineNameForInstallation: 'logs-test@custom',
+      dataStream: {
+        type: 'logs',
+        dataset: 'test',
+      } as any,
+      shouldInstallCustomPipelines: true,
     });
 
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
-      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
+      `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Global pipeline for all data streams\\"}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for all data streams of type \`logs\`\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for the \`test\` dataset\\"}}]}"`
     );
+  });
+
+  describe('with local routing rules', () => {
+    it('add reroute processor after custom pipeline processor for yaml pipeline', () => {
+      const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
+        contentForInstallation: `
+processors:
+  - set:
+      field: test
+      value: toto
+      `,
+        extension: 'yml',
+        nameForInstallation: 'logs-test-1.0.0',
+        shouldInstallCustomPipelines: true,
+        dataStream: {
+          type: 'logs',
+          dataset: 'test.access',
+          routing_rules: [
+            {
+              source_dataset: 'test.access',
+              rules: [
+                {
+                  target_dataset: 'test.reroute',
+                  if: 'true == true',
+                  namespace: 'default',
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(`
+        "---
+        processors:
+          - set:
+              field: test
+              value: toto
+          - pipeline:
+              name: global@custom
+              ignore_missing_pipeline: true
+              description: '[Fleet] Global pipeline for all data streams'
+          - pipeline:
+              name: logs@custom
+              ignore_missing_pipeline: true
+              description: '[Fleet] Pipeline for all data streams of type \`logs\`'
+          - pipeline:
+              name: logs-test.access@custom
+              ignore_missing_pipeline: true
+              description: '[Fleet] Pipeline for the \`test.access\` dataset'
+          - reroute:
+              tag: test.access
+              dataset: test.reroute
+              namespace: default
+              if: true == true
+        "
+      `);
+    });
+
+    it('add reroute processor after custom pipeline processor for json pipeline', () => {
+      const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
+        contentForInstallation: `{
+        "processors": [
+          {
+            "set": {
+              "field": "test",
+              "value": "toto"
+            }
+          }
+        ]
+      }`,
+        extension: 'json',
+        nameForInstallation: 'logs-test-1.0.0',
+        shouldInstallCustomPipelines: true,
+        dataStream: {
+          type: 'logs',
+          dataset: 'test.access',
+          routing_rules: [
+            {
+              source_dataset: 'test.access',
+              rules: [
+                {
+                  target_dataset: 'test.reroute',
+                  if: 'true == true',
+                  namespace: 'default',
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
+        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"global@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Global pipeline for all data streams\\"}},{\\"pipeline\\":{\\"name\\":\\"logs@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for all data streams of type \`logs\`\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test.access@custom\\",\\"ignore_missing_pipeline\\":true,\\"description\\":\\"[Fleet] Pipeline for the \`test.access\` dataset\\"}},{\\"reroute\\":{\\"tag\\":\\"test.access\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
+      );
+    });
   });
 });

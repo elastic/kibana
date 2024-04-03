@@ -7,7 +7,7 @@
  */
 
 import { duration } from 'moment';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -40,6 +40,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: {
@@ -237,7 +238,7 @@ describe('createPluginPrebootSetupContext', () => {
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
-    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+    const prebootSetupContext = createPluginPrebootSetupContext({ deps: corePreboot, plugin });
 
     const holdSetupPromise = Promise.resolve(undefined);
     prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);

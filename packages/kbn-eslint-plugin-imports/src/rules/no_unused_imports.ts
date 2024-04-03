@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Rule, Scope, AST } from 'eslint';
+import type { Rule, Scope, AST } from 'eslint';
 import type { Comment } from 'estree';
 import * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
@@ -78,6 +78,7 @@ function isTsOrEslintIgnore(comment: Comment) {
 
 export const NoUnusedImportsRule: Rule.RuleModule = {
   meta: {
+    hasSuggestions: true,
     fixable: 'code',
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionGaugePlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ExpressionGaugePlugin } = await import('./plugin');
   return new ExpressionGaugePlugin();
 }

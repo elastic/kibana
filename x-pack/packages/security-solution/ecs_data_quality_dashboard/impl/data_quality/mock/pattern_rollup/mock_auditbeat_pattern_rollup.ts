@@ -53,6 +53,7 @@ export const auditbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 18791790,
+          total_data_set_size_in_bytes: 18791790,
           reserved_in_bytes: 0,
         },
       },
@@ -70,6 +71,7 @@ export const auditbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 247,
+          total_data_set_size_in_bytes: 247,
           reserved_in_bytes: 0,
         },
       },
@@ -87,6 +89,7 @@ export const auditbeatNoResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 28409,
+          total_data_set_size_in_bytes: 28409,
           reserved_in_bytes: 0,
         },
       },
@@ -151,6 +154,8 @@ export const auditbeatWithAllResults: PatternRollup = {
       indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
+      sameFamily: 0,
+      checkedAt: 1706526408000,
     },
     'auditbeat-custom-index-1': {
       docsCount: 4,
@@ -160,6 +165,8 @@ export const auditbeatWithAllResults: PatternRollup = {
       indexName: 'auditbeat-custom-index-1',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
+      sameFamily: 0,
+      checkedAt: 1706526408000,
     },
     'auditbeat-custom-empty-index-1': {
       docsCount: 0,
@@ -169,6 +176,8 @@ export const auditbeatWithAllResults: PatternRollup = {
       indexName: 'auditbeat-custom-empty-index-1',
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: 'auditbeat-*',
+      sameFamily: 0,
+      checkedAt: 1706526408000,
     },
   },
   sizeInBytes: 18820446,
@@ -179,6 +188,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 18791790,
+          total_data_set_size_in_bytes: 18791790,
           reserved_in_bytes: 0,
         },
       },
@@ -196,6 +206,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 247,
+          total_data_set_size_in_bytes: 247,
           reserved_in_bytes: 0,
         },
       },
@@ -213,6 +224,7 @@ export const auditbeatWithAllResults: PatternRollup = {
       primaries: {
         store: {
           size_in_bytes: 28409,
+          total_data_set_size_in_bytes: 28409,
           reserved_in_bytes: 0,
         },
       },

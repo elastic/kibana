@@ -13,31 +13,14 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
+import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 
 const mockSearchApi = jest.fn();
-
-jest.mock('../../../kibana_services', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let registry: any[] = [];
-
-  return {
-    getDocViewsRegistry: () => ({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      addDocView(view: any) {
-        registry.push(view);
-      },
-      getDocViewsSorted() {
-        return registry;
-      },
-      resetRegistry: () => {
-        registry = [];
-      },
-    }),
-  };
-});
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -86,6 +69,14 @@ async function mountDoc(update = false) {
     locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
     chrome: { setBreadcrumbs: jest.fn() },
   };
+  setUnifiedDocViewerServices({
+    ...mockUnifiedDocViewerServices,
+    data: {
+      search: {
+        search: mockSearchApi,
+      },
+    },
+  } as unknown as UnifiedDocViewerServices);
   await act(async () => {
     comp = mountWithIntl(
       <KibanaContextProvider services={services}>

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -23,7 +21,8 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
@@ -53,97 +52,32 @@ import {
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
-import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout } from './layouts';
+
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
-import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
+import { ExperimentalFeaturesService } from './services';
+import { ErrorLayout, PermissionsError } from './layouts';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient();
 
-const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
-  isAddIntegrationsPath,
-  children,
-}) => (
-  <EuiErrorBoundary>
-    {isAddIntegrationsPath ? (
-      <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
-    ) : (
-      <DefaultLayout>
-        <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-      </DefaultLayout>
-    )}
-  </EuiErrorBoundary>
-);
-
-const Panel = styled(EuiPanel)`
-  max-width: 500px;
-  margin-right: auto;
-  margin-left: auto;
-`;
-
-const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ error }) => {
-  if (error === 'MISSING_SECURITY') {
-    return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
-  }
-
-  if (error === 'MISSING_PRIVILEGES') {
-    return (
-      <Panel data-test-subj="missingPrivilegesPrompt">
-        <EuiEmptyPrompt
-          iconType="securityApp"
-          title={
-            <h2 data-test-subj="missingPrivilegesPromptTitle">
-              <FormattedMessage
-                id="xpack.fleet.permissionDeniedErrorTitle"
-                defaultMessage="Permission denied"
-              />
-            </h2>
-          }
-          body={
-            <p data-test-subj="missingPrivilegesPromptMessage">
-              <FormattedMessage
-                id="xpack.fleet.permissionDeniedErrorMessage"
-                defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
-                values={{
-                  roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
-                  roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
-                }}
-              />
-            </p>
-          }
-        />
-      </Panel>
-    );
-  }
-
-  return (
-    <Error
-      title={
-        <FormattedMessage
-          id="xpack.fleet.permissionsRequestErrorMessageTitle"
-          defaultMessage="Unable to check permissions"
-        />
-      }
-      error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-        defaultMessage: 'There was a problem checking Fleet permissions',
-      })}
-    />
-  );
-});
-
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
-
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
+  const hasAnyFleetReadPrivileges =
+    authz.fleet.readEnrollmentTokens ||
+    authz.fleet.readAgents ||
+    authz.fleet.readAgentPolicies ||
+    authz.fleet.readSettings;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -176,7 +110,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
-            if (!hasFleetAllPrivileges) {
+            if (!hasAnyFleetReadPrivileges) {
               setPermissionsError('MISSING_PRIVILEGES');
             }
           } catch (err) {
@@ -190,7 +124,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts, hasFleetAllPrivileges]);
+  }, [notifications.toasts, hasAnyFleetReadPrivileges]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
@@ -253,10 +187,15 @@ export const FleetAppContext: React.FC<{
     theme$,
     fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const darkModeObservable = useObservable(theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
-      <RedirectAppLinks application={startServices.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: startServices.application,
+        }}
+      >
         <startServices.i18n.Context>
           <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
             <EuiErrorBoundary>
@@ -320,6 +259,9 @@ export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
+    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+
+    const authz = useAuthz();
 
     return (
       <>
@@ -327,20 +269,60 @@ export const AppRoutes = memo(
 
         <Routes>
           <Route path={FLEET_ROUTING_PATHS.agents}>
-            <AgentsApp />
+            {authz.fleet.readAgents ? (
+              <AgentsApp />
+            ) : (
+              <ErrorLayout isAddIntegrationsPath={false}>
+                <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents Read" />
+              </ErrorLayout>
+            )}
           </Route>
+
           <Route path={FLEET_ROUTING_PATHS.policies}>
-            <AgentPolicyApp />
+            {authz.fleet.readAgentPolicies ? (
+              <AgentPolicyApp />
+            ) : (
+              <ErrorLayout isAddIntegrationsPath={false}>
+                <PermissionsError
+                  error="MISSING_PRIVILEGES"
+                  requiredFleetRole="Agent policies Read"
+                />
+              </ErrorLayout>
+            )}
           </Route>
+
           <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
-            <EnrollmentTokenListPage />
+            {authz.fleet.allAgents ? (
+              <EnrollmentTokenListPage />
+            ) : (
+              <ErrorLayout isAddIntegrationsPath={false}>
+                <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+              </ErrorLayout>
+            )}
           </Route>
+          {agentTamperProtectionEnabled && (
+            <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
+              {authz.fleet.allAgents ? (
+                <UninstallTokenListPage />
+              ) : (
+                <ErrorLayout isAddIntegrationsPath={false}>
+                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+                </ErrorLayout>
+              )}
+            </Route>
+          )}
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <DataStreamApp />
           </Route>
 
           <Route path={FLEET_ROUTING_PATHS.settings}>
-            <SettingsApp />
+            {authz.fleet.readSettings ? (
+              <SettingsApp />
+            ) : (
+              <ErrorLayout isAddIntegrationsPath={false}>
+                <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Settings Read" />
+              </ErrorLayout>
+            )}
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}
@@ -353,7 +335,14 @@ export const AppRoutes = memo(
               // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
               const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
               if (!shouldRedirectHash) {
-                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
+                // Redirect to the first authorized tab
+                const redirectTo = authz.fleet.readAgents
+                  ? FLEET_ROUTING_PATHS.agents
+                  : authz.fleet.readAgentPolicies
+                  ? FLEET_ROUTING_PATHS.policies
+                  : FLEET_ROUTING_PATHS.settings;
+
+                return <Redirect to={redirectTo} />;
               }
               const pathname = location.hash.replace(/^#(\/fleet)?/, '');
 

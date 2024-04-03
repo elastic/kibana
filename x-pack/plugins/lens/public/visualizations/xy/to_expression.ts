@@ -7,17 +7,17 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  EventAnnotationServiceType,
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+} from '@kbn/event-annotation-common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
@@ -35,7 +35,7 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
@@ -57,6 +57,7 @@ import {
   getDataLayers,
   getReferenceLayers,
   getAnnotationsLayers,
+  isTimeChart,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import {
@@ -331,14 +332,16 @@ export const buildXYExpression = (
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
     legend: buildExpression([legendConfigFn]).toAst(),
-    fittingFunction: state.fittingFunction || 'None',
-    endValue: state.endValue || 'None',
-    emphasizeFitting: state.emphasizeFitting || false,
-    fillOpacity: state.fillOpacity || 0.3,
-    valueLabels: state?.valueLabels || 'hide',
-    hideEndzones: state?.hideEndzones || false,
-    addTimeMarker: state?.showCurrentTimeMarker || false,
-    valuesInLegend: state?.valuesInLegend || false,
+    fittingFunction: state.fittingFunction ?? 'None',
+    endValue: state.endValue ?? 'None',
+    emphasizeFitting: state.emphasizeFitting ?? false,
+    minBarHeight: state.minBarHeight ?? 1,
+    fillOpacity: state.fillOpacity ?? 0.3,
+    valueLabels: state.valueLabels ?? 'hide',
+    hideEndzones: state.hideEndzones ?? false,
+    addTimeMarker:
+      (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
+    valuesInLegend: state.valuesInLegend ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
     showTooltip: [],
@@ -511,6 +514,7 @@ const dataLayerToExpression = (
             name: 'default',
           }),
     ]).toAst(),
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   });
 
   return {

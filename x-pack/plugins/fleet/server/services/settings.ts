@@ -41,6 +41,20 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   };
 }
 
+export async function getSettingsOrUndefined(
+  soClient: SavedObjectsClientContract
+): Promise<Settings | undefined> {
+  try {
+    return await getSettings(soClient);
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      return undefined;
+    }
+
+    throw e;
+  }
+}
+
 export async function settingsSetup(soClient: SavedObjectsClientContract) {
   try {
     await getSettings(soClient);

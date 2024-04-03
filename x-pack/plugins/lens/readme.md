@@ -10,7 +10,7 @@ exposed via contract. For more information check out the example in `x-pack/exam
 When adding visualizations to a solution page, there are multiple ways to approach this with pros and cons:
 
 * #### **Use a dashboard**
-  If the app page you are planning to build strongly resembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. The Presentation team is currently working on making it possible to embed dashboard into the solution navigation, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
+  If the app page you are planning to build strongly resembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. Portable dasboards make it possible to embed a dashboard into your application, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
 
   Pros:
    * No need to write and maintain custom code
@@ -33,14 +33,14 @@ When adding visualizations to a solution page, there are multiple ways to approa
 
 
 * #### **Using custom data fetching and rendering**
-  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
+  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
 
   Pros:
    * Full flexibility in data fetching optimization and chart rendering
   
   Cons:
    * "Open in Lens" requires additional logic
-   * High maintenance and development effort
+   * Should follow elastic charts api changes
 
 ## Getting started
 
@@ -80,7 +80,46 @@ On a high level there are references, datasource state, visualization state and 
 
 ### References
 
-References (`references`) are regular saved object references forming a graph of saved objects which depend on each other. For the Lens case, these references are always data views (called `type: "index-pattern"`) in code, referencing data views which are used in the current Lens visualization. Often there is just a single data view in use, but it's possible to use multiple data views for multiple layers in a Lens xy chart. The `id` of a reference needs to be the saved object id of the referenced data view (see the "Handling data views" section below). The `name` of the reference is comprised out of multiple parts used to map the data view to the correct layer : `indexpattern-datasource-layer-<id of the layer>`. Even if multiple layers are using the same data view, there has to be one reference per layer (all pointing to the same data view id).
+References (`references`) are regular saved object references forming a graph of saved objects which depend on each other. For the Lens case, these references can be annotation groups or data views (called `type: "index-pattern"` in code), referencing permanent data views which are used in the current Lens visualization. Often there is just a single data view in use, but it's possible to use multiple data views for multiple layers in a Lens xy chart. The `id` of a reference needs to be the saved object id of the referenced data view (see the "Handling data views" section below). The `name` of the reference is comprised out of multiple parts used to map the data view to the correct layer : `indexpattern-datasource-layer-<id of the layer>`. Even if multiple layers are using the same data view, there has to be one reference per layer (all pointing to the same data view id). References array can be empty in case of adhoc dataviews (see section below).
+
+
+### Ad-hoc data views
+
+In some cases a globally accessible data view is not desirable:
+* You need some special runtime fields which only make sense in the context of that one visualization and you don't want to "pollute" the global data view for all consumers
+* It's a "one-off" visualization which is built on data that's not normally used and having a global data view object for it would be weird
+* You want to allow a read-only user to work with data and no data view exists yet - the user isn't allowed to create data views but they are allowed to access the data
+
+In these situations ad-hoc data views are useful - these are data views which are stored as part of the Lens visualization itself, so they do not show up in other contexts. In the UI you can create these by opening the data view picker, selecting "Create a data view" and then using the "Use without saving" button.
+
+Ad-hoc data views are part of the Lens attributes stored in `state.adHocDataViews`. Each data view is defined by its JSON-serializable `DataViewSpec` object. If a layer is using an ad hoc data view, the reference goes into the `state.internalReferences` array instead of the external `references` array.
+
+Example:
+```json
+"state": {
+  // ...
+  "internalReferences": [
+    {
+      "type": "index-pattern",
+      "id": "adhoc-1",
+      "name": "indexpattern-datasource-layer-layer1"
+    }
+  ],
+  "adHocDataViews": {
+    "adhoc-1": {
+      "id": "adhoc-1",
+      "title": "my-pattern*",
+      "timeFieldName": "@timestamp",
+      "sourceFilters": [],
+      "fieldFormats": {},
+      "runtimeFieldMap": {},
+      "fieldAttrs": {},
+      "allowNoIndex": false,
+      "name": "My ad-hoc data view"
+    }
+  }
+}
+```
 
 ### Datasource state
 
@@ -126,44 +165,6 @@ if (!dataView) {
   });
 }
 const dataViewIdForLens = dataView.id;
-```
-
-### Ad-hoc data views
-
-In some cases a globally accessible data view is not desirable:
-* You need some special runtime fields which only make sense in the context of that one visualization and you don't want to "pollute" the global data view for all consumers
-* It's a "one-off" visualization which is built on data that's not normally used and having a global data view object for it would be weird
-* You want to allow a read-only user to work with data and no data view exists yet - the user isn't allowed to create data views but they are allowed to access the data
-
-In these situations ad-hoc data views are useful - these are data views which are stored as part of the Lens visualization itself, so they do not show up in other contexts. In the UI you can create these by opening the data view picker, selecting "Create a data view" and then using the "Use without saving" button.
-
-Ad-hoc data views are part of the Lens attributes stored in `state.adHocDataViews`. Each data view is defined by its JSON-serializable `DataViewSpec` object. If a layer is using an ad hoc data view, the reference goes into the `state.internalReferences` array instead of the external `references` array.
-
-Example:
-```json
-"state": {
-  // ...
-  "internalReferences": [
-    {
-      "type": "index-pattern",
-      "id": "adhoc-1",
-      "name": "indexpattern-datasource-layer-layer1"
-    }
-  ],
-  "adHocDataViews": {
-    "adhoc-1": {
-      "id": "adhoc-1",
-      "title": "my-pattern*",
-      "timeFieldName": "@timestamp",
-      "sourceFilters": [],
-      "fieldFormats": {},
-      "runtimeFieldMap": {},
-      "fieldAttrs": {},
-      "allowNoIndex": false,
-      "name": "My ad-hoc data view"
-    }
-  }
-}
 ```
 
 **Important!** To prevent conflicts, it's important to not re-use ad-hoc data view ids for different specs. If you change the spec in some way, make sure to also change its id. This even applies across multiple embeddables, sessions, etc. Ideally, the id will be globally unique. You can use the `uuid` package to generate a new unique id every time when you are changing the spec in some way. However, make sure to also not change the id on every single render either, as this will have a substantial performance impact.
@@ -235,8 +236,8 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
 - Performance journeys:
-  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
-  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_tests_server.js --config x-pack/test/performance/journeys_e2e/data_stress_test_lens/config.ts`
+  - Run `node scripts/functional_test_runner --config x-pack/test/performance/journeys_e2e/data_stress_test_lens/config.ts`
 
 ## Developing tips
 
@@ -270,3 +271,11 @@ Lens has a lot of UI elements – to make it easier to refer to them in issues o
 * **Suggestion panel** Panel to the bottom showing previews for suggestions on how to change the current chart
 
 ![Layout](./layout.png "Layout")
+
+
+# Inline Editing of a Lens Embeddable
+
+If you have a Lens embeddable in your application and you want to allow inline editing you can do it with 3 ways:
+- If you use a portable dashboard, the functionality is built in and you don't need to do anything
+- If you don't have a portable dashboard then you can use UI actions to retrieve the inline editing component. For more information check out the example in `x-pack/examples/lens_embeddable_inline_editing_example`.
+- The component is also exported from Lens start contract. Check the `EditLensConfigPanelApi`. This is advised to be used only when the 2 above cases can't be used.

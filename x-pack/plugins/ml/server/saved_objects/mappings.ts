@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const mlJob: SavedObjectsTypeMappingDefinition = {
   properties: {
@@ -113,6 +113,14 @@ export const mlModule: SavedObjectsTypeMappingDefinition = {
     },
     datafeeds: {
       type: 'object',
+    },
+    tags: {
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
     },
   },
 };

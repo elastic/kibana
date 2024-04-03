@@ -12,3 +12,6 @@ export const meta = t.object;
 export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
+
+export const nullableMetaOrUndefined = t.union([metaOrUndefined, t.null]);
+export type NullableMetaOrUndefined = t.TypeOf<typeof nullableMetaOrUndefined>;

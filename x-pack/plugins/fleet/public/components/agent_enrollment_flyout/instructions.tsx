@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useGetAgents, useFleetServerStandalone } from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone, sendGetAllFleetServerAgents } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
+import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 import { Loading } from '..';
-import { policyHasFleetServer } from '../../services';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
 import type { InstructionProps } from './types';
@@ -23,7 +22,6 @@ import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
   const {
-    agentPolicies,
     isFleetServerPolicySelected,
     fleetServerHosts,
     isLoadingAgentPolicies,
@@ -32,35 +30,29 @@ export const Instructions = (props: InstructionProps) => {
     mode,
     setMode,
     isIntegrationFlow,
-    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
     useFleetServerUnhealthy();
 
   const { isFleetServerStandalone } = useFleetServerStandalone();
+  const [fleetServerAgentsCount, setFleetServerAgentsCount] = useState<number>(0);
+  const [isLoadingAgents, setIsLoadingAgents] = useState<boolean>(true);
 
   useEffect(() => {
-    refreshAgentPolicies();
-  }, [refreshAgentPolicies]);
+    const fetchFleetServerAgents = async () => {
+      try {
+        const { fleetServerAgentsCount: count } = await sendGetAllFleetServerAgents(true);
+        setFleetServerAgentsCount(count ?? 0);
+        setIsLoadingAgents(false);
+      } catch (error) {
+        return;
+      }
+    };
 
-  const fleetServerAgentPolicies: string[] = useMemo(
-    () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
-    [agentPolicies]
-  );
-
-  const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
-    perPage: SO_SEARCH_LIMIT,
-    showInactive: false,
-    kuery:
-      fleetServerAgentPolicies.length === 0
-        ? ''
-        : `${AGENTS_PREFIX}.policy_id:${fleetServerAgentPolicies
-            .map((id) => `"${id}"`)
-            .join(' or ')}`,
-  });
-
-  const fleetServers = agents?.items || [];
+    setIsLoadingAgents(true);
+    fetchFleetServerAgents();
+  }, []);
 
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
@@ -69,19 +61,23 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerStandalone ||
     (fleetStatus.isReady &&
       !isFleetServerUnhealthy &&
-      fleetServers.length > 0 &&
+      fleetServerAgentsCount > 0 &&
       (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
     !isFleetServerPolicySelected &&
-    (fleetServers.length === 0 ||
+    (fleetServerAgentsCount === 0 ||
       isFleetServerUnhealthy ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   useEffect(() => {
-    // If we have a cloudFormationTemplateUrl, we want to hide the selection type
-    if (props.cloudSecurityIntegration?.cloudformationUrl) {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (
+      props.cloudSecurityIntegration?.isAzureArmTemplate ||
+      props.cloudSecurityIntegration?.isCloudFormation ||
+      props.cloudSecurityIntegration?.cloudShellUrl
+    ) {
       setSelectionType(undefined);
     } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
@@ -103,7 +99,7 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          {selectionType === 'tabs' && (
+          {selectionType === 'tabs' && !props.cloudSecurityIntegration?.cloudShellUrl && (
             <>
               <EuiText>
                 <FormattedMessage
@@ -117,10 +113,7 @@ export const Instructions = (props: InstructionProps) => {
           {isFleetServerPolicySelected ? (
             <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
-            <ManagedSteps
-              {...props}
-              cloudFormationTemplateUrl={props.cloudSecurityIntegration?.cloudformationUrl}
-            />
+            <ManagedSteps {...props} />
           )}
         </>
       );

@@ -23,6 +23,11 @@ import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal
 import { ActionsConfig } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+} from '../../common';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -39,9 +44,6 @@ const CA = fsReadFileSync(CA_FILE, 'utf8');
 const Auth = 'elastic:changeme';
 const AuthB64 = Buffer.from(Auth).toString('base64');
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const AxiosDefaultsAadapter = require('axios/lib/adapters/http');
-
 const ServerResponse = 'A unique response returned by the server!';
 
 describe('axios connections', () => {
@@ -53,7 +55,7 @@ describe('axios connections', () => {
     // needed to prevent the dreaded Error: Cross origin http://localhost forbidden
     // see: https://github.com/axios/axios/issues/1754#issuecomment-572778305
     savedAxiosDefaultsAdapter = axios.defaults.adapter;
-    axios.defaults.adapter = AxiosDefaultsAadapter;
+    axios.defaults.adapter = 'http';
   });
 
   afterEach(() => {
@@ -592,6 +594,9 @@ const BaseActionsConfig: ActionsConfig = {
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
   enableFooterInEmail: true,
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

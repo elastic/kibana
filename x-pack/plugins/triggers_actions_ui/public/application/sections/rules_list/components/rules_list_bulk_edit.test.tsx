@@ -90,6 +90,18 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
 }));
+jest.mock('@kbn/alerts-ui-shared', () => ({ MaintenanceWindowCallout: jest.fn(() => <></>) }));
+jest.mock('@kbn/kibana-utils-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
+  return {
+    ...originalModule,
+    createKbnUrlStateStorage: jest.fn(() => ({
+      get: jest.fn(() => null),
+      set: jest.fn(() => null),
+    })),
+  };
+});
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'

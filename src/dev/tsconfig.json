@@ -38,7 +38,9 @@
     "@kbn/repo-file-maps",
     "@kbn/get-repo-files",
     "@kbn/import-locator",
-    "@kbn/journeys",
     "@kbn/config-schema",
+    "@kbn/core-test-helpers-so-type-serializer",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/dev-proc-runner",
   ]
 }

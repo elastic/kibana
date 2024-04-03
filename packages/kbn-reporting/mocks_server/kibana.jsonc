@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/reporting-mocks-server",
+  "owner": "@elastic/appex-sharedux"
+}

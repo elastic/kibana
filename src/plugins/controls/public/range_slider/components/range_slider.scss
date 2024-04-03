@@ -1,52 +1,52 @@
-.rangeSlider__popoverOverride {
-  height: 100%;
-  max-width: 100%;
-  width: 100%;
-}
-
-@include euiBreakpoint('m', 'l', 'xl') {
-  .rangeSlider__panelOverride {
-    min-width: $euiSizeXXL * 12;
-  }
-}
-
-.rangeSlider__anchorOverride {
-  >div {
-    height: 100%;
-  }
-}
-
 .rangeSliderAnchor__button {
-  width: 100%;
-  height: 100%;
-  background-color: $euiFormBackgroundColor;
-  padding: 0;
-
-  .euiFormControlLayout__childrenWrapper {
-    border-radius: 0 $euiFormControlBorderRadius $euiFormControlBorderRadius 0 !important;
-  }
-
-  .euiToolTipAnchor {
-    width: 100%;
-  }
-
-  .rangeSliderAnchor__fieldNumber {
-    font-weight: $euiFontWeightBold;
+  .euiFormControlLayout {
+    align-items: center;
     box-shadow: none;
-    text-align: center;
-    background-color: unset;
+    background-color: transparent;
 
-    &:invalid {
-      color: $euiTextSubduedColor;
-      text-decoration: line-through;
-      font-weight: $euiFontWeightRegular;
-      background-image: none; // hide the red bottom border
-    }
+    .euiFormControlLayout__childrenWrapper {
+      background-color: transparent;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-right-radius: $euiBorderRadius;
+      border-bottom-right-radius: $euiBorderRadius;
 
-    &::placeholder {
-      font-weight: $euiFontWeightRegular;
-      color: $euiColorMediumShade;
-      text-decoration: none;
+      .euiFormControlLayoutDelimited__delimiter, .euiFormControlLayoutIcons--static {
+        height: auto !important;
+      }
     }
+  }
+
+  .rangeSlider__invalidToken {
+    height: $euiSizeS * 2;
+    padding: 0 $euiSizeS;
+
+    .euiIcon {
+      background-color: transparent;
+      width: $euiSizeS * 2;
+      border-radius: $euiSizeXS;
+      padding: 0 calc($euiSizeXS / 2);
+    }
+  }
+}
+
+.rangeSliderAnchor__fieldNumber {
+  font-weight: $euiFontWeightMedium;
+  box-shadow: none;
+  text-align: center;
+  background-color: transparent;
+
+  &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus) {
+    background-image: none; // override the red underline for values between steps
+  }
+
+  &.rangeSliderAnchor__fieldNumber--invalid {
+    color: $euiColorWarningText;
+  }
+
+  &:placeholder-shown, &::placeholder {
+    font-weight: $euiFontWeightRegular;
+    color: $euiTextSubduedColor;
+    text-decoration: none;
   }
 }

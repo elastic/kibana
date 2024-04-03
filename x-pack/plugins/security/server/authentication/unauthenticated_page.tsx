@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-// @ts-expect-error no definitions in component folder
-import { EuiButton } from '@elastic/eui/lib/components/button';
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { IBasePath } from '@kbn/core/server';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { IStaticAssets } from '@kbn/core-http-server';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,16 +19,21 @@ import { PromptPage } from '../prompt_page';
 
 interface Props {
   originalURL: string;
-  buildNumber: number;
   basePath: IBasePath;
+  staticAssets: IStaticAssets;
   customBranding: CustomBranding;
 }
 
-export function UnauthenticatedPage({ basePath, originalURL, buildNumber, customBranding }: Props) {
+export function UnauthenticatedPage({
+  basePath,
+  originalURL,
+  staticAssets,
+  customBranding,
+}: Props) {
   return (
     <PromptPage
-      buildNumber={buildNumber}
       basePath={basePath}
+      staticAssets={staticAssets}
       title={i18n.translate('xpack.security.unauthenticated.pageTitle', {
         defaultMessage: 'We hit an authentication error',
       })}

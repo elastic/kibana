@@ -7,8 +7,8 @@
  */
 
 import type { DebugState } from '@elastic/charts';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 type Duration =
   | 'Milliseconds'
@@ -260,8 +260,10 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clickSeriesOption(nth = 0) {
-    const el = await this.testSubjects.findAll('seriesOptions');
-    await el[nth].click();
+    const button = await this.find.byXPath(
+      `(//button[@data-test-subj='seriesOptions'])[${nth + 1}]`
+    );
+    await button.click();
   }
 
   public async clearOffsetSeries() {
@@ -325,8 +327,7 @@ export class VisualBuilderPageObject extends FtrService {
       });
     }
     if (decimalPlaces) {
-      const decimalPlacesInput = await this.testSubjects.find('dataFormatPickerDurationDecimal');
-      await decimalPlacesInput.type(decimalPlaces);
+      await this.testSubjects.setValue('dataFormatPickerDurationDecimal', decimalPlaces);
     }
   }
 
@@ -437,22 +438,30 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async selectAggType(value: string, nth = 0) {
-    const elements = await this.testSubjects.findAll('aggSelector');
-    await this.comboBox.setElement(elements[nth], value);
+    const element = await this.find.byXPath(`(//div[@data-test-subj='aggSelector'])[${nth + 1}]`);
+    await this.comboBox.setElement(element, value);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async fillInExpression(expression: string, nth = 0) {
-    const expressions = await this.testSubjects.findAll('mathExpression');
-    await expressions[nth].type(expression);
+    const element = await this.find.byXPath(
+      `(//textarea[@data-test-subj='mathExpression'])[${nth + 1}]`
+    );
+    await element.type(expression);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async fillInVariable(name = 'test', metric = 'Count', nth = 0) {
-    const elements = await this.testSubjects.findAll('varRow');
-    const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
+    const varNameInput = await this.find.byXPath(
+      `(//div[@data-test-subj="varRow"])[${nth + 1}]//input[@data-test-subj='tvbAggsVarNameInput']`
+    );
     await varNameInput.type(name);
-    const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
+    const metricSelectWrapper = await this.find.byXPath(
+      `(//div[@data-test-subj="varRow"])[${
+        nth + 1
+      }]//div[@data-test-subj='tvbAggsVarMetricWrapper']`
+    );
+
     await this.comboBox.setElement(metricSelectWrapper, metric);
     return await this.header.waitUntilLoadingHasFinished();
   }
@@ -510,19 +519,16 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setAnnotationFilter(query: string) {
-    const annotationQueryBar = await this.testSubjects.find('annotationQueryBar');
-    await annotationQueryBar.type(query);
+    await this.testSubjects.setValue('annotationQueryBar', query);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setAnnotationFields(fields: string) {
-    const annotationFieldsInput = await this.testSubjects.find('annotationFieldsInput');
-    await annotationFieldsInput.type(fields);
+    await this.testSubjects.setValue('annotationFieldsInput', fields);
   }
 
   public async setAnnotationRowTemplate(template: string) {
-    const annotationRowTemplateInput = await this.testSubjects.find('annotationRowTemplateInput');
-    await annotationRowTemplateInput.type(template);
+    await this.testSubjects.setValue('annotationRowTemplateInput', template);
   }
 
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
@@ -644,7 +650,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setStaticValue(value: number, nth: number = 0): Promise<void> {
-    const input = (await this.testSubjects.findAll('staticValue'))[nth];
+    const input = await this.find.byXPath(`(//input[@data-test-subj='staticValue'])[${nth + 1}]`);
     await input.type(value.toString());
   }
 
@@ -657,9 +663,11 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
     await this.comboBox.setElement(fieldEl, field);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setFieldForAggregateBy(field: string): Promise<void> {
@@ -691,16 +699,17 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getFieldForAggregation(aggNth: number = 0): Promise<WebElementWrapper> {
-    const labels = await this.testSubjects.findAll('aggRow');
-    const label = labels[aggNth];
-
-    return (await label.findAllByTestSubject('comboBoxInput'))[1];
+    // Aggregation has 2 comboBox elements: Aggregation Type and Field
+    // Locator picks the aggregation by index (aggNth) and its Field comboBox child by index (2)
+    return await this.find.byXPath(
+      `((//div[@data-test-subj='aggRow'])[${aggNth + 1}]//div[@data-test-subj='comboBoxInput'])[2]`
+    );
   }
 
   public async clickColorPicker(nth: number = 0): Promise<void> {
-    const picker = (await this.find.allByCssSelector('[data-test-subj="tvbColorPicker"] button'))[
-      nth
-    ];
+    const picker = await this.find.byXPath(
+      `(//button[@data-test-subj='euiColorPickerAnchor'])[${nth + 1}]`
+    );
     await picker.clickMouseButton();
   }
 
@@ -837,22 +846,35 @@ export class VisualBuilderPageObject extends FtrService {
   ) {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
-    const byField = await this.testSubjects.find('groupByField');
     await this.retry.try(async () => {
+      const byField = await this.testSubjects.find('groupByField');
       await this.comboBox.setElement(byField, field);
+      const isSelected = await this.comboBox.isOptionSelected(byField, field);
+      if (!isSelected) {
+        throw new Error(`setMetricsGroupByTerms: failed to set '${field}' field`);
+      }
     });
-
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
   }
 
   public async setAnotherGroupByTermsField(field: string) {
-    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
-    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    // Using xpath locator to find the last element
+    const fieldSelectAddButtonLast = await this.find.byXPath(
+      `(//*[@data-test-subj='fieldSelectItemAddBtn'])[last()]`
+    );
+    // In case of StaleElementReferenceError 'browser' service will try to find element again
+    await fieldSelectAddButtonLast.click();
     await this.common.sleep(2000);
-    const byFields = await this.testSubjects.findAll('fieldSelectItem');
-    const selectedByField = byFields[byFields.length - 1];
+
     await this.retry.try(async () => {
+      const selectedByField = await this.find.byXPath(
+        `(//*[@data-test-subj='fieldSelectItem'])[last()]`
+      );
       await this.comboBox.setElement(selectedByField, field);
+      const isSelected = await this.comboBox.isOptionSelected(selectedByField, field);
+      if (!isSelected) {
+        throw new Error(`setAnotherGroupByTermsField: failed to set '${field}' field`);
+      }
     });
   }
 
@@ -881,34 +903,40 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setGroupByFilterQuery(query: string, nth: number = 0) {
-    const filterQueryInput = await this.testSubjects.findAll('filterItemsQueryBar');
-    await filterQueryInput[nth].type(query);
+    const filterQueryInput = await this.find.byXPath(
+      `(//textarea[@data-test-subj='filterItemsQueryBar'])[${nth + 1}]`
+    );
+    await filterQueryInput.type(query);
   }
 
   public async setGroupByFilterLabel(label: string, nth: number = 0) {
-    const filterLabelInput = await this.testSubjects.findAll('filterItemsLabel');
-    await filterLabelInput[nth].type(label);
+    const filterLabelInput = await this.find.byXPath(
+      `(//input[@data-test-subj='filterItemsLabel'])[${nth + 1}]`
+    );
+    await filterLabelInput.type(label);
   }
 
   public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
-    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
-    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+    const seriesChartTypeComboBox = await this.find.byXPath(
+      `(//div[@data-test-subj='seriesChartTypeComboBox'])[${nth + 1}]`
+    );
+    return await this.comboBox.setElement(seriesChartTypeComboBox, type);
   }
 
   public async setStackedType(stackedType: string, nth: number = 0) {
-    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
-    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
+    const seriesStackedComboBox = await this.find.byXPath(
+      `(//div[@data-test-subj='seriesStackedComboBox'])[${nth + 1}]`
+    );
+    return await this.comboBox.setElement(seriesStackedComboBox, stackedType);
   }
 
   public async setSeriesFilter(query: string) {
-    const seriesFilterQueryInput = await this.testSubjects.find('seriesConfigQueryBar');
-    await seriesFilterQueryInput.type(query);
+    await this.testSubjects.setValue('seriesConfigQueryBar', query);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setPanelFilter(query: string) {
-    const panelFilterQueryInput = await this.testSubjects.find('panelFilterQueryBar');
-    await panelFilterQueryInput.type(query);
+    await this.testSubjects.setValue('panelFilterQueryBar', query);
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -938,8 +966,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
-    const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
-    await optionInput.type(query);
+    await this.testSubjects.setValue(`filterRatio${optionType}Input`, query);
   }
 
   public async clickSeriesLegendItem(name: string) {

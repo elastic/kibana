@@ -6,23 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement } from 'react';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { SearchInput } from '..';
-import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { DiscoverServices } from '../build_services';
-import { discoverServiceMock } from '../__mocks__/services';
-import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
-import { render } from 'react-dom';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { Observable, of, throwError } from 'rxjs';
-import { ReactWrapper } from 'enzyme';
-import { SHOW_FIELD_STATISTICS } from '../../common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import { ReactWrapper } from 'enzyme';
+import { ReactElement } from 'react';
+import { render } from 'react-dom';
+import { act } from 'react-dom/test-utils';
+import { Observable, throwError } from 'rxjs';
+import { SearchInput } from '..';
 import { VIEW_MODE } from '../../common/constants';
-import { buildDataViewMock, deepMockedFields } from '../__mocks__/data_view';
+import { DiscoverServices } from '../build_services';
+import { dataViewAdHoc } from '../__mocks__/data_view_complex';
+import { discoverServiceMock } from '../__mocks__/services';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+
+jest.mock('./get_discover_locator_params', () => {
+  const actual = jest.requireActual('./get_discover_locator_params');
+  return {
+    ...actual,
+    getDiscoverLocatorParams: jest.fn(actual.getDiscoverLocatorParams),
+  };
+});
 
 let discoverComponent: ReactWrapper;
 
@@ -36,69 +47,88 @@ jest.mock('react-dom', () => {
   };
 });
 
-const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+
 function getSearchResponse(nrOfHits: number) {
-  const hits = new Array(nrOfHits).map((idx) => ({ id: idx }));
-  return of({
+  const hits = new Array(nrOfHits).fill(null).map((_, idx) => ({ id: idx }));
+  return {
     rawResponse: {
       hits: { hits, total: nrOfHits },
     },
     isPartial: false,
     isRunning: false,
-  });
+  };
 }
+
+const createSearchFnMock = (nrOfHits: number) => {
+  let resolveSearch = () => {};
+  const search = jest.fn(() => {
+    return new Observable((subscriber) => {
+      resolveSearch = () => {
+        subscriber.next(getSearchResponse(nrOfHits));
+        subscriber.complete();
+      };
+    });
+  });
+  return { search, resolveSearch: () => resolveSearch() };
+};
 
 const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
 describe('saved search embeddable', () => {
   let mountpoint: HTMLDivElement;
-  let filterManagerMock: jest.Mocked<FilterManager>;
   let servicesMock: jest.Mocked<DiscoverServices>;
 
   let executeTriggerActions: jest.Mock;
   let showFieldStatisticsMockValue: boolean = false;
   let viewModeMockValue: VIEW_MODE = VIEW_MODE.DOCUMENT_LEVEL;
 
-  const createEmbeddable = (searchMock?: jest.Mock, customTitle?: string) => {
-    const searchSource = createSearchSourceMock({ index: dataViewMock }, undefined, searchMock);
-    const savedSearchMock = {
+  const createEmbeddable = ({
+    searchMock,
+    customTitle,
+    dataView = dataViewMock,
+    byValue,
+  }: {
+    searchMock?: jest.Mock;
+    customTitle?: string;
+    dataView?: DataView;
+    byValue?: boolean;
+  } = {}) => {
+    const searchSource = createSearchSourceMock({ index: dataView }, undefined, searchMock);
+    const savedSearch = {
       id: 'mock-id',
       title: 'saved search',
       sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource,
       viewMode: viewModeMockValue,
+      managed: false,
     };
-
-    const url = getSavedSearchUrl(savedSearchMock.id);
-    const editUrl = `/app/discover${url}`;
-    const indexPatterns = [dataViewMock];
+    executeTriggerActions = jest.fn();
+    jest
+      .spyOn(servicesMock.savedSearch.byValue, 'toSavedSearch')
+      .mockReturnValue(Promise.resolve(savedSearch));
     const savedSearchEmbeddableConfig: SearchEmbeddableConfig = {
-      savedSearch: savedSearchMock,
-      editUrl,
-      editPath: url,
       editable: true,
-      indexPatterns,
-      filterManager: filterManagerMock,
       services: servicesMock,
+      executeTriggerActions,
     };
-    const searchInput: SearchInput = {
+    const baseInput = {
       id: 'mock-embeddable-id',
+      viewMode: ViewMode.EDIT,
       timeRange: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
+      headerRowHeight: 5,
       rowsPerPage: 50,
+      sampleSize: 250,
     };
+    const searchInput: SearchInput = byValue
+      ? { ...baseInput, attributes: {} as SavedSearchByValueAttributes }
+      : { ...baseInput, savedObjectId: savedSearch.id };
     if (customTitle) {
       searchInput.title = customTitle;
     }
-
-    executeTriggerActions = jest.fn();
-
-    const embeddable = new SavedSearchEmbeddable(
-      savedSearchEmbeddableConfig,
-      searchInput,
-      executeTriggerActions
-    );
+    const embeddable = new SavedSearchEmbeddable(savedSearchEmbeddableConfig, searchInput);
 
     // this helps to trigger reload
     // eslint-disable-next-line dot-notation
@@ -106,12 +136,11 @@ describe('saved search embeddable', () => {
       (input) => (input.lastReloadRequestTime = Date.now())
     );
 
-    return { embeddable, searchInput, searchSource };
+    return { embeddable, searchInput, searchSource, savedSearch };
   };
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
-    filterManagerMock = createFilterManagerMock();
 
     showFieldStatisticsMockValue = false;
     viewModeMockValue = VIEW_MODE.DOCUMENT_LEVEL;
@@ -134,17 +163,17 @@ describe('saved search embeddable', () => {
     const { embeddable } = createEmbeddable();
     jest.spyOn(embeddable, 'updateOutput');
 
+    await waitOneTick();
+    expect(render).toHaveBeenCalledTimes(0);
     embeddable.render(mountpoint);
     expect(render).toHaveBeenCalledTimes(1);
-    await waitOneTick();
-    expect(render).toHaveBeenCalledTimes(2);
 
     const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
 
     searchProps.onAddColumn!('bytes');
     await waitOneTick();
     expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
-    expect(render).toHaveBeenCalledTimes(4); // twice per an update to show and then hide a loading indicator
+    expect(render).toHaveBeenCalledTimes(3); // twice per an update to show and then hide a loading indicator
 
     searchProps.onRemoveColumn!('bytes');
     await waitOneTick();
@@ -163,10 +192,24 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(searchProps.rowHeightState).toEqual(40);
 
+    expect(searchProps.headerRowHeightState).toEqual(5);
+    searchProps.onUpdateHeaderRowHeight!(3);
+    await waitOneTick();
+    expect(searchProps.headerRowHeightState).toEqual(3);
+
     expect(searchProps.rowsPerPageState).toEqual(50);
     searchProps.onUpdateRowsPerPage!(100);
     await waitOneTick();
     expect(searchProps.rowsPerPageState).toEqual(100);
+
+    expect(
+      discoverComponent.find(SavedSearchEmbeddableComponent).prop('fetchedSampleSize')
+    ).toEqual(250);
+    searchProps.onUpdateSampleSize!(300);
+    await waitOneTick();
+    expect(
+      discoverComponent.find(SavedSearchEmbeddableComponent).prop('fetchedSampleSize')
+    ).toEqual(300);
 
     searchProps.onFilter!({ name: 'customer_id', type: 'string', scripted: false }, [17], '+');
     await waitOneTick();
@@ -175,9 +218,11 @@ describe('saved search embeddable', () => {
 
   it('should render saved search embeddable when successfully loading data', async () => {
     // mock return data
-    const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search);
+    const { search, resolveSearch } = createSearchFnMock(1);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
+
+    await waitOneTick();
 
     // check that loading state
     const loadingOutput = embeddable.getOutput();
@@ -189,6 +234,7 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(1);
 
     // wait for data fetching
+    resolveSearch();
     await waitOneTick();
     expect(render).toHaveBeenCalledTimes(2);
 
@@ -201,9 +247,11 @@ describe('saved search embeddable', () => {
 
   it('should render saved search embeddable when empty data is returned', async () => {
     // mock return data
-    const search = jest.fn().mockReturnValue(getSearchResponse(0));
-    const { embeddable } = createEmbeddable(search);
+    const { search, resolveSearch } = createSearchFnMock(0);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
+
+    await waitOneTick();
 
     // check that loading state
     const loadingOutput = embeddable.getOutput();
@@ -215,6 +263,7 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(1);
 
     // wait for data fetching
+    resolveSearch();
     await waitOneTick();
     expect(render).toHaveBeenCalledTimes(2);
 
@@ -229,8 +278,11 @@ describe('saved search embeddable', () => {
     showFieldStatisticsMockValue = true;
     viewModeMockValue = VIEW_MODE.AGGREGATED_LEVEL;
 
-    const { embeddable } = createEmbeddable();
+    const { search, resolveSearch } = createSearchFnMock(1);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
+
+    await waitOneTick();
 
     // check that loading state
     const loadingOutput = embeddable.getOutput();
@@ -242,6 +294,7 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(1);
 
     // wait for data fetching
+    resolveSearch();
     await waitOneTick();
     expect(render).toHaveBeenCalledTimes(2);
 
@@ -254,14 +307,14 @@ describe('saved search embeddable', () => {
 
   it('should emit error output in case of fetch error', async () => {
     const search = jest.fn().mockReturnValue(throwError(new Error('Fetch error')));
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     jest.spyOn(embeddable, 'updateOutput');
 
     embeddable.render(mountpoint);
     // wait for data fetching
     await waitOneTick();
 
-    expect((embeddable.updateOutput as jest.Mock).mock.calls[1][0].error.message).toBe(
+    expect((embeddable.updateOutput as jest.Mock).mock.calls[2][0].error.message).toBe(
       'Fetch error'
     );
     // check that loading state
@@ -273,8 +326,8 @@ describe('saved search embeddable', () => {
 
   it('should not fetch data if only a new input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable, searchInput } = createEmbeddable(search);
-
+    const { embeddable, searchInput } = createEmbeddable({ searchMock: search });
+    await waitOneTick();
     embeddable.render(mountpoint);
     // wait for data fetching
     await waitOneTick();
@@ -284,10 +337,12 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(search).toHaveBeenCalledTimes(1);
   });
+
   it('should not reload when the input title doesnt change', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search, 'custom title');
+    const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
     embeddable.reload = jest.fn();
+    await waitOneTick();
     embeddable.render(mountpoint);
     // wait for data fetching
     await waitOneTick();
@@ -300,8 +355,9 @@ describe('saved search embeddable', () => {
 
   it('should reload when a different input title is set', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search, 'custom title');
+    const { embeddable } = createEmbeddable({ searchMock: search, customTitle: 'custom title' });
     embeddable.reload = jest.fn();
+    await waitOneTick();
     embeddable.render(mountpoint);
 
     await waitOneTick();
@@ -314,8 +370,9 @@ describe('saved search embeddable', () => {
 
   it('should not reload and fetch when a input title matches the saved search title', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
-    const { embeddable } = createEmbeddable(search);
+    const { embeddable } = createEmbeddable({ searchMock: search });
     embeddable.reload = jest.fn();
+    await waitOneTick();
     embeddable.render(mountpoint);
     await waitOneTick();
     embeddable.updateOutput({ title: 'saved search' });
@@ -349,5 +406,73 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(updateOutput).toHaveBeenCalledTimes(5);
     expect(abortSignals[2].aborted).toBe(false);
+  });
+
+  describe('edit link params', () => {
+    const runEditLinkTest = async (dataView?: DataView, byValue?: boolean) => {
+      jest
+        .spyOn(servicesMock.locator, 'getUrl')
+        .mockClear()
+        .mockResolvedValueOnce('/base/mock-url');
+      jest
+        .spyOn(servicesMock.core.http.basePath, 'remove')
+        .mockClear()
+        .mockReturnValueOnce('/mock-url');
+      const { embeddable } = createEmbeddable({ dataView, byValue });
+
+      const locatorParams = getDiscoverLocatorParams(embeddable);
+      (getDiscoverLocatorParams as jest.Mock).mockClear();
+      await waitOneTick();
+      expect(getDiscoverLocatorParams).toHaveBeenCalledTimes(1);
+      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(embeddable);
+      expect(servicesMock.locator.getUrl).toHaveBeenCalledTimes(1);
+      expect(servicesMock.locator.getUrl).toHaveBeenCalledWith(locatorParams);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
+      const { editApp, editPath, editUrl } = embeddable.getOutput();
+      expect(editApp).toBe('discover');
+      expect(editPath).toBe('/mock-url');
+      expect(editUrl).toBe('/base/mock-url');
+    };
+
+    it('should correctly output edit link params for by reference saved search', async () => {
+      await runEditLinkTest();
+    });
+
+    it('should correctly output edit link params for by reference saved search with ad hoc data view', async () => {
+      await runEditLinkTest(dataViewAdHoc);
+    });
+
+    it('should correctly output edit link params for by value saved search', async () => {
+      await runEditLinkTest(undefined, true);
+    });
+
+    it('should correctly output edit link params for by value saved search with ad hoc data view', async () => {
+      jest
+        .spyOn(servicesMock.locator, 'getRedirectUrl')
+        .mockClear()
+        .mockReturnValueOnce('/base/mock-url');
+      jest
+        .spyOn(servicesMock.core.http.basePath, 'remove')
+        .mockClear()
+        .mockReturnValueOnce('/mock-url');
+      const { embeddable } = createEmbeddable({
+        dataView: dataViewAdHoc,
+        byValue: true,
+      });
+      const locatorParams = getDiscoverLocatorParams(embeddable);
+      (getDiscoverLocatorParams as jest.Mock).mockClear();
+      await waitOneTick();
+      expect(getDiscoverLocatorParams).toHaveBeenCalledTimes(1);
+      expect(getDiscoverLocatorParams).toHaveBeenCalledWith(embeddable);
+      expect(servicesMock.locator.getRedirectUrl).toHaveBeenCalledTimes(1);
+      expect(servicesMock.locator.getRedirectUrl).toHaveBeenCalledWith(locatorParams);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledTimes(1);
+      expect(servicesMock.core.http.basePath.remove).toHaveBeenCalledWith('/base/mock-url');
+      const { editApp, editPath, editUrl } = embeddable.getOutput();
+      expect(editApp).toBe('r');
+      expect(editPath).toBe('/mock-url');
+      expect(editUrl).toBe('/base/mock-url');
+    });
   });
 });

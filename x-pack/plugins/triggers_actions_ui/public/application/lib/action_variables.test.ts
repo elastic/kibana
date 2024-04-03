@@ -7,7 +7,7 @@
 
 import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -70,6 +70,10 @@ const expectedTransformResult = [
     name: 'alert.flapping',
   },
   {
+    description: 'The number of consecutive runs that meet the rule conditions.',
+    name: 'alert.consecutiveMatches',
+  },
+  {
     description: 'The configured server.publicBaseUrl value or empty string if not configured.',
     name: 'kibanaBaseUrl',
   },
@@ -113,6 +117,11 @@ const expectedTransformResult = [
     description: 'This has been deprecated in favor of rule.tags.',
     name: 'tags',
   },
+  {
+    deprecated: true,
+    description: 'This has been deprecated in favor of rule.params.',
+    name: 'params',
+  },
 ];
 
 const expectedContextTransformResult = (withBraces: boolean = false) => [
@@ -139,7 +148,7 @@ const expectedStateTransformResult = (withBraces: boolean = false) => [
 const expectedParamsTransformResult = (withBraces: boolean = false) => [
   {
     description: 'fooP-description',
-    name: 'params.fooP',
+    name: 'rule.params.fooP',
     ...(withBraces && { useWithTripleBracesInTemplates: true }),
   },
 ];
@@ -316,7 +325,7 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     defaultActionGroupId: 'default',
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
-    producer: ALERTS_FEATURE_ID,
+    producer: ALERTING_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
   };

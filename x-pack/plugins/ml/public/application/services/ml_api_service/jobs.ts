@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { HttpService } from '../http_service';
+import type { CategorizationAnalyzer, FieldValidationResults } from '@kbn/ml-category-validator';
+import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
 import type { Dictionary } from '../../../../common/types/common';
@@ -25,12 +26,7 @@ import type { JobMessage } from '../../../../common/types/audit_message';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import type { Group } from '../../../../common/types/groups';
 import type { ExistingJobsAndGroups } from '../job_service';
-import type {
-  CategorizationAnalyzer,
-  CategoryFieldExample,
-  FieldExampleCheck,
-} from '../../../../common/types/categories';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
+
 import type { Category } from '../../../../common/types/categories';
 import type {
   JobsExistResponse,
@@ -71,8 +67,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobForCloning(jobId: string) {
-    const body = JSON.stringify({ jobId });
+  jobForCloning(jobId: string, retainCreatedBy = false) {
+    const body = JSON.stringify({ jobId, retainCreatedBy });
     return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/job_for_cloning`,
       method: 'POST',
@@ -134,8 +130,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
-    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
+  deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean, deleteAlertingRules?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations, deleteAlertingRules });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/delete_jobs`,
       method: 'POST',
@@ -345,7 +341,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    includeExamples?: boolean
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -358,14 +355,10 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       analyzer,
       runtimeMappings,
       indicesOptions,
+      includeExamples,
     });
-    return httpService.http<{
-      examples: CategoryFieldExample[];
-      sampleSize: number;
-      overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
-      validationChecks: FieldExampleCheck[];
-    }>({
-      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
+    return httpService.http<FieldValidationResults>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       method: 'POST',
       body,
       version: '1',

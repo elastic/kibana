@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-APM_CYPRESS_RECORD_KEY="$(retry 5 5 vault read -field=CYPRESS_RECORD_KEY secret/kibana-issues/dev/apm-cypress-dashboard-record-key)"
+APM_CYPRESS_RECORD_KEY="$(vault_get apm-cypress-dashboard-record-key CYPRESS_RECORD_KEY)"
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
@@ -16,7 +16,7 @@ GH_APM_TEAM_LABEL="Team:APM"
 if (! is_pr); then
   echo "--- Add GH labels to buildkite metadata"
   ts-node .buildkite/scripts/steps/add_gh_labels_to_bk_metadata.ts BUILDKITE_MESSAGE true
-  GH_ON_MERGE_LABELS="$(buildkite-agent meta-data get gh_labels)"
+  GH_ON_MERGE_LABELS="$(buildkite-agent meta-data get gh_labels --default '')"
 fi
 
 # Enabling cypress dashboard recording when PR is labeled with `apm:cypress-record` and we are not using the flaky test runner OR on merge with Team:APM label applied
@@ -30,6 +30,6 @@ echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/apm/scripts/test/e2e.js \
+node plugins/observability_solution/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   $CYPRESS_ARGS

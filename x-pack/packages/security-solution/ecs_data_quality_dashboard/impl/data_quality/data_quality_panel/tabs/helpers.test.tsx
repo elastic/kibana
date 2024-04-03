@@ -96,6 +96,10 @@ describe('helpers', () => {
           name: 'Incompatible fields',
         },
         {
+          id: 'sameFamilyTab',
+          name: 'Same family',
+        },
+        {
           id: 'customTab',
           name: 'Custom fields',
         },

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { map, filter, startWith, buffer, share } from 'rxjs/operators';
+import { map, filter, startWith, buffer, share } from 'rxjs';
 import { JsonObject } from '@kbn/utility-types';
 import { combineLatest, Observable, zip } from 'rxjs';
 import { isOk, Ok } from '../lib/result_type';
-import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskRunEvent, isTaskManagerStatEvent } from '../task_events';

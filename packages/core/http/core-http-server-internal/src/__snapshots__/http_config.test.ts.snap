@@ -41,6 +41,7 @@ exports[`basePath throws if not specified, but rewriteBasePath is set 1`] = `"ca
 exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
+  "cdn": Object {},
   "compression": Object {
     "brotli": Object {
       "enabled": false,
@@ -72,18 +73,18 @@ Object {
     "valueInBytes": 1048576,
   },
   "name": "kibana-hostname",
+  "payloadTimeout": 20000,
   "port": 5601,
   "requestId": Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],
   },
-  "restrictInternalApis": false,
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
     "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
-    "referrerPolicy": "no-referrer-when-downgrade",
+    "referrerPolicy": "strict-origin-when-cross-origin",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
@@ -128,6 +129,7 @@ Object {
   },
   "versioned": Object {
     "strictClientVersionCheck": true,
+    "useVersionResolutionStrategyForInternalPaths": Array [],
     "versionResolution": "oldest",
   },
   "xsrf": Object {

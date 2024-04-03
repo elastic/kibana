@@ -812,12 +812,8 @@
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts"
             },
             {
-              "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/telemetry/sender.ts"
-            },
-            {
-              "plugin": "uptime",
-              "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/telemetry/sender.ts"
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender_helpers.ts"
             },
             {
               "plugin": "fleet",
@@ -829,23 +825,19 @@
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
+              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.ts"
             },
             {
               "plugin": "synthetics",
-              "path": "x-pack/plugins/synthetics/server/telemetry/sender.test.ts"
+              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/telemetry/sender.test.ts"
             },
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "uptime",
-              "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/telemetry/sender.test.ts"
-            },
-            {
-              "plugin": "uptime",
-              "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/telemetry/sender.test.ts"
             }
           ],
           "children": [],

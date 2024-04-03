@@ -1,0 +1,59 @@
+openapi: 3.1.0
+info:
+  title: Data views
+  description: OpenAPI schema for data view endpoints
+  version: '0.1'
+  contact:
+    name: Kibana Core Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: data views
+    description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+servers:
+  - url: /
+paths:
+# Default space
+  # '/api/data_views':
+  #   $ref: 'paths/api@data_views.yaml'
+  # '/api/data_views/data_view':
+  #   $ref: 'paths/api@data_views@data_view.yaml'
+  # '/api/data_views/data_view/{viewId}':
+  #   $ref: 'paths/api@data_views@data_view@{viewid}.yaml'
+  # '/api/data_views/data_view/{viewId}/fields':
+  #   $ref: 'paths/api@data_views@data_view@{viewid}@fields.yaml'
+  # '/api/data_views/data_view/{viewId}/runtime_field':
+  #  $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field.yaml'
+  # '/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
+  #   $ref: 'paths/api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
+  # '/api/data_views/default':
+  #   $ref: 'paths/api@data_views@default.yaml'
+# Non-default space
+ '/s/{spaceId}/api/data_views':
+   $ref: 'paths/s@{spaceid}@api@data_views.yaml'
+ '/s/{spaceId}/api/data_views/data_view':
+   $ref: 'paths/s@{spaceid}@api@data_views@data_view.yaml'
+ '/s/{spaceId}/api/data_views/data_view/{viewId}':
+   $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}.yaml'
+ '/s/{spaceId}/api/data_views/default':
+   $ref: 'paths/s@{spaceid}@api@data_views@default.yaml'
+ '/s/{spaceId}/api/data_views/data_view/{viewId}/fields':
+   $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}@fields.yaml'
+ '/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field':
+   $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}@runtime_field.yaml'
+ '/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}':
+   $ref: 'paths/s@{spaceid}@api@data_views@data_view@{viewid}@runtime_field@{fieldname}.yaml'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+security:
+  - basicAuth: []
+  - apiKeyAuth: []

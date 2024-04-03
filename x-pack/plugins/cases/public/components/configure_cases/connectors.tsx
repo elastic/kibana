@@ -15,26 +15,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import type { ActionTypeConnector } from '../../../common/api';
-import { ConnectorTypes } from '../../../common/api';
+import type { ActionTypeConnector } from '../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
-
-const EuiFormRowExtended = styled(EuiFormRow)`
-  .euiFormRow__labelWrapper {
-    .euiFormRow__label {
-      width: 100%;
-    }
-  }
-`;
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface Props {
   actionTypes: ActionTypeConnector[];
@@ -63,6 +56,8 @@ const ConnectorsComponent: React.FC<Props> = ({
     () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
   );
+  const { permissions } = useCasesContext();
+  const canUseConnectors = permissions.connectors && actions.read;
 
   const connectorsName = connector?.name ?? 'none';
 
@@ -98,14 +93,19 @@ const ConnectorsComponent: React.FC<Props> = ({
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
         data-test-subj="case-connectors-form-group"
       >
-        <EuiFormRowExtended
+        <EuiFormRow
           fullWidth
+          css={css`
+            label {
+              width: 100%;
+            }
+          `}
           label={dropDownLabel}
           data-test-subj="case-connectors-form-row"
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              {actions.read ? (
+              {canUseConnectors ? (
                 <ConnectorsDropdown
                   connectors={connectors}
                   disabled={disabled}
@@ -137,7 +137,7 @@ const ConnectorsComponent: React.FC<Props> = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </EuiFormRowExtended>
+        </EuiFormRow>
       </EuiDescribedFormGroup>
     </>
   );

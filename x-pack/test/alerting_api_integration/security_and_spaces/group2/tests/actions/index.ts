@@ -18,6 +18,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     after(async () => {
       await tearDown(getService);
     });
+
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));
     loadTestFile(require.resolve('./connector_types/jira'));
@@ -31,6 +32,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/es_index_preconfigured'));
     loadTestFile(require.resolve('./connector_types/opsgenie'));
     loadTestFile(require.resolve('./connector_types/pagerduty'));
+    loadTestFile(require.resolve('./connector_types/sentinelone'));
     loadTestFile(require.resolve('./connector_types/server_log'));
     loadTestFile(require.resolve('./connector_types/slack_webhook'));
     loadTestFile(require.resolve('./connector_types/slack_api'));
@@ -38,19 +40,24 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/xmatters'));
     loadTestFile(require.resolve('./connector_types/tines'));
     loadTestFile(require.resolve('./connector_types/torq'));
-    loadTestFile(require.resolve('./connector_types/gen_ai'));
+    loadTestFile(require.resolve('./connector_types/openai'));
     loadTestFile(require.resolve('./connector_types/d3security'));
+    loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_all_system'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./bulk_enqueue'));
 
     /**
      * Sub action framework
      */
-    // loadTestFile(require.resolve('./sub_action_framework'));
+
+    loadTestFile(require.resolve('./sub_action_framework'));
   });
 }

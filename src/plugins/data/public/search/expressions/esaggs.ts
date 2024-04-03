@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import { defer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { StartServicesAccessor } from '@kbn/core/public';
 import {
   EsaggsExpressionFunctionDefinition,
@@ -61,7 +61,7 @@ export function getFunctionDefinition({
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
-          const { disableShardWarnings } = getSearchContext();
+          const { disableWarningToasts } = getSearchContext();
 
           return handleEsaggsRequest({
             abortSignal,
@@ -74,7 +74,7 @@ export function getFunctionDefinition({
             searchSourceService: searchSource,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
-            disableShardWarnings: (disableShardWarnings || false) as boolean,
+            disableWarningToasts: (disableWarningToasts || false) as boolean,
             getNow,
             executionContext: getExecutionContext(),
           });

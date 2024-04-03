@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
-import { LanguageDefinition, Languages } from './types';
 
 export const rubyDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.rubyAdvancedConfig,
   apiReference: docLinks.rubyExamples,
   buildSearchQuery: `client.search(index: 'books', q: 'snow')`,
   configureClient: ({ url, apiKey }) => `client = ElasticsearchServerless::Client.new(
@@ -21,6 +20,12 @@ export const rubyDefinition: LanguageDefinition = {
 `,
   basicConfig: docLinks.rubyBasicConfig,
   docLink: docLinks.rubyClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-ruby',
+    label: i18n.translate('xpack.serverlessSearch.languages.ruby.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-ruby',
+    }),
+  },
   iconType: 'ruby.svg',
   id: Languages.RUBY,
   ingestData: `documents = [
@@ -46,8 +51,14 @@ client.bulk(body: documents)
 `,
   installClient: `# Requires Ruby version 3.0 or higher
 
-# From the project's root directory:$ gem build elasticsearch-serverless.gemspec
-$ gem install elasticsearch-serverless-x.x.x.gem`,
+# Install from RubyGems:
+gem install elasticsearch-serverless --pre
+
+# Or include the gem in your Gemfile
+gem 'elasticsearch-serverless'
+
+# And require it in your code
+require 'elasticsearch-serverless'`,
   name: i18n.translate('xpack.serverlessSearch.languages.ruby', {
     defaultMessage: 'Ruby',
   }),

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { CaseUserActionStatsResponse } from '../../../common/api';
-import { decodeOrThrow, CaseUserActionStatsResponseRt } from '../../../common/api';
+import type { CaseUserActionStatsResponse } from '../../../common/types/api';
+import { CaseUserActionStatsResponseRt } from '../../../common/types/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { UserActionGet } from './types';

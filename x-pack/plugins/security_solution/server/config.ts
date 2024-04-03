@@ -11,6 +11,16 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
+
+/**
+ * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)
+ */
+const isValidTaskManagerDuration = (value: string): string | undefined => {
+  if (/^\d+[s,m]{1}$/.test(value)) {
+    return `Invalid duration [${value}]. Value must be a number followed by either 's' for seconds or 'm' for minutes `;
+  }
+};
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -91,14 +101,36 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Artifacts Configuration
+   * Endpoint Artifacts Configuration: the interval between runs of the task that builds the
+   * artifacts and associated manifest.
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
+   * Endpoint Artifacts Configuration: timeout value for how long the task should run.
+   */
+  packagerTaskTimeout: schema.string({ defaultValue: '20m' }),
+
+  /**
    * Artifacts Configuration for package policy update concurrency
    */
-  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 25, max: 50, min: 1 }),
+
+  /**
+   * Complete External Response Actions task: interval duration
+   */
+  completeExternalResponseActionsTaskInterval: schema.string({
+    defaultValue: '60s',
+    validate: isValidTaskManagerDuration,
+  }),
+
+  /**
+   * Complete External Response Actions task: Timeout value for how long the task should run
+   */
+  completeExternalResponseActionsTaskTimeout: schema.string({
+    defaultValue: '20m',
+    validate: isValidTaskManagerDuration,
+  }),
 
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install
@@ -113,6 +145,7 @@ export const configSchema = schema.object({
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 
   /**
    * The Max number of Bytes allowed for the `upload` endpoint response action
@@ -121,12 +154,30 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+  /**
+   * Defines the settings for a specific offering of the Security Solution app.
+   * They override the default values.
+   * @example
+   * xpack.securitySolution.offeringSettings: {
+   *  "ILMEnabled": false,
+   * }
+   */
+  offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
+    defaultValue: {},
+  }),
+  entityAnalytics: schema.object({
+    riskEngine: schema.object({
+      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = ConfigSchema & {
+export type ConfigType = Omit<ConfigSchema, 'offeringSettings'> & {
   experimentalFeatures: ExperimentalFeatures;
+  settings: ConfigSettings;
+  enableUiSettingsValidations: boolean;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
@@ -146,8 +197,20 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
+  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(
+    pluginConfig.offeringSettings
+  );
+
+  if (invalidConfigSettings.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.offeringSettings" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
+
   return {
     ...pluginConfig,
     experimentalFeatures,
+    settings,
   };
 };

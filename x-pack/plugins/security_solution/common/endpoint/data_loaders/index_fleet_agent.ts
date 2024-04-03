@@ -6,11 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { AxiosResponse } from 'axios';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KbnClient } from '@kbn/test';
-import type { Agent, FleetServerAgent, GetOneAgentResponse } from '@kbn/fleet-plugin/common';
-import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { wrapErrorAndRejectPromise } from './utils';
@@ -18,7 +19,7 @@ import { wrapErrorAndRejectPromise } from './utils';
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
 export interface IndexedFleetAgentResponse {
-  agents: Array<Agent & FleetServerAgent>;
+  agents: FleetServerAgent[];
   fleetAgentsIndex: string;
 }
 
@@ -33,15 +34,48 @@ export interface IndexedFleetAgentResponse {
  * @param [kibanaVersion]
  * @param [fleetAgentGenerator]
  */
-export const indexFleetAgentForHost = async (
-  esClient: Client,
-  kbnClient: KbnClient,
+export const indexFleetAgentForHost = usageTracker.track(
+  'indexFleetAgentForHost',
+  async (
+    esClient: Client,
+    kbnClient: KbnClient,
+    endpointHost: HostMetadata,
+    agentPolicyId: string,
+    kibanaVersion: string = '8.0.0',
+    fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
+  ): Promise<IndexedFleetAgentResponse> => {
+    const agentDoc = generateFleetAgentEsHitForEndpointHost(
+      endpointHost,
+      agentPolicyId,
+      kibanaVersion,
+      fleetAgentGenerator
+    );
+
+    await esClient
+      .index<FleetServerAgent>({
+        index: agentDoc._index,
+        id: agentDoc._id,
+        body: agentDoc._source,
+        op_type: 'create',
+        refresh: 'wait_for',
+      })
+      .catch(wrapErrorAndRejectPromise);
+
+    return {
+      fleetAgentsIndex: agentDoc._index,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      agents: [agentDoc._source!],
+    };
+  }
+);
+
+const generateFleetAgentEsHitForEndpointHost = (
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0',
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
-): Promise<IndexedFleetAgentResponse> => {
-  const agentDoc = fleetAgentGenerator.generateEsHit({
+) => {
+  return fleetAgentGenerator.generateEsHit({
     _id: endpointHost.agent.id,
     _source: {
       agent: {
@@ -65,34 +99,56 @@ export const indexFleetAgentForHost = async (
       policy_id: agentPolicyId,
     },
   });
-
-  const createdFleetAgent = await esClient
-    .index<FleetServerAgent>({
-      index: agentDoc._index,
-      id: agentDoc._id,
-      body: agentDoc._source,
-      op_type: 'create',
-      refresh: 'wait_for',
-    })
-    .catch(wrapErrorAndRejectPromise);
-
-  return {
-    fleetAgentsIndex: agentDoc._index,
-    agents: [
-      await fetchFleetAgent(kbnClient, createdFleetAgent._id).catch(wrapErrorAndRejectPromise),
-    ],
-  };
 };
 
-const fetchFleetAgent = async (kbnClient: KbnClient, agentId: string): Promise<Agent> => {
-  return (
-    (await kbnClient
-      .request({
-        path: AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
-        method: 'GET',
-      })
-      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<GetOneAgentResponse>
-  ).data.item;
+interface BuildFleetAgentBulkCreateOperationsOptions {
+  endpoints: HostMetadata[];
+  agentPolicyId: string;
+  kibanaVersion?: string;
+  fleetAgentGenerator?: FleetAgentGenerator;
+}
+
+interface BuildFleetAgentBulkCreateOperationsResponse extends IndexedFleetAgentResponse {
+  operations: Required<BulkRequest>['operations'];
+}
+
+/**
+ * Creates an array of ES records with Fleet Agents that are associated with the provided set of Endpoint Agents.
+ * Array can be used with the `bulk()` API's `operations` option.
+ * @param endpoints
+ * @param agentPolicyId
+ * @param kibanaVersion
+ * @param fleetAgentGenerator
+ */
+export const buildFleetAgentBulkCreateOperations = ({
+  endpoints,
+  agentPolicyId,
+  kibanaVersion = '8.0.0',
+  fleetAgentGenerator = defaultFleetAgentGenerator,
+}: BuildFleetAgentBulkCreateOperationsOptions): BuildFleetAgentBulkCreateOperationsResponse => {
+  const response: BuildFleetAgentBulkCreateOperationsResponse = {
+    operations: [],
+    agents: [],
+    fleetAgentsIndex: AGENTS_INDEX,
+  };
+
+  for (const endpointHost of endpoints) {
+    const agentDoc = generateFleetAgentEsHitForEndpointHost(
+      endpointHost,
+      agentPolicyId,
+      kibanaVersion,
+      fleetAgentGenerator
+    );
+
+    response.operations.push(
+      { create: { _index: agentDoc._index, _id: agentDoc._id } },
+      agentDoc._source
+    );
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    response.agents.push(agentDoc._source!);
+  }
+
+  return response;
 };
 
 export interface DeleteIndexedFleetAgentsResponse {

@@ -15,6 +15,9 @@ export const getServicesMock = () => {
     ...getKibanaNoDataPageServicesMock(),
     kibanaGuideDocLink: 'Kibana guide',
     customBranding: { hasCustomBranding$: of(false) },
+    prependBasePath: (path) => path,
+    getHttp: <T>() => Promise.resolve({} as T),
+    pageFlavor: 'kibana',
   };
 
   return services;
@@ -26,6 +29,9 @@ export const getServicesMockCustomBranding = () => {
     // this mock will have custom branding set to true
     customBranding: { hasCustomBranding$: of(true) },
     kibanaGuideDocLink: 'Kibana guide',
+    prependBasePath: (path) => path,
+    getHttp: <T>() => Promise.resolve({} as T),
+    pageFlavor: 'kibana',
   };
 
   return services;

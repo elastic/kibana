@@ -13,17 +13,16 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import {
-  FindingsStatsTaskResult,
-  TaskHealthStatus,
-  ScoreByPolicyTemplateBucket,
-  VulnSeverityAggs,
-} from './types';
+import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSPM_FINDINGS_STATS_INTERVAL,
+  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_SEVERITY,
@@ -31,10 +30,16 @@ import {
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
 import { CspServerPluginStartServices } from '../types';
+import {
+  stateSchemaByVersion,
+  emptyState,
+  type LatestTaskStateSchema,
+  type TaskHealthStatus,
+} from './task_state';
+import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
-const CSPM_FINDINGS_STATS_INTERVAL = '5m';
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
@@ -46,9 +51,9 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        interval: CSPM_FINDINGS_STATS_INTERVAL,
+        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
       },
-      state: {},
+      state: emptyState,
       params: {},
     },
     logger
@@ -71,6 +76,7 @@ export function setupFindingsStatsTask(
     taskManager.registerTaskDefinitions({
       [CSPM_FINDINGS_STATS_TASK_TYPE]: {
         title: 'Aggregate latest findings index for score calculation',
+        stateSchemaByVersion,
         createTaskRunner: taskRunner(coreStartServices, logger),
       },
     });
@@ -85,28 +91,35 @@ export function setupFindingsStatsTask(
 
 export function taskRunner(coreStartServices: CspServerPluginStartServices, logger: Logger) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run(): Promise<FindingsStatsTaskResult> {
         try {
           logger.info(`Runs task: ${CSPM_FINDINGS_STATS_TASK_TYPE}`);
-          const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          const status = await aggregateLatestFindings(esClient, state.runs, logger);
+          const startServices = await coreStartServices;
+          const esClient = startServices[0].elasticsearch.client.asInternalUser;
+          const encryptedSoClient = startServices[0].savedObjects.createInternalRepository([
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+          ]);
 
+          const status = await aggregateLatestFindings(esClient, encryptedSoClient, logger);
+
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            health_status: status,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: status,
-            },
+            state: updatedState,
           };
         } catch (errMsg) {
           const error = transformError(errMsg);
           logger.warn(`Error executing alerting health check task: ${error.message}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            health_status: 'error',
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: 'error',
-            },
+            state: updatedState,
           };
         }
       },
@@ -114,13 +127,15 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
-const getScoreQuery = (): SearchRequest => ({
+const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
-    match_all: {},
+    bool: {
+      must_not: filteredRules,
+    },
   },
   aggs: {
     score_by_policy_template: {
@@ -168,6 +183,39 @@ const getScoreQuery = (): SearchRequest => ({
               filter: {
                 term: {
                   'result.evaluation': 'failed',
+                },
+              },
+            },
+          },
+        },
+        score_by_benchmark_id: {
+          terms: {
+            field: 'rule.benchmark.id',
+          },
+          aggregations: {
+            benchmark_versions: {
+              terms: {
+                field: 'rule.benchmark.version',
+              },
+              aggs: {
+                total_findings: {
+                  value_count: {
+                    field: 'result.evaluation',
+                  },
+                },
+                passed_findings: {
+                  filter: {
+                    term: {
+                      'result.evaluation': 'passed',
+                    },
+                  },
+                },
+                failed_findings: {
+                  filter: {
+                    term: {
+                      'result.evaluation': 'failed',
+                    },
+                  },
                 },
               },
             },
@@ -233,7 +281,8 @@ const getVulnStatsTrendQuery = (): SearchRequest => ({
 
 const getFindingsScoresDocIndexingPromises = (
   esClient: ElasticsearchClient,
-  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets']
+  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets'],
+  isCustomScore: boolean
 ) =>
   scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
     // creating score per cluster id objects
@@ -251,6 +300,27 @@ const getFindingsScoresDocIndexingPromises = (
         ];
       })
     );
+    // creating score per benchmark id and version
+    const benchmarkStats = Object.fromEntries(
+      policyTemplateTrend.score_by_benchmark_id.buckets.map((benchmarkIdBucket) => {
+        const benchmarkId = benchmarkIdBucket.key;
+        const benchmarkVersions = Object.fromEntries(
+          benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
+            const benchmarkVersion = toBenchmarkMappingFieldKey(benchmarkVersionBucket.key);
+            return [
+              benchmarkVersion,
+              {
+                total_findings: benchmarkVersionBucket.total_findings.value,
+                passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
+                failed_findings: benchmarkVersionBucket.failed_findings.doc_count,
+              },
+            ];
+          })
+        );
+
+        return [benchmarkId, benchmarkVersions];
+      })
+    );
 
     // each document contains the policy template and its scores
     return esClient.index({
@@ -261,6 +331,8 @@ const getFindingsScoresDocIndexingPromises = (
         failed_findings: policyTemplateTrend.failed_findings.doc_count,
         total_findings: policyTemplateTrend.total_findings.value,
         score_by_cluster_id: clustersStats,
+        score_by_benchmark_id: benchmarkStats,
+        is_enabled_rules_score: isCustomScore,
       },
     });
   });
@@ -304,19 +376,27 @@ const getVulnStatsTrendDocIndexingPromises = (
 
 export const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
-  stateRuns: number,
+  encryptedSoClient: ISavedObjectsRepository,
   logger: Logger
 ): Promise<TaskHealthStatus> => {
   try {
     const startAggTime = performance.now();
-    const scoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
-      getScoreQuery()
+
+    const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
+
+    const customScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery(rulesFilter)
     );
+
+    const fullScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery([])
+    );
+
     const vulnStatsTrendIndexQueryResult = await esClient.search<unknown, VulnSeverityAggs>(
       getVulnStatsTrendQuery()
     );
 
-    if (!scoreIndexQueryResult.aggregations && !vulnStatsTrendIndexQueryResult.aggregations) {
+    if (!customScoreIndexQueryResult.aggregations && !vulnStatsTrendIndexQueryResult.aggregations) {
       logger.warn(`No data found in latest findings index`);
       return 'warning';
     }
@@ -329,13 +409,23 @@ export const aggregateLatestFindings = async (
     );
 
     // getting score per policy template buckets
-    const scoresByPolicyTemplatesBuckets =
-      scoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+    const customScoresByPolicyTemplatesBuckets =
+      customScoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+
+    const fullScoresByPolicyTemplatesBuckets =
+      fullScoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
 
     // iterating over the buckets and return promises which will index a modified document into the scores index
-    const findingsScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
+    const findingsCustomScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
       esClient,
-      scoresByPolicyTemplatesBuckets
+      customScoresByPolicyTemplatesBuckets,
+      true
+    );
+
+    const findingsFullScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
+      esClient,
+      fullScoresByPolicyTemplatesBuckets,
+      false
     );
 
     const vulnStatsTrendDocIndexingPromises = getVulnStatsTrendDocIndexingPromises(
@@ -347,7 +437,11 @@ export const aggregateLatestFindings = async (
 
     // executing indexing commands
     await Promise.all(
-      [...findingsScoresDocIndexingPromises, vulnStatsTrendDocIndexingPromises].filter(Boolean)
+      [
+        ...findingsCustomScoresDocIndexingPromises,
+        findingsFullScoresDocIndexingPromises,
+        vulnStatsTrendDocIndexingPromises,
+      ].filter(Boolean)
     );
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);

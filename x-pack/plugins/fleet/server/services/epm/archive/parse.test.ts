@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Logger } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import type { ArchivePackage } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
+
+import { appContextService } from '../..';
 
 import {
   parseDefaultIngestPipeline,
@@ -21,7 +28,20 @@ import {
   parseAndVerifyReadme,
 } from './parse';
 
+jest.mock('../../app_context');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
 describe('parseDefaultIngestPipeline', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   it('Should return undefined for stream without any elasticsearch dir', () => {
     expect(
       parseDefaultIngestPipeline('pkg-1.0.0/data_stream/stream1/', [
@@ -324,6 +344,11 @@ describe('parseAndVerifyArchive', () => {
       owner: {
         github: 'elastic/integrations',
       },
+      agent: {
+        privileges: {
+          root: true,
+        },
+      },
       policy_templates: [
         {
           description: 'Collect your custom log files.',
@@ -388,7 +413,7 @@ describe('parseAndVerifyArchive', () => {
   it('should throw on missing manifest file', () => {
     expect(() => parseAndVerifyArchive(['input_only-0.1.0/test/manifest.yml'], {})).toThrowError(
       new PackageInvalidArchiveError(
-        'Package at top-level directory input_only-0.1.0 must contain a top-level manifest.yml file.'
+        'Manifest file input_only-0.1.0/manifest.yml not found in paths.'
       )
     );
   });
@@ -459,7 +484,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/README.md'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {},
+        assetsMap: {},
       })
     ).toThrowError("No manifest.yml file found for data stream 'stream1'");
   });
@@ -470,7 +495,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.alloc(1),
         },
       })
@@ -483,7 +508,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs`,
@@ -502,7 +527,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs
@@ -532,7 +557,7 @@ describe('parseAndVerifyDataStreams', () => {
         paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
         pkgName: 'input-only',
         pkgVersion: '0.1.0',
-        manifests: {
+        assetsMap: {
           'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
             `
           title: Custom Logs
@@ -555,6 +580,93 @@ describe('parseAndVerifyDataStreams', () => {
         release: 'ga',
         title: 'Custom Logs',
         type: 'logs',
+      },
+    ]);
+  });
+
+  it('should parse routing rules', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/routing_rules.yml': Buffer.from(
+            `
+          - source_dataset: ds
+            rules:
+              - target_dataset: ds.test
+                if: true == true
+                namespace: "default"
+          `,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        routing_rules: [
+          {
+            source_dataset: 'ds',
+            rules: [
+              {
+                target_dataset: 'ds.test',
+                if: 'true == true',
+                namespace: 'default',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should parse lifecycle', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        assetsMap: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+          'input-only-0.1.0/data_stream/stream1/lifecycle.yml': Buffer.from(
+            `data_retention: "7d"`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+        elasticsearch: {},
+        lifecycle: { data_retention: '7d' },
       },
     ]);
   });

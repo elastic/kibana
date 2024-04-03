@@ -5,7 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import {
+  getESQLAdHocDataview,
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
@@ -14,16 +19,21 @@ export async function getDataViewByTextBasedQueryLang(
   currentDataView: DataView | undefined,
   services: DiscoverServices
 ) {
-  const text = 'sql' in query ? query.sql : undefined;
+  let indexPatternFromQuery = '';
+  if ('sql' in query) {
+    indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
+  }
+  if ('esql' in query) {
+    indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
+  }
+  // we should find a better way to work with ESQL queries which dont need a dataview
+  if (!indexPatternFromQuery && currentDataView) return currentDataView;
 
-  const indexPatternFromQuery = getIndexPatternFromSQLQuery(text);
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await services.dataViews.create({
-      title: indexPatternFromQuery,
-    });
+    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
     if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
       dataViewObj.timeFieldName = '@timestamp';

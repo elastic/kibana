@@ -7,15 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment, { type Moment } from 'moment';
+import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { cleanEmptyKeys, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { isFilterPinned, Filter } from '@kbn/es-query';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   isDataFrameAnalyticsConfigs,
@@ -24,7 +27,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { isDefined } from '@kbn/ml-is-defined';
-import { DashboardItems } from '../../../services/dashboard_service';
+import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -42,12 +45,9 @@ import {
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
-import {
-  CombinedJob,
-  Job,
-  isAnomalyDetectionJob,
-} from '../../../../../common/types/anomaly_detection_jobs';
-import { TimeRangeType } from './constants';
+import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { TimeRangeType } from './constants';
 
 export interface TimeRange {
   type: TimeRangeType;
@@ -75,7 +75,8 @@ export interface CustomUrlSettings {
 export function getNewCustomUrlDefaults(
   job: Job | DataFrameAnalyticsConfig,
   dashboards: DashboardItems,
-  dataViews: DataViewListItem[]
+  dataViews: DataViewListItem[],
+  isPartialDFAJob?: boolean
 ): CustomUrlSettings {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
@@ -111,11 +112,21 @@ export function getNewCustomUrlDefaults(
     indicesName = job.datafeed_config.indices.join();
     query = job.datafeed_config?.query ?? {};
     jobId = job.job_id;
-  } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
-    indicesName = job.dest.index;
-    backupIndicesName = job.source.index[0];
-    query = job.source?.query ?? {};
-    jobId = job.id;
+  } else if (
+    (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) &&
+    dataViews !== undefined &&
+    dataViews.length > 0
+  ) {
+    // Ensure cast as dfaJob if it's just a partial from the wizard
+    const dfaJob = job as DataFrameAnalyticsConfig;
+    const sourceIndex = Array.isArray(dfaJob.source.index)
+      ? dfaJob.source.index.join()
+      : dfaJob.source.index;
+
+    indicesName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+    backupIndicesName = sourceIndex;
+    query = dfaJob.source?.query ?? {};
+    jobId = dfaJob.id;
   }
 
   const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
@@ -245,7 +256,8 @@ function getUrlRangeFromSettings(settings: CustomUrlSettings) {
 
 async function buildDashboardUrlFromSettings(
   dashboardService: DashboardStart,
-  settings: CustomUrlSettings
+  settings: CustomUrlSettings,
+  isPartialDFAJob?: boolean
 ): Promise<MlUrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
@@ -354,7 +366,6 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
     index: discoverIndexPatternId,
     filters,
   };
-
   // If partitioning field entities have been configured add tokens
   // to the URL to use in the Discover page search.
 
@@ -459,8 +470,8 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
     // No anomalies yet for this job, so do a preview of the search
     // configured in the job datafeed to obtain sample docs.
 
-    let { datafeed_config: datafeedConfig } = job;
-    let jobConfig = job;
+    let jobConfig = cloneDeep(job);
+    let { datafeed_config: datafeedConfig } = jobConfig;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
       const [{ jobs }, { datafeeds }] = await Promise.all([
@@ -508,21 +519,26 @@ async function getDataFrameAnalyticsTestUrl(
   job: DataFrameAnalyticsConfig,
   customUrl: MlKibanaUrlConfig,
   timeFieldName: string | null,
-  currentTimeFilter?: EsQueryTimeRange
+  currentTimeFilter?: EsQueryTimeRange,
+  isPartialDFAJob?: boolean
 ): Promise<string> {
   // By default, return configured url_value. Look to substitute any dollar-delimited
   // tokens with values from a sample doc in the destination index
+  const sourceIndex = Array.isArray(job.source.index) ? job.source.index.join() : job.source.index;
   let testUrl = customUrl.url_value;
   let record;
   let resp;
 
   try {
-    resp = await ml.esSearch({
-      index: job.dest.index,
+    const body = {
+      // Use source index for partial job as there is no dest index yet
+      index: isPartialDFAJob ? sourceIndex : job.dest.index,
       body: {
         size: 1,
       },
-    });
+    };
+
+    resp = await ml.esSearch(body);
 
     if (resp && resp.hits.total.value > 0) {
       record = resp.hits.hits[0]._source;
@@ -576,10 +592,17 @@ export function getTestUrl(
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlUrlConfig,
   timeFieldName: string | null,
-  currentTimeFilter?: EsQueryTimeRange
+  currentTimeFilter?: EsQueryTimeRange,
+  isPartialDFAJob?: boolean
 ) {
-  if (isDataFrameAnalyticsConfigs(job)) {
-    return getDataFrameAnalyticsTestUrl(job, customUrl, timeFieldName, currentTimeFilter);
+  if (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) {
+    return getDataFrameAnalyticsTestUrl(
+      job as DataFrameAnalyticsConfig,
+      customUrl,
+      timeFieldName,
+      currentTimeFilter,
+      isPartialDFAJob
+    );
   }
 
   return getAnomalyDetectionJobTestUrl(job, customUrl);

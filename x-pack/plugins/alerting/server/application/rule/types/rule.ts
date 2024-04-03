@@ -15,12 +15,10 @@ import {
 } from '../constants';
 import {
   ruleParamsSchema,
-  rRuleSchema,
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
-  actionSchema,
   ruleSchema,
   ruleDomainSchema,
 } from '../schemas';
@@ -36,11 +34,9 @@ export type RuleExecutionStatusWarningReason =
   typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
-export type RRule = TypeOf<typeof rRuleSchema>;
-export type SnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
+export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
-export type Action = TypeOf<typeof actionSchema>;
 type RuleSchemaType = TypeOf<typeof ruleSchema>;
 type RuleDomainSchemaType = TypeOf<typeof ruleDomainSchema>;
 
@@ -62,6 +58,7 @@ export interface Rule<Params extends RuleParams = never> {
   consumer: RuleSchemaType['consumer'];
   schedule: RuleSchemaType['schedule'];
   actions: RuleSchemaType['actions'];
+  systemActions?: RuleSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleSchemaType['mapped_params'];
   scheduledTaskId?: RuleSchemaType['scheduledTaskId'];
@@ -85,6 +82,7 @@ export interface Rule<Params extends RuleParams = never> {
   revision: RuleSchemaType['revision'];
   running?: RuleSchemaType['running'];
   viewInAppRelativeUrl?: RuleSchemaType['viewInAppRelativeUrl'];
+  alertDelay?: RuleSchemaType['alertDelay'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -96,6 +94,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   consumer: RuleDomainSchemaType['consumer'];
   schedule: RuleDomainSchemaType['schedule'];
   actions: RuleDomainSchemaType['actions'];
+  systemActions: RuleDomainSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleDomainSchemaType['mapped_params'];
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];
@@ -120,4 +119,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   revision: RuleDomainSchemaType['revision'];
   running?: RuleDomainSchemaType['running'];
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];
+  alertDelay?: RuleSchemaType['alertDelay'];
 }

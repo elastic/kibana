@@ -25,6 +25,13 @@ export const dashboardReadonlyBadge = {
     }),
 };
 
+export const dashboardManagedBadge = {
+  getTooltip: () =>
+    i18n.translate('dashboard.badge.managed.tooltip', {
+      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
+    }),
+};
+
 /**
  * @param title {string} the current title of the dashboard
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
@@ -50,6 +57,15 @@ export const unsavedChangesBadgeStrings = {
     i18n.translate('dashboard.unsavedChangesBadgeToolTipContent', {
       defaultMessage:
         ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
+    }),
+  getHasRunMigrationsText: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadge', {
+      defaultMessage: 'Save recommended',
+    }),
+  getHasRunMigrationsToolTipContent: () =>
+    i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
+      defaultMessage:
+        'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
     }),
 };
 
@@ -132,7 +148,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Dashboards',
   });
 
 export const topNavStrings = {

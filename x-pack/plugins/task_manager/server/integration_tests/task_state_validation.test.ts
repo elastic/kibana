@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import {
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import { v4 as uuidV4 } from 'uuid';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { schema } from '@kbn/config-schema';
 import { TaskStatus } from '../task';
-import { type TaskPollingLifecycleOpts } from '../polling_lifecycle';
-import { type TaskClaimingOpts } from '../queries/task_claiming';
+import type { TaskPollingLifecycleOpts } from '../polling_lifecycle';
+import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
 
@@ -77,8 +75,8 @@ jest.mock('../queries/task_claiming', () => {
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
 describe('task state validation', () => {
-  // FLAKY: https://github.com/elastic/kibana/issues/161081
-  describe.skip('allow_reading_invalid_state: true', () => {
+  describe('allow_reading_invalid_state: true', () => {
+    const taskIdsToRemove: string[] = [];
     let esServer: TestElasticsearchUtils;
     let kibanaServer: TestKibanaUtils;
     let taskManagerPlugin: TaskManagerStartContract;
@@ -110,19 +108,20 @@ describe('task state validation', () => {
     });
 
     afterEach(async () => {
-      await taskManagerPlugin.removeIfExists('foo');
+      while (taskIdsToRemove.length > 0) {
+        const id = taskIdsToRemove.pop();
+        await taskManagerPlugin.removeIfExists(id!);
+      }
     });
 
     it('should drop unknown fields from the task state', async () => {
-      const taskRunnerPromise = new Promise((resolve) => {
-        mockTaskTypeRunFn.mockImplementation(() => {
-          setTimeout(resolve, 0);
-          return { state: {} };
-        });
+      mockTaskTypeRunFn.mockImplementation(() => {
+        return { state: {} };
       });
 
+      const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-        id: 'foo',
+        id,
         taskType: 'fooType',
         params: { foo: true },
         state: { foo: 'test', bar: 'test', baz: 'test', invalidProperty: 'invalid' },
@@ -136,8 +135,11 @@ describe('task state validation', () => {
         retryAt: null,
         ownerId: null,
       });
+      taskIdsToRemove.push(id);
 
-      await taskRunnerPromise;
+      await retry(async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalled();
+      });
 
       expect(mockCreateTaskRunner).toHaveBeenCalledTimes(1);
       const call = mockCreateTaskRunner.mock.calls[0][0];
@@ -150,22 +152,21 @@ describe('task state validation', () => {
 
     it('should fail to update the task if the task runner returns an unknown property in the state', async () => {
       const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
-      const taskRunnerPromise = new Promise((resolve) => {
-        mockTaskTypeRunFn.mockImplementation(() => {
-          setTimeout(resolve, 0);
-          return { state: { invalidField: true, foo: 'test', bar: 'test', baz: 'test' } };
-        });
+      mockTaskTypeRunFn.mockImplementation(() => {
+        return { state: { invalidField: true, foo: 'test', bar: 'test', baz: 'test' } };
       });
 
-      await taskManagerPlugin.schedule({
-        id: 'foo',
+      const task = await taskManagerPlugin.schedule({
         taskType: 'fooType',
         params: {},
         state: { foo: 'test', bar: 'test', baz: 'test' },
         schedule: { interval: '1d' },
       });
+      taskIdsToRemove.push(task.id);
 
-      await taskRunnerPromise;
+      await retry(async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalled();
+      });
 
       expect(mockCreateTaskRunner).toHaveBeenCalledTimes(1);
       const call = mockCreateTaskRunner.mock.calls[0][0];
@@ -175,21 +176,19 @@ describe('task state validation', () => {
         baz: 'test',
       });
       expect(errorLogSpy).toHaveBeenCalledWith(
-        'Task fooType "foo" failed: Error: [invalidField]: definition for this key is missing',
+        `Task fooType "${task.id}" failed: Error: [invalidField]: definition for this key is missing`,
         expect.anything()
       );
     });
 
     it('should migrate the task state', async () => {
-      const taskRunnerPromise = new Promise((resolve) => {
-        mockTaskTypeRunFn.mockImplementation(() => {
-          setTimeout(resolve, 0);
-          return { state: {} };
-        });
+      mockTaskTypeRunFn.mockImplementation(() => {
+        return { state: {} };
       });
 
+      const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-        id: 'foo',
+        id,
         taskType: 'fooType',
         params: { foo: true },
         state: {},
@@ -202,8 +201,11 @@ describe('task state validation', () => {
         retryAt: null,
         ownerId: null,
       });
+      taskIdsToRemove.push(id);
 
-      await taskRunnerPromise;
+      await retry(async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalled();
+      });
 
       expect(mockCreateTaskRunner).toHaveBeenCalledTimes(1);
       const call = mockCreateTaskRunner.mock.calls[0][0];
@@ -216,15 +218,13 @@ describe('task state validation', () => {
 
     it('should debug log by default when reading an invalid task state', async () => {
       const debugLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'debug');
-      const taskRunnerPromise = new Promise((resolve) => {
-        mockTaskTypeRunFn.mockImplementation(() => {
-          setTimeout(resolve, 0);
-          return { state: {} };
-        });
+      mockTaskTypeRunFn.mockImplementation(() => {
+        return { state: {} };
       });
 
+      const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-        id: 'foo',
+        id,
         taskType: 'fooType',
         params: { foo: true },
         state: { foo: true, bar: 'test', baz: 'test' },
@@ -238,8 +238,11 @@ describe('task state validation', () => {
         retryAt: null,
         ownerId: null,
       });
+      taskIdsToRemove.push(id);
 
-      await taskRunnerPromise;
+      await retry(async () => {
+        expect(mockTaskTypeRunFn).toHaveBeenCalled();
+      });
 
       expect(mockCreateTaskRunner).toHaveBeenCalledTimes(1);
       const call = mockCreateTaskRunner.mock.calls[0][0];
@@ -250,12 +253,13 @@ describe('task state validation', () => {
       });
 
       expect(debugLogSpy).toHaveBeenCalledWith(
-        `[fooType][foo] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [foo]: expected value of type [string] but got [boolean]`
+        `[fooType][${id}] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: [foo]: expected value of type [string] but got [boolean]`
       );
     });
   });
 
   describe('allow_reading_invalid_state: false', () => {
+    const taskIdsToRemove: string[] = [];
     let esServer: TestElasticsearchUtils;
     let kibanaServer: TestKibanaUtils;
     let taskManagerPlugin: TaskManagerStartContract;
@@ -293,14 +297,19 @@ describe('task state validation', () => {
     });
 
     afterEach(async () => {
-      await taskManagerPlugin.removeIfExists('foo');
+      while (taskIdsToRemove.length > 0) {
+        const id = taskIdsToRemove.pop();
+        await taskManagerPlugin.removeIfExists(id!);
+      }
     });
 
     it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
-      const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
+      const logSpy = jest.spyOn(pollingLifecycleOpts.logger, 'warn');
+      const updateSpy = jest.spyOn(pollingLifecycleOpts.taskStore, 'bulkUpdate');
 
+      const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
-        id: 'foo',
+        id,
         taskType: 'fooType',
         params: { foo: true },
         state: { foo: true, bar: 'test', baz: 'test' },
@@ -314,14 +323,17 @@ describe('task state validation', () => {
         retryAt: null,
         ownerId: null,
       });
+      taskIdsToRemove.push(id);
 
       await retry(async () => {
-        expect(errorLogSpy).toHaveBeenCalledWith(
-          `Failed to poll for work: Error: [foo]: expected value of type [string] but got [boolean]`
+        expect(logSpy.mock.calls[0][0]).toBe(
+          `Task (fooType/${id}) has a validation error: [foo]: expected value of type [string] but got [boolean]`
+        );
+        expect(updateSpy).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ id, taskType: 'fooType' })]),
+          { validate: false }
         );
       });
-
-      expect(mockCreateTaskRunner).not.toHaveBeenCalled();
     });
   });
 });

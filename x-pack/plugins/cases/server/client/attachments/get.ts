@@ -7,27 +7,25 @@
 
 import type { SavedObject } from '@kbn/core/server';
 
+import type {
+  AlertAttachmentAttributes,
+  Attachment,
+  Attachments,
+} from '../../../common/types/domain';
+import { AttachmentType } from '../../../common';
+import type { AlertResponse, AttachmentsFindResponse } from '../../../common/types/api';
+import {
+  AlertResponseRt,
+  FindAttachmentsQueryParamsRt,
+  AttachmentsFindResponseRt,
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
-import type {
-  AlertResponse,
-  Comments,
-  AttributesTypeAlerts,
-  Comment,
-  CommentsFindResponse,
-} from '../../../common/api';
+
 import type { FindCommentsArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
-import {
-  FindCommentsQueryParamsRt,
-  CommentType,
-  CommentsRt,
-  CommentRt,
-  CommentsFindResponseRt,
-  decodeWithExcessOrThrow,
-  AlertResponseRt,
-} from '../../../common/api';
+import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
   transformComments,
@@ -39,9 +37,11 @@ import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
 
-const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
+const normalizeAlertResponse = (
+  alerts: Array<SavedObject<AlertAttachmentAttributes>>
+): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
     const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
 
@@ -113,7 +113,7 @@ export const getAllAlertsAttachToCase = async (
 export async function find(
   { caseID, findQueryParams }: FindCommentsArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentsFindResponse> {
+): Promise<AttachmentsFindResponse> {
   const {
     services: { attachmentService },
     logger,
@@ -121,14 +121,14 @@ export async function find(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(FindCommentsQueryParamsRt)(findQueryParams);
+    const queryParams = decodeWithExcessOrThrow(FindAttachmentsQueryParamsRt)(findQueryParams);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);
 
     const filter = combineFilters([
       buildFilter({
-        filters: [CommentType.user],
+        filters: [AttachmentType.user],
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -156,7 +156,7 @@ export async function find(
 
     const res = transformComments(theComments);
 
-    return decodeOrThrow(CommentsFindResponseRt)(res);
+    return decodeOrThrow(AttachmentsFindResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -172,7 +172,7 @@ export async function find(
 export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<Comment> {
+): Promise<Attachment> {
   const {
     services: { attachmentService },
     logger,
@@ -191,7 +191,7 @@ export async function get(
 
     const res = flattenCommentSavedObject(comment);
 
-    return decodeOrThrow(CommentRt)(res);
+    return decodeOrThrow(AttachmentRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
@@ -207,7 +207,7 @@ export async function get(
 export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<Comments> {
+): Promise<Attachments> {
   const {
     services: { caseService },
     logger,
@@ -233,7 +233,7 @@ export async function getAll(
 
     const res = flattenCommentSavedObjects(comments.saved_objects);
 
-    return decodeOrThrow(CommentsRt)(res);
+    return decodeOrThrow(AttachmentsRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -14,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
-import { GraphControls } from './graph_controls';
+import { GraphControls } from './controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
@@ -71,9 +69,7 @@ export const ResolverWithoutProviders = React.memo(
     const timeAtRender = timestamp();
 
     const { processNodePositions, connectingEdgeLineSegments } = useSelector((state: State) =>
-      selectors.visibleNodesAndEdgeLines(state.analyzer.analyzerById[resolverComponentInstanceID])(
-        timeAtRender
-      )
+      selectors.visibleNodesAndEdgeLines(state.analyzer[resolverComponentInstanceID])(timeAtRender)
     );
 
     const {
@@ -97,16 +93,16 @@ export const ResolverWithoutProviders = React.memo(
       [cameraRef, refToForward]
     );
     const isLoading = useSelector((state: State) =>
-      selectors.isTreeLoading(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.isTreeLoading(state.analyzer[resolverComponentInstanceID])
     );
     const hasError = useSelector((state: State) =>
-      selectors.hadErrorLoadingTree(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.hadErrorLoadingTree(state.analyzer[resolverComponentInstanceID])
     );
     const activeDescendantId = useSelector((state: State) =>
-      selectors.ariaActiveDescendant(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.ariaActiveDescendant(state.analyzer[resolverComponentInstanceID])
     );
     const resolverTreeHasNodes = useSelector((state: State) =>
-      selectors.resolverTreeHasNodes(state.analyzer.analyzerById[resolverComponentInstanceID])
+      selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID])
     );
     const colorMap = useColors();
 

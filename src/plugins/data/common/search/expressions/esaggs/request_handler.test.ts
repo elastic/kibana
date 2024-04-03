@@ -22,7 +22,7 @@ jest.mock('../../tabify', () => ({
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;
@@ -53,7 +53,7 @@ describe('esaggs expression function - public', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: searchSourceCommonMock,
-      disableShardWarnings: false,
+      disableWarningToasts: false,
       timeFields: ['@timestamp', 'utc_time'],
       timeRange: undefined,
     };
@@ -139,7 +139,7 @@ describe('esaggs expression function - public', () => {
         description: 'This request queries Elasticsearch to fetch the data for the visualization.',
         adapter: undefined,
       },
-      disableShardFailureWarning: false,
+      disableWarningToasts: false,
     });
   });
 
@@ -159,7 +159,7 @@ describe('esaggs expression function - public', () => {
         description: 'MyDescription',
         adapter: undefined,
       },
-      disableShardFailureWarning: false,
+      disableWarningToasts: false,
     });
   });
 

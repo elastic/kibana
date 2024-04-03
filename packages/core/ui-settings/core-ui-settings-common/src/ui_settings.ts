@@ -26,6 +26,14 @@ export type UiSettingsType =
   | 'color';
 
 /**
+ * Type for the readonly mode of the readonly settings.
+ * 'strict' indicates that the value cannot be changed through API and is not displayed in the UI
+ * 'ui' indicates that the value is just not displayed in the UI
+ * @public
+ * */
+export type ReadonlyModeType = 'strict' | 'ui';
+
+/**
  * UiSettings deprecation field options.
  * @public
  * */
@@ -57,6 +65,8 @@ export interface UiSettingsParams<T = unknown> {
   requiresPageReload?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
+  /** a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType} */
+  readonlyMode?: ReadonlyModeType;
   /**
    * a flag indicating that value might contain user sensitive data.
    * used by telemetry to mask the value of the setting when sent.
@@ -73,9 +83,15 @@ export interface UiSettingsParams<T = unknown> {
    * @remark settings without order defined will be displayed last and ordered by name
    */
   order?: number;
-  /*
-   * Value validation schema
+  /**
+   * Value validation schema.
    * Used to validate value on write and read.
+   *
+   * This schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.
+   * Use schema options to specify limits on the value. For example:
+   * `schema.number({ min: 0, max: 100 })`
+   *
+   * More information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md
    */
   schema: Type<T>;
   /**

@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import path from 'path';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['header']);
+  const pageObjects = getPageObjects(['header', 'common']);
   const aceEditor = getService('aceEditor');
 
   return {
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
-    },
-
-    async emptyStateHeaderText() {
-      return await testSubjects.getVisibleText('title');
     },
 
     async createNewPipeline({
@@ -37,8 +34,6 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     }) {
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createNewPipeline');
-
-      await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.setValue('descriptionField > input', description);
@@ -61,7 +56,11 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async getPipelinesList() {
+    async getPipelinesList(options?: { searchFor?: string }) {
+      if (options?.searchFor) {
+        await this.searchPipelineList(options.searchFor);
+      }
+
       const pipelines = await testSubjects.findAll('pipelineTableRow');
 
       const getPipelineName = async (pipeline: WebElementWrapper) => {
@@ -72,24 +71,27 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await Promise.all(pipelines.map((pipeline) => getPipelineName(pipeline)));
     },
 
-    async navigateToCreateFromCsv() {
-      await testSubjects.click('createPipelineDropdown');
-      await testSubjects.click('createPipelineFromCsv');
+    async searchPipelineList(searchTerm: string) {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('pipelineTableSearch', searchTerm);
+    },
 
-      await testSubjects.exists('createFromCsvInstructions');
+    async clickPipelineLink(index: number) {
+      const links = await testSubjects.findAll('pipelineDetailsLink');
+      await links.at(index)?.click();
     },
 
     async createPipelineFromCsv({ name }: { name: string }) {
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createPipelineFromCsv');
+
+      await pageObjects.common.setFileInputPath(
+        path.join(__dirname, '..', 'fixtures', 'ingest_pipeline_example_mapping.csv')
+      );
+
       await testSubjects.click('processFileButton');
 
-      await testSubjects.exists('pipelineMappingsJSONEditor');
-
-      await testSubjects.exists('copyToClipboard');
-      await testSubjects.exists('downloadJson');
-
       await testSubjects.click('continueToCreate');
-
-      await testSubjects.exists('pipelineForm');
 
       await testSubjects.setValue('nameField > input', name);
       await testSubjects.click('submitButton');
@@ -99,6 +101,15 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async closePipelineDetailsFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async detailsFlyoutExists() {
+      return await testSubjects.exists('pipelineDetails');
+    },
+
+    async increasePipelineListPageSize() {
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click(`tablePagination-50-rows`);
     },
   };
 }

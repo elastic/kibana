@@ -30,6 +30,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -257,9 +259,9 @@ describe('update()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation update 
-            Error: Error: Unauthorized for fake.rule and apm"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation update 
+      Error: Error: Unauthorized for fake.rule and apm"
+    `);
 
     expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
       message: `Failed attempt to update alert [id=${fakeAlertId}]`,
@@ -289,9 +291,9 @@ describe('update()', () => {
         index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation update 
-            Error: Error: something went wrong on update"
-          `);
+      "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation update 
+      Error: Error: something went wrong on update"
+    `);
   });
 
   test(`throws an error if ES client update fails`, async () => {

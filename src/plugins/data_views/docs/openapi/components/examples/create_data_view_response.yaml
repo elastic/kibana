@@ -1,0 +1,50 @@
+summary: The create data view API returns a JSON object that contains details about the new data view.
+value:
+  {
+    "data_view": {
+      "id": "b561acfb-0181-455e-84a3-ce8980b2272f",
+      "version": "WzQ5LDJd",
+      "title": "logstash-*",
+      "sourceFilters": [],
+      "fields": {
+        "runtime_shape_name": {
+          "count": 0,
+          "name": "runtime_shape_name",
+          "type": "string",
+          "esTypes": [
+            "keyword"
+          ],
+          "scripted": false,
+          "searchable": true,
+          "aggregatable": true,
+          "readFromDocValues": false,
+          "format": {
+            "id": "string"
+          },
+          "shortDotsEnable": false,
+          "runtimeField": {
+            "type": "keyword",
+            "script": {
+              "source": "emit(doc['shape_name'].value)"
+            }
+          }
+        }
+      },
+      "typeMeta": {},
+      "fieldFormats": {},
+      "runtimeFieldMap": {
+        "runtime_shape_name": {
+          "type": "keyword",
+          "script": {
+            "source": "emit(doc['shape_name'].value)"
+          }
+        }
+      },
+      "fieldAttrs": {},
+      "allowNoIndex": false,
+      "name": "My Logstash data view",
+      "namespaces": [
+        "default"
+      ]
+    }
+  }

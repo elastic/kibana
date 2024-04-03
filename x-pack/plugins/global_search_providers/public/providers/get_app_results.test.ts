@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  AppNavLinkStatus,
-  AppStatus,
-  PublicAppInfo,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/public';
+import { AppStatus, PublicAppInfo, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import {
   AppLink,
   appToResult,
@@ -24,8 +19,7 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   title: 'App 1',
   appRoute: '/app/app1',
   status: AppStatus.accessible,
-  navLinkStatus: AppNavLinkStatus.visible,
-  searchable: true,
+  visibleIn: ['globalSearch'],
   chromeless: false,
   keywords: [],
   deepLinks: [],
@@ -48,7 +42,7 @@ describe('getAppResults', () => {
       createApp({
         id: 'dashboard_not_searchable',
         title: 'dashboard not searchable',
-        searchable: false,
+        visibleIn: [],
       }),
     ];
 
@@ -68,8 +62,7 @@ describe('getAppResults', () => {
             path: '/sub1',
             deepLinks: [],
             keywords: [],
-            navLinkStatus: AppNavLinkStatus.hidden,
-            searchable: true,
+            visibleIn: ['globalSearch'],
           },
           {
             id: 'sub2',
@@ -82,13 +75,11 @@ describe('getAppResults', () => {
                 path: '/sub2/sub1',
                 deepLinks: [],
                 keywords: [],
-                navLinkStatus: AppNavLinkStatus.hidden,
-                searchable: true,
+                visibleIn: ['globalSearch'],
               },
             ],
             keywords: [],
-            navLinkStatus: AppNavLinkStatus.visible,
-            searchable: false,
+            visibleIn: [],
           },
         ],
         keywords: [],
@@ -104,6 +95,54 @@ describe('getAppResults', () => {
     ]);
   });
 
+  it('deep links "category" and "icon" should take precedence over the same app properties', () => {
+    const apps = [
+      createApp({
+        euiIconType: 'logoKibana',
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        deepLinks: [
+          {
+            id: 'sub-observability',
+            title: 'Sub Observability',
+            path: '/sub-observability',
+            deepLinks: [],
+            keywords: [],
+            visibleIn: ['globalSearch'],
+          },
+          {
+            id: 'sub-security',
+            title: 'Sub Security',
+            path: '/sub-security',
+            deepLinks: [],
+            keywords: [],
+            visibleIn: ['globalSearch'],
+            euiIconType: 'logoSecurity',
+            category: DEFAULT_APP_CATEGORIES.security,
+          },
+        ],
+        keywords: [],
+      }),
+    ];
+
+    const results = getAppResults('App 1', apps);
+    const [appLink, observabilityLink, securityLink] = results;
+    expect(appLink).toMatchObject({
+      icon: 'logoKibana',
+      meta: { categoryId: 'kibana', categoryLabel: 'Analytics' },
+      title: 'App 1',
+    });
+    expect(observabilityLink).toMatchObject({
+      icon: 'logoKibana',
+      meta: { categoryId: 'kibana', categoryLabel: 'Analytics' },
+      title: 'App 1 / Sub Observability',
+    });
+    expect(securityLink).toMatchObject({
+      icon: 'logoSecurity',
+      meta: { categoryId: 'securitySolution', categoryLabel: 'Security' },
+      title: 'App 1 / Sub Security',
+    });
+  });
+
   it('only includes deepLinks when search term is non-empty', () => {
     const apps = [
       createApp({
@@ -114,8 +153,7 @@ describe('getAppResults', () => {
             path: '/sub1',
             deepLinks: [],
             keywords: [],
-            navLinkStatus: AppNavLinkStatus.hidden,
-            searchable: true,
+            visibleIn: ['globalSearch'],
           },
         ],
         keywords: [],
@@ -123,7 +161,7 @@ describe('getAppResults', () => {
       createApp({
         id: 'AppNotSearchable',
         title: 'App 1 not searchable',
-        searchable: false,
+        visibleIn: [],
       }),
     ];
 
@@ -147,8 +185,7 @@ describe('getAppResults', () => {
             path: '/sub1',
             deepLinks: [],
             keywords: [],
-            navLinkStatus: AppNavLinkStatus.hidden,
-            searchable: true,
+            visibleIn: ['globalSearch'],
           },
           {
             id: 'sub2',
@@ -161,13 +198,11 @@ describe('getAppResults', () => {
                 path: '/sub2/sub1',
                 deepLinks: [],
                 keywords: ['TwoOne'],
-                navLinkStatus: AppNavLinkStatus.hidden,
-                searchable: true,
+                visibleIn: ['globalSearch'],
               },
             ],
             keywords: ['two'],
-            navLinkStatus: AppNavLinkStatus.hidden,
-            searchable: true,
+            visibleIn: ['globalSearch'],
           },
         ],
         keywords: [],

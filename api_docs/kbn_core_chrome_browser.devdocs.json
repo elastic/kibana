@@ -73,6 +73,54 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeBreadcrumb",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeBreadcrumb",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          },
+          " extends ",
+          "EuiBreadcrumbProps"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeBreadcrumb.deepLinkId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deepLinkId",
+            "description": [
+              "\nThe deepLinkId can be used to merge the navigational breadcrumbs set via project navigation\nwith the deeper context breadcrumbs set via the `chrome.setBreadcrumbs` API."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.AppDeepLinkId",
+                "text": "AppDeepLinkId"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.ChromeBreadcrumbsAppendExtension",
         "type": "Interface",
         "tags": [],
@@ -700,6 +748,9 @@
             "tags": [],
             "label": "href",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -710,6 +761,36 @@
             "type": "string",
             "tags": [],
             "label": "iconType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpMenuLink.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpMenuLink.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
             "description": [],
             "signature": [
               "string | undefined"
@@ -1209,31 +1290,24 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeNavLink.disabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabled",
+            "id": "def-common.ChromeNavLink.visibleIn",
+            "type": "Array",
+            "tags": [
+              "default"
+            ],
+            "label": "visibleIn",
             "description": [
-              "\nDisables a link from being clickable.\n"
+              "\nList of locations where the nav link should be visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
             ],
             "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeNavLink.hidden",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidden",
-            "description": [
-              "\nHides a link from the navigation."
-            ],
-            "signature": [
-              "boolean | undefined"
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLinkLocations",
+                "text": "AppDeepLinkLocations"
+              },
+              "[]"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
             "deprecated": false,
@@ -1428,48 +1502,23 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-common.ChromeProjectNavigation",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeProjectNavigation",
-        "description": [],
-        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigation.navigationTree",
-            "type": "Array",
-            "tags": [],
-            "label": "navigationTree",
-            "description": [
-              "\nThe navigation tree representation of the side bar navigation."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
-              "[]"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.ChromeProjectNavigationNode",
         "type": "Interface",
         "tags": [],
         "label": "ChromeProjectNavigationNode",
-        "description": [],
+        "description": [
+          "\n\nChrome project navigation node. This is the tree definition stored in the Chrome service\nthat is generated based on the NodeDefinition below.\nSome of the process that occurs between the 2 are:\n- \"link\" prop get converted to existing ChromNavLink\n- \"path\" is added to each node based on where it is located in the tree\n- \"isActive\" state is set for each node if its URL matches the current location"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeProjectNavigationNode",
+            "text": "ChromeProjectNavigationNode"
+          },
+          " extends NodeDefinitionBase"
+        ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1503,14 +1552,11 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeProjectNavigationNode.path",
-            "type": "Array",
+            "type": "string",
             "tags": [],
             "label": "path",
             "description": [
               "Path in the tree of the node"
-            ],
-            "signature": [
-              "string[]"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -1541,28 +1587,12 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.icon",
-            "type": "string",
-            "tags": [],
-            "label": "icon",
-            "description": [
-              "Optional icon for the navigation node. Note: not all navigation depth will render the icon"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeProjectNavigationNode.children",
             "type": "Array",
             "tags": [],
             "label": "children",
             "description": [
-              "Optional children of the navigation node"
+              "\nOptional children of the navigation node. Once a node has \"children\" defined it is\nconsidered a \"group\" node."
             ],
             "signature": [
               {
@@ -1580,86 +1610,33 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.href",
-            "type": "string",
-            "tags": [],
-            "label": "href",
-            "description": [
-              "\nhref for absolute links only. Internal links should use \"link\"."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.isActive",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isActive",
-            "description": [
-              "\nFlag to indicate if the node is currently active."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.getIsActive",
+            "id": "def-common.ChromeProjectNavigationNode.renderItem",
             "type": "Function",
             "tags": [],
-            "label": "getIsActive",
+            "label": "renderItem",
             "description": [
-              "\nOptional function to get the active state. This function is called whenever the location changes."
+              "\nHandler to render the node item with custom JSX. This handler is added to render the `children` of\nthe Navigation.Item component when React components are used to declare the navigation tree."
             ],
             "signature": [
-              "((location: ",
-              "Location",
-              "<unknown>) => boolean) | undefined"
+              "(() => React.ReactNode) | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-common.ChromeProjectNavigationNode.getIsActive.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "location",
-                "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
-                "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
+            "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.ChromeProjectNavigationNode.breadcrumbStatus",
+            "id": "def-common.ChromeProjectNavigationNode.isElasticInternalLink",
             "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
-            "label": "breadcrumbStatus",
+            "tags": [],
+            "label": "isElasticInternalLink",
             "description": [
-              "\nOptional flag to indicate if the breadcrumb should be hidden when this node is active."
+              "\nFlag to indicate if the node is an \"external\" cloud link"
             ],
             "signature": [
-              "\"hidden\" | \"visible\" | undefined"
+              "boolean | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -2125,7 +2102,13 @@
               "() => ",
               "Observable",
               "<",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]>"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
@@ -2145,7 +2128,13 @@
             ],
             "signature": [
               "(newBreadcrumbs: ",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]) => void"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
@@ -2160,7 +2149,13 @@
                 "label": "newBreadcrumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumbProps",
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeBreadcrumb",
+                    "text": "ChromeBreadcrumb"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
@@ -2750,6 +2745,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.getIsSideNavCollapsed$",
+            "type": "Function",
+            "tags": [],
+            "label": "getIsSideNavCollapsed$",
+            "description": [
+              "\nGet an observable of the current collapsed state of the side nav."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2808,6 +2823,411 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.CloudLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudLink",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudLink.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudLink.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.CloudURLs",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudURLs",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.baseUrl",
+            "type": "string",
+            "tags": [],
+            "label": "baseUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.billingUrl",
+            "type": "string",
+            "tags": [],
+            "label": "billingUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.deploymentsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "deploymentsUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.deploymentUrl",
+            "type": "string",
+            "tags": [],
+            "label": "deploymentUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.projectsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "projectsUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.performanceUrl",
+            "type": "string",
+            "tags": [],
+            "label": "performanceUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.CloudURLs.usersAndRolesUrl",
+            "type": "string",
+            "tags": [],
+            "label": "usersAndRolesUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.GroupDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.GroupDefinition",
+            "text": "GroupDefinition"
+          },
+          "<LinkId, Id, ChildrenId> extends Omit<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<LinkId, Id, ChildrenId>, \"children\">"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.GroupDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"navGroup\""
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.GroupDefinition.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.NodeDefinition",
+                "text": "NodeDefinition"
+              },
+              "<LinkId, Id, ChildrenId>[]"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ItemDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ItemDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ItemDefinition",
+            "text": "ItemDefinition"
+          },
+          "<LinkId, Id, ChildrenId> extends Omit<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.NodeDefinition",
+            "text": "NodeDefinition"
+          },
+          "<LinkId, Id, ChildrenId>, \"children\">"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ItemDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"navItem\""
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.NavigationTreeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "NavigationTreeDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.NavigationTreeDefinition",
+            "text": "NavigationTreeDefinition"
+          },
+          "<LinkId, Id, ChildrenId>"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NavigationTreeDefinition.body",
+            "type": "Array",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "\nMain content of the navigation. Can contain any number of \"cloudLink\", \"recentlyAccessed\"\nor \"group\" items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.RootNavigationItemDefinition",
+                "text": "RootNavigationItemDefinition"
+              },
+              "<LinkId, Id, ChildrenId>[]"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NavigationTreeDefinition.footer",
+            "type": "Array",
+            "tags": [],
+            "label": "footer",
+            "description": [
+              "\nFooter content of the navigation. Can contain any number of \"cloudLink\", \"recentlyAccessed\"\nor \"group\" items."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.RootNavigationItemDefinition",
+                "text": "RootNavigationItemDefinition"
+              },
+              "<LinkId, Id, ChildrenId>[] | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.NavigationTreeDefinitionUI",
+        "type": "Interface",
+        "tags": [],
+        "label": "NavigationTreeDefinitionUI",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NavigationTreeDefinitionUI.body",
+            "type": "Array",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeProjectNavigationNode",
+                "text": "ChromeProjectNavigationNode"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.RecentlyAccessedDefinition",
+                "text": "RecentlyAccessedDefinition"
+              },
+              ")[]"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NavigationTreeDefinitionUI.footer",
+            "type": "Array",
+            "tags": [],
+            "label": "footer",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeProjectNavigationNode",
+                "text": "ChromeProjectNavigationNode"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.RecentlyAccessedDefinition",
+                "text": "RecentlyAccessedDefinition"
+              },
+              ")[] | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.NodeDefinition",
         "type": "Interface",
         "tags": [],
@@ -2821,7 +3241,7 @@
             "section": "def-common.NodeDefinition",
             "text": "NodeDefinition"
           },
-          "<LinkId, Id, ChildrenId>"
+          "<LinkId, Id, ChildrenId> extends NodeDefinitionBase"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
@@ -2877,15 +3297,22 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.NodeDefinition.icon",
-            "type": "string",
+            "id": "def-common.NodeDefinition.cloudLink",
+            "type": "CompoundType",
             "tags": [],
-            "label": "icon",
+            "label": "cloudLink",
             "description": [
-              "Optional icon for the navigation node. Note: not all navigation depth will render the icon"
+              "Cloud link id"
             ],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.CloudLinkId",
+                "text": "CloudLinkId"
+              },
+              " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -2894,14 +3321,13 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.NodeDefinition.children",
-            "type": "Object",
+            "type": "Array",
             "tags": [],
             "label": "children",
             "description": [
-              "Optional children of the navigation node"
+              "Optional children of the navigation node. Can not be used with `isGroupTitle`"
             ],
             "signature": [
-              "NonEmptyArray<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
                 "scope": "common",
@@ -2909,23 +3335,53 @@
                 "section": "def-common.NodeDefinition",
                 "text": "NodeDefinition"
               },
-              "<LinkId, Id, ChildrenId>> | undefined"
+              "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.PresetDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "PresetDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.PresetDefinition",
+            "text": "PresetDefinition"
           },
+          "<LinkId, Id, ChildrenId> extends Omit<",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.GroupDefinition",
+            "text": "GroupDefinition"
+          },
+          "<LinkId, Id, ChildrenId>, \"type\" | \"children\">"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.NodeDefinition.href",
+            "id": "def-common.PresetDefinition.type",
             "type": "string",
             "tags": [],
-            "label": "href",
-            "description": [
-              "\nUse href for absolute links only. Internal links should use \"link\"."
-            ],
+            "label": "type",
+            "description": [],
             "signature": [
-              "string | undefined"
+              "\"preset\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -2933,54 +3389,84 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.NodeDefinition.getIsActive",
-            "type": "Function",
+            "id": "def-common.PresetDefinition.preset",
+            "type": "CompoundType",
             "tags": [],
-            "label": "getIsActive",
-            "description": [
-              "\nOptional function to get the active state. This function is called whenever the location changes."
-            ],
+            "label": "preset",
+            "description": [],
             "signature": [
-              "((location: ",
-              "Location",
-              "<unknown>) => boolean) | undefined"
+              "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-common.NodeDefinition.getIsActive.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "location",
-                "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
-                "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.RecentlyAccessedDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentlyAccessedDefinition",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.RecentlyAccessedDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"recentlyAccessed\""
             ],
-            "returnComment": []
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-common.NodeDefinition.breadcrumbStatus",
+            "id": "def-common.RecentlyAccessedDefinition.recentlyAccessed$",
+            "type": "Object",
+            "tags": [],
+            "label": "recentlyAccessed$",
+            "description": [
+              "\nOptional observable for recently accessed items. If not provided, the\nrecently items from the Chrome service will be used."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeRecentlyAccessedHistoryItem",
+                "text": "ChromeRecentlyAccessedHistoryItem"
+              },
+              "[]> | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.RecentlyAccessedDefinition.defaultIsCollapsed",
             "type": "CompoundType",
             "tags": [
               "default"
             ],
-            "label": "breadcrumbStatus",
+            "label": "defaultIsCollapsed",
             "description": [
-              "\nOptional flag to indicate if the breadcrumb should be hidden when this node is active."
+              "\nIf true, the recently accessed list will be collapsed by default."
             ],
             "signature": [
-              "\"hidden\" | \"visible\" | undefined"
+              "boolean | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
@@ -3023,6 +3509,181 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.SolutionNavigationDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SolutionNavigationDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.SolutionNavigationDefinition",
+            "text": "SolutionNavigationDefinition"
+          },
+          "<LinkId>"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique id for the solution navigation."
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinition.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "Title for the solution navigation."
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinition.navigationTree$",
+            "type": "Object",
+            "tags": [],
+            "label": "navigationTree$",
+            "description": [
+              "The navigation tree definition"
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.NavigationTreeDefinition",
+                "text": "NavigationTreeDefinition"
+              },
+              "<LinkId, string, string>>"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinition.icon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "Optional icon for the solution navigation to render in the select dropdown."
+            ],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinition.sideNavComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sideNavComponent",
+            "description": [
+              "React component to render in the side nav for the navigation"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.SideNavComponent",
+                "text": "SideNavComponent"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinition.homePage",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "homePage",
+            "description": [
+              "The page to navigate to when switching to this solution navigation."
+            ],
+            "signature": [
+              "LinkId | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.SolutionNavigationDefinitions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SolutionNavigationDefinitions",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SolutionNavigationDefinitions.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[id: string]: SolutionNavigationDefinition<AppDeepLinkId>",
+            "description": [],
+            "signature": [
+              "[id: string]:  ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.SolutionNavigationDefinition",
+                "text": "SolutionNavigationDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.AppDeepLinkId",
+                "text": "AppDeepLinkId"
+              },
+              ">"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -3035,53 +3696,7 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/deeplinks-analytics",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksAnalyticsPluginApi",
-            "section": "def-common.AppId",
-            "text": "AppId"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/deeplinks-devtools",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksDevtoolsPluginApi",
-            "section": "def-common.DeepLinkId",
-            "text": "DeepLinkId"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/deeplinks-ml",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksMlPluginApi",
-            "section": "def-common.DeepLinkId",
-            "text": "DeepLinkId"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/deeplinks-management",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksManagementPluginApi",
-            "section": "def-common.DeepLinkId",
-            "text": "DeepLinkId"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/deeplinks-search",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksSearchPluginApi",
-            "section": "def-common.DeepLinkId",
-            "text": "DeepLinkId"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/deeplinks-observability",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.DeepLinkId",
-            "text": "DeepLinkId"
-          }
+          "\"fleet\" | \"ml\" | \"monitoring\" | \"metrics\" | \"management\" | \"synthetics\" | \"apm\" | \"logs\" | \"dashboards\" | \"home\" | \"integrations\" | \"discover\" | \"observability-overview\" | \"dev_tools\" | \"visualize\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:singleMetricViewer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysis\" | \"ml:logPatternAnalysis\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:cases\" | \"management:tags\" | \"management:maintenanceWindows\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:filesManagement\" | \"management:roles\" | \"management:reporting\" | \"management:aiAssistantManagementSelection\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:cross_cluster_replication\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:pipelines\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:triggersActions\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"observability-logs-explorer\" | \"observabilityOnboarding\" | \"slo\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:network\" | \"securitySolutionUI:sessions\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:assets\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:investigations\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:machine_learning-landing\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:uncommon_processes\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:coverage-overview\" | \"fleet:settings\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"fleet:agents\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3096,7 +3711,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"ml\" | \"dev_tools\" | ",
+          "\"fleet\" | \"ml\" | \"home\" | \"dev_tools\" | ",
           {
             "pluginId": "@kbn/deeplinks-analytics",
             "scope": "common",
@@ -3119,26 +3734,10 @@
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.AppId",
             "text": "AppId"
-          }
+          },
+          " | \"securitySolutionUI\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-common.ChromeBreadcrumb",
-        "type": "Type",
-        "tags": [],
-        "label": "ChromeBreadcrumb",
-        "description": [],
-        "signature": [
-          "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
-          "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"time\" | \"step\" | \"location\" | undefined; }"
-        ],
-        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3213,9 +3812,13 @@
         "label": "ChromeProjectBreadcrumb",
         "description": [],
         "signature": [
-          "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
-          "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"time\" | \"step\" | \"location\" | undefined; }"
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          }
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3230,9 +3833,119 @@
         "label": "ChromeStyle",
         "description": [],
         "signature": [
-          "\"project\" | \"classic\""
+          "\"classic\" | \"project\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.CloudLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudLinkId",
+        "description": [],
+        "signature": [
+          "\"projects\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployment\" | \"deployments\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.CloudLinks",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudLinks",
+        "description": [],
+        "signature": [
+          "{ projects?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; userAndRoles?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; performance?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; billingAndSub?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; deployment?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; deployments?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.CloudLink",
+            "text": "CloudLink"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.EuiThemeSize",
+        "type": "Type",
+        "tags": [],
+        "label": "EuiThemeSize",
+        "description": [],
+        "signature": [
+          "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.NavigationGroupPreset",
+        "type": "Type",
+        "tags": [],
+        "label": "NavigationGroupPreset",
+        "description": [
+          "The preset that can be pass to the NavigationBucket component"
+        ],
+        "signature": [
+          "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3252,7 +3965,7 @@
             "section": "def-common.NodeDefinition",
             "text": "NodeDefinition"
           },
-          "<LinkId, Id, ChildrenID> & { children: NonEmptyArray<",
+          "<LinkId, Id, ChildrenID> & { children: ",
           {
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "common",
@@ -3260,7 +3973,68 @@
             "section": "def-common.NodeDefinition",
             "text": "NodeDefinition"
           },
-          "<LinkId, Id, ChildrenID>>; }"
+          "<LinkId, Id, ChildrenID>[]; }"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.RenderAs",
+        "type": "Type",
+        "tags": [],
+        "label": "RenderAs",
+        "description": [],
+        "signature": [
+          "\"block\" | \"item\" | \"accordion\" | \"panelOpener\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.RootNavigationItemDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "RootNavigationItemDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.RecentlyAccessedDefinition",
+            "text": "RecentlyAccessedDefinition"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.GroupDefinition",
+            "text": "GroupDefinition"
+          },
+          "<LinkId, Id, ChildrenId> | ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.PresetDefinition",
+            "text": "PresetDefinition"
+          },
+          "<LinkId, Id, ChildrenId> | ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ItemDefinition",
+            "text": "ItemDefinition"
+          },
+          "<LinkId, Id, ChildrenId>"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3292,6 +4066,21 @@
             "text": "SideNavCompProps"
           },
           ">"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.SideNavNodeStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "SideNavNodeStatus",
+        "description": [],
+        "signature": [
+          "\"hidden\" | \"visible\""
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,

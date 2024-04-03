@@ -7,9 +7,8 @@
  */
 import { useCallback, useMemo } from 'react';
 import { Query } from '@elastic/eui';
-
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { Tag } from './types';
-import type { UserContentCommonSchema } from './table_list_view_table';
 
 type QueryUpdater = (query: Query, tag: Tag) => Query;
 

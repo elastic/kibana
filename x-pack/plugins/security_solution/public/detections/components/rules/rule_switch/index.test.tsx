@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 
 import { performBulkAction } from '../../../../detection_engine/rule_management/api/api';
 import { RuleSwitchComponent } from '.';
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 import { TestProviders } from '../../../../common/mock';
@@ -72,6 +72,33 @@ describe('RuleSwitch', () => {
       wrappingComponent: TestProviders,
     });
     expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props().checked).toBeFalsy();
+  });
+
+  test('it sets the undefined aria-label for switch if ruleName not passed', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} />, {
+      wrappingComponent: TestProviders,
+    });
+    expect(
+      wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']
+    ).toBeUndefined();
+  });
+
+  test('it sets the correct aria-label for switch if "enabled" is true', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={true} id={'7'} ruleName={'test'} />, {
+      wrappingComponent: TestProviders,
+    });
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']).toBe(
+      'Switch off "test"'
+    );
+  });
+
+  test('it sets the correct aria-label for switch if "enabled" is false', () => {
+    const wrapper = mount(<RuleSwitchComponent enabled={false} id={'7'} ruleName={'test'} />, {
+      wrappingComponent: TestProviders,
+    });
+    expect(wrapper.find('[data-test-subj="ruleSwitch"]').at(0).props()['aria-label']).toBe(
+      'Switch on "test"'
+    );
   });
 
   test('it dispatches error toaster if "enableRules" call rejects', async () => {

@@ -41,6 +41,22 @@
         "children": [
           {
             "parentPluginId": "devTools",
+            "id": "def-public.DevToolsPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "devTools",
             "id": "def-public.DevToolsPlugin.setup",
             "type": "Function",
             "tags": [],
@@ -156,7 +172,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.DEV_TOOLS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_FEATURE_ID",
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "description": [
+          "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
+        ],
+        "signature": [
+          "\"devTools:enablePersistentConsole\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "devTools",
@@ -226,7 +277,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-common.DEV_TOOLS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_FEATURE_ID",
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "devTools",
+        "id": "def-common.ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
+        "description": [
+          "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
+        ],
+        "signature": [
+          "\"devTools:enablePersistentConsole\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

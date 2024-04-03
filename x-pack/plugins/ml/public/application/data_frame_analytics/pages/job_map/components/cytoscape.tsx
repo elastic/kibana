@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import React, {
-  CSSProperties,
-  useState,
-  useRef,
-  useEffect,
-  ReactNode,
-  createContext,
-  useCallback,
-  useMemo,
-} from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import cytoscape, { type Stylesheet } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { EuiThemeType } from '../../../../components/color_range_legend';
 import { getCytoscapeOptions } from './cytoscape_options';
+import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 cytoscape.use(dagre);
 
@@ -98,8 +90,8 @@ export function Cytoscape({
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
   const divStyle = useMemo(() => {
-    return { ...style, height };
-  }, [style, height]);
+    return { ...style, height, width };
+  }, [style, height, width]);
 
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
@@ -144,8 +136,10 @@ export function Cytoscape({
   useEffect(() => {
     if (cy) {
       cy.reset();
+      // Refitting because it's possible the the width/height have changed
+      cy.fit();
     }
-  }, [cy, resetCy]);
+  }, [cy, resetCy, width, height]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

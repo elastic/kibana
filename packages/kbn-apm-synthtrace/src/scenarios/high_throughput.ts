@@ -10,6 +10,7 @@ import { random } from 'lodash';
 import { apm, Instance, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -18,7 +19,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const services = ['web', 'order-processing', 'api-backend'];
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.interval('1s');
 
       const instances = services.map((service, index) =>
@@ -95,10 +96,13 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         return successfulTraceEvents;
       };
 
-      return logger.perf('generating_apm_events', () =>
-        instances
-          .flatMap((instance) => urls.map((url) => ({ instance, url })))
-          .map(({ instance, url }, index) => instanceSpans(instance, url, index))
+      return withClient(
+        apmEsClient,
+        logger.perf('generating_apm_events', () =>
+          instances
+            .flatMap((instance) => urls.map((url) => ({ instance, url })))
+            .map(({ instance, url }, index) => instanceSpans(instance, url, index))
+        )
       );
     },
   };

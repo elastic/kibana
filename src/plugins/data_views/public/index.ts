@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+
 export {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
@@ -55,8 +57,8 @@ export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 
 import { DataViewsPublicPlugin } from './plugin';
 
-export function plugin() {
-  return new DataViewsPublicPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataViewsPublicPlugin(initializerContext);
 }
 
 export type {
@@ -65,6 +67,7 @@ export type {
   DataViewsContract,
   HasDataViewsResponse,
   IndicesViaSearchResponse,
+  UserIdGetter,
 } from './types';
 
 // Export plugin after all other imports

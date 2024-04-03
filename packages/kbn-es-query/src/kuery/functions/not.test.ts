@@ -12,6 +12,7 @@ import { DataViewBase } from '../../..';
 
 import * as ast from '../ast';
 import * as not from './not';
+import { KqlNotFunctionNode } from './not';
 
 jest.mock('../grammar');
 
@@ -40,7 +41,7 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test("should wrap a subquery in an ES bool query's must_not clause", () => {
-        const node = nodeTypes.function.buildNode('not', childNode);
+        const node = nodeTypes.function.buildNode('not', childNode) as KqlNotFunctionNode;
         const result = not.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -50,6 +51,14 @@ describe('kuery functions', () => {
         expect(Object.keys(result.bool!).length).toBe(1);
 
         expect(result.bool!.must_not).toEqual(ast.toElasticsearchQuery(childNode, indexPattern));
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('with one sub-expression', () => {
+        const node = nodeTypes.function.buildNode('not', childNode) as KqlNotFunctionNode;
+        const result = not.toKqlExpression(node);
+        expect(result).toBe('NOT extension: jpg');
       });
     });
   });

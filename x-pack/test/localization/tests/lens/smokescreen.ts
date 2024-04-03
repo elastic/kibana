@@ -31,6 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return 'Vertical à barres';
       case 'bar_stacked':
         return 'Vertical à barres empilées';
+      case 'bar_horizontal':
+        return 'Horizontal à barres';
       case 'line':
         return 'Ligne';
       case 'donut':
@@ -58,7 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `Maximum de ${field}` : 'Maximum';
       case 'terms':
-        return field ? `${values} principales valeurs de ${field}` : 'Valeurs les plus élevées';
+        return field
+          ? `${values} valeurs les plus élevées de ${field}`
+          : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
       default:
@@ -76,6 +80,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '縦棒';
       case 'bar_stacked':
         return '積み上げ縦棒';
+      case 'bar_horizontal':
+        return '横棒';
       case 'line':
         return '折れ線';
       case 'donut':
@@ -100,9 +106,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'average':
         return field ? `${field} の平均` : `平均`;
       case 'max':
-        return field ? `${field} お最高値` : '最高';
+        return field ? `${field} の最高値` : '最高';
       case 'terms':
-        return field ? `${field}の上位の${values} 値` : 'トップの値';
+        return field ? `${field}の上位${values} の値` : 'トップの値';
       case 'sum':
         return '合計';
       default:
@@ -120,6 +126,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return '垂直条形图';
       case 'bar_stacked':
         return '垂直堆积条形图';
+      case 'bar_horizontal':
+        return '水平条形图';
       case 'line':
         return '折线图';
       case 'donut':
@@ -243,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // Verify that the field was persisted from the transition
-      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
+      expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`"ip" : *`, `geo.src : CN`]);
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
     });
 
@@ -289,6 +297,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await PageObjects.lens.switchToVisualization('line', termTranslator('line'));
+
+      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('line'));
+      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('bar_stacked'));
+
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -297,14 +309,73 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'median',
-        field: 'bytes',
+        operation: 'average',
+        field: 'machine.ram',
       });
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
+    });
+
+    it('should transition selected layer in a multi layer bar using layer chart switch', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.src',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'machine.ram',
+      });
+
+      // only changes one layer for compatible chart
+      await PageObjects.lens.switchToVisualization('line', termTranslator('line'), 1);
+
+      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('bar_stacked'));
+      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('line'));
+
+      // changes all layers for multilayer chart
+      await PageObjects.lens.switchToVisualization(
+        'bar_horizontal',
+        termTranslator('bar_horizontal'),
+        1
+      );
+      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('bar_horizontal'));
+      expect(await PageObjects.lens.getLayerType(1)).to.eql(termTranslator('bar_horizontal'));
+
+      // generates new one layer chart based on selected layer
+      await PageObjects.lens.switchToVisualization('pie', termTranslator('pie'), 1);
+      expect(await PageObjects.lens.getLayerType(0)).to.eql(termTranslator('pie'));
+      const sliceByText = await PageObjects.lens.getDimensionTriggerText(
+        'lnsPie_sliceByDimensionPanel'
+      );
+      const sizeByText = await PageObjects.lens.getDimensionTriggerText(
+        'lnsPie_sizeByDimensionPanel'
+      );
+
+      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 5));
+      expect(sizeByText).to.be(termTranslator('average', 'machine.ram'));
     });
 
     it('should edit settings of xy line chart', async () => {
@@ -476,12 +547,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from bar chart to line chart using layer chart switch', async () => {
+    it('should transition from bar chart to line chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchLayerSeriesType('line');
+      await PageObjects.lens.switchToVisualization('line', termTranslator('line'));
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
         '@timestamp'

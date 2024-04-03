@@ -17,9 +17,11 @@ import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { FleetIntegrations } from './fleet_integrations_page';
 import { ArtifactEntriesListPageProvider } from './artifact_entries_list_page';
+import { SvlCommonPageProvider } from './svl_common_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
+
   endpoint: EndpointPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
@@ -31,4 +33,6 @@ export const pageObjects = {
   trustedApps: TrustedAppsPageProvider,
   artifactEntriesList: ArtifactEntriesListPageProvider,
   fleetIntegrations: FleetIntegrations,
+
+  svlCommonPage: SvlCommonPageProvider,
 };

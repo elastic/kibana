@@ -10,12 +10,11 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageHeader,
-  EuiEmptyPrompt,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiPageTemplate,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -44,6 +43,25 @@ const ManagedPipelineCallout = () => (
     <FormattedMessage
       id="xpack.ingestPipelines.edit.managedCalloutDescription"
       defaultMessage="Managed pipelines are critical for internal operations."
+    />
+  </EuiCallOut>
+);
+
+const DeprecatedPipelineCallout = () => (
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    data-test-subj="deprecatedPipelineCallout"
+    title={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.deprecatedCalloutTitle"
+        defaultMessage="This pipeline is deprecated"
+      />
+    }
+  >
+    <FormattedMessage
+      id="xpack.ingestPipelines.edit.deprecatedCalloutDescription"
+      defaultMessage="This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one."
     />
   </EuiCallOut>
 );
@@ -95,47 +113,39 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   if (isLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
-            defaultMessage="Loading pipeline…"
-          />
-        </SectionLoading>
-      </EuiPageContent>
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.ingestPipelines.edit.loadingPipelinesDescription"
+          defaultMessage="Loading pipeline…"
+        />
+      </SectionLoading>
     );
   }
 
   if (error) {
     return (
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
+      <EuiPageTemplate.EmptyPrompt
         color="danger"
-        data-test-subj="fetchPipelineError"
-      >
-        <EuiEmptyPrompt
-          iconType="warning"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestPipelines.edit.fetchPipelineError"
-                defaultMessage="Unable to load '{name}'"
-                values={{ name: decodedPipelineName }}
-              />
-            </h2>
-          }
-          body={<p>{error.message}</p>}
-          actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-              <FormattedMessage
-                id="xpack.ingestPipelines.edit.fetchPipelineReloadButton"
-                defaultMessage="Try again"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageContent>
+        iconType="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestPipelines.edit.fetchPipelineError"
+              defaultMessage="Unable to load '{name}'"
+              values={{ name: decodedPipelineName }}
+            />
+          </h2>
+        }
+        body={<p>{error.message}</p>}
+        actions={
+          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.ingestPipelines.edit.fetchPipelineReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 
@@ -173,6 +183,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       {pipeline?.isManaged && (
         <>
           <ManagedPipelineCallout />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {pipeline?.deprecated && (
+        <>
+          <DeprecatedPipelineCallout />
           <EuiSpacer size="l" />
         </>
       )}

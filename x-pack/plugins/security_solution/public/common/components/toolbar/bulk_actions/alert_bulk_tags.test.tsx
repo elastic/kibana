@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
 import { useUiSetting$ } from '../../../lib/kibana';
+import * as helpers from './helpers';
 
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useSetAlertTags } from './use_set_alert_tags';
-import { getUpdateAlertsQuery } from './helpers';
 
 jest.mock('../../../lib/kibana');
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('./use_set_alert_tags');
-jest.mock('./helpers');
 
 const mockTagItems = [
   {
@@ -29,27 +25,172 @@ const mockTagItems = [
   },
 ];
 
-(useUiSetting$ as jest.Mock).mockReturnValue(['default-test-tag']);
-(useAppToasts as jest.Mock).mockReturnValue({
-  addError: jest.fn(),
-  addSuccess: jest.fn(),
-  addWarning: jest.fn(),
-});
-(useSetAlertTags as jest.Mock).mockReturnValue([false, jest.fn()]);
-(getUpdateAlertsQuery as jest.Mock).mockReturnValue({ query: {} });
+(useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1', 'default-test-tag-2']]);
+const createInitialTagsState = jest.spyOn(helpers, 'createInitialTagsState');
+
+const renderTagsMenu = (
+  tags: TimelineItem[],
+  closePopover: () => void = jest.fn(),
+  onSubmit: () => Promise<void> = jest.fn(),
+  setIsLoading: () => void = jest.fn()
+) => {
+  return render(
+    <TestProviders>
+      <BulkAlertTagsPanel
+        alertItems={tags}
+        setIsLoading={setIsLoading}
+        closePopoverMenu={closePopover}
+        onSubmit={onSubmit}
+      />
+    </TestProviders>
+  );
+};
 
 describe('BulkAlertTagsPanel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it renders', () => {
-    const wrapper = render(
-      <TestProviders>
-        <BulkAlertTagsPanel
-          alertItems={mockTagItems}
-          setIsLoading={() => {}}
-          closePopoverMenu={() => {}}
-        />
-      </TestProviders>
-    );
+    const wrapper = renderTagsMenu(mockTagItems);
 
     expect(wrapper.getByTestId('alert-tags-selectable-menu')).toBeInTheDocument();
+    expect(createInitialTagsState).toHaveBeenCalled();
+  });
+
+  test('it renders a valid state when existing alert tags are passed', () => {
+    const mockTags = [
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1'] }],
+        ecs: { _id: 'test-id' },
+      },
+    ];
+    const wrapper = renderTagsMenu(mockTags);
+
+    expect(wrapper.getByTestId('selected-alert-tag')).toHaveTextContent('default-test-tag-1');
+    expect(wrapper.getByTestId('unselected-alert-tag')).toHaveTextContent('default-test-tag-2');
+  });
+
+  test('it renders a valid state when multiple alerts with tags are passed', () => {
+    const mockTags = [
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1'] }],
+        ecs: { _id: 'test-id' },
+      },
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1', 'default-test-tag-2'] }],
+        ecs: { _id: 'test-id' },
+      },
+    ];
+    const wrapper = renderTagsMenu(mockTags);
+
+    expect(wrapper.getByTestId('selected-alert-tag')).toHaveTextContent('default-test-tag-1');
+    expect(wrapper.getByTestId('mixed-alert-tag')).toHaveTextContent('default-test-tag-2');
+  });
+
+  test('it calls expected functions on submit when nothing has changed', () => {
+    const mockedClosePopover = jest.fn();
+    const mockedOnSubmit = jest.fn();
+    const mockedSetIsLoading = jest.fn();
+
+    const mockTags = [
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1'] }],
+        ecs: { _id: 'test-id' },
+      },
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1', 'default-test-tag-2'] }],
+        ecs: { _id: 'test-id' },
+      },
+    ];
+    const wrapper = renderTagsMenu(
+      mockTags,
+      mockedClosePopover,
+      mockedOnSubmit,
+      mockedSetIsLoading
+    );
+
+    act(() => {
+      fireEvent.click(wrapper.getByTestId('alert-tags-update-button'));
+    });
+    expect(mockedClosePopover).toHaveBeenCalled();
+    expect(mockedOnSubmit).not.toHaveBeenCalled();
+    expect(mockedSetIsLoading).not.toHaveBeenCalled();
+  });
+
+  test('it updates state correctly', () => {
+    const mockTags = [
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1'] }],
+        ecs: { _id: 'test-id' },
+      },
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1', 'default-test-tag-2'] }],
+        ecs: { _id: 'test-id' },
+      },
+    ];
+    const wrapper = renderTagsMenu(mockTags);
+
+    expect(wrapper.getByTitle('default-test-tag-1')).toBeChecked();
+    act(() => {
+      fireEvent.click(wrapper.getByText('default-test-tag-1'));
+    });
+    expect(wrapper.getByTitle('default-test-tag-1')).not.toBeChecked();
+
+    expect(wrapper.getByTitle('default-test-tag-2')).not.toBeChecked();
+    act(() => {
+      fireEvent.click(wrapper.getByText('default-test-tag-2'));
+    });
+    expect(wrapper.getByTitle('default-test-tag-2')).toBeChecked();
+  });
+
+  test('it calls expected functions on submit when alerts have changed', () => {
+    const mockedClosePopover = jest.fn();
+    const mockedOnSubmit = jest.fn();
+    const mockedSetIsLoading = jest.fn();
+
+    const mockTags = [
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1'] }],
+        ecs: { _id: 'test-id' },
+      },
+      {
+        _id: 'test-id',
+        data: [{ field: ALERT_WORKFLOW_TAGS, value: ['default-test-tag-1', 'default-test-tag-2'] }],
+        ecs: { _id: 'test-id' },
+      },
+    ];
+    const wrapper = renderTagsMenu(
+      mockTags,
+      mockedClosePopover,
+      mockedOnSubmit,
+      mockedSetIsLoading
+    );
+    act(() => {
+      fireEvent.click(wrapper.getByText('default-test-tag-1'));
+    });
+    act(() => {
+      fireEvent.click(wrapper.getByText('default-test-tag-2'));
+    });
+
+    act(() => {
+      fireEvent.click(wrapper.getByTestId('alert-tags-update-button'));
+    });
+    expect(mockedClosePopover).toHaveBeenCalled();
+    expect(mockedOnSubmit).toHaveBeenCalled();
+    expect(mockedOnSubmit).toHaveBeenCalledWith(
+      { tags_to_add: ['default-test-tag-2'], tags_to_remove: ['default-test-tag-1'] },
+      ['test-id', 'test-id'],
+      expect.anything(), // An anonymous callback defined in the onSubmit function
+      mockedSetIsLoading
+    );
   });
 });

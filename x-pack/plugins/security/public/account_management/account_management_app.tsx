@@ -18,13 +18,17 @@ import type {
   CoreTheme,
   StartServicesAccessor,
 } from '@kbn/core/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+} from '@kbn/kibana-react-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
+import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 
-import type { AuthenticationServiceSetup } from '../authentication';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
 import type { BreadcrumbsChangeHandler } from '../components/breadcrumb';
@@ -45,7 +49,7 @@ export const accountManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.account.breadcrumb', {
         defaultMessage: 'User settings',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       appRoute: '/security/account',
       async mount({ element, theme$, history }: AppMountParameters) {
         const [[coreStart], { AccountManagementPage }] = await Promise.all([
@@ -96,7 +100,17 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
         <I18nProvider>
           <KibanaThemeProvider theme$={theme$}>
             <Router history={history}>
-              <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+              <BreadcrumbsProvider onChange={onChange}>
+                <UserProfilesKibanaProvider
+                  core={services}
+                  security={{
+                    userProfiles: securityApiClients.userProfiles,
+                  }}
+                  toMountPoint={toMountPoint}
+                >
+                  {children}
+                </UserProfilesKibanaProvider>
+              </BreadcrumbsProvider>
             </Router>
           </KibanaThemeProvider>
         </I18nProvider>

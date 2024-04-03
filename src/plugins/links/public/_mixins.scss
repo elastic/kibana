@@ -1,0 +1,38 @@
+@import '../../../core/public/mixins';
+
+@keyframes euiFlyoutOpenAnimation {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}
+
+@keyframes euiFlyoutCloseAnimation {
+  0% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@mixin euiFlyout {
+  height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+  position: fixed;
+  display: flex;
+  inline-size: 50vw;
+  z-index: $euiZFlyout;
+  align-items: stretch;
+  flex-direction: column;
+  border-left: $euiBorderThin;
+  background: $euiColorEmptyShade;
+  min-width: ($euiSizeXL * 13) + $euiSizeS; // 424px
+}

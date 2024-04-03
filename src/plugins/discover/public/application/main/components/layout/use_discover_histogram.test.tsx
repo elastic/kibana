@@ -25,6 +25,9 @@ import {
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
+import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
+import { useDiscoverCustomization } from '../../../../customizations';
+import { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {
@@ -71,6 +74,19 @@ jest.mock('../../hooks/use_saved_search_messages', () => {
     sendErrorTo: jest.fn(originalModule.sendErrorTo),
   };
 });
+jest.mock('../../../../customizations', () => ({
+  ...jest.requireActual('../../../../customizations'),
+  useDiscoverCustomization: jest.fn(),
+}));
+
+let mockUseCustomizations = false;
+
+const mockHistogramCustomization: UnifiedHistogramCustomization = {
+  id: 'unified_histogram',
+  onFilter: jest.fn(),
+  onBrushEnd: jest.fn(),
+  withDefaultActions: true,
+};
 
 const mockCheckHitCount = checkHitCount as jest.MockedFunction<typeof checkHitCount>;
 
@@ -126,6 +142,23 @@ describe('useDiscoverHistogram', () => {
     return { hook, initialProps };
   };
 
+  beforeEach(() => {
+    mockUseCustomizations = false;
+    jest.clearAllMocks();
+
+    (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+      if (!mockUseCustomizations) {
+        return undefined;
+      }
+      switch (id) {
+        case 'unified_histogram':
+          return mockHistogramCustomization;
+        default:
+          throw new Error(`Unknown customization id: ${id}`);
+      }
+    });
+  });
+
   describe('initialization', () => {
     it('should return the expected parameters from getCreationOptions', async () => {
       const { hook } = await renderUseDiscoverHistogram();
@@ -139,6 +172,12 @@ describe('useDiscoverHistogram', () => {
         'totalHitsStatus',
         'totalHitsResult',
       ]);
+    });
+
+    it('should return the isChartLoading params for text based languages', async () => {
+      const { hook } = await renderUseDiscoverHistogram({ isPlainRecord: true });
+      const isChartLoading = hook.result.current.isChartLoading;
+      expect(isChartLoading).toBe(false);
     });
   });
 
@@ -222,20 +261,14 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.ref(api);
       });
       stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
-      expect(api.setTotalHits).toHaveBeenCalled();
+      expect(api.setTotalHits).not.toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
       expect(api.setBreakdownField).toHaveBeenCalled();
-      expect(Object.keys(params ?? {})).toEqual([
-        'totalHitsStatus',
-        'totalHitsResult',
-        'breakdownField',
-        'timeInterval',
-        'chartHidden',
-      ]);
+      expect(Object.keys(params ?? {})).toEqual(['breakdownField', 'timeInterval', 'chartHidden']);
     });
 
-    it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates after the first load', async () => {
+    it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
@@ -251,20 +284,13 @@ describe('useDiscoverHistogram', () => {
       api.setChartHidden = jest.fn((chartHidden) => {
         params = { ...params, chartHidden };
       });
-      api.setTotalHits = jest.fn((p) => {
-        params = { ...params, ...p };
-      });
       const subject$ = new BehaviorSubject(state);
       api.state$ = subject$;
       act(() => {
         hook.result.current.ref(api);
       });
       stateContainer.appState.update({ hideChart: true });
-      expect(Object.keys(params ?? {})).toEqual([
-        'totalHitsStatus',
-        'totalHitsResult',
-        'chartHidden',
-      ]);
+      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
       params = {};
       stateContainer.appState.update({ hideChart: false });
       act(() => {
@@ -357,12 +383,35 @@ describe('useDiscoverHistogram', () => {
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
+
+    it('should set isChartLoading to true for fetch start', async () => {
+      const fetch$ = new Subject<{
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
+        searchSessionId: string;
+      }>();
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer, isPlainRecord: true });
+      act(() => {
+        fetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(hook.result.current.isChartLoading).toBe(true);
+    });
   });
 
   describe('refetching', () => {
     it('should call refetch when savedSearchFetch$ is triggered', async () => {
       const savedSearchFetch$ = new Subject<{
-        reset: boolean;
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
         searchSessionId: string;
       }>();
       const stateContainer = getStateContainer();
@@ -372,16 +421,22 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.refetch).not.toHaveBeenCalled();
-      act(() => {
-        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
-      });
       expect(api.refetch).toHaveBeenCalled();
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).toHaveBeenCalledTimes(2);
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
       const savedSearchFetch$ = new Subject<{
-        reset: boolean;
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
         searchSessionId: string;
       }>();
       const stateContainer = getStateContainer();
@@ -391,6 +446,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
+      expect(api.refetch).toHaveBeenCalled();
       act(() => {
         hook.rerender({ ...initialProps, hideChart: true });
       });
@@ -398,9 +454,60 @@ describe('useDiscoverHistogram', () => {
         hook.rerender({ ...initialProps, hideChart: false });
       });
       act(() => {
-        savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
       });
-      expect(api.refetch).not.toHaveBeenCalled();
+      expect(api.refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip the next refetch when fetching more', async () => {
+      const savedSearchFetch$ = new Subject<{
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
+        searchSessionId: string;
+      }>();
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.ref(api);
+      });
+      expect(api.refetch).toHaveBeenCalledTimes(1);
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: true },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        savedSearchFetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(api.refetch).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('customization', () => {
+    test('should use custom values provided by customization fwk ', async () => {
+      mockUseCustomizations = true;
+      const stateContainer = getStateContainer();
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+
+      expect(hook.result.current.onFilter).toEqual(mockHistogramCustomization.onFilter);
+      expect(hook.result.current.onBrushEnd).toEqual(mockHistogramCustomization.onBrushEnd);
+      expect(hook.result.current.withDefaultActions).toEqual(
+        mockHistogramCustomization.withDefaultActions
+      );
+      expect(hook.result.current.disabledActions).toBeUndefined();
     });
   });
 });

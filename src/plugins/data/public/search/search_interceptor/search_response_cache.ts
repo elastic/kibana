@@ -8,7 +8,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { SearchAbortController } from './search_abort_controller';
-import { IKibanaSearchResponse, isErrorResponse } from '../../../common';
+import { IKibanaSearchResponse } from '../../../common';
 
 interface ResponseCacheItem {
   response$: Observable<IKibanaSearchResponse>;
@@ -102,14 +102,14 @@ export class SearchResponseCache {
         next: (r) => {
           // TODO: avoid stringiying. Get the size some other way!
           const newSize = new Blob([JSON.stringify(r)]).size;
-          if (this.byteToMb(newSize) < this.maxCacheSizeMB && !isErrorResponse(r)) {
+          if (this.byteToMb(newSize) < this.maxCacheSizeMB) {
             this.setItem(key, {
               ...cacheItem,
               size: newSize,
             });
             this.shrink();
           } else {
-            // Single item is too large to be cached, or an error response returned.
+            // Single item is too large to be cached
             // Evict and ignore.
             this.deleteItem(key);
           }

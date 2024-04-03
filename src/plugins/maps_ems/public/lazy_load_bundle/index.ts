@@ -7,13 +7,18 @@
  */
 
 import type { EMSClient } from '@elastic/ems-client';
+import { BuildFlavor } from '@kbn/config/src/types';
 import type { EMSSettings } from '../../common';
 
-let lazyLoaded: (emsSettings: EMSSettings, version: string) => EMSClient;
+let lazyLoaded: (emsSettings: EMSSettings, version: string, buildFlavor: BuildFlavor) => EMSClient;
 
-export async function createEMSClientLazy(emsSettings: EMSSettings, version: string) {
+export async function createEMSClientLazy(
+  emsSettings: EMSSettings,
+  version: string,
+  buildFlavor: BuildFlavor = 'traditional'
+) {
   if (lazyLoaded) {
-    return await lazyLoaded(emsSettings, version);
+    return await lazyLoaded(emsSettings, version, buildFlavor);
   }
 
   lazyLoaded = await new Promise(async (resolve, reject) => {
@@ -29,5 +34,5 @@ export async function createEMSClientLazy(emsSettings: EMSSettings, version: str
     }
   });
 
-  return await lazyLoaded(emsSettings, version);
+  return await lazyLoaded(emsSettings, version, buildFlavor);
 }

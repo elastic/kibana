@@ -56,6 +56,39 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.createPlainError",
+        "type": "Function",
+        "tags": [],
+        "label": "createPlainError",
+        "description": [],
+        "signature": [
+          "(message: string) => Error"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.createPlainError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.createRouteValidationFunction",
         "type": "Function",
         "tags": [],
@@ -90,6 +123,57 @@
               "<DecodedValue, EncodedValue, InputValue>"
             ],
             "path": "packages/kbn-io-ts-utils/src/route_validation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.decodeOrThrow",
+        "type": "Function",
+        "tags": [],
+        "label": "decodeOrThrow",
+        "description": [],
+        "signature": [
+          "<DecodedValue, EncodedValue, InputValue>(runtimeType: ",
+          "Type",
+          "<DecodedValue, EncodedValue, InputValue>, createError?: ErrorFactory) => (inputValue: InputValue) => DecodedValue"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.decodeOrThrow.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeType",
+            "description": [],
+            "signature": [
+              "Type",
+              "<DecodedValue, EncodedValue, InputValue>"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.decodeOrThrow.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "createError",
+            "description": [],
+            "signature": [
+              "ErrorFactory"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,13 +228,13 @@
           "<any, any, unknown> | ",
           "ParseableType",
           ") => ",
-          "Type",
-          "<any, any, unknown> | ",
           "StringType",
           " | ",
-          "BooleanType",
-          " | ",
+          "Type",
+          "<any, any, unknown> | ",
           "NumberType",
+          " | ",
+          "BooleanType",
           " | ",
           "RecordC",
           "<",
@@ -202,6 +286,42 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.formatErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "formatErrors",
+        "description": [],
+        "signature": [
+          "(errors: ",
+          "ValidationError",
+          "[]) => string"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.formatErrors.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "ValidationError",
+              "[]"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.inRangeFromStringRt",
         "type": "Function",
         "tags": [],
@@ -210,7 +330,7 @@
         "signature": [
           "(start: number, end: number) => ",
           "Type",
-          "<number, unknown, unknown>"
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/in_range_rt/index.ts",
         "deprecated": false,
@@ -476,6 +596,41 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.throwErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "throwErrors",
+        "description": [],
+        "signature": [
+          "(createError: ErrorFactory) => (errors: ",
+          "Errors",
+          ") => never"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.throwErrors.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "createError",
+            "description": [],
+            "signature": [
+              "ErrorFactory"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/decode_or_throw.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.toJsonSchema",
         "type": "Function",
         "tags": [],
@@ -483,7 +638,9 @@
         "description": [],
         "signature": [
           "(type: ",
-          "Mixed",
+          "Type",
+          "<any, any, unknown> | ",
+          "ParseableType",
           ") => JSONSchema"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
@@ -493,12 +650,14 @@
           {
             "parentPluginId": "@kbn/io-ts-utils",
             "id": "def-common.toJsonSchema.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "Mixed"
+              "Type",
+              "<any, any, unknown> | ",
+              "ParseableType"
             ],
             "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
             "deprecated": false,
@@ -618,6 +777,41 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.UniqueTimeKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "UniqueTimeKey",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.UniqueTimeKey",
+            "text": "UniqueTimeKey"
+          },
+          " extends { time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.UniqueTimeKey.gid",
+            "type": "string",
+            "tags": [],
+            "label": "gid",
+            "description": [],
+            "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -693,6 +887,21 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.MinimalTimeKey",
+        "type": "Type",
+        "tags": [],
+        "label": "MinimalTimeKey",
+        "description": [],
+        "signature": [
+          "{ time: string; tiebreaker: number; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.NonEmptyString",
         "type": "Type",
         "tags": [],
@@ -715,9 +924,40 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.TimeKey",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeKey",
+        "description": [],
+        "signature": [
+          "{ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.DateFromStringOrNumber",
+        "type": "Object",
+        "tags": [],
+        "label": "DateFromStringOrNumber",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string | number, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.datemathStringRt",
@@ -792,6 +1032,22 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.isoToEpochSecsRt",
+        "type": "Object",
+        "tags": [],
+        "label": "isoToEpochSecsRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<number, string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_secs_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.jsonRt",
         "type": "Object",
         "tags": [],
@@ -802,6 +1058,26 @@
           "<any, string, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/json_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.minimalTimeKeyRT",
+        "type": "Object",
+        "tags": [],
+        "label": "minimalTimeKeyRT",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ time: ",
+          "Type",
+          "<string, string | number, unknown>; tiebreaker: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -841,7 +1117,7 @@
         "description": [],
         "signature": [
           "Type",
-          "<boolean, unknown, unknown>"
+          "<boolean, boolean, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_boolean_rt/index.ts",
         "deprecated": false,
@@ -857,7 +1133,7 @@
         "description": [],
         "signature": [
           "Type",
-          "<number, unknown, unknown>"
+          "<number, number, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/to_number_rt/index.ts",
         "deprecated": false,

@@ -1,26 +1,28 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Alerting
   description: OpenAPI schema for alerting endpoints
-  version: '0.1'
+  version: '0.2'
   contact:
     name: Alerting Team
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: /
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: alerting
     description: Alerting APIs enable you to create and manage rules and alerts.
-servers:
-  - url: http://localhost:5601
-    description: local
 paths:
   /s/{spaceId}/api/alerting/rule:
     post:
       summary: Creates a rule with a randomly generated rule identifier.
       operationId: createRule
       description: |
-        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.
+        To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.
       tags:
         - alerting
       parameters:
@@ -33,8 +35,16 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
-              createRuleRequest:
-                $ref: '#/components/examples/create_rule_request'
+              createEsQueryEsqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
+              createEsQueryRuleRequest:
+                $ref: '#/components/examples/create_es_query_rule_request'
+              createEsQueryKqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_kql_rule_request'
+              createIndexThresholdRuleRequest:
+                $ref: '#/components/examples/create_index_threshold_rule_request'
+              createTrackingContainmentRuleRequest:
+                $ref: '#/components/examples/create_tracking_containment_rule_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -43,8 +53,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
-                createRuleResponse:
-                  $ref: '#/components/examples/create_rule_response'
+                createEsQueryEsqlRuleResponse:
+                  $ref: '#/components/examples/create_es_query_esql_rule_response'
+                createEsQueryRuleResponse:
+                  $ref: '#/components/examples/create_es_query_rule_response'
+                createEsQueryKqlRuleResponse:
+                  $ref: '#/components/examples/create_es_query_kql_rule_response'
+                createIndexThresholdRuleResponse:
+                  $ref: '#/components/examples/create_index_threshold_rule_response'
+                createTrackingContainmentRuleResponse:
+                  $ref: '#/components/examples/create_tracking_containment_rule_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -57,10 +75,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}:
     get:
       summary: Retrieves a rule by its identifier.
@@ -94,13 +108,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a rule.
       operationId: deleteRule
       description: |
-        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it.
+        To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it. If the API key that is used by the rule was created automatically, it is deleted.
       tags:
         - alerting
       parameters:
@@ -122,13 +134,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a rule with a specific rule identifier.
       operationId: createRuleId
       description: |
-        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you create a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If a user with different privileges updates the rule, its behavior might change.
+        To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.
       tags:
         - alerting
       parameters:
@@ -141,7 +151,8 @@ paths:
           required: true
           schema:
             type: string
-            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+            examples:
+              - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
       requestBody:
         required: true
         content:
@@ -149,8 +160,14 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
-              createRuleIdRequest:
-                $ref: '#/components/examples/create_rule_request'
+              createEsQueryEsqlRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
+              createEsQueryRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_rule_request'
+              createEsQueryKqlRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_kql_rule_request'
+              createIndexThreholdRuleIdRequest:
+                $ref: '#/components/examples/create_index_threshold_rule_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -159,8 +176,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
-                createRuleIdResponse:
-                  $ref: '#/components/examples/create_rule_response'
+                createEsQueryEsqlRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_esql_rule_response'
+                createEsQueryRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_rule_response'
+                createEsQueryKqlRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_kql_rule_response'
+                createIndexThresholdRuleIdResponse:
+                  $ref: '#/components/examples/create_index_threshold_rule_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -173,13 +196,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a rule.
       operationId: updateRule
       description: |
-        You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.  If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. NOTE: This API supports only token-based authentication. When you update a rule, it identifies which roles you have at that point in time. Thereafter, when the rule performs queries, it uses those security privileges. If you have different privileges than the user that created or most recently updated the rule, you might change its behavior. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.
+        To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs. NOTE: If the API key has different privileges than the key that created or most recently updated the rule, the rule behavior might change. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.
       tags:
         - alerting
       parameters:
@@ -217,10 +238,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_disable:
     post:
       summary: Disables a rule.
@@ -248,16 +265,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_enable:
     post:
       summary: Enables a rule.
       operationId: enableRule
       description: |
-        This API supports token-based authentication only. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.
+        To enable a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.
       tags:
         - alerting
       parameters:
@@ -279,10 +292,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rules/_find:
     get:
       summary: Retrieves information about rules.
@@ -299,7 +308,8 @@ paths:
           schema:
             type: string
             default: OR
-          example: OR
+            examples:
+              - AND
         - name: fields
           in: query
           description: The fields to return in the `attributes` key of the response.
@@ -329,25 +339,31 @@ paths:
           schema:
             type: integer
             default: 1
-          example: 1
+            examples:
+              - 1
         - name: per_page
           in: query
           description: The number of rules to return per page.
           schema:
             type: integer
             default: 20
-          example: 20
+            examples:
+              - 20
         - name: search
           in: query
           description: An Elasticsearch simple_query_string query that filters the objects in the response.
           schema:
             type: string
+            examples:
+              - threshold +-test*
         - name: search_fields
           in: query
           description: The fields to perform the simple_query_string parsed query against.
           schema:
             oneOf:
               - type: string
+                examples:
+                  - name
               - type: array
                 items:
                   type: string
@@ -366,7 +382,8 @@ paths:
               - asc
               - desc
             default: desc
-          example: asc
+            examples:
+              - asc
       responses:
         '200':
           description: Indicates a successful call.
@@ -396,10 +413,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/_health:
     get:
       summary: Retrieves the health status of the alerting framework.
@@ -429,7 +442,8 @@ paths:
                         properties:
                           status:
                             type: string
-                            example: ok
+                            examples:
+                              - ok
                             enum:
                               - error
                               - ok
@@ -437,14 +451,16 @@ paths:
                           timestamp:
                             type: string
                             format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
+                            examples:
+                              - '2023-01-13T01:28:00.280Z'
                       execution_health:
                         type: object
                         description: The timestamp and status of the rule run.
                         properties:
                           status:
                             type: string
-                            example: ok
+                            examples:
+                              - ok
                             enum:
                               - error
                               - ok
@@ -452,14 +468,16 @@ paths:
                           timestamp:
                             type: string
                             format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
+                            examples:
+                              - '2023-01-13T01:28:00.280Z'
                       read_health:
                         type: object
                         description: The timestamp and status of the rule reading events.
                         properties:
                           status:
                             type: string
-                            example: ok
+                            examples:
+                              - ok
                             enum:
                               - error
                               - ok
@@ -467,15 +485,18 @@ paths:
                           timestamp:
                             type: string
                             format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
+                            examples:
+                              - '2023-01-13T01:28:00.280Z'
                   has_permanent_encryption_key:
                     type: boolean
                     description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
-                    example: true
+                    examples:
+                      - true
                   is_sufficiently_secure:
                     type: boolean
                     description: If `false`, security is enabled but TLS is not.
-                    example: true
+                    examples:
+                      - true
               examples:
                 getAlertingHealthResponse:
                   $ref: '#/components/examples/get_health_response'
@@ -485,8 +506,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule_types:
     get:
       summary: Retrieves a list of rule types.
@@ -552,6 +571,63 @@ paths:
                                 type: string
                               name:
                                 type: string
+                    alerts:
+                      type: object
+                      description: |
+                        Details for writing alerts as data documents for this rule type.
+                      properties:
+                        context:
+                          type: string
+                          description: |
+                            The namespace for this rule type.
+                          enum:
+                            - ml.anomaly-detection
+                            - observability.apm
+                            - observability.logs
+                            - observability.metrics
+                            - observability.slo
+                            - observability.threshold
+                            - observability.uptime
+                            - security
+                            - stack
+                        dynamic:
+                          type: string
+                          description: Indicates whether new fields are added dynamically.
+                          enum:
+                            - 'false'
+                            - runtime
+                            - strict
+                            - 'true'
+                        isSpaceAware:
+                          type: boolean
+                          description: |
+                            Indicates whether the alerts are space-aware. If true, space-specific alert indices are used.
+                        mappings:
+                          type: object
+                          properties:
+                            fieldMap:
+                              type: object
+                              description: |
+                                Mapping information for each field supported in alerts as data documents for this rule type. For more information about mapping parameters, refer to the Elasticsearch documentation.
+                              additionalProperties:
+                                $ref: '#/components/schemas/fieldmap_properties'
+                        secondaryAlias:
+                          type: string
+                          description: |
+                            A secondary alias. It is typically used to support the signals alias for detection rules.
+                        shouldWrite:
+                          type: boolean
+                          description: |
+                            Indicates whether the rule should write out alerts as data.
+                        useEcs:
+                          type: boolean
+                          description: |
+                            Indicates whether to include the ECS component template for the alerts.
+                        useLegacyAlerts:
+                          type: boolean
+                          default: false
+                          description: |
+                            Indicates whether to include the legacy component template for the alerts.
                     authorized_consumers:
                       description: The list of the plugins IDs that have access to the rule type.
                       type: object
@@ -612,6 +688,13 @@ paths:
                               type: boolean
                             read:
                               type: boolean
+                        slo:
+                          type: object
+                          properties:
+                            all:
+                              type: boolean
+                            read:
+                              type: boolean
                         stackAlerts:
                           type: object
                           properties:
@@ -626,6 +709,13 @@ paths:
                               type: boolean
                             read:
                               type: boolean
+                    category:
+                      type: string
+                      description: The rule category, which is used by features such as category-specific maintenance windows.
+                      enum:
+                        - management
+                        - observability
+                        - securitySolution
                     default_action_group_id:
                       description: The default identifier for the rule type group.
                       type: string
@@ -634,6 +724,11 @@ paths:
                       type: boolean
                     enabled_in_license:
                       description: Indicates whether the rule type is enabled or disabled based on the subscription.
+                      type: boolean
+                    has_alerts_mappings:
+                      type: boolean
+                      description: Indicates whether the rule type has custom mappings for the alert data.
+                    has_fields_for_a_a_d:
                       type: boolean
                     id:
                       description: The unique identifier for the rule type.
@@ -644,14 +739,16 @@ paths:
                     minimum_license_required:
                       description: The subscriptions required to use the rule type.
                       type: string
-                      example: basic
+                      examples:
+                        - basic
                     name:
                       description: The descriptive name of the rule type.
                       type: string
                     producer:
                       description: An identifier for the application that produces this rule type.
                       type: string
-                      example: stackAlerts
+                      examples:
+                        - stackAlerts
                     recovery_action_group:
                       description: An action group to use when an alert goes from an active state to an inactive one.
                       type: object
@@ -662,7 +759,8 @@ paths:
                           type: string
                     rule_task_timeout:
                       type: string
-                      example: 5m
+                      examples:
+                        - 5m
               examples:
                 getRuleTypesResponse:
                   $ref: '#/components/examples/get_rule_types_response'
@@ -672,8 +770,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all:
     post:
       summary: Mutes all alerts.
@@ -695,10 +791,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all:
     post:
       summary: Unmutes all alerts.
@@ -720,10 +812,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
+  /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key:
+    post:
+      summary: Updates the API key for a rule.
+      operationId: updateRuleAPIKey
+      description: The new API key has the credentials of the user that submits the request.
+      tags:
+        - alerting
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/rule_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
   /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute:
     post:
       summary: Mutes an alert.
@@ -746,10 +854,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute:
     post:
       summary: Unmutes an alert.
@@ -772,10 +876,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}:
     delete:
       summary: Permanently removes an alert.
@@ -794,7 +894,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       responses:
         '204':
           description: Indicates a successful call.
@@ -804,8 +905,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves an alert by its identifier.
       operationId: legacyGetAlert
@@ -821,7 +920,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       responses:
         '200':
           description: Indicates a successful call.
@@ -835,8 +935,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Create an alert.
       operationId: legacyCreateAlert
@@ -852,7 +950,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
         - $ref: '#/components/parameters/space_id'
       requestBody:
         required: true
@@ -923,7 +1022,8 @@ paths:
                     interval:
                       type: string
                       description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-                      example: 10s
+                      examples:
+                        - 10s
                 tags:
                   type: array
                   items:
@@ -946,8 +1046,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for an alert.
       operationId: legacyUpdateAlert
@@ -964,7 +1062,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       requestBody:
         required: true
         content:
@@ -1023,7 +1122,8 @@ paths:
                     interval:
                       type: string
                       description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-                      example: 1d
+                      examples:
+                        - 1d
                 tags:
                   type: array
                   items:
@@ -1046,10 +1146,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_disable:
     post:
       summary: Disables an alert.
@@ -1067,7 +1163,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       responses:
         '204':
           description: Indicates a successful call.
@@ -1077,10 +1174,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_enable:
     post:
       summary: Enables an alert.
@@ -1098,7 +1191,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       responses:
         '204':
           description: Indicates a successful call.
@@ -1108,10 +1202,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_mute_all:
     post:
       summary: Mutes all alert instances.
@@ -1129,7 +1219,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       responses:
         '204':
           description: Indicates a successful call.
@@ -1139,10 +1230,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all:
     post:
       summary: Unmutes all alert instances.
@@ -1160,7 +1247,8 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
       responses:
         '204':
           description: Indicates a successful call.
@@ -1170,10 +1258,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/_find:
     get:
       summary: Retrieves a paginated set of alerts.
@@ -1191,7 +1275,8 @@ paths:
           schema:
             type: string
             default: OR
-          example: OR
+            examples:
+              - OR
         - name: fields
           in: query
           description: The fields to return in the `attributes` key of the response.
@@ -1221,14 +1306,16 @@ paths:
           schema:
             type: integer
             default: 1
-          example: 1
+            examples:
+              - 1
         - name: per_page
           in: query
           description: The number of alerts to return per page.
           schema:
             type: integer
             default: 20
-          example: 20
+            examples:
+              - 20
         - name: search
           in: query
           description: An Elasticsearch `simple_query_string` query that filters the alerts in the response.
@@ -1258,7 +1345,8 @@ paths:
               - asc
               - desc
             default: desc
-          example: asc
+            examples:
+              - asc
       responses:
         '200':
           description: Indicates a successful call.
@@ -1283,10 +1371,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/_health:
     get:
       summary: Retrieves the health status of the alerting framework.
@@ -1316,7 +1400,8 @@ paths:
                         properties:
                           status:
                             type: string
-                            example: ok
+                            examples:
+                              - ok
                             enum:
                               - error
                               - ok
@@ -1324,14 +1409,16 @@ paths:
                           timestamp:
                             type: string
                             format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
+                            examples:
+                              - '2023-01-13T01:28:00.280Z'
                       executionHealth:
                         type: object
                         description: The timestamp and status of the alert execution.
                         properties:
                           status:
                             type: string
-                            example: ok
+                            examples:
+                              - ok
                             enum:
                               - error
                               - ok
@@ -1339,14 +1426,16 @@ paths:
                           timestamp:
                             type: string
                             format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
+                            examples:
+                              - '2023-01-13T01:28:00.280Z'
                       readHealth:
                         type: object
                         description: The timestamp and status of the alert reading events.
                         properties:
                           status:
                             type: string
-                            example: ok
+                            examples:
+                              - ok
                             enum:
                               - error
                               - ok
@@ -1354,23 +1443,24 @@ paths:
                           timestamp:
                             type: string
                             format: date-time
-                            example: '2023-01-13T01:28:00.280Z'
+                            examples:
+                              - '2023-01-13T01:28:00.280Z'
                   hasPermanentEncryptionKey:
                     type: boolean
                     description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
-                    example: true
+                    examples:
+                      - true
                   isSufficientlySecure:
                     type: boolean
                     description: If `false`, security is enabled but TLS is not.
-                    example: true
+                    examples:
+                      - true
         '401':
           description: Authorization information is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/list_alert_types:
     get:
       summary: Retrieves a list of alert types.
@@ -1473,8 +1563,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
     post:
       summary: Mutes an alert instance.
@@ -1492,14 +1580,16 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
         - in: path
           name: alertInstanceId
           description: An identifier for the alert instance.
           required: true
           schema:
             type: string
-            example: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+            examples:
+              - dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
       responses:
         '204':
           description: Indicates a successful call.
@@ -1509,10 +1599,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
     post:
       summary: Unmutes an alert instance.
@@ -1530,14 +1616,16 @@ paths:
           required: true
           schema:
             type: string
-            example: 41893910-6bca-11eb-9e0d-85d233e3ee35
+            examples:
+              - 41893910-6bca-11eb-9e0d-85d233e3ee35
         - in: path
           name: alertInstanceId
           description: An identifier for the alert instance.
           required: true
           schema:
             type: string
-            example: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+            examples:
+              - dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
       responses:
         '204':
           description: Indicates a successful call.
@@ -1547,10 +1635,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -1559,7 +1643,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     kbn_xsrf:
       schema:
@@ -1575,7 +1660,8 @@ components:
       required: true
       schema:
         type: string
-        example: default
+        examples:
+          - default
     rule_id:
       in: path
       name: ruleId
@@ -1583,7 +1669,8 @@ components:
       required: true
       schema:
         type: string
-        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        examples:
+          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
     alert_id:
       in: path
       name: alertId
@@ -1591,178 +1678,9 @@ components:
       required: true
       schema:
         type: string
-        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        examples:
+          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   schemas:
-    notify_when:
-      type: string
-      description: |
-        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
-      enum:
-        - onActionGroupChange
-        - onActiveAlert
-        - onThrottleInterval
-      example: onActiveAlert
-    throttle:
-      type: string
-      description: |
-        The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
-      nullable: true
-      default: null
-      example: 10m
-    actions:
-      type: array
-      default: []
-      required:
-        - group
-        - id
-        - params
-      nullable: true
-      items:
-        type: object
-        properties:
-          alerts_filter:
-            type: object
-            description: |
-              Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.
-            properties:
-              query:
-                type: object
-                description: Defines a query filter that determines whether the action runs.
-                properties:
-                  kql:
-                    type: string
-                    description: A filter written in Kibana Query Language (KQL).
-                  filters:
-                    type: array
-                    items:
-                      type: object
-                      description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
-                      properties:
-                        meta:
-                          type: object
-                          properties:
-                            alias:
-                              type: string
-                              nullable: true
-                            controlledBy:
-                              type: string
-                            disabled:
-                              type: boolean
-                            field:
-                              type: string
-                            group:
-                              type: string
-                            index:
-                              type: string
-                            isMultiIndex:
-                              type: boolean
-                            key:
-                              type: string
-                            negate:
-                              type: boolean
-                            params:
-                              type: object
-                            type:
-                              type: string
-                            value:
-                              type: string
-                        query:
-                          type: object
-                        $state:
-                          type: object
-              timeframe:
-                type: object
-                description: Defines a period that limits whether the action runs.
-                properties:
-                  days:
-                    type: array
-                    description: Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.
-                    items:
-                      type: integer
-                    example:
-                      - 1
-                      - 2
-                      - 3
-                      - 4
-                      - 5
-                  hours:
-                    type: object
-                    description: |
-                      Defines the range of time in a day that the action can run. If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.
-                    properties:
-                      end:
-                        type: string
-                        description: The end of the time frame in 24-hour notation (`hh:mm`).
-                        example: '17:00'
-                      start:
-                        type: string
-                        description: The start of the time frame in 24-hour notation (`hh:mm`).
-                        example: '08:00'
-                  timezone:
-                    type: string
-                    description: |
-                      The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
-                    example: Europe/Madrid
-          connector_type_id:
-            type: string
-            description: The type of connector. This property appears in responses but cannot be set in requests.
-            example: .server-log
-            readOnly: true
-          frequency:
-            type: object
-            description: |
-              The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
-            required:
-              - notify_when
-              - summary
-            properties:
-              notify_when:
-                $ref: '#/components/schemas/notify_when'
-              summary:
-                type: boolean
-                description: Indicates whether the action is a summary.
-              throttle:
-                $ref: '#/components/schemas/throttle'
-          group:
-            type: string
-            description: The group name for the actions. If you don't need to group actions, set to `default`.
-            example: default
-          id:
-            type: string
-            description: The identifier for the connector saved object.
-            example: 9dca3e00-74f5-11ed-9801-35303b735aef
-          params:
-            type: object
-            description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
-            additionalProperties: true
-          uuid:
-            type: string
-            description: A universally unique identifier (UUID) for the action.
-            example: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
-    consumer:
-      type: string
-      description: |
-        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
-    enabled_rule:
-      type: boolean
-      description: Indicates whether you want to run the rule on an interval basis after it is created.
-    name_rule:
-      type: string
-      description: |
-        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
-    schedule:
-      type: object
-      description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
-      properties:
-        interval:
-          type: string
-          example: 1m
-    tags:
-      type: array
-      description: The tags for the rule.
-      items:
-        type: string
-      default: []
     create_anomaly_detection_alert_rule_request:
       title: Create anomaly detection rule request
       description: |
@@ -1777,6 +1695,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1814,6 +1734,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1837,41 +1759,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_anomaly:
-      required:
-        - windowSize
-        - windowUnit
-        - environment
-        - anomalySeverityType
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        transactionType:
-          type: string
-          description: The transaction type from APM
-        windowSize:
-          type: number
-          example: 6
-          description: The window size
-        windowUnit:
-          type: string
-          description: The window size unit
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-          description: The environment from APM
-        anomalySeverityType:
-          type: string
-          description: The anomaly threshold value
-          enum:
-            - critical
-            - major
-            - minor
-            - warning
     create_apm_anomaly_rule_request:
       title: Create APM anomaly rule rule request
       description: A rule that detects when either the latency, throughput, or failed transaction rate of a service is anomalous.
@@ -1885,6 +1772,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1906,48 +1795,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_error_count:
-      required:
-        - windowSize
-        - windowUnit
-        - threshold
-        - environment
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        windowSize:
-          type: number
-          description: The window size
-          example: 6
-        windowUnit:
-          type: string
-          description: The window size unit
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-          description: The environment from APM
-        threshold:
-          type: number
-          description: The error count threshold value
-        groupBy:
-          type: array
-          default:
-            - service.name
-            - service.environment
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-              - service.name
-              - service.environment
-              - transaction.name
-              - error.grouping_key
-        errorGroupingKey:
-          type: string
     create_apm_error_count_rule_request:
       title: Create APM error count rule request
       description: A rule that detects when the number of errors in a service exceeds a defined threshold.
@@ -1961,6 +1808,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1982,59 +1831,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_transaction_duration:
-      required:
-        - windowSize
-        - windowUnit
-        - threshold
-        - environment
-        - aggregationType
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        transactionType:
-          type: string
-          description: The transaction type from APM
-        transactionName:
-          type: string
-          description: The transaction name from APM
-        windowSize:
-          type: number
-          description: The window size
-          example: 6
-        windowUnit:
-          type: string
-          description: ç
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-        threshold:
-          type: number
-          description: The latency threshold value
-        groupBy:
-          type: array
-          default:
-            - service.name
-            - service.environment
-            - transaction.type
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-              - service.name
-              - service.environment
-              - transaction.type
-              - transaction.name
-        aggregationType:
-          type: string
-          enum:
-            - avg
-            - 95th
-            - 99th
     create_apm_transaction_duration_rule_request:
       title: Create latency threshold rule request
       description: A rule that detects when the latency of a specific transaction type in a service exceeds a threshold.
@@ -2048,6 +1844,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2069,53 +1867,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_transaction_error_rate:
-      required:
-        - windowSize
-        - windowUnit
-        - threshold
-        - environment
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        transactionType:
-          type: string
-          description: The transaction type from APM
-        transactionName:
-          type: string
-          description: The transaction name from APM
-        windowSize:
-          type: number
-          description: The window size
-          example: 6
-        windowUnit:
-          type: string
-          description: The window size unit
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-          description: The environment from APM
-        threshold:
-          type: number
-          description: The error rate threshold value
-        groupBy:
-          type: array
-          default:
-            - service.name
-            - service.environment
-            - transaction.type
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-              - service.name
-              - service.environment
-              - transaction.type
-              - transaction.name
     create_apm_transaction_error_rate_rule_request:
       title: Create APM transaction error rate rule request
       description: A rule that sends notifications when the rate of transaction errors in a service exceeds a threshold.
@@ -2129,6 +1880,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2164,6 +1917,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2173,9 +1928,7 @@ components:
         notify_when:
           $ref: '#/components/schemas/notify_when'
         params:
-          type: object
-          description: The parameters for an Elasticsearch query rule.
-          additionalProperties: true
+          $ref: '#/components/schemas/params_es_query_rule'
         rule_type_id:
           type: string
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
@@ -2188,7 +1941,7 @@ components:
         throttle:
           $ref: '#/components/schemas/throttle'
     create_geo_containment_rule_request:
-      title: Create traacking containment rule request
+      title: Create tracking containment rule request
       description: |
         A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  
       type: object
@@ -2201,6 +1954,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2237,6 +1992,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2246,9 +2003,7 @@ components:
         notify_when:
           $ref: '#/components/schemas/notify_when'
         params:
-          type: object
-          description: The parameters for an index threshold rule.
-          additionalProperties: true
+          $ref: '#/components/schemas/params_index_threshold_rule'
         rule_type_id:
           type: string
           description: The ID of the rule type that you want to call when the rule is scheduled to run.
@@ -2260,117 +2015,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_infra_inventory:
-      properties:
-        criteria:
-          type: array
-          items:
-            type: object
-            properties:
-              metric:
-                type: string
-                enum:
-                  - count
-                  - cpu
-                  - diskLatency
-                  - load
-                  - memory
-                  - memoryTotal
-                  - tx
-                  - rx
-                  - logRate
-                  - diskIOReadBytes
-                  - diskIOWriteBytes
-                  - s3TotalRequests
-                  - s3NumberOfObjects
-                  - s3BucketSize
-                  - s3DownloadBytes
-                  - s3UploadBytes
-                  - rdsConnections
-                  - rdsQueriesExecuted
-                  - rdsActiveTransactions
-                  - rdsLatency
-                  - sqsMessagesVisible
-                  - sqsMessagesDelayed
-                  - sqsMessagesSent
-                  - sqsMessagesEmpty
-                  - sqsOldestMessage
-                  - custom
-              timeSize:
-                type: number
-              timeUnit:
-                type: string
-                enum:
-                  - s
-                  - m
-                  - h
-                  - d
-              sourceId:
-                type: string
-              threshold:
-                type: array
-                items:
-                  type: number
-              comparator:
-                type: string
-                enum:
-                  - <
-                  - <=
-                  - '>'
-                  - '>='
-                  - between
-                  - outside
-              customMetric:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    enum:
-                      - custom
-                  field:
-                    type: string
-                  aggregation:
-                    type: string
-                    enum:
-                      - avg
-                      - max
-                      - min
-                      - rate
-                  id:
-                    type: string
-                  label:
-                    type: string
-              warningThreshold:
-                type: array
-                items:
-                  type: number
-              warningComparator:
-                type: string
-                enum:
-                  - <
-                  - <=
-                  - '>'
-                  - '>='
-                  - between
-                  - outside
-        filterQuery:
-          type: string
-        filterQueryText:
-          type: string
-        nodeType:
-          type: string
-          enum:
-            - host
-            - pod
-            - container
-            - awsEC2
-            - awsS3
-            - awsSQS
-            - awsRDS
-        sourceId:
-          type: string
-        alertOnNoData:
-          type: boolean
     create_infra_inventory_rule_request:
       title: Create infra inventory rule request
       description: |
@@ -2385,6 +2029,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2418,6 +2064,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2441,180 +2089,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_infra_metric_threshold:
-      properties:
-        criteria:
-          type: array
-          items:
-            oneOf:
-              - title: non count criterion
-                type: object
-                properties:
-                  threshold:
-                    type: array
-                    items:
-                      type: number
-                  comparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  timeUnit:
-                    type: string
-                  timeSize:
-                    type: number
-                  warningThreshold:
-                    type: array
-                    items:
-                      type: number
-                  warningComparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  metric:
-                    type: string
-                  aggType:
-                    type: string
-                    enum:
-                      - avg
-                      - max
-                      - min
-                      - cardinality
-                      - rate
-                      - count
-                      - sum
-                      - p95
-                      - p99
-                      - custom
-              - title: count criterion
-                type: object
-                properties:
-                  threshold:
-                    type: array
-                    items:
-                      type: number
-                  comparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  timeUnit:
-                    type: string
-                  timeSize:
-                    type: number
-                  warningThreshold:
-                    type: array
-                    items:
-                      type: number
-                  warningComparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  aggType:
-                    type: string
-                    enum:
-                      - count
-              - title: custom criterion
-                type: object
-                properties:
-                  threshold:
-                    type: array
-                    items:
-                      type: number
-                  comparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  timeUnit:
-                    type: string
-                  timeSize:
-                    type: number
-                  warningThreshold:
-                    type: array
-                    items:
-                      type: number
-                  warningComparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  aggType:
-                    type: string
-                    enum:
-                      - custom
-                  customMetric:
-                    type: array
-                    items:
-                      oneOf:
-                        - type: object
-                          properties:
-                            name:
-                              type: string
-                            aggType:
-                              type: string
-                              enum:
-                                - avg
-                                - sum
-                                - max
-                                - min
-                                - cardinality
-                            field:
-                              type: string
-                        - type: object
-                          properties:
-                            name:
-                              type: string
-                            aggType:
-                              type: string
-                              enum:
-                                - count
-                            filter:
-                              type: string
-                  equation:
-                    type: string
-                  label:
-                    type: string
-        groupBy:
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-        filterQuery:
-          type: string
-        sourceId:
-          type: string
-        alertOnNoData:
-          type: boolean
-        alertOnGroupDisappear:
-          type: boolean
     create_infra_metric_threshold_rule_request:
       title: Create infra metric threshold rule request
       description: |
@@ -2629,6 +2103,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2686,168 +2162,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_log_threshold:
-      oneOf:
-        - title: Count
-          type: object
-          required:
-            - count
-            - timeSize
-            - timeUnit
-            - logView
-          properties:
-            criteria:
-              type: array
-              items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                    example: my.field
-                  comparator:
-                    type: string
-                    enum:
-                      - more than
-                      - more than or equals
-                      - less than
-                      - less than or equals
-                      - equals
-                      - does not equal
-                      - matches
-                      - does not match
-                      - matches phrase
-                      - does not match phrase
-                  value:
-                    oneOf:
-                      - type: number
-                        example: 42
-                      - type: string
-                        example: value
-            count:
-              type: object
-              properties:
-                comparator:
-                  type: string
-                  enum:
-                    - more than
-                    - more than or equals
-                    - less than
-                    - less than or equals
-                    - equals
-                    - does not equal
-                    - matches
-                    - does not match
-                    - matches phrase
-                    - does not match phrase
-                value:
-                  type: number
-                  example: 100
-            timeSize:
-              type: number
-              example: 6
-            timeUnit:
-              type: string
-              enum:
-                - s
-                - m
-                - h
-                - d
-            logView:
-              type: object
-              properties:
-                logViewId:
-                  type: string
-                type:
-                  type: string
-                  enum:
-                    - log-view-reference
-                  example: log-view-reference
-            groupBy:
-              type: array
-              items:
-                type: string
-        - title: Ratio
-          type: object
-          required:
-            - count
-            - timeSize
-            - timeUnit
-            - logView
-          properties:
-            criteria:
-              type: array
-              items:
-                minItems: 2
-                maxItems: 2
-                type: array
-                items:
-                  type: object
-                  properties:
-                    field:
-                      type: string
-                      example: my.field
-                    comparator:
-                      type: string
-                      enum:
-                        - more than
-                        - more than or equals
-                        - less than
-                        - less than or equals
-                        - equals
-                        - does not equal
-                        - matches
-                        - does not match
-                        - matches phrase
-                        - does not match phrase
-                    value:
-                      oneOf:
-                        - type: number
-                          example: 42
-                        - type: string
-                          example: value
-            count:
-              type: object
-              properties:
-                comparator:
-                  type: string
-                  enum:
-                    - more than
-                    - more than or equals
-                    - less than
-                    - less than or equals
-                    - equals
-                    - does not equal
-                    - matches
-                    - does not match
-                    - matches phrase
-                    - does not match phrase
-                value:
-                  type: number
-                  example: 100
-            timeSize:
-              type: number
-              example: 6
-            timeUnit:
-              type: string
-              enum:
-                - s
-                - m
-                - h
-                - d
-            logView:
-              type: object
-              properties:
-                logViewId:
-                  type: string
-                type:
-                  type: string
-                  enum:
-                    - log-view-reference
-                  example: log-view-reference
-            groupBy:
-              type: array
-              items:
-                type: string
     create_log_threshold_rule_request:
       title: Create log threshold rule request
       description: A rule that detects when a log aggregation exceeds a threshold.
@@ -2861,6 +2175,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3643,44 +2959,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_slo_burn_rate:
-      properties:
-        sloId:
-          description: The SLO identifier used by the rule
-          type: string
-          example: 8853df00-ae2e-11ed-90af-09bb6422b258
-        burnRateThreshold:
-          description: The burn rate threshold used to trigger the alert
-          type: number
-          example: 14.4
-        maxBurnRateThreshold:
-          description: The maximum burn rate threshold value defined by the SLO error budget
-          type: number
-          example: 168
-        longWindow:
-          description: The duration of the long window used to compute the burn rate
-          type: object
-          properties:
-            value:
-              description: The duration value
-              type: number
-              example: 6
-            unit:
-              description: The duration unit
-              type: string
-              example: h
-        shortWindow:
-          description: The duration of the short window used to compute the burn rate
-          type: object
-          properties:
-            value:
-              description: The duration value
-              type: number
-              example: 30
-            unit:
-              description: The duration unit
-              type: string
-              example: m
     create_slo_burn_rate_rule_request:
       title: Create slo burn rate rule request
       description: |
@@ -3695,6 +2973,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3729,6 +3009,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3766,6 +3048,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3789,14 +3073,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_synthetics_uptime_tls:
-      properties:
-        search:
-          type: string
-        certExpirationThreshold:
-          type: number
-        certAgeThreshold:
-          type: number
     create_synthetics_uptime_tls_rule_request:
       title: Create synthetics uptime TLS rule request
       type: object
@@ -3844,6 +3120,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3881,6 +3159,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3904,6 +3184,1239 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    create_uptime_monitor_status_rule_request:
+      title: Create uptime monitor status rule request
+      description: A rule that detects monitor errors and outages.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_synthetics_monitor_status'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.monitorStatus
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    filter:
+      type: object
+      description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
+      properties:
+        meta:
+          type: object
+          properties:
+            alias:
+              type:
+                - string
+                - 'null'
+            controlledBy:
+              type: string
+            disabled:
+              type: boolean
+            field:
+              type: string
+            group:
+              type: string
+            index:
+              type: string
+            isMultiIndex:
+              type: boolean
+            key:
+              type: string
+            negate:
+              type: boolean
+            params:
+              type: object
+            type:
+              type: string
+            value:
+              type: string
+        query:
+          type: object
+        $state:
+          type: object
+    notify_when_action:
+      type: string
+      description: |
+        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      enum:
+        - onActionGroupChange
+        - onActiveAlert
+        - onThrottleInterval
+      examples:
+        - onActiveAlert
+    throttle_action:
+      type:
+        - string
+        - 'null'
+      description: |
+        The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      default: null
+      examples:
+        - 10m
+    actions:
+      type:
+        - array
+        - 'null'
+      default: []
+      items:
+        type: object
+        required:
+          - group
+          - id
+          - params
+        description: |
+          An action that runs under defined conditions.
+        properties:
+          alerts_filter:
+            type: object
+            description: |
+              Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.
+            properties:
+              query:
+                type: object
+                description: Defines a query filter that determines whether the action runs.
+                properties:
+                  kql:
+                    type: string
+                    description: A filter written in Kibana Query Language (KQL).
+                  filters:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/filter'
+              timeframe:
+                type: object
+                description: Defines a period that limits whether the action runs.
+                properties:
+                  days:
+                    type: array
+                    description: Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.
+                    items:
+                      type: integer
+                    examples:
+                      - - 1
+                        - 2
+                        - 3
+                        - 4
+                        - 5
+                  hours:
+                    type: object
+                    description: |
+                      Defines the range of time in a day that the action can run. If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.
+                    properties:
+                      end:
+                        type: string
+                        description: The end of the time frame in 24-hour notation (`hh:mm`).
+                        examples:
+                          - '17:00'
+                      start:
+                        type: string
+                        description: The start of the time frame in 24-hour notation (`hh:mm`).
+                        examples:
+                          - '08:00'
+                  timezone:
+                    type: string
+                    description: |
+                      The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                    examples:
+                      - Europe/Madrid
+          connector_type_id:
+            type: string
+            description: The type of connector. This property appears in responses but cannot be set in requests.
+            examples:
+              - .server-log
+            readOnly: true
+          frequency:
+            type: object
+            description: |
+              The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+            required:
+              - notify_when
+              - summary
+            properties:
+              notify_when:
+                $ref: '#/components/schemas/notify_when_action'
+              summary:
+                type: boolean
+                description: Indicates whether the action is a summary.
+              throttle:
+                $ref: '#/components/schemas/throttle_action'
+          group:
+            type: string
+            description: |
+              The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
+            examples:
+              - default
+          id:
+            type: string
+            description: The identifier for the connector saved object.
+            examples:
+              - 9dca3e00-74f5-11ed-9801-35303b735aef
+          params:
+            type: object
+            description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
+            additionalProperties: true
+          uuid:
+            type: string
+            description: A universally unique identifier (UUID) for the action.
+            examples:
+              - 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+    alert_delay:
+      type: object
+      description: Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.
+      required:
+        - active
+      properties:
+        active:
+          type: number
+          description: The number of consecutive runs that must meet the rule conditions.
+          example: 3
+    consumer:
+      type: string
+      description: |
+        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+    enabled_rule:
+      type: boolean
+      description: Indicates whether you want to run the rule on an interval basis after it is created.
+    name_rule:
+      type: string
+      description: |
+        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
+    notify_when:
+      type: string
+      description: |
+        Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      enum:
+        - onActionGroupChange
+        - onActiveAlert
+        - onThrottleInterval
+      deprecated: true
+      examples:
+        - onActiveAlert
+    schedule:
+      type: object
+      description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
+      properties:
+        interval:
+          type: string
+          examples:
+            - 1m
+    tags:
+      type: array
+      description: The tags for the rule.
+      items:
+        type: string
+      default: []
+    throttle:
+      type:
+        - string
+        - 'null'
+      description: |
+        Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      default: null
+      deprecated: true
+      examples:
+        - 10m
+    params_property_apm_anomaly:
+      required:
+        - windowSize
+        - windowUnit
+        - environment
+        - anomalySeverityType
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        windowSize:
+          type: number
+          example: 6
+          description: The window size
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        anomalySeverityType:
+          type: string
+          description: The anomaly threshold value
+          enum:
+            - critical
+            - major
+            - minor
+            - warning
+    params_property_apm_error_count:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        threshold:
+          type: number
+          description: The error count threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.name
+              - error.grouping_key
+        errorGroupingKey:
+          type: string
+    params_property_apm_transaction_duration:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+        - aggregationType
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        transactionName:
+          type: string
+          description: The transaction name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: ç
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+        threshold:
+          type: number
+          description: The latency threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+            - transaction.type
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.type
+              - transaction.name
+        aggregationType:
+          type: string
+          enum:
+            - avg
+            - 95th
+            - 99th
+    params_property_apm_transaction_error_rate:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        transactionName:
+          type: string
+          description: The transaction name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        threshold:
+          type: number
+          description: The error rate threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+            - transaction.type
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.type
+              - transaction.name
+    aggfield:
+      description: |
+        The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
+      type: string
+    aggtype:
+      description: The type of aggregation to perform.
+      type: string
+      enum:
+        - avg
+        - count
+        - max
+        - min
+        - sum
+      default: count
+    excludehitsfrompreviousrun:
+      description: |
+        Indicates whether to exclude matches from previous runs. If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified.
+      type: boolean
+    groupby:
+      description: |
+        Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
+      type: string
+      enum:
+        - all
+        - top
+      default: all
+    termsize:
+      description: |
+        This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
+      type: integer
+    timefield:
+      description: The field that is used to calculate the time window.
+      type: string
+    timewindowsize:
+      description: |
+        The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+      type: integer
+      examples:
+        - 5
+    timewindowunit:
+      description: |
+        The type of units for the time window: seconds, minutes, hours, or days.
+      type: string
+      enum:
+        - s
+        - m
+        - h
+        - d
+      examples:
+        - m
+    size:
+      description: |
+        The number of documents to pass to the configured actions when the threshold condition is met.
+      type: integer
+    termfield:
+      description: |
+        The names of up to four fields that are used for grouping the aggregation. This property is required when `groupBy` is `top`.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          maxItems: 4
+    threshold:
+      description: |
+        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+      type: array
+      items:
+        type: integer
+        examples:
+          - 4000
+    thresholdcomparator:
+      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+      type: string
+      enum:
+        - '>'
+        - '>='
+        - <
+        - <=
+        - between
+        - notBetween
+      examples:
+        - '>'
+    params_es_query_rule:
+      oneOf:
+        - type: object
+          x-technical-preview: true
+          description: |
+            The parameters for an Elasticsearch query rule that uses ES|QL to define the query. This functionality is in technical pre view and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+          required:
+            - esqlQuery
+            - searchType
+            - size
+            - threshold
+            - thresholdComparator
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            esqlQuery:
+              type: object
+              required:
+                - esql
+              properties:
+                esql:
+                  description: The query definition, which uses Elasticsearch Query Language.
+                  type: string
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            searchType:
+              description: The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).
+              type: string
+              enum:
+                - esqlQuery
+              examples:
+                - esqlQuery
+            size:
+              type: integer
+              description: |
+                When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
+              examples:
+                - 0
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              type: array
+              items:
+                type: integer
+                minimum: 0
+                maximum: 0
+              description: |
+                The threshold value that is used with the `thresholdComparator`. When `searchType` is `esqlQuery`, this property is required and must be set to zero.
+            thresholdComparator:
+              type: string
+              description: |
+                The comparison function for the threshold. When `searchType` is `esqlQuery`, this property is required and must be set to ">". Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
+              enum:
+                - '>'
+              examples:
+                - '>'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+        - type: object
+          description: The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.
+          required:
+            - searchType
+            - size
+            - threshold
+            - thresholdComparator
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            searchConfiguration:
+              description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
+              type: object
+              properties:
+                filter:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/filter'
+                index:
+                  description: The indices to query.
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                query:
+                  type: object
+                  properties:
+                    language:
+                      type: string
+                      examples:
+                        - kuery
+                    query:
+                      type: string
+            searchType:
+              description: The type of query, in this case a text-based query that uses KQL or Lucene.
+              type: string
+              enum:
+                - searchSource
+              examples:
+                - searchSource
+            size:
+              $ref: '#/components/schemas/size'
+            termField:
+              $ref: '#/components/schemas/termfield'
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              $ref: '#/components/schemas/threshold'
+            thresholdComparator:
+              $ref: '#/components/schemas/thresholdcomparator'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+        - type: object
+          description: The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.
+          required:
+            - esQuery
+            - index
+            - threshold
+            - thresholdComparator
+            - timeField
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            esQuery:
+              description: The query definition, which uses Elasticsearch Query DSL.
+              type: string
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            index:
+              description: The indices to query.
+              oneOf:
+                - type: array
+                  items:
+                    type: string
+                - type: string
+            searchType:
+              description: The type of query, in this case a query that uses Elasticsearch Query DSL.
+              type: string
+              enum:
+                - esQuery
+              default: esQuery
+              examples:
+                - esQuery
+            size:
+              $ref: '#/components/schemas/size'
+            termField:
+              $ref: '#/components/schemas/termfield'
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              $ref: '#/components/schemas/threshold'
+            thresholdComparator:
+              $ref: '#/components/schemas/thresholdcomparator'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+    params_index_threshold_rule:
+      type: object
+      description: The parameters for an index threshold rule.
+      required:
+        - index
+        - threshold
+        - thresholdComparator
+        - timeField
+        - timeWindowSize
+        - timeWindowUnit
+      properties:
+        aggField:
+          $ref: '#/components/schemas/aggfield'
+        aggType:
+          $ref: '#/components/schemas/aggtype'
+        filterKuery:
+          description: A KQL expression thats limits the scope of alerts.
+          type: string
+        groupBy:
+          $ref: '#/components/schemas/groupby'
+        index:
+          description: The indices to query.
+          type: array
+          items:
+            type: string
+        termField:
+          $ref: '#/components/schemas/termfield'
+        termSize:
+          $ref: '#/components/schemas/termsize'
+        threshold:
+          $ref: '#/components/schemas/threshold'
+        thresholdComparator:
+          $ref: '#/components/schemas/thresholdcomparator'
+        timeField:
+          $ref: '#/components/schemas/timefield'
+        timeWindowSize:
+          $ref: '#/components/schemas/timewindowsize'
+        timeWindowUnit:
+          $ref: '#/components/schemas/timewindowunit'
+    params_property_infra_inventory:
+      properties:
+        criteria:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+                enum:
+                  - count
+                  - cpu
+                  - diskLatency
+                  - load
+                  - memory
+                  - memoryTotal
+                  - tx
+                  - rx
+                  - logRate
+                  - diskIOReadBytes
+                  - diskIOWriteBytes
+                  - s3TotalRequests
+                  - s3NumberOfObjects
+                  - s3BucketSize
+                  - s3DownloadBytes
+                  - s3UploadBytes
+                  - rdsConnections
+                  - rdsQueriesExecuted
+                  - rdsActiveTransactions
+                  - rdsLatency
+                  - sqsMessagesVisible
+                  - sqsMessagesDelayed
+                  - sqsMessagesSent
+                  - sqsMessagesEmpty
+                  - sqsOldestMessage
+                  - custom
+              timeSize:
+                type: number
+              timeUnit:
+                type: string
+                enum:
+                  - s
+                  - m
+                  - h
+                  - d
+              sourceId:
+                type: string
+              threshold:
+                type: array
+                items:
+                  type: number
+              comparator:
+                type: string
+                enum:
+                  - <
+                  - <=
+                  - '>'
+                  - '>='
+                  - between
+                  - outside
+              customMetric:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - custom
+                  field:
+                    type: string
+                  aggregation:
+                    type: string
+                    enum:
+                      - avg
+                      - max
+                      - min
+                      - rate
+                  id:
+                    type: string
+                  label:
+                    type: string
+              warningThreshold:
+                type: array
+                items:
+                  type: number
+              warningComparator:
+                type: string
+                enum:
+                  - <
+                  - <=
+                  - '>'
+                  - '>='
+                  - between
+                  - outside
+        filterQuery:
+          type: string
+        filterQueryText:
+          type: string
+        nodeType:
+          type: string
+          enum:
+            - host
+            - pod
+            - container
+            - awsEC2
+            - awsS3
+            - awsSQS
+            - awsRDS
+        sourceId:
+          type: string
+        alertOnNoData:
+          type: boolean
+    params_property_infra_metric_threshold:
+      properties:
+        criteria:
+          type: array
+          items:
+            oneOf:
+              - title: non count criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  metric:
+                    type: string
+                  aggType:
+                    type: string
+                    enum:
+                      - avg
+                      - max
+                      - min
+                      - cardinality
+                      - rate
+                      - count
+                      - sum
+                      - p95
+                      - p99
+                      - custom
+              - title: count criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  aggType:
+                    type: string
+                    enum:
+                      - count
+              - title: custom criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  aggType:
+                    type: string
+                    enum:
+                      - custom
+                  customMetric:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                            aggType:
+                              type: string
+                              enum:
+                                - avg
+                                - sum
+                                - max
+                                - min
+                                - cardinality
+                            field:
+                              type: string
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                            aggType:
+                              type: string
+                              enum:
+                                - count
+                            filter:
+                              type: string
+                  equation:
+                    type: string
+                  label:
+                    type: string
+        groupBy:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        filterQuery:
+          type: string
+        sourceId:
+          type: string
+        alertOnNoData:
+          type: boolean
+        alertOnGroupDisappear:
+          type: boolean
+    params_property_log_threshold:
+      oneOf:
+        - title: Count
+          type: object
+          required:
+            - count
+            - timeSize
+            - timeUnit
+            - logView
+          properties:
+            criteria:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: my.field
+                  comparator:
+                    type: string
+                    enum:
+                      - more than
+                      - more than or equals
+                      - less than
+                      - less than or equals
+                      - equals
+                      - does not equal
+                      - matches
+                      - does not match
+                      - matches phrase
+                      - does not match phrase
+                  value:
+                    oneOf:
+                      - type: number
+                        example: 42
+                      - type: string
+                        example: value
+            count:
+              type: object
+              properties:
+                comparator:
+                  type: string
+                  enum:
+                    - more than
+                    - more than or equals
+                    - less than
+                    - less than or equals
+                    - equals
+                    - does not equal
+                    - matches
+                    - does not match
+                    - matches phrase
+                    - does not match phrase
+                value:
+                  type: number
+                  example: 100
+            timeSize:
+              type: number
+              example: 6
+            timeUnit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+            logView:
+              type: object
+              properties:
+                logViewId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - log-view-reference
+                  example: log-view-reference
+            groupBy:
+              type: array
+              items:
+                type: string
+        - title: Ratio
+          type: object
+          required:
+            - count
+            - timeSize
+            - timeUnit
+            - logView
+          properties:
+            criteria:
+              type: array
+              items:
+                minItems: 2
+                maxItems: 2
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: my.field
+                    comparator:
+                      type: string
+                      enum:
+                        - more than
+                        - more than or equals
+                        - less than
+                        - less than or equals
+                        - equals
+                        - does not equal
+                        - matches
+                        - does not match
+                        - matches phrase
+                        - does not match phrase
+                    value:
+                      oneOf:
+                        - type: number
+                          example: 42
+                        - type: string
+                          example: value
+            count:
+              type: object
+              properties:
+                comparator:
+                  type: string
+                  enum:
+                    - more than
+                    - more than or equals
+                    - less than
+                    - less than or equals
+                    - equals
+                    - does not equal
+                    - matches
+                    - does not match
+                    - matches phrase
+                    - does not match phrase
+                value:
+                  type: number
+                  example: 100
+            timeSize:
+              type: number
+              example: 6
+            timeUnit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+            logView:
+              type: object
+              properties:
+                logViewId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - log-view-reference
+                  example: log-view-reference
+            groupBy:
+              type: array
+              items:
+                type: string
+    params_property_slo_burn_rate:
+      properties:
+        sloId:
+          description: The SLO identifier used by the rule
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        burnRateThreshold:
+          description: The burn rate threshold used to trigger the alert
+          type: number
+          example: 14.4
+        maxBurnRateThreshold:
+          description: The maximum burn rate threshold value defined by the SLO error budget
+          type: number
+          example: 168
+        longWindow:
+          description: The duration of the long window used to compute the burn rate
+          type: object
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 6
+            unit:
+              description: The duration unit
+              type: string
+              example: h
+        shortWindow:
+          description: The duration of the short window used to compute the burn rate
+          type: object
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 30
+            unit:
+              description: The duration unit
+              type: string
+              example: m
+    params_property_synthetics_uptime_tls:
+      properties:
+        search:
+          type: string
+        certExpirationThreshold:
+          type: number
+        certAgeThreshold:
+          type: number
     params_property_synthetics_monitor_status:
       required:
         - numTimes
@@ -3970,40 +4483,6 @@ components:
           type: number
         isAutoGenerated:
           type: boolean
-    create_uptime_monitor_status_rule_request:
-      title: Create uptime monitor status rule request
-      description: A rule that detects monitor errors and outages.
-      type: object
-      required:
-        - consumer
-        - name
-        - params
-        - rule_type_id
-        - schedule
-      properties:
-        actions:
-          $ref: '#/components/schemas/actions'
-        consumer:
-          $ref: '#/components/schemas/consumer'
-        enabled:
-          $ref: '#/components/schemas/enabled_rule'
-        name:
-          $ref: '#/components/schemas/name_rule'
-        notify_when:
-          $ref: '#/components/schemas/notify_when'
-        params:
-          $ref: '#/components/schemas/params_property_synthetics_monitor_status'
-        rule_type_id:
-          type: string
-          description: The ID of the rule type that you want to call when the rule is scheduled to run.
-          enum:
-            - xpack.uptime.alerts.monitorStatus
-        schedule:
-          $ref: '#/components/schemas/schedule'
-        tags:
-          $ref: '#/components/schemas/tags'
-        throttle:
-          $ref: '#/components/schemas/throttle'
     create_rule_request:
       title: Create rule request body properties
       description: The properties vary depending on the rule type.
@@ -4052,6 +4531,49 @@ components:
         - $ref: '#/components/schemas/create_uptime_monitor_status_rule_request'
       discriminator:
         propertyName: rule_type_id
+        mapping:
+          xpack.ml.anomaly_detection_alert: '#/components/schemas/create_anomaly_detection_alert_rule_request'
+          xpack.ml.anomaly_detection_jobs_health: '#/components/schemas/create_anomaly_detection_jobs_health_rule_request'
+          apm.anomaly: '#/components/schemas/create_apm_anomaly_rule_request'
+          apm.error_rate: '#/components/schemas/create_apm_error_count_rule_request'
+          apm.transaction_duration: '#/components/schemas/create_apm_transaction_duration_rule_request'
+          apm.transaction_error_rate: '#/components/schemas/create_apm_transaction_error_rate_rule_request'
+          .es-query: '#/components/schemas/create_es_query_rule_request'
+          .geo-containment: '#/components/schemas/create_geo_containment_rule_request'
+          .index-threshold: '#/components/schemas/create_index_threshold_rule_request'
+          metrics.alert.inventory.threshold: '#/components/schemas/create_infra_inventory_rule_request'
+          metrics.alert.anomaly: '#/components/schemas/create_infra_metric_anomaly_rule_request'
+          metrics.alert.threshold: '#/components/schemas/create_infra_metric_threshold_rule_request'
+          monitoring_alert_jvm_memory_usage: '#/components/schemas/create_monitoring_jvm_memory_usage_rule_request'
+          logs.alert.document.count: '#/components/schemas/create_log_threshold_rule_request'
+          monitoring_ccr_read_exceptions: '#/components/schemas/create_monitoring_ccr_exceptions_rule_request'
+          monitoring_alert_cluster_health: '#/components/schemas/create_monitoring_cluster_health_rule_request'
+          monitoring_alert_cpu_usage: '#/components/schemas/create_monitoring_cpu_usage_rule_request'
+          monitoring_alert_disk_usage: '#/components/schemas/create_monitoring_disk_usage_rule_request'
+          monitoring_alert_elasticsearch_version_mismatch: '#/components/schemas/create_monitoring_elasticsearch_version_mismatch_rule_request'
+          monitoring_alert_license_expiration: '#/components/schemas/create_monitoring_license_expiration_rule_request'
+          monitoring_alert_kibana_version_mismatch: '#/components/schemas/create_monitoring_kibana_version_mismatch_rule_request'
+          monitoring_alert_logstash_version_mismatch: '#/components/schemas/create_monitoring_logstash_version_mismatch_rule_request'
+          monitoring_alert_missing_monitoring_data: '#/components/schemas/create_monitoring_missing_data_rule_request'
+          monitoring_alert_nodes_changed: '#/components/schemas/create_monitoring_nodes_changed_rule_request'
+          monitoring_shard_size: '#/components/schemas/create_monitoring_shard_size_rule_request'
+          monitoring_alert_thread_pool_search_rejections: '#/components/schemas/create_monitoring_thread_pool_search_rejections_rule_request'
+          monitoring_alert_thread_pool_write_rejections: '#/components/schemas/create_monitoring_thread_pool_write_rejections_rule_request'
+          siem.eqlRule: '#/components/schemas/create_siem_eql_rule_request'
+          siem.indicatorRule: '#/components/schemas/create_siem_indicator_rule_request'
+          siem.mlRule: '#/components/schemas/create_siem_ml_rule_request'
+          siem.newTermsRule: '#/components/schemas/create_siem_new_terms_rule_request'
+          siem.notifications: '#/components/schemas/create_siem_notifications_rule_request'
+          siem.queryRule: '#/components/schemas/create_siem_query_rule_request'
+          siem.savedQueryRule: '#/components/schemas/create_siem_saved_query_rule_request'
+          siem.thresholdRule: '#/components/schemas/create_siem_threshold_rule_request'
+          slo.rules.burnRate: '#/components/schemas/create_slo_burn_rate_rule_request'
+          xpack.synthetics.alerts.monitorStatus: '#/components/schemas/create_synthetics_monitor_status_rule_request'
+          xpack.uptime.alerts.durationAnomaly: '#/components/schemas/create_synthetics_uptime_duration_anomaly_rule_request'
+          xpack.uptime.alerts.tls: '#/components/schemas/create_synthetics_uptime_tls_rule_request'
+          xpack.uptime.alerts.tlsCertificate: '#/components/schemas/create_synthetics_uptime_tls_certificate_rule_request'
+          transform_health: '#/components/schemas/create_transform_health_rule_request'
+          xpack.uptime.alerts.monitorStatus: '#/components/schemas/create_uptime_monitor_status_rule_request'
     rule_response_properties:
       title: Rule response properties
       type: object
@@ -4077,51 +4599,65 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         api_key_created_by_user:
           type: boolean
           description: Indicates whether the API key that is associated with the rule was created by the user.
-          example: false
+          examples:
+            - false
         api_key_owner:
-          type: string
+          type:
+            - string
+            - 'null'
           description: |
             The owner of the API key that is associated with the rule and used to run background tasks.
-          nullable: true
-          example: elastic
+          examples:
+            - elastic
         consumer:
           type: string
           description: The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
-          example: alerts
+          examples:
+            - alerts
         created_at:
           type: string
           description: The date and time that the rule was created.
           format: date-time
-          example: '2022-12-05T23:36:58.284Z'
+          examples:
+            - '2022-12-05T23:36:58.284Z'
         created_by:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The identifier for the user that created the rule.
-          nullable: true
-          example: elastic
+          examples:
+            - elastic
         enabled:
           type: boolean
           description: Indicates whether the rule is currently enabled.
-          example: true
+          examples:
+            - true
         execution_status:
           type: object
           properties:
             last_duration:
               type: integer
-              example: 55
+              examples:
+                - 55
             last_execution_date:
               type: string
               format: date-time
-              example: '2022-12-06T00:13:43.890Z'
+              examples:
+                - '2022-12-06T00:13:43.890Z'
             status:
               type: string
-              example: ok
+              examples:
+                - ok
         id:
           type: string
           description: The identifier for the rule.
-          example: b530fed0-74f5-11ed-9801-35303b735aef
+          examples:
+            - b530fed0-74f5-11ed-9801-35303b735aef
         last_run:
           type: object
           properties:
@@ -4138,39 +4674,49 @@ components:
                   type: integer
             outcome:
               type: string
-              example: succeeded
+              examples:
+                - succeeded
             outcome_msg:
-              type: array
+              type:
+                - array
+                - 'null'
               items:
                 type: string
-              nullable: true
             outcome_order:
               type: integer
             warning:
-              type: string
-              nullable: true
-              example: null
+              type:
+                - string
+                - 'null'
+              examples:
+                - null
         muted_alert_ids:
-          type: array
-          nullable: true
+          type:
+            - array
+            - 'null'
           items:
             type: string
         mute_all:
           type: boolean
-          example: false
+          examples:
+            - false
         name:
           type: string
           description: The name of the rule.
-          example: cluster_health_rule
+          examples:
+            - cluster_health_rule
         next_run:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
-          example: '2022-12-06T00:14:43.818Z'
+          examples:
+            - '2022-12-06T00:14:43.818Z'
         notify_when:
-          type: string
+          type:
+            - string
+            - 'null'
           description: Indicates how often alerts generate actions.
-          nullable: true
         params:
           type: object
           description: The parameters for the rule.
@@ -4182,7 +4728,8 @@ components:
           type: string
           description: |
             The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
-          example: monitoring_alert_cluster_health
+          examples:
+            - monitoring_alert_cluster_health
         running:
           type: boolean
           description: Indicates whether the rule is running.
@@ -4190,7 +4737,8 @@ components:
           $ref: '#/components/schemas/schedule'
         scheduled_task_id:
           type: string
-          example: b530fed0-74f5-11ed-9801-35303b735aef
+          examples:
+            - b530fed0-74f5-11ed-9801-35303b735aef
         tags:
           $ref: '#/components/schemas/tags'
         throttle:
@@ -4198,26 +4746,31 @@ components:
         updated_at:
           type: string
           description: The date and time that the rule was updated most recently.
-          example: '2022-12-05T23:36:58.284Z'
+          examples:
+            - '2022-12-05T23:36:58.284Z'
         updated_by:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The identifier for the user that updated this rule most recently.
-          nullable: true
-          example: elastic
+          examples:
+            - elastic
     401_response:
       type: object
       title: Unsuccessful rule API response
       properties:
         error:
           type: string
-          example: Unauthorized
+          examples:
+            - Unauthorized
           enum:
             - Unauthorized
         message:
           type: string
         statusCode:
           type: integer
-          example: 401
+          examples:
+            - 401
           enum:
             - 401
     404_response:
@@ -4225,15 +4778,18 @@ components:
       properties:
         error:
           type: string
-          example: Not Found
+          examples:
+            - Not Found
           enum:
             - Not Found
         message:
           type: string
-          example: Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
+          examples:
+            - Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
         statusCode:
           type: integer
-          example: 404
+          examples:
+            - 404
           enum:
             - 404
     update_rule_request:
@@ -4248,10 +4804,13 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         name:
           type: string
           description: The name of the rule.
-          example: cluster_health_rule
+          examples:
+            - cluster_health_rule
         notify_when:
           $ref: '#/components/schemas/notify_when'
         params:
@@ -4264,6 +4823,68 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    fieldmap_properties:
+      title: Field map objects in the get rule types response
+      type: object
+      properties:
+        array:
+          type: boolean
+          description: Indicates whether the field is an array.
+        dynamic:
+          type: boolean
+          description: Indicates whether it is a dynamic field mapping.
+        format:
+          type: string
+          description: |
+            Indicates the format of the field. For example, if the `type` is `date_range`, the `format` can be `epoch_millis||strict_date_optional_time`.
+        ignore_above:
+          type: integer
+          description: Specifies the maximum length of a string field. Longer strings are not indexed or stored.
+        index:
+          type: boolean
+          description: Indicates whether field values are indexed.
+        path:
+          type: string
+          description: TBD
+        properties:
+          type: object
+          description: |
+            Details about the object properties. This property is applicable when `type` is `object`.
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                type: string
+                description: The data type for each object property.
+        required:
+          type: boolean
+          description: Indicates whether the field is required.
+        scaling_factor:
+          type: integer
+          description: |
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
+        type:
+          type: string
+          description: Specifies the data type for the field.
+          example: scaled_float
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400
     alert_response_properties:
       title: Legacy alert response properties
       type: object
@@ -4274,53 +4895,66 @@ components:
             type: object
         alertTypeId:
           type: string
-          example: .index-threshold
+          examples:
+            - .index-threshold
         apiKeyOwner:
-          type: string
-          nullable: true
-          example: elastic
+          type:
+            - string
+            - 'null'
+          examples:
+            - elastic
         createdAt:
           type: string
           description: The date and time that the alert was created.
           format: date-time
-          example: '2022-12-05T23:36:58.284Z'
+          examples:
+            - '2022-12-05T23:36:58.284Z'
         createdBy:
           type: string
           description: The identifier for the user that created the alert.
-          example: elastic
+          examples:
+            - elastic
         enabled:
           type: boolean
           description: Indicates whether the alert is currently enabled.
-          example: true
+          examples:
+            - true
         executionStatus:
           type: object
           properties:
             lastExecutionDate:
               type: string
               format: date-time
-              example: '2022-12-06T00:13:43.890Z'
+              examples:
+                - '2022-12-06T00:13:43.890Z'
             status:
               type: string
-              example: ok
+              examples:
+                - ok
         id:
           type: string
           description: The identifier for the alert.
-          example: b530fed0-74f5-11ed-9801-35303b735aef
+          examples:
+            - b530fed0-74f5-11ed-9801-35303b735aef
         muteAll:
           type: boolean
-          example: false
+          examples:
+            - false
         mutedInstanceIds:
-          type: array
-          nullable: true
+          type:
+            - array
+            - 'null'
           items:
             type: string
         name:
           type: string
           description: The name of the alert.
-          example: my alert
+          examples:
+            - my alert
         notifyWhen:
           type: string
-          example: onActionGroupChange
+          examples:
+            - onActionGroupChange
         params:
           type: object
           additionalProperties: true
@@ -4331,24 +4965,120 @@ components:
               type: string
         scheduledTaskId:
           type: string
-          example: b530fed0-74f5-11ed-9801-35303b735aef
+          examples:
+            - b530fed0-74f5-11ed-9801-35303b735aef
         tags:
           type: array
           items:
             type: string
         throttle:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
         updatedAt:
           type: string
-          example: '2022-12-05T23:36:58.284Z'
+          examples:
+            - '2022-12-05T23:36:58.284Z'
         updatedBy:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The identifier for the user that updated this alert most recently.
-          nullable: true
-          example: elastic
+          examples:
+            - elastic
   examples:
-    create_rule_request:
+    create_es_query_esql_rule_request:
+      summary: Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
+      value:
+        name: my Elasticsearch query ESQL rule
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != "GB" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          size: 0
+          thresholdComparator: '>'
+          threshold:
+            - 0
+        consumer: stackAlerts
+        rule_type_id: .es-query
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+            params:
+              level: info
+              message: |-
+                Elasticsearch query rule '{{rule.name}}' is active:
+                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+            frequency:
+              summary: false
+              notify_when: onActiveAlert
+    create_es_query_rule_request:
+      summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
+      value:
+        actions:
+          - group: query matched
+            params:
+              level: info
+              message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            frequency:
+              throttle: 1d
+              summary: true
+              notify_when: onThrottleInterval
+          - group: recovered
+            params:
+              level: info
+              message: Recovered
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            frequency:
+              summary: false
+              notify_when: onActionGroupChange
+        consumer: alerts
+        name: my Elasticsearch query rule
+        params:
+          esQuery: '"""{"query":{"match_all" : {}}}"""'
+          index:
+            - kibana_sample_data_logs
+          size: 100
+          threshold:
+            - 100
+          thresholdComparator: '>'
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+        rule_type_id: .es-query
+        schedule:
+          interval: 1d
+    create_es_query_kql_rule_request:
+      summary: Create an Elasticsearch query rule that uses Kibana query language (KQL).
+      value:
+        consumer: alerts
+        name: my Elasticsearch query KQL rule
+        params:
+          aggType: count
+          excludeHitsFromPreviousRun: true
+          groupBy: all
+          searchConfiguration:
+            query:
+              query: '""geo.src : "US" ""'
+              language: kuery
+            index: 90943e30-9a47-11e8-b64d-95841ca0b247
+          searchType: searchSource
+          size: 100
+          threshold:
+            - 1000
+          thresholdComparator: '>'
+          timeWindowSize: 5
+          timeWindowUnit: m
+        rule_type_id: .es-query
+        schedule:
+          interval: 1m
+    create_index_threshold_rule_request:
       summary: Create an index threshold rule.
       value:
         actions:
@@ -4365,6 +5095,8 @@ components:
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
+        alert_delay:
+          active: 3
         consumer: alerts
         name: my rule
         params:
@@ -4386,7 +5118,190 @@ components:
           interval: 1m
         tags:
           - cpu
-    create_rule_response:
+    create_tracking_containment_rule_request:
+      summary: Create a tracking containment rule.
+      value:
+        consumer: alerts
+        name: my tracking rule
+        params:
+          index: kibana_sample_data_logs
+          dateField": '@timestamp'
+          geoField: geo.coordinates
+          entity: agent.keyword
+          boundaryType: entireIndex
+          boundaryIndexTitle: boundary*
+          boundaryGeoField: location
+          boundaryNameField: name
+          indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+          boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+        rule_type_id: .geo-containment
+        schedule:
+          interval: 1h
+    create_es_query_esql_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: e0d62360-78e8-11ee-9177-f7d404c8c945
+        enabled: true
+        name: my Elasticsearch query ESQL rule
+        tags: []
+        rule_type_id: .es-query
+        consumer: stackAlerts
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+            params:
+              level: info
+              message: |-
+                Elasticsearch query rule '{{rule.name}}' is active:
+                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+            connector_type_id: .server-log
+            frequency:
+              summary: false
+              notify_when: onActiveAlert
+              throttle: null
+            uuid: bfe370a3-531b-4855-bbe6-ad739f578844
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != "GB" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          size: 0
+          thresholdComparator: '>'
+          threshold:
+            - 0
+          excludeHitsFromPreviousRun": true,
+          aggType: count
+          groupBy: all
+        scheduled_task_id: e0d62360-78e8-11ee-9177-f7d404c8c945
+        created_by: elastic
+        updated_by: elastic",
+        created_at: '2023-11-01T19:00:10.453Z'
+        updated_at: '2023-11-01T19:00:10.453Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        mute_all: false
+        notify_when: null
+        muted_alert_ids: []
+        execution_status:
+          status: pending
+          last_execution_date: '2023-11-01T19:00:10.453Z'
+        revision: 0
+        running: false
+    create_es_query_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: 58148c70-407f-11ee-850e-c71febc4ca7f
+        enabled: true
+        name: my Elasticsearch query rule
+        tags: []
+        rule_type_id: .es-query
+        consumer: alerts
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            params:
+              level: info
+              message: The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts.
+            connector_type_id: .server-log
+            frequency:
+              summary: true
+              notify_when: onThrottleInterval
+              throttle: 1d
+            uuid: 53f3c2a3-e5d0-4cfa-af3b-6f0881385e78
+          - group: recovered
+            id: fdbece50-406c-11ee-850e-c71febc4ca7f
+            params:
+              level: info
+              message: Recovered
+            connector_type_id: .server-log
+            frequency:
+              summary: false
+              notify_when: onActionGroupChange
+              throttle: null
+            uuid: 2324e45b-c0df-45c7-9d70-4993e30be758
+        params:
+          thresholdComparator: '>'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          threshold:
+            - 100
+          size: 100
+          timeField: '@timestamp'
+          index:
+            - kibana_sample_data_logs
+          esQuery: '"""{"query":{"match_all" : {}}}"""'
+          excludeHitsFromPreviousRun: true
+          aggType: count
+          groupBy: all
+          searchType: esQuery
+        scheduled_task_id: 58148c70-407f-11ee-850e-c71febc4ca7f
+        created_by: elastic
+        updated_by: elastic
+        created_at: '2023-08-22T00:03:38.263Z'
+        updated_at: '2023-08-22T00:03:38.263Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        mute_all: false
+        notify_when: null
+        muted_alert_ids: []
+        execution_status:
+          status: pending
+          last_execution_date: '2023-08-22T00:03:38.263Z'
+        revision: 0
+        running: false
+    create_es_query_kql_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: 7bd506d0-2284-11ee-8fad-6101956ced88
+        enabled: true
+        name: my Elasticsearch query KQL rule"
+        tags: []
+        rule_type_id: .es-query
+        consumer: alerts
+        schedule:
+          interval: 1m
+        actions: []
+        params:
+          searchConfiguration:
+            query:
+              query: '""geo.src : "US" ""'
+              language: kuery
+            index: 90943e30-9a47-11e8-b64d-95841ca0b247
+          searchType: searchSource
+          timeWindowSize: 5
+          timeWindowUnit: m
+          threshold:
+            - 1000
+          thresholdComparator: '>'
+          size: 100
+          aggType: count
+          groupBy: all
+          excludeHitsFromPreviousRun: true
+        created_by: elastic
+        updated_by: elastic
+        created_at: '2023-07-14T20:24:50.729Z'
+        updated_at: '2023-07-14T20:24:50.729Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        notify_when: null
+        mute_all: false
+        muted_alert_ids: []
+        scheduled_task_id: 7bd506d0-2284-11ee-8fad-6101956ced88
+        execution_status:
+          status: pending
+          last_execution_date: '2023-07-14T20:24:50.729Z'
+        revision: 0
+        running: false
+    create_index_threshold_rule_response:
       summary: The create rule API returns a JSON object that contains details about the rule.
       value:
         actions:
@@ -4406,6 +5321,8 @@ components:
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
+        alert_delay:
+          active: 3
         api_key_created_by_user: false
         api_key_owner: elastic
         consumer: alerts
@@ -4445,6 +5362,57 @@ components:
         throttle: null
         updated_at: '2022-06-08T17:20:31.632Z'
         updated_by: elastic
+    create_tracking_containment_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: b6883f9d-5f70-4758-a66e-369d7c26012f
+        name: my tracking rule
+        tags: []
+        enabled: true
+        consumer: alerts
+        throttle: null
+        revision: 1
+        running: false
+        schedule:
+          interval: 1h
+        params:
+          index: kibana_sample_data_logs
+          dateField: '@timestamp'
+          geoField: geo.coordinates
+          entity: agent.keyword
+          boundaryType: entireIndex
+          boundaryIndexTitle: boundary*
+          boundaryGeoField: location
+          boundaryNameField: name
+          indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+          boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+        rule_type_id: .geo-containment
+        created_by: elastic
+        updated_by: elastic
+        created_at: '2024-02-14T19:52:55.920Z'
+        updated_at: '2024-02-15T03:24:32.574Z'
+        api_key_owner: elastic
+        notify_when: null
+        mute_all: false
+        muted_alert_ids: []
+        scheduled_task_id: b6883f9d-5f70-4758-a66e-369d7c26012f
+        execution_status:
+          status: ok
+          last_execution_date: '2024-02-15T03:25:38.125Z'
+          last_duration: 74
+        actions: []
+        last_run:
+          alerts_count:
+            active: 0
+            new: 0
+            recovered: 0
+            ignored: 0
+          outcome_msg: null
+          outcome_order: 0
+          outcome: succeeded
+          warning: null
+        next_run: '2024-02-15T03:26:38.033Z'
+        api_key_created_by_user: false
     get_rule_response:
       summary: The get rule API returns a JSON object that contains details about the rule.
       value:
@@ -4536,7 +5504,7 @@ components:
           aggField: sheet.version
           aggType: avg
           index:
-            - .test-index
+            - .updated-index
           groupBy: top
           termField: name.keyword
           termSize: 6
@@ -4550,7 +5518,6 @@ components:
         schedule:
           interval: 1m
         tags: []
-        throttle: null
     update_rule_response:
       summary: The update rule API returns a JSON object that contains details about the rule.
       value:
@@ -4563,7 +5530,7 @@ components:
         revision: 1
         running: false
         schedule:
-          interval: 10m
+          interval: 1m
         params:
           index:
             - .updated-index
@@ -4583,13 +5550,13 @@ components:
         updated_by: elastic
         rule_type_id: .index-threshold
         scheduled_task_id: 4c5eda00-e74f-11ec-b72f-5b18752ff9ea
-        created_at: '2023-01-31T23:03:33.127Z'
-        updated_at: '2023-01-31T23:55:27.314Z'
+        created_at: '2024-03-26T23:13:20.985Z'
+        updated_at: '2024-03-26T23:22:59.949Z'
         mute_all: false
         muted_alert_ids: []
         execution_status:
           status: ok
-          last_execution_date: '2023-01-31T23:48:42.499Z'
+          last_execution_date: '2024-03-26T23:22:51.390Z'
           last_duration: 52
         actions:
           - group: threshold met
@@ -4617,7 +5584,7 @@ components:
           outcome_msg: null
           warning: null
           outcome: succeeded
-        next_run: '2023-01-31T23:49:42.432Z'
+        next_run: '2024-03-26T23:23:51.316Z'
         api_key_created_by_user: false
     find_rules_response:
       summary: Retrieve information about a rule.
@@ -4832,11 +5799,101 @@ components:
       summary: Retrieve rule types associated with Kibana machine learning features
       value:
         - id: xpack.ml.anomaly_detection_alert
+          name: Anomaly detection alert
+          category: management
+          producer: ml
+          alerts:
+            context: ml.anomaly-detection
+            mappings:
+              fieldMap:
+                kibana.alert.job_id:
+                  type: keyword
+                  array: false
+                  required: true
+                kibana.alert.anomaly_score:
+                  type: double
+                  array: false
+                  required: false
+                kibana.alert.is_interim:
+                  type: boolean
+                  array: false
+                  required: false
+                kibana.alert.anomaly_timestamp:
+                  type: date
+                  array: false
+                  required: false
+                kibana.alert.top_records:
+                  type: object
+                  array: true
+                  required: false
+                  dynamic: false
+                  properties:
+                    job_id:
+                      type: keyword
+                    record_score:
+                      type: double
+                    initial_record_score:
+                      type: double
+                    detector_index:
+                      type: integer
+                    is_interim:
+                      type: boolean
+                    timestamp:
+                      type: date
+                    partition_field_name:
+                      type: keyword
+                    partition_field_value:
+                      type: keyword
+                    over_field_name:
+                      type: keyword
+                    over_field_value:
+                      type: keyword
+                    by_field_name:
+                      type: keyword
+                    by_field_value:
+                      type: keyword
+                    function:
+                      type: keyword
+                    typical:
+                      type: double
+                    actual:
+                      type: double
+                    field_name:
+                      type: keyword
+                kibana.alert.top_influencers:
+                  type: object
+                  array: true
+                  required: false
+                  dynamic: false
+                  properties:
+                    job_id:
+                      type: keyword
+                    influencer_field_name:
+                      type: keyword
+                    influencer_field_value:
+                      type: keyword
+                    influencer_score:
+                      type: double
+                    initial_influencer_score:
+                      type: double
+                    is_interim:
+                      type: boolean
+                    timestamp:
+                      type: date
+            shouldWrite: true
+          enabled_in_license: true
+          recovery_action_group:
+            id: recovered
+            name: Recovered
           action_groups:
             - id: anomaly_score_match
               name: Anomaly score matched the condition
             - id: recovered
               name: Recovered
+          default_action_group_id: anomaly_score_match
+          minimum_license_required: platinum
+          is_exportable: true
+          rule_task_timeout: 5m
           action_variables:
             context:
               - name: timestamp
@@ -4858,58 +5915,104 @@ components:
               - name: anomalyExplorerUrl
                 description: URL to open in the Anomaly Explorer
                 useWithTripleBracesInTemplates: true
-            params: []
             state: []
+            params: []
           authorized_consumers:
             alerts:
-              all: true
               read: true
+              all: true
+            stackAlerts:
+              read: true
+              all: true
+            slo:
+              read: true
+              all: true
             ml:
-              all: true
               read: true
-          default_action_group_id: anomaly_score_match
+              all: true
+            uptime:
+              read: true
+              all: true
+            infrastructure:
+              read: true
+              all: true
+            logs:
+              read: true
+              all: true
+            monitoring:
+              read: true
+              all: true
+            siem:
+              read: true
+              all: true
+            apm:
+              read: true
+              all: true
+            discover:
+              read: true
+              all: true
           does_set_recovery_context: true
-          enabled_in_license: true
-          is_exportable: true
-          minimum_license_required: platinum
-          name: Anomaly detection alert
+          has_alerts_mappings: true
+          has_fields_for_a_a_d: false
+        - id: xpack.ml.anomaly_detection_jobs_health
+          name: Anomaly detection jobs health
+          category: management
           producer: ml
+          enabled_in_license: true
           recovery_action_group:
             id: recovered
             name: Recovered
-          rule_task_timeout: 5m
-        - id: xpack.ml.anomaly_detection_jobs_health
           action_groups:
             - id: anomaly_detection_realtime_issue
               name: Issue detected
             - id: recovered
               name: Recovered
+          default_action_group_id: anomaly_detection_realtime_issue
+          minimum_license_required: platinum
+          is_exportable: true
+          rule_task_timeout: 5m
           action_variables:
             context:
               - name: results
                 description: Results of the rule execution
               - name: message
                 description: Alert info message
-            params: []
             state: []
+            params: []
           authorized_consumers:
             alerts:
-              all: true
               read: true
+              all: true
+            stackAlerts:
+              read: true
+              all: true
+            slo:
+              read: true
+              all: true
             ml:
-              all: true
               read: true
-          default_action_group_id: anomaly_detection_realtime_issue
+              all: true
+            uptime:
+              read: true
+              all: true
+            infrastructure:
+              read: true
+              all: true
+            logs:
+              read: true
+              all: true
+            monitoring:
+              read: true
+              all: true
+            siem:
+              read: true
+              all: true
+            apm:
+              read: true
+              all: true
+            discover:
+              read: true
+              all: true
           does_set_recovery_context: true
-          enabled_in_license: true
-          is_exportable: true
-          minimum_license_required: platinum
-          name: Anomaly detection jobs health
-          producer: ml
-          recovery_action_group:
-            id: recovered
-            name: Recovered
-          rule_task_timeout: 5m
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
+          has_alerts_mappings: false
+          has_fields_for_a_a_d: false

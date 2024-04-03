@@ -23,7 +23,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
-import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import type {
   DatasourceDimensionEditorProps,
@@ -38,7 +38,6 @@ import type {
   IndexPatternRef,
   DataSourceInfo,
   UserMessage,
-  FrameDatasourceAPI,
   StateSetter,
   IndexPatternMap,
 } from '../../types';
@@ -64,11 +63,12 @@ import {
 
 import {
   getFiltersInLayer,
-  getShardFailuresWarningMessages,
+  getSearchWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
   getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -134,6 +134,27 @@ function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPatte
     return column.dataType;
   }
 }
+
+export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = ({
+  prevState,
+  layerId,
+  columnId,
+  indexPatterns,
+}) => {
+  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
+  if (!indexPattern) {
+    throw new Error('indexPatterns is not passed to the function');
+  }
+  return mergeLayer({
+    state: prevState,
+    layerId,
+    newLayer: deleteColumn({
+      layer: prevState.layers[layerId],
+      columnId,
+      indexPattern,
+    }),
+  });
+};
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
@@ -300,18 +321,7 @@ export function getFormBasedDatasource({
       return Object.keys(state?.layers);
     },
 
-    removeColumn({ prevState, layerId, columnId, indexPatterns }) {
-      const indexPattern = indexPatterns[prevState.layers[layerId]?.indexPatternId];
-      return mergeLayer({
-        state: prevState,
-        layerId,
-        newLayer: deleteColumn({
-          layer: prevState.layers[layerId],
-          columnId,
-          indexPattern,
-        }),
-      });
-    },
+    removeColumn,
 
     initializeDimension(
       state,
@@ -486,8 +496,8 @@ export function getFormBasedDatasource({
               ? column.label
               : operationDefinitionMap[column.operationType].getDefaultLabel(
                   column,
-                  indexPatternsMap[layer.indexPatternId],
-                  layer.columns
+                  layer.columns,
+                  indexPatternsMap[layer.indexPatternId]
                 )
           );
         });
@@ -539,10 +549,6 @@ export function getFormBasedDatasource({
           {...otherProps}
         />
       );
-    },
-
-    canCloseDimensionEditor: (state) => {
-      return !state.isDimensionClosePrevented;
     },
 
     getDropProps,
@@ -742,18 +748,12 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
+    getUserMessages(state, { frame: framePublicAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
 
-      const layerErrorMessages = getLayerErrorMessages(
-        state,
-        frameDatasourceAPI,
-        setState,
-        core,
-        data
-      );
+      const layerErrorMessages = getLayerErrorMessages(state, framePublicAPI, setState, core, data);
 
       const dimensionErrorMessages = getInvalidDimensionErrorMessages(
         state,
@@ -763,8 +763,8 @@ export function getFormBasedDatasource({
           return !isColumnInvalid(
             layer,
             columnId,
-            frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
-            frameDatasourceAPI.dateRange,
+            framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+            framePublicAPI.dateRange,
             uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
@@ -772,11 +772,8 @@ export function getFormBasedDatasource({
 
       const warningMessages = [
         ...[
-          ...(getStateTimeShiftWarningMessages(
-            data.datatableUtilities,
-            state,
-            frameDatasourceAPI
-          ) || []),
+          ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, framePublicAPI) ||
+            []),
         ].map((longMessage) => {
           const message: UserMessage = {
             severity: 'warning',
@@ -791,19 +788,20 @@ export function getFormBasedDatasource({
         ...getPrecisionErrorWarningMessages(
           data.datatableUtilities,
           state,
-          frameDatasourceAPI,
+          framePublicAPI,
           core.docLinks,
           setState
         ),
+        ...getUnsupportedOperationsWarningMessage(state, framePublicAPI, core.docLinks),
       ];
 
-      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+      const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
       return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
+      return [...getSearchWarningMessages(state, warning, request, response, core.theme)];
     },
 
     checkIntegrity: (state, indexPatterns) => {
@@ -849,6 +847,14 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+    injectReferencesToLayers: (state, references) => {
+      const layers =
+        references && state ? injectReferences(state, references).layers : state?.layers;
+      return {
+        ...state,
+        layers,
+      };
     },
 
     getDatasourceInfo: async (state, references, dataViewsService) => {
@@ -906,12 +912,12 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
 
 function getLayerErrorMessages(
   state: FormBasedPrivateState,
-  frameDatasourceAPI: FrameDatasourceAPI,
+  framePublicAPI: FramePublicAPI,
   setState: StateSetter<FormBasedPrivateState, unknown>,
   core: CoreStart,
   data: DataPublicPluginStart
 ) {
-  const indexPatterns = frameDatasourceAPI.dataViews.indexPatterns;
+  const indexPatterns = framePublicAPI.dataViews.indexPatterns;
 
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
     .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
@@ -938,7 +944,7 @@ function getLayerErrorMessages(
                   <EuiButton
                     data-test-subj="errorFixAction"
                     onClick={async () => {
-                      const newState = await error.fixAction?.newState(frameDatasourceAPI);
+                      const newState = await error.fixAction?.newState(framePublicAPI);
                       if (newState) {
                         setState(newState);
                       }

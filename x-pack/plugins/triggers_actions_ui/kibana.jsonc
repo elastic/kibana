@@ -16,20 +16,23 @@
       "data",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjects",
       "unifiedSearch",
+      "fieldFormats",
       "dataViews",
       "dataViewEditor",
       "alerting",
       "actions",
       "dashboard",
       "licensing",
+      "expressions",
+      "lens"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "alerting",

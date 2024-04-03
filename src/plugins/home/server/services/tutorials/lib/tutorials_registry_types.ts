@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, IStaticAssets } from '@kbn/core/server';
 import type { TutorialSchema } from './tutorial_schema';
 export { TutorialsCategory } from '../../../../common/constants';
 
@@ -25,6 +25,7 @@ export type Platform = 'WINDOWS' | 'OSX' | 'DEB' | 'RPM';
 
 export interface TutorialContext {
   kibanaBranch: string;
+  staticAssets: IStaticAssets;
   [key: string]: unknown;
 }
 export type TutorialProvider = (context: TutorialContext) => TutorialSchema;

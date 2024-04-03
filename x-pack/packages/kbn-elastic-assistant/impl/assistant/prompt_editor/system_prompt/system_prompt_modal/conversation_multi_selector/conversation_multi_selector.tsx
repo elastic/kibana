@@ -13,6 +13,7 @@ import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
 
 interface Props {
+  isDisabled?: boolean;
   onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
   conversations: Conversation[];
   selectedConversations?: Conversation[];
@@ -22,20 +23,25 @@ interface Props {
  * Selector for choosing multiple Conversations
  */
 export const ConversationMultiSelector: React.FC<Props> = React.memo(
-  ({ onConversationSelectionChange, conversations, selectedConversations = [] }) => {
+  ({
+    conversations,
+    isDisabled = false,
+    onConversationSelectionChange,
+    selectedConversations = [],
+  }) => {
     // ComboBox options
     const options = useMemo<EuiComboBoxOptionOption[]>(
       () =>
         conversations.map((conversation) => ({
-          label: conversation.id,
-          'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.id),
+          label: conversation.title ?? '',
+          'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.title),
         })),
       [conversations]
     );
     const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
       return selectedConversations != null
         ? selectedConversations.map((conversation) => ({
-            label: conversation.id,
+            label: conversation.title,
           }))
         : [];
     }, [selectedConversations]);
@@ -43,7 +49,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     const handleSelectionChange = useCallback(
       (conversationMultiSelectorOption: EuiComboBoxOptionOption[]) => {
         const newConversationSelection = conversations.filter((conversation) =>
-          conversationMultiSelectorOption.some((cmso) => conversation.id === cmso.label)
+          conversationMultiSelectorOption.some((cmso) => conversation.title === cmso.label)
         );
         onConversationSelectionChange(newConversationSelection);
       },
@@ -64,8 +70,11 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
-        data-test-subj={TEST_IDS.CONVERSATIONS_MULTISELECTOR}
         aria-label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
+        compressed
+        data-test-subj={TEST_IDS.CONVERSATIONS_MULTISELECTOR}
+        isDisabled={isDisabled}
+        fullWidth
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChange}

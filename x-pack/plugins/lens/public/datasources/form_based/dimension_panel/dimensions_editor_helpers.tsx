@@ -16,14 +16,102 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { operationDefinitionMap } from '../operations';
+import { nonNullable } from '../../../utils';
+import {
+  operationDefinitionMap,
+  type PercentileIndexPatternColumn,
+  type PercentileRanksIndexPatternColumn,
+  type TermsIndexPatternColumn,
+} from '../operations';
+import { isColumnOfType } from '../operations/definitions/helpers';
+import { FormBasedLayer } from '../types';
+import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';
 export const quickFunctionsName = 'quickFunctions';
+export const termsOperationName = 'terms';
+export const optionallySortableOperationNames = ['percentile', 'percentile_ranks'];
 export const nonQuickFunctions = new Set([formulaOperationName, staticValueOperationName]);
 
 export type TemporaryState = typeof quickFunctionsName | typeof staticValueOperationName | 'none';
+
+export function isLayerChangingDueToOtherBucketChange(
+  prevLayer: FormBasedLayer,
+  newLayer: FormBasedLayer
+) {
+  // Finds the other bucket in prevState and return its value
+  const prevStateTermsColumns = Object.entries(prevLayer.columns)
+    .map(([id, column]) => {
+      if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+        return { id, otherBucket: column.params.otherBucket, termsSize: column.params.size };
+      }
+    })
+    .filter(nonNullable);
+  // Checks if the terms columns have changed the otherBucket value programatically.
+  // This happens when the terms size is greater than equal MAX_TERMS_OTHER_ENABLED
+  // and the previous state terms size is lower than MAX_TERMS_OTHER_ENABLED
+  const hasChangedOtherBucket = prevStateTermsColumns.some(({ id, otherBucket, termsSize }) => {
+    const newStateTermsColumn = newLayer.columns[id];
+    if (!isColumnOfType<TermsIndexPatternColumn>('terms', newStateTermsColumn)) {
+      return false;
+    }
+
+    return (
+      newStateTermsColumn.params.otherBucket !== otherBucket &&
+      !newStateTermsColumn.params.otherBucket &&
+      newStateTermsColumn.params.size >= MAX_TERMS_OTHER_ENABLED &&
+      termsSize < MAX_TERMS_OTHER_ENABLED
+    );
+  });
+  return hasChangedOtherBucket;
+}
+
+export function isLayerChangingDueToDecimalsPercentile(
+  prevLayer: FormBasedLayer,
+  newLayer: FormBasedLayer
+) {
+  // step 1: find the ranking column in prevState and return its value
+  const termsRiskyColumns = Object.entries(prevLayer.columns)
+    .map(([id, column]) => {
+      if (
+        isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
+        column.params?.orderBy.type === 'column' &&
+        column.params.orderBy.columnId != null
+      ) {
+        const rankingColumn = prevLayer.columns[column.params.orderBy.columnId];
+        if (isColumnOfType<PercentileIndexPatternColumn>('percentile', rankingColumn)) {
+          if (Number.isInteger(rankingColumn.params.percentile)) {
+            return { id, rankId: column.params.orderBy.columnId };
+          }
+        }
+        if (isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', rankingColumn)) {
+          if (Number.isInteger(rankingColumn.params.value)) {
+            return { id, rankId: column.params.orderBy.columnId };
+          }
+        }
+      }
+    })
+    .filter(nonNullable);
+  // now check again the terms risky column in the new layer and verify that at
+  // least one changed due to decimals
+  const hasChangedDueToDecimals = termsRiskyColumns.some(({ id, rankId }) => {
+    const termsColumn = newLayer.columns[id];
+    if (!isColumnOfType<TermsIndexPatternColumn>('terms', termsColumn)) {
+      return false;
+    }
+    if (termsColumn.params.orderBy.type === 'alphabetical') {
+      const rankingColumn = newLayer.columns[rankId];
+      if (isColumnOfType<PercentileIndexPatternColumn>('percentile', rankingColumn)) {
+        return !Number.isInteger(rankingColumn.params.percentile);
+      }
+      if (isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', rankingColumn)) {
+        return !Number.isInteger(rankingColumn.params.value);
+      }
+    }
+  });
+  return hasChangedDueToDecimals;
+}
 
 export function isQuickFunction(operationType: string) {
   return !nonQuickFunctions.has(operationType);

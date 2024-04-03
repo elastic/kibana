@@ -22,6 +22,7 @@ import * as i18n from './translations';
 import { QuickPrompt } from '../types';
 
 interface Props {
+  isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
   onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
   quickPrompts: QuickPrompt[];
@@ -34,7 +35,13 @@ export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boo
  * Selector for choosing and deleting Quick Prompts
  */
 export const QuickPromptSelector: React.FC<Props> = React.memo(
-  ({ quickPrompts, onQuickPromptDeleted, onQuickPromptSelectionChange, selectedQuickPrompt }) => {
+  ({
+    isDisabled = false,
+    quickPrompts,
+    onQuickPromptDeleted,
+    onQuickPromptSelectionChange,
+    selectedQuickPrompt,
+  }) => {
     // Form options
     const [options, setOptions] = useState<QuickPromptSelectorOption[]>(
       quickPrompts.map((qp) => ({
@@ -42,6 +49,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
           isDefault: qp.isDefault ?? false,
         },
         label: qp.title,
+        'data-test-subj': qp.title,
         color: qp.color,
       }))
     );
@@ -131,14 +139,24 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
       return (
         <EuiFlexGroup
           alignItems="center"
-          justifyContent="spaceBetween"
           className={'parentFlexGroup'}
+          component={'span'}
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem grow={false}>
-            <EuiHealth color={color}>
-              <span className={contentClassName}>
-                <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-              </span>
+          <EuiFlexItem
+            component={'span'}
+            grow={false}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
+            <EuiHealth
+              color={color}
+              css={css`
+                overflow: hidden;
+              `}
+            >
+              <EuiHighlight search={searchValue}>{label}</EuiHighlight>
             </EuiHealth>
           </EuiFlexItem>
           {!value?.isDefault && (
@@ -147,6 +165,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18n.DELETE_QUICK_PROMPT_}
+                  data-test-subj="delete-quick-prompt"
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
@@ -168,7 +187,10 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
+        data-test-subj="quickPromptSelector"
         aria-label={i18n.QUICK_PROMPT_SELECTOR}
+        compressed
+        isDisabled={isDisabled}
         placeholder={i18n.QUICK_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={true}
@@ -177,6 +199,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         onChange={onChange}
         onCreateOption={onCreateOption}
         renderOption={renderOption}
+        fullWidth
       />
     );
   }

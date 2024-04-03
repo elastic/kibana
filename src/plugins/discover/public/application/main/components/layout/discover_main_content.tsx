@@ -7,21 +7,21 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
-import React, { useCallback } from 'react';
+import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { ErrorCallout } from '../../../../components/common/error_callout';
-import { useDataState } from '../../hooks/use_data_state';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
+import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 
 const DROP_PROPS = {
   value: {
@@ -45,6 +45,8 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
+  panelsToggle: ReactElement<PanelsToggleProps>;
+  isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
 }
 
 export const DiscoverMainContent = ({
@@ -56,6 +58,8 @@ export const DiscoverMainContent = ({
   columns,
   stateContainer,
   onDropFieldToTable,
+  panelsToggle,
+  isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
@@ -74,12 +78,35 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const dataState = useDataState(stateContainer.dataState.data$.main$);
   const isDropAllowed = Boolean(onDropFieldToTable);
 
+  const viewModeToggle = useMemo(() => {
+    return (
+      <DocumentViewModeToggle
+        viewMode={viewMode}
+        isTextBasedQuery={isPlainRecord}
+        stateContainer={stateContainer}
+        setDiscoverViewMode={setDiscoverViewMode}
+        prepend={
+          React.isValidElement(panelsToggle)
+            ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
+            : undefined
+        }
+      />
+    );
+  }, [
+    viewMode,
+    setDiscoverViewMode,
+    isPlainRecord,
+    stateContainer,
+    panelsToggle,
+    isChartAvailable,
+  ]);
+
+  const showChart = useAppStateSelector((state) => !state.hideChart);
+
   return (
-    <DragDrop
-      draggable={false}
+    <Droppable
       dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
       value={DROP_PROPS.value}
       order={DROP_PROPS.order}
@@ -93,44 +120,29 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="none" />
-            {!isPlainRecord && (
-              <DocumentViewModeToggle
-                viewMode={viewMode}
-                setDiscoverViewMode={setDiscoverViewMode}
-              />
-            )}
-          </EuiFlexItem>
-          {dataState.error && (
-            <ErrorCallout
-              title={i18n.translate('discover.documentsErrorTitle', {
-                defaultMessage: 'Search error',
-              })}
-              error={dataState.error}
-              inline
-              data-test-subj="discoverMainError"
-            />
-          )}
-
+          {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
+              viewModeToggle={viewModeToggle}
               dataView={dataView}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               stateContainer={stateContainer}
               onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
             />
           ) : (
-            <FieldStatisticsTab
-              dataView={dataView}
-              columns={columns}
-              stateContainer={stateContainer}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              trackUiMetric={trackUiMetric}
-            />
+            <>
+              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <FieldStatisticsTab
+                dataView={dataView}
+                columns={columns}
+                stateContainer={stateContainer}
+                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                trackUiMetric={trackUiMetric}
+              />
+            </>
           )}
         </EuiFlexGroup>
       </DropOverlayWrapper>
-    </DragDrop>
+    </Droppable>
   );
 };

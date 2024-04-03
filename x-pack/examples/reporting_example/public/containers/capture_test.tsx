@@ -19,8 +19,7 @@ import {
   EuiPage,
   EuiPageHeader,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
 } from '@elastic/eui';
 
 import { TestImageA } from '../components';
@@ -62,7 +61,7 @@ export const CaptureTest: FunctionComponent = () => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPageSection>
           <EuiPageHeader>
             <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
@@ -75,16 +74,16 @@ export const CaptureTest: FunctionComponent = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeader>
-          <EuiPageContentBody>
-            <EuiSpacer />
-            <EuiTabbedContent
-              tabs={tabs}
-              initialSelectedTab={
-                tabToRender ? tabs.find((tab) => tab.id === tabToRender) : undefined
-              }
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
+        </EuiPageSection>
+        <EuiPageSection>
+          <EuiSpacer />
+          <EuiTabbedContent
+            tabs={tabs}
+            initialSelectedTab={
+              tabToRender ? tabs.find((tab) => tab.id === tabToRender) : undefined
+            }
+          />
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );

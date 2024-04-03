@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/react-kibana-context-root",
+  "owner": "@elastic/appex-sharedux"
+}

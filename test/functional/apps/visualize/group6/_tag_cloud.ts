@@ -35,12 +35,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('select Tags');
       await PageObjects.visEditor.clickBucket('Tags');
       log.debug('Click aggregation Terms');
@@ -51,6 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.visEditor.selectOrderByMetric(2, '_key');
       await PageObjects.visEditor.clickGo();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     it('should have inspector enabled', async function () {
@@ -161,7 +165,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visChart.waitForVisualization();
       });
 

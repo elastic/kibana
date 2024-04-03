@@ -1,7 +1,6 @@
 title: Connector response properties for a Swimlane connector
 type: object
 required:
-  - config
   - connector_type_id
   - id
   - is_deprecated
@@ -24,6 +23,10 @@ properties:
     $ref: 'is_missing_secrets.yaml'
   is_preconfigured:
     $ref: 'is_preconfigured.yaml'
+  is_system_action:
+    $ref: 'is_system_action.yaml'
   name:
     type: string
     description: The display name for the connector.
+  referenced_by_count:
+    $ref: 'referenced_by_count.yaml'

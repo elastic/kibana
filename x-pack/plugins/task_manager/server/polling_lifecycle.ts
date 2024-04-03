@@ -8,7 +8,7 @@
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map as mapOptional } from 'fp-ts/lib/Option';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
@@ -27,6 +27,7 @@ import {
   TaskManagerStat,
   asTaskManagerStatEvent,
   EphemeralTaskRejectedDueToCapacity,
+  TaskManagerMetric,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
@@ -40,7 +41,12 @@ import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
-import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
+import { TaskClaiming } from './queries/task_claiming';
+import { ClaimOwnershipResult } from './task_claimers';
+
+export interface ITaskEventEmitter<T> {
+  get events(): Observable<T>;
+}
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -61,12 +67,13 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
+  | TaskManagerMetric
   | EphemeralTaskRejectedDueToCapacity;
 
 /**
  * The public interface into the task manager system.
  */
-export class TaskPollingLifecycle {
+export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEvent> {
   private definitions: TaskTypeDictionary;
 
   private store: TaskStore;
@@ -126,6 +133,7 @@ export class TaskPollingLifecycle {
 
     this.taskClaiming = new TaskClaiming({
       taskStore,
+      strategy: config.claim_strategy,
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
@@ -165,7 +173,7 @@ export class TaskPollingLifecycle {
         const capacity = this.pool.availableWorkers;
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
-          // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
+          // high load causes the poller to skip work (work isn't called when there is no capacity)
           this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
 
           // Emit event indicating task manager utilization
@@ -209,6 +217,7 @@ export class TaskPollingLifecycle {
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
+      allowReadingInvalidState: this.config.allow_reading_invalid_state,
     });
   };
 

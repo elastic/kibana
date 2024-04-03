@@ -38,7 +38,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/uwsgi.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/uwsgi.svg'),
     isBeta: false,
     artifacts: {
       dashboards: [
@@ -55,7 +55,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/uwsgi_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/uwsgi_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

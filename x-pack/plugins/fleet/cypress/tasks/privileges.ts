@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { request } from './common';
 import { constructUrlWithUser, getEnvAuth } from './login';
 
 interface User {
@@ -132,6 +133,33 @@ export const FleetAllIntegrNoneUser: User = {
   password: 'password',
   roles: [FleetAllIntegrNoneRole.name],
 };
+export const FleetAgentsReadIntegrNoneRole: Role = {
+  name: 'fleet_agents_read_int_none_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          fleetv2: ['minimal_read', 'agents_read'],
+          fleet: ['none'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+export const FleetAgentsReadIntegrNoneUser: User = {
+  username: 'fleet_agents_read_int_none_role',
+  password: 'password',
+  roles: [FleetAgentsReadIntegrNoneRole.name],
+};
 export const FleetNoneIntegrAllRole: Role = {
   name: 'fleet_none_int_all_role',
   privileges: {
@@ -186,7 +214,7 @@ export const createRoles = (roles: Role[]) => {
   const envUser = getEnvAuth();
   for (const role of roles) {
     cy.log(`Creating role: ${JSON.stringify(role)}`);
-    cy.request({
+    request({
       body: role.privileges,
       headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
       method: 'PUT',
@@ -202,7 +230,7 @@ export const deleteRoles = (roles: Role[]) => {
 
   for (const role of roles) {
     cy.log(`Deleting role: ${JSON.stringify(role)}`);
-    cy.request({
+    request({
       headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
       method: 'DELETE',
       url: constructUrlWithUser(envUser, `/api/security/role/${role.name}`),
@@ -221,7 +249,7 @@ export const createUsers = (users: User[]) => {
   for (const user of users) {
     const userInfo = getUserInfo(user);
     cy.log(`Creating user: ${JSON.stringify(user)}`);
-    cy.request({
+    request({
       body: {
         username: user.username,
         password: user.password,
@@ -242,7 +270,7 @@ export const deleteUsers = (users: User[]) => {
   const envUser = getEnvAuth();
   for (const user of users) {
     cy.log(`Deleting user: ${JSON.stringify(user)}`);
-    cy.request({
+    request({
       headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
       method: 'DELETE',
       url: constructUrlWithUser(envUser, `/internal/security/users/${user.username}`),

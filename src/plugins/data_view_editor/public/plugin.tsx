@@ -63,10 +63,14 @@ export class DataViewEditorPlugin
       userPermissions: {
         editDataView: () => dataViews.getCanSaveSync(),
       },
+      /**
+       * Helper method to generate a new data view editor service.
+       * @returns DataViewEditorService
+       */
+      dataViewEditorServiceFactory: async () => {
+        const module = await import('./data_view_editor_service_lazy');
+        return module;
+      },
     };
-  }
-
-  public stop() {
-    return {};
   }
 }

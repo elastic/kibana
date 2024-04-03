@@ -27,7 +27,6 @@
       "dashboard",
       "embeddable",
       "mapsEms",
-      "savedObjects",
       "share",
       "presentationUtil",
       "contentManagement"
@@ -41,14 +40,17 @@
       "screenshotMode",
       "security",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch",
-      "fieldFormats"
+      "fieldFormats",
+      "textBasedLanguages",
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common"

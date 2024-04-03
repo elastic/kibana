@@ -6,13 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { RouteInitialization, SystemRouteDeps } from '../types';
+import type { RouteInitialization, SystemRouteDeps } from '../types';
 import { getMlNodeCount } from '../lib/node_utils';
 
 /**
@@ -73,7 +74,6 @@ export function systemRoutes(
             // return that security is disabled and don't call the privilegeCheck endpoint
             return response.ok({
               body: {
-                securityDisabled: true,
                 upgradeInProgress,
               },
             });
@@ -81,7 +81,7 @@ export function systemRoutes(
             const body = await asCurrentUser.security.hasPrivileges({ body: request.body });
             return response.ok({
               body: {
-                ...body,
+                hasPrivileges: body,
                 upgradeInProgress,
               },
             });
@@ -276,6 +276,47 @@ export function systemRoutes(
             acc[cur] = { exists: results[i] };
             return acc;
           }, {} as Record<string, { exists: boolean }>);
+
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.customError(wrapError(error));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /internal/ml/reindex_with_pipeline ES reindex wrapper to reindex with pipeline
+   * @apiName MlReindexWithPipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.any(),
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+        const reindexRequest = {
+          body: request.body,
+          // Create a task and return task id instead of blocking until complete
+          wait_for_completion: false,
+        } as estypes.ReindexRequest;
+        try {
+          const result = await client.asCurrentUser.reindex(reindexRequest);
 
           return response.ok({
             body: result,

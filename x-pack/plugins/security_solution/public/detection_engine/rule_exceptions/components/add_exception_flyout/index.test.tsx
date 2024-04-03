@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import { waitFor, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -31,10 +31,11 @@ import { TestProviders } from '../../../../common/mock';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -144,7 +145,6 @@ describe('When the add exception modal is opened', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -662,6 +662,42 @@ describe('When the add exception modal is opened', () => {
         expect(getByTestId('entryOperator')).toHaveTextContent('included');
         expect(getByTestId('entryType')).toHaveTextContent('match');
         expect(getByTestId('entryValue')).toHaveTextContent('test/path');
+      });
+
+      it('should include rule defined custom highlighted fields', () => {
+        const wrapper = render(
+          (() => (
+            <TestProviders>
+              <AddExceptionFlyout
+                rules={[
+                  {
+                    ...getRulesSchemaMock(),
+                    investigation_fields: { field_names: ['foo.bar'] },
+                    exceptions_list: [],
+                  } as Rule,
+                ]}
+                isBulkAction={false}
+                alertData={{ ...alertDataMock, foo: { bar: 'blob' } } as AlertData}
+                isAlertDataLoading={false}
+                alertStatus="open"
+                isEndpointItem={false}
+                showAlertCloseOptions
+                onCancel={jest.fn()}
+                onConfirm={jest.fn()}
+              />
+            </TestProviders>
+          ))()
+        );
+        const { getByTestId, getAllByTestId } = wrapper;
+        expect(getByTestId('alertExceptionBuilder')).toBeInTheDocument();
+        expect(getAllByTestId('entryField')[0]).toHaveTextContent('foo.bar');
+        expect(getAllByTestId('entryOperator')[0]).toHaveTextContent('included');
+        expect(getAllByTestId('entryType')[0]).toHaveTextContent('match');
+        expect(getAllByTestId('entryValue')[0]).toHaveTextContent('blob');
+        expect(getAllByTestId('entryField')[1]).toHaveTextContent('file.path');
+        expect(getAllByTestId('entryOperator')[1]).toHaveTextContent('included');
+        expect(getAllByTestId('entryType')[1]).toHaveTextContent('match');
+        expect(getAllByTestId('entryValue')[1]).toHaveTextContent('test/path');
       });
     });
     describe('bulk closeable alert data is passed in', () => {
@@ -1269,6 +1305,47 @@ describe('When the add exception modal is opened', () => {
       expect(
         wrapper.find('button[data-test-subj="addExceptionConfirmButton"]').getDOMNode()
       ).toBeDisabled();
+    });
+
+    test('when there is a comment error has submit button disabled', async () => {
+      const { getByLabelText, queryByText, getByTestId } = render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesEqlSchemaMock(),
+                query:
+                  'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const commentInput = getByLabelText('Comment Input');
+
+      const commentErrorMessage = `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`;
+      expect(queryByText(commentErrorMessage)).toBeNull();
+
+      // Put comment with the length above maximum allowed
+      act(() => {
+        fireEvent.change(commentInput, {
+          target: {
+            value: [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join(''),
+          },
+        });
+        fireEvent.blur(commentInput);
+      });
+      expect(queryByText(commentErrorMessage)).not.toBeNull();
+      expect(getByTestId('addExceptionConfirmButton')).toBeDisabled();
     });
   });
 });

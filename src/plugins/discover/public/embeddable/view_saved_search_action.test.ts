@@ -7,56 +7,42 @@
  */
 
 import { ContactCardEmbeddable } from '@kbn/embeddable-plugin/public/lib/test_samples';
-
 import { ViewSavedSearchAction } from './view_saved_search_action';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { createStartContractMock } from '../__mocks__/start_contract';
-import { savedSearchMock } from '../__mocks__/saved_search';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 const applicationMock = createStartContractMock();
-const savedSearch = savedSearchMock;
-const dataViews = [] as DataView[];
 const services = discoverServiceMock;
-const filterManager = createFilterManagerMock();
 const searchInput = {
   timeRange: {
     from: '2021-09-15',
     to: '2021-09-16',
   },
   id: '1',
+  savedObjectId: 'mock-saved-object-id',
   viewMode: ViewMode.VIEW,
 };
 const executeTriggerActions = async (triggerId: string, context: object) => {
   return Promise.resolve(undefined);
 };
-const trigger = { id: 'ACTION_VIEW_SAVED_SEARCH' };
 const embeddableConfig = {
-  savedSearch,
-  editUrl: '',
-  editPath: '',
-  dataViews,
   editable: true,
-  filterManager,
   services,
+  executeTriggerActions,
 };
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
-    const embeddable = new SavedSearchEmbeddable(
-      embeddableConfig,
-      searchInput,
-      executeTriggerActions
-    );
-    expect(await action.isCompatible({ embeddable, trigger })).toBe(true);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
+    const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
+    expect(await action.isCompatible({ embeddable })).toBe(true);
   });
 
   it('is not compatible when embeddable not of type saved search', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new ContactCardEmbeddable(
       {
         id: '123',
@@ -70,33 +56,28 @@ describe('view saved search action', () => {
     expect(
       await action.isCompatible({
         embeddable,
-        trigger,
       })
     ).toBe(false);
   });
 
   it('is not visible when in edit mode', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const input = { ...searchInput, viewMode: ViewMode.EDIT };
-    const embeddable = new SavedSearchEmbeddable(embeddableConfig, input, executeTriggerActions);
+    const embeddable = new SavedSearchEmbeddable(embeddableConfig, input);
     expect(
       await action.isCompatible({
         embeddable,
-        trigger,
       })
     ).toBe(false);
   });
 
   it('execute navigates to a saved search', async () => {
-    const action = new ViewSavedSearchAction(applicationMock);
-    const embeddable = new SavedSearchEmbeddable(
-      embeddableConfig,
-      searchInput,
-      executeTriggerActions
+    const action = new ViewSavedSearchAction(applicationMock, services.locator);
+    const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await action.execute({ embeddable });
+    expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
+      getDiscoverLocatorParams(embeddable)
     );
-    await action.execute({ embeddable, trigger });
-    expect(applicationMock.navigateToApp).toHaveBeenCalledWith('discover', {
-      path: `#/view/${savedSearch.id}`,
-    });
   });
 });

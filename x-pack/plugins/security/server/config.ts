@@ -10,13 +10,13 @@ import type { Duration } from 'moment';
 import path from 'path';
 
 import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { AppenderConfigType, Logger } from '@kbn/core/server';
 import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getLogsPath } from '@kbn/utils';
 
-import type { AuthenticationProvider } from '../common/model';
+import type { AuthenticationProvider } from '../common';
 
 export type ConfigType = ReturnType<typeof createConfig>;
 type RawConfigType = TypeOf<typeof ConfigSchema>;
@@ -214,7 +214,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('8h'),
+      defaultValue: schema.duration().validate('3d'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),
@@ -279,6 +279,11 @@ export const ConfigSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
+      jwt: offeringBasedSchema({
+        serverless: schema.object({
+          taggedRoutesOnly: schema.boolean({ defaultValue: true }),
+        }),
+      }),
     }),
   }),
   audit: schema.object({
@@ -296,19 +301,18 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
-  enabled: schema.boolean({ defaultValue: true }),
+
+  roleManagementEnabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
 
   // Setting only allowed in the Serverless offering
-  ui: schema.conditional(
-    schema.contextRef('serverless'),
-    true,
-    schema.object({
-      userManagementEnabled: schema.boolean({ defaultValue: false }),
-      roleManagementEnabled: schema.boolean({ defaultValue: false }),
-      roleMappingManagementEnabled: schema.boolean({ defaultValue: false }),
+  ui: offeringBasedSchema({
+    serverless: schema.object({
+      userManagementEnabled: schema.boolean({ defaultValue: true }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
-    schema.never()
-  ),
+  }),
 });
 
 export function createConfig(

@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable } from '@hello-pangea/dnd';
 import type { ResizeCallback } from 're-resizable';
 import { Resizable } from 're-resizable';
 import { useDispatch } from 'react-redux';
@@ -27,7 +27,7 @@ import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import type { Sort } from '../sort';
 
 import { Header } from './header';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 
 import * as i18n from './translations';
 
@@ -42,7 +42,7 @@ const ContextMenu = styled(EuiContextMenu)`
 `;
 
 const PopoverContainer = styled.div<{ $width: number }>`
-  & .euiPopover__anchor {
+  & .euiPopover {
     padding-right: 8px;
     width: ${({ $width }) => $width}px;
   }

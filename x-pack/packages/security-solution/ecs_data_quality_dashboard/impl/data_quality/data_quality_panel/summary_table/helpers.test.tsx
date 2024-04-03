@@ -21,6 +21,7 @@ import {
   getResultToolTip,
   getShowPagination,
   getSummaryTableColumns,
+  getSummaryTableILMPhaseColumn,
   getToggleButtonId,
   IndexSummaryTableItem,
 } from './helpers';
@@ -132,6 +133,7 @@ describe('helpers', () => {
 
   describe('getSummaryTableColumns', () => {
     const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
+    const isILMAvailable = true;
 
     const indexSummaryTableItem: IndexSummaryTableItem = {
       indexName,
@@ -141,6 +143,7 @@ describe('helpers', () => {
       pattern: 'auditbeat-*',
       patternDocsCount: 57410,
       sizeInBytes: 103344068,
+      checkedAt: Date.now(),
     };
 
     const hasIncompatible: IndexSummaryTableItem = {
@@ -153,6 +156,7 @@ describe('helpers', () => {
         formatBytes,
         formatNumber,
         itemIdToExpandedRowMap: {},
+        isILMAvailable,
         pattern: 'auditbeat-*',
         toggleExpanded: jest.fn(),
       }).map((x) => omit('render', x));
@@ -185,6 +189,7 @@ describe('helpers', () => {
         },
         { field: 'ilmPhase', name: 'ILM Phase', sortable: true, truncateText: false },
         { field: 'sizeInBytes', name: 'Size', sortable: true, truncateText: false },
+        { field: 'checkedAt', name: 'Last check', sortable: true, truncateText: false },
       ]);
     });
 
@@ -194,6 +199,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -219,6 +225,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap,
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -242,6 +249,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded,
         });
@@ -273,6 +281,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -295,6 +304,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -321,6 +331,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -344,6 +355,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -367,6 +379,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -401,6 +414,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -422,6 +436,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -440,12 +455,26 @@ describe('helpers', () => {
       });
     });
 
+    describe('getSummaryTableILMPhaseColumn', () => {
+      test('it returns the expected column configuration when `isILMAvailable` is true', () => {
+        const column = getSummaryTableILMPhaseColumn(isILMAvailable);
+        expect(column.length).toEqual(1);
+        expect(column[0].name).toEqual('ILM Phase');
+      });
+
+      test('it returns an emptry array when `isILMAvailable` is false', () => {
+        const column = getSummaryTableILMPhaseColumn(false);
+        expect(column.length).toEqual(0);
+      });
+    });
+
     describe('ilmPhase column render()', () => {
       test('it renders the expected ilmPhase badge content', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -471,6 +500,32 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
+          pattern: 'auditbeat-*',
+          toggleExpanded: jest.fn(),
+        });
+        const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
+          .render;
+
+        render(
+          <TestProviders>
+            {ilmPhaseRender != null && ilmPhaseRender(ilmPhaseIsUndefined, ilmPhaseIsUndefined)}
+          </TestProviders>
+        );
+
+        expect(screen.queryByTestId('ilmPhase')).not.toBeInTheDocument();
+      });
+
+      test('it does NOT render the ilmPhase badge when `isILMAvailable` is false', () => {
+        const ilmPhaseIsUndefined: IndexSummaryTableItem = {
+          ...indexSummaryTableItem,
+        };
+
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          itemIdToExpandedRowMap: {},
+          isILMAvailable: false,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });
@@ -493,6 +548,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           itemIdToExpandedRowMap: {},
+          isILMAvailable,
           pattern: 'auditbeat-*',
           toggleExpanded: jest.fn(),
         });

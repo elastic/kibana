@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 
@@ -17,9 +19,11 @@ import * as i18n from './translations';
 
 import type {
   DataQualityCheckResult,
+  DataQualityIndexCheckedParams,
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
+  IlmPhase,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
@@ -27,21 +31,26 @@ import type {
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
+export const INTERNAL_API_VERSION = '1';
 
 export const getIndexNames = ({
   ilmExplain,
   ilmPhases,
+  isILMAvailable,
   stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   ilmPhases: string[];
+  isILMAvailable: boolean;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): string[] => {
-  if (ilmExplain != null && stats != null) {
+  if (((isILMAvailable && ilmExplain != null) || !isILMAvailable) && stats != null) {
     const allIndexNames = Object.keys(stats);
-    const filteredByIlmPhase = allIndexNames.filter((indexName) =>
-      ilmPhases.includes(getIlmPhase(ilmExplain[indexName]) ?? '')
-    );
+    const filteredByIlmPhase = isILMAvailable
+      ? allIndexNames.filter((indexName) =>
+          ilmPhases.includes(getIlmPhase(ilmExplain?.[indexName], isILMAvailable) ?? '')
+        )
+      : allIndexNames;
 
     return filteredByIlmPhase;
   } else {
@@ -176,7 +185,11 @@ export const getEnrichedFieldMetadata = ({
     const ecsExpectedType = ecsMetadata[field].type;
     const isEcsCompliant =
       isMappingCompatible({ ecsExpectedType, type }) && indexInvalidValues.length === 0;
-    const isInSameFamily = getIsInSameFamily({ ecsExpectedType, type });
+
+    const isInSameFamily =
+      !isMappingCompatible({ ecsExpectedType, type }) &&
+      indexInvalidValues.length === 0 &&
+      getIsInSameFamily({ ecsExpectedType, type });
 
     return {
       ...ecsMetadata[field],
@@ -219,26 +232,31 @@ export const getPartitionedFieldMetadata = (
       ecsCompliant: x.isEcsCompliant ? [...acc.ecsCompliant, x] : acc.ecsCompliant,
       custom: !x.hasEcsMetadata ? [...acc.custom, x] : acc.custom,
       incompatible:
-        x.hasEcsMetadata && !x.isEcsCompliant ? [...acc.incompatible, x] : acc.incompatible,
+        x.hasEcsMetadata && !x.isEcsCompliant && !x.isInSameFamily
+          ? [...acc.incompatible, x]
+          : acc.incompatible,
+      sameFamily: x.isInSameFamily ? [...acc.sameFamily, x] : acc.sameFamily,
     }),
     {
       all: [],
       ecsCompliant: [],
       custom: [],
       incompatible: [],
+      sameFamily: [],
     }
   );
 
 export const getPartitionedFieldMetadataStats = (
   partitionedFieldMetadata: PartitionedFieldMetadata
 ): PartitionedFieldMetadataStats => {
-  const { all, ecsCompliant, custom, incompatible } = partitionedFieldMetadata;
+  const { all, ecsCompliant, custom, incompatible, sameFamily } = partitionedFieldMetadata;
 
   return {
     all: all.length,
     ecsCompliant: ecsCompliant.length,
     custom: custom.length,
     incompatible: incompatible.length,
+    sameFamily: sameFamily.length,
   };
 };
 
@@ -255,13 +273,21 @@ export const getDocsCount = ({
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
+export const getIndexId = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): string | null | undefined => stats && stats[indexName]?.uuid;
+
 export const getSizeInBytes = ({
   indexName,
   stats,
 }: {
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+}): number => (stats && stats[indexName]?.primaries?.store?.total_data_set_size_in_bytes) ?? 0;
 
 export const getTotalDocsCount = ({
   indexNames,
@@ -357,8 +383,23 @@ export const getTotalPatternIndicesChecked = (patternRollup: PatternRollup | und
   }
 };
 
+export const getTotalPatternSameFamily = (
+  results: Record<string, DataQualityCheckResult> | undefined
+): number | undefined => {
+  if (results == null) {
+    return undefined;
+  }
+
+  const allResults = Object.values(results);
+
+  return allResults.reduce<number>((acc, { sameFamily }) => acc + (sameFamily ?? 0), 0);
+};
+
 export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
   incompatible != null && incompatible > 0 ? getFillColor('incompatible') : undefined;
+
+export const getSameFamilyStatColor = (sameFamily: number | undefined): string | undefined =>
+  sameFamily != null && sameFamily > 0 ? getFillColor('same-family') : undefined;
 
 export const getErrorSummary = ({
   error,
@@ -406,3 +447,123 @@ export const getErrorSummaries = (
     []
   );
 };
+
+export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
+
+export interface StorageResult {
+  batchId: string;
+  indexName: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  ilmPhase?: IlmPhase;
+  markdownComments: string[];
+  ecsVersion: string;
+  indexId: string;
+  error: string | null;
+}
+
+export const formatStorageResult = ({
+  result,
+  report,
+  partitionedFieldMetadata,
+}: {
+  result: DataQualityCheckResult;
+  report: DataQualityIndexCheckedParams;
+  partitionedFieldMetadata: PartitionedFieldMetadata;
+}): StorageResult => ({
+  batchId: report.batchId,
+  indexName: result.indexName,
+  isCheckAll: report.isCheckAll,
+  checkedAt: result.checkedAt ?? Date.now(),
+  docsCount: result.docsCount ?? 0,
+  totalFieldCount: partitionedFieldMetadata.all.length,
+  ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
+  customFieldCount: partitionedFieldMetadata.custom.length,
+  incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
+  sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
+  sameFamilyFields: report.sameFamilyFields ?? [],
+  unallowedMappingFields: report.unallowedMappingFields ?? [],
+  unallowedValueFields: report.unallowedValueFields ?? [],
+  sizeInBytes: report.sizeInBytes ?? 0,
+  ilmPhase: result.ilmPhase,
+  markdownComments: result.markdownComments,
+  ecsVersion: report.ecsVersion,
+  indexId: report.indexId,
+  error: result.error,
+});
+
+export const formatResultFromStorage = ({
+  storageResult,
+  pattern,
+}: {
+  storageResult: StorageResult;
+  pattern: string;
+}): DataQualityCheckResult => ({
+  docsCount: storageResult.docsCount,
+  error: storageResult.error,
+  ilmPhase: storageResult.ilmPhase,
+  incompatible: storageResult.incompatibleFieldCount,
+  indexName: storageResult.indexName,
+  markdownComments: storageResult.markdownComments,
+  sameFamily: storageResult.sameFamilyFieldCount,
+  checkedAt: storageResult.checkedAt,
+  pattern,
+});
+
+export async function postStorageResult({
+  storageResult,
+  httpFetch,
+  toasts,
+  abortController = new AbortController(),
+}: {
+  storageResult: StorageResult;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController?: AbortController;
+}): Promise<void> {
+  try {
+    await httpFetch<void>(RESULTS_API_ROUTE, {
+      method: 'POST',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      body: JSON.stringify(storageResult),
+    });
+  } catch (err) {
+    toasts.addError(err, { title: i18n.POST_RESULT_ERROR_TITLE });
+  }
+}
+
+export async function getStorageResults({
+  pattern,
+  httpFetch,
+  toasts,
+  abortController,
+}: {
+  pattern: string;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
+}): Promise<StorageResult[]> {
+  try {
+    const results = await httpFetch<StorageResult[]>(RESULTS_API_ROUTE, {
+      method: 'GET',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      query: { pattern },
+    });
+    return results;
+  } catch (err) {
+    toasts.addError(err, { title: i18n.GET_RESULTS_ERROR_TITLE });
+    return [];
+  }
+}

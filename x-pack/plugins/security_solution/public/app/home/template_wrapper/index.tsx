@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { ExpandableFlyout, ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { expandableFlyoutDocumentsPanels } from '../../../flyout';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
-import {
-  BOTTOM_BAR_CLASSNAME,
-  SecuritySolutionBottomBar,
-  SecuritySolutionBottomBarProps,
-} from './bottom_bar';
+import { Timeline } from './timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
-import { useSyncFlyoutStateWithUrl } from '../../../flyout/url/use_sync_flyout_state_with_url';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { SecurityPageName } from '../../types';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -34,20 +32,12 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   Omit<KibanaPageTemplateProps, 'ref'> & {
     $isShowingTimelineOverlay?: boolean;
     $addBottomPadding?: boolean;
+    theme: EuiThemeComputed; // using computed EUI theme to be consistent with user profile theming
   }
 >`
-  .kbnSolutionNav {
-    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  .kbnSolutionNav__sidebar:not(.kbnSolutionNav__sidebar--shrink) {
+    background-color: ${({ theme }) => theme.colors.emptyShade};
   }
-
-  .${BOTTOM_BAR_CLASSNAME} {
-    animation: 'none !important'; // disable the default bottom bar slide animation
-    background: ${({ theme }) =>
-      theme.eui.euiColorEmptyShade}; // Override bottom bar black background
-    color: inherit; // Necessary to override the bottom bar 'white text'
-    transform: ${(
-      { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
-    ) => ($isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))')};
 
     .${IS_DRAGGING_CLASS_NAME} & {
       // When a drag is in process the bottom flyout should slide up to allow a drop
@@ -56,7 +46,14 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
-export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
+export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps, 'ref'> & {
+  /**
+   * Combined with isEmptyState, this prop allows complete override of the empty page
+   */
+  emptyPageBody?: ReactNode;
+};
+
+export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
   React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
@@ -64,12 +61,16 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const [routeProps] = useRouteSpy();
+    const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
-    const { colorMode: globalColorMode } = useEuiTheme();
+    const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
 
-    const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
+    // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
+    // here if isEmptyState is set
+    const isNotEmpty = !rest.isEmptyState;
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -78,42 +79,43 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <ExpandableFlyoutProvider
-        onChanges={handleFlyoutChangedOrClosed}
-        onClosePanels={handleFlyoutChangedOrClosed}
-        ref={flyoutRef}
+      <StyledKibanaPageTemplate
+        theme={euiTheme}
+        $isShowingTimelineOverlay={isShowingTimelineOverlay}
+        paddingSize="none"
+        solutionNav={solutionNavProps}
+        restrictWidth={false}
+        {...rest}
       >
-        <StyledKibanaPageTemplate
-          $isShowingTimelineOverlay={isShowingTimelineOverlay}
-          paddingSize="none"
-          solutionNav={solutionNavProps}
-          restrictWidth={false}
-          {...rest}
-        >
-          <GlobalKQLHeader />
-          <KibanaPageTemplate.Section
-            className="securityPageWrapper"
-            data-test-subj="pageContainer"
-            paddingSize={rest.paddingSize ?? 'l'}
-            alignment="top"
-            component="div"
-            grow={true}
-          >
-            {children}
-          </KibanaPageTemplate.Section>
-          {isTimelineBottomBarVisible && (
-            <KibanaPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
-              <EuiThemeProvider colorMode={globalColorMode}>
-                <SecuritySolutionBottomBar />
-              </EuiThemeProvider>
-            </KibanaPageTemplate.BottomBar>
-          )}
-          <ExpandableFlyout
-            registeredPanels={expandableFlyoutDocumentsPanels}
-            handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
-          />
-        </StyledKibanaPageTemplate>
-      </ExpandableFlyoutProvider>
+        {isNotEmpty && (
+          <>
+            <GlobalKQLHeader />
+            <KibanaPageTemplate.Section
+              className="securityPageWrapper"
+              data-test-subj="pageContainer"
+              paddingSize={rest.paddingSize ?? 'l'}
+              alignment="top"
+              component="div"
+              grow={true}
+            >
+              <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
+                {children}
+                <SecuritySolutionFlyout />
+              </ExpandableFlyoutProvider>
+            </KibanaPageTemplate.Section>
+            {isTimelineBottomBarVisible && (
+              <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
+                <EuiThemeProvider colorMode={globalColorMode}>
+                  <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
+                    <Timeline />
+                    <TimelineFlyout />
+                  </ExpandableFlyoutProvider>
+                </EuiThemeProvider>
+              </KibanaPageTemplate.BottomBar>
+            )}
+          </>
+        )}
+      </StyledKibanaPageTemplate>
     );
   });
 

@@ -23,8 +23,8 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkAddRuleActions as i18n } from '../translations';
@@ -33,7 +33,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 
 import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
-import { RuleActionsField } from '../../../../../../detections/components/rules/rule_actions_field';
+import { RuleActionsField } from '../../../../../rule_creation/components/rule_actions_field';
 import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
@@ -99,8 +99,8 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
 
     const { actions = [], overwrite: overwriteValue } = data;
     const editAction = overwriteValue
-      ? BulkActionEditType.set_rule_actions
-      : BulkActionEditType.add_rule_actions;
+      ? BulkActionEditTypeEnum.set_rule_actions
+      : BulkActionEditTypeEnum.add_rule_actions;
 
     onConfirm({
       type: editAction,

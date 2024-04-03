@@ -16,6 +16,7 @@ import { IToasts } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getConnectorType as getSlackConnectorType } from './slack';
 import { getSlackApiConnectorType } from '../slack_api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -51,6 +52,14 @@ const { loadActionTypes } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
 );
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 // GET api/actions/connector_types?feature_id=alerting
 loadActionTypes.mockResolvedValue([
@@ -95,7 +104,8 @@ actionTypeRegistry.register(getSlackApiConnectorType());
 const baseProps = {
   actions: [],
   defaultActionGroupId: 'metrics.inventory_threshold.fired',
-  hasSummary: true,
+  ruleTypeId: 'metrics.inventory_threshold',
+  hasAlertsMappings: true,
   featureId: 'alerting',
   recoveryActionGroup: 'recovered',
   actionTypeRegistry,
@@ -164,15 +174,18 @@ describe('ActionForm - Slack API Connector', () => {
 
     const testProps = {
       ...baseProps,
+      hasAlertsMappings: false,
       actions: testActions,
     };
 
     render(
       <IntlProvider locale="en">
-        <ActionForm {...testProps} />
+        <QueryClientProvider client={queryClient}>
+          <ActionForm {...testProps} />
+        </QueryClientProvider>
       </IntlProvider>
     );
 
-    expect(await screen.findByText('Channel is required.')).toBeInTheDocument();
+    expect(await screen.findByText('Channel ID is required.')).toBeInTheDocument();
   });
 });

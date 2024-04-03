@@ -7,7 +7,13 @@
 
 import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
+import {
+  createMockDatasource,
+  createMockFramePublicAPI,
+  DatasourceMock,
+  generateActiveData,
+} from '../../mocks';
+import faker from 'faker';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -15,6 +21,7 @@ import {
   FramePublicAPI,
   TableSuggestionColumn,
   VisualizationDimensionGroupConfig,
+  VisualizationConfigProps,
 } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -131,6 +138,26 @@ describe('Datatable Visualization', () => {
           layerId: 'first',
           changeType: 'initial',
           columns: [numCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+    });
+
+    it('should force table as suggestion when there are no number fields', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [strCol('col1'), strCol('col2')],
+          notAssignedMetrics: true,
         },
         keptLayerIds: [],
       });
@@ -387,6 +414,110 @@ describe('Datatable Visualization', () => {
         }).groups[2].accessors
       ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
+
+    describe('with palette', () => {
+      let params: VisualizationConfigProps<DatatableVisualizationState>;
+      beforeEach(() => {
+        const datasource = createMockDatasource('test');
+        datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'b', fields: [] }]);
+        params = {
+          layerId: 'a',
+          state: {
+            layerId: 'a',
+            layerType: LayerTypes.DATA,
+            columns: [
+              {
+                columnId: 'b',
+                palette: {
+                  type: 'palette' as const,
+                  name: '',
+                  params: { stops: [{ color: 'blue', stop: 0 }] },
+                },
+              },
+            ],
+          },
+          frame: {
+            ...mockFrame(),
+            activeData: generateActiveData([
+              {
+                id: 'a',
+                rows: Array(3).fill({
+                  b: faker.random.number(),
+                }),
+              },
+            ]),
+            datasourceLayers: { a: datasource.publicAPIMock },
+          },
+        };
+      });
+
+      it('does include palette for accessor config if the values are numeric and palette exists', () => {
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b', palette: ['blue'], triggerIconType: 'colorBy' },
+        ]);
+      });
+      it('does not include palette for accessor config if the values are not numeric and palette exists', () => {
+        params.frame.activeData = generateActiveData([
+          {
+            id: 'a',
+            rows: Array(3).fill({
+              b: faker.random.word(),
+            }),
+          },
+        ]);
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b' },
+        ]);
+      });
+      it('does not include palette for accessor config if the values are numeric but palette exists', () => {
+        params.state.columns[0].palette = undefined;
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b' },
+        ]);
+      });
+    });
+
+    it('should compute the groups correctly for text based languages', () => {
+      const datasource = createMockDatasource('textBased', {
+        isTextBasedLanguage: jest.fn(() => true),
+      });
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
+      const frame = mockFrame();
+      frame.datasourceLayers = { first: datasource.publicAPIMock };
+
+      const groups = datatableVisualization.getConfiguration({
+        layerId: 'first',
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'b', isMetric: true }, { columnId: 'c' }],
+        },
+        frame,
+      }).groups;
+
+      // rows
+      expect(groups[0].accessors).toEqual([
+        {
+          columnId: 'c',
+          triggerIconType: undefined,
+        },
+      ]);
+
+      // columns
+      expect(groups[1].accessors).toEqual([]);
+
+      // metrics
+      expect(groups[2].accessors).toEqual([
+        {
+          columnId: 'b',
+          triggerIconType: undefined,
+          palette: undefined,
+        },
+      ]);
+    });
   });
 
   describe('#removeDimension', () => {
@@ -462,7 +593,11 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         layerId: 'layer1',
         layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }, { columnId: 'd', isTransposed: false }],
+        columns: [
+          { columnId: 'b' },
+          { columnId: 'c' },
+          { columnId: 'd', isTransposed: false, isMetric: false },
+        ],
       });
     });
 
@@ -482,7 +617,7 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         layerId: 'layer1',
         layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b', isTransposed: false }, { columnId: 'c' }],
+        columns: [{ columnId: 'b', isTransposed: false, isMetric: false }, { columnId: 'c' }],
       });
     });
   });
@@ -692,6 +827,47 @@ describe('Datatable Visualization', () => {
           headerRowHeight: 'custom',
         }).headerRowHeightLines
       ).toEqual([2]);
+    });
+
+    it('sets alignment correctly', () => {
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: false, // <= make them metrics
+        label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+      });
+      const expression = datatableVisualization.toExpression(
+        {
+          ...defaultExpressionTableState,
+          columns: [
+            { columnId: 'b', alignment: 'center' },
+            { columnId: 'c', alignment: 'left' },
+            { columnId: 'a' },
+          ],
+        },
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
+      ) as Ast;
+
+      const columnArgs = buildExpression(expression).findFunction('lens_datatable_column');
+      expect(columnArgs[0].arguments).toEqual(
+        expect.objectContaining({
+          alignment: ['left'],
+        })
+      );
+      expect(columnArgs[1].arguments).toEqual(
+        expect.objectContaining({
+          alignment: ['center'],
+        })
+      );
+      expect(columnArgs[2].arguments).toEqual(
+        expect.not.objectContaining({
+          alignment: [],
+        })
+      );
     });
   });
 

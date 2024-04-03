@@ -28,7 +28,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role } from '../../../../common/model';
+import { ConfirmDelete } from './confirm_delete';
+import { PermissionDenied } from './permission_denied';
+import type { Role } from '../../../../common';
 import {
   getExtendedRoleDeprecationNotice,
   isRoleDeprecated,
@@ -39,8 +41,6 @@ import {
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { ActionsEuiTableFormatting } from '../../table_utils';
 import type { RolesAPIClient } from '../roles_api_client';
-import { ConfirmDelete } from './confirm_delete';
-import { PermissionDenied } from './permission_denied';
 
 interface Props {
   notifications: NotificationsStart;
@@ -68,7 +68,6 @@ export class RolesGridPage extends Component<Props, State> {
     readOnly: false,
   };
 
-  private tableRef: React.RefObject<EuiInMemoryTable<Role>>;
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -80,7 +79,6 @@ export class RolesGridPage extends Component<Props, State> {
       permissionDenied: false,
       includeReservedRoles: true,
     };
-    this.tableRef = React.createRef();
   }
 
   public componentDidMount() {
@@ -156,6 +154,7 @@ export class RolesGridPage extends Component<Props, State> {
                     selectableMessage: (selectable: boolean) =>
                       !selectable ? 'Role is reserved' : '',
                     onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+                    selected: this.state.selection,
                   }
             }
             pagination={{
@@ -188,7 +187,6 @@ export class RolesGridPage extends Component<Props, State> {
                 direction: 'asc',
               },
             }}
-            ref={this.tableRef}
             rowProps={(role: Role) => {
               return {
                 'data-test-subj': `roleRow`,
@@ -484,7 +482,6 @@ export class RolesGridPage extends Component<Props, State> {
     );
   }
   private onCancelDelete = () => {
-    this.setState({ showDeleteConfirmation: false, selection: [] });
-    this.tableRef.current?.setSelection([]);
+    this.setState({ showDeleteConfirmation: false });
   };
 }

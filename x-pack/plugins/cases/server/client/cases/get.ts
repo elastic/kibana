@@ -5,40 +5,39 @@
  * 2.0.
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
 import type {
-  Case,
-  CaseResolveResponse,
-  User,
-  AllTagsFindRequest,
   AllCategoriesFindRequest,
   AllReportersFindRequest,
+  AllTagsFindRequest,
+  CaseResolveResponse,
   CasesByAlertIDRequest,
-  CasesByAlertId,
-  CaseAttributes,
-  AttachmentTotals,
-} from '../../../common/api';
+  GetRelatedCasesByAlertResponse,
+} from '../../../common/types/api';
 import {
-  AllTagsFindRequestRt,
   AllCategoriesFindRequestRt,
-  CaseRt,
-  CaseResolveResponseRt,
-  decodeWithExcessOrThrow,
   AllReportersFindRequestRt,
+  AllTagsFindRequestRt,
+  CaseResolveResponseRt,
   CasesByAlertIDRequestRt,
-  CasesByAlertIdRt,
-  GetTagsResponseRt,
-  GetReportersResponseRt,
   GetCategoriesResponseRt,
-} from '../../../common/api';
+  GetRelatedCasesByAlertResponseRt,
+  GetReportersResponseRt,
+  GetTagsResponseRt,
+} from '../../../common/types/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
-import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type {
+  CaseSavedObjectTransformed,
+  CaseTransformedAttributes,
+} from '../../common/types/case';
+import { CaseRt } from '../../../common/types/domain';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -63,7 +62,7 @@ export interface CasesByAlertIDParams {
 export const getCasesByAlertID = async (
   { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
-): Promise<CasesByAlertId> => {
+): Promise<GetRelatedCasesByAlertResponse> => {
   const {
     services: { caseService, attachmentService },
     logger,
@@ -115,7 +114,7 @@ export const getCasesByAlertID = async (
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
     // just ignore it
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo) => caseInfo.error === undefined
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
     );
 
     ensureSavedObjectsAreAuthorized(
@@ -134,7 +133,7 @@ export const getCasesByAlertID = async (
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
 
-    return decodeOrThrow(CasesByAlertIdRt)(res);
+    return decodeOrThrow(GetRelatedCasesByAlertResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(

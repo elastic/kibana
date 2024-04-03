@@ -11,6 +11,7 @@ import {
   DataView,
   DataViewField,
   DataViewListItem,
+  DataViewType,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
@@ -28,8 +29,8 @@ const rollupIndexPatternListName = i18n.translate(
   }
 );
 
-const isRollup = (indexPatternType: string = '') => {
-  return indexPatternType === 'rollup';
+export const isRollup = (indexPatternType: string = '') => {
+  return indexPatternType === DataViewType.ROLLUP;
 };
 
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
@@ -37,7 +38,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
     const { id, title, namespaces, name } = idxPattern;
     const isDefault = defaultIndex === id;
-    const tags = getTags(idxPattern, isDefault);
+    const tags = getTags(idxPattern, isDefault, dataViewsService.getRollupsEnabled());
     const displayName = name ? name : title;
 
     return {
@@ -68,25 +69,27 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
   );
 }
 
-export const getTags = (indexPattern: DataViewListItem | DataView, isDefault: boolean) => {
+export const getTags = (
+  indexPattern: DataViewListItem | DataView,
+  isDefault: boolean,
+  rollupsEnabled: boolean
+) => {
   const tags = [];
   if (isDefault) {
     tags.push({
-      key: 'default',
+      key: DataViewType.DEFAULT,
       name: defaultIndexPatternListName,
+      'data-test-subj': 'default-tag',
     });
   }
-  if (isRollup(indexPattern.type)) {
+  if (isRollup(indexPattern.type) && rollupsEnabled) {
     tags.push({
-      key: 'rollup',
+      key: DataViewType.ROLLUP,
       name: rollupIndexPatternListName,
+      'data-test-subj': 'rollup-tag',
     });
   }
   return tags;
-};
-
-export const areScriptedFieldsEnabled = (indexPattern: DataViewListItem | DataView) => {
-  return !isRollup(indexPattern.type);
 };
 
 export const getFieldInfo = (indexPattern: DataViewListItem | DataView, field: DataViewField) => {

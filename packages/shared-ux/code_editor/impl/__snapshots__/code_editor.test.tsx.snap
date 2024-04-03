@@ -3,8 +3,8 @@
 exports[`<CodeEditor /> hint element should be tabable 1`] = `
 <div
   aria-label="Code Editor"
-  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
-  data-test-subj="codeEditorHint"
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,false"
+  data-test-subj="codeEditorHint codeEditorHint--active"
   id="1234"
   role="button"
   tabindex="0"
@@ -125,20 +125,8 @@ exports[`<CodeEditor /> is rendered 1`] = `
 "
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "1dubd8m",
-        "next": undefined,
-        "styles": "
-   {
-    position: relative;
-    height: 100%;
-  }
-",
-        "toString": [Function],
-      }
-    }
+    className="kibanaCodeEditor"
+    data-test-subj="kibanaCodeEditor"
     onKeyDown={[Function]}
   >
     <EuiToolTip
@@ -146,20 +134,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
         <React.Fragment>
           <p>
             <FormattedMessage
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "1dubd8m",
-                  "next": undefined,
-                  "styles": "
-   {
-    position: relative;
-    height: 100%;
-  }
-",
-                  "toString": [Function],
-                }
-              }
               defaultMessage="Press {key} to start editing."
               id="sharedUXPackages.codeEditor.startEditing"
               values={
@@ -173,20 +147,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
           </p>
           <p>
             <FormattedMessage
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "1dubd8m",
-                  "next": undefined,
-                  "styles": "
-   {
-    position: relative;
-    height: 100%;
-  }
-",
-                  "toString": [Function],
-                }
-              }
               defaultMessage="Press {key} to stop editing."
               id="sharedUXPackages.codeEditor.stopEditing"
               values={
@@ -299,42 +259,24 @@ exports[`<CodeEditor /> is rendered 1`] = `
                 Array [
                   Object {
                     "map": undefined,
-                    "name": "1dubd8m",
+                    "name": "jym74u",
                     "next": undefined,
                     "styles": "
-   {
-    position: relative;
-    height: 100%;
-  }
-",
-                    "toString": [Function],
-                  },
-                  Object {
-                    "map": undefined,
-                    "name": "7fzoim",
-                    "next": undefined,
-                    "styles": "
-     {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-
-      &:focus {
-        z-index: 6000;
-      }
-
-      &--isInactive {
-        display: none;
-      }
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    &:focus {
+      z-index: 6000;
     }
   ",
                     "toString": [Function],
                   },
+                  false,
                 ]
               }
-              data-test-subj="codeEditorHint"
+              data-test-subj="codeEditorHint codeEditorHint--active"
               id="1234"
               onBlur={[Function]}
               onClick={[Function]}
@@ -348,48 +290,92 @@ exports[`<CodeEditor /> is rendered 1`] = `
       </EuiToolTipAnchor>
     </EuiToolTip>
     <Component>
-      <mockMonacoEditor
-        editorDidMount={[Function]}
-        editorWillMount={[Function]}
-        height="100px"
-        language="loglang"
-        onChange={[Function]}
-        options={
-          Object {
-            "fontFamily": "Roboto Mono",
-            "fontSize": 12,
-            "lineHeight": 21,
-            "matchBrackets": "never",
-            "minimap": Object {
-              "enabled": false,
-            },
-            "padding": Object {},
-            "renderLineHighlight": "none",
-            "scrollBeyondLastLine": false,
-            "scrollbar": Object {
-              "alwaysConsumeMouseWheel": false,
-              "useShadows": false,
-            },
-            "wordBasedSuggestions": false,
-            "wordWrap": "on",
-            "wrappingIndent": "indent",
+      <UseBug177756ReBroadcastMouseDown>
+        <div
+          style={
+            Object {
+              "display": "contents",
+            }
           }
-        }
-        theme="euiColors"
-        value="
+        >
+          <MockedMonacoEditor
+            editorDidMount={[Function]}
+            editorWillMount={[Function]}
+            editorWillUnmount={[Function]}
+            height={250}
+            language="loglang"
+            onChange={[Function]}
+            options={
+              Object {
+                "bracketPairColorization.enabled": false,
+                "fontFamily": "Roboto Mono",
+                "fontSize": 12,
+                "lineHeight": 21,
+                "matchBrackets": "never",
+                "minimap": Object {
+                  "enabled": false,
+                },
+                "padding": Object {},
+                "renderLineHighlight": "none",
+                "scrollBeyondLastLine": false,
+                "scrollbar": Object {
+                  "alwaysConsumeMouseWheel": false,
+                  "useShadows": false,
+                },
+                "wordBasedSuggestions": false,
+                "wordWrap": "on",
+                "wrappingIndent": "indent",
+              }
+            }
+            theme="euiColors"
+            value="
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 "
-      >
-        <div>
-          <div />
-          <textarea
-            data-test-subj="monacoEditorTextarea"
-            onKeyDown={[Function]}
-          />
+          >
+            <div>
+              <div />
+              <textarea
+                data-test-subj="monacoEditorTextarea"
+                editorWillUnmount={[Function]}
+                height={250}
+                language="loglang"
+                onChange={[Function]}
+                onKeyDown={[Function]}
+                options={
+                  Object {
+                    "bracketPairColorization.enabled": false,
+                    "fontFamily": "Roboto Mono",
+                    "fontSize": 12,
+                    "lineHeight": 21,
+                    "matchBrackets": "never",
+                    "minimap": Object {
+                      "enabled": false,
+                    },
+                    "padding": Object {},
+                    "renderLineHighlight": "none",
+                    "scrollBeyondLastLine": false,
+                    "scrollbar": Object {
+                      "alwaysConsumeMouseWheel": false,
+                      "useShadows": false,
+                    },
+                    "wordBasedSuggestions": false,
+                    "wordWrap": "on",
+                    "wrappingIndent": "indent",
+                  }
+                }
+                theme="euiColors"
+                value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+              />
+            </div>
+          </MockedMonacoEditor>
         </div>
-      </mockMonacoEditor>
+      </UseBug177756ReBroadcastMouseDown>
     </Component>
   </div>
 </CodeEditor>

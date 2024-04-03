@@ -1,17 +1,37 @@
 {
   "indices.clone": {
     "url_params": {
-      "timeout": "",
-      "master_timeout": "",
-      "wait_for_active_shards": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "1",
+        "all",
+        "index-setting"
+      ]
     },
     "methods": [
       "PUT",
       "POST"
     ],
     "patterns": [
-      "{indices}/_clone/{target}"
+      "{index}/_clone/{target}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clone-index.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clone-index.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

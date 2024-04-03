@@ -15,7 +15,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, Subject, throwError } from 'rxjs';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -85,7 +85,7 @@ describe('useTotalHits', () => {
     const query = { query: 'test query', language: 'kuery' };
     const filters: Filter[] = [{ meta: { index: 'test' }, query: { match_all: {} } }];
     const adapter = new RequestAdapter();
-    renderHook(() =>
+    const { rerender } = renderHook(() =>
       useTotalHits({
         ...getDeps(),
         services: { data } as any,
@@ -99,6 +99,8 @@ describe('useTotalHits', () => {
         onTotalHitsChange,
       })
     );
+    refetch$.next({ type: 'refetch' });
+    rerender();
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('index', dataViewWithTimefieldMock);
@@ -117,20 +119,18 @@ describe('useTotalHits', () => {
     });
   });
 
-  it('should fetch total hits if isPlainRecord is true', async () => {
+  it('should not fetch total hits if isPlainRecord is true', async () => {
     const onTotalHitsChange = jest.fn();
     const deps = {
       ...getDeps(),
       isPlainRecord: true,
       onTotalHitsChange,
-      query: { sql: 'select * from test' },
+      query: { esql: 'from test' },
     };
-    renderHook(() => useTotalHits(deps));
-    expect(onTotalHitsChange).toBeCalledTimes(1);
-    await waitFor(() => {
-      expect(deps.services.expressions.run).toBeCalledTimes(1);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.complete, 3);
-    });
+    const { rerender } = renderHook(() => useTotalHits(deps));
+    refetch$.next({ type: 'refetch' });
+    rerender();
+    expect(onTotalHitsChange).not.toHaveBeenCalled();
   });
 
   it('should not fetch total hits if chartVisible is true', async () => {
@@ -153,22 +153,16 @@ describe('useTotalHits', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('should not fetch a second time if refetch$ is not triggered', async () => {
+  it('should not fetch if refetch$ is not triggered', async () => {
     const onTotalHitsChange = jest.fn();
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
-    expect(onTotalHitsChange).toBeCalledTimes(1);
-    expect(setFieldSpy).toHaveBeenCalled();
-    expect(fetchSpy).toHaveBeenCalled();
-    await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
-    });
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(2);
-    expect(setFieldSpy).toHaveBeenCalledTimes(5);
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(setFieldSpy).toHaveBeenCalledTimes(0);
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
   });
 
   it('should fetch a second time if refetch$ is triggered', async () => {
@@ -178,6 +172,8 @@ describe('useTotalHits', () => {
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
+    refetch$.next({ type: 'refetch' });
+    rerender();
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
     expect(fetchSpy).toHaveBeenCalled();
@@ -202,7 +198,9 @@ describe('useTotalHits', () => {
       .spyOn(searchSourceInstanceMock, 'fetch$')
       .mockClear()
       .mockReturnValue(throwError(() => error));
-    renderHook(() => useTotalHits({ ...getDeps(), onTotalHitsChange }));
+    const { rerender } = renderHook(() => useTotalHits({ ...getDeps(), onTotalHitsChange }));
+    refetch$.next({ type: 'refetch' });
+    rerender();
     await waitFor(() => {
       expect(onTotalHitsChange).toBeCalledTimes(2);
       expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.error, error);
@@ -220,7 +218,7 @@ describe('useTotalHits', () => {
       .mockClear()
       .mockReturnValue(timeRange as any);
     const filters: Filter[] = [{ meta: { index: 'test' }, query: { match_all: {} } }];
-    renderHook(() =>
+    const { rerender } = renderHook(() =>
       useTotalHits({
         ...getDeps(),
         dataView: {
@@ -230,6 +228,8 @@ describe('useTotalHits', () => {
         filters,
       })
     );
+    refetch$.next({ type: 'refetch' });
+    rerender();
     expect(setOverwriteDataViewTypeSpy).toHaveBeenCalledWith(undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('filter', filters);
   });

@@ -9,10 +9,10 @@ import { serverMock, requestContextMock, requestMock } from '../../../../routes/
 
 import {
   GET_RULE_EXECUTION_EVENTS_URL,
-  LogLevel,
-  RuleExecutionEventType,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/detection_engine/rule_monitoring/mocks';
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 import type { GetExecutionEventsArgs } from '../../../logic/rule_execution_log';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
 
@@ -35,8 +35,8 @@ describe('getRuleExecutionEventsRoute', () => {
         ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       },
       query: {
-        event_types: `${RuleExecutionEventType['status-change']}`,
-        log_levels: `${LogLevel.debug},${LogLevel.info}`,
+        event_types: `${RuleExecutionEventTypeEnum['status-change']}`,
+        log_levels: `${LogLevelEnum.debug},${LogLevelEnum.info}`,
         page: 3,
       },
     });
@@ -44,8 +44,8 @@ describe('getRuleExecutionEventsRoute', () => {
   it('passes request arguments to rule execution log', async () => {
     const expectedArgs: GetExecutionEventsArgs = {
       ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      eventTypes: [RuleExecutionEventType['status-change']],
-      logLevels: [LogLevel.debug, LogLevel.info],
+      eventTypes: [RuleExecutionEventTypeEnum['status-change']],
+      logLevels: [LogLevelEnum.debug, LogLevelEnum.info],
       sortOrder: 'desc',
       page: 3,
       perPage: 20,

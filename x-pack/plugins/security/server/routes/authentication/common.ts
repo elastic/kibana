@@ -32,16 +32,25 @@ export function defineCommonRoutes({
   basePath,
   license,
   logger,
+  buildFlavor,
 }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/logout', '/api/security/v1/logout']) {
+  // For a serverless build, do not register deprecated versioned routes
+  for (const path of [
+    '/api/security/logout',
+    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/logout'] : []),
+  ]) {
     router.get(
       {
         path,
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
         // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
-        options: { authRequired: false, tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW] },
+        options: {
+          access: 'public',
+          authRequired: false,
+          tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],
+        },
       },
       async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
@@ -75,18 +84,22 @@ export function defineCommonRoutes({
   }
 
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/internal/security/me', '/api/security/v1/me']) {
+  // For a serverless build, do not register deprecated versioned routes
+  for (const path of [
+    '/internal/security/me',
+    ...(buildFlavor !== 'serverless' ? ['/api/security/v1/me'] : []),
+  ]) {
     router.get(
       { path, validate: false },
-      createLicensedRouteHandler((context, request, response) => {
+      createLicensedRouteHandler(async (context, request, response) => {
         if (path === '/api/security/v1/me') {
           logger.warn(
             `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
             { tags: ['deprecation'] }
           );
         }
-
-        return response.ok({ body: getAuthenticationService().getCurrentUser(request)! });
+        const { security: coreSecurity } = await context.core;
+        return response.ok({ body: coreSecurity.authc.getCurrentUser()! });
       })
     );
   }
@@ -119,6 +132,8 @@ export function defineCommonRoutes({
     return undefined;
   }
 
+  // Register the login route for serverless for the time being. Note: This route will move into the buildFlavor !== 'serverless' block below. See next line.
+  // ToDo: In the serverless environment, we do not support API login - the only valid authentication methodology (or maybe just method or mechanism?) is SAML
   router.post(
     {
       path: '/internal/security/login',
@@ -142,8 +157,6 @@ export function defineCommonRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
-      logger.info(`Logging in with provider "${providerName}" (${providerType})`);
-
       const redirectURL = parseNext(currentURL, basePath.serverBasePath);
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },
@@ -165,20 +178,23 @@ export function defineCommonRoutes({
     })
   );
 
-  router.post(
-    { path: '/internal/security/access_agreement/acknowledge', validate: false },
-    createLicensedRouteHandler(async (context, request, response) => {
-      // If license doesn't allow access agreement we shouldn't handle request.
-      if (!license.getFeatures().allowAccessAgreement) {
-        logger.warn(`Attempted to acknowledge access agreement when license doesn't allow it.`);
-        return response.forbidden({
-          body: { message: `Current license doesn't support access agreement.` },
-        });
-      }
+  if (buildFlavor !== 'serverless') {
+    // In the serverless offering, the access agreement functionality isn't available.
+    router.post(
+      { path: '/internal/security/access_agreement/acknowledge', validate: false },
+      createLicensedRouteHandler(async (context, request, response) => {
+        // If license doesn't allow access agreement we shouldn't handle request.
+        if (!license.getFeatures().allowAccessAgreement) {
+          logger.warn(`Attempted to acknowledge access agreement when license doesn't allow it.`);
+          return response.forbidden({
+            body: { message: `Current license doesn't support access agreement.` },
+          });
+        }
 
-      await getAuthenticationService().acknowledgeAccessAgreement(request);
+        await getAuthenticationService().acknowledgeAccessAgreement(request);
 
-      return response.noContent();
-    })
-  );
+        return response.noContent();
+      })
+    );
+  }
 }

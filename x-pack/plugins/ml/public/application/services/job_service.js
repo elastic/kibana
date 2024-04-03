@@ -8,7 +8,6 @@
 import { cloneDeep, each, find, get, isNumber } from 'lodash';
 import moment from 'moment';
 
-import { i18n } from '@kbn/i18n';
 import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -22,7 +21,20 @@ let jobs = [];
 let datafeedIds = {};
 
 class JobService {
-  constructor() {
+  // The overrides allow the use of JobService in contexts where
+  // the dependency cache is not available, for example when embedding
+  // the Single Metric Viewer chart. Note we cannot set the members here
+  // already based on the dependency cache because they will not be
+  // initialized yet. So this wouldn't work:
+  //
+  // this.ml = mlOverride ?? ml;
+  //
+  // That's why we have the getters like getMl() below to only access them
+  // when the methods of this class are being called.
+  constructor(toastNotificationServiceOverride, mlOverride) {
+    this.toastNotificationService = toastNotificationServiceOverride;
+    this.ml = mlOverride;
+
     // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
     // if populated when loading the advanced wizard, the job is used for cloning.
@@ -47,62 +59,28 @@ class JobService {
     this.jobDescriptions = {};
     this.detectorsByJob = {};
     this.customUrlsByJob = {};
-    this.jobStats = {
-      activeNodes: {
-        label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
-          defaultMessage: 'Active ML nodes',
-        }),
-        value: 0,
-        show: true,
-      },
-      total: {
-        label: i18n.translate('xpack.ml.jobService.totalJobsLabel', {
-          defaultMessage: 'Total jobs',
-        }),
-        value: 0,
-        show: true,
-      },
-      open: {
-        label: i18n.translate('xpack.ml.jobService.openJobsLabel', {
-          defaultMessage: 'Open jobs',
-        }),
-        value: 0,
-        show: true,
-      },
-      closed: {
-        label: i18n.translate('xpack.ml.jobService.closedJobsLabel', {
-          defaultMessage: 'Closed jobs',
-        }),
-        value: 0,
-        show: true,
-      },
-      failed: {
-        label: i18n.translate('xpack.ml.jobService.failedJobsLabel', {
-          defaultMessage: 'Failed jobs',
-        }),
-        value: 0,
-        show: false,
-      },
-      activeDatafeeds: {
-        label: i18n.translate('xpack.ml.jobService.activeDatafeedsLabel', {
-          defaultMessage: 'Active datafeeds',
-        }),
-        value: 0,
-        show: true,
-      },
-    };
+  }
+
+  getMl() {
+    return this.ml ?? ml;
+  }
+
+  getToastNotificationService() {
+    return this.toastNotificationService ?? getToastNotificationService();
   }
 
   loadJobs() {
     return new Promise((resolve, reject) => {
       jobs = [];
       datafeedIds = {};
-      ml.getJobs()
+      this.getMl()
+        .getJobs()
         .then((resp) => {
           jobs = resp.jobs;
 
           // load jobs stats
-          ml.getJobStats()
+          this.getMl()
+            .getJobStats()
             .then((statsResp) => {
               // merge jobs stats into jobs
               for (let i = 0; i < jobs.length; i++) {
@@ -152,7 +130,7 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        getToastNotificationService().displayErrorToast(err);
+        this.getToastNotificationService().displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -172,13 +150,15 @@ class JobService {
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
-      ml.getJobs({ jobId })
+      this.getMl()
+        .getJobs({ jobId })
         .then((resp) => {
           if (resp.jobs && resp.jobs.length) {
             const newJob = resp.jobs[0];
 
             // load jobs stats
-            ml.getJobStats({ jobId })
+            this.getMl()
+              .getJobStats({ jobId })
               .then((statsResp) => {
                 // merge jobs stats into jobs
                 for (let j = 0; j < statsResp.jobs.length; j++) {
@@ -233,7 +213,7 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        getToastNotificationService().displayErrorToast(err);
+        this.getToastNotificationService().displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -243,12 +223,14 @@ class JobService {
     return new Promise((resolve, reject) => {
       const sId = datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined;
 
-      ml.getDatafeeds(sId)
+      this.getMl()
+        .getDatafeeds(sId)
         .then((resp) => {
           const datafeeds = resp.datafeeds;
 
           // load datafeeds stats
-          ml.getDatafeedStats()
+          this.getMl()
+            .getDatafeedStats()
             .then((statsResp) => {
               // merge datafeeds stats into datafeeds
               for (let i = 0; i < datafeeds.length; i++) {
@@ -271,7 +253,7 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        getToastNotificationService().displayErrorToast(err);
+        this.getToastNotificationService().displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -281,7 +263,8 @@ class JobService {
     return new Promise((resolve, reject) => {
       const datafeedId = this.getDatafeedId(jobId);
 
-      ml.getDatafeedStats({ datafeedId })
+      this.getMl()
+        .getDatafeedStats({ datafeedId })
         .then((resp) => {
           // console.log('updateSingleJobCounts controller query response:', resp);
           const datafeeds = resp.datafeeds;
@@ -306,7 +289,7 @@ class JobService {
     }
 
     // return the promise chain
-    return ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
+    return this.getMl().addJob({ jobId: job.job_id, job }).then(func).catch(func);
   }
 
   cloneDatafeed(datafeed) {
@@ -330,18 +313,18 @@ class JobService {
   }
 
   openJob(jobId) {
-    return ml.openJob({ jobId });
+    return this.getMl().openJob({ jobId });
   }
 
   closeJob(jobId) {
-    return ml.closeJob({ jobId });
+    return this.getMl().closeJob({ jobId });
   }
 
   saveNewDatafeed(datafeedConfig, jobId) {
     const datafeedId = `datafeed-${jobId}`;
     datafeedConfig.job_id = jobId;
 
-    return ml.addDatafeed({
+    return this.getMl().addDatafeed({
       datafeedId,
       datafeedConfig,
     });
@@ -357,11 +340,12 @@ class JobService {
         end++;
       }
 
-      ml.startDatafeed({
-        datafeedId,
-        start,
-        end,
-      })
+      this.getMl()
+        .startDatafeed({
+          datafeedId,
+          start,
+          end,
+        })
         .then((resp) => {
           resolve(resp);
         })
@@ -373,29 +357,30 @@ class JobService {
   }
 
   forceStartDatafeeds(dIds, start, end) {
-    return ml.jobs.forceStartDatafeeds(dIds, start, end);
+    return this.getMl().jobs.forceStartDatafeeds(dIds, start, end);
   }
 
   stopDatafeeds(dIds) {
-    return ml.jobs.stopDatafeeds(dIds);
+    return this.getMl().jobs.stopDatafeeds(dIds);
   }
 
-  deleteJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations);
+  deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules) {
+    return this.getMl().jobs.deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules);
   }
 
   closeJobs(jIds) {
-    return ml.jobs.closeJobs(jIds);
+    return this.getMl().jobs.closeJobs(jIds);
   }
 
   resetJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.resetJobs(jIds, deleteUserAnnotations);
+    return this.getMl().jobs.resetJobs(jIds, deleteUserAnnotations);
   }
 
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
-        ml.validateDetector({ detector })
+        this.getMl()
+          .validateDetector({ detector })
           .then((resp) => {
             resolve(resp);
           })
@@ -447,7 +432,7 @@ class JobService {
 
   async getJobAndGroupIds() {
     try {
-      return await ml.jobs.getAllJobAndGroupIds();
+      return await this.getMl().jobs.getAllJobAndGroupIds();
     } catch (error) {
       return {
         jobIds: [],
@@ -608,3 +593,5 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
 }
 
 export const mlJobService = new JobService();
+export const mlJobServiceFactory = (toastNotificationServiceOverride, mlOverride) =>
+  new JobService(toastNotificationServiceOverride, mlOverride);

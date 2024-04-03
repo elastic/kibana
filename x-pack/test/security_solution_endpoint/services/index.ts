@@ -13,9 +13,14 @@ import { TimelineTestService } from '../../security_solution_ftr/services/timeli
 import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
 import { EndpointArtifactsTestResources } from './endpoint_artifacts';
+import {
+  KibanaSupertestWithCertProvider,
+  KibanaSupertestWithCertWithoutAuthProvider,
+} from './supertest_with_cert';
 
 export const services = {
   ...xPackFunctionalServices,
+
   endpointTestResources: EndpointTestResources,
   telemetryTestResources: EndpointTelemetryTestResourcesProvider,
   ingestManager: IngestManagerProvider,
@@ -23,4 +28,11 @@ export const services = {
   detections: DetectionsTestService,
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   policyTestResources: EndpointPolicyTestResourcesProvider,
+};
+
+export const svlServices = {
+  ...services,
+
+  supertest: KibanaSupertestWithCertProvider,
+  supertestWithoutAuth: KibanaSupertestWithCertWithoutAuthProvider,
 };

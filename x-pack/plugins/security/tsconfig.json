@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "__mocks__/**/*"
+  ],
   "kbn_references": [
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
@@ -55,12 +60,22 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-common",
     "@kbn/core-custom-branding-server-mocks",
-    "@kbn/ecs",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-user-settings-server",
+    "@kbn/remote-clusters-plugin",
+    "@kbn/analytics-client",
+    "@kbn/security-plugin-types-common",
+    "@kbn/security-plugin-types-public",
+    "@kbn/security-plugin-types-server",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-server",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",

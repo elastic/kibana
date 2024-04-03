@@ -1,0 +1,9 @@
+description: >
+  The names of up to four fields that are used for grouping the aggregation.
+  This property is required when `groupBy` is `top`.
+oneOf:
+  - type: string
+  - type: array
+    items:
+      type: string
+    maxItems: 4

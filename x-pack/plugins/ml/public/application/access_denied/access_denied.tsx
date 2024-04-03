@@ -9,15 +9,9 @@ import React, { type FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
-import { MlCapabilitiesKey } from '../../../common/types/capabilities';
+import type { MlCapabilitiesKey } from '../../../common/types/capabilities';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -35,39 +29,34 @@ export const AccessDeniedCallout: FC<AccessDeniedCalloutProps> = ({ missingCapab
 
   return (
     <>
-      <EuiSpacer size="xxl" />
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-            <EuiEmptyPrompt
-              iconType="warning"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.ml.management.jobsList.accessDeniedTitle"
-                    defaultMessage="Access denied"
-                  />
-                </h2>
-              }
-              body={
-                <div>
-                  <FormattedMessage
-                    id="xpack.ml.accessDenied.description"
-                    defaultMessage="You do not have permission to view this page."
-                  />
-                  {errorMessages ? (
-                    <ul>
-                      {errorMessages.map((v) => (
-                        <li key={v}>{v}</li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              }
+      <EuiPageTemplate.EmptyPrompt
+        color={'danger'}
+        alignment={'horizontalCenter'}
+        iconType="warning"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.management.jobsList.accessDeniedTitle"
+              defaultMessage="Access denied"
             />
-          </EuiPageContent>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </h2>
+        }
+        body={
+          <div>
+            <FormattedMessage
+              id="xpack.ml.accessDenied.description"
+              defaultMessage="You do not have permission to view this page."
+            />
+            {errorMessages ? (
+              <ul>
+                {errorMessages.map((v) => (
+                  <li key={v}>{v}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        }
+      />
       <HelpMenu docLink={helpLink} />
     </>
   );

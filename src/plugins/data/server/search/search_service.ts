@@ -19,16 +19,12 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
@@ -64,6 +60,7 @@ import {
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  ipPrefixFunction,
   ipRangeFunction,
   ISearchOptions,
   kibana,
@@ -83,8 +80,10 @@ import {
   SearchSourceService,
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
+  ESQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
 } from '../../common/search';
-import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -99,6 +98,8 @@ import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 import { CachedUiSettingsClient } from './services';
 import { sqlSearchStrategyProvider } from './strategies/sql_search';
 import { searchSessionSavedObjectType } from './saved_objects';
+import { esqlSearchStrategyProvider } from './strategies/esql_search';
+import { esqlAsyncSearchStrategyProvider } from './strategies/esql_async_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -107,7 +108,6 @@ export interface SearchServiceSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
-  taskManager?: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
 }
 
@@ -115,7 +115,6 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
   indexPatterns: DataViewsServerPluginStart;
-  taskManager?: TaskManagerStartContract;
 }
 
 /** @internal */
@@ -131,6 +130,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private sessionService: SearchSessionService;
   private asScoped!: ISearchStart['asScoped'];
   private searchAsInternalUser!: ISearchStrategy;
+  private rollupsEnabled: boolean = false;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -145,7 +145,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, taskManager, security }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection, security }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -180,6 +180,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.logger,
         usage
       )
+    );
+    this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(
+      ESQL_ASYNC_SEARCH_STRATEGY,
+      esqlAsyncSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
     );
 
     // We don't want to register this because we don't want the client to be able to access this
@@ -221,11 +226,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEssql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEql({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEsql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(geoBoundingBoxFunction);
     expressions.registerFunction(geoPointFunction);
+    expressions.registerFunction(ipPrefixFunction);
     expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
@@ -261,12 +268,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
       searchSource: this.searchSourceService.setup(),
+      enableRollups: () => (this.rollupsEnabled = true),
     };
   }
 
   public start(
     core: CoreStart,
-    { fieldFormats, indexPatterns, taskManager }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
@@ -278,7 +286,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       indexPatterns,
     });
 
-    this.asScoped = this.asScopedProvider(core);
+    this.asScoped = this.asScopedProvider(core, this.rollupsEnabled);
     return {
       aggs,
       searchAsInternalUser: this.searchAsInternalUser,
@@ -306,6 +314,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
+            scriptedFieldsEnabled: true,
           };
 
           return this.searchSourceService.start(scopedIndexPatterns, searchSourceDependencies);
@@ -436,11 +445,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
   };
 
-  private cancel = async (
-    deps: SearchStrategyDependencies,
-    id: string,
-    options: ISearchOptions = {}
-  ) => {
+  private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
@@ -467,14 +472,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     await Promise.allSettled(
-      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+      Array.from(searchIdMapping).map(async ([searchId, strategyName]) => {
         const searchOptions = {
           sessionId,
           strategy: strategyName,
           isStored: true,
         };
 
-        return this.cancel(deps, searchId, searchOptions);
+        try {
+          await this.cancel(deps, searchId, searchOptions);
+        } catch (e) {
+          this.logger.error(`cancelSessionSearches error: ${e.message}`);
+        }
       })
     );
   };
@@ -516,7 +525,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
 
-  private asScopedProvider = (core: CoreStart) => {
+  private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): IScopedSearchClient => {
@@ -530,6 +539,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
         request,
+        rollupsEnabled,
       };
       return {
         search: <

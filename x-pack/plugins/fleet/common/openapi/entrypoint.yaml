@@ -10,8 +10,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: 'http://localhost:5601/api/fleet'
-    description: local
+  - url: 'http://KIBANA_HOST:5601/api/fleet'
 paths:
   # Fleet internals
   /health_check:
@@ -42,10 +41,14 @@ paths:
     $ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}':
     $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
+  '/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}@transforms@authorize.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
     $ref: paths/epm@get_file.yaml
   '/epm/packages/{pkgName}/stats':
     $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
+  '/epm/templates/{pkgName}/{pkgVersion}/inputs':
+    $ref: 'paths/epm@templates@{pkg_name}@{pkg_version}@inputs.yaml'
 
   # Agent endpoints
   /agents/setup:
@@ -140,6 +143,8 @@ paths:
     $ref: paths/outputs.yaml
   /outputs/{outputId}:
     $ref: paths/outputs@{output_id}.yaml
+  /outputs/{outputId}/health:
+    $ref: paths/output_health@{output_id}.yaml
   /logstash_api_keys:
     $ref: paths/logstash_api_keys.yaml
 
@@ -164,6 +169,13 @@ paths:
   # K8s
   /kubernetes:
     $ref: paths/kubernetes.yaml
+
+  # Uninstall tokens
+  /uninstall_tokens:
+    $ref: paths/uninstall_tokens.yaml
+  /uninstall_tokens/{uninstallTokenId}:
+    $ref: paths/uninstall_tokens@{uninstall_token_id}.yaml
+
 components:
   securitySchemes:
     basicAuth:

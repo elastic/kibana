@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -54,6 +55,45 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql({ ...getConfigurationOutput(true), closure_type: 'close-by-pushing' });
     });
 
+    it('should patch a configuration with customFields', async () => {
+      const customFields = [
+        {
+          key: 'text_field_1',
+          label: '#1',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'toggle_field_1',
+          label: '#2',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+        {
+          key: 'text_field_2',
+          label: '#3',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+          defaultValue: 'foobar',
+        },
+        {
+          key: 'toggle_field_2',
+          label: '#4',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+          defaultValue: true,
+        },
+      ] as ConfigurationPatchRequest['customFields'];
+      const configuration = await createConfiguration(supertest);
+      const newConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        customFields,
+      });
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
+      expect(data).to.eql({ ...getConfigurationOutput(true), customFields });
+    });
+
     it('should update mapping when changing connector', async () => {
       const configuration = await createConfiguration(supertest);
       await updateConfiguration(supertest, configuration.id, {
@@ -87,80 +127,149 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
     });
 
-    it('should not patch a configuration with unsupported connector type', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        getConfigurationRequest({ type: '.unsupported' }),
-        400
-      );
-    });
-
-    it('should not patch a configuration with unsupported connector fields', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
-        400
-      );
-    });
-
-    it('should handle patch request when there is no configuration', async () => {
-      const error = await updateConfiguration(
-        supertest,
-        'not-exist',
-        { closure_type: 'close-by-pushing', version: 'no-version' },
-        404
-      );
-
-      expect(error).to.eql({
-        error: 'Not Found',
-        message: 'Saved object [cases-configure/not-exist] not found',
-        statusCode: 404,
+    describe('validation', () => {
+      it('should not patch a configuration with unsupported connector type', async () => {
+        const configuration = await createConfiguration(supertest);
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          // @ts-expect-error
+          getConfigurationRequest({ type: '.unsupported' }),
+          400
+        );
       });
-    });
 
-    it('should handle patch request when versions are different', async () => {
-      const configuration = await createConfiguration(supertest);
-      const error = await updateConfiguration(
-        supertest,
-        configuration.id,
-        { closure_type: 'close-by-pushing', version: 'no-version' },
-        409
-      );
-
-      expect(error).to.eql({
-        error: 'Conflict',
-        message:
-          'This configuration has been updated. Please refresh before saving additional updates.',
-        statusCode: 409,
+      it('should not patch a configuration with unsupported connector fields', async () => {
+        const configuration = await createConfiguration(supertest);
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          // @ts-expect-error
+          getConfigurationRequest({ type: '.jira', fields: { unsupported: 'value' } }),
+          400
+        );
       });
-    });
 
-    it('should not allow to change the owner of the configuration', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        { owner: 'observabilityFixture', version: configuration.version },
-        400
-      );
-    });
+      it('should handle patch request when there is no configuration', async () => {
+        const error = await updateConfiguration(
+          supertest,
+          'not-exist',
+          { closure_type: 'close-by-pushing', version: 'no-version' },
+          404
+        );
 
-    it('should not allow excess attributes', async () => {
-      const configuration = await createConfiguration(supertest);
-      await updateConfiguration(
-        supertest,
-        configuration.id,
-        // @ts-expect-error
-        { notExist: 'not-exist', version: configuration.version },
-        400
-      );
+        expect(error).to.eql({
+          error: 'Not Found',
+          message: 'Saved object [cases-configure/not-exist] not found',
+          statusCode: 404,
+        });
+      });
+
+      it('should handle patch request when versions are different', async () => {
+        const configuration = await createConfiguration(supertest);
+        const error = await updateConfiguration(
+          supertest,
+          configuration.id,
+          { closure_type: 'close-by-pushing', version: 'no-version' },
+          409
+        );
+
+        expect(error).to.eql({
+          error: 'Conflict',
+          message:
+            'This configuration has been updated. Please refresh before saving additional updates.',
+          statusCode: 409,
+        });
+      });
+
+      it('should not allow to change the owner of the configuration', async () => {
+        const configuration = await createConfiguration(supertest);
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          // @ts-expect-error
+          { owner: 'observabilityFixture', version: configuration.version },
+          400
+        );
+      });
+
+      it('should not allow excess attributes', async () => {
+        const configuration = await createConfiguration(supertest);
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          // @ts-expect-error
+          { notExist: 'not-exist', version: configuration.version },
+          400
+        );
+      });
+
+      it('should not allow patching the type of a custom field', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'wrong_type_key',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
+
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          {
+            version: configuration.version,
+            customFields: [
+              {
+                key: 'wrong_type_key',
+                label: '#1',
+                type: CustomFieldTypes.TOGGLE,
+                required: false,
+              },
+            ],
+          },
+          400
+        );
+      });
+
+      it('should not patch a configuration with duplicated custom field keys', async () => {
+        const configuration = await createConfiguration(supertest);
+        await updateConfiguration(
+          supertest,
+          configuration.id,
+          {
+            version: configuration.version,
+            customFields: [
+              {
+                key: 'triplicated_key',
+                label: '#1',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+              {
+                key: 'triplicated_key',
+                label: '#2',
+                type: CustomFieldTypes.TOGGLE,
+                required: false,
+              },
+              {
+                key: 'triplicated_key',
+                label: '#2',
+                type: CustomFieldTypes.TOGGLE,
+                required: false,
+              },
+            ],
+          },
+          400
+        );
+      });
     });
 
     describe('rbac', () => {

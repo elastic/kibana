@@ -21,7 +21,6 @@
       "navigation",
       "urlForwarding",
       "visualizations",
-      "dashboard",
       "uiActions",
       "uiActionsEnhanced",
       "embeddable",
@@ -45,7 +44,8 @@
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "unifiedSearch",
@@ -55,7 +55,7 @@
       "embeddable",
       "fieldFormats",
       "charts",
-      "visualizationUiComponents"
+      "textBasedLanguages",
     ],
     "extraPublicDirs": [
       "common/constants"

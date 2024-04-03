@@ -17,12 +17,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   useKibana,
+  JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
@@ -283,8 +286,15 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             incident.summary !== undefined
           }
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
-            defaultMessage: 'Summary (required)',
+            defaultMessage: 'Summary',
           })}
+          labelAppend={
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {
+                defaultMessage: 'Required',
+              })}
+            </EuiText>
+          }
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -373,6 +383,51 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             }
           )}
         />
+        <EuiFormRow
+          fullWidth
+          error={errors['subActionParams.incident.otherFields']}
+          isInvalid={
+            errors['subActionParams.incident.otherFields'] !== undefined &&
+            errors['subActionParams.incident.otherFields'].length > 0
+          }
+        >
+          <JsonEditorWithMessageVariables
+            messageVariables={messageVariables}
+            paramsProperty={'otherFields'}
+            inputTargetValue={actionParams.subActionParams?.incident?.otherFields}
+            errors={errors.otherFields as string[]}
+            label={
+              <>
+                {i18n.translate('xpack.stackConnectors.components.jira.otherFieldsFieldLabel', {
+                  defaultMessage: 'Additional fields',
+                })}
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  data-test-subj="otherFieldsHelpTooltip"
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpTooltip',
+                    {
+                      defaultMessage: 'Additional fields help',
+                    }
+                  )}
+                  content={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpText',
+                    {
+                      defaultMessage:
+                        'When adding custom fields, please note that the system does not validate inputs or enforce required fields. To avoid failed actions, ensure compliance with Jira policies.',
+                    }
+                  )}
+                />
+              </>
+            }
+            onDocumentsChange={(json: string) => {
+              editSubActionProperty('otherFields', json);
+            }}
+          />
+        </EuiFormRow>
       </>
     </>
   );

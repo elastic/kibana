@@ -8,8 +8,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import type { RelatedIntegrationArray } from '../../../../../../common/detection_engine/rule_schema';
-import type { ListItems } from '../../description_step/types';
+import type { RelatedIntegrationArray } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ListItems } from '../../../../../detection_engine/rule_creation_ui/components/description_step/types';
 import type { IntegrationDetails } from '../integration_details';
 import { useRelatedIntegrations } from '../use_related_integrations';
 
@@ -21,11 +21,12 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-export const IntegrationDescriptionComponent: React.FC<{ integration: IntegrationDetails }> = ({
-  integration,
-}) => {
+export const IntegrationDescriptionComponent: React.FC<{
+  integration: IntegrationDetails;
+  dataTestSubj?: string;
+}> = ({ integration, dataTestSubj = 'integrationDescription' }) => {
   return (
-    <Wrapper>
+    <Wrapper data-test-subj={`${dataTestSubj}-${integration.packageName}`}>
       <IntegrationLink integration={integration} />{' '}
       <IntegrationStatusBadge integration={integration} />
       <IntegrationVersionMismatchIcon integration={integration} />
@@ -37,7 +38,8 @@ export const IntegrationDescription = React.memo(IntegrationDescriptionComponent
 
 export const RelatedIntegrationsDescription: React.FC<{
   relatedIntegrations: RelatedIntegrationArray;
-}> = ({ relatedIntegrations }) => {
+  dataTestSubj?: string;
+}> = ({ relatedIntegrations, dataTestSubj = 'relatedIntegrationsDescription' }) => {
   const { integrations } = useRelatedIntegrations(relatedIntegrations);
 
   return (
@@ -46,6 +48,7 @@ export const RelatedIntegrationsDescription: React.FC<{
         <IntegrationDescription
           key={`${integration.packageName}-${index}`}
           integration={integration}
+          dataTestSubj={dataTestSubj}
         />
       ))}
     </>

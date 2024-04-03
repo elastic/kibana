@@ -56,3 +56,20 @@ export function buildKueryForUpdatingAgents(): string {
 export function buildKueryForInactiveAgents() {
   return 'status:inactive';
 }
+
+export const AGENT_UPDATING_TIMEOUT_HOURS = 2;
+
+export function isStuckInUpdating(agent: Agent): boolean {
+  return (
+    (agent.status !== 'offline' && agent.active && isAgentInFailedUpgradeState(agent)) ||
+    (agent.status === 'updating' &&
+      !!agent.upgrade_started_at &&
+      !agent.upgraded_at &&
+      Date.now() - Date.parse(agent.upgrade_started_at) >
+        AGENT_UPDATING_TIMEOUT_HOURS * 60 * 60 * 1000)
+  );
+}
+
+export function isAgentInFailedUpgradeState(agent: Agent): boolean {
+  return agent.upgrade_details?.state === 'UPG_FAILED';
+}

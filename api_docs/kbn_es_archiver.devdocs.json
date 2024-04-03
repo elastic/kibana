@@ -188,7 +188,15 @@
               "\nLoad an index from an archive\n"
             ],
             "signature": [
-              "(path: string, { skipExisting, useCreate, docsOnly, }?: { skipExisting?: boolean | undefined; useCreate?: boolean | undefined; docsOnly?: boolean | undefined; }) => Promise<Record<string, ",
+              "(path: string, { skipExisting, useCreate, docsOnly, performance, }?: { skipExisting?: boolean | undefined; useCreate?: boolean | undefined; docsOnly?: boolean | undefined; performance?: ",
+              {
+                "pluginId": "@kbn/es-archiver",
+                "scope": "common",
+                "docId": "kibKbnEsArchiverPluginApi",
+                "section": "def-common.LoadActionPerfOptions",
+                "text": "LoadActionPerfOptions"
+              },
+              " | undefined; }) => Promise<Record<string, ",
               "IndexStats",
               ">>"
             ],
@@ -218,7 +226,7 @@
                 "id": "def-common.EsArchiver.load.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      skipExisting = false,\n      useCreate = false,\n      docsOnly = false,\n    }",
+                "label": "{\n      skipExisting = false,\n      useCreate = false,\n      docsOnly = false,\n      performance,\n    }",
                 "description": [],
                 "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                 "deprecated": false,
@@ -261,6 +269,27 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-common.EsArchiver.load.$2.performance",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "performance",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/es-archiver",
+                        "scope": "common",
+                        "docId": "kibKbnEsArchiverPluginApi",
+                        "section": "def-common.LoadActionPerfOptions",
+                        "text": "LoadActionPerfOptions"
+                      },
+                      " | undefined"
                     ],
                     "path": "packages/kbn-es-archiver/src/es_archiver.ts",
                     "deprecated": false,
@@ -406,7 +435,15 @@
               "\nJust like load, but skips any existing index\n"
             ],
             "signature": [
-              "(name: string) => Promise<Record<string, ",
+              "(name: string, performance?: ",
+              {
+                "pluginId": "@kbn/es-archiver",
+                "scope": "common",
+                "docId": "kibKbnEsArchiverPluginApi",
+                "section": "def-common.LoadActionPerfOptions",
+                "text": "LoadActionPerfOptions"
+              },
+              " | undefined) => Promise<Record<string, ",
               "IndexStats",
               ">>"
             ],
@@ -428,6 +465,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-common.EsArchiver.loadIfNeeded.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "performance",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.LoadActionPerfOptions",
+                    "text": "LoadActionPerfOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -439,7 +498,7 @@
             "tags": [],
             "label": "emptyKibanaIndex",
             "description": [
-              "\nDelete any Kibana indices, and initialize the Kibana index as Kibana would do\non startup."
+              "\nCleanup saved object indices, preserving the space:default saved object."
             ],
             "signature": [
               "() => Promise<Record<string, ",
@@ -475,7 +534,50 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/es-archiver",
+        "id": "def-common.LoadActionPerfOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoadActionPerfOptions",
+        "description": [],
+        "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-common.LoadActionPerfOptions.batchSize",
+            "type": "number",
+            "tags": [],
+            "label": "batchSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-common.LoadActionPerfOptions.concurrency",
+            "type": "number",
+            "tags": [],
+            "label": "concurrency",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

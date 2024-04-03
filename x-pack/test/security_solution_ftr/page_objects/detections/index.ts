@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../../functional/ftr_provider_context';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
 
@@ -121,7 +121,7 @@ export class DetectionsPageObject extends FtrService {
 
   async preview(): Promise<void> {
     await this.common.clickAndValidate(
-      'queryPreviewButton',
+      'previewSubmitButton',
       'queryPreviewCustomHistogram',
       undefined,
       500

@@ -7,19 +7,16 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EmbeddablePanelError } from '../panel/embeddable_panel_error';
-import { Embeddable } from './embeddable';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+
+import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
+
 import { IContainer } from '../containers';
+import { Embeddable } from './embeddable';
+import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+
 import './error_embeddable.scss';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
-
-export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
-  embeddable: TEmbeddable | ErrorEmbeddable
-): embeddable is ErrorEmbeddable {
-  return Boolean(embeddable.fatalError || (embeddable as ErrorEmbeddable).error !== undefined);
-}
 
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput, ReactNode> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
@@ -35,6 +32,6 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render() {
     const error = typeof this.error === 'string' ? { message: this.error, name: '' } : this.error;
 
-    return <EmbeddablePanelError embeddable={this} error={error} />;
+    return <PresentationPanelError api={this} error={error} />;
   }
 }

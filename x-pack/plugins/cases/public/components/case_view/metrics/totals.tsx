@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
@@ -20,6 +21,7 @@ import {
 export const CaseViewMetricItems = React.memo(
   ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
     const metricItems = useGetTitleValueMetricItems(metrics, features);
+    const { euiTheme } = useEuiTheme();
 
     return (
       <>
@@ -27,7 +29,14 @@ export const CaseViewMetricItems = React.memo(
           <EuiFlexItem key={title} data-test-subj={`case-metrics-totals-${id}`}>
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem>{title}</EuiFlexItem>
-              <MetricValue>{value}</MetricValue>
+              <EuiFlexItem
+                css={css`
+                  font-size: ${euiTheme.size.l};
+                  font-weight: bold;
+                `}
+              >
+                {value}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         ))}
@@ -36,11 +45,6 @@ export const CaseViewMetricItems = React.memo(
   }
 );
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
-
-const MetricValue = euiStyled(EuiFlexItem)`
-  font-size: ${({ theme }) => theme.eui.euiSizeL};
-  font-weight: bold;
-`;
 
 interface MetricItem {
   id: string;
@@ -62,11 +66,14 @@ const useGetTitleValueMetricItems = (
 
   const metricItems = useMemo<MetricItems>(() => {
     const items: Array<[SingleCaseMetricsFeature, Omit<MetricItem, 'id'>]> = [
-      ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
-      ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
-      ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
-      ['actions.isolateHost', { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts }],
-      ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
+      [CaseMetricsFeature.ALERTS_COUNT, { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
+      [CaseMetricsFeature.ALERTS_USERS, { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
+      [CaseMetricsFeature.ALERTS_HOSTS, { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
+      [
+        CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
+        { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts },
+      ],
+      [CaseMetricsFeature.CONNECTORS, { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
     ];
 
     return items.reduce(

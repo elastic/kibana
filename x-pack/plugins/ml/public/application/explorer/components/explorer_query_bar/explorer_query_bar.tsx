@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
 import { useMlKibana } from '../../../contexts/kibana';
 
@@ -78,23 +79,16 @@ export function getKqlQueryValues({
 }
 
 function getInitSearchInputState({
-  filterActive,
   queryString,
+  searchInput,
 }: {
-  filterActive: boolean;
   queryString?: string;
+  searchInput?: Query;
 }) {
-  if (queryString !== undefined && filterActive === true) {
-    return {
-      language: SEARCH_QUERY_LANGUAGE.KUERY,
-      query: queryString,
-    };
-  } else {
-    return {
-      query: '',
-      language: DEFAULT_QUERY_LANG,
-    };
-  }
+  return {
+    language: searchInput?.language ?? DEFAULT_QUERY_LANG,
+    query: queryString ?? '',
+  };
 }
 
 interface ExplorerQueryBarProps {
@@ -117,30 +111,23 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
   const {
-    unifiedSearch,
-    data,
-    storage,
-    appName,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    dataViews: dataViewsService,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = services;
 
   // The internal state of the input query bar updated on every key stroke.
-  const [searchInput, setSearchInput] = useState<Query>(
-    getInitSearchInputState({ filterActive, queryString })
-  );
+  const [searchInput, setSearchInput] = useState<Query>(getInitSearchInputState({ queryString }));
   const [queryErrorMessage, setQueryErrorMessage] = useState<QueryErrorMessage | undefined>(
     undefined
   );
 
   useEffect(
     function updateSearchInputFromFilter() {
-      setSearchInput(getInitSearchInputState({ filterActive, queryString }));
+      setSearchInput(getInitSearchInputState({ queryString, searchInput }));
     },
-    [filterActive, queryString]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queryString, searchInput.language]
   );
 
   const searchChangeHandler = (query: Query) => {
@@ -171,7 +158,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
 
   return (
     <EuiInputPopover
-      css={{ 'max-width': '100%' }}
+      css={{ maxWidth: '100%' }}
       closePopover={setQueryErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput
@@ -184,17 +171,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           disableAutoFocus
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
-          appName={appName}
-          deps={{
-            unifiedSearch,
-            notifications,
-            http,
-            docLinks,
-            uiSettings,
-            data,
-            storage,
-            dataViews: dataViewsService,
-          }}
+          appName={PLUGIN_ID}
         />
       }
       isOpen={queryErrorMessage?.query === searchInput.query && queryErrorMessage?.message !== ''}

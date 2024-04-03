@@ -3,8 +3,13 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
+xpack.infra.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
-xpack.uptime.enabled: false
+xpack.observabilityAIAssistant.enabled: false
+
+## Cloud settings
+xpack.cloud.serverless.project_type: security
 
 ## Enable the Security Solution Serverless plugin
 xpack.securitySolutionServerless.enabled: true
@@ -12,7 +17,15 @@ xpack.securitySolutionServerless.productTypes:
   [
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
   ]
+
+xpack.securitySolution.offeringSettings: {
+    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+    ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
+  }
+
+newsfeed.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
@@ -22,3 +35,37 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
+
+# Fleet specific configuration
+xpack.fleet.internal.registry.capabilities: ['security']
+xpack.fleet.internal.registry.spec.max: '3.0'
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
+xpack.fleet.internal.registry.spec.min: '1.0'
+xpack.fleet.internal.registry.excludePackages: [
+    # Oblt integrations
+    'apm',
+    'synthetics',
+    'synthetics_dashboards',
+
+    # Removed in 8.11 integrations
+    'cisco',
+    'microsoft',
+    'symantec',
+    'cyberark',
+
+    # ML integrations
+    'dga',
+  ]
+# fleet_server package installed to publish agent metrics
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest
+
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
+xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'security'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

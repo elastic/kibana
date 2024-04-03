@@ -6,8 +6,9 @@
  */
 
 import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createMockDataViewsState } from '../data_views_service/mocks';
-import { FramePublicAPI, FrameDatasourceAPI } from '../types';
+import { FramePublicAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {
   visualizationMap,
@@ -25,46 +26,24 @@ export {
   defaultState,
   makeLensStore,
   mountWithProvider,
-  getMountWithProviderParams,
+  renderWithReduxStore,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
+export { mockDataViewWithTimefield } from './dataview_mock';
+export { mockAllSuggestions } from './suggestions_mock';
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
-export const createMockFramePublicAPI = ({
-  datasourceLayers,
-  dateRange,
-  dataViews,
-  activeData,
-}: Partial<Omit<FramePublicAPI, 'dataViews'>> & {
-  dataViews?: Partial<FramePublicAPI['dataViews']>;
-} = {}): FrameMock => ({
-  datasourceLayers: datasourceLayers ?? {},
-  dateRange: dateRange ?? {
+export const createMockFramePublicAPI = (overrides: Partial<FramePublicAPI> = {}): FrameMock => ({
+  datasourceLayers: {},
+  dateRange: {
     fromDate: '2022-03-17T08:25:00.000Z',
     toDate: '2022-04-17T08:25:00.000Z',
   },
-  dataViews: createMockDataViewsState(dataViews),
-  activeData,
-});
-
-export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
-
-export const createMockFrameDatasourceAPI = ({
-  datasourceLayers,
-  dateRange,
-  dataViews,
-  query,
-  filters,
-}: Partial<FrameDatasourceAPI> = {}): FrameDatasourceMock => ({
-  datasourceLayers: datasourceLayers ?? {},
-  dateRange: dateRange ?? {
-    fromDate: '2022-03-17T08:25:00.000Z',
-    toDate: '2022-04-17T08:25:00.000Z',
-  },
-  query: query ?? { query: '', language: 'lucene' },
-  filters: filters ?? [],
-  dataViews: createMockDataViewsState(dataViews),
+  dataViews: createMockDataViewsState(),
+  query: { query: '', language: 'lucene' },
+  filters: [],
+  ...overrides,
 });
 
 export function createMockedDragDropContext(
@@ -76,10 +55,33 @@ export function createMockedDragDropContext(
       dataTestSubjPrefix: 'lnsDragDrop',
       dragging: undefined,
       keyboardMode: false,
-      activeDropTarget: undefined,
+      hoveredDropTarget: undefined,
       dropTargetsByOrder: undefined,
       ...partialState,
     },
     setState ? setState : jest.fn(),
   ];
+}
+
+export function generateActiveData(
+  json: Array<{
+    id: string;
+    rows: Array<Record<string, number | null>>;
+  }>
+) {
+  return json.reduce((memo, { id, rows }) => {
+    const columns = Object.keys(rows[0]).map((columnId) => ({
+      id: columnId,
+      name: columnId,
+      meta: {
+        type: typeof rows[0][columnId]! as DatatableColumnType,
+      },
+    }));
+    memo[id] = {
+      type: 'datatable' as const,
+      columns,
+      rows,
+    };
+    return memo;
+  }, {} as NonNullable<FramePublicAPI['activeData']>);
 }

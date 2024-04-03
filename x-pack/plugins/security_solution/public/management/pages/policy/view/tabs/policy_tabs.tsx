@@ -9,8 +9,13 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
+import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
@@ -23,6 +28,7 @@ import {
   getPolicyDetailsArtifactsListPath,
   getBlocklistsListPath,
   getPolicyBlocklistsPath,
+  getPolicyProtectionUpdatesPath,
 } from '../../../../common/routing';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
@@ -34,9 +40,9 @@ import {
   isOnBlocklistsView,
   policyDetails,
   policyIdFromParams,
+  isOnProtectionUpdatesView,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
-import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
 import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
@@ -58,6 +64,7 @@ enum PolicyTabKeys {
   EVENT_FILTERS = 'eventFilters',
   HOST_ISOLATION_EXCEPTIONS = 'hostIsolationExceptions',
   BLOCKLISTS = 'blocklists',
+  PROTECTION_UPDATES = 'protectionUpdates',
 }
 
 interface PolicyTab {
@@ -76,8 +83,35 @@ export const PolicyTabs = React.memo(() => {
   const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
+  const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
-  const policyItem = usePolicyDetailsSelector(policyDetails);
+
+  const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
+    showModal: boolean;
+    nextTab: EuiTabbedContentTab | null;
+  }>({ showModal: false, nextTab: null });
+
+  const [unsavedChanges, setUnsavedChanges] = useState<
+    Record<PolicyTabKeys.SETTINGS | PolicyTabKeys.PROTECTION_UPDATES, boolean>
+  >({
+    [PolicyTabKeys.SETTINGS]: false,
+    [PolicyTabKeys.PROTECTION_UPDATES]: false,
+  });
+
+  const setTabUnsavedChanges = useCallback(
+    (tab: PolicyTabKeys.SETTINGS | PolicyTabKeys.PROTECTION_UPDATES) =>
+      (hasUnsavedChanges: boolean) => {
+        if (unsavedChanges[tab] !== hasUnsavedChanges) {
+          setUnsavedChanges((prev) => ({ ...prev, [tab]: hasUnsavedChanges }));
+        }
+      },
+    [unsavedChanges]
+  );
+
+  // By the time the tabs load, we know that we already have a `policyItem` since a conditional
+  // check is done at the `PageDetails` component level. So asserting to non-null/undefined here.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const policyItem = usePolicyDetailsSelector(policyDetails)!;
   const {
     canReadTrustedApplications,
     canWriteTrustedApplications,
@@ -91,6 +125,11 @@ export const PolicyTabs = React.memo(() => {
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
+  const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'protectionUpdatesEnabled'
+  );
+  const isEnterprise = useLicense().isEnterprise();
+  const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
   // move the user out of this route if they can't access it
   useEffect(() => {
     if (
@@ -116,6 +155,7 @@ export const PolicyTabs = React.memo(() => {
     isInBlocklistsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
+    isInProtectionUpdatesTab,
     isInTrustedAppsTab,
     policyId,
     toasts,
@@ -195,9 +235,14 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyFormLayout />
+
+            <PolicySettingsLayout
+              policy={policyItem}
+              setUnsavedChanges={setTabUnsavedChanges(PolicyTabKeys.SETTINGS)}
+            />
           </>
         ),
+        'data-test-subj': 'policySettingsTab',
       },
       [PolicyTabKeys.TRUSTED_APPS]: canReadTrustedApplications
         ? {
@@ -222,6 +267,7 @@ export const PolicyTabs = React.memo(() => {
                 />
               </>
             ),
+            'data-test-subj': 'policyTrustedAppsTab',
           }
         : undefined,
       [PolicyTabKeys.EVENT_FILTERS]: canReadEventFilters
@@ -247,6 +293,7 @@ export const PolicyTabs = React.memo(() => {
                 />
               </>
             ),
+            'data-test-subj': 'policyEventFiltersTab',
           }
         : undefined,
       [PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS]: canReadHostIsolationExceptions
@@ -272,6 +319,7 @@ export const PolicyTabs = React.memo(() => {
                 />
               </>
             ),
+            'data-test-subj': 'policyHostIsolationExceptionsTab',
           }
         : undefined,
       [PolicyTabKeys.BLOCKLISTS]: canReadBlocklist
@@ -294,23 +342,48 @@ export const PolicyTabs = React.memo(() => {
                 />
               </>
             ),
+            'data-test-subj': 'policyBlocklistTab',
+          }
+        : undefined,
+
+      [PolicyTabKeys.PROTECTION_UPDATES]: isProtectionUpdatesEnabled
+        ? {
+            id: PolicyTabKeys.PROTECTION_UPDATES,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.protectionUpdates',
+              {
+                defaultMessage: 'Protection updates',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <ProtectionUpdatesLayout
+                  policy={policyItem}
+                  setUnsavedChanges={setTabUnsavedChanges(PolicyTabKeys.PROTECTION_UPDATES)}
+                />
+              </>
+            ),
+            'data-test-subj': 'policyProtectionUpdatesTab',
           }
         : undefined,
     };
   }, [
+    policyItem,
+    setTabUnsavedChanges,
     canReadTrustedApplications,
+    getTrustedAppsApiClientInstance,
     canWriteTrustedApplications,
     canReadEventFilters,
+    getEventFiltersApiClientInstance,
     canWriteEventFilters,
     canReadHostIsolationExceptions,
+    getHostIsolationExceptionsApiClientInstance,
     canWriteHostIsolationExceptions,
     canReadBlocklist,
-    canWriteBlocklist,
-    getEventFiltersApiClientInstance,
-    getHostIsolationExceptionsApiClientInstance,
     getBlocklistsApiClientInstance,
-    getTrustedAppsApiClientInstance,
-    policyItem,
+    canWriteBlocklist,
+    isProtectionUpdatesEnabled,
   ]);
 
   // convert tabs object into an array EuiTabbedContent can understand
@@ -333,6 +406,8 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS];
     } else if (isInBlocklistsTab) {
       selectedTab = tabs[PolicyTabKeys.BLOCKLISTS];
+    } else if (isInProtectionUpdatesTab) {
+      selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
     }
 
     return selectedTab || defaultTab;
@@ -343,10 +418,18 @@ export const PolicyTabs = React.memo(() => {
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
+    isInProtectionUpdatesTab,
   ]);
 
-  const onTabClickHandler = useCallback(
+  const cancelUnsavedChangesModal = useCallback(() => {
+    setUnsavedChangesModal({ showModal: false, nextTab: null });
+  }, [setUnsavedChangesModal]);
+
+  const changeTab = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
+      if (unsavedChangesModal.showModal) {
+        cancelUnsavedChangesModal();
+      }
       let path: string = '';
       switch (selectedTab.id) {
         case PolicyTabKeys.SETTINGS:
@@ -364,11 +447,40 @@ export const PolicyTabs = React.memo(() => {
         case PolicyTabKeys.BLOCKLISTS:
           path = getPolicyBlocklistsPath(policyId);
           break;
+        case PolicyTabKeys.PROTECTION_UPDATES:
+          path = getPolicyProtectionUpdatesPath(policyId);
+          break;
       }
       history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);
     },
-    [history, policyId, routeState]
+    [
+      cancelUnsavedChangesModal,
+      history,
+      policyId,
+      routeState.backLink,
+      unsavedChangesModal.showModal,
+    ]
   );
+
+  const onTabClickHandler = useCallback(
+    (selectedTab: EuiTabbedContentTab) => {
+      if (
+        (isInSettingsTab && unsavedChanges[PolicyTabKeys.SETTINGS]) ||
+        (isInProtectionUpdatesTab && unsavedChanges[PolicyTabKeys.PROTECTION_UPDATES])
+      ) {
+        setUnsavedChangesModal({ showModal: true, nextTab: selectedTab });
+      } else {
+        changeTab(selectedTab);
+      }
+    },
+    [changeTab, isInProtectionUpdatesTab, isInSettingsTab, unsavedChanges]
+  );
+
+  const confirmUnsavedChangesModal = useCallback(() => {
+    if (unsavedChangesModal.nextTab) {
+      changeTab(unsavedChangesModal.nextTab);
+    }
+  }, [changeTab, unsavedChangesModal.nextTab]);
 
   // show loader for privileges validation
   if (privilegesLoading) {
@@ -376,12 +488,21 @@ export const PolicyTabs = React.memo(() => {
   }
 
   return (
-    <EuiTabbedContent
-      tabs={tabsList}
-      selectedTab={currentSelectedTab}
-      size="l"
-      onTabClick={onTabClickHandler}
-    />
+    <>
+      {unsavedChangesModal.showModal && (
+        <UnsavedChangesConfirmModal
+          onCancel={cancelUnsavedChangesModal}
+          onConfirm={confirmUnsavedChangesModal}
+        />
+      )}
+      <EuiTabbedContent
+        data-test-subj="policyTabs"
+        tabs={tabsList}
+        selectedTab={currentSelectedTab}
+        size="l"
+        onTabClick={onTabClickHandler}
+      />
+    </>
   );
 });
 

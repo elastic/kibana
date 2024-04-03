@@ -16,6 +16,8 @@ import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exceptio
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
+import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -23,6 +25,7 @@ import {
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
+  isEsqlParams,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -33,7 +36,7 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
@@ -71,6 +74,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    experimentalFeatures,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -79,6 +83,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
       logger,
       formatAlert: formatAlertForNotificationActions,
     });
+
     return persistenceRuleType({
       ...type,
       cancelAlertsOnRuleTimeout: false,
@@ -166,21 +171,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           };
 
           const {
-            actions,
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          const refresh = actions.length ? 'wait_for' : false;
+          const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug('[+] Starting Signal Rule execution');
-          ruleExecutionLogger.debug(`interval: ${interval}`);
+          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
 
           await ruleExecutionLogger.logStatusChange({
-            newStatus: RuleExecutionStatus.running,
+            newStatus: RuleExecutionStatusEnum.running,
           });
 
           let result = createResultObject(state);
           let wroteWarningStatus = false;
+          let warningMessage;
           let hasError = false;
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
@@ -207,13 +211,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           /**
            * Data Views Logic
-           * Use of data views is supported for all rules other than ML.
+           * Use of data views is supported for all rules other than ML and Esql.
            * Rules can define both a data view and index pattern, but on execution:
            *  - Data view is used if it is defined
            *    - Rule exits early if data view defined is not found (ie: it's been deleted)
            *  - If no data view defined, falls to using existing index logic
+           * Esql rules has index in query, which can be retrieved
            */
-          if (!isMachineLearningParams(params)) {
+          if (isEsqlParams(params)) {
+            inputIndex = getIndexListFromEsqlQuery(params.query);
+          } else if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,
@@ -233,7 +240,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   : `Check for indices to search failed ${exc}`;
 
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatus.failed,
+                newStatus: RuleExecutionStatusEnum.failed,
                 message: errorMessage,
               });
 
@@ -249,11 +256,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
-              wroteWarningStatus = await hasReadIndexPrivileges({
-                privileges,
-                ruleExecutionLogger,
-                uiSettingsClient,
-              });
+              const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
+                await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
+
+              wroteWarningStatus = wroteWarningMessage;
+              warningMessage = readIndexWarningMessage;
 
               if (!wroteWarningStatus) {
                 const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
@@ -271,20 +282,24 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
 
-                const { wroteWarningStatus: wroteWarningStatusResult, foundNoIndices } =
-                  await hasTimestampFields({
-                    timestampField: primaryTimestamp,
-                    timestampFieldCapsResponse: timestampFieldCaps,
-                    inputIndices: inputIndex,
-                    ruleExecutionLogger,
-                  });
+                const {
+                  wroteWarningStatus: wroteWarningStatusResult,
+                  foundNoIndices,
+                  warningMessage: warningMissingTimestampFieldsMessage,
+                } = await hasTimestampFields({
+                  timestampField: primaryTimestamp,
+                  timestampFieldCapsResponse: timestampFieldCaps,
+                  inputIndices: inputIndex,
+                  ruleExecutionLogger,
+                });
                 wroteWarningStatus = wroteWarningStatusResult;
+                warningMessage = warningMissingTimestampFieldsMessage;
                 skipExecution = foundNoIndices;
               }
             }
           } catch (exc) {
             await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatus['partial failure'],
+              newStatus: RuleExecutionStatusEnum['partial failure'],
               message: `Check privileges failed to execute ${exc}`,
             });
             wroteWarningStatus = true;
@@ -306,13 +321,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
 
             await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatus.failed,
+              newStatus: RuleExecutionStatusEnum.failed,
               message: `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`,
               metrics: { executionGap: remainingGap },
             });
           }
 
-          if (!isMachineLearningParams(params)) {
+          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
               dataViews: services.dataViews,
@@ -338,7 +353,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
-              ruleExecutionLogger
+              ruleExecutionLogger,
+              experimentalFeatures
             );
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
@@ -396,7 +412,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     wrapHits,
                     wrapSequences,
                     listClient,
-                    ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                    ruleDataClient,
                     mergeStrategy,
                     primaryTimestamp,
                     secondaryTimestamp,
@@ -406,6 +422,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
+                    experimentalFeatures,
                   },
                 });
 
@@ -443,24 +460,33 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             if (result.warningMessages.length) {
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatus['partial failure'],
+                newStatus: RuleExecutionStatusEnum['partial failure'],
                 message: truncateList(result.warningMessages).join(),
+                metrics: {
+                  searchDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
+                },
               });
             }
 
             const createdSignalsCount = result.createdSignals.length;
 
             if (result.success) {
-              ruleExecutionLogger.debug('[+] Signal Rule execution completed.');
+              ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexNameWithNamespace(
+                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )}`
+                )} ${
+                  !isEmpty(tuples)
+                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    : ''
+                }`
               );
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
                 await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatus.succeeded,
+                  newStatus: RuleExecutionStatusEnum.succeeded,
                   message: 'Rule execution completed successfully',
                   metrics: {
                     searchDurations: result.searchAfterTimes,
@@ -468,19 +494,23 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     enrichmentDurations: result.enrichmentTimes,
                   },
                 });
+              } else if (wroteWarningStatus && !hasError && !result.warning) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum['partial failure'],
+                  message: warningMessage,
+                  metrics: {
+                    searchDurations: result.searchAfterTimes,
+                    indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
+                  },
+                });
               }
-
-              ruleExecutionLogger.debug(
-                `[+] Finished indexing ${createdSignalsCount} ${
-                  !isEmpty(tuples)
-                    ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
-                    : ''
-                }`
-              );
             } else {
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatus.failed,
-                message: `Bulk Indexing of signals failed: ${truncateList(result.errors).join()}`,
+                newStatus: RuleExecutionStatusEnum.failed,
+                message: `An error occurred during rule execution: message: "${truncateList(
+                  result.errors
+                ).join()}"`,
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -492,7 +522,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const errorMessage = error.message ?? '(no error message given)';
 
             await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatus.failed,
+              newStatus: RuleExecutionStatusEnum.failed,
               message: `An error occurred during rule execution: message: "${errorMessage}"`,
               metrics: {
                 searchDurations: result.searchAfterTimes,
@@ -515,6 +545,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         useLegacyAlerts: true,
         isSpaceAware: true,
         secondaryAlias: config.signalsIndex,
+        formatAlert: formatAlertForNotificationActions as unknown as FormatAlert<never>,
       },
     });
   };

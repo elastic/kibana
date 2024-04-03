@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { useSavedSearchInitial } from '../../services/discover_state_provider';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { ResetSearchButton } from './reset_search_button';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { FetchStatus } from '../../../types';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  resizeRef: RefObject<HTMLDivElement>;
+  container: HTMLElement | null;
 }
 
 const histogramLayoutCss = css`
@@ -28,11 +28,11 @@ export const DiscoverHistogramLayout = ({
   isPlainRecord,
   dataView,
   stateContainer,
-  resizeRef,
+  container,
+  panelsToggle,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
-  const savedSearch = useSavedSearchInitial();
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
   const hideChart = useAppStateSelector((state) => state.hideChart);
   const unifiedHistogramProps = useDiscoverHistogram({
@@ -41,6 +41,29 @@ export const DiscoverHistogramLayout = ({
     hideChart,
     isPlainRecord,
   });
+
+  const datatable = useObservable(dataState.data$.documents$);
+  const renderCustomChartToggleActions = useCallback(
+    () =>
+      React.isValidElement(panelsToggle)
+        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
+        : panelsToggle,
+    [panelsToggle]
+  );
+
+  const table: Datatable | undefined = useMemo(() => {
+    if (
+      isPlainRecord &&
+      datatable &&
+      [FetchStatus.PARTIAL, FetchStatus.COMPLETE].includes(datatable.fetchStatus)
+    ) {
+      return {
+        type: 'datatable' as 'datatable',
+        rows: datatable.result!.map((r) => r.raw),
+        columns: datatable.textBasedQueryColumns || [],
+      };
+    }
+  }, [datatable, isPlainRecord]);
 
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
@@ -53,22 +76,18 @@ export const DiscoverHistogramLayout = ({
       {...unifiedHistogramProps}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
-      resizeRef={resizeRef}
-      appendHitsCounter={
-        savedSearch.id ? (
-          <ResetSearchButton resetSavedSearch={stateContainer.actions.undoSavedSearchChanges} />
-        ) : undefined
-      }
+      table={table}
+      container={container}
       css={histogramLayoutCss}
+      renderCustomChartToggleActions={renderCustomChartToggleActions}
+      abortController={stateContainer.dataState.getAbortController()}
     >
       <DiscoverMainContent
         {...mainContentProps}
         stateContainer={stateContainer}
         dataView={dataView}
         isPlainRecord={isPlainRecord}
-        // The documents grid doesn't rerender when the chart visibility changes
-        // which causes it to render blank space, so we need to force a rerender
-        key={`docKey${hideChart}`}
+        panelsToggle={panelsToggle}
       />
     </UnifiedHistogramContainer>
   );

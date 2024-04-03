@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsFeature } from './types';
+import type { AllCasesTableState } from '../components/all_cases/types';
+import type { FilterOptions, QueryParams, SingleCaseMetricsFeature } from './types';
+import { SortFieldCase } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -45,8 +47,9 @@ export const casesQueriesKeys = {
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
   categories: () => [...casesQueriesKeys.all, 'categories'] as const,
-  alertFeatureIds: (alertRegistrationContexts: string[]) =>
-    [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
+  alertFeatureIds: (alertIds: string[]) =>
+    [...casesQueriesKeys.alerts, 'features', alertIds] as const,
+  configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
 };
 
 export const casesMutationsKeys = {
@@ -59,4 +62,34 @@ export const casesMutationsKeys = {
   deleteComment: ['delete-comment'] as const,
   deleteFileAttachment: ['delete-file-attachment'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
+  persistCaseConfiguration: ['persist-case-configuration'] as const,
+  replaceCustomField: ['replace-custom-field'] as const,
+};
+
+const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
+
+// TODO: Remove reporters. Move searchFields to API.
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  search: '',
+  searchFields: DEFAULT_SEARCH_FIELDS,
+  severity: [],
+  assignees: [],
+  reporters: [],
+  status: [],
+  tags: [],
+  owner: [],
+  category: [],
+  customFields: {},
+};
+
+export const DEFAULT_QUERY_PARAMS: QueryParams = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+};
+
+export const DEFAULT_CASES_TABLE_STATE: AllCasesTableState = {
+  filterOptions: DEFAULT_FILTER_OPTIONS,
+  queryParams: DEFAULT_QUERY_PARAMS,
 };

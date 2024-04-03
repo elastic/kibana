@@ -6,28 +6,26 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import {
   useEuiBreakpoint,
   useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageTemplate,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import {
   DatePickerWrapper,
@@ -37,6 +35,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
@@ -46,70 +45,37 @@ import {
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
-import {
-  DataVisualizerTable,
-  ItemIdToExpandedRowMap,
-} from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
+import { DataVisualizerTable } from '../../../common/components/stats_table';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
-import { OverallStats } from '../../types/overall_stats';
+import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import {
+import type {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
-  RandomSamplerOption,
+  type RandomSamplerOption,
 } from '../../constants/random_sampler';
-
-interface DataVisualizerPageState {
-  overallStats: OverallStats;
-  metricConfigs: FieldVisConfig[];
-  totalMetricFieldCount: number;
-  populatedMetricFieldCount: number;
-  metricsLoaded: boolean;
-  nonMetricConfigs: FieldVisConfig[];
-  nonMetricsLoaded: boolean;
-  documentCountStats?: FieldVisConfig;
-}
+import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
 const defaultSearchQuery = {
   match_all: {},
 };
 
-export function getDefaultPageState(): DataVisualizerPageState {
-  return {
-    overallStats: {
-      totalCount: 0,
-      aggregatableExistsFields: [],
-      aggregatableNotExistsFields: [],
-      nonAggregatableExistsFields: [],
-      nonAggregatableNotExistsFields: [],
-    },
-    metricConfigs: [],
-    totalMetricFieldCount: 0,
-    populatedMetricFieldCount: 0,
-    metricsLoaded: false,
-    nonMetricConfigs: [],
-    nonMetricsLoaded: false,
-    documentCountStats: undefined,
-  };
-}
 export const getDefaultDataVisualizerListState = (
   overrides?: Partial<DataVisualizerIndexBasedAppState>
 ): Required<DataVisualizerIndexBasedAppState> => ({
@@ -119,7 +85,6 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  samplerShardSize: 5000,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -173,8 +138,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { services } = useDataVisualizerKibana();
-  const { notifications, uiSettings, data } = services;
-  const { toasts } = notifications;
+  const { uiSettings, data } = services;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
@@ -188,26 +152,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
-
-  useEffect(() => {
-    if (!currentDataView.isTimeBased()) {
-      toasts.addWarning({
-        title: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationTitle',
-          {
-            defaultMessage: 'The data view {dataViewTitle} is not based on a time series',
-            values: { dataViewTitle: currentDataView.title },
-          }
-        ),
-        text: i18n.translate(
-          'xpack.dataVisualizer.index.dataViewNotBasedOnTimeSeriesNotificationDescription',
-          {
-            defaultMessage: 'Anomaly detection only runs over time-based indices',
-          }
-        ),
-      });
-    }
-  }, [currentDataView, toasts]);
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
 
@@ -270,7 +214,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
   };
 
-  const input: DataVisualizerGridInput = useMemo(() => {
+  const input: Required<DataVisualizerGridInput, 'dataView'> = useMemo(() => {
     return {
       dataView: currentDataView,
       savedSearch: currentSavedSearch,
@@ -415,14 +359,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         language: searchQueryLanguage,
       };
 
-      const combinedQuery = createMergedEsQuery(
+      const combinedQuery = buildEsQuery(
+        currentDataView,
         {
           query: searchString || '',
           language: searchQueryLanguage,
         },
         data.query.filterManager.getFilters() ?? [],
-        currentDataView,
-        uiSettings
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
 
       setSearchParams({
@@ -518,59 +462,61 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   });
 
   return (
-    <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiPageContentHeader data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
-            <EuiPageContentHeaderSection>
-              <EuiFlexGroup
-                data-test-subj="dataViewTitleHeader"
-                direction="row"
-                alignItems="center"
-                css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
-              >
-                <EuiTitle size={'s'}>
-                  <h2>{currentDataView.getName()}</h2>
-                </EuiTitle>
-                <DataVisualizerDataViewManagement
-                  currentDataView={currentDataView}
-                  useNewFieldsApi={true}
-                />
-              </EuiFlexGroup>
-            </EuiPageContentHeaderSection>
+    <EuiPageTemplate
+      offset={0}
+      restrictWidth={false}
+      bottomBorder={false}
+      grow={false}
+      data-test-subj="dataVisualizerIndexPage"
+      paddingSize="none"
+    >
+      <EuiPageTemplate.Section>
+        <EuiPageTemplate.Header data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
+          <EuiFlexGroup
+            data-test-subj="dataViewTitleHeader"
+            direction="row"
+            alignItems="center"
+            css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
+          >
+            <EuiTitle size={'s'}>
+              <h2>{currentDataView.getName()}</h2>
+            </EuiTitle>
+            <DataVisualizerDataViewManagement
+              currentDataView={currentDataView}
+              useNewFieldsApi={true}
+            />
+          </EuiFlexGroup>
 
-            {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="s"
-              data-test-subj="dataVisualizerTimeRangeSelectorSection"
-            >
-              {hasValidTimeField ? (
-                <EuiFlexItem grow={false}>
-                  <FullTimeRangeSelector
-                    frozenDataPreference={frozenDataPreference}
-                    setFrozenDataPreference={setFrozenDataPreference}
-                    dataView={currentDataView}
-                    query={undefined}
-                    disabled={false}
-                    timefilter={timefilter}
-                  />
-                </EuiFlexItem>
-              ) : null}
+          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="s"
+            data-test-subj="dataVisualizerTimeRangeSelectorSection"
+          >
+            {hasValidTimeField ? (
               <EuiFlexItem grow={false}>
-                <DatePickerWrapper
-                  isAutoRefreshOnly={!hasValidTimeField}
-                  showRefresh={!hasValidTimeField}
-                  width="full"
+                <FullTimeRangeSelector
+                  frozenDataPreference={frozenDataPreference}
+                  setFrozenDataPreference={setFrozenDataPreference}
+                  dataView={currentDataView}
+                  query={undefined}
+                  disabled={false}
+                  timefilter={timefilter}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentHeader>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiPageContentBody>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <DatePickerWrapper
+                isAutoRefreshOnly={!hasValidTimeField}
+                showRefresh={!hasValidTimeField}
+                width="full"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageTemplate.Header>
+        <EuiSpacer size="m" />
+
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
@@ -643,7 +589,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
-    </EuiPageBody>
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

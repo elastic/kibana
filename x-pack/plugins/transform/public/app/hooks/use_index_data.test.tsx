@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
+import React, { type FC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { CoreSetup } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { CoreSetup } from '@kbn/core/public';
 import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SimpleQuery } from '@kbn/ml-query-utils';
 
 import { getMlSharedImports } from '../../shared_imports';
 
-import { SimpleQuery } from '../common';
-
-import { SearchItems } from './use_search_items';
+import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
 
 jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
-jest.mock('./use_api');
 
 import { MlSharedContext } from '../__mocks__/shared_context';
 
@@ -45,13 +43,17 @@ const runtimeMappings: RuntimeMappings = {
   },
 };
 
+const queryClient = new QueryClient();
+
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
     const wrapper: FC = ({ children }) => (
-      <IntlProvider locale="en">
-        <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
-      </IntlProvider>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+        </IntlProvider>
+      </QueryClientProvider>
     );
 
     const { result, waitForNextUpdate } = renderHook(
@@ -102,11 +104,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <MlSharedContext.Provider value={mlSharedImports}>
-          <Wrapper />
-        </MlSharedContext.Provider>
-      </IntlProvider>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <MlSharedContext.Provider value={mlSharedImports}>
+            <Wrapper />
+          </MlSharedContext.Provider>
+        </IntlProvider>
+      </QueryClientProvider>
     );
 
     // Act
@@ -142,11 +146,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <MlSharedContext.Provider value={mlSharedImports}>
-          <Wrapper />
-        </MlSharedContext.Provider>
-      </IntlProvider>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <MlSharedContext.Provider value={mlSharedImports}>
+            <Wrapper />
+          </MlSharedContext.Provider>
+        </IntlProvider>
+      </QueryClientProvider>
     );
 
     // Act

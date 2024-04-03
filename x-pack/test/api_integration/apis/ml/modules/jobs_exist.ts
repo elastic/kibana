@@ -39,12 +39,12 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await esArchiver.loadIfNeeded(sourceDataArchive);
       // create data view in default space
-      await ml.testResources.createIndexPatternIfNeeded(
+      await ml.testResources.createDataViewIfNeeded(
         moduleInfo.dataView.name,
         moduleInfo.dataView.timeField
       );
       // create data view in idSpace1
-      await ml.testResources.createIndexPatternIfNeeded(
+      await ml.testResources.createDataViewIfNeeded(
         moduleInfo.dataView.name,
         moduleInfo.dataView.timeField,
         idSpace1
@@ -57,8 +57,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       // delete all data views in all spaces
-      await ml.testResources.deleteIndexPatternByTitle(moduleInfo.dataView.name);
-      await ml.testResources.deleteIndexPatternByTitle(moduleInfo.dataView.name, idSpace1);
+      await ml.testResources.deleteDataViewByTitle(moduleInfo.dataView.name);
+      await ml.testResources.deleteDataViewByTitle(moduleInfo.dataView.name, idSpace1);
     });
 
     it('should find jobs installed by module without prefix', async () => {

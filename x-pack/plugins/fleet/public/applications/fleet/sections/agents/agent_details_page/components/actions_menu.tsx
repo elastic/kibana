@@ -10,9 +10,10 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useKibanaVersion } from '../../../../hooks';
+import { useAuthz } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -32,8 +33,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   assignFlyoutOpenByDefault?: boolean;
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const kibanaVersion = useKibanaVersion();
+  const authz = useAuthz();
+  const hasFleetAllPrivileges = authz.fleet.allAgents;
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
@@ -41,6 +42,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
   const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
+  const isAgentUpdating = isStuckInUpdating(agent);
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const onContextMenuChange = useCallback(
@@ -63,7 +65,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
 
   const menuItems = [];
 
-  if (!agentPolicy?.is_managed) {
+  if (hasFleetAllPrivileges && !agentPolicy?.is_managed) {
     menuItems.push(
       <EuiContextMenuItem
         icon="pencil"
@@ -100,15 +102,34 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        disabled={!isAgentUpgradeable(agent)}
         onClick={() => {
           setIsUpgradeModalOpen(true);
         }}
         key="upgradeAgent"
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
           defaultMessage="Upgrade agent"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  if (hasFleetAllPrivileges && isAgentUpdating) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="refresh"
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="restartUpgradeAgent"
+        data-test-subj="restartUpgradeBtn"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.restartUpgradeOneButton"
+          defaultMessage="Restart upgrade"
         />
       </EuiContextMenuItem>
     );
@@ -131,11 +152,11 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     </EuiContextMenuItem>
   );
 
-  if (diagnosticFileUploadEnabled) {
+  if (authz.fleet.readAgents && diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         icon="download"
-        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        disabled={!isAgentRequestDiagnosticsSupported(agent)}
         onClick={() => {
           setIsRequestDiagnosticsModalOpen(true);
         }}
@@ -180,6 +201,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               setIsUpgradeModalOpen(false);
               refreshAgent();
             }}
+            isUpdating={isAgentUpdating}
           />
         </EuiPortal>
       )}

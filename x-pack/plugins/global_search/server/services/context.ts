@@ -27,7 +27,9 @@ export const getContextFactory =
         uiSettings: {
           client: coreStart.uiSettings.asScopedToClient(soClient),
         },
-        capabilities: from(coreStart.capabilities.resolveCapabilities(request)),
+        capabilities: from(
+          coreStart.capabilities.resolveCapabilities(request, { capabilityPath: '*' })
+        ),
       },
     };
   };

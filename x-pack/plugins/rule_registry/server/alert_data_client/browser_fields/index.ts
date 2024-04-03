@@ -36,7 +36,7 @@ export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): 
     const browserField = browserFieldFactory(field, category);
 
     if (browserFields[category] && browserFields[category]) {
-      Object.assign(browserFields[category].fields, browserField);
+      Object.assign(browserFields[category].fields || {}, browserField);
     } else {
       browserFields[category] = { fields: browserField };
     }

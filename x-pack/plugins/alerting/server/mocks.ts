@@ -35,6 +35,8 @@ const createSetupMock = () => {
       enabled: jest.fn(),
       getContextInitializationPromise: jest.fn(),
     },
+    getDataStreamAdapter: jest.fn(),
+    registerConnectorAdapter: jest.fn(),
   };
   return mock;
 };
@@ -59,6 +61,7 @@ const createStartMock = () => {
     listTypes: jest.fn(),
     getType: jest.fn(),
     getAllTypes: jest.fn(),
+    getAlertIndicesAlias: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
@@ -189,3 +192,5 @@ export const alertsMock = {
 export const ruleMonitoringServiceMock = { create: createRuleMonitoringServiceMock };
 
 export const ruleLastRunServiceMock = { create: createRuleLastRunServiceMock };
+
+export { createDataStreamAdapterMock } from './alerts_service/lib/data_stream_adapter.mock';

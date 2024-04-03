@@ -9,6 +9,8 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
 
+export { SecurityPageName } from '@kbn/security-solution-navigation';
+
 /**
  * as const
  *
@@ -18,6 +20,7 @@ import * as i18n from './translations';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
@@ -29,7 +32,6 @@ export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threa
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
@@ -57,7 +59,6 @@ export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
-export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
@@ -77,80 +78,6 @@ export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments' as const;
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex' as const;
 export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'] as const;
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
-
-export enum SecurityPageName {
-  administration = 'administration',
-  alerts = 'alerts',
-  blocklist = 'blocklist',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
-   */
-  case = 'cases', // must match `CasesDeepLinkId.cases`
-  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
-  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts
-   */
-  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
-  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
-  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
-  cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All cloud defend page names must match `CloudDefendPageId` in x-pack/plugins/cloud_defend/public/common/navigation/types.ts
-   */
-  cloudDefendPolicies = 'cloud_defend-policies',
-  dashboards = 'dashboards',
-  dataQuality = 'data_quality',
-  detections = 'detections',
-  detectionAndResponse = 'detection_response',
-  endpoints = 'endpoints',
-  eventFilters = 'event_filters',
-  exceptions = 'exceptions',
-  exploreLanding = 'explore',
-  hostIsolationExceptions = 'host_isolation_exceptions',
-  hosts = 'hosts',
-  hostsAnomalies = 'hosts-anomalies',
-  hostsRisk = 'hosts-risk',
-  hostsEvents = 'hosts-events',
-  investigate = 'investigate',
-  kubernetes = 'kubernetes',
-  landing = 'get_started',
-  network = 'network',
-  networkAnomalies = 'network-anomalies',
-  networkDns = 'network-dns',
-  networkEvents = 'network-events',
-  networkHttp = 'network-http',
-  networkTls = 'network-tls',
-  noPage = '',
-  overview = 'overview',
-  policies = 'policy',
-  responseActionsHistory = 'response_actions_history',
-  rules = 'rules',
-  rulesAdd = 'rules-add',
-  rulesCreate = 'rules-create',
-  rulesLanding = 'rules-landing',
-  sessions = 'sessions',
-  /*
-   * Warning: Computed values are not permitted in an enum with string valued members
-   * All threat intelligence page names must match `TIPageId` in x-pack/plugins/threat_intelligence/public/common/navigation/types.ts
-   */
-  threatIntelligenceIndicators = 'threat_intelligence-indicators',
-  timelines = 'timelines',
-  timelinesTemplates = 'timelines-templates',
-  trustedApps = 'trusted_apps',
-  uncommonProcesses = 'uncommon_processes',
-  users = 'users',
-  usersAnomalies = 'users-anomalies',
-  usersAuthentications = 'users-authentications',
-  usersEvents = 'users-events',
-  usersRisk = 'users-risk',
-  entityAnalytics = 'entity-analytics',
-  entityAnalyticsManagement = 'entity-analytics-management',
-  coverageOverview = 'coverage-overview',
-}
 
 export const EXPLORE_PATH = '/explore' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
@@ -235,6 +162,13 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
+export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
+export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
+
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
@@ -268,6 +202,9 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
+export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -282,7 +219,6 @@ export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/n
 /**
  * Exceptions management routes
  */
-
 export const SHARED_EXCEPTION_LIST_URL = `/api${EXCEPTIONS_PATH}/shared` as const;
 
 /**
@@ -305,6 +241,9 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+/**
+ * Internal Risk Score routes
+ */
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
 export const DEV_TOOL_PREBUILT_CONTENT =
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
@@ -316,15 +255,32 @@ export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
 export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
 export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
   `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
-
-export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
-export const INTERNAL_TAGS_URL = `/internal/tags`;
-
 export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
 export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
 export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
 export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
+
+export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine`;
+export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
+export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
+export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
+export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
+export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
+
+export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
+export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
+export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
+
+/**
+ * Public Risk Score routes
+ */
+export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
+export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
+
+export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
+export const INTERNAL_TAGS_URL = `/internal/tags`;
 
 /**
  * Internal detection engine routes
@@ -332,6 +288,8 @@ export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -349,6 +307,7 @@ export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import` as const;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
+export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
@@ -371,22 +330,32 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
 export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
+export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
+
+/**
+ * Security Integrations routes
+ */
+export const SECRUTIY_INTEGRATIONS_FLEET_MANAGED_INDEX_TEMPLATES_URL =
+  '/internal/fleet_index_templates' as const;
+
+export const SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE = 'cribl-routing-pipeline' as const;
 
 /**
  * Common naming convention for an unauthenticated user
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
 
-/*
-  Licensing requirements
+/**
+ Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
 
-/*
-  Machine Learning constants
+/**
+ Machine Learning constants
  */
 export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
@@ -485,7 +454,9 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
+  TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -499,14 +470,8 @@ export enum BulkActionsDryRunErrCode {
   IMMUTABLE = 'IMMUTABLE',
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
+  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
 }
-
-export const RISKY_HOSTS_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
-export const RISKY_USERS_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
-export const DETECTION_ENTITY_DASHBOARD =
-  'https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
@@ -552,6 +517,7 @@ export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   ALERTS_PAGE: `${APP_ID}-alerts-page`,
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
+  RISK_INPUTS: `${APP_ID}-risk-inputs`,
 } as const;
 
 export const DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
@@ -560,3 +526,13 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+/**
+ * Max length for the comments within security solution
+ */
+export const MAX_COMMENT_LENGTH = 30000 as const;
+
+/**
+ * Cases external attachment IDs
+ */
+export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;

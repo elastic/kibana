@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import type { Store } from 'redux';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import type { DroppableProps, DraggableProps } from 'react-beautiful-dnd';
 
 import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
@@ -17,14 +15,12 @@ import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
 import {
-  createSecuritySolutionStorageMock,
   defaultHeaders,
-  kibanaObservable,
   mockGlobalState,
   mockTimelineData,
-  SUB_PLUGINS_REDUCER,
+  createMockStore,
+  TestProviders,
 } from '../../../../common/mock';
-import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
@@ -32,17 +28,26 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
+import type {
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from '@hello-pangea/dnd';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
+
+jest.mock('../../../../common/hooks/use_upselling', () => ({
+  useUpsellingMessage: jest.fn(),
+}));
 
 jest.mock('../../../../common/components/user_privileges', () => {
   return {
@@ -122,19 +127,6 @@ jest.mock('../../../../common/components/links', () => {
   };
 });
 
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_open_alert_details',
-  () => {
-    return {
-      useOpenAlertDetailsAction: () => {
-        return {
-          alertDetailsActionItems: [],
-        };
-      },
-    };
-  }
-);
-
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
 
@@ -167,55 +159,61 @@ jest.mock(
   }
 );
 
-jest.mock('react-beautiful-dnd', () => {
-  const original = jest.requireActual('react-beautiful-dnd');
-  return {
-    ...original,
-    Droppable: ({ children }: { children: DroppableProps['children'] }) =>
-      children(
-        {
-          droppableProps: {
-            'data-rbd-droppable-context-id': '',
-            'data-rbd-droppable-id': '',
-          },
-          innerRef: jest.fn(),
+jest.mock('@hello-pangea/dnd', () => ({
+  Droppable: ({
+    children,
+  }: {
+    children: (a: DroppableProvided, b: DroppableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        droppableProps: {
+          'data-rfd-droppable-context-id': '123',
+          'data-rfd-droppable-id': '123',
         },
-        {
-          isDraggingOver: false,
-          isUsingPlaceholder: false,
-        }
-      ),
-    Draggable: ({ children }: { children: DraggableProps['children'] }) =>
-      children(
-        {
-          draggableProps: {
-            'data-rbd-draggable-context-id': '',
-            'data-rbd-draggable-id': '',
-          },
-          innerRef: jest.fn(),
+        innerRef: jest.fn(),
+        placeholder: null,
+      },
+      {
+        isDraggingOver: false,
+        draggingOverWith: null,
+        draggingFromThisWith: null,
+        isUsingPlaceholder: false,
+      }
+    ),
+  Draggable: ({
+    children,
+  }: {
+    children: (a: DraggableProvided, b: DraggableStateSnapshot) => void;
+  }) =>
+    children(
+      {
+        draggableProps: {
+          'data-rfd-draggable-context-id': '123',
+          'data-rfd-draggable-id': '123',
         },
-        {
-          isDragging: false,
-          isDropAnimating: false,
-        },
-        {
-          draggableId: '',
-          mode: 'SNAP',
-          source: {
-            droppableId: '',
-            index: 0,
-          },
-        }
-      ),
-    DraggableProvided: () => <></>,
-    DraggableStateSnapshot: () => <></>,
-    DraggingStyle: () => <></>,
-    NotDraggingStyle: () => <></>,
-  };
-});
+        innerRef: jest.fn(),
+        dragHandleProps: null,
+      },
+      {
+        isDragging: false,
+        isDropAnimating: false,
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
+      }
+    ),
+  DragDropContext: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 describe('Body', () => {
-  const getWrapper = async (childrenComponent: JSX.Element, store?: { store: Store<State> }) => {
+  const getWrapper = async (
+    childrenComponent: JSX.Element,
+    store?: { store: ReturnType<typeof createMockStore> }
+  ) => {
     const wrapper = mount(childrenComponent, {
       wrappingComponent: TestProviders,
       wrappingComponentProps: store ?? {},
@@ -302,7 +300,6 @@ describe('Body', () => {
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
     test('it renders a tooltip for timestamp', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
       const state: State = {
         ...mockGlobalState,
@@ -319,7 +316,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createMockStore(state);
       const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
 
       headersJustTimestamp.forEach(() => {
@@ -379,7 +376,6 @@ describe('Body', () => {
     });
 
     test('Add two notes to an event', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,
         timeline: {
@@ -395,7 +391,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createMockStore(state);
 
       const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 

@@ -18,10 +18,11 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
+import { documentationService } from '../../../mappings_editor/shared_imports';
 
 interface Props {
   defaultValue?: { [key: string]: any };
@@ -65,7 +66,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={`${esDocsBase}/indices-aliases.html`}
+              href={documentationService.getBulkIndexAlias()}
               target="_blank"
               iconType="help"
             >

@@ -23,11 +23,11 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import type { State } from '../../../common/store';
-import { RowRendererId } from '../../../../common/types/timeline/api';
+import { RowRendererId } from '../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/timeline/actions';
-import { timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/actions';
+import { timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 

@@ -20,6 +20,7 @@ import {
 } from '@elastic/charts';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { AlertStatus } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
 import { Alert, ChartProps } from '../types';
@@ -42,7 +43,7 @@ export const AlertSummaryWidgetCompact = ({
   onClick,
 }: AlertSummaryWidgetCompactProps) => {
   const chartTheme = [
-    theme,
+    ...(theme ? [theme] : []),
     EUI_SPARKLINE_THEME_PARTIAL,
     {
       chartMargins: {
@@ -98,7 +99,7 @@ export const AlertSummaryWidgetCompact = ({
             <EuiFlexItem style={{ minWidth: '200px' }}>
               <Chart size={{ height: 50 }}>
                 <Tooltip type={TooltipType.None} />
-                <Settings theme={chartTheme} baseTheme={baseTheme} />
+                <Settings theme={chartTheme} baseTheme={baseTheme} locale={i18n.getLocale()} />
                 <Axis
                   hide
                   id="activeAlertsAxis"

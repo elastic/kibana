@@ -55,6 +55,7 @@ export { ObjectType, Type };
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
+export { offeringBasedSchema } from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -139,6 +140,22 @@ function recordOf<K extends string, V>(
   return new RecordOfType(keyType, valueType, options);
 }
 
+function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
+  types: [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>
+  ],
+  options?: TypeOptions<A | B | C | D | E | F | G | H | I | J | K>
+): Type<A | B | C | D | E | F | G | H | I | J | K>;
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
   options?: TypeOptions<A | B | C | D | E | F | G | H | I | J>

@@ -287,8 +287,6 @@ To make changes to the panel, use the panel menu options.
 
 . Open the panel menu, then use the following options:
 
-* *Edit lens* &mdash; Opens *Lens* so you can make changes to the visualization. 
-
 * *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
 +
 To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.

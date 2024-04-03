@@ -12,5 +12,9 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./index_template_wizard'));
+    loadTestFile(require.resolve('./index_details_page'));
+    loadTestFile(require.resolve('./enrich_policies_tab'));
+    loadTestFile(require.resolve('./create_enrich_policy'));
+    loadTestFile(require.resolve('./data_streams_tab'));
   });
 };

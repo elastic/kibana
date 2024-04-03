@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ConnectorConfiguration } from '@kbn/search-connectors';
+
 import { isConfigEntry } from '../../../../common/connectors/is_category_entry';
-import { ConnectorConfiguration } from '../../../../common/types/connectors';
 
 export const hasConfiguredConfiguration = (configuration: ConnectorConfiguration) => {
   return !Object.entries(configuration).find(

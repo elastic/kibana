@@ -28,6 +28,8 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
   }
 >;
 
+export type DashboardItem = DashboardCrudTypes['Item'];
+
 /**
  * Grid type for React Grid Layout
  */
@@ -49,13 +51,24 @@ export interface SavedDashboardPanel {
   panelRefName?: string;
   gridData: GridData;
   panelIndex: string;
-  version: string;
   title?: string;
+
+  /**
+   * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.
+   * As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the
+   * embeddable's input. (embeddableConfig in this type).
+   */
+  version?: string;
 }
+
+type ControlGroupAttributesV1 = Pick<
+  RawControlGroupAttributes,
+  'panelsJSON' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettingsJSON'
+>;
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type DashboardAttributes = {
-  controlGroupInput?: RawControlGroupAttributes;
+  controlGroupInput?: ControlGroupAttributesV1;
   refreshInterval?: RefreshInterval;
   timeRestore: boolean;
   optionsJSON?: string;

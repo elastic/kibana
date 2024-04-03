@@ -7,6 +7,7 @@
  */
 
 import React, { FC } from 'react';
+import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 
 import { useServices } from './services';
 import { RedirectAppLinks as Component } from './redirect_app_links.component';
@@ -22,6 +23,11 @@ import { RedirectAppLinks as Component } from './redirect_app_links.component';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<{}> = ({ children }) => (
-  <Component {...useServices()}>{children}</Component>
+export const RedirectAppLinks: FC<Omit<RedirectAppLinksComponentProps, 'navigateToUrl'>> = ({
+  children,
+  ...props
+}) => (
+  <Component {...useServices()} {...props}>
+    {children}
+  </Component>
 );

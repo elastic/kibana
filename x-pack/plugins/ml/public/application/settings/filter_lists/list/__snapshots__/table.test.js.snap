@@ -97,6 +97,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
           ],
         }
       }
+      searchFormat="eql"
       selection={
         Object {
           "onSelectionChange": [Function],
@@ -201,6 +202,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
           ],
         }
       }
+      searchFormat="eql"
       selection={
         Object {
           "onSelectionChange": [Function],

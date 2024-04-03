@@ -28,11 +28,11 @@ const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <h5>
+            <h3>
               {type === ENRICHMENT_TYPES.IndicatorMatchRule
                 ? i18n.INDICATOR_ENRICHMENT_TITLE
                 : i18n.INVESTIGATION_ENRICHMENT_TITLE}
-            </h5>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

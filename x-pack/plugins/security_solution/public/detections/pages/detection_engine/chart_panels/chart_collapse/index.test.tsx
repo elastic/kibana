@@ -35,7 +35,6 @@ describe('ChartCollapse', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('it renders the chart collapse panel and the 3 summary componenets', () => {

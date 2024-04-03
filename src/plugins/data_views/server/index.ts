@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor, RollupIndexCapability } from './fetcher';
 export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
 export type {
+  DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
 } from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { DataViewsServerPlugin } from './plugin';
+import type { DataViewsServerPlugin } from './plugin';
 import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
 export type { dataViewsServiceFactory } from './data_views_service_factory';
 
@@ -25,7 +28,8 @@ export type { dataViewsServiceFactory } from './data_views_service_factory';
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DataViewsServerPlugin } = await import('./plugin');
   return new DataViewsServerPlugin(initializerContext);
 }
 
@@ -33,7 +37,38 @@ export type {
   DataViewsServerPluginSetup as PluginSetup,
   DataViewsServerPluginStart as PluginStart,
 };
-export { DataViewsServerPlugin as Plugin };
+export type { DataViewsServerPlugin as Plugin };
+
+const configSchema = schema.object({
+  scriptedFieldsEnabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
+
+  dataTiersExcludedForFields: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.never(),
+    schema.boolean({ defaultValue: true })
+  ),
+  fieldListCachingEnabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.boolean({ defaultValue: true })
+  ),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    scriptedFieldsEnabled: true,
+  },
+};
 
 export {
   SERVICE_PATH,

@@ -8,7 +8,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   EuiBasicTable,
@@ -40,6 +39,7 @@ import {
   CLEAR_SELECTION,
   TOTAL_RULES,
   SELECT_ALL_ARIA_LABEL,
+  CLEAR_FILTERS,
 } from '../translations';
 import {
   Rule,
@@ -50,6 +50,7 @@ import {
   TriggersActionsUiConfig,
   RuleTypeRegistryContract,
   SnoozeSchedule,
+  BulkOperationResponse,
 } from '../../../../types';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
@@ -125,8 +126,8 @@ export interface RulesListTableProps {
   onTagClose?: (rule: RuleTableItem) => void;
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
   onRuleChanged: () => Promise<void>;
-  onEnableRule: (rule: RuleTableItem) => Promise<void>;
-  onDisableRule: (rule: RuleTableItem) => Promise<void>;
+  onEnableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
+  onDisableRule: (rule: RuleTableItem, untrack: boolean) => Promise<BulkOperationResponse>;
   onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
   onSelectAll: () => void;
@@ -140,6 +141,8 @@ export interface RulesListTableProps {
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
   visibleColumns?: string[];
+  numberOfFilters: number;
+  resetFilters: () => void;
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -193,8 +196,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onManageLicenseClick = EMPTY_HANDLER,
     onPercentileOptionsChange = EMPTY_HANDLER,
     onRuleChanged,
-    onEnableRule = EMPTY_HANDLER,
-    onDisableRule = EMPTY_HANDLER,
+    onEnableRule,
+    onDisableRule,
     onSnoozeRule = EMPTY_HANDLER,
     onUnsnoozeRule = EMPTY_HANDLER,
     onSelectAll = EMPTY_HANDLER,
@@ -205,6 +208,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
     renderSelectAllDropdown,
     renderRuleError = EMPTY_RENDER,
     visibleColumns,
+    resetFilters,
+    numberOfFilters,
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
@@ -276,12 +281,19 @@ export const RulesListTable = (props: RulesListTableProps) => {
     [ruleTypeRegistry]
   );
 
+  const onDisableRuleInternal = useCallback(
+    (rule: RuleTableItem) => (untrack: boolean) => {
+      return onDisableRule(rule, untrack);
+    },
+    [onDisableRule]
+  );
+
   const renderRuleStatusDropdown = useCallback(
     (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
-          disableRule={async () => await onDisableRule(rule)}
+          disableRule={onDisableRuleInternal(rule)}
           enableRule={async () => await onEnableRule(rule)}
           snoozeRule={async () => {}}
           unsnoozeRule={async () => {}}
@@ -291,7 +303,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         />
       );
     },
-    [isRuleTypeEditableInContext, onDisableRule, onEnableRule, onRuleChanged]
+    [isRuleTypeEditableInContext, onDisableRuleInternal, onEnableRule, onRuleChanged]
   );
 
   const selectionColumn = useMemo(() => {
@@ -340,7 +352,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           { defaultMessage: 'Name' }
         ),
         sortable: true,
-        truncateText: true,
+        truncateText: false,
         width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
@@ -413,14 +425,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-lastExecutionDateTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
               {
                 defaultMessage: 'Start time of the last run.',
               }
             )}
           >
             <span>
-              Last run{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitle',
+                { defaultMessage: 'Last run' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -478,7 +493,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '14%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
-          if (rule.consumer === AlertConsumers.SIEM || !rule.enabled) {
+          if (!rule.enabled) {
             return null;
           }
           return (
@@ -569,14 +584,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-durationTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitleTooltip',
               {
                 defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
               }
             )}
           >
             <span>
-              Duration{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
+                { defaultMessage: 'Duration' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -639,14 +657,17 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-successRatioTooltip"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitleTooltip',
               {
                 defaultMessage: 'How often this rule runs successfully.',
               }
             )}
           >
             <span>
-              Success ratio{' '}
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
+                { defaultMessage: 'Success ratio' }
+              )}
               <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
             </span>
           </EuiToolTip>
@@ -835,34 +856,56 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {numberOfSelectedRules > 0 ? (
+                renderSelectAllDropdown?.()
+              ) : (
+                <EuiText
+                  size="xs"
+                  style={{ fontWeight: euiTheme.font.weight.semiBold }}
+                  data-test-subj="totalRulesCount"
+                >
+                  {TOTAL_RULES(formattedTotalRules, rulesState.totalItemCount)}
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {numberOfSelectedRules > 0 && authorizedToModifyAllRules && (
+                <EuiButtonEmpty
+                  size="xs"
+                  aria-label={SELECT_ALL_ARIA_LABEL}
+                  data-test-subj="selectAllRulesButton"
+                  iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+                  onClick={onSelectAll}
+                >
+                  {selectAllButtonText}
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexItem>
+            {numberOfFilters > 0 && (
+              <EuiFlexItem
+                css={{
+                  borderLeft: euiTheme.border.thin,
+                  paddingLeft: euiTheme.size.m,
+                }}
+              >
+                <EuiButtonEmpty
+                  onClick={resetFilters}
+                  size="xs"
+                  iconSide="left"
+                  flush="left"
+                  data-test-subj="rules-list-clear-filter"
+                >
+                  {CLEAR_FILTERS(numberOfFilters)}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {numberOfSelectedRules > 0 ? (
-            renderSelectAllDropdown?.()
-          ) : (
-            <EuiText
-              size="xs"
-              style={{ fontWeight: euiTheme.font.weight.semiBold }}
-              data-test-subj="totalRulesCount"
-            >
-              {TOTAL_RULES(formattedTotalRules, rulesState.totalItemCount)}
-            </EuiText>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {numberOfSelectedRules > 0 && authorizedToModifyAllRules && (
-            <EuiButtonEmpty
-              size="xs"
-              aria-label={SELECT_ALL_ARIA_LABEL}
-              data-test-subj="selectAllRulesButton"
-              iconType={isAllSelected ? 'cross' : 'pagesSelect'}
-              onClick={onSelectAll}
-            >
-              {selectAllButtonText}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
         <EuiBasicTable

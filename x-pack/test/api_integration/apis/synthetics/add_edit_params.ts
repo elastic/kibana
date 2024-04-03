@@ -94,9 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
       assertHas(param, testParam);
 
       await supertestAPI
-        .put(SYNTHETICS_API_URLS.PARAMS)
+        .put(SYNTHETICS_API_URLS.PARAMS + '/' + param.id)
         .set('kbn-xsrf', 'true')
-        .send({ ...expectedUpdatedParam, id: param.id })
+        .send(expectedUpdatedParam)
         .expect(200);
 
       const updatedGetResponse = await supertestAPI
@@ -155,9 +155,9 @@ export default function ({ getService }: FtrProviderContext) {
       assertHas(param, testParam);
 
       await supertestAPI
-        .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}`)
+        .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PARAMS}/${param.id}`)
         .set('kbn-xsrf', 'true')
-        .send({ ...expectedUpdatedParam, id: param.id })
+        .send(expectedUpdatedParam)
         .expect(200);
 
       const updatedGetResponse = await supertestAPI
@@ -204,9 +204,9 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       await supertestAPI
-        .put(`/s/${SPACE_ID_TWO}${SYNTHETICS_API_URLS.PARAMS}`)
+        .put(`/s/${SPACE_ID_TWO}${SYNTHETICS_API_URLS.PARAMS}/${param.id}}`)
         .set('kbn-xsrf', 'true')
-        .send({ ...updatedParam, id: param.id })
+        .send(updatedParam)
         .expect(404);
 
       const updatedGetResponse = await supertestAPI
@@ -251,9 +251,9 @@ export default function ({ getService }: FtrProviderContext) {
       assertHas(param, testParam);
 
       await supertestAPI
-        .put(`/s/doesnotexist${SYNTHETICS_API_URLS.PARAMS}`)
+        .put(`/s/doesnotexist${SYNTHETICS_API_URLS.PARAMS}/${param.id}}`)
         .set('kbn-xsrf', 'true')
-        .send({ ...updatedParam, id: param.id })
+        .send(updatedParam)
         .expect(404);
     });
 

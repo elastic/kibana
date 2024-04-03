@@ -7,14 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import React, { FC, Suspense } from 'react';
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '../../../locator';
 import type { NavigateToPath } from '../../contexts/kibana';
+import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import type { MlRoute, PageProps } from '../router';
+import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
@@ -67,5 +70,13 @@ export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const Page: FC = () => {
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
+  if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === true) {
+    // if only NLP is enabled, redirect to the trained models page.
+    // in the search serverless project, the overview page is blank, so we
+    // need to redirect to the trained models page instead
+    return <Redirect to={createPath(ML_PAGES.TRAINED_MODELS_MANAGE)} />;
+  }
+
   return <Redirect to={createPath(ML_PAGES.OVERVIEW)} />;
 };

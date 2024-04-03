@@ -36,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
   }
 
   const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}-${version}`).expect(200);
+    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
     return res.body.item.savedObject.attributes;
   };
 
@@ -1359,11 +1359,14 @@ export default function (providerContext: FtrProviderContext) {
           const installation = await getInstallationSavedObject('integration_to_input', '3.0.0');
           expectIdArraysEqual(installation.installed_es, expectedAssets);
 
-          for (const expectedAsset of expectedAssets) {
-            if (expectedAsset.type === 'component_template') {
-              const componentTemplate = await getComponentTemplate(expectedAsset.id);
-              expect(componentTemplate).not.to.be(null);
-            }
+          const expectedComponentTemplates = expectedAssets.filter(
+            (expectedAsset) =>
+              expectedAsset.type === 'component_template' && !expectedAsset.id.endsWith('@custom')
+          );
+
+          for (const expectedAsset of expectedComponentTemplates) {
+            const componentTemplate = await getComponentTemplate(expectedAsset.id);
+            expect(componentTemplate).not.to.be(null);
           }
         });
       });

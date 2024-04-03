@@ -10,22 +10,28 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type {
   ActionConnector,
-  CaseFullExternalService,
+  Attachment,
   Case,
-  Comment,
-  User,
-  CaseAttributes,
   CaseAssignees,
-  CaseField,
-  ThirdPartyField,
-  CaseUserActionsDeprecatedResponse,
+  CaseAttributes,
+  CaseCustomField,
   ConnectorMappings,
-} from '../../../common/api';
-import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
+  ConnectorMappingSource,
+  ConnectorMappingTarget,
+  CustomFieldsConfiguration,
+  ExternalService,
+  User,
+} from '../../../common/types/domain';
+import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
+import type {
+  CasePostRequest,
+  CaseRequestCustomFields,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
@@ -52,7 +58,7 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
-type LatestPushInfo = { index: number; pushedInfo: CaseFullExternalService } | null;
+type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -77,14 +83,14 @@ export const getLatestPushInfo = (
   return null;
 };
 
-const getCommentContent = (comment: Comment): string => {
-  if (comment.type === CommentType.user) {
+const getCommentContent = (comment: Attachment): string => {
+  if (comment.type === AttachmentType.user) {
     return comment.comment;
-  } else if (comment.type === CommentType.alert) {
+  } else if (comment.type === AttachmentType.alert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
   } else if (
-    comment.type === CommentType.actions &&
+    comment.type === AttachmentType.actions &&
     (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
   ) {
     const firstHostname =
@@ -112,7 +118,7 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === CommentType.alert) {
+      if (comment.type === AttachmentType.alert) {
         return {
           totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,
@@ -210,13 +216,13 @@ export const createIncident = async ({
 };
 
 export const mapCaseFieldsToExternalSystemFields = (
-  caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
+  caseFields: Record<Exclude<ConnectorMappingSource, 'comments' | 'tags'>, unknown>,
   mapping: ConnectorMappings
-): Record<ThirdPartyField, unknown> => {
-  const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
+): Record<ConnectorMappingTarget, unknown> => {
+  const mappedCaseFields: Record<ConnectorMappingTarget, unknown> = {};
 
   for (const caseFieldKey of Object.keys(caseFields) as Array<
-    Exclude<CaseField, 'comments' | 'tags'>
+    Exclude<ConnectorMappingSource, 'comments' | 'tags'>
   >) {
     const mapDefinition = mapping.find(
       (mappingEntry) => mappingEntry.source === caseFieldKey && mappingEntry.target !== 'not_mapped'
@@ -248,14 +254,14 @@ export const formatComments = ({
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
-      .filter((action) => action.type === ActionTypes.comment)
+      .filter((action) => action.type === UserActionTypes.comment)
       .map((action) => action.comment_id)
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
     (comment) =>
       // We push only user's comments
-      (comment.type === CommentType.user || comment.type === CommentType.actions) &&
+      (comment.type === AttachmentType.user || comment.type === AttachmentType.actions) &&
       commentsIdsToBeUpdated.has(comment.id)
   );
 
@@ -453,3 +459,50 @@ export const getUserProfiles = async (
     return acc;
   }, new Map());
 };
+
+export const fillMissingCustomFields = ({
+  customFields = [],
+  customFieldsConfiguration = [],
+}: {
+  customFields?: CaseRequestCustomFields;
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): CaseRequestCustomFields => {
+  const customFieldsKeys = new Set(customFields.map((customField) => customField.key));
+  const missingCustomFields: CaseRequestCustomFields = [];
+
+  // only populate with the default value required custom fields missing from the request
+  for (const confCustomField of customFieldsConfiguration) {
+    if (!customFieldsKeys.has(confCustomField.key)) {
+      if (confCustomField?.defaultValue !== null && confCustomField?.defaultValue !== undefined) {
+        missingCustomFields.push({
+          key: confCustomField.key,
+          type: confCustomField.type,
+          value: confCustomField.defaultValue,
+        } as CaseCustomField);
+      } else if (!confCustomField.required) {
+        missingCustomFields.push({
+          key: confCustomField.key,
+          type: confCustomField.type,
+          value: null,
+        } as CaseCustomField);
+      } // else, missing required custom fields without default are not touched
+    }
+  }
+
+  return [...customFields, ...missingCustomFields];
+};
+
+export const normalizeCreateCaseRequest = (
+  request: CasePostRequest,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+) => ({
+  ...request,
+  title: request.title.trim(),
+  description: request.description.trim(),
+  category: request.category?.trim() ?? null,
+  tags: request.tags?.map((tag) => tag.trim()) ?? [],
+  customFields: fillMissingCustomFields({
+    customFields: request.customFields,
+    customFieldsConfiguration,
+  }),
+});

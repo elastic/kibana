@@ -1,0 +1,13 @@
+// styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
+.lnsConfigPanel__overlay {
+  clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+  background: $euiColorLightestShade;
+  .kbnOverlayMountWrapper {
+    padding-left: $euiFormMaxWidth;
+    margin-left: -$euiFormMaxWidth;
+    pointer-events: none;
+    .euiFlyoutFooter {
+      pointer-events: auto;
+    }
+  }
+}

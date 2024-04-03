@@ -7,6 +7,8 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 import { FLEET_SERVER_HOST_API_ROUTES } from '../../../common/constants';
 import {
   GetAllFleetServerHostRequestSchema,
@@ -24,54 +26,74 @@ import {
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: FLEET_SERVER_HOST_API_ROUTES.LIST_PATTERN,
-      validate: GetAllFleetServerHostRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getAllFleetServerHostsHandler
-  );
-  router.post(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetAllFleetServerHostRequestSchema },
+      },
+      getAllFleetServerHostsHandler
+    );
+  router.versioned
+    .post({
       path: FLEET_SERVER_HOST_API_ROUTES.CREATE_PATTERN,
-      validate: PostFleetServerHostRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    postFleetServerHost
-  );
-  router.get(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PostFleetServerHostRequestSchema },
+      },
+      postFleetServerHost
+    );
+  router.versioned
+    .get({
       path: FLEET_SERVER_HOST_API_ROUTES.INFO_PATTERN,
-      validate: GetOneFleetServerHostRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { readSettings: true },
       },
-    },
-    getFleetServerHostHandler
-  );
-  router.delete(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOneFleetServerHostRequestSchema },
+      },
+      getFleetServerHostHandler
+    );
+  router.versioned
+    .delete({
       path: FLEET_SERVER_HOST_API_ROUTES.DELETE_PATTERN,
-      validate: GetOneFleetServerHostRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    deleteFleetServerHostHandler
-  );
-  router.put(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOneFleetServerHostRequestSchema },
+      },
+      deleteFleetServerHostHandler
+    );
+  router.versioned
+    .put({
       path: FLEET_SERVER_HOST_API_ROUTES.UPDATE_PATTERN,
-      validate: PutFleetServerHostRequestSchema,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
-    },
-    putFleetServerHostHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PutFleetServerHostRequestSchema },
+      },
+      putFleetServerHostHandler
+    );
 };

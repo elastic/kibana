@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { pick } from 'lodash';
-import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const apiResponseFields = [
@@ -81,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // call the job count api
       const { text: countText } = await supertestNoAuth
-        .get(`/api/reporting/jobs/count`)
+        .get(INTERNAL_ROUTES.JOBS.COUNT)
         .set('kbn-xsrf', 'xxx');
       expect(countText).to.be('1');
 
@@ -109,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // call the listing api
       const { text: listText } = await supertestNoAuth
-        .get(`/api/reporting/jobs/list?page=0&ids=${job.id}`)
+        .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${job.id}`)
         .set('kbn-xsrf', 'xxx');
 
       // verify the top item in the list
@@ -156,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // call the listing api
       const { text: listText, status } = await supertestNoAuth
-        .get(`/api/reporting/jobs/list?page=0`)
+        .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0`)
         .set('kbn-xsrf', 'xxx');
       expect(status).to.be(200);
 
@@ -203,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
       `);
 
       const { text: infoText, status } = await supertestNoAuth
-        .get(`/api/reporting/jobs/info/${job.id}`)
+        .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/${job.id}`)
         .set('kbn-xsrf', 'xxx');
       expect(status).to.be(200);
 

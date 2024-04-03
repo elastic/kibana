@@ -7,6 +7,7 @@
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { taskModelVersions } from './task_model_versions';
 import { taskMappings } from './mappings';
 import { getMigrations } from './migrations';
 import { TaskManagerConfig } from '../config';
@@ -50,6 +51,7 @@ export function setupSavedObjects(
                   'actions:.jira',
                   'actions:.resilient',
                   'actions:.teams',
+                  'actions:.sentinelone',
                 ],
               },
             },
@@ -71,5 +73,6 @@ export function setupSavedObjects(
         },
       } as estypes.QueryDslQueryContainer;
     },
+    modelVersions: taskModelVersions,
   });
 }

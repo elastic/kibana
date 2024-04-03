@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CaseUserActionsDeprecatedResponse } from '../../../common/api';
-import { CaseUserActionsDeprecatedResponseRt } from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
+import { CaseUserActionsDeprecatedResponseRt } from '../../../common/types/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { UserActionGet } from './types';
 import { extractAttributes } from './utils';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow } from '../../common/runtime_types';
 
 export const get = async (
   { caseId }: UserActionGet,

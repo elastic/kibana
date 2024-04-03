@@ -11,9 +11,9 @@ import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common
 // these won't exist in on server
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-
 import { i18n } from '@kbn/i18n';
-import type { SavedSearch } from '../types';
+import type { Reference } from '@kbn/content-management-utils';
+import type { SavedSearch, SavedSearchAttributes } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
@@ -31,9 +31,9 @@ const getSavedSearchUrlConflictMessage = async (json: string) =>
     values: { json },
   });
 
-export const getSavedSearch = async (
+export const getSearchSavedObject = async (
   savedSearchId: string,
-  { searchSourceCreate, spaces, savedObjectsTagging, getSavedSrch }: GetSavedSearchDependencies
+  { spaces, getSavedSrch }: GetSavedSearchDependencies
 ) => {
   const so = await getSavedSrch(savedSearchId);
 
@@ -55,32 +55,66 @@ export const getSavedSearch = async (
     );
   }
 
-  const savedSearch = so.item;
+  return so;
+};
 
+export const convertToSavedSearch = async (
+  {
+    savedSearchId,
+    attributes,
+    references,
+    sharingSavedObjectProps,
+    managed,
+  }: {
+    savedSearchId: string | undefined;
+    attributes: SavedSearchAttributes;
+    references: Reference[];
+    sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
+    managed: boolean | undefined;
+  },
+  { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies
+) => {
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
     parsedSearchSourceJSON as Parameters<typeof injectReferences>[0],
-    savedSearch.references
+    references
   );
 
   // front end only
   const tags = savedObjectsTagging
-    ? savedObjectsTagging.ui.getTagIdsFromReferences(savedSearch.references)
+    ? savedObjectsTagging.ui.getTagIdsFromReferences(references)
     : undefined;
 
   const returnVal = fromSavedSearchAttributes(
     savedSearchId,
-    savedSearch.attributes,
+    attributes,
     tags,
-    savedSearch.references,
+    references,
     await searchSourceCreate(searchSourceValues),
-    so.meta
+    sharingSavedObjectProps,
+    Boolean(managed)
   );
 
   return returnVal;
+};
+
+export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
+  const so = await getSearchSavedObject(savedSearchId, deps);
+  const savedSearch = await convertToSavedSearch(
+    {
+      savedSearchId,
+      attributes: so.item.attributes,
+      references: so.item.references,
+      sharingSavedObjectProps: so.meta,
+      managed: so.item.managed,
+    },
+    deps
+  );
+
+  return savedSearch;
 };
 
 /**
@@ -94,4 +128,5 @@ export const getNewSavedSearch = ({
   searchSource: ISearchStartSearchSource;
 }): SavedSearch => ({
   searchSource: searchSource.createEmpty(),
+  managed: false,
 });

@@ -7,44 +7,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { addProfile, getProfile } from '../../common/customizations';
 import type { DiscoverServices } from '../build_services';
 
 const rootPath = '#/';
 
 const getRootPath = ({ history }: DiscoverServices) => {
-  const { profile } = getProfile(history().location.pathname);
+  const { profile } = getProfile(history.location.pathname);
   return profile ? addProfile(rootPath, profile) : rootPath;
 };
 
-export function getRootBreadcrumbs({
+function getRootBreadcrumbs({
   breadcrumb,
   services,
 }: {
   breadcrumb?: string;
   services: DiscoverServices;
-}) {
+}): ChromeBreadcrumb[] {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
+      deepLinkId: 'discover',
       href: breadcrumb || getRootPath(services),
-    },
-  ];
-}
-
-export function getSavedSearchBreadcrumbs({
-  id,
-  services,
-}: {
-  id: string;
-  services: DiscoverServices;
-}) {
-  return [
-    ...getRootBreadcrumbs({ services }),
-    {
-      text: id,
     },
   ];
 }
@@ -53,25 +40,25 @@ export function getSavedSearchBreadcrumbs({
  * Helper function to set the Discover's breadcrumb
  * if there's an active savedSearch, its title is appended
  */
-export function setBreadcrumbsTitle({
-  title,
+export function setBreadcrumbs({
+  rootBreadcrumbPath,
+  titleBreadcrumbText,
   services,
 }: {
-  title: string | undefined;
+  rootBreadcrumbPath?: string;
+  titleBreadcrumbText?: string;
   services: DiscoverServices;
 }) {
+  const rootBreadcrumbs = getRootBreadcrumbs({
+    breadcrumb: rootBreadcrumbPath,
+    services,
+  });
   const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
 
-  if (title) {
-    services.chrome.setBreadcrumbs([
-      {
-        text: discoverBreadcrumbsTitle,
-        href: getRootPath(services),
-      },
-      { text: title },
-    ]);
+  if (titleBreadcrumbText) {
+    services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
   } else {
     services.chrome.setBreadcrumbs([
       {

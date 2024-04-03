@@ -5,18 +5,35 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import { ConnectorsEmailService } from './connectors_email_service';
 import type { PlainTextEmail, HTMLEmail } from './types';
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 
 const REQUESTER_ID = 'requesterId';
 const CONNECTOR_ID = 'connectorId';
 
 describe('sendPlainTextEmail()', () => {
+  const logger = loggerMock.create();
+  beforeEach(() => {
+    loggerMock.clear(logger);
+  });
+
   describe('calls the provided ActionsClient#bulkEnqueueExecution() with the appropriate params', () => {
     it(`omits the 'relatedSavedObjects' field if no context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
+          },
+        ],
+      });
+      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: PlainTextEmail = {
         to: ['user1@email.com'],
         subject: 'This is a notification email',
@@ -40,7 +57,17 @@ describe('sendPlainTextEmail()', () => {
 
     it(`populates the 'relatedSavedObjects' field if context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
+          },
+        ],
+      });
+      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: PlainTextEmail = {
         to: ['user1@email.com', 'user2@email.com', 'user3@email.com'],
         subject: 'This is a notification email',
@@ -106,15 +133,54 @@ describe('sendPlainTextEmail()', () => {
           ],
         },
       ]);
+    });
+
+    it(`logs an error when the maximum number of queued actions has been reached`, async () => {
+      const actionsClient = unsecuredActionsClientMock.create();
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+            actionTypeId: 'test',
+          },
+        ],
+      });
+      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
+      const payload: PlainTextEmail = {
+        to: ['user1@email.com'],
+        subject: 'This is a notification email',
+        message: 'With some contents inside.',
+      };
+
+      await email.sendPlainTextEmail(payload);
+
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 });
 
 describe('sendHTMLEmail()', () => {
+  const logger = loggerMock.create();
+  beforeEach(() => {
+    loggerMock.clear(logger);
+  });
+
   describe('calls the provided ActionsClient#bulkEnqueueExecution() with the appropriate params', () => {
     it(`omits the 'relatedSavedObjects' field if no context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
+          },
+        ],
+      });
+      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: HTMLEmail = {
         to: ['user1@email.com'],
         subject: 'This is a notification email',
@@ -140,7 +206,17 @@ describe('sendHTMLEmail()', () => {
 
     it(`populates the 'relatedSavedObjects' field if context is provided`, () => {
       const actionsClient = unsecuredActionsClientMock.create();
-      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient);
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.SUCCESS,
+            actionTypeId: 'test',
+          },
+        ],
+      });
+      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
       const payload: HTMLEmail = {
         to: ['user1@email.com', 'user2@email.com', 'user3@email.com'],
         subject: 'This is a notification email',
@@ -210,6 +286,30 @@ describe('sendHTMLEmail()', () => {
           ],
         },
       ]);
+    });
+    it(`logs an error when the maximum number of queued actions has been reached`, async () => {
+      const actionsClient = unsecuredActionsClientMock.create();
+      actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            id: CONNECTOR_ID,
+            response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+            actionTypeId: 'test',
+          },
+        ],
+      });
+      const email = new ConnectorsEmailService(REQUESTER_ID, CONNECTOR_ID, actionsClient, logger);
+      const payload: HTMLEmail = {
+        to: ['user1@email.com'],
+        subject: 'This is a notification email',
+        message: 'With some contents inside.',
+        messageHTML: '<html><body><span>With some contents inside.</span></body></html>',
+      };
+
+      await email.sendHTMLEmail(payload);
+
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 });

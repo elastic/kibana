@@ -147,6 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           {
             submit: true,
+            clearWithKeyboard: true,
           }
         );
 
@@ -154,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('confirmSaveSavedObjectButton');
 
-        const toastContents = await toastsService.getToastContent(1);
+        const toastContents = await toastsService.getContentByIndex(1);
 
         expect(toastContents).to.be(
           `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`

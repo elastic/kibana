@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ILM_POLICY_NAME } from '@kbn/reporting-plugin/common/constants';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { ILM_POLICY_NAME } from '@kbn/reporting-common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -194,13 +195,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         await supertestWithoutAuth
-          .put(reportingAPI.routes.API_MIGRATE_ILM_POLICY_URL)
+          .put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
           .expect(404);
 
         await supertestWithoutAuth
-          .get(reportingAPI.routes.API_GET_ILM_POLICY_STATUS)
+          .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
           .auth(UNAUTHZD_TEST_USERNAME, UNAUTHZD_TEST_USER_PASSWORD)
           .set('kbn-xsrf', 'xxx')
           .expect(404);

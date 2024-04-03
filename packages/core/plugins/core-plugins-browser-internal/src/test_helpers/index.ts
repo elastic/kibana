@@ -7,3 +7,4 @@
  */
 
 export { createPluginInitializerContextMock } from './mocks';
+export { createRuntimePluginContractResolverMock } from './plugin_contract_resolver.mock';

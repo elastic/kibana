@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
-import { PLI_APP_FEATURES } from '../../../common/pli/pli_config';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import { PLI_PRODUCT_FEATURES } from '../../../common/pli/pli_config';
 
-export const useProductTypeByPLI = (requiredPLI: AppFeatureKey): string | null => {
-  if (PLI_APP_FEATURES.security.essentials.includes(requiredPLI)) {
+export const getProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string | null => {
+  if (PLI_PRODUCT_FEATURES.security.essentials.includes(requiredPLI)) {
     return 'Security Essentials';
   }
-  if (PLI_APP_FEATURES.security.complete.includes(requiredPLI)) {
+  if (PLI_PRODUCT_FEATURES.security.complete.includes(requiredPLI)) {
     return 'Security Complete';
   }
-  if (PLI_APP_FEATURES.endpoint.essentials.includes(requiredPLI)) {
+  if (PLI_PRODUCT_FEATURES.endpoint.essentials.includes(requiredPLI)) {
     return 'Endpoint Essentials';
   }
-  if (PLI_APP_FEATURES.endpoint.complete.includes(requiredPLI)) {
+  if (PLI_PRODUCT_FEATURES.endpoint.complete.includes(requiredPLI)) {
     return 'Endpoint Complete';
   }
-  if (PLI_APP_FEATURES.cloud.essentials.includes(requiredPLI)) {
+  if (PLI_PRODUCT_FEATURES.cloud.essentials.includes(requiredPLI)) {
     return 'Cloud Essentials';
   }
-  if (PLI_APP_FEATURES.cloud.complete.includes(requiredPLI)) {
+  if (PLI_PRODUCT_FEATURES.cloud.complete.includes(requiredPLI)) {
     return 'Cloud Complete';
   }
   return null;

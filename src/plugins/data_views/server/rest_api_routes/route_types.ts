@@ -17,6 +17,7 @@ import { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
 
 export type SourceFilterRestResponse = {
   value: string;
+  clientId?: string | number;
 };
 
 export type AggregationRestrictionsRestResponse = Record<
@@ -40,6 +41,7 @@ export type TypeMetaRestResponse = {
 
 export type FieldAttrSetRestResponse = {
   customLabel?: string;
+  customDescription?: string;
   count?: number;
 };
 
@@ -93,11 +95,12 @@ export type FieldSpecRestResponse = DataViewFieldBaseRestResponse & {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
+  customDescription?: string;
   runtimeField?: RuntimeFieldSpecRestResponse;
   fixedInterval?: string[];
   timeZone?: string[];
   timeSeriesDimension?: boolean;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
   shortDotsEnable?: boolean;
   isMapped?: boolean;
   parentName?: string;
@@ -120,6 +123,7 @@ export type DataViewSpecRestResponse = {
   allowNoIndex?: boolean;
   namespaces?: string[];
   name?: string;
+  allowHidden?: boolean;
 };
 
 export interface DataViewListItemRestResponse {
@@ -161,7 +165,7 @@ export interface FieldDescriptorRestResponse {
   metadata_field?: boolean;
   fixedInterval?: string[];
   timeZone?: string[];
-  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge' | 'position';
   timeSeriesDimension?: boolean;
   conflictDescriptions?: Record<string, string[]>;
 }

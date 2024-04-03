@@ -17,7 +17,33 @@ if (!global.URL.hasOwnProperty('createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!global.hasOwnProperty('TextEncoder')) {
-  const { TextEncoder, TextDecoder } = require('util');
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
+  const customTextEncoding = require('@kayahr/text-encoding');
+  global.TextEncoder = customTextEncoding.TextEncoder;
+  global.TextDecoder = customTextEncoding.TextDecoder;
+}
+
+// NOTE: We should evaluate removing this once we upgrade to Node 18 and find out if loaders.gl already fixed this usage
+// or instead check if we can use the official Blob implementation.
+// This is needed for x-pack/plugins/file_upload/public/importer/geo/geojson_importer/geojson_importer.test.js
+//
+// https://github.com/jsdom/jsdom/issues/2555
+global.Blob = require('blob-polyfill').Blob;
+
+if (!global.hasOwnProperty('ResizeObserver')) {
+  global.ResizeObserver = require('resize-observer-polyfill');
+}
+
+if (!global.hasOwnProperty('Worker')) {
+  class Worker {
+    constructor(stringUrl) {
+      this.url = stringUrl;
+      this.onmessage = () => {};
+    }
+
+    postMessage(msg) {
+      this.onmessage(msg);
+    }
+  }
+
+  global.Worker = Worker;
 }

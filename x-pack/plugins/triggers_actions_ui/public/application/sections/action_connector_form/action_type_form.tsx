@@ -29,6 +29,7 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiCallOut,
+  EuiSwitch,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import {
@@ -42,6 +43,8 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
+import { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { betaBadgeProps } from './beta_badge_props';
 import {
   IErrorObject,
@@ -64,6 +67,7 @@ import { validateParamsForWarnings } from '../../lib/validate_params_for_warning
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
+import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -72,6 +76,7 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
+  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionAlertsFilterProperty: (
@@ -85,7 +90,7 @@ export type ActionTypeFormProps = {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideNotifyWhen?: boolean;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
@@ -120,6 +125,7 @@ export const ActionTypeForm = ({
   onAddConnector,
   onConnectorSelected,
   onDeleteAction,
+  setActionUseAlertDataForTemplate,
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
@@ -136,7 +142,7 @@ export const ActionTypeForm = ({
   recoveryActionGroup,
   hideNotifyWhen = false,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
@@ -148,7 +154,7 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
-    http: { basePath },
+    http,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -177,6 +183,53 @@ export const ActionTypeForm = ({
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
   const isSummaryAction = actionItem.frequency?.summary;
+
+  const [useAadTemplateFields, setUseAadTemplateField] = useState(
+    actionItem?.useAlertDataForTemplate ?? false
+  );
+  const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
+    Record<string, SavedObjectAttribute>
+  >({});
+
+  const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
+    http,
+    ruleTypeId,
+    useAadTemplateFields
+  );
+
+  const templateFields = useMemo(
+    () => (useAadTemplateFields ? aadTemplateFields : availableActionVariables),
+    [aadTemplateFields, availableActionVariables, useAadTemplateFields]
+  );
+
+  let showMustacheAutocompleteSwitch;
+  try {
+    showMustacheAutocompleteSwitch =
+      getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch') && ruleTypeId;
+  } catch (e) {
+    showMustacheAutocompleteSwitch = false;
+  }
+
+  const handleUseAadTemplateFields = useCallback(() => {
+    setUseAadTemplateField((prevVal) => {
+      if (setActionUseAlertDataForTemplate) {
+        setActionUseAlertDataForTemplate(!prevVal, index);
+      }
+      return !prevVal;
+    });
+    const currentActionParams = { ...actionItem.params };
+    for (const key of Object.keys(currentActionParams)) {
+      setActionParamsProperty(key, storedActionParamsForAadToggle[key] ?? '', index);
+    }
+    setStoredActionParamsForAadToggle(currentActionParams);
+  }, [
+    setActionUseAlertDataForTemplate,
+    storedActionParamsForAadToggle,
+    setStoredActionParamsForAadToggle,
+    setActionParamsProperty,
+    actionItem.params,
+    index,
+  ]);
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -227,9 +280,15 @@ export const ActionTypeForm = ({
       const defaultParams = await getDefaultParams();
       if (defaultParams) {
         for (const [key, paramValue] of Object.entries(defaultParams)) {
+          const defaultAADParams: typeof defaultParams = {};
           if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
             setActionParamsProperty(key, paramValue, index);
+            // Add default param to AAD defaults only if it does not contain any template code
+            if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
+              defaultAADParams[key] = paramValue;
+            }
           }
+          setStoredActionParamsForAadToggle(defaultAADParams);
         }
       }
     })();
@@ -240,9 +299,14 @@ export const ActionTypeForm = ({
     (async () => {
       const defaultParams = await getDefaultParams();
       if (defaultParams && actionGroup) {
+        const defaultAADParams: typeof defaultParams = {};
         for (const [key, paramValue] of Object.entries(defaultParams)) {
           setActionParamsProperty(key, paramValue, index);
+          if (!paramValue.match(/{{.*?}}/g)) {
+            defaultAADParams[key] = paramValue;
+          }
         }
+        setStoredActionParamsForAadToggle(defaultAADParams);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -273,6 +337,12 @@ export const ActionTypeForm = ({
     })();
   }, [actionItem, disableErrorMessages]);
 
+  useEffect(() => {
+    if (isEmpty(storedActionParamsForAadToggle) && actionItem.params.subAction) {
+      setStoredActionParamsForAadToggle(actionItem.params);
+    }
+  }, [actionItem.params, storedActionParamsForAadToggle]);
+
   const canSave = hasSaveActionsCapability(capabilities);
 
   const actionGroupDisplay = (
@@ -302,7 +372,7 @@ export const ActionTypeForm = ({
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
-      hasSummary={hasSummary}
+      hasAlertsMappings={hasAlertsMappings}
       onNotifyWhenChange={useCallback(
         (notifyWhen) => {
           setActionFrequencyProperty('notifyWhen', notifyWhen, index);
@@ -462,39 +532,55 @@ export const ActionTypeForm = ({
       <EuiSplitPanel.Inner color="plain">
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>
-            <Suspense fallback={null}>
-              <ParamsFieldsComponent
-                actionParams={actionItem.params as any}
-                index={index}
-                errors={actionParamsErrors.errors}
-                editAction={(key: string, value: RuleActionParam, i: number) => {
-                  setWarning(
-                    validateParamsForWarnings(
-                      value,
-                      basePath.publicBaseUrl,
-                      availableActionVariables
-                    )
-                  );
-                  setActionParamsProperty(key, value, i);
-                }}
-                messageVariables={availableActionVariables}
-                defaultMessage={
-                  // if action is a summary action, show the default summary message
-                  isSummaryAction
-                    ? defaultSummaryMessage
-                    : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
-                }
-                useDefaultMessage={useDefaultMessage}
-                actionConnector={actionConnector}
-                executionMode={ActionConnectorMode.ActionForm}
-              />
-              {warning ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCallOut size="s" color="warning" title={warning} />
-                </>
-              ) : null}
-            </Suspense>
+            <EuiFlexGroup gutterSize="m" direction="column">
+              {showMustacheAutocompleteSwitch && (
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label="Use template fields from alerts index"
+                    checked={useAadTemplateFields}
+                    onChange={handleUseAadTemplateFields}
+                    data-test-subj="mustacheAutocompleteSwitch"
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <Suspense fallback={null}>
+                  <ParamsFieldsComponent
+                    actionParams={actionItem.params as any}
+                    errors={actionParamsErrors.errors}
+                    index={index}
+                    selectedActionGroupId={selectedActionGroup?.id}
+                    editAction={(key: string, value: RuleActionParam, i: number) => {
+                      setWarning(
+                        validateParamsForWarnings(
+                          value,
+                          http.basePath.publicBaseUrl,
+                          availableActionVariables
+                        )
+                      );
+                      setActionParamsProperty(key, value, i);
+                    }}
+                    messageVariables={templateFields}
+                    defaultMessage={
+                      // if action is a summary action, show the default summary message
+                      isSummaryAction
+                        ? defaultSummaryMessage
+                        : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
+                    }
+                    useDefaultMessage={useDefaultMessage}
+                    actionConnector={actionConnector}
+                    executionMode={ActionConnectorMode.ActionForm}
+                    ruleTypeId={ruleTypeId}
+                  />
+                  {warning ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut size="s" color="warning" title={warning} />
+                    </>
+                  ) : null}
+                </Suspense>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiErrorBoundary>
         ) : null}
       </EuiSplitPanel.Inner>

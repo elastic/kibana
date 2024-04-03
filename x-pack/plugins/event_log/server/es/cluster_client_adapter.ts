@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -82,6 +82,7 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 };
 
 export interface AggregateEventsBySavedObjectResult {
+  hits?: estypes.SearchHitsMetadata<unknown>;
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
@@ -178,42 +179,11 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
-    const request = {
-      method: 'GET',
-      path: `/_ilm/policy/${policyName}`,
-    };
-    try {
-      const esClient = await this.elasticsearchClientPromise;
-      await esClient.transport.request(request);
-    } catch (err) {
-      if (err.statusCode === 404) return false;
-      throw new Error(`error checking existance of ilm policy: ${err.message}`);
-    }
-    return true;
-  }
-
-  public async createIlmPolicy(policyName: string, policy: Record<string, unknown>): Promise<void> {
-    this.logger.info(`Installing ILM policy ${policyName}`);
-    const request = {
-      method: 'PUT',
-      path: `/_ilm/policy/${policyName}`,
-      body: policy,
-    };
-    try {
-      const esClient = await this.elasticsearchClientPromise;
-      await esClient.transport.request(request);
-    } catch (err) {
-      throw new Error(`error creating ilm policy: ${err.message}`);
-    }
-  }
-
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const legacyResult = await esClient.indices.existsTemplate({ name });
       const indexTemplateResult = await esClient.indices.existsIndexTemplate({ name });
-      return (legacyResult as boolean) || (indexTemplateResult as boolean);
+      return indexTemplateResult as boolean;
     } catch (err) {
       throw new Error(`error checking existence of index template: ${err.message}`);
     }
@@ -486,12 +456,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     };
 
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
       throw new Error(
@@ -519,19 +490,20 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       query,
       aggs,
     };
-
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
-      throw new Error(
+      this.logger.debug(
         `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
       );
+      throw err;
     }
   }
 }

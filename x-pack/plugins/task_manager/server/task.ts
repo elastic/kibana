@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { DecoratedError } from './task_running';
+
+export enum TaskPriority {
+  Low = 1,
+  Normal = 50,
+}
 
 /*
  * Type definitions and validations for tasks.
@@ -47,6 +54,8 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
+  taskRunError?: DecoratedError;
+  shouldValidate?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -74,7 +83,7 @@ export type FailedRunResult = SuccessfulRunResult & {
    * If specified, indicates that the task failed to accomplish its work. This is
    * logged out as a warning, and the task will be reattempted after a delay.
    */
-  error: Error;
+  error: DecoratedError;
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
@@ -83,18 +92,20 @@ export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
-  status: TaskStatus.Failed;
+  status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-export interface CancellableTask {
+export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
 }
 
-export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type TaskRunCreatorFunction = (
+  context: RunContext
+) => CancellableTask<RunContext['taskInstance']>;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -106,6 +117,10 @@ export const taskDefinitionSchema = schema.object(
      * A brief, human-friendly title for this task.
      */
     title: schema.maybe(schema.string()),
+    /**
+     * Priority of this task type. Defaults to "NORMAL" if not defined
+     */
+    priority: schema.maybe(schema.number()),
     /**
      * An optional more detailed description of what this task does.
      */
@@ -147,11 +162,19 @@ export const taskDefinitionSchema = schema.object(
         })
       )
     ),
+
+    paramsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout }) {
+    validate({ timeout, priority }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+      }
+
+      if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
+        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
       }
     },
   }
@@ -161,7 +184,7 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
+export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
@@ -174,6 +197,7 @@ export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
       up: (state: Record<string, unknown>) => Record<string, unknown>;
     }
   >;
+  paramsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
@@ -182,6 +206,7 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
   Unrecognized = 'unrecognized',
+  DeadLetter = 'dead_letter',
 }
 
 export enum TaskLifecycleResult {
@@ -291,6 +316,11 @@ export interface TaskInstance {
    * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
    */
   enabled?: boolean;
+
+  /*
+   * Optionally override the timeout defined in the task type for this specific task instance
+   */
+  timeoutOverride?: string;
 }
 
 /**
@@ -303,6 +333,10 @@ export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval?: string;
+  /**
+   * Indicates the number of skipped executions.
+   */
+  numSkippedRuns?: number;
 }
 
 /**
@@ -324,6 +358,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
    */
   interval?: string;
+
+  /**
+   *  @deprecated removed with version 8.14.0
+   */
+  numSkippedRuns?: number;
 
   /**
    * The saved object version from the Elasticsearch document.

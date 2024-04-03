@@ -8,13 +8,16 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../mocks';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 
 const CONNECTOR_TYPE_ID = '.jira';
 let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {
@@ -35,7 +38,11 @@ describe('jira action params validation', () => {
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { 'subActionParams.incident.summary': [], 'subActionParams.incident.labels': [] },
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': [],
+        'subActionParams.incident.otherFields': [],
+      },
     });
   });
 
@@ -48,6 +55,7 @@ describe('jira action params validation', () => {
       errors: {
         'subActionParams.incident.summary': ['Summary is required.'],
         'subActionParams.incident.labels': [],
+        'subActionParams.incident.otherFields': [],
       },
     });
   });
@@ -64,6 +72,78 @@ describe('jira action params validation', () => {
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': ['Labels cannot contain spaces.'],
+        'subActionParams.incident.otherFields': [],
+      },
+    });
+  });
+
+  test('params validation fails when otherFields is not valid JSON', async () => {
+    const actionParams = {
+      subActionParams: {
+        incident: { summary: 'some title', otherFields: 'invalid json' },
+        comments: [],
+      },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': [],
+        'subActionParams.incident.otherFields': [
+          'Additional fields field must be a valid JSON object.',
+        ],
+      },
+    });
+  });
+
+  test(`params validation succeeds when its valid json and otherFields has ${MAX_OTHER_FIELDS_LENGTH} fields`, async () => {
+    const longJSON: { [key in string]: string } = {};
+    for (let i = 0; i < MAX_OTHER_FIELDS_LENGTH; i++) {
+      longJSON[`key${i}`] = 'value';
+    }
+    const actionParams = {
+      subActionParams: {
+        incident: {
+          summary: 'some title',
+          otherFields: JSON.stringify(longJSON),
+        },
+        comments: [],
+      },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': [],
+        'subActionParams.incident.otherFields': [],
+      },
+    });
+  });
+
+  test(`params validation fails when otherFields has ${
+    MAX_OTHER_FIELDS_LENGTH + 1
+  } fields`, async () => {
+    const longJSON: { [key in string]: string } = {};
+    for (let i = 0; i < MAX_OTHER_FIELDS_LENGTH + 1; i++) {
+      longJSON[`key${i}`] = 'value';
+    }
+    const actionParams = {
+      subActionParams: {
+        incident: {
+          summary: 'some title',
+          otherFields: JSON.stringify(longJSON),
+        },
+        comments: [],
+      },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': [],
+        'subActionParams.incident.otherFields': [
+          `A maximum of ${MAX_OTHER_FIELDS_LENGTH} additional fields can be defined at a time.`,
+        ],
       },
     });
   });

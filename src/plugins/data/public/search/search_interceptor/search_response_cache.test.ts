@@ -7,7 +7,7 @@
  */
 
 import { interval, Observable, of, throwError } from 'rxjs';
-import { shareReplay, switchMap, take } from 'rxjs/operators';
+import { shareReplay, switchMap, take } from 'rxjs';
 import { IKibanaSearchResponse } from '../..';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchResponseCache } from './search_response_cache';
@@ -120,23 +120,17 @@ describe('SearchResponseCache', () => {
           isPartial: true,
           isRunning: true,
           rawResponse: {
-            t: 1,
+            t: 'a'.repeat(1000),
           },
         },
-        {
-          isPartial: true,
-          isRunning: false,
-          rawResponse: {
-            t: 2,
-          },
-        },
+        {} as any,
       ]);
       cache.set('123', wrapWithAbortController(err$));
 
       const errHandler = jest.fn();
       await err$.toPromise().catch(errHandler);
 
-      expect(errHandler).toBeCalledTimes(0);
+      expect(errHandler).toBeCalledTimes(1);
       expect(cache.get('123')).toBeUndefined();
     });
 

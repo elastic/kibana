@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 

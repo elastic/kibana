@@ -38,7 +38,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/nats.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/nats.svg'),
     artifacts: {
       dashboards: [
         {
@@ -54,7 +54,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/nats_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/nats_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

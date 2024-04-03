@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import type {
+  SecurityIndicesPrivileges,
+  SecurityRoleDescriptor,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import {
+  FLEET_APM_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
 } from '../../../common/constants';
@@ -18,6 +24,7 @@ import type {
   RegistryDataStreamPrivileges,
 } from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
+import { PackagePolicyRequestError } from '../../errors';
 
 import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
@@ -34,13 +41,14 @@ export const UNIVERSAL_PROFILING_PERMISSIONS = [
   'view_index_metadata',
 ];
 
-export async function storedPackagePoliciesToAgentPermissions(
+export function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
+  agentPolicyNamespace: string,
   packagePolicies?: PackagePolicy[]
-): Promise<FullAgentPolicyOutputPermissions | undefined> {
+): FullAgentPolicyOutputPermissions | undefined {
   // I'm not sure what permissions to return for this case, so let's return the defaults
   if (!packagePolicies) {
-    throw new Error(
+    throw new PackagePolicyRequestError(
       'storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy'
     );
   }
@@ -49,114 +57,117 @@ export async function storedPackagePoliciesToAgentPermissions(
     return;
   }
 
-  const permissionEntries = (packagePolicies as PackagePolicy[]).map<Promise<[string, any]>>(
-    async (packagePolicy) => {
-      if (!packagePolicy.package) {
-        throw new Error(`No package for package policy ${packagePolicy.name ?? packagePolicy.id}`);
-      }
-
-      const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
-
-      // Special handling for Universal Profiling packages, as it does not use data streams _only_,
-      // but also indices that do not adhere to the convention.
-      if (
-        pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
-        pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
-      ) {
-        return Promise.resolve(universalProfilingPermissions(packagePolicy.id));
-      }
-
-      const dataStreams = getNormalizedDataStreams(pkg);
-      if (!dataStreams || dataStreams.length === 0) {
-        return [packagePolicy.name, undefined];
-      }
-
-      let dataStreamsForPermissions: DataStreamMeta[];
-
-      switch (pkg.name) {
-        case 'endpoint':
-          // - Endpoint doesn't store the `data_stream` metadata in
-          // `packagePolicy.inputs`, so we will use _all_ data_streams from the
-          // package.
-          dataStreamsForPermissions = dataStreams;
-          break;
-
-        case 'apm':
-          // - APM doesn't store the `data_stream` metadata in
-          //   `packagePolicy.inputs`, so we will use _all_ data_streams from
-          //   the package.
-          dataStreamsForPermissions = dataStreams;
-          break;
-
-        case 'osquery_manager':
-          // - Osquery manager doesn't store the `data_stream` metadata in
-          //   `packagePolicy.inputs`, so we will use _all_ data_streams from
-          //   the package.
-          dataStreamsForPermissions = dataStreams;
-          break;
-
-        default:
-          // - Normal packages store some of the `data_stream` metadata in
-          //   `packagePolicy.inputs[].streams[].data_stream`
-          // - The rest of the metadata needs to be fetched from the
-          //   `data_stream` object in the package. The link is
-          //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
-          // - Some packages (custom logs) have a compiled dataset, stored in
-          //   `input.streams.compiled_stream.data_stream.dataset`
-          dataStreamsForPermissions = packagePolicy.inputs
-            .filter((i) => i.enabled)
-            .flatMap((input) => {
-              if (!input.streams) {
-                return [];
-              }
-
-              const dataStreams_: DataStreamMeta[] = [];
-
-              input.streams
-                .filter((s) => s.enabled)
-                .forEach((stream) => {
-                  if (!('data_stream' in stream)) {
-                    return;
-                  }
-
-                  const ds: DataStreamMeta = {
-                    type: stream.data_stream.type,
-                    dataset:
-                      stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
-                  };
-
-                  if (stream.data_stream.elasticsearch) {
-                    ds.elasticsearch = stream.data_stream.elasticsearch;
-                  }
-
-                  dataStreams_.push(ds);
-                });
-
-              return dataStreams_;
-            });
-      }
-
-      let clusterRoleDescriptor = {};
-      const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
-      if (cluster.length > 0) {
-        clusterRoleDescriptor = {
-          cluster,
-        };
-      }
-
-      return [
-        packagePolicy.id,
-        {
-          indices: dataStreamsForPermissions.map((ds) =>
-            getDataStreamPrivileges(ds, packagePolicy.namespace)
-          ),
-          ...clusterRoleDescriptor,
-        },
-      ];
+  const permissionEntries = packagePolicies.map((packagePolicy) => {
+    if (!packagePolicy.package) {
+      throw new PackagePolicyRequestError(
+        `No package for package policy ${packagePolicy.name ?? packagePolicy.id}`
+      );
     }
-  );
 
-  return Object.fromEntries(await Promise.all(permissionEntries));
+    const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
+
+    // Special handling for Universal Profiling packages, as it does not use data streams _only_,
+    // but also indices that do not adhere to the convention.
+    if (
+      pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||
+      pkg.name === FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE
+    ) {
+      return universalProfilingPermissions(packagePolicy.id);
+    }
+
+    if (pkg.name === FLEET_APM_PACKAGE) {
+      return apmPermissions(packagePolicy.id);
+    }
+
+    const dataStreams = getNormalizedDataStreams(pkg);
+    if (!dataStreams || dataStreams.length === 0) {
+      return [packagePolicy.name, undefined];
+    }
+
+    let dataStreamsForPermissions: DataStreamMeta[];
+
+    switch (pkg.name) {
+      case 'endpoint':
+        // - Endpoint doesn't store the `data_stream` metadata in
+        // `packagePolicy.inputs`, so we will use _all_ data_streams from the
+        // package.
+        dataStreamsForPermissions = dataStreams;
+        break;
+
+      case 'apm':
+        // - APM doesn't store the `data_stream` metadata in
+        //   `packagePolicy.inputs`, so we will use _all_ data_streams from
+        //   the package.
+        dataStreamsForPermissions = dataStreams;
+        break;
+
+      case 'osquery_manager':
+        // - Osquery manager doesn't store the `data_stream` metadata in
+        //   `packagePolicy.inputs`, so we will use _all_ data_streams from
+        //   the package.
+        dataStreamsForPermissions = dataStreams;
+        break;
+
+      default:
+        // - Normal packages store some of the `data_stream` metadata in
+        //   `packagePolicy.inputs[].streams[].data_stream`
+        // - The rest of the metadata needs to be fetched from the
+        //   `data_stream` object in the package. The link is
+        //   `packagePolicy.inputs[].type == dataStreams.streams[].input`
+        // - Some packages (custom logs) have a compiled dataset, stored in
+        //   `input.streams.compiled_stream.data_stream.dataset`
+        dataStreamsForPermissions = packagePolicy.inputs
+          .filter((i) => i.enabled)
+          .flatMap((input) => {
+            if (!input.streams) {
+              return [];
+            }
+
+            const dataStreams_: DataStreamMeta[] = [];
+
+            input.streams
+              .filter((s) => s.enabled)
+              .forEach((stream) => {
+                if (!('data_stream' in stream)) {
+                  return;
+                }
+
+                const ds: DataStreamMeta = {
+                  type: stream.data_stream.type,
+                  dataset:
+                    stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
+                };
+
+                if (stream.data_stream.elasticsearch) {
+                  ds.elasticsearch = stream.data_stream.elasticsearch;
+                }
+
+                dataStreams_.push(ds);
+              });
+
+            return dataStreams_;
+          });
+    }
+
+    let clusterRoleDescriptor = {};
+    const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
+    if (cluster.length > 0) {
+      clusterRoleDescriptor = {
+        cluster,
+      };
+    }
+    // namespace is either the package policy's or the agent policy one
+    const namespace = packagePolicy?.namespace || agentPolicyNamespace;
+    return [
+      packagePolicy.id,
+      {
+        indices: dataStreamsForPermissions.map((ds) => getDataStreamPrivileges(ds, namespace)),
+        ...clusterRoleDescriptor,
+      },
+    ];
+  });
+
+  return Object.fromEntries(permissionEntries);
 }
 
 export interface DataStreamMeta {
@@ -171,7 +182,10 @@ export interface DataStreamMeta {
   };
 }
 
-export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: string = '*') {
+export function getDataStreamPrivileges(
+  dataStream: DataStreamMeta,
+  namespace: string = '*'
+): SecurityIndicesPrivileges {
   let index = dataStream.hidden ? `.${dataStream.type}-` : `${dataStream.type}-`;
 
   // Determine dataset
@@ -200,7 +214,7 @@ export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: s
   };
 }
 
-async function universalProfilingPermissions(packagePolicyId: string): Promise<[string, any]> {
+function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
   const profilingIndexPattern = 'profiling-*';
   return [
     packagePolicyId,
@@ -209,6 +223,25 @@ async function universalProfilingPermissions(packagePolicyId: string): Promise<[
         {
           names: [profilingIndexPattern],
           privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+        },
+      ],
+    },
+  ];
+}
+
+function apmPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
+  return [
+    packagePolicyId,
+    {
+      cluster: ['cluster:monitor/main'],
+      indices: [
+        {
+          names: ['traces-*', 'logs-*', 'metrics-*'],
+          privileges: ['auto_configure', 'create_doc'],
+        },
+        {
+          names: ['traces-apm.sampled-*'],
+          privileges: ['auto_configure', 'create_doc', 'maintenance', 'monitor', 'read'],
         },
       ],
     },

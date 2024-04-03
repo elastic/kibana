@@ -33,6 +33,7 @@ import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
+import type { RenderCellValueContext } from './fetch_page_context';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -95,7 +96,7 @@ export const getRenderCellValueHook = ({
   scopeId: SourcererScopeName;
   tableId: TableId;
 }) => {
-  const useRenderCellValue: GetRenderCellValue = () => {
+  const useRenderCellValue: GetRenderCellValue = ({ context }) => {
     const { browserFields } = useSourcererDataView(scopeId);
     const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -173,10 +174,11 @@ export const getRenderCellValueHook = ({
             scopeId={tableId}
             truncate={truncate}
             asPlainText={false}
+            context={context as RenderCellValueContext}
           />
         );
       },
-      [browserFieldsByName, browserFields, columnHeaders]
+      [browserFieldsByName, columnHeaders, browserFields, context]
     );
     return result;
   };

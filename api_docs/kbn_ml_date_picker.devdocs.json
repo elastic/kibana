@@ -476,8 +476,8 @@
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceStart",
-                "text": "ThemeServiceStart"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               }
             ],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
@@ -524,138 +524,41 @@
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.wrapWithTheme",
-            "type": "Function",
+            "id": "def-common.DatePickerDependencies.i18n",
+            "type": "Object",
             "tags": [],
-            "label": "wrapWithTheme",
+            "label": "i18n",
             "description": [
-              "\nhelper to be used with notifications."
+              "\nInternationalisation service"
             ],
             "signature": [
-              "(node: React.ReactNode, theme$: ",
-              "Observable",
-              "<",
               {
-                "pluginId": "@kbn/core-theme-browser",
+                "pluginId": "@kbn/core-i18n-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
             ],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/ml-date-picker",
-                "id": "def-common.DatePickerDependencies.wrapWithTheme.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
-                ],
-                "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ml-date-picker",
-                "id": "def-common.DatePickerDependencies.wrapWithTheme.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "theme$",
-                "description": [],
-                "signature": [
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.CoreTheme",
-                    "text": "CoreTheme"
-                  },
-                  ">"
-                ],
-                "path": "src/plugins/kibana_react/public/theme/wrap_with_theme.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.toMountPoint",
-            "type": "Function",
+            "id": "def-common.DatePickerDependencies.showFrozenDataTierChoice",
+            "type": "CompoundType",
             "tags": [],
-            "label": "toMountPoint",
+            "label": "showFrozenDataTierChoice",
             "description": [
-              "\nhelper to be used with notifications."
+              "\nOptional flag to disable the frozen data tier choice."
             ],
             "signature": [
-              "(node: React.ReactNode, { theme$ }?: ",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.ToMountPointOptions",
-                "text": "ToMountPointOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
-                "text": "MountPoint"
-              },
-              "<HTMLElement>"
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/ml-date-picker",
-                "id": "def-common.DatePickerDependencies.toMountPoint.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
-                ],
-                "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ml-date-picker",
-                "id": "def-common.DatePickerDependencies.toMountPoint.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "__1",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "kibanaReact",
-                    "scope": "public",
-                    "docId": "kibKibanaReactPluginApi",
-                    "section": "def-public.ToMountPointOptions",
-                    "text": "ToMountPointOptions"
-                  }
-                ],
-                "path": "src/plugins/kibana_react/public/util/to_mount_point.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -18,8 +19,11 @@ import {
 } from '@elastic/eui';
 
 import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
+  const { isADEnabled } = useEnabledFeatures();
+
   if (syncItems === null) {
     return null;
   }
@@ -34,13 +38,17 @@ export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ sy
 
       <EuiHorizontalRule margin="l" />
 
-      <DatafeedsAdded syncItems={syncItems} />
+      {isADEnabled ? (
+        <>
+          <DatafeedsAdded syncItems={syncItems} />
 
-      <EuiHorizontalRule margin="l" />
+          <EuiHorizontalRule margin="l" />
 
-      <DatafeedsRemoved syncItems={syncItems} />
+          <DatafeedsRemoved syncItems={syncItems} />
 
-      <EuiHorizontalRule margin="l" />
+          <EuiHorizontalRule margin="l" />
+        </>
+      ) : null}
     </>
   );
 };

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { TransformStats } from '../types/transform_stats';
+import type { TransformStats } from '../types/transform_stats';
 
 import { getTransformsRequestSchema } from './transforms';
 
 export const getTransformsStatsRequestSchema = getTransformsRequestSchema;
 
-export type GetTransformsRequestSchema = TypeOf<typeof getTransformsStatsRequestSchema>;
+export type GetTransformsStatsRequestSchema = TypeOf<typeof getTransformsStatsRequestSchema>;
 
 export interface GetTransformsStatsResponseSchema {
   node_failures?: object;

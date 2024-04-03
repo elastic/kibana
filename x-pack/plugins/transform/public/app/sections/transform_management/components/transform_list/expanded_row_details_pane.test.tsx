@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { ExpandedRowDetailsPane, Section, SectionConfig } from './expanded_row_details_pane';
+import type { SectionConfig } from './expanded_row_details_pane';
+import { ExpandedRowDetailsPane, Section } from './expanded_row_details_pane';
 
 const section: SectionConfig = {
   title: 'the-section-title',
@@ -23,16 +24,20 @@ const section: SectionConfig = {
 
 describe('Transform: Job List Expanded Row <ExpandedRowDetailsPane />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<ExpandedRowDetailsPane sections={[section]} />);
+    const { container } = render(<ExpandedRowDetailsPane sections={[section]} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-section-title');
+    expect(container.textContent).toContain('the-item-title');
+    expect(container.textContent).toContain('the-item-description');
   });
 });
 
 describe('Transform: Job List Expanded Row <Section />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<Section section={section} />);
+    const { container } = render(<Section section={section} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-section-title');
+    expect(container.textContent).toContain('the-item-title');
+    expect(container.textContent).toContain('the-item-description');
   });
 });

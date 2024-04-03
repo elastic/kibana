@@ -184,7 +184,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [
-              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys directory."
+              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys_e2e directory."
             ],
             "signature": [
               "any"
@@ -276,13 +276,7 @@
             ],
             "signature": [
               "({ getService }: ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-common.FtrProviderContext",
-                "text": "FtrProviderContext"
-              },
+              "FtrProviderContext",
               ") => void"
             ],
             "path": "packages/kbn-journeys/journey/journey.ts",
@@ -297,13 +291,7 @@
                 "label": "{ getService }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "common",
-                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-common.FtrProviderContext",
-                    "text": "FtrProviderContext"
-                  }
+                  "FtrProviderContext"
                 ],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
@@ -675,6 +663,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getSynthtraceConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getSynthtraceConfig",
+            "description": [],
+            "signature": [
+              "() => JourneySynthtrace<CtxExt, any> | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

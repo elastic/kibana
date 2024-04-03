@@ -5,4 +5,17 @@
  * 2.0.
  */
 
-export const services = {};
+import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
+import { SvlCommonApiServiceProvider } from './svl_common_api';
+import { SvlReportingServiceProvider } from './svl_reporting';
+import { SvlUserManagerProvider } from './svl_user_manager';
+
+export type { RoleCredentials } from './svl_user_manager';
+
+export const services = {
+  supertest: SupertestProvider,
+  supertestWithoutAuth: SupertestWithoutAuthProvider,
+  svlCommonApi: SvlCommonApiServiceProvider,
+  svlReportingApi: SvlReportingServiceProvider,
+  svlUserManager: SvlUserManagerProvider,
+};

@@ -11,6 +11,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       queue: kibana-default
+    timeout_in_minutes: 10
     env:
       FTR_CONFIGS_DEPS: ''
       LIMIT_CONFIG_TYPE: 'unit,integration'
@@ -24,5 +25,5 @@ steps:
     depends_on:
       - jest
       - jest-integration
-    timeout_in_minutes: 30
+    timeout_in_minutes: 50
     key: ingest

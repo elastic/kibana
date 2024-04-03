@@ -8,12 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 
+import type { RolePayloadSchemaType } from './model';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import type { RolePayloadSchemaType } from './model';
-import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (features: KibanaFeature[], role: RolePayloadSchemaType) => {
   if (!role.kibana) {
@@ -94,7 +94,6 @@ export function definePutRolesRoutes({
 
         await esClient.asCurrentUser.security.putRole({
           name: request.params.name,
-          // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
           body,
         });
 

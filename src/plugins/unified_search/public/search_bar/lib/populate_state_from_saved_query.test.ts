@@ -25,6 +25,7 @@ describe('populateStateFromSavedQuery', () => {
         language: 'kuery',
       },
     },
+    namespaces: ['default'],
   };
 
   beforeEach(() => {

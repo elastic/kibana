@@ -21,9 +21,9 @@ import { updateRuleRoute } from './route';
 import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
-} from '../../../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { RESPONSE_ACTION_TYPES } from '../../../../../../../common/detection_engine/rule_response_actions/schemas';
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -181,7 +181,7 @@ describe('Update rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
   describe('rule containing response actions', () => {
@@ -189,11 +189,12 @@ describe('Update rule route', () => {
       // @ts-expect-error We're writting to a read only property just for the purpose of the test
       clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
     });
-    const getResponseAction = (command: string = 'isolate') => ({
+    const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {
         command,
         comment: '',
+        ...(config ? { config } : {}),
       },
     });
     const defaultAction = getResponseAction();
@@ -245,10 +246,11 @@ describe('Update rule route', () => {
             ...getQueryRuleParams(),
             responseActions: [
               {
-                actionTypeId: RESPONSE_ACTION_TYPES.ENDPOINT,
+                actionTypeId: ResponseActionTypesEnum['.endpoint'],
                 params: {
                   command: 'isolate',
                   comment: '',
+                  config: undefined,
                 },
               },
             ],
@@ -272,7 +274,7 @@ describe('Update rule route', () => {
       );
     });
     test('fails when provided with an unsupported command', async () => {
-      const wrongAction = getResponseAction('processes');
+      const wrongAction = getResponseAction('execute');
 
       const request = requestMock.create({
         method: 'post',
@@ -284,7 +286,23 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "processes" supplied to "response_actions,params,command"'
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+      );
+    });
+    test('fails when provided with payload missing data', async () => {
+      const wrongAction = getResponseAction('kill-process', { overwrite: true });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
       );
     });
   });

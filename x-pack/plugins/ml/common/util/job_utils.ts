@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { each, isEmpty, isEqual, pick } from 'lodash';
+import { cloneDeep, each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
-import moment, { Duration } from 'moment';
+import type { Duration } from 'moment';
+import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +30,7 @@ import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
 import type {
   CombinedJob,
+  CombinedJobWithStats,
   CustomSettings,
   Datafeed,
   Job,
@@ -935,4 +937,15 @@ export function extractInfluencers(jobs: Job | Job[]): string[] {
     }
   }
   return Array.from(influencers);
+}
+
+export function removeNodeInfo(job: CombinedJobWithStats) {
+  const newJob = cloneDeep(job);
+  if (newJob.node !== undefined) {
+    delete newJob.node;
+  }
+  if (newJob.datafeed_config?.node !== undefined) {
+    delete newJob.datafeed_config.node;
+  }
+  return newJob;
 }

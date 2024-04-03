@@ -14,7 +14,7 @@ import {
   TestSecrets,
   TestSubActionConnector,
 } from './mocks';
-import { IService, SubActionConnectorType, ValidatorType } from './types';
+import { IService, ServiceParams, SubActionConnectorType, ValidatorType } from './types';
 import { buildValidators } from './validators';
 
 describe('Validators', () => {
@@ -30,7 +30,8 @@ describe('Validators', () => {
         config: TestConfigSchema,
         secrets: TestSecretsSchema,
       },
-      Service,
+      getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
+        new Service(serviceParams),
     };
 
     return buildValidators({ configurationUtilities: mockedActionsConfig, connector });
@@ -59,7 +60,8 @@ describe('Validators', () => {
           validator: secretsValidator,
         },
       ],
-      Service,
+      getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
+        new Service(serviceParams),
     };
 
     return {

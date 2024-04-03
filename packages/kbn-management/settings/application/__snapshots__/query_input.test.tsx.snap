@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Search should render normally 1`] = `
+<Fragment>
+  <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "settingsSearchBar",
+        "incremental": true,
+        "placeholder": "Search advanced settings",
+      }
+    }
+    filters={
+      Array [
+        Object {
+          "field": "categories",
+          "multiSelect": "or",
+          "name": "Category",
+          "options": Array [
+            Object {
+              "name": "General",
+              "value": "general",
+            },
+            Object {
+              "name": "Notifications",
+              "value": "notifications",
+            },
+            Object {
+              "name": "Dashboard",
+              "value": "dashboard",
+            },
+          ],
+          "type": "field_value_selection",
+        },
+      ]
+    }
+    onChange={[Function]}
+    query={
+      Query {
+        "ast": _AST {
+          "_clauses": Array [],
+          "_indexedClauses": Object {
+            "field": Object {},
+            "group": Array [],
+            "is": Object {},
+            "term": Array [],
+          },
+        },
+        "syntax": Object {
+          "parse": [Function],
+          "print": [Function],
+          "printClause": [Function],
+        },
+        "text": "",
+      }
+    }
+  />
+</Fragment>
+`;

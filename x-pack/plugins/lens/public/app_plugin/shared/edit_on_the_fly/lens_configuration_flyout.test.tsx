@@ -5,62 +5,69 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlyoutBody } from '@elastic/eui';
-import { mountWithProvider } from '../../../mocks';
+import { renderWithReduxStore } from '../../../mocks';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import {
-  mockVisualizationMap,
-  mockDatasourceMap,
-  mockStoreDeps,
-  mockDataPlugin,
-} from '../../../mocks';
+import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
-import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
+import type { EditConfigPanelProps } from './types';
 
-let container: HTMLDivElement | undefined;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  container.id = 'lensContainer';
-  document.body.appendChild(container);
+const lensAttributes = {
+  title: 'test',
+  visualizationType: 'testVis',
+  state: {
+    datasourceStates: {
+      testDatasource: {},
+    },
+    visualization: {},
+    filters: [],
+    query: {
+      esql: 'from index1 | limit 10',
+    },
+  },
+  filters: [],
+  query: {
+    esql: 'from index1 | limit 10',
+  },
+  references: [],
+} as unknown as TypedLensByValueInput['attributes'];
+const mockStartDependencies =
+  createMockStartDependencies() as unknown as LensPluginStartDependencies;
+const data = mockDataPlugin();
+(data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+  from: 'now-2m',
+  to: 'now',
 });
-
-afterEach(() => {
-  if (container && container.parentNode) {
-    container.parentNode.removeChild(container);
-  }
-
-  container = undefined;
-});
+const startDependencies = {
+  ...mockStartDependencies,
+  data,
+};
+const datasourceMap = mockDatasourceMap();
+const visualizationMap = mockVisualizationMap();
 
 describe('LensEditConfigurationFlyout', () => {
-  const mockStartDependencies =
-    createMockStartDependencies() as unknown as LensPluginStartDependencies;
-  const data = mockDataPlugin();
-  (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
-    from: 'now-2m',
-    to: 'now',
-  });
-  const startDependencies = {
-    ...mockStartDependencies,
-    data,
-  };
-
-  function prepareAndMountComponent(
-    props: ReturnType<typeof getDefaultProps>,
+  function renderConfigFlyout(
+    propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery
   ) {
-    return mountWithProvider(
-      <LensEditConfigurationFlyout {...props} />,
+    return renderWithReduxStore(
+      <LensEditConfigurationFlyout
+        attributes={lensAttributes}
+        updatePanelState={jest.fn()}
+        coreStart={coreMock.createStart()}
+        startDependencies={startDependencies}
+        datasourceMap={datasourceMap}
+        visualizationMap={visualizationMap}
+        closeFlyout={jest.fn()}
+        datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
+        {...propsOverrides}
+      />,
+      {},
       {
         preloadedState: {
           datasourceStates: {
@@ -72,362 +79,157 @@ describe('LensEditConfigurationFlyout', () => {
           activeDatasourceId: 'testDatasource',
           query: query as Query,
         },
-        storeDeps: mockStoreDeps({
-          datasourceMap: props.datasourceMap,
-          visualizationMap: props.visualizationMap,
-        }),
-      },
-      {
-        attachTo: container,
       }
     );
   }
 
-  function getDefaultProps(
-    { datasourceMap = mockDatasourceMap(), visualizationMap = mockVisualizationMap() } = {
-      datasourceMap: mockDatasourceMap(),
-      visualizationMap: mockVisualizationMap(),
-    }
-  ) {
-    const lensAttributes = {
-      title: 'test',
-      visualizationType: 'testVis',
-      state: {
-        datasourceStates: {
-          testDatasource: {},
-        },
-        visualization: {},
-        filters: [],
-        query: {
-          language: 'lucene',
-          query: '',
-        },
-      },
-      filters: [],
-      query: {
-        language: 'lucene',
-        query: '',
-      },
-      references: [],
-    } as unknown as TypedLensByValueInput['attributes'];
+  it('should display the header and the link to editor if necessary props are given', async () => {
+    const navigateToLensEditorSpy = jest.fn();
 
-    const dataView = { id: 'index1', isPersisted: () => true } as unknown as DataView;
-    return {
-      attributes: lensAttributes,
-      dataView,
-      updateAll: jest.fn(),
-      coreStart: coreMock.createStart(),
-      startDependencies,
-      visualizationMap,
-      datasourceMap,
-      closeFlyout: jest.fn(),
-      datasourceId: 'testDatasource',
-    } as unknown as EditConfigPanelProps;
-  }
+    renderConfigFlyout({
+      displayFlyoutHeader: true,
+      navigateToLensEditor: navigateToLensEditorSpy,
+    });
+    expect(screen.getByTestId('editFlyoutHeader')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('navigateToLensEditorLink'));
+    expect(navigateToLensEditorSpy).toHaveBeenCalled();
+  });
 
-  it('should call the closeFlyout callback if collapse button is clicked', async () => {
+  it('should display the header title correctly for a newly created panel', async () => {
+    renderConfigFlyout({
+      displayFlyoutHeader: true,
+      isNewPanel: true,
+    });
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
+      'Create ES|QL visualization'
+    );
+  });
+
+  it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
-    const props = getDefaultProps();
-    const newProps = {
-      ...props,
+
+    renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
-    };
-    const { instance } = await prepareAndMountComponent(newProps);
-    expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
-    instance.find('[data-test-subj="collapseFlyoutButton"]').at(1).simulate('click');
+    });
+    expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
-  it('should compute the frame public api correctly', async () => {
-    const props = getDefaultProps();
-    const { instance } = await prepareAndMountComponent(props);
-    expect(instance.find(ConfigPanelWrapper).exists()).toBe(true);
-    expect(instance.find(VisualizationToolbar).exists()).toBe(true);
-    expect(instance.find(VisualizationToolbar).prop('framePublicAPI')).toMatchInlineSnapshot(`
-      Object {
-        "activeData": Object {},
-        "dataViews": Object {
-          "indexPatternRefs": Array [],
-          "indexPatterns": Object {
-            "index1": Object {
-              "id": "index1",
-              "isPersisted": [Function],
-            },
-          },
-        },
-        "datasourceLayers": Object {
-          "a": Object {
-            "datasourceId": "testDatasource",
-            "getFilters": [MockFunction],
-            "getMaxPossibleNumValues": [MockFunction],
-            "getOperationForColumnId": [MockFunction],
-            "getSourceId": [MockFunction],
-            "getTableSpec": [MockFunction],
-            "getVisualDefaults": [MockFunction],
-            "hasDefaultTimeField": [MockFunction],
-            "isTextBasedLanguage": [MockFunction] {
-              "calls": Array [
-                Array [],
-                Array [],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": false,
-                },
-                Object {
-                  "type": "return",
-                  "value": false,
-                },
-              ],
-            },
-          },
-        },
-        "dateRange": Object {
-          "fromDate": "2021-01-10T04:00:00.000Z",
-          "toDate": "2021-01-10T08:00:00.000Z",
-        },
-      }
-    `);
+  it('should call the updatePanelState callback if cancel button is clicked', async () => {
+    const updatePanelStateSpy = jest.fn();
+    renderConfigFlyout({
+      updatePanelState: updatePanelStateSpy,
+    });
+    expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
-  it('should compute the activeVisualization correctly', async () => {
-    const props = getDefaultProps();
-    const { instance } = await prepareAndMountComponent(props);
-    expect(instance.find(VisualizationToolbar).prop('activeVisualization')).toMatchInlineSnapshot(`
-      Object {
-        "DimensionEditorComponent": [MockFunction],
-        "appendLayer": [MockFunction],
-        "clearLayer": [MockFunction],
-        "getConfiguration": [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {
-                "frame": Object {
-                  "activeData": Object {},
-                  "dataViews": Object {
-                    "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
-                  },
-                  "datasourceLayers": Object {
-                    "a": Object {
-                      "datasourceId": "testDatasource",
-                      "getFilters": [MockFunction],
-                      "getMaxPossibleNumValues": [MockFunction],
-                      "getOperationForColumnId": [MockFunction],
-                      "getSourceId": [MockFunction],
-                      "getTableSpec": [MockFunction],
-                      "getVisualDefaults": [MockFunction],
-                      "hasDefaultTimeField": [MockFunction],
-                      "isTextBasedLanguage": [MockFunction] {
-                        "calls": Array [
-                          Array [],
-                          Array [],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": false,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": false,
-                          },
-                        ],
-                      },
-                    },
-                  },
-                  "dateRange": Object {
-                    "fromDate": "2021-01-10T04:00:00.000Z",
-                    "toDate": "2021-01-10T08:00:00.000Z",
-                  },
-                },
-                "layerId": "layer1",
-                "state": Object {},
-              },
-            ],
-            Array [
-              Object {
-                "frame": Object {
-                  "activeData": Object {},
-                  "dataViews": Object {
-                    "indexPatternRefs": Array [],
-                    "indexPatterns": Object {
-                      "index1": Object {
-                        "id": "index1",
-                        "isPersisted": [Function],
-                      },
-                    },
-                  },
-                  "datasourceLayers": Object {
-                    "a": Object {
-                      "datasourceId": "testDatasource",
-                      "getFilters": [MockFunction],
-                      "getMaxPossibleNumValues": [MockFunction],
-                      "getOperationForColumnId": [MockFunction],
-                      "getSourceId": [MockFunction],
-                      "getTableSpec": [MockFunction],
-                      "getVisualDefaults": [MockFunction],
-                      "hasDefaultTimeField": [MockFunction],
-                      "isTextBasedLanguage": [MockFunction] {
-                        "calls": Array [
-                          Array [],
-                          Array [],
-                        ],
-                        "results": Array [
-                          Object {
-                            "type": "return",
-                            "value": false,
-                          },
-                          Object {
-                            "type": "return",
-                            "value": false,
-                          },
-                        ],
-                      },
-                    },
-                  },
-                  "dateRange": Object {
-                    "fromDate": "2021-01-10T04:00:00.000Z",
-                    "toDate": "2021-01-10T08:00:00.000Z",
-                  },
-                },
-                "layerId": "layer1",
-                "state": Object {},
-              },
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": Object {
-                "groups": Array [
-                  Object {
-                    "accessors": Array [],
-                    "dataTestSubj": "mockVisA",
-                    "filterOperations": [MockFunction],
-                    "groupId": "a",
-                    "groupLabel": "a",
-                    "layerId": "layer1",
-                    "supportsMoreColumns": true,
-                  },
-                ],
-              },
-            },
-            Object {
-              "type": "return",
-              "value": Object {
-                "groups": Array [
-                  Object {
-                    "accessors": Array [],
-                    "dataTestSubj": "mockVisA",
-                    "filterOperations": [MockFunction],
-                    "groupId": "a",
-                    "groupLabel": "a",
-                    "layerId": "layer1",
-                    "supportsMoreColumns": true,
-                  },
-                ],
-              },
-            },
-          ],
+  it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
+    const updateByRefInputSpy = jest.fn();
+
+    renderConfigFlyout({
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+    });
+    userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+    expect(updateByRefInputSpy).toHaveBeenCalled();
+  });
+
+  it('should call the saveByRef callback if apply button is clicked and savedObjectId exists', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const saveByRefSpy = jest.fn();
+
+    renderConfigFlyout({
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+      saveByRef: saveByRefSpy,
+    });
+    userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    expect(updateByRefInputSpy).toHaveBeenCalled();
+    expect(saveByRefSpy).toHaveBeenCalled();
+  });
+
+  it('should not display the editor if canEditTextBasedQuery prop is false', async () => {
+    renderConfigFlyout({
+      canEditTextBasedQuery: false,
+    });
+    expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+  });
+
+  it('should not display the editor if canEditTextBasedQuery prop is true but the query is not text based', async () => {
+    renderConfigFlyout({
+      canEditTextBasedQuery: true,
+      attributes: {
+        ...lensAttributes,
+        state: {
+          ...lensAttributes.state,
+          query: {
+            type: 'kql',
+            query: '',
+          } as unknown as Query,
         },
-        "getDescription": [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {},
-            ],
-            Array [
-              Object {},
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": Object {
-                "label": "",
-              },
-            },
-            Object {
-              "type": "return",
-              "value": Object {
-                "label": "",
-              },
-            },
-          ],
-        },
-        "getLayerIds": [MockFunction] {
-          "calls": Array [
-            Array [
-              Object {},
-            ],
-            Array [
-              Object {},
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": Array [
-                "layer1",
-              ],
-            },
-            Object {
-              "type": "return",
-              "value": Array [
-                "layer1",
-              ],
-            },
-          ],
-        },
-        "getLayerType": [MockFunction] {
-          "calls": Array [
-            Array [
-              "layer1",
-              Object {},
-            ],
-            Array [
-              "layer1",
-              Object {},
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": "data",
-            },
-            Object {
-              "type": "return",
-              "value": "data",
-            },
-          ],
-        },
-        "getRenderEventCounters": [MockFunction],
-        "getSuggestions": [MockFunction],
-        "getSupportedLayers": [MockFunction],
-        "getVisualizationTypeId": [MockFunction],
-        "id": "testVis",
-        "initialize": [MockFunction],
-        "removeDimension": [MockFunction],
-        "removeLayer": [MockFunction],
-        "setDimension": [MockFunction],
-        "switchVisualizationType": [MockFunction],
-        "toExpression": [MockFunction],
-        "toPreviewExpression": [MockFunction],
-        "visualizationTypes": Array [
-          Object {
-            "groupLabel": "testVisGroup",
-            "icon": "empty",
-            "id": "testVis",
-            "label": "TEST",
-          },
-        ],
+      },
+    });
+    expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+  });
+
+  it('should not display the suggestions if hidesSuggestions prop is true', async () => {
+    renderConfigFlyout({
+      hidesSuggestions: true,
+    });
+    expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
+  });
+
+  it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {
+    renderConfigFlyout(
+      {
+        canEditTextBasedQuery: true,
+      },
+      {
+        esql: 'from index1 | limit 10',
       }
-    `);
+    );
+    expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+  });
+  it('save button is disabled if no changes have been made', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const saveByRefSpy = jest.fn();
+    const newProps = {
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+      saveByRef: saveByRefSpy,
+      attributes: lensAttributes,
+    };
+    // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
+    // @ts-ignore
+    newProps.attributes.state.datasourceStates.testDatasource = 'state';
+    renderConfigFlyout(newProps);
+    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
+  });
+  it('save button should be disabled if expression cannot be generated', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const saveByRefSpy = jest.fn();
+    const newProps = {
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+      saveByRef: saveByRefSpy,
+      datasourceMap: {
+        ...datasourceMap,
+        testDatasource: {
+          ...datasourceMap.testDatasource,
+          toExpression: jest.fn(() => null),
+        },
+      },
+    };
+
+    renderConfigFlyout(newProps);
+    expect(screen.getByRole('button', { name: /apply changes/i })).toBeDisabled();
   });
 });

@@ -56,12 +56,16 @@ const externals = {
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
   'io-ts': '__kbnSharedDeps__.IoTs',
+  '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
+  'react-redux': '__kbnSharedDeps__.ReactRedux',
+  redux: '__kbnSharedDeps__.Redux',
+  immer: '__kbnSharedDeps__.Immer',
+  reselect: '__kbnSharedDeps__.Reselect',
 
   /**
    * big deps which are locked to a single version
    */
   rxjs: '__kbnSharedDeps__.Rxjs',
-  'rxjs/operators': '__kbnSharedDeps__.RxjsOperators',
   numeral: '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/numeral': '__kbnSharedDeps__.ElasticNumeral',
   '@elastic/charts': '__kbnSharedDeps__.ElasticCharts',
@@ -72,7 +76,7 @@ const externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
 
   // transient dep of eui
-  'react-beautiful-dnd': '__kbnSharedDeps__.ReactBeautifulDnD',
+  '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
   fflate: '__kbnSharedDeps__.Fflate',
@@ -84,13 +88,16 @@ const externals = {
   uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
+  '@kbn/search-errors': '__kbnSharedDeps__.KbnSearchErrors',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  '@kbn/shared-ux-error-boundary': '__kbnSharedDeps__.KbnSharedUxErrorBoundary',
   '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
+  '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

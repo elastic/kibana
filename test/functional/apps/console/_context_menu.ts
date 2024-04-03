@@ -16,18 +16,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/155029
-  describe.skip('console context menu', function testContextMenu() {
+  describe('console context menu', function testContextMenu() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.closeHelpIfExists();
       await PageObjects.console.clearTextArea();
+      await PageObjects.console.enterRequest();
     });
 
     it('should open context menu', async () => {
       expect(await PageObjects.console.isContextMenuOpen()).to.be(false);
-      await PageObjects.console.enterRequest();
       await PageObjects.console.clickContextMenu();
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
     });
@@ -44,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickCopyAsCurlButton();
 
-      const resultToast = await toasts.getToastElement(1);
+      const resultToast = await toasts.getElementByIndex(1);
       const toastText = await resultToast.getVisibleText();
 
       if (toastText.includes('Write permission denied')) {
@@ -80,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchTab(0);
     });
 
-    it('should auto indent when auto indent button is clicked', async () => {
+    it('should toggle auto indent when auto indent button is clicked', async () => {
       await PageObjects.console.clearTextArea();
       await PageObjects.console.enterRequest('GET _search\n{"query": {"match_all": {}}}');
       await PageObjects.console.clickContextMenu();
@@ -90,10 +89,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const request = await PageObjects.console.getRequest();
         expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
       });
-    });
 
-    it('should condense when auto indent button is clicked again', async () => {
       await PageObjects.console.clickContextMenu();
+      // Click the auto-indent button again to condense request
       await PageObjects.console.clickAutoIndentButton();
       // Retry until the request is condensed
       await retry.try(async () => {

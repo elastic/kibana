@@ -108,12 +108,6 @@ const openMenuAndClickButton = (rendered, rowIndex, buttonSelector) => {
   rendered.update();
 };
 
-const testEditor = (rendered, buttonSelector, rowIndex = 0) => {
-  openMenuAndClickButton(rendered, rowIndex, buttonSelector);
-  rendered.update();
-  snapshot(findTestSubject(rendered, 'detailPanelTabSelected').text());
-};
-
 const testAction = (rendered, buttonSelector, indexName = 'testy0') => {
   const rowIndex = namesText(rendered).indexOf(indexName);
   // This is leaking some implementation details about how Redux works. Not sure exactly what's going on
@@ -144,7 +138,7 @@ const getActionMenuButtons = (rendered) => {
 describe('index table', () => {
   const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
 
-  beforeEach(() => {
+  const setupMockComponent = (dependenciesOverride) => {
     // Mock initialization of services
     const services = {
       extensionsService: new ExtensionsService(),
@@ -168,12 +162,18 @@ describe('index table', () => {
       },
       plugins: {},
       url: urlServiceMock,
+      // Default stateful configuration
+      config: {
+        enableLegacyTemplates: true,
+        enableIndexActions: true,
+        enableIndexStats: true,
+      },
     };
 
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <AppContextProvider value={appDependencies}>
+          <AppContextProvider value={{ ...appDependencies, ...dependenciesOverride }}>
             <AppWithoutRouter />
           </AppContextProvider>
         </MemoryRouter>
@@ -181,6 +181,11 @@ describe('index table', () => {
     );
 
     store.dispatch(loadIndicesSuccess({ indices }));
+  };
+
+  beforeEach(() => {
+    // Mock initialization of services
+    setupMockComponent();
 
     httpRequestsMockHelpers.setLoadIndicesResponse(indices);
     httpRequestsMockHelpers.setReloadIndicesResponse(indices);
@@ -207,7 +212,7 @@ describe('index table', () => {
     perPageButton.simulate('click');
     rendered.update();
 
-    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
+    const fiftyButton = rendered.find('button.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);
@@ -272,7 +277,7 @@ describe('index table', () => {
     snapshot(indicesInTable);
 
     // Enable "Show hidden indices"
-    const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
+    const switchControl = findTestSubject(rendered, 'checkboxToggles-includeHiddenIndices');
     switchControl.simulate('click');
 
     // We do expect now the `.admin1` and `.admin3` indices to be in the list
@@ -313,20 +318,6 @@ describe('index table', () => {
     nameHeader.simulate('click');
     rendered.update();
     snapshot(namesText(rendered));
-  });
-
-  test('should open the index detail slideout when the index name is clicked', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-
-    expect(findTestSubject(rendered, 'indexDetailFlyout').length).toBe(0);
-
-    const indexNameLink = names(rendered).at(0);
-    indexNameLink.simulate('click');
-    rendered.update();
-    expect(findTestSubject(rendered, 'indexDetailFlyout').length).toBe(1);
-    expect(findTestSubject(rendered, 'indexDetailFlyoutDiscover').length).toBe(1);
   });
 
   test('should show the right context menu options when one index is selected and open', async () => {
@@ -479,31 +470,24 @@ describe('index table', () => {
     testAction(rendered, 'openIndexMenuButton', 'testy1');
   });
 
-  test('show settings button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-    testEditor(rendered, 'showSettingsIndexMenuButton');
-  });
+  describe('Common index actions', () => {
+    beforeEach(() => {
+      // Mock initialization of services; set enableIndexActions=false to verify config behavior
+      setupMockComponent({ config: { enableIndexActions: false, enableLegacyTemplates: true } });
+    });
 
-  test('show mappings button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-    testEditor(rendered, 'showMappingsIndexMenuButton');
-  });
+    test('Common index actions should be hidden when feature is turned off', async () => {
+      const rendered = mountWithIntl(component);
+      await runAllPromises();
+      rendered.update();
 
-  test('show stats button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-    testEditor(rendered, 'showStatsIndexMenuButton');
-  });
-
-  test('edit index button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-    testEditor(rendered, 'editIndexMenuButton');
+      expect(findTestSubject(rendered, 'showStatsIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'closeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'forcemergeIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'refreshIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'clearCacheIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'flushIndexMenuButton').length).toBe(0);
+      expect(findTestSubject(rendered, 'unfreezeIndexMenuButton').length).toBe(0);
+    });
   });
 });

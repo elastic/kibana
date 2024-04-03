@@ -7,6 +7,7 @@
 
 /** endpoint data streams that are used for host isolation  */
 import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+import { EndpointSortableField } from './types';
 
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
@@ -28,14 +29,20 @@ export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
 /** index that the metadata transform writes to (destination) and that is used by endpoint APIs */
 export const metadataCurrentIndexPattern = 'metrics-endpoint.metadata_current_*';
 
+// endpoint package V2 has an additional prefix in the transform names
+const PACKAGE_V2_PREFIX = 'logs-';
+
 /** The metadata Transform Name prefix with NO (package) version) */
 export const metadataTransformPrefix = 'endpoint.metadata_current-default';
+export const METADATA_CURRENT_TRANSFORM_V2 = `${PACKAGE_V2_PREFIX}${metadataTransformPrefix}`;
 
 // metadata transforms pattern for matching all metadata transform ids
 export const METADATA_TRANSFORMS_PATTERN = 'endpoint.metadata_*';
+export const METADATA_TRANSFORMS_PATTERN_V2 = `${PACKAGE_V2_PREFIX}${METADATA_TRANSFORMS_PATTERN}`;
 
 // united metadata transform id
 export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
+export const METADATA_UNITED_TRANSFORM_V2 = `${PACKAGE_V2_PREFIX}${METADATA_UNITED_TRANSFORM}`;
 
 // united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
@@ -44,6 +51,8 @@ export const POLICY_RESPONSE_INDEX = 'metrics-endpoint.policy-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
+
+export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
 
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
@@ -60,6 +69,7 @@ export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
 export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_updates_note/{package_policy_id}`;
 
 /** Suggestions routes */
 export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
@@ -93,10 +103,15 @@ export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{acti
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
 export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 
+/** Endpoint Agent Routes */
+export const ENDPOINT_AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;
+
 export const failedFleetActionErrorCode = '424';
 
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+export const ENDPOINT_DEFAULT_SORT_FIELD = EndpointSortableField.ENROLLED_AT;
+export const ENDPOINT_DEFAULT_SORT_DIRECTION = 'desc';
 
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,
@@ -105,3 +120,6 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
 export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
+
+/** Search strategy keys */
+export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';

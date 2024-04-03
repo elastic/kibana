@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
-import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import type {
+  CombinedJob,
+  Detector,
+  JobId,
+} from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import {
-  ComboBoxOption,
-  EMPTY_FIELD_VALUE_LABEL,
-  EntityControlProps,
-} from '../entity_control/entity_control';
+import type { ComboBoxOption, EntityControlProps } from '../entity_control/entity_control';
+import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import {
   ML_ENTITY_FIELDS_CONFIG,
@@ -30,7 +34,7 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../common/types/storage';
-import { FieldDefinition } from '../../../services/results_service/result_service_rx';
+import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
 
@@ -67,12 +71,13 @@ const getDefaultFieldConfig = (
 };
 
 interface SeriesControlsProps {
-  selectedDetectorIndex: number;
-  selectedJobId: JobId;
-  bounds: any;
   appStateHandler: Function;
+  bounds: any;
+  functionDescription?: string;
+  job?: CombinedJob | MlJob;
+  selectedDetectorIndex: number;
   selectedEntities: Record<string, any>;
-  functionDescription: string;
+  selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
 }
 
@@ -80,13 +85,14 @@ interface SeriesControlsProps {
  * Component for handling the detector and entities controls.
  */
 export const SeriesControls: FC<SeriesControlsProps> = ({
-  bounds,
-  selectedDetectorIndex,
-  selectedJobId,
   appStateHandler,
+  bounds,
   children,
-  selectedEntities,
   functionDescription,
+  job,
+  selectedDetectorIndex,
+  selectedEntities,
+  selectedJobId,
   setFunctionDescription,
 }) => {
   const {
@@ -97,7 +103,11 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     },
   } = useMlKibana();
 
-  const selectedJob = useMemo(() => mlJobService.getJob(selectedJobId), [selectedJobId]);
+  const selectedJob: CombinedJob | MlJob = useMemo(
+    () => job ?? mlJobService.getJob(selectedJobId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId]
+  );
 
   const isModelPlotEnabled = !!selectedJob.model_plot_config?.enabled;
 
@@ -108,11 +118,17 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     index: number;
     detector_description: Detector['detector_description'];
   }> = useMemo(() => {
-    return getViewableDetectors(selectedJob);
+    return getViewableDetectors(selectedJob as CombinedJob);
   }, [selectedJob]);
 
   const entityControls = useMemo(() => {
-    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
+    return getControlsForDetector(
+      selectedDetectorIndex,
+      selectedEntities,
+      selectedJobId,
+      selectedJob as CombinedJob
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
   const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<
@@ -318,6 +334,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
           );
         })}
         <PlotByFunctionControls
+          job={job}
           selectedJobId={selectedJobId}
           selectedDetectorIndex={selectedDetectorIndex}
           selectedEntities={selectedEntities}

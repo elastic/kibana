@@ -25,9 +25,11 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
   buildNum: 42,
   buildSha: 'buildSha',
+  buildShaShort: 'buildShaShort',
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
   dist: false,
   version: '8.0.0',
+  buildFlavor: 'traditional',
   ...parts,
 });
 
@@ -61,7 +63,7 @@ describe('bootstrapRenderer', () => {
       auth,
       packageInfo,
       uiPlugins,
-      serverBasePath: '/base-path',
+      baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
     });
   });
 
@@ -92,7 +94,7 @@ describe('bootstrapRenderer', () => {
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
     });
 
-    it('calls getThemeTag with the values from the UiSettingsClient when the UserSettingsService is not provided', async () => {
+    it('calls getThemeTag with the values from the UiSettingsClient (true/dark) when the UserSettingsService is not provided', async () => {
       uiSettingsClient.get.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest();
@@ -109,14 +111,31 @@ describe('bootstrapRenderer', () => {
       });
     });
 
-    it('calls getThemeTag with values from the UserSettingsService when provided', async () => {
+    it('calls getThemeTag with the values from the UiSettingsClient (false/light) when the UserSettingsService is not provided', async () => {
+      uiSettingsClient.get.mockResolvedValue(false);
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        themeVersion: 'v8',
+        darkMode: false,
+      });
+    });
+
+    it('calls getThemeTag with values (true/dark) from the UserSettingsService when provided', async () => {
       userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(true);
 
       renderer = bootstrapRendererFactory({
         auth,
         packageInfo,
         uiPlugins,
-        serverBasePath: '/base-path',
+        baseHref: '/base-path',
         userSettingsService,
       });
 
@@ -135,14 +154,40 @@ describe('bootstrapRenderer', () => {
       });
     });
 
-    it('calls getThemeTag with values from the UiSettingsClient when values from UserSettingsService are `undefined`', async () => {
+    it('calls getThemeTag with values (false/light) from the UserSettingsService when provided', async () => {
+      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(false);
+
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: '/base-path',
+        userSettingsService,
+      });
+
+      uiSettingsClient.get.mockResolvedValue(true);
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        themeVersion: 'v8',
+        darkMode: false,
+      });
+    });
+
+    it('calls getThemeTag with values from the UiSettingsClient when values (false/light) from UserSettingsService are `undefined`', async () => {
       userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,
         packageInfo,
         uiPlugins,
-        serverBasePath: '/base-path',
+        baseHref: '/base-path',
         userSettingsService,
       });
 
@@ -158,6 +203,32 @@ describe('bootstrapRenderer', () => {
       expect(getThemeTagMock).toHaveBeenCalledWith({
         themeVersion: 'v8',
         darkMode: false,
+      });
+    });
+
+    it('calls getThemeTag with values from the UiSettingsClient when values (true/dark) from UserSettingsService are `undefined`', async () => {
+      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+
+      renderer = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: '/base-path',
+        userSettingsService,
+      });
+
+      uiSettingsClient.get.mockResolvedValue(true);
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        themeVersion: 'v8',
+        darkMode: true,
       });
     });
   });
@@ -196,6 +267,23 @@ describe('bootstrapRenderer', () => {
       expect(getThemeTagMock).toHaveBeenCalledWith({
         themeVersion: 'v8',
         darkMode: true,
+      });
+    });
+
+    it('calls getThemeTag with the correct parameters when darkMode is `system`', async () => {
+      uiSettingsClient.get.mockResolvedValue('system');
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await renderer({
+        request,
+        uiSettingsClient,
+      });
+
+      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+      expect(getThemeTagMock).toHaveBeenCalledWith({
+        themeVersion: 'v8',
+        darkMode: false,
       });
     });
   });
@@ -249,7 +337,7 @@ describe('bootstrapRenderer', () => {
       expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
         isAnonymousPage,
         uiPlugins,
-        regularBundlePath: '/base-path/42/bundles',
+        bundlesHref: '/base-path/buildShaShort/bundles',
       });
     });
   });
@@ -268,7 +356,7 @@ describe('bootstrapRenderer', () => {
 
     expect(getJsDependencyPathsMock).toHaveBeenCalledTimes(1);
     expect(getJsDependencyPathsMock).toHaveBeenCalledWith(
-      '/base-path/42/bundles',
+      '/base-path/buildShaShort/bundles',
       pluginsBundlePaths
     );
   });

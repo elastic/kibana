@@ -15,8 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160929
-  describe.skip('Snapshot restore', function () {
+  describe('Snapshot restore', function () {
     before(async () => {
       await security.testUser.setRoles(['snapshot_restore_user'], { skipBrowserRefresh: true });
       await pageObjects.common.navigateToApp('snapshotRestore');
@@ -24,12 +23,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Create a repository
       await es.snapshot.createRepository({
         name: 'my-repository',
-        type: 'fs',
-        settings: {
-          location: '/tmp/es-backups/',
-          compress: true,
-        },
         verify: true,
+        repository: {
+          type: 'fs',
+          settings: {
+            location: '/tmp/es-backups/',
+            compress: true,
+          },
+        },
       });
 
       // Create a snapshot
@@ -39,7 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       // Wait for snapshot to be ready
-      await pageObjects.common.sleep(1000);
+      await pageObjects.common.sleep(2000);
 
       // Refresh page so that the snapshot shows up in the snapshots table
       await browser.refresh();

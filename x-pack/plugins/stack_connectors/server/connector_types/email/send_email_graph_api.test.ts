@@ -6,6 +6,7 @@
  */
 jest.mock('axios', () => ({
   create: jest.fn(),
+  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
 }));
 
 import axios from 'axios';
@@ -31,7 +32,11 @@ describe('sendEmailGraphApi', () => {
       status: 202,
     });
     await sendEmailGraphApi(
-      { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
+      {
+        options: getSendEmailOptions(),
+        messageHTML: 'test1',
+        headers: {},
+      },
       logger,
       configurationUtilities
     );
@@ -90,6 +95,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -98,6 +104,7 @@ describe('sendEmailGraphApi', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
@@ -107,7 +114,7 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('email was sent on behalf of the user "from" mailbox', async () => {
@@ -180,6 +187,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -188,6 +196,7 @@ describe('sendEmailGraphApi', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
@@ -197,19 +206,19 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('sendMail request was sent to the custom configured Graph API URL', async () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
+    configurationUtilities.getMicrosoftGraphApiUrl.mockReturnValueOnce('https://test');
     await sendEmailGraphApi(
       {
         options: getSendEmailOptions(),
         messageHTML: 'test3',
         headers: {},
-        graphApiUrl: 'https://test',
       },
       logger,
       configurationUtilities
@@ -269,6 +278,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -277,6 +287,7 @@ describe('sendEmailGraphApi', () => {
             "scheduling": "lifo",
             "sockets": Object {},
             "totalSocketCount": 0,
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "maxContentLength": 1000000,
@@ -286,7 +297,7 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('throw the exception and log the proper error if message was not sent successfuly', async () => {

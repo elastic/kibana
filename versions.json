@@ -2,19 +2,19 @@
   "notice": "This file is not maintained outside of the main branch and should only be used for tooling.",
   "versions": [
     {
-      "version": "8.10.0",
+      "version": "8.14.0",
       "branch": "main",
       "currentMajor": true,
       "currentMinor": true
     },
     {
-      "version": "8.9.0",
-      "branch": "8.9",
+      "version": "8.13.2",
+      "branch": "8.13",
       "currentMajor": true,
       "previousMinor": true
     },
     {
-      "version": "7.17.12",
+      "version": "7.17.20",
       "branch": "7.17",
       "previousMajor": true
     }

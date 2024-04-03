@@ -5,57 +5,55 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '../../../common/api';
+import { CaseSeverity } from '../../../common/types/domain';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { screen, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
-describe('Severity form field', () => {
-  const onSeverityChange = jest.fn();
+// FLAKY: https://github.com/elastic/kibana/issues/176336
+describe.skip('Severity form field', () => {
+  const onChange = jest.fn();
   let appMockRender: AppMockRenderer;
   const props = {
-    isLoading: false,
-    selectedSeverity: CaseSeverity.LOW,
-    isDisabled: false,
-    onSeverityChange,
+    selectedOptionKeys: [],
+    onChange,
   };
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
   });
-  it('renders', () => {
-    const result = appMockRender.render(<SeverityFilter {...props} />);
-    expect(result.getByTestId('case-severity-filter')).not.toHaveAttribute('disabled');
-  });
 
-  // default to LOW in this test configuration
-  it('defaults to the correct value', () => {
-    const result = appMockRender.render(<SeverityFilter {...props} />);
-    // Popver span and ID was removed here:
-    // https://github.com/elastic/eui/pull/6630#discussion_r1123655995
-    expect(result.getAllByTestId('case-severity-filter-low').length).toBe(1);
+  it('renders', async () => {
+    appMockRender.render(<SeverityFilter {...props} />);
+    expect(await screen.findByTestId('options-filter-popover-button-severity')).toBeInTheDocument();
+    expect(await screen.findByTestId('options-filter-popover-button-severity')).not.toBeDisabled();
+
+    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    await waitForEuiPopoverOpen();
+
+    expect(await screen.findByRole('option', { name: CaseSeverity.LOW })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: CaseSeverity.MEDIUM })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: CaseSeverity.HIGH })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: CaseSeverity.CRITICAL })).toBeInTheDocument();
+    expect((await screen.findAllByRole('option')).length).toBe(4);
   });
 
   it('selects the correct value when changed', async () => {
-    const result = appMockRender.render(<SeverityFilter {...props} />);
-    userEvent.click(result.getByTestId('case-severity-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-severity-filter-high'));
-    await waitFor(() => {
-      expect(onSeverityChange).toHaveBeenCalledWith('high');
-    });
-  });
+    appMockRender.render(<SeverityFilter {...props} />);
 
-  it('selects the correct value when changed (all)', async () => {
-    const result = appMockRender.render(<SeverityFilter {...props} />);
-    userEvent.click(result.getByTestId('case-severity-filter'));
+    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-severity-filter-all'));
+    userEvent.click(await screen.findByRole('option', { name: 'high' }));
+
     await waitFor(() => {
-      expect(onSeverityChange).toHaveBeenCalledWith('all');
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'severity',
+        selectedOptionKeys: ['high'],
+      });
     });
   });
 });

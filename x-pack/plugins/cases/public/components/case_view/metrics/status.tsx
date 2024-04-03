@@ -7,8 +7,17 @@
 
 import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import type { EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
@@ -20,11 +29,12 @@ import {
 } from './translations';
 import { getMaybeDate } from '../../formatted_date/maybe_date';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
-import { getEmptyTagValue } from '../../empty_value';
+import { getEmptyCellValue } from '../../empty_value';
 
 export const CaseStatusMetrics = React.memo(
   ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
     const lifespanMetrics = useGetLifespanMetrics(metrics, features);
+    const { euiTheme } = useEuiTheme();
 
     if (!lifespanMetrics) {
       return null;
@@ -37,6 +47,7 @@ export const CaseStatusMetrics = React.memo(
           <CaseStatusMetricsItem
             title={CASE_CREATED}
             value={<CreationDate date={lifespanMetrics.creationDate} />}
+            euiTheme={euiTheme}
           />
         ),
         dataTestSubject: 'case-metrics-lifespan-item-creation-date',
@@ -47,6 +58,7 @@ export const CaseStatusMetrics = React.memo(
           <CaseStatusMetricsItem
             title={CASE_IN_PROGRESS_DURATION}
             value={getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration)}
+            euiTheme={euiTheme}
           />
         ),
         dataTestSubject: 'case-metrics-lifespan-item-inProgress-duration',
@@ -57,6 +69,7 @@ export const CaseStatusMetrics = React.memo(
           <CaseStatusMetricsItem
             title={CASE_OPEN_DURATION}
             value={formatDuration(lifespanMetrics.statusInfo.openDuration)}
+            euiTheme={euiTheme}
           />
         ),
         dataTestSubject: 'case-metrics-lifespan-item-open-duration',
@@ -68,6 +81,7 @@ export const CaseStatusMetrics = React.memo(
             title={CASE_OPEN_TO_CLOSE_DURATION}
             value={getOpenCloseDuration(lifespanMetrics.creationDate, lifespanMetrics.closeDate)}
             reopens={lifespanMetrics.statusInfo.reopenDates}
+            euiTheme={euiTheme}
           />
         ),
         dataTestSubject: 'case-metrics-lifespan-item-open-to-close-duration',
@@ -100,7 +114,7 @@ const useGetLifespanMetrics = (
       statusInfo: { inProgressDuration: 0, reopenDates: [], openDuration: 0 },
     };
 
-    if (!features.includes('lifespan')) {
+    if (!features.includes(CaseMetricsFeature.LIFESPAN)) {
       return;
     }
 
@@ -111,7 +125,7 @@ const useGetLifespanMetrics = (
 const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
   const creationDate = getMaybeDate(date);
   if (!creationDate.isValid()) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   }
 
   return (
@@ -126,7 +140,7 @@ CreationDate.displayName = 'CreationDate';
 
 const getInProgressDuration = (duration: number) => {
   if (duration <= 0) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   }
 
   return formatDuration(duration);
@@ -151,17 +165,20 @@ const getOpenCloseDuration = (openDate: string, closeDate: string | null): strin
   return formatDuration(closeDateObject.diff(openDateObject));
 };
 
-const Title = euiStyled(EuiFlexItem)`
-  font-size: ${({ theme }) => theme.eui.euiSizeM};
-  font-weight: bold;
-`;
-
 const CaseStatusMetricsItem: React.FC<{
   title: string;
   value: JSX.Element | string;
-}> = React.memo(({ title, value }) => (
+  euiTheme: EuiThemeComputed<{}>;
+}> = React.memo(({ title, value, euiTheme }) => (
   <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-    <Title>{title}</Title>
+    <EuiFlexItem
+      css={css`
+        font-size: ${euiTheme.size.m};
+        font-weight: bold;
+      `}
+    >
+      {title}
+    </EuiFlexItem>
     <EuiFlexItem>{value}</EuiFlexItem>
   </EuiFlexGroup>
 ));
@@ -171,12 +188,20 @@ const CaseStatusMetricsOpenCloseDuration: React.FC<{
   title: string;
   value?: string;
   reopens: string[];
-}> = React.memo(({ title, value, reopens }) => {
+  euiTheme: EuiThemeComputed<{}>;
+}> = React.memo(({ title, value, reopens, euiTheme }) => {
   const valueText = getOpenCloseDurationText(value, reopens);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-      <Title>{title}</Title>
+      <EuiFlexItem
+        css={css`
+          font-size: ${euiTheme.size.m};
+          font-weight: bold;
+        `}
+      >
+        {title}
+      </EuiFlexItem>
       {value != null && caseWasReopened(reopens) ? (
         <ValueWithExplanationIcon value={valueText} explanationValues={reopens} />
       ) : (
@@ -189,7 +214,7 @@ CaseStatusMetricsOpenCloseDuration.displayName = 'OpenCloseDuration';
 
 const getOpenCloseDurationText = (value: string | undefined, reopens: string[]) => {
   if (value == null) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   } else if (reopens.length > 0) {
     return `${value} ${CASE_REOPENED}`;
   }

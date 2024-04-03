@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,6 +17,7 @@ import type { SideEffectSimulator, ResolverProps } from '../../types';
 import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
 import { SideEffectContext } from '../../view/side_effect_context';
 import type { State } from '../../../common/store/types';
+import { TestProviders } from '../../../common/mock';
 
 enableMapSet();
 
@@ -64,6 +63,7 @@ type MockResolverProps = {
  * trigger a simulated resize on the root node reference any time it changes. This simulates the layout process a real
  * browser would do when an element is attached to the DOM.
  */
+// eslint-disable-next-line react/display-name
 export const MockResolver = React.memo((props: MockResolverProps) => {
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
 
@@ -94,23 +94,25 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
   }, [props.rasterWidth, props.rasterHeight, props.sideEffectSimulator.controls, resolverElement]);
 
   return (
-    <I18nProvider>
-      <Router history={props.history}>
-        <KibanaContextProvider services={props.coreStart}>
-          <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
-            <Provider store={props.store}>
-              <ResolverWithoutProviders
-                ref={resolverRef}
-                databaseDocumentID={props.databaseDocumentID}
-                resolverComponentInstanceID={props.resolverComponentInstanceID}
-                indices={props.indices}
-                shouldUpdate={props.shouldUpdate}
-                filters={props.filters}
-              />
-            </Provider>
-          </SideEffectContext.Provider>
-        </KibanaContextProvider>
-      </Router>
-    </I18nProvider>
+    <TestProviders>
+      <I18nProvider>
+        <Router history={props.history}>
+          <KibanaContextProvider services={props.coreStart}>
+            <SideEffectContext.Provider value={props.sideEffectSimulator.mock}>
+              <Provider store={props.store}>
+                <ResolverWithoutProviders
+                  ref={resolverRef}
+                  databaseDocumentID={props.databaseDocumentID}
+                  resolverComponentInstanceID={props.resolverComponentInstanceID}
+                  indices={props.indices}
+                  shouldUpdate={props.shouldUpdate}
+                  filters={props.filters}
+                />
+              </Provider>
+            </SideEffectContext.Provider>
+          </KibanaContextProvider>
+        </Router>
+      </I18nProvider>
+    </TestProviders>
   );
 });

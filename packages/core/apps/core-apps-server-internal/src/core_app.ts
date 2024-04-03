@@ -7,8 +7,8 @@
  */
 
 import { stringify } from 'querystring';
-import { Env } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
+import { Env, IConfigService } from '@kbn/config';
+import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -22,6 +22,9 @@ import type {
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { InternalStaticAssets } from '@kbn/core-http-server-internal';
+import { firstValueFrom, map, type Observable } from 'rxjs';
+import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
 import { registerBundleRoutes } from './bundle_routes';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
@@ -31,6 +34,7 @@ interface CommonRoutesParams {
   httpResources: HttpResources;
   basePath: IBasePath;
   uiPlugins: UiPlugins;
+  staticAssets: InternalStaticAssets;
   onResourceNotFound: (
     req: KibanaRequest,
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
@@ -41,10 +45,16 @@ interface CommonRoutesParams {
 export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;
+  private readonly configService: IConfigService;
+  private readonly config$: Observable<CoreAppConfig>;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
     this.env = core.env;
+    this.configService = core.configService;
+    this.config$ = this.configService
+      .atPath<CoreAppConfigType>(CoreAppPath)
+      .pipe(map((rawCfg) => new CoreAppConfig(rawCfg)));
   }
 
   preboot(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -53,14 +63,15 @@ export class CoreAppsService {
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
       this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
-      this.registerStaticDirs(corePreboot);
+      this.registerStaticDirs(corePreboot, uiPlugins);
     }
   }
 
-  setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  async setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
-    this.registerDefaultRoutes(coreSetup, uiPlugins);
-    this.registerStaticDirs(coreSetup);
+    const config = await firstValueFrom(this.config$);
+    this.registerDefaultRoutes(coreSetup, uiPlugins, config);
+    this.registerStaticDirs(coreSetup, uiPlugins);
   }
 
   private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -68,10 +79,11 @@ export class CoreAppsService {
       this.registerCommonDefaultRoutes({
         basePath: corePreboot.http.basePath,
         httpResources: corePreboot.httpResources.createRegistrar(router),
+        staticAssets: corePreboot.http.staticAssets,
         router,
         uiPlugins,
         onResourceNotFound: async (req, res) =>
-          // THe API consumers might call various Kibana APIs (e.g. `/api/status`) when Kibana is still at the preboot
+          // The API consumers might call various Kibana APIs (e.g. `/api/status`) when Kibana is still at the preboot
           // stage, and the main HTTP server that registers API handlers isn't up yet. At this stage we don't know if
           // the API endpoint exists or not, and hence cannot reply with `404`. We also should not reply with completely
           // unexpected response (`200 text/html` for the Core app). The only suitable option is to reply with `503`
@@ -88,27 +100,35 @@ export class CoreAppsService {
     });
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
+  private registerDefaultRoutes(
+    coreSetup: InternalCoreSetup,
+    uiPlugins: UiPlugins,
+    config: CoreAppConfig
+  ) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
-    router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const { uiSettings } = await context.core;
-      const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
-      const basePath = httpSetup.basePath.get(req);
-      const url = `${basePath}${defaultRoute}`;
+    router.get(
+      { path: '/', validate: false, options: { access: 'public' } },
+      async (context, req, res) => {
+        const { uiSettings } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const basePath = httpSetup.basePath.get(req);
+        const url = `${basePath}${defaultRoute}`;
 
-      return res.redirected({
-        headers: {
-          location: url,
-        },
-      });
-    });
+        return res.redirected({
+          headers: {
+            location: url,
+          },
+        });
+      }
+    );
 
     this.registerCommonDefaultRoutes({
       basePath: coreSetup.http.basePath,
       httpResources: resources,
+      staticAssets: coreSetup.http.staticAssets,
       router,
       uiPlugins,
       onResourceNotFound: async (req, res) => res.notFound(),
@@ -144,11 +164,57 @@ export class CoreAppsService {
         }
       }
     );
+
+    if (config.allowDynamicConfigOverrides) {
+      this.registerInternalCoreSettingsRoute(router);
+    }
+  }
+
+  /**
+   * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
+   * @param router {@link IRouter}
+   * @private
+   */
+  private registerInternalCoreSettingsRoute(router: IRouter) {
+    router.versioned
+      .put({
+        path: '/internal/core/_settings',
+        access: 'internal',
+        options: {
+          tags: ['access:updateDynamicConfig'],
+        },
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: {
+              body: schema.recordOf(schema.string(), schema.any()),
+            },
+            response: {
+              '200': { body: schema.object({ ok: schema.boolean() }) },
+            },
+          },
+        },
+        async (context, req, res) => {
+          try {
+            this.configService.setDynamicConfigOverrides(req.body);
+          } catch (err) {
+            if (err instanceof ValidationError) {
+              return res.badRequest({ body: err });
+            }
+            throw err;
+          }
+
+          return res.ok({ body: { ok: true } });
+        }
+      );
   }
 
   private registerCommonDefaultRoutes({
     router,
     basePath,
+    staticAssets,
     uiPlugins,
     onResourceNotFound,
     httpResources,
@@ -198,22 +264,37 @@ export class CoreAppsService {
     registerBundleRoutes({
       router,
       uiPlugins,
+      staticAssets,
       packageInfo: this.env.packageInfo,
-      serverBasePath: basePath.serverBasePath,
     });
   }
 
   // After the package is built and bootstrap extracts files to bazel-bin,
   // assets are exposed at the root of the package and in the package's node_modules dir
-  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
-    core.http.registerStaticDir(
-      '/ui/{path*}',
-      fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
-    );
+  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
+    /**
+     * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+     * Eventually we only want to serve from the sha scoped path
+     */
+    [core.http.staticAssets.prependServerPath('/ui/{path*}'), '/ui/{path*}'].forEach((path) => {
+      core.http.registerStaticDir(
+        path,
+        fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
+      );
+    });
 
-    core.http.registerStaticDir(
-      '/node_modules/@kbn/ui-framework/dist/{path*}',
-      fromRoot('node_modules/@kbn/ui-framework/dist')
-    );
+    for (const [pluginName, pluginInfo] of uiPlugins.internal) {
+      if (!pluginInfo.publicAssetsDir) continue;
+      /**
+       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+       * Eventually we only want to serve from the sha scoped path
+       */
+      [
+        core.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
+        `/plugins/${pluginName}/assets/{path*}`,
+      ].forEach((path) => {
+        core.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
+      });
+    }
   }
 }

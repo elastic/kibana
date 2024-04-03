@@ -25,7 +25,7 @@ import type {
   RequestHandler,
   VersionedRouter,
 } from '@kbn/core-http-server';
-import { validBodyOutput } from '@kbn/core-http-server';
+import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -67,17 +67,15 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate !== false) {
-    Object.entries(route.validate).forEach(([key, schema]) => {
+    const validation = getRequestValidation(route.validate);
+    Object.entries(validation).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
           `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
-  }
-
-  if (route.validate) {
-    return RouteValidator.from(route.validate);
+    return RouteValidator.from(validation);
   }
 }
 
@@ -93,7 +91,7 @@ function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
+  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {
@@ -123,11 +121,14 @@ function validOptions(
 export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
-  /**
-   * Which route resolution algo to use.
-   * @note default to "oldest", but when running in dev default to "none"
-   */
-  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
+
+  versionedRouterOptions?: {
+    /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
+    defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
+
+    /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
+    useVersionResolutionStrategyForInternalPaths?: string[];
+  };
 }
 
 /**
@@ -184,6 +185,26 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
   public handleLegacyErrors = wrapErrors;
 
+  private logError(
+    msg: string,
+    statusCode: number,
+    {
+      error,
+      request,
+    }: {
+      request: Request;
+      error: Error;
+    }
+  ) {
+    this.log.error(msg, {
+      http: {
+        response: { status_code: statusCode },
+        request: { method: request.route?.method, path: request.route?.path },
+      },
+      error: { message: error.message },
+    });
+  }
+
   private async handle<P, Q, B>({
     routeSchemas,
     request,
@@ -199,26 +220,28 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
-    } catch (e) {
-      return hapiResponseAdapter.toBadRequest(e.message);
+    } catch (error) {
+      this.logError('400 Bad Request', 400, { request, error });
+      return hapiResponseAdapter.toBadRequest(error.message);
     }
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       return hapiResponseAdapter.handle(kibanaResponse);
-    } catch (e) {
-      // log and capture error
-      this.log.error(e);
-      apm.captureError(e);
+    } catch (error) {
+      // capture error
+      apm.captureError(error);
 
       // forward 401 errors from ES client
-      if (isElasticsearchUnauthorizedError(e)) {
+      if (isElasticsearchUnauthorizedError(error)) {
+        this.logError('401 Unauthorized', 401, { request, error });
         return hapiResponseAdapter.handle(
-          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
+          kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
         );
       }
 
       // return a generic 500 to avoid error info / stack trace surfacing
+      this.logError('500 Server Error', 500, { request, error });
       return hapiResponseAdapter.toInternalError();
     }
   }
@@ -230,7 +253,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
-        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
+        ...this.options.versionedRouterOptions,
       });
     }
     return this.versionedRouter;

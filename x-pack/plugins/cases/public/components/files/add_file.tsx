@@ -24,7 +24,7 @@ import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import type { Owner } from '../../../common/constants/types';
 
-import { CommentType, ExternalReferenceStorageType } from '../../../common';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -70,7 +70,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
           caseOwner: owner[0],
           attachments: [
             {
-              type: CommentType.externalReference,
+              type: AttachmentType.externalReference,
               externalReferenceId: file.id,
               externalReferenceStorage: {
                 type: ExternalReferenceStorageType.savedObject,

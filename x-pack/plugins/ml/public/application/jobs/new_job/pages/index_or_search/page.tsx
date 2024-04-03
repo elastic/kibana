@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiPageBody, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
@@ -17,18 +19,28 @@ export interface PageProps {
   nextStepPath: string;
 }
 
-export const Page: FC<PageProps> = ({ nextStepPath }) => {
-  const RESULTS_PER_PAGE = 20;
-  const { uiSettings, http, savedObjectsManagement } = useMlKibana().services;
+const RESULTS_PER_PAGE = 20;
+
+export const Page: FC<PageProps> = ({
+  nextStepPath,
+  extraButtons,
+}: {
+  nextStepPath: string;
+  extraButtons?: React.ReactNode;
+}) => {
+  const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 
-  const onObjectSelection = (id: string, type: string) => {
-    navigateToPath(
-      `${nextStepPath}?${type === 'index-pattern' ? 'index' : 'savedSearchId'}=${encodeURIComponent(
-        id
-      )}`
-    );
-  };
+  const onObjectSelection = useCallback(
+    (id: string, type: string, name?: string) => {
+      navigateToPath(
+        `${nextStepPath}?${
+          type === 'index-pattern' ? 'index' : 'savedSearchId'
+        }=${encodeURIComponent(id)}`
+      );
+    },
+    [navigateToPath, nextStepPath]
+  );
 
   return (
     <div data-test-subj="mlPageSourceSelection">
@@ -39,7 +51,7 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
             defaultMessage="Select data view or saved search"
           />
         </MlPageHeader>
-        <EuiPageContent hasShadow={false} hasBorder={true}>
+        <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
@@ -67,17 +79,23 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={RESULTS_PER_PAGE}
             services={{
+              contentClient: contentManagement.client,
               uiSettings,
-              http,
-              savedObjectsManagement,
             }}
-          />
-        </EuiPageContent>
+          >
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <CreateDataViewButton
+                onDataViewCreated={onObjectSelection}
+                allowAdHocDataView={true}
+              />
+              {extraButtons ? extraButtons : null}
+            </EuiFlexGroup>
+          </SavedObjectFinder>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );

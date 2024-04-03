@@ -10,7 +10,7 @@
 import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 
@@ -27,8 +27,9 @@ const BASE_PATH = 'http://localhost/myBase';
 describe('Fetch', () => {
   const executionContextMock = executionContextServiceMock.createSetupContract();
   const fetchInstance = new Fetch({
-    basePath: new BasePath(BASE_PATH),
+    basePath: new BasePath({ basePath: BASE_PATH }),
     kibanaVersion: 'VERSION',
+    buildNumber: 1234,
     executionContext: executionContextMock,
   });
   afterEach(() => {
@@ -160,6 +161,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
+        'kbn-build-number': '1234',
         'x-elastic-internal-origin': 'Kibana',
         myheader: 'foo',
       });
@@ -176,6 +178,19 @@ describe('Fetch', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
+    });
+    it('should not allow overwriting of kbn-build-number header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: {
+            myHeader: 'foo',
+            'kbn-build-number': 4321,
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-build-number]"`
       );
     });
 

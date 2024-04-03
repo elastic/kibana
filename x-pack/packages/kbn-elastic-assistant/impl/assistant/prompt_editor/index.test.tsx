@@ -29,13 +29,17 @@ const mockSelectedEventPromptContext: SelectedPromptContext = {
 
 const defaultProps: Props = {
   conversation: undefined,
+  editingSystemPromptId: undefined,
   isNewConversation: true,
+  isSettingsModalVisible: false,
+  onSystemPromptSelectionChange: jest.fn(),
   promptContexts: {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
     [mockEventPromptContext.id]: mockEventPromptContext,
   },
   promptTextPreview: 'Preview text',
   selectedPromptContexts: {},
+  setIsSettingsModalVisible: jest.fn(),
   setSelectedPromptContexts: jest.fn(),
 };
 

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/management-settings-utilities",
+  "owner": "@elastic/kibana-management"
+}

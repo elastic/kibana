@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
       await PageObjects.visualize.clickMapsApp();

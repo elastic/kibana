@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -47,7 +47,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+} from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -59,10 +63,12 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -110,8 +116,14 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry } from './types';
-import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
+import { ListingViewRegistry, SerializedVis } from './types';
+import {
+  LATEST_VERSION,
+  CONTENT_ID,
+  VisualizationSavedObjectAttributes,
+} from '../common/content_management';
+import { SerializedVisData } from '../common';
+import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -164,6 +176,8 @@ export interface VisualizationsStartDeps {
   usageCollection: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 /**
@@ -327,6 +341,9 @@ export class VisualizationsPlugin
           visEditorsRegistry,
           listingViewRegistry,
           unifiedSearch: pluginsStart.unifiedSearch,
+          serverless: pluginsStart.serverless,
+          noDataPage: pluginsStart.noDataPage,
+          contentManagement: pluginsStart.contentManagement,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -389,6 +406,37 @@ export class VisualizationsPlugin
       },
       name: 'Visualize Library',
     });
+
+    registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        const visState = savedObject.attributes.visState;
+
+        // not sure if visState actually is ever undefined, but following the type
+        if (!savedObject.managed || !visState) {
+          return {
+            savedObjectId: savedObject.id,
+          };
+        }
+
+        // data is not always defined, so I added a default value since the extract
+        // routine in the embeddable factory expects it to be there
+        const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+          data?: SerializedVisData;
+        };
+
+        if (!savedVis.data) {
+          savedVis.data = {
+            searchSource: {},
+            aggs: [],
+          };
+        }
+
+        return {
+          savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+        };
+      }
+    );
 
     return {
       ...this.types.setup(),

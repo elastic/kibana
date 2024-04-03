@@ -12,6 +12,7 @@ import type {
   Event,
   IShipper,
 } from '@kbn/analytics-client';
+import { Subject, distinct, debounceTime, map, filter, Subscription } from 'rxjs';
 import { get, has } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { FullStoryApi } from './types';
@@ -29,9 +30,10 @@ const PAGE_VARS_KEYS = [
 
   // Deployment-specific keys
   'version', // x4, split to version_major, version_minor, version_patch for easier filtering
-  'buildNum', // May be useful for Serverless
+  'buildNum', // May be useful for Serverless, TODO: replace with buildHash
   'cloudId',
   'deploymentId',
+  'projectId', // projectId and deploymentId are mutually exclusive. They shouldn't be sent in the same offering.
   'cluster_name',
   'cluster_uuid',
   'cluster_version',
@@ -54,7 +56,17 @@ export interface FullStoryShipperConfig extends FullStorySnippetConfig {
    * If this setting is provided, it'll only send the event types specified in this list.
    */
   eventTypesAllowlist?: string[];
+  pageVarsDebounceTimeMs?: number;
 }
+
+interface FullStoryUserVars {
+  userId?: string;
+  isElasticCloudUser?: boolean;
+  cloudIsElasticStaffOwned?: boolean;
+  cloudTrialEndDate?: string;
+}
+
+type FullStoryPageContext = Pick<EventContext, typeof PAGE_VARS_KEYS[number]>;
 
 /**
  * FullStory shipper.
@@ -66,6 +78,9 @@ export class FullStoryShipper implements IShipper {
   private readonly fullStoryApi: FullStoryApi;
   private lastUserId: string | undefined;
   private readonly eventTypesAllowlist?: string[];
+  private readonly pageContext$ = new Subject<EventContext>();
+  private readonly userContext$ = new Subject<FullStoryUserVars>();
+  private readonly subscriptions = new Subscription();
 
   /**
    * Creates a new instance of the FullStoryShipper.
@@ -76,9 +91,54 @@ export class FullStoryShipper implements IShipper {
     config: FullStoryShipperConfig,
     private readonly initContext: AnalyticsClientInitContext
   ) {
-    const { eventTypesAllowlist, ...snippetConfig } = config;
+    const { eventTypesAllowlist, pageVarsDebounceTimeMs = 500, ...snippetConfig } = config;
     this.fullStoryApi = loadSnippet(snippetConfig);
     this.eventTypesAllowlist = eventTypesAllowlist;
+
+    this.subscriptions.add(
+      this.userContext$
+        .pipe(
+          distinct(({ userId, isElasticCloudUser, cloudIsElasticStaffOwned, cloudTrialEndDate }) =>
+            [userId, isElasticCloudUser, cloudIsElasticStaffOwned, cloudTrialEndDate].join('-')
+          )
+        )
+        .subscribe((userVars) => this.updateUserVars(userVars))
+    );
+
+    this.subscriptions.add(
+      this.pageContext$
+        .pipe(
+          map((newContext) => {
+            // Cherry-picking fields because FS limits the number of fields that can be sent.
+            // > Note: You can capture up to 20 unique page properties (exclusive of pageName) for any given page
+            // > and up to 500 unique page properties across all pages.
+            // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
+            return PAGE_VARS_KEYS.reduce((acc, key) => {
+              if (has(newContext, key)) {
+                set(acc, key, get(newContext, key));
+              }
+              return acc;
+            }, {} as Partial<FullStoryPageContext> & Record<string, unknown>);
+          }),
+          filter((pageVars) => Object.keys(pageVars).length > 0),
+          // Wait for anything to actually change.
+          distinct((pageVars) => {
+            const sortedKeys = Object.keys(pageVars).sort();
+            return sortedKeys.map((key) => pageVars[key]).join('-');
+          }),
+          // We need some debounce time to ensure everything is updated before calling FS because some properties cannot be changed twice for the same URL.
+          debounceTime(pageVarsDebounceTimeMs)
+        )
+        .subscribe((pageVars) => {
+          this.initContext.logger.debug(
+            `Calling FS.setVars with context ${JSON.stringify(pageVars)}`
+          );
+          this.fullStoryApi.setVars('page', {
+            ...formatPayload(pageVars),
+            ...(pageVars.version ? getParsedVersion(pageVars.version) : {}),
+          });
+        })
+    );
   }
 
   /**
@@ -88,57 +148,11 @@ export class FullStoryShipper implements IShipper {
   public extendContext(newContext: EventContext): void {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
-    // FullStory requires different APIs for different type of contexts.
-    const {
-      userId,
-      isElasticCloudUser,
-      cloudIsElasticStaffOwned,
-      cloudTrialEndDate,
-      ...nonUserContext
-    } = newContext;
-
-    // Call it only when the userId changes
-    if (userId && userId !== this.lastUserId) {
-      this.initContext.logger.debug(`Calling FS.identify with userId ${userId}`);
-      // We need to call the API for every new userId (restarting the session).
-      this.fullStoryApi.identify(userId);
-      this.lastUserId = userId;
-    }
-
-    // User-level context
-    if (
-      typeof isElasticCloudUser === 'boolean' ||
-      typeof cloudIsElasticStaffOwned === 'boolean' ||
-      cloudTrialEndDate
-    ) {
-      const userVars = {
-        isElasticCloudUser,
-        cloudIsElasticStaffOwned,
-        cloudTrialEndDate,
-      };
-      this.initContext.logger.debug(`Calling FS.setUserVars with ${JSON.stringify(userVars)}`);
-      this.fullStoryApi.setUserVars(formatPayload(userVars));
-    }
-
-    // Cherry-picking fields because FS limits the number of fields that can be sent.
-    // > Note: You can capture up to 20 unique page properties (exclusive of pageName) for any given page
-    // > and up to 500 unique page properties across all pages.
-    // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
-    const pageVars = PAGE_VARS_KEYS.reduce((acc, key) => {
-      if (has(nonUserContext, key)) {
-        set(acc, key, get(nonUserContext, key));
-      }
-      return acc;
-    }, {} as Partial<Pick<EventContext, typeof PAGE_VARS_KEYS[number]>> & Record<string, unknown>);
-
+    // FullStory requires different APIs for different type of contexts:
+    // User-level context.
+    this.userContext$.next(newContext);
     // Event-level context. At the moment, only the scope `page` is supported by FullStory for webapps.
-    if (Object.keys(pageVars).length) {
-      this.initContext.logger.debug(`Calling FS.setVars with context ${JSON.stringify(pageVars)}`);
-      this.fullStoryApi.setVars('page', {
-        ...formatPayload(pageVars),
-        ...(pageVars.version ? getParsedVersion(pageVars.version) : {}),
-      });
-    }
+    this.pageContext$.next(newContext);
   }
 
   /**
@@ -183,9 +197,38 @@ export class FullStoryShipper implements IShipper {
 
   /**
    * Shuts down the shipper.
-   * It doesn't really do anything inside because this shipper doesn't hold any internal queues.
    */
   public shutdown() {
-    // No need to do anything here for now.
+    this.subscriptions.unsubscribe();
+  }
+
+  private updateUserVars({
+    userId,
+    isElasticCloudUser,
+    cloudIsElasticStaffOwned,
+    cloudTrialEndDate,
+  }: FullStoryUserVars) {
+    // Call it only when the userId changes
+    if (userId && userId !== this.lastUserId) {
+      this.initContext.logger.debug(`Calling FS.identify with userId ${userId}`);
+      // We need to call the API for every new userId (restarting the session).
+      this.fullStoryApi.identify(userId);
+      this.lastUserId = userId;
+    }
+
+    // User-level context
+    if (
+      typeof isElasticCloudUser === 'boolean' ||
+      typeof cloudIsElasticStaffOwned === 'boolean' ||
+      cloudTrialEndDate
+    ) {
+      const userVars = {
+        isElasticCloudUser,
+        cloudIsElasticStaffOwned,
+        cloudTrialEndDate,
+      };
+      this.initContext.logger.debug(`Calling FS.setUserVars with ${JSON.stringify(userVars)}`);
+      this.fullStoryApi.setUserVars(formatPayload(userVars));
+    }
   }
 }

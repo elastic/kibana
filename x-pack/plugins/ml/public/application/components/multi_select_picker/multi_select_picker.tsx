@@ -10,12 +10,14 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiSelectableMessage,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Option {
@@ -26,18 +28,16 @@ export interface Option {
 
 const NoFilterItems = () => {
   return (
-    <div className="euiFilterSelect__note">
-      <div className="euiFilterSelect__noteContent">
-        <EuiIcon type="minusInCircle" />
-        <EuiSpacer size="xs" />
-        <p>
-          <FormattedMessage
-            id="xpack.ml.multiSelectPicker.NoFiltersFoundMessage"
-            defaultMessage="No filters found"
-          />
-        </p>
-      </div>
-    </div>
+    <EuiSelectableMessage>
+      <EuiIcon type="minusInCircle" />
+      <EuiSpacer size="xs" />
+      <p>
+        <FormattedMessage
+          id="xpack.ml.multiSelectPicker.NoFiltersFoundMessage"
+          defaultMessage="No filters found"
+        />
+      </p>
+    </EuiSelectableMessage>
   );
 };
 

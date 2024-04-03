@@ -19,6 +19,7 @@ const testFactories: EmbeddableFactoryDefinition[] = [
     getIconType: () => '',
     getDescription: () => 'Description for anomaly swimlane',
     isEditable: () => Promise.resolve(true),
+    latestVersion: '1.0.0',
     create: () => Promise.resolve({ id: 'swimlane_embeddable' } as IEmbeddable),
     grouping: [
       {
@@ -35,6 +36,7 @@ const testFactories: EmbeddableFactoryDefinition[] = [
     getDescription: () => 'Description for anomaly chart',
     isEditable: () => Promise.resolve(true),
     create: () => Promise.resolve({ id: 'anomaly_chart_embeddable' } as IEmbeddable),
+    latestVersion: '1.0.0',
     grouping: [
       {
         id: 'ml',
@@ -48,6 +50,7 @@ const testFactories: EmbeddableFactoryDefinition[] = [
     getDisplayName: () => 'Log stream',
     getIconType: () => '',
     getDescription: () => 'Description for log stream',
+    latestVersion: '1.0.0',
     isEditable: () => Promise.resolve(true),
     create: () => Promise.resolve({ id: 'anomaly_chart_embeddable' } as IEmbeddable),
   },
@@ -67,8 +70,10 @@ const testVisTypes: BaseVisType[] = [
 const testVisTypeAliases: VisTypeAlias[] = [
   {
     title: 'Lens',
-    aliasApp: 'lens',
-    aliasPath: 'path/to/lens',
+    alias: {
+      app: 'lens',
+      path: 'path/to/lens',
+    },
     icon: 'lensApp',
     name: 'lens',
     description: 'Description of Lens app',
@@ -76,8 +81,10 @@ const testVisTypeAliases: VisTypeAlias[] = [
   },
   {
     title: 'Maps',
-    aliasApp: 'maps',
-    aliasPath: 'path/to/maps',
+    alias: {
+      app: 'maps',
+      path: 'path/to/maps',
+    },
     icon: 'gisApp',
     name: 'maps',
     description: 'Description of Maps app',
@@ -87,10 +94,12 @@ const testVisTypeAliases: VisTypeAlias[] = [
 
 storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
   <EditorMenu
+    addPanelActions={[]}
     factories={testFactories}
     promotedVisTypes={testVisTypes}
     visTypeAliases={testVisTypeAliases}
     createNewVisType={() => action('createNewVisType')}
-    createNewEmbeddable={() => action('createNewEmbeddable')}
+    createNewEmbeddableFromFactory={() => action('createNewEmbeddableFromFactory')}
+    createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
   />
 ));

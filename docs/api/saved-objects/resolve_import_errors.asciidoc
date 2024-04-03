@@ -14,6 +14,12 @@ To resolve errors, you can:
 
 * Change references to different saved objects
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 
@@ -105,7 +111,7 @@ to the <<saved-objects-api-resolve-import-errors-example, examples>>.
 
 This example builds upon the <<saved-objects-api-import-example-3,Import objects API example with conflict errors>>.
 
-Resolve conflict errors for {a-data-source}, visualization, and *Canvas* workpad by overwriting the existing saved objects:
+Resolve conflict errors for a {data-source}, visualization, and *Canvas* workpad by overwriting the existing saved objects:
 
 [source,sh]
 --------------------------------------------------

@@ -9,8 +9,6 @@ import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { createFleetTestRendererMock } from '../../../../../mock';
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
 
@@ -18,7 +16,7 @@ import { AgentPolicyListPage } from '.';
 
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
-  useGetAgentPolicies: jest.fn().mockReturnValue({
+  useGetAgentPoliciesQuery: jest.fn().mockReturnValue({
     data: {
       items: [
         { id: 'not_managed_policy', is_managed: false, updated_at: '2023-04-06T07:19:29.892Z' },
@@ -27,7 +25,7 @@ jest.mock('../../../hooks', () => ({
       total: 2,
     } as GetAgentPoliciesResponse,
     isLoading: false,
-    resendRequest: jest.fn(),
+    refetch: jest.fn(),
   }),
 }));
 
@@ -36,12 +34,6 @@ describe('AgentPolicyListPage', () => {
 
   const render = () => {
     const renderer = createFleetTestRendererMock();
-
-    // todo: this can be removed when agentTamperProtectionEnabled feature flag is enabled/deleted
-    ExperimentalFeaturesService.init({
-      ...allowedExperimentalValues,
-      agentTamperProtectionEnabled: true,
-    });
 
     return renderer.render(<AgentPolicyListPage />);
   };

@@ -17,8 +17,20 @@ import type {
   ReportMLJobUpdateParams,
   ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
+  ReportDataQualityIndexCheckedParams,
+  ReportDataQualityCheckAllCompletedParams,
+  ReportBreadcrumbClickedParams,
+  ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
+  ReportAssistantSettingToggledParams,
+  ReportRiskInputsExpandedFlyoutOpenedParams,
+  ReportToggleRiskSummaryClickedParams,
+  ReportDetailsFlyoutOpenedParams,
+  ReportDetailsFlyoutTabClickedParams,
 } from './types';
-import { TelemetryEventTypes } from './types';
+import { TelemetryEventTypes } from './constants';
+import type { ReportAddRiskInputToTimelineClickedParams } from './events/entity_analytics/types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions
@@ -27,42 +39,51 @@ import { TelemetryEventTypes } from './types';
 export class TelemetryClient implements TelemetryClientStart {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
-  public reportAlertsGroupingChanged = ({
-    tableId,
-    groupByField,
-  }: ReportAlertsGroupingChangedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingChanged, {
-      tableId,
-      groupByField,
+  public reportAlertsGroupingChanged = (params: ReportAlertsGroupingChangedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingChanged, params);
+  };
+
+  public reportAlertsGroupingToggled = (params: ReportAlertsGroupingToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingToggled, params);
+  };
+
+  public reportAlertsGroupingTakeAction = (params: ReportAlertsTakeActionParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, params);
+  };
+
+  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
+      conversationId,
+      invokedBy,
     });
   };
 
-  public reportAlertsGroupingToggled = ({
-    isOpen,
-    tableId,
-    groupNumber,
-    groupName,
-  }: ReportAlertsGroupingToggledParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingToggled, {
-      isOpen,
-      tableId,
-      groupNumber,
-      groupName,
+  public reportAssistantMessageSent = ({
+    conversationId,
+    isEnabledKnowledgeBase,
+    isEnabledRAGAlerts,
+    role,
+  }: ReportAssistantMessageSentParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
+      conversationId,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
+      role,
     });
   };
 
-  public reportAlertsGroupingTakeAction = ({
-    tableId,
-    groupNumber,
-    status,
-    groupByField,
-  }: ReportAlertsTakeActionParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, {
-      tableId,
-      groupNumber,
-      status,
-      groupByField,
+  public reportAssistantQuickPrompt = ({
+    conversationId,
+    promptTitle,
+  }: ReportAssistantQuickPromptParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, {
+      conversationId,
+      promptTitle,
     });
+  };
+
+  public reportAssistantSettingToggled = (params: ReportAssistantSettingToggledParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
@@ -91,11 +112,45 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.MLJobUpdate, params);
   };
 
+  reportToggleRiskSummaryClicked(params: ReportToggleRiskSummaryClickedParams): void {
+    this.analytics.reportEvent(TelemetryEventTypes.ToggleRiskSummaryClicked, params);
+  }
+  reportRiskInputsExpandedFlyoutOpened(params: ReportRiskInputsExpandedFlyoutOpenedParams): void {
+    this.analytics.reportEvent(TelemetryEventTypes.RiskInputsExpandedFlyoutOpened, params);
+  }
+  reportAddRiskInputToTimelineClicked(params: ReportAddRiskInputToTimelineClickedParams): void {
+    this.analytics.reportEvent(TelemetryEventTypes.AddRiskInputToTimelineClicked, params);
+  }
+
   public reportCellActionClicked = (params: ReportCellActionClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.CellActionClicked, params);
   };
 
   public reportAnomaliesCountClicked = (params: ReportAnomaliesCountClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, params);
+  };
+
+  public reportDataQualityIndexChecked = (params: ReportDataQualityIndexCheckedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DataQualityIndexChecked, params);
+  };
+
+  public reportDataQualityCheckAllCompleted = (
+    params: ReportDataQualityCheckAllCompletedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DataQualityCheckAllCompleted, params);
+  };
+
+  public reportBreadcrumbClicked = ({ title }: ReportBreadcrumbClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.BreadcrumbClicked, {
+      title,
+    });
+  };
+
+  public reportDetailsFlyoutOpened = (params: ReportDetailsFlyoutOpenedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DetailsFlyoutOpened, params);
+  };
+
+  public reportDetailsFlyoutTabClicked = (params: ReportDetailsFlyoutTabClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.DetailsFlyoutTabClicked, params);
   };
 }

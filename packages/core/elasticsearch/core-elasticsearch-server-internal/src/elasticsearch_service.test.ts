@@ -16,11 +16,15 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
-import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
+import {
+  MockClusterClient,
+  isScriptingEnabledMock,
+  getClusterInfoMock,
+} from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { first, concatMap } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
@@ -65,6 +69,7 @@ beforeEach(() => {
     hosts: ['http://1.2.3.4'],
     healthCheck: {
       delay: duration(10),
+      startupDelay: duration(10),
     },
     ssl: {
       verificationMode: 'none',
@@ -81,6 +86,8 @@ beforeEach(() => {
 
   isScriptingEnabledMock.mockResolvedValue(true);
 
+  getClusterInfoMock.mockReturnValue(of({}));
+
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
 });
@@ -89,6 +96,7 @@ afterEach(async () => {
   jest.clearAllMocks();
   MockClusterClient.mockClear();
   isScriptingEnabledMock.mockReset();
+  getClusterInfoMock.mockReset();
   await elasticsearchService?.stop();
 });
 
@@ -175,6 +183,7 @@ describe('#preboot', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
@@ -393,6 +402,7 @@ describe('#start', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],

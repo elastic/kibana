@@ -7,8 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import type { RuleExecutionEventType } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { RULE_EXECUTION_EVENT_TYPES } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionEventType } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { EventTypeIndicator } from '../../indicators/event_type_indicator';
 import { MultiselectFilter } from '../multiselect_filter';
 
@@ -28,7 +27,7 @@ const EventTypeFilterComponent: React.FC<EventTypeFilterProps> = ({ selectedItem
     <MultiselectFilter<RuleExecutionEventType>
       dataTestSubj="eventTypeFilter"
       title={i18n.FILTER_TITLE}
-      items={RULE_EXECUTION_EVENT_TYPES}
+      items={RuleExecutionEventType.options}
       selectedItems={selectedItems}
       onSelectionChange={onChange}
       renderItem={renderItem}

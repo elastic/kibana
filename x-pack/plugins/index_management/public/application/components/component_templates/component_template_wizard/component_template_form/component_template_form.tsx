@@ -19,6 +19,10 @@ import {
   StepMappingsContainer,
   StepAliasesContainer,
 } from '../../shared_imports';
+import {
+  serializeAsESLifecycle,
+  deserializeESLifecycle,
+} from '../../../../../../common/lib/data_stream_serialization';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 
@@ -96,14 +100,17 @@ export const ComponentTemplateForm = ({
   onStepChange,
 }: Props) => {
   const {
-    template: { settings, mappings, aliases },
+    template: { settings, mappings, aliases, lifecycle },
     ...logistics
   } = defaultValue;
 
   const { documentation } = useComponentTemplatesContext();
 
   const wizardDefaultValue: WizardContent = {
-    logistics,
+    logistics: {
+      ...logistics,
+      ...(lifecycle ? { lifecycle: deserializeESLifecycle(lifecycle) } : {}),
+    },
     settings,
     mappings,
     aliases,
@@ -162,6 +169,10 @@ export const ComponentTemplateForm = ({
       delete outputTemplate.template.aliases;
     }
 
+    if (outputTemplate.lifecycle) {
+      delete outputTemplate.lifecycle;
+    }
+
     return outputTemplate;
   };
 
@@ -177,9 +188,14 @@ export const ComponentTemplateForm = ({
             settings: wizardData.settings,
             mappings: wizardData.mappings,
             aliases: wizardData.aliases,
+            lifecycle: wizardData.logistics.lifecycle
+              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
+              : undefined,
           },
         };
-        return cleanupComponentTemplateObject(outputComponentTemplate);
+        return cleanupComponentTemplateObject(
+          outputComponentTemplate as ComponentTemplateDeserialized
+        );
       },
     []
   );

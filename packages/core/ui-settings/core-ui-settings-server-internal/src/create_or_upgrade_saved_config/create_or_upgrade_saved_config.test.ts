@@ -79,6 +79,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
+          refresh: false,
         }
       );
     });
@@ -110,6 +111,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
+          refresh: false,
         }
       );
     });
@@ -140,7 +142,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           defaultIndex: 'another-index',
           isDefaultIndexMigrated: true,
         },
-        { id: version }
+        { id: version, refresh: false }
       );
     });
 
@@ -282,6 +284,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
+          refresh: false,
         }
       );
     });
@@ -313,6 +316,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         },
         {
           id: version,
+          refresh: false,
         }
       );
     });

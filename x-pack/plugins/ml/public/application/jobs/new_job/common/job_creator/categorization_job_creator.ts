@@ -14,8 +14,19 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  type CategorizationAnalyzer,
+  type CategoryFieldExample,
+  type FieldExampleCheck,
+  VALIDATION_RESULT,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+} from '@kbn/ml-category-validator';
 import { JobCreator } from './job_creator';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import {
   JOB_TYPE,
@@ -23,29 +34,28 @@ import {
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
-import {
-  CategorizationAnalyzer,
-  CategoryFieldExample,
-  FieldExampleCheck,
-  VALIDATION_RESULT,
-} from '../../../../../../common/types/categories';
+
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { isCcsIndexPattern } from '../../../../util/index_utils';
 
+type DetectorType =
+  | ML_JOB_AGGREGATION.COUNT
+  | ML_JOB_AGGREGATION.HIGH_COUNT
+  | ML_JOB_AGGREGATION.RARE;
+
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
   private _createCountDetector: () => void = () => {};
+  private _createHighCountDetector: () => void = () => {};
   private _createRareDetector: () => void = () => {};
   private _examplesLoader: CategorizationExamplesLoader;
   private _categoryFieldExamples: CategoryFieldExample[] = [];
   private _validationChecks: FieldExampleCheck[] = [];
   private _overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS =
     CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
-  private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
-    ML_JOB_AGGREGATION.COUNT;
+  private _detectorType: DetectorType = ML_JOB_AGGREGATION.COUNT;
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
   private _partitionFieldName: string | null = null;
@@ -62,15 +72,19 @@ export class CategorizationJobCreator extends JobCreator {
 
   public setDefaultDetectorProperties(
     count: Aggregation | null,
+    highCount: Aggregation | null,
     rare: Aggregation | null,
     eventRate: Field | null
   ) {
-    if (count === null || rare === null || eventRate === null) {
+    if (count === null || highCount === null || rare === null || eventRate === null) {
       throw Error('event_rate field or count or rare aggregations missing');
     }
 
     this._createCountDetector = () => {
       this._createDetector(count, eventRate);
+    };
+    this._createHighCountDetector = () => {
+      this._createDetector(highCount, eventRate);
     };
     this._createRareDetector = () => {
       this._createDetector(rare, eventRate);
@@ -88,11 +102,14 @@ export class CategorizationJobCreator extends JobCreator {
     this._addDetector(dtr, agg, mlCategory);
   }
 
-  public setDetectorType(type: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE) {
+  public setDetectorType(type: DetectorType) {
     this._detectorType = type;
     this.removeAllDetectors();
     if (type === ML_JOB_AGGREGATION.COUNT) {
       this._createCountDetector();
+      this.bucketSpan = DEFAULT_BUCKET_SPAN;
+    } else if (type === ML_JOB_AGGREGATION.HIGH_COUNT) {
+      this._createHighCountDetector();
       this.bucketSpan = DEFAULT_BUCKET_SPAN;
     } else {
       this._createRareDetector();
@@ -121,11 +138,16 @@ export class CategorizationJobCreator extends JobCreator {
   public async loadCategorizationFieldExamples() {
     const { examples, sampleSize, overallValidStatus, validationChecks } =
       await this._examplesLoader.loadExamples();
-    this._categoryFieldExamples = examples;
+    const categoryFieldExamples = examples ?? [];
+    this._categoryFieldExamples = categoryFieldExamples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
-    this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
+    this._ccsVersionFailure = this._checkCcsFailure(
+      categoryFieldExamples,
+      overallValidStatus,
+      validationChecks
+    );
     if (this._ccsVersionFailure === true) {
       // if the data view contains a cross-cluster search, one of the clusters may
       // be on a version which doesn't support the fields API (e.g. 6.8)
@@ -137,7 +159,7 @@ export class CategorizationJobCreator extends JobCreator {
     this._wizardInitialized$.next(true);
 
     return {
-      examples,
+      examples: categoryFieldExamples,
       sampleSize,
       overallValidStatus,
       validationChecks,
@@ -236,10 +258,14 @@ export class CategorizationJobCreator extends JobCreator {
 
     const dtr = detectors[0];
     if (dtr !== undefined && dtr.agg !== null && dtr.field !== null) {
-      const detectorType =
-        dtr.agg.id === ML_JOB_AGGREGATION.COUNT
-          ? ML_JOB_AGGREGATION.COUNT
-          : ML_JOB_AGGREGATION.RARE;
+      let detectorType: DetectorType;
+      if (dtr.agg.id === ML_JOB_AGGREGATION.COUNT) {
+        detectorType = ML_JOB_AGGREGATION.COUNT;
+      } else if (dtr.agg.id === ML_JOB_AGGREGATION.HIGH_COUNT) {
+        detectorType = ML_JOB_AGGREGATION.HIGH_COUNT;
+      } else {
+        detectorType = ML_JOB_AGGREGATION.RARE;
+      }
 
       const bs = job.analysis_config.bucket_span!;
       this.setDetectorType(detectorType);

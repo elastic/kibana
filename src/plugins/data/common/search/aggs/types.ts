@@ -30,6 +30,7 @@ import {
   aggGeoCentroid,
   aggGeoTile,
   aggHistogram,
+  aggIpPrefix,
   aggIpRange,
   aggMax,
   aggMedian,
@@ -59,6 +60,7 @@ import {
   AggParamsGeoCentroid,
   AggParamsGeoTile,
   AggParamsHistogram,
+  AggParamsIpPrefix,
   AggParamsIpRange,
   AggParamsMax,
   AggParamsMedian,
@@ -123,6 +125,7 @@ export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
 export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpPrefixKey } from './buckets/lib/ip_prefix';
 export type { IpRangeKey } from './buckets/lib/ip_range';
 export type { OptionedValueProp } from './param_types/optioned';
 
@@ -173,6 +176,7 @@ export type AggExpressionFunctionArgs<Name extends keyof SerializedAggParamsMapp
  */
 interface SerializedAggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_PREFIX]: AggParamsIpPrefix;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
@@ -219,6 +223,7 @@ interface SerializedAggParamsMapping {
 
 export interface AggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_PREFIX]: AggParamsIpPrefix;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
@@ -269,6 +274,7 @@ export interface AggFunctionsMapping {
   aggFilter: ReturnType<typeof aggFilter>;
   aggFilters: ReturnType<typeof aggFilters>;
   aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
+  aggIpPrefix: ReturnType<typeof aggIpPrefix>;
   aggIpRange: ReturnType<typeof aggIpRange>;
   aggDateRange: ReturnType<typeof aggDateRange>;
   aggRange: ReturnType<typeof aggRange>;

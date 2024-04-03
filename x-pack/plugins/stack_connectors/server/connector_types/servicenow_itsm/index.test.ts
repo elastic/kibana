@@ -23,6 +23,7 @@ jest.mock('./api', () => ({
     getIncident: jest.fn(),
     handshake: jest.fn(),
     pushToService: jest.fn(),
+    closeIncident: jest.fn(),
   },
 }));
 
@@ -74,6 +75,33 @@ describe('ServiceNow', () => {
         expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
           'work_notes'
         );
+      });
+
+      test('calls closeIncident sub action correctly', async () => {
+        const actionId = 'some-action-id';
+        const executorOptions = {
+          actionId,
+          config,
+          secrets,
+          params: {
+            subAction: 'closeIncident',
+            subActionParams: {
+              incident: {
+                correlationId: 'custom_correlation_id',
+                externalId: null,
+              },
+            },
+          },
+          services,
+          logger: mockedLogger,
+        } as unknown as ServiceNowConnectorTypeExecutorOptions<
+          ServiceNowPublicConfigurationType,
+          ExecutorParams
+        >;
+        await connectorType.executor(executorOptions);
+        expect(
+          (api.closeIncident as jest.Mock).mock.calls[0][0].params.incident.correlationId
+        ).toBe('custom_correlation_id');
       });
     });
   });

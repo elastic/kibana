@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import { take, toArray } from 'rxjs/operators';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
+import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  ClusterClientMock,
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  statusServiceMock,
+} from '@kbn/core/server/mocks';
+import {
+  CoreStatus,
+  IClusterClient,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+} from '@kbn/core/server';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { IClusterClient } from '@kbn/core/server';
-import { firstValueFrom } from 'rxjs';
 
 function buildRawLicense(
   options: Partial<estypes.XpackInfoMinimalLicenseInformation> = {}
@@ -56,22 +66,23 @@ describe('licensing plugin', () => {
     return client;
   };
 
+  let plugin: LicensingPlugin;
+  let pluginInitContextMock: ReturnType<typeof coreMock.createPluginInitializerContext>;
+
+  beforeEach(() => {
+    pluginInitContextMock = coreMock.createPluginInitializerContext({
+      api_polling_frequency: moment.duration(100),
+      license_cache_duration: moment.duration(1000),
+    });
+    plugin = new LicensingPlugin(pluginInitContextMock);
+  });
+
+  afterEach(async () => {
+    await plugin?.stop();
+  });
+
   describe('#start', () => {
     describe('#license$', () => {
-      let plugin: LicensingPlugin;
-      let pluginInitContextMock: ReturnType<typeof coreMock.createPluginInitializerContext>;
-
-      beforeEach(() => {
-        pluginInitContextMock = coreMock.createPluginInitializerContext({
-          api_polling_frequency: moment.duration(100),
-        });
-        plugin = new LicensingPlugin(pluginInitContextMock);
-      });
-
-      afterEach(async () => {
-        await plugin.stop();
-      });
-
       it('returns license', async () => {
         const esClient = createEsClient({
           license: buildRawLicense(),
@@ -79,8 +90,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
         const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(true);
       });
@@ -92,8 +103,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
         await firstValueFrom(license$);
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
@@ -111,8 +122,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
         const [first, second, third] = await firstValueFrom(license$.pipe(take(3), toArray()));
 
         expect(first.type).toBe('basic');
@@ -125,8 +136,8 @@ describe('licensing plugin', () => {
         esClient.asInternalUser.xpack.info.mockRejectedValue(new Error('test'));
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
 
         const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(false);
@@ -140,8 +151,8 @@ describe('licensing plugin', () => {
         esClient.asInternalUser.xpack.info.mockRejectedValue(error);
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
 
         const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(false);
@@ -169,8 +180,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
 
         const [first, second, third] = await firstValueFrom(license$.pipe(take(3), toArray()));
 
@@ -186,8 +197,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        await plugin.start();
+        plugin.setup(coreSetup);
+        plugin.start();
 
         await flushPromises();
 
@@ -201,8 +212,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        await plugin.start();
+        plugin.setup(coreSetup);
+        plugin.start();
 
         await flushPromises();
 
@@ -229,8 +240,8 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { license$ } = plugin.start();
 
         const [first, second, third] = await firstValueFrom(license$.pipe(take(3), toArray()));
         expect(first.signature === third.signature).toBe(true);
@@ -239,16 +250,12 @@ describe('licensing plugin', () => {
     });
 
     describe('#refresh', () => {
-      let plugin: LicensingPlugin;
-      afterEach(async () => {
-        await plugin.stop();
-      });
-
       it('forces refresh immediately', async () => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
             // disable polling mechanism
             api_polling_frequency: moment.duration(50000),
+            license_cache_duration: moment.duration(1000),
           })
         );
         const esClient = createEsClient({
@@ -257,31 +264,26 @@ describe('licensing plugin', () => {
         });
 
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { refresh, license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { refresh, license$ } = plugin.start();
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
 
-        await license$.pipe(take(1)).toPromise();
+        await firstValueFrom(license$);
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
-        refresh();
+        await refresh();
         await flushPromises();
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
       });
     });
 
     describe('#createLicensePoller', () => {
-      let plugin: LicensingPlugin;
-
-      afterEach(async () => {
-        await plugin.stop();
-      });
-
       it(`creates a poller fetching license from passed 'clusterClient' every 'api_polling_frequency' ms`, async () => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
             api_polling_frequency: moment.duration(50000),
+            license_cache_duration: moment.duration(1000),
           })
         );
 
@@ -290,8 +292,8 @@ describe('licensing plugin', () => {
           features: {},
         });
         const coreSetup = createCoreSetupWith(esClient);
-        await plugin.setup(coreSetup);
-        const { createLicensePoller, license$ } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { createLicensePoller, license$ } = plugin.start();
 
         const customClient = createEsClient({
           license: buildRawLicense({ type: 'gold' }),
@@ -305,6 +307,11 @@ describe('licensing plugin', () => {
         );
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
 
+        // We make the request when the timer ticks
+        await flushPromises(customPollingFrequency);
+        expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+        // And we have the license without making any extra requests
         const customLicense = await firstValueFrom(customLicense$);
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
@@ -313,19 +320,13 @@ describe('licensing plugin', () => {
         expect(customLicense.isAvailable).toBe(true);
         expect(customLicense.type).toBe('gold');
 
-        expect(await license$.pipe(take(1)).toPromise()).not.toBe(customLicense);
+        expect(await firstValueFrom(license$)).not.toBe(customLicense);
       });
 
       it('creates a poller with a manual refresh control', async () => {
-        plugin = new LicensingPlugin(
-          coreMock.createPluginInitializerContext({
-            api_polling_frequency: moment.duration(100),
-          })
-        );
-
         const coreSetup = coreMock.createSetup();
-        await plugin.setup(coreSetup);
-        const { createLicensePoller } = await plugin.start();
+        plugin.setup(coreSetup);
+        const { createLicensePoller } = plugin.start();
 
         const customClient = createEsClient({
           license: buildRawLicense({ type: 'gold' }),
@@ -341,27 +342,111 @@ describe('licensing plugin', () => {
         const license = await firstValueFrom(license$);
         expect(license.type).toBe('gold');
       });
+
+      describe('only fetch the license if ES is available', () => {
+        let customClient: ClusterClientMock;
+        let coreStatus$: BehaviorSubject<CoreStatus>;
+        let coreStatus: CoreStatus;
+        const customPollingFrequency = 100;
+
+        async function setElasticsearchStatus(esStatus: ServiceStatusLevel) {
+          coreStatus$.next({
+            ...coreStatus,
+            elasticsearch: {
+              ...coreStatus.elasticsearch,
+              level: esStatus,
+            },
+          });
+          await flushPromises(1); // need to wait for async operations
+        }
+
+        beforeEach(async () => {
+          plugin = new LicensingPlugin(
+            coreMock.createPluginInitializerContext({
+              api_polling_frequency: moment.duration(50000),
+              license_cache_duration: moment.duration(1000),
+            })
+          );
+
+          const esClient = createEsClient({
+            license: buildRawLicense(),
+            features: {},
+          });
+          const coreSetup = createCoreSetupWith(esClient);
+          coreStatus = await firstValueFrom(statusServiceMock.createSetupContract().core$);
+          coreStatus$ = new BehaviorSubject<CoreStatus>({
+            ...coreStatus,
+            elasticsearch: {
+              ...coreStatus.elasticsearch,
+              level: ServiceStatusLevels.unavailable,
+            },
+          });
+          coreSetup.status.core$ = coreStatus$;
+          plugin.setup(coreSetup);
+          const { createLicensePoller } = plugin.start();
+
+          customClient = createEsClient({
+            license: buildRawLicense({ type: 'gold' }),
+            features: {},
+          });
+
+          createLicensePoller(customClient, customPollingFrequency);
+        });
+
+        it(`only fetch the license if ES is available`, async () => {
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // Despite waiting for the timer, it still doesn't call the API
+          await flushPromises(customPollingFrequency * 1.8);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // When ES becomes available, we perform the request
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+          // While ES is still available, we retrieve the license on every timer tick
+          await flushPromises(customPollingFrequency);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
+        });
+
+        it(`stop fetching the license when ES becomes not available`, async () => {
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // When ES becomes available, we perform the request
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+          // When ES becomes unavailable, we stop performing the requests
+          await setElasticsearchStatus(ServiceStatusLevels.unavailable);
+          await flushPromises(customPollingFrequency * 3);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+        });
+
+        it(`avoid fetching the license too often if ES status comes and goes`, async () => {
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+          // When ES becomes available, we perform the request
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
+
+          // When ES becomes unavailable, and immediately after, it becomes available
+          await setElasticsearchStatus(ServiceStatusLevels.unavailable);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // Still previous number of requests
+          await setElasticsearchStatus(ServiceStatusLevels.available);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // Still previous number of requests
+
+          // After polling frequency, we retrieve it again
+          await flushPromises(customPollingFrequency);
+          expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
+        });
+      });
     });
 
     describe('extends core contexts', () => {
-      let plugin: LicensingPlugin;
-
-      beforeEach(() => {
-        plugin = new LicensingPlugin(
-          coreMock.createPluginInitializerContext({
-            api_polling_frequency: moment.duration(100),
-          })
-        );
-      });
-
-      afterEach(async () => {
-        await plugin.stop();
-      });
-
       it('provides a licensing context to http routes', async () => {
         const coreSetup = coreMock.createSetup();
 
-        await plugin.setup(coreSetup);
+        plugin.setup(coreSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext.mock.calls).toMatchInlineSnapshot(`
                   Array [
@@ -375,22 +460,10 @@ describe('licensing plugin', () => {
     });
 
     describe('registers on pre-response interceptor', () => {
-      let plugin: LicensingPlugin;
-
-      beforeEach(() => {
-        plugin = new LicensingPlugin(
-          coreMock.createPluginInitializerContext({ api_polling_frequency: moment.duration(100) })
-        );
-      });
-
-      afterEach(async () => {
-        await plugin.stop();
-      });
-
       it('once', async () => {
         const coreSetup = coreMock.createSetup();
 
-        await plugin.setup(coreSetup);
+        plugin.setup(coreSetup);
 
         expect(coreSetup.http.registerOnPreResponse).toHaveBeenCalledTimes(1);
       });
@@ -399,14 +472,9 @@ describe('licensing plugin', () => {
 
   describe('#stop', () => {
     it('stops polling', async () => {
-      const plugin = new LicensingPlugin(
-        coreMock.createPluginInitializerContext({
-          api_polling_frequency: moment.duration(100),
-        })
-      );
       const coreSetup = coreMock.createSetup();
-      await plugin.setup(coreSetup);
-      const { license$ } = await plugin.start();
+      plugin.setup(coreSetup);
+      const { license$ } = plugin.start();
 
       let completed = false;
       license$.subscribe({ complete: () => (completed = true) });

@@ -32,7 +32,7 @@ export const SearchIndexEmptyState: React.FC = () => {
           <p>
             {i18n.translate('xpack.enterpriseSearch.content.newIndex.emptyState.description', {
               defaultMessage:
-                'Data you add in Enterprise Search is called a search index and it’s searchable in both App Search and Workplace Search. Now you can use your connectors in App Search and your web crawlers in Workplace Search.',
+                'Data you add in Search is called a search index and it’s searchable in both App Search and Workplace Search. Now you can use your connectors in App Search and your web crawlers in Workplace Search.',
             })}
           </p>
         }

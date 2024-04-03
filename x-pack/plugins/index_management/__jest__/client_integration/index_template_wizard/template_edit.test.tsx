@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, kibanaVersion } from '../helpers';
@@ -28,8 +27,8 @@ const MAPPING = {
   },
 };
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -120,6 +119,11 @@ describe('<TemplateEdit />', () => {
         name: 'test',
         indexPatterns: ['myPattern*'],
         version: 1,
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
       });
       // Component templates
       await actions.completeStepTwo();
@@ -141,6 +145,7 @@ describe('<TemplateEdit />', () => {
             name: 'test',
             indexPatterns: ['myPattern*'],
             version: 1,
+            allowAutoCreate: 'NO_OVERWRITE',
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
@@ -149,6 +154,12 @@ describe('<TemplateEdit />', () => {
               type: 'default',
               hasDatastream: true,
               isLegacy: false,
+            },
+            template: {
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })
@@ -199,6 +210,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepOne({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
+          allowAutoCreate: 'TRUE',
         });
         // Component templates
         await actions.completeStepTwo();
@@ -253,6 +265,7 @@ describe('<TemplateEdit />', () => {
               indexPatterns: UPDATED_INDEX_PATTERN,
               priority: 3,
               version: templateToEdit.version,
+              allowAutoCreate: 'TRUE',
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,

@@ -29,7 +29,7 @@ import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
@@ -43,7 +43,7 @@ import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { BarSeries, Chart, Settings, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
@@ -188,7 +188,7 @@ function ExplorerChartContainer({
   const chartRef = useRef(null);
 
   const { euiTheme } = useEuiTheme();
-  const chartTheme = chartsService.theme.useChartsTheme();
+  const chartTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
     isDateHistogram: true,
@@ -238,7 +238,14 @@ function ExplorerChartContainer({
       {/* so that we can use chart's ref which controls the activeCursor api */}
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
-          <Settings noResults={<div />} width={0} height={0} />
+          <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
+            noResults={<div />}
+            width={0}
+            height={0}
+            locale={i18n.getLocale()}
+          />
           {/* Just need an empty chart to access cursor service */}
           <BarSeries id={'count'} xAccessor="x" yAccessors={['y']} data={[]} />
         </Chart>

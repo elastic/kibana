@@ -10,15 +10,18 @@ import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
-import { firstValueFrom, from, of, timer } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
   exhaustMap,
+  firstValueFrom,
+  from,
   map,
+  of,
   shareReplay,
   takeWhile,
-} from 'rxjs/operators';
+  timer,
+} from 'rxjs';
 import tls from 'tls';
 
 import type {
@@ -30,10 +33,10 @@ import type {
 } from '@kbn/core/server';
 import { pollEsNodesVersion } from '@kbn/core/server';
 
-import { ElasticsearchConnectionStatus } from '../common';
-import type { Certificate, PingResult } from '../common';
 import { CompatibilityError } from './compatibility_error';
 import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
+import { ElasticsearchConnectionStatus } from '../common';
+import type { Certificate, PingResult } from '../common';
 
 export interface EnrollParameters {
   apiKey: string;
@@ -393,7 +396,7 @@ export class ElasticsearchService {
         log: this.logger,
         kibanaVersion: this.kibanaVersion,
         ignoreVersionMismatch: false,
-        esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
+        healthCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
       })
     );
   }

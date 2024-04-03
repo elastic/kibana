@@ -20,7 +20,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkPatchRulesRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -192,7 +192,7 @@ describe('Bulk patch rules route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
+        '0.type: Invalid literal value, expected "eql", 0.language: Invalid literal value, expected "eql", 0.type: Invalid literal value, expected "query", 0.type: Invalid literal value, expected "saved_query", 0.type: Invalid literal value, expected "threshold", and 5 more'
       );
     });
 
@@ -220,7 +220,9 @@ describe('Bulk patch rules route', () => {
         ],
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '0.from: Failed to parse date-math expression'
+      );
     });
   });
 });

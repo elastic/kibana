@@ -14,7 +14,7 @@ import type {
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { createConcatStream, createMapStream, createPromiseFromStreams } from '@kbn/utils';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { ExportableRule } from './exportable_rule';
 
 export interface DefaultActionConnectorDetails {
   exported_action_connector_count: number;
@@ -63,7 +63,7 @@ const filterOutPredefinedActionConnectorsIds = async (
 // to getAll actions connectors
 
 export const getRuleActionConnectorsForExport = async (
-  rules: RuleResponse[],
+  rules: ExportableRule[],
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
   actionsClient: ActionsClient

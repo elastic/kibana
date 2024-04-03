@@ -8,7 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { getLanguageDisplayName } from '@kbn/es-query';
 import {
   EuiModal,
   EuiModalBody,
@@ -25,20 +25,27 @@ import {
 export interface TextBasedLanguagesTransitionModalProps {
   closeModal: (dismissFlag: boolean, needsSave?: boolean) => void;
   setIsTextLangTransitionModalVisible: (flag: boolean) => void;
+  textBasedLanguage?: string;
 }
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function TextBasedLanguagesTransitionModal({
   closeModal,
   setIsTextLangTransitionModalVisible,
+  textBasedLanguage,
 }: TextBasedLanguagesTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
   const onTransitionModalDismiss = useCallback((e) => {
     setDismissModalChecked(e.target.checked);
   }, []);
 
+  const language = getLanguageDisplayName(textBasedLanguage);
   return (
-    <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
+    <EuiModal
+      onClose={() => setIsTextLangTransitionModalVisible(false)}
+      style={{ width: 700 }}
+      data-test-subj="unifiedSearch_switch_modal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate(
@@ -56,7 +63,8 @@ export default function TextBasedLanguagesTransitionModal({
             'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalBody',
             {
               defaultMessage:
-                "Switching data views removes the current SQL query. Save this search to ensure you don't lose work.",
+                "Switching data views removes the current {language} query. Save this search to ensure you don't lose work.",
+              values: { language },
             }
           )}
         </EuiText>

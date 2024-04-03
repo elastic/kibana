@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -43,14 +43,26 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server",
-    "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",
     "@kbn/shared-ux-router",
     "@kbn/core-saved-objects-server",
     "@kbn/share-plugin",
     "@kbn/core-http-server",
+    "@kbn/core-http-browser",
+    "@kbn/discover-utils",
+    "@kbn/unified-data-table",
+    "@kbn/cell-actions",
+    "@kbn/unified-field-list",
+    "@kbn/unified-doc-viewer",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/securitysolution-grouping",
+    "@kbn/alerting-plugin",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { filter, first } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /**
@@ -23,8 +23,8 @@ import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 export async function isValidConnection(
   esNodesCompatibility$: Observable<NodesVersionCompatibility>
 ) {
-  return await esNodesCompatibility$
-    .pipe(
+  return await firstValueFrom(
+    esNodesCompatibility$.pipe(
       filter(({ nodesInfoRequestError, isCompatible }) => {
         if (
           nodesInfoRequestError &&
@@ -35,8 +35,7 @@ export async function isValidConnection(
           throw nodesInfoRequestError;
         }
         return isCompatible;
-      }),
-      first()
+      })
     )
-    .toPromise();
+  );
 }

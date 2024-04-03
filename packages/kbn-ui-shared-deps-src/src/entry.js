@@ -38,7 +38,6 @@ Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 
 // big deps which are locked to a single version
 export const Rxjs = require('rxjs');
-export const RxjsOperators = require('rxjs/operators');
 export const ElasticNumeral = require('@elastic/numeral');
 export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
@@ -46,7 +45,12 @@ export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services'
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
 export const KbnDatemath = require('@kbn/datemath');
-export const ReactBeautifulDnD = require('react-beautiful-dnd');
+export const HelloPangeaDnd = require('@hello-pangea/dnd/dist/dnd');
+export const ReduxjsToolkit = require('@reduxjs/toolkit');
+export const ReactRedux = require('react-redux');
+export const Redux = require('redux');
+export const Immer = require('immer');
+export const Reselect = require('reselect');
 
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
@@ -59,10 +63,14 @@ export const TsLib = require('tslib');
 export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnEsQuery = require('@kbn/es-query');
+export const KbnSearchErrors = require('@kbn/search-errors');
 export const KbnStd = require('@kbn/std');
 export const SaferLodashSet = require('@kbn/safer-lodash-set');
+
+export const KbnSharedUxErrorBoundary = require('@kbn/shared-ux-error-boundary');
 export const KbnRison = require('@kbn/rison');
 export const History = require('history');
 export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
+export const KbnCodeEditor = require('@kbn/code-editor');

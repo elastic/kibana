@@ -208,3 +208,75 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
 
   expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 });
+
+describe('packageInfo.buildFlavor', () => {
+  it('is set to `serverless` when the `serverless` cli flag is `true`', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
+
+    const env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        configs: ['/test/cwd/config/kibana.yml'],
+        cliArgs: {
+          serverless: true,
+        },
+      })
+    );
+
+    expect(env.packageInfo.buildFlavor).toEqual('serverless');
+  });
+
+  it('is set to `traditional` when the `serverless` cli flag is `false`', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
+
+    const env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        configs: ['/test/cwd/config/kibana.yml'],
+        cliArgs: {
+          serverless: false,
+        },
+      })
+    );
+
+    expect(env.packageInfo.buildFlavor).toEqual('traditional');
+  });
+});
+
+describe('packageInfo.buildShaShort', () => {
+  const sha = 'c6e1a25bea71a623929a8f172c0273bf0c811ca0';
+  it('provides the sha and a short version of the sha', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
+
+    const env = new Env(
+      '/some/home/dir',
+      {
+        branch: 'whathaveyou',
+        version: 'v1',
+        build: {
+          distributable: true,
+          number: 100,
+          sha,
+          date: BUILD_DATE,
+        },
+      },
+      getEnvOptions({
+        cliArgs: { dev: false },
+        configs: ['/some/other/path/some-kibana.yml'],
+        repoPackages: ['FakePackage1', 'FakePackage2'] as unknown as Package[],
+      })
+    );
+
+    expect(env.packageInfo.buildSha).toEqual('c6e1a25bea71a623929a8f172c0273bf0c811ca0');
+    expect(env.packageInfo.buildShaShort).toEqual('c6e1a25bea71');
+  });
+});

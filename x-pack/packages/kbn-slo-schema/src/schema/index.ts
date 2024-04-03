@@ -6,7 +6,6 @@
  */
 
 export * from './common';
-export * from './composite_slo';
 export * from './duration';
 export * from './indicators';
 export * from './time_window';

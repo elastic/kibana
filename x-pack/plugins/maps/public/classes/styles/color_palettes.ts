@@ -7,26 +7,17 @@
 
 import tinycolor from 'tinycolor2';
 import {
-  // @ts-ignore
   colorPalette as colorPaletteGenerator,
-  // @ts-ignore
   euiPaletteForStatus,
-  // @ts-ignore
   euiPaletteForTemperature,
-  // @ts-ignore
   euiPaletteCool,
-  // @ts-ignore
   euiPaletteWarm,
-  // @ts-ignore
-  euiPaletteNegative,
-  // @ts-ignore
-  euiPalettePositive,
-  // @ts-ignore
+  euiPaletteRed,
+  euiPaletteGreen,
   euiPaletteGray,
-  // @ts-ignore
   euiPaletteColorBlind,
-} from '@elastic/eui/lib/services';
-import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+  EuiColorPalettePickerPaletteProps,
+} from '@elastic/eui';
 import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
@@ -68,9 +59,9 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
     value: 'Greens',
     getPalette: (steps: number) => {
-      return euiPalettePositive(steps);
+      return euiPaletteGreen(steps);
     },
-    palette: euiPalettePositive(8),
+    palette: euiPaletteGreen(8),
     type: 'gradient',
   },
   {
@@ -84,9 +75,9 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
     value: 'Reds',
     getPalette: (steps: number) => {
-      return euiPaletteNegative(steps);
+      return euiPaletteRed(steps);
     },
-    palette: euiPaletteNegative(8),
+    palette: euiPaletteRed(8),
     type: 'gradient',
   },
   {

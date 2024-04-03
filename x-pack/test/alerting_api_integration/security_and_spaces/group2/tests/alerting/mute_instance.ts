@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -14,8 +15,7 @@ import {
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -72,11 +72,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -103,7 +99,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -137,7 +133,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -159,7 +155,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -191,7 +187,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -201,17 +197,6 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -226,7 +211,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -257,11 +242,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -271,7 +252,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'muteAlert',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -293,7 +274,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -324,11 +305,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;

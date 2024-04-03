@@ -5,98 +5,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "profiling",
-        "id": "def-public.ProfilingLocators",
-        "type": "Type",
-        "tags": [],
-        "label": "ProfilingLocators",
-        "description": [],
-        "signature": [
-          "{ flamegraphLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "FlamegraphLocatorParams",
-          ">; topNFunctionsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "TopNFunctionsLocatorParams",
-          ">; stacktracesLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "StacktracesLocatorParams",
-          ">; }"
-        ],
-        "path": "x-pack/plugins/profiling/public/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profiling",
-        "id": "def-public.ProfilingPluginSetup",
-        "type": "Type",
-        "tags": [],
-        "label": "ProfilingPluginSetup",
-        "description": [],
-        "signature": [
-          "{ locators: { flamegraphLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "FlamegraphLocatorParams",
-          ">; topNFunctionsLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "TopNFunctionsLocatorParams",
-          ">; stacktracesLocator: ",
-          {
-            "pluginId": "share",
-            "scope": "common",
-            "docId": "kibSharePluginApi",
-            "section": "def-common.LocatorPublic",
-            "text": "LocatorPublic"
-          },
-          "<",
-          "StacktracesLocatorParams",
-          ">; }; hasSetup: () => Promise<boolean>; }"
-        ],
-        "path": "x-pack/plugins/profiling/public/plugin.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "profiling",
@@ -108,7 +17,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/profiling/public/plugin.tsx",
+      "path": "x-pack/plugins/observability_solution/profiling/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -129,9 +38,9 @@
         "label": "PackageInputType",
         "description": [],
         "signature": [
-          "{ readonly host?: string | undefined; readonly tls_enabled?: boolean | undefined; readonly tls_supported_protocols?: string[] | undefined; readonly tls_certificate_path?: string | undefined; readonly tls_key_path?: string | undefined; }"
+          "{ readonly telemetry?: boolean | undefined; readonly host?: string | undefined; readonly tls_enabled?: boolean | undefined; readonly tls_supported_protocols?: string[] | undefined; readonly tls_certificate_path?: string | undefined; readonly tls_key_path?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/profiling/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -144,9 +53,9 @@
         "label": "ProfilingConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; readonly symbolizer?: Readonly<{ host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly collector?: Readonly<{ host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly enabled: boolean; }"
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; readonly symbolizer?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly collector?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly enabled: boolean; }"
         ],
-        "path": "x-pack/plugins/profiling/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -160,7 +69,7 @@
       "tags": [],
       "label": "ProfilingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/profiling/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/profiling/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -174,7 +83,7 @@
       "tags": [],
       "label": "ProfilingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/profiling/server/types.ts",
+      "path": "x-pack/plugins/observability_solution/profiling/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -187,48 +96,15 @@
     "functions": [
       {
         "parentPluginId": "profiling",
-        "id": "def-common.fromMapToRecord",
-        "type": "Function",
-        "tags": [],
-        "label": "fromMapToRecord",
-        "description": [],
-        "signature": [
-          "(m: Map<K, V>) => Record<string, V>"
-        ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "profiling",
-            "id": "def-common.fromMapToRecord.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "m",
-            "description": [],
-            "signature": [
-              "Map<K, V>"
-            ],
-            "path": "x-pack/plugins/profiling/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "profiling",
         "id": "def-common.getRoutePaths",
         "type": "Function",
         "tags": [],
         "label": "getRoutePaths",
         "description": [],
         "signature": [
-          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; }"
+          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; StorageExplorerSummary: string; StorageExplorerHostStorageDetails: string; StorageExplorerIndicesStorageDetails: string; }"
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -245,7 +121,7 @@
         "signature": [
           "(request: any) => [number, number]"
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -259,7 +135,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/profiling/common/index.ts",
+            "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -282,7 +158,7 @@
         "signature": [
           "\"profiling-events-all\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -297,7 +173,7 @@
         "signature": [
           "\"profiling-executables\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,7 +188,7 @@
         "signature": [
           "\"profiling-stackframes\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -327,7 +203,7 @@
         "signature": [
           "\"profiling-stacktraces\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -335,14 +211,11 @@
       {
         "parentPluginId": "profiling",
         "id": "def-common.NOT_AVAILABLE_LABEL",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "NOT_AVAILABLE_LABEL",
         "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -357,7 +230,7 @@
         "signature": [
           "\"profiling\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -372,7 +245,7 @@
         "signature": [
           "\"profiling\""
         ],
-        "path": "x-pack/plugins/profiling/common/index.ts",
+        "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

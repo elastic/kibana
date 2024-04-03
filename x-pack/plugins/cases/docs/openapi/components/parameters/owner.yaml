@@ -10,4 +10,5 @@ schema:
     - type: array
       items:
         $ref: '../schemas/owners.yaml'
-example: cases
+      examples:
+        - [ cases ]

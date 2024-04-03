@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { isPromise } from '@kbn/std';
@@ -21,83 +21,45 @@ interface Props {
   input?: EmbeddableInput;
 }
 
-interface State {
-  node?: ReactNode;
-}
+export const EmbeddableRoot: React.FC<Props> = ({ embeddable, loading, error, input }) => {
+  const [node, setNode] = useState<ReactNode | undefined>();
+  const [embeddableHasMounted, setEmbeddableHasMounted] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
-export class EmbeddableRoot extends React.Component<Props, State> {
-  private root?: React.RefObject<HTMLDivElement>;
-  private alreadyMounted: boolean = false;
-
-  constructor(props: Props) {
-    super(props);
-
-    this.root = React.createRef();
-    this.state = {};
-  }
-
-  private updateNode = (node: MaybePromise<ReactNode>) => {
-    if (isPromise(node)) {
-      node.then(this.updateNode);
-
+  const updateNode = useCallback((newNode: MaybePromise<ReactNode>) => {
+    if (isPromise(newNode)) {
+      newNode.then(updateNode);
       return;
     }
 
-    this.setState({ node });
-  };
+    setNode(newNode);
+  }, []);
 
-  public componentDidMount() {
-    if (!this.root?.current || !this.props.embeddable) {
+  useEffect(() => {
+    if (!rootRef.current || !embeddable) {
       return;
     }
 
-    this.alreadyMounted = true;
-    this.updateNode(this.props.embeddable.render(this.root.current) ?? undefined);
-  }
+    setEmbeddableHasMounted(true);
+    updateNode(embeddable.render(rootRef.current) ?? undefined);
+    embeddable.render(rootRef.current);
+  }, [updateNode, embeddable]);
 
-  public componentDidUpdate(prevProps?: Props) {
-    let justRendered = false;
-    if (this.root?.current && this.props.embeddable && !this.alreadyMounted) {
-      this.alreadyMounted = true;
-      this.updateNode(this.props.embeddable.render(this.root.current) ?? undefined);
-      justRendered = true;
+  useEffect(() => {
+    if (input && embeddable && embeddableHasMounted) {
+      embeddable.updateInput(input);
     }
+  }, [input, embeddable, embeddableHasMounted]);
 
-    if (
-      !justRendered &&
-      this.root &&
-      this.root.current &&
-      this.props.embeddable &&
-      this.alreadyMounted &&
-      this.props.input &&
-      prevProps?.input !== this.props.input
-    ) {
-      this.props.embeddable.updateInput(this.props.input);
-    }
-  }
-
-  public shouldComponentUpdate({ embeddable, error, input, loading }: Props, { node }: State) {
-    return Boolean(
-      error !== this.props.error ||
-        loading !== this.props.loading ||
-        embeddable !== this.props.embeddable ||
-        (this.root && this.root.current && embeddable && !this.alreadyMounted) ||
-        input !== this.props.input ||
-        node !== this.state.node
-    );
-  }
-
-  public render() {
-    return (
-      <React.Fragment>
-        <div ref={this.root}>{this.state.node}</div>
-        {this.props.loading && <EuiLoadingSpinner data-test-subj="embedSpinner" />}
-        {this.props.error && (
-          <EmbeddableErrorHandler embeddable={this.props.embeddable} error={this.props.error}>
-            {({ message }) => <EuiText data-test-subj="embedError">{message}</EuiText>}
-          </EmbeddableErrorHandler>
-        )}
-      </React.Fragment>
-    );
-  }
-}
+  return (
+    <>
+      <div ref={rootRef}>{node}</div>
+      {loading && <EuiLoadingSpinner data-test-subj="embedSpinner" />}
+      {error && (
+        <EmbeddableErrorHandler embeddable={embeddable} error={error}>
+          {({ message }) => <EuiText data-test-subj="embedError">{message}</EuiText>}
+        </EmbeddableErrorHandler>
+      )}
+    </>
+  );
+};

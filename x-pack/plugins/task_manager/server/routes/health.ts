@@ -14,8 +14,8 @@ import {
 } from '@kbn/core/server';
 import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
-import { throttleTime } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs';
+import { throttleTime } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
@@ -114,7 +114,8 @@ export function healthRoute(params: HealthRouteParams): {
       }),
       // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
-      map((stats) => withServiceStatus(getHealthStatus(stats)))
+      map((stats) => withServiceStatus(getHealthStatus(stats))),
+      filter(([monitoredHealth]) => monitoredHealth.status !== HealthStatus.Uninitialized)
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);

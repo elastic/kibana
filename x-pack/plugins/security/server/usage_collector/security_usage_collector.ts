@@ -7,7 +7,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 
 interface Usage {
@@ -160,12 +160,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
-        ...new Set(
-          config.authc.sortedProviders.reduce(
-            (acc, provider) => [...acc, provider.type],
-            [] as string[]
-          )
-        ),
+        ...new Set(config.authc.sortedProviders.map((provider) => provider.type)),
       ];
       const accessAgreementEnabled =
         allowAccessAgreement &&

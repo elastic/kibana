@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,9 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
+  const browser = getService('browser');
+  const { dashboardControls, common, dashboard, header } = getPageObjects([
     'dashboardControls',
-    'timePicker',
     'dashboard',
     'common',
     'header',
@@ -36,6 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'kibana_sample_admin',
         'test_logstash_reader',
       ]);
+      // disable the invalid selection warning toast
+      await browser.setLocalStorageItem('controls:showInvalidSelectionWarning', 'false');
+
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -46,16 +49,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await common.navigateToApp('dashboard');
-      await dashboardControls.enableControlsLab();
-      await common.navigateToApp('dashboard');
+      await common.setTime({
+        from: 'Oct 22, 2018 @ 00:00:00.000',
+        to: 'Dec 3, 2018 @ 00:00:00.000',
+      });
+      await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await timePicker.setAbsoluteRange(
-        'Oct 22, 2018 @ 00:00:00.000',
-        'Dec 3, 2018 @ 00:00:00.000'
-      );
       await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
@@ -66,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.uiSettings.unset('defaultIndex');
+      await common.unsetTime();
       await security.testUser.restoreDefaults();
     });
 
@@ -76,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
+          additionalSettings: { step: 10 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
         await dashboard.clearUnsavedChanges();
@@ -96,9 +99,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
           width: 'medium',
+          additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
-        const secondId = (await dashboardControls.getAllControlIds())[1];
+        const [firstId, secondId] = await dashboardControls.getAllControlIds();
+        await dashboardControls.clearControlSelections(firstId);
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
 
         await dashboardControls.rangeSliderSetLowerBound(secondId, '200');
@@ -114,6 +120,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         const newTitle = 'Average ticket price';
         await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlsEditorVerifySupportedControlTypes({
+          supportedTypes: [OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL],
+          selectedType: RANGE_SLIDER_CONTROL,
+        });
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
@@ -130,7 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
+        await dashboardControls.controlsEditorSetfield('dayOfWeek');
+        await dashboardControls.controlsEditorSetControlType(RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', firstId, '0', '6');
@@ -171,6 +182,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.rangeSliderWaitForLoading(secondId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1000');
+        await dashboard.clearUnsavedChanges();
+      });
+
+      it('can select a range on a defined step interval using arrow keys', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
+        );
+
+        // use arrow key to set lower bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '300', '');
+
+        // use arrow key to set lower bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        await dashboardControls.validateRange('value', secondId, '200', '');
+
+        await dashboardControls.rangeSliderSetUpperBound(secondId, '800');
+
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__upperBoundFieldNumber`
+        );
+
+        // use arrow key to set upper bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '200', '900');
+
+        // use arrow key to set upper bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        await dashboardControls.validateRange('value', secondId, '200', '800');
+
         await dashboard.clearUnsavedChanges();
       });
 
@@ -218,7 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
       });
 
-      it('hides range slider in popover when no data available', async () => {
+      it('cannot open popover when no data available', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
@@ -226,10 +269,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.rangeSliderOpenPopover(secondId);
-        await dashboardControls.rangeSliderPopoverAssertOpen();
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
+        ); // try to open popover
         await testSubjects.missingOrFail('rangeSlider__slider');
-        expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
       });
     });
 

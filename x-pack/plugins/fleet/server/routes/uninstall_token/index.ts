@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UNINSTALL_TOKEN_ROUTES } from '../../../common/constants';
+import { UNINSTALL_TOKEN_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -20,26 +20,34 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
 
   if (experimentalFeatures.agentTamperProtectionEnabled) {
-    router.get(
-      {
+    router.versioned
+      .get({
         path: UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
-        validate: GetUninstallTokensMetadataRequestSchema,
         fleetAuthz: {
-          fleet: { all: true },
+          fleet: { allAgents: true },
         },
-      },
-      getUninstallTokensMetadataHandler
-    );
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: GetUninstallTokensMetadataRequestSchema },
+        },
+        getUninstallTokensMetadataHandler
+      );
 
-    router.get(
-      {
+    router.versioned
+      .get({
         path: UNINSTALL_TOKEN_ROUTES.INFO_PATTERN,
-        validate: GetUninstallTokenRequestSchema,
         fleetAuthz: {
-          fleet: { all: true },
+          fleet: { allAgents: true },
         },
-      },
-      getUninstallTokenHandler
-    );
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: GetUninstallTokenRequestSchema },
+        },
+        getUninstallTokenHandler
+      );
   }
 };

@@ -32,7 +32,6 @@ export const buildOSSFeatures = ({
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
-      alerting: ['.es-query'],
       privileges: {
         all: {
           app: ['discover', 'kibana'],
@@ -43,14 +42,6 @@ export const buildOSSFeatures = ({
             read: ['index-pattern'],
           },
           ui: ['show', 'save', 'saveQuery'],
-          alerting: {
-            rule: {
-              all: ['.es-query'],
-            },
-            alert: {
-              all: ['.es-query'],
-            },
-          },
         },
         read: {
           app: ['discover', 'kibana'],
@@ -60,14 +51,6 @@ export const buildOSSFeatures = ({
             read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
-          alerting: {
-            rule: {
-              all: ['.es-query'],
-            },
-            alert: {
-              all: ['.es-query'],
-            },
-          },
         },
       },
       subFeatures: [
@@ -220,6 +203,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'tag',
             ],
@@ -237,6 +221,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'dashboard',
               'query',
@@ -535,6 +520,31 @@ export const buildOSSFeatures = ({
         },
       },
     },
+    {
+      id: 'savedQueryManagement',
+      name: i18n.translate('xpack.features.savedQueryManagementFeatureName', {
+        defaultMessage: 'Saved Query Management',
+      }),
+      order: 1750,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
+        defaultMessage:
+          'If set to "All", saved queries can be managed across Kibana in all applications that support them. If set to "None", saved query privileges will be determined independently by each application.',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          catalogue: [],
+          savedObject: {
+            all: ['query'],
+            read: [],
+          },
+          ui: ['saveQuery'],
+        }, // No read-only mode supported
+      },
+    },
   ] as KibanaFeatureConfig[];
 };
 
@@ -595,7 +605,7 @@ const reportingFeatures: {
           {
             id: 'download_csv_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
-              defaultMessage: 'Download CSV reports from Saved Search panels',
+              defaultMessage: 'Generate CSV reports from Saved Search panels',
             }),
             includeIn: 'all',
             savedObject: { all: [], read: [] },

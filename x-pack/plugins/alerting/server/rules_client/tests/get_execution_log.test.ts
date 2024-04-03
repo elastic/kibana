@@ -7,7 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -22,6 +27,8 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
 import { fromKueryExpression } from '@kbn/es-query';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -32,6 +39,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -42,10 +50,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
@@ -53,6 +63,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -66,7 +81,7 @@ const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     enabled: true,
     name: 'rule-name',
@@ -329,12 +344,14 @@ const aggregateResults = {
         ],
       },
       executionUuidCardinality: {
-        executionUuidCardinality: {
-          value: 374,
-        },
+        value: 374,
       },
     },
   },
+  hits: {
+    total: { value: 875, relation: 'eq' },
+    hits: [],
+  } as estypes.SearchHitsMetadata<unknown>,
 };
 
 function getRuleSavedObject(attributes: Partial<RawRule> = {}): SavedObject<RawRule> {
@@ -435,7 +452,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -461,7 +478,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -487,7 +504,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -513,7 +530,7 @@ describe('getExecutionLogForRule()', () => {
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
     expect(eventLogClient.aggregateEventsBySavedObjectIds.mock.calls[0]).toEqual([
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       ['1'],
       {
         aggs: getExecutionLogAggregation({
@@ -653,7 +670,7 @@ describe('getExecutionLogForRule()', () => {
             action: 'rule_get_execution_log',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -675,7 +692,7 @@ describe('getExecutionLogForRule()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {

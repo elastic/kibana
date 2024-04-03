@@ -23,6 +23,8 @@ const ES_TEST_INDEX_SOURCE = 'ml-alert:anomaly-detection';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ad-alert-output`;
 
+const AAD_INDEX = '.alerts-ml.anomaly-detection.alerts-default';
+
 const ALERT_INTERVAL_SECONDS = 3;
 
 const AD_JOB_ID = 'rt-anomaly-mean-value';
@@ -144,6 +146,18 @@ export default function alertTests({ getService }: FtrProviderContext) {
           '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
         );
       }
+
+      log.debug('Checking docs in the alerts-as-data index...');
+
+      const aadDocs = await waitForAAD(1);
+
+      for (const doc of aadDocs) {
+        expect(doc._source['kibana.alert.job_id']).to.be(AD_JOB_ID);
+        expect(doc._source['kibana.alert.url']).to.contain(
+          '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
+        );
+        expect(doc._source['kibana.alert.anomaly_score'][0]).to.be.above(0);
+      }
     });
 
     async function waitForDocs(count: number): Promise<any[]> {
@@ -152,6 +166,20 @@ export default function alertTests({ getService }: FtrProviderContext) {
         ES_TEST_INDEX_REFERENCE,
         count
       );
+    }
+
+    async function waitForAAD(numDocs: number): Promise<any[]> {
+      return await retry.try(async () => {
+        const searchResult = await es.search({ index: AAD_INDEX, size: 1000 });
+
+        // @ts-expect-error doesn't handle total: number
+        const value = searchResult.hits.total.value?.value || searchResult.hits.total.value;
+        if (value < numDocs) {
+          // @ts-expect-error doesn't handle total: number
+          throw new Error(`Expected ${numDocs} but received ${searchResult.hits.total.value}.`);
+        }
+        return searchResult.hits.hits;
+      });
     }
 
     async function createAlert({
@@ -168,7 +196,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               source: ES_TEST_INDEX_SOURCE,
               reference: ES_TEST_INDEX_REFERENCE,
               params: {
-                name: '{{{alertName}}}',
+                name: '{{{rule.name}}}',
                 message: '{{{context.message}}}',
                 anomalyExplorerUrl: '{{{context.anomalyExplorerUrl}}}',
               },

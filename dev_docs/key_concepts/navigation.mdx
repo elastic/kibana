@@ -3,7 +3,7 @@ id: kibDevKeyConceptsNavigation
 slug: /kibana-dev-docs/routing-and-navigation
 title: Routing, Navigation and URL
 description: Learn best practices about navigation inside Kibana
-date: 2021-10-05
+date: 2023-11-07
 tags: ['kibana', 'dev', 'architecture', 'contributor']
 ---
 
@@ -116,11 +116,11 @@ const MySPALink = () =>
 ```
 
 As it would be too much boilerplate to do this for each link in your app, there is a handy wrapper that helps with it:
-[RedirectAppLinks](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49).
+[RedirectAppLinks](https://github.com/elastic/kibana/blob/main/packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx).
 
 ```jsx
 const MyApp = () =>
-<RedirectAppLinks application={core.application}>
+<RedirectAppLinks coreStart={{application: core.application}}>
   {/*...*/}
   {/* navigations using this link will happen in SPA friendly way */}
   <a href={urlToADashboard}>Go to Dashboard</a>

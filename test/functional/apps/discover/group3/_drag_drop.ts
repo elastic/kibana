@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '53 available fields. 0 empty fields. 3 meta fields.'
+          '48 available fields. 5 empty fields. 3 meta fields.'
         );
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           '@timestamp, Document'
@@ -60,17 +60,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '@timestamp, extension'
         );
 
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
+        ).to.be('extension');
+      });
+
+      it('should support dragging and dropping a field onto the grid (with keyboard)', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '48 available fields. 5 empty fields. 3 meta fields.'
+        );
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          '@timestamp, Document'
+        );
+
         await PageObjects.discover.dragFieldWithKeyboardToTable('@message');
 
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          '@timestamp, extension, @message'
+          '@timestamp, @message'
         );
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
         expect(
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
-        ).to.be('extension, @message');
+        ).to.be('@message');
       });
     });
   });

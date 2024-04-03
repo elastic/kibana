@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { parsePath } from 'history';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import * as Rx from 'rxjs';
+import { takeWhile } from 'rxjs';
+
 import {
   EuiButton,
   EuiCard,
@@ -18,28 +24,20 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
+  EuiPageSection,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { parsePath } from 'history';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
-import * as Rx from 'rxjs';
-import { takeWhile } from 'rxjs/operators';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type {
-  JobAppParamsPDF,
-  JobParamsPDFV2,
-  JobParamsPNGV2,
-} from '@kbn/reporting-plugin/common/types';
+import { JobParamsPDFDeprecated, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
@@ -82,12 +80,14 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       });
   });
 
-  const getPDFJobParamsDefault = (): JobAppParamsPDF => {
+  const getPDFJobParamsDefault = (): JobParamsPDFDeprecated => {
     return {
       layout: { id: 'preserve_layout' },
       relativeUrls: ['/app/reportingExample#/intended-visualization'],
       objectType: 'develeloperExample',
       title: 'Reporting Developer Example',
+      browserTimezone: 'UTC',
+      version: '1',
     };
   };
 
@@ -292,86 +292,84 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                 <h1>Reporting Example</h1>
               </EuiTitle>
             </EuiPageHeader>
-            <EuiPageContent>
-              <EuiPageContentBody>
-                <EuiTitle>
-                  <h2>Example of a Sharing menu using components from Reporting</h2>
-                </EuiTitle>
-                <EuiSpacer />
-                <EuiText>
-                  <EuiFlexGroup alignItems="center" gutterSize="l">
-                    <EuiFlexItem grow={false}>
-                      <EuiPopover
-                        id="contextMenuExample"
-                        button={
-                          <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
-                            Share
-                          </EuiButton>
-                        }
-                        isOpen={isPopoverOpen}
-                        closePopover={closePopover}
-                        panelPaddingSize="none"
-                        anchorPosition="downLeft"
+            <EuiPageSection>
+              <EuiTitle>
+                <h2>Example of a Sharing menu using components from Reporting</h2>
+              </EuiTitle>
+              <EuiSpacer />
+              <EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      id="contextMenuExample"
+                      button={
+                        <EuiButton data-test-subj="shareButton" onClick={onButtonClick}>
+                          Share
+                        </EuiButton>
+                      }
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
+                      panelPaddingSize="none"
+                      anchorPosition="downLeft"
+                    >
+                      <EuiContextMenu initialPanelId={0} panels={panels} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
+                        Go to capture test
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiHorizontalRule />
+
+                <div data-shared-items-container data-shared-items-count="5">
+                  <EuiFlexGroup gutterSize="l">
+                    <EuiFlexItem data-shared-item>
+                      {forwardedState ? (
+                        <>
+                          <EuiText>
+                            <p>
+                              <strong>Forwarded app state</strong>
+                            </p>
+                          </EuiText>
+                          <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
+                        </>
+                      ) : (
+                        <>
+                          <EuiText>
+                            <p>
+                              <strong>No forwarded app state found</strong>
+                            </p>
+                          </EuiText>
+                          <EuiCodeBlock>{'{}'}</EuiCodeBlock>
+                        </>
+                      )}
+                    </EuiFlexItem>
+                    {logos.map((item, index) => (
+                      <EuiFlexItem
+                        key={index}
+                        data-shared-item
+                        data-shared-render-error
+                        data-render-error="This is an example error"
                       >
-                        <EuiContextMenu initialPanelId={0} panels={panels} />
-                      </EuiPopover>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
-                          Go to capture test
-                        </EuiLink>
-                      </EuiText>
-                    </EuiFlexItem>
+                        <EuiCard
+                          icon={<EuiIcon size="xxl" type={`logo${item}`} />}
+                          title={`Elastic ${item}`}
+                          description="Example of a card's description. Stick to one or two sentences."
+                          onClick={() => {}}
+                        />
+                      </EuiFlexItem>
+                    ))}
                   </EuiFlexGroup>
 
-                  <EuiHorizontalRule />
-
-                  <div data-shared-items-container data-shared-items-count="5">
-                    <EuiFlexGroup gutterSize="l">
-                      <EuiFlexItem data-shared-item>
-                        {forwardedState ? (
-                          <>
-                            <EuiText>
-                              <p>
-                                <strong>Forwarded app state</strong>
-                              </p>
-                            </EuiText>
-                            <EuiCodeBlock>{JSON.stringify(forwardedState)}</EuiCodeBlock>
-                          </>
-                        ) : (
-                          <>
-                            <EuiText>
-                              <p>
-                                <strong>No forwarded app state found</strong>
-                              </p>
-                            </EuiText>
-                            <EuiCodeBlock>{'{}'}</EuiCodeBlock>
-                          </>
-                        )}
-                      </EuiFlexItem>
-                      {logos.map((item, index) => (
-                        <EuiFlexItem
-                          key={index}
-                          data-shared-item
-                          data-shared-render-error
-                          data-render-error="This is an example error"
-                        >
-                          <EuiCard
-                            icon={<EuiIcon size="xxl" type={`logo${item}`} />}
-                            title={`Elastic ${item}`}
-                            description="Example of a card's description. Stick to one or two sentences."
-                            onClick={() => {}}
-                          />
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-
-                    <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
-                  </div>
-                </EuiText>
-              </EuiPageContentBody>
-            </EuiPageContent>
+                  <p>Screenshot Mode is {screenshotMode.isScreenshotMode() ? 'ON' : 'OFF'}!</p>
+                </div>
+              </EuiText>
+            </EuiPageSection>
           </EuiPageBody>
         </EuiPage>
       </I18nProvider>

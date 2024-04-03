@@ -17,9 +17,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./data_view_field_editor'));
     loadTestFile(require.resolve('./data_views'));
+    loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./kql_telemetry'));
     loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
+    loadTestFile(require.resolve('./saved_queries'));
     loadTestFile(require.resolve('./scripts'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./short_url'));
@@ -30,5 +32,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./guided_onboarding'));
+    loadTestFile(require.resolve('./esql'));
   });
 }

@@ -9,12 +9,13 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createPushedUserActionBuilder } from './pushed';
 import { getMockBuilderArgs } from './mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -27,7 +28,7 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('renders correctly pushing for the first time', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service);
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service);
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
       userAction,
@@ -48,7 +49,7 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('renders correctly if oldestUserActionPushDate is not defined', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service);
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service);
     const caseConnectors = getCaseConnectorsMockResponse({
       'push.details.oldestUserActionPushDate': undefined,
     });
@@ -69,7 +70,7 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('renders correctly when updating an external service', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service);
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service);
     const caseConnectors = getCaseConnectorsMockResponse({
       'push.details.oldestUserActionPushDate': '2023-01-16T09:46:29.813Z',
     });
@@ -91,7 +92,7 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('shows only the top footer if it is the latest push and there is nothing to push', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service, {
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service, {
       createdAt: '2023-01-17T09:46:29.813Z',
     });
 
@@ -118,7 +119,7 @@ describe('createPushedUserActionBuilder ', () => {
       'push.needsToBePushed': true,
     });
 
-    const userAction = getUserAction('pushed', Actions.push_to_service, {
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service, {
       createdAt: '2023-01-17T09:46:29.813Z',
     });
     const builder = createPushedUserActionBuilder({
@@ -139,7 +140,7 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('does not show the footers if it is not the latest push', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service, {
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service, {
       createdAt: '2020-01-17T09:46:29.813Z',
     });
 
@@ -170,7 +171,7 @@ describe('createPushedUserActionBuilder ', () => {
       'push.details.latestUserActionPushDate': undefined,
     });
 
-    const userAction = getUserAction('pushed', Actions.push_to_service, {
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service, {
       createdAt: '2023-01-17T09:46:29.813Z',
     });
 
@@ -198,7 +199,7 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('does not show the push information if the connector is none', async () => {
     const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
-    const userAction = getUserAction('pushed', Actions.push_to_service, {
+    const userAction = getUserAction('pushed', UserActionActions.push_to_service, {
       createdAt: '2023-01-17T09:46:29.813Z',
       payload: {
         externalService: { connectorId: NONE_CONNECTOR_ID, connectorName: 'none connector' },

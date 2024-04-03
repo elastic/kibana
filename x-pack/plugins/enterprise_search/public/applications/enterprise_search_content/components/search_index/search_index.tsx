@@ -11,24 +11,24 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import useObservable from 'react-use/lib/useObservable';
-
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { ErrorStatePrompt } from '../../../shared/error_state';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
 import { getHeaderActions } from './components/header_actions/header_actions';
-import { ConnectorConfiguration } from './connector/connector_configuration';
-import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
+import { ConnectorScheduling } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
@@ -65,6 +65,7 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
 
   /**
    * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
@@ -72,28 +73,44 @@ export const SearchIndex: React.FC = () => {
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
   const {
+    config,
     guidedOnboarding,
     productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
-  const isAppGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
-  );
-  const isWebsiteGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('websiteSearch', 'add_data')
-  );
-  const isDatabaseGuideActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('databaseSearch', 'add_data')
-  );
+
   useEffect(() => {
-    if (isAppGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
-    } else if (isWebsiteGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
-    } else if (isDatabaseGuideActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-    }
-  }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('appSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('websiteSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    const subscription = guidedOnboarding?.guidedOnboardingApi
+      ?.isGuideStepActive$('databaseSearch', 'add_data')
+      .subscribe((isStepActive) => {
+        if (isStepActive && index?.count) {
+          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
+        }
+      });
+    return () => subscription?.unsubscribe();
+  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -140,7 +157,7 @@ export const SearchIndex: React.FC = () => {
         ]
       : []),
     {
-      content: <ConnectorSchedulingComponent />,
+      content: <ConnectorScheduling />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
@@ -204,6 +221,7 @@ export const SearchIndex: React.FC = () => {
       )
     );
   };
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
@@ -211,11 +229,16 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
+        rightSideGroupProps: {
+          responsive: false,
+        },
         rightSideItems: getHeaderActions(index, hasAppSearchAccess),
       }}
     >
       {isCrawlerIndex(index) && !index.connector ? (
         <NoConnectorRecord />
+      ) : isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config.host) ? (
+        <ErrorStatePrompt />
       ) : (
         <>
           {indexName === index?.name && (

@@ -6,12 +6,12 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
+import type { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import {
   getMSearchRequestBody,
   getMSearchRequestHeader,
 } from '../helpers/get_unallowed_field_requests';
-import { GetUnallowedFieldValuesInputs } from '../schemas/get_unallowed_field_values';
+import type { GetUnallowedFieldValuesInputs } from '../schemas/get_unallowed_field_values';
 
 export const getUnallowedFieldValues = (
   esClient: ElasticsearchClient,

@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ContextApp } from './context_app';
 import { DiscoverServices } from '../../build_services';
 import { dataViewsMock } from '../../__mocks__/data_views';
@@ -59,7 +59,7 @@ describe('ContextApp test', () => {
       notifications: { toasts: [] },
       theme: { theme$: themeServiceMock.createStartContract().theme$ },
     },
-    history: () => history,
+    history,
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
       getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
@@ -88,7 +88,7 @@ describe('ContextApp test', () => {
     showSearchBar: true,
     showQueryInput: false,
     showFilterBar: true,
-    showSaveQuery: false,
+    saveQueryMenuVisibility: 'hidden' as const,
     showDatePicker: false,
     indexPatterns: [dataViewMock],
     useDefaultBehaviors: true,

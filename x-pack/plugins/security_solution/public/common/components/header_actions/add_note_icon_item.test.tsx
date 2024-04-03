@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../mock';
@@ -19,7 +19,7 @@ const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('AddEventNoteAction', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('isDisabled', () => {

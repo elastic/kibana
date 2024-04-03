@@ -8,7 +8,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { defaults, get } from 'lodash';
-import { DataViewsService, DataView } from '.';
+import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import {
@@ -115,6 +115,7 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
       getCanSaveAdvancedSettings: () => Promise.resolve(true),
+      scriptedFieldsEnabled: true,
     });
 
     indexPatternsNoAccess = new DataViewsService({
@@ -127,6 +128,7 @@ describe('IndexPatterns', () => {
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
       getCanSaveAdvancedSettings: () => Promise.resolve(false),
+      scriptedFieldsEnabled: true,
     });
   });
 
@@ -154,12 +156,49 @@ describe('IndexPatterns', () => {
     SOClientGetDelay = 0;
   });
 
+  test('does cache gets for the same id for DataViewLazy', async () => {
+    SOClientGetDelay = 1000;
+    const id = '1';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+      },
+    });
+
+    // make two requests before first can complete
+    const dataViewLazyPromise = indexPatterns.getDataViewLazy(id);
+    indexPatterns.getDataViewLazy(id);
+
+    dataViewLazyPromise.then((dataViewLazy) => {
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(dataViewLazy).toBeDefined();
+    });
+
+    expect(await dataViewLazyPromise).toBe(await indexPatterns.getDataViewLazy(id));
+    SOClientGetDelay = 0;
+  });
+
   test('force field refresh', async () => {
     const id = '1';
+    // make sure initial load and subsequent reloads use same params
+    const args = {
+      allowHidden: undefined,
+      allowNoIndex: true,
+      indexFilter: undefined,
+      metaFields: false,
+      pattern: 'something',
+      rollupIndex: undefined,
+      type: undefined,
+    };
+
     await indexPatterns.get(id);
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
     await indexPatterns.get(id, undefined, true);
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
   });
 
   test('getFieldsForWildcard called with allowNoIndex set to true as default ', async () => {
@@ -216,6 +255,46 @@ describe('IndexPatterns', () => {
 
     expect(mockedCreateFromSpec).toHaveBeenCalledTimes(1);
     expect(mockedCreateFromSpec).toHaveBeenCalledWith({ id: '1' }, false, true);
+  });
+
+  test('does cache ad-hoc data views for DataViewLazy', async () => {
+    const id = '1';
+
+    const createFromSpecOriginal = get(indexPatterns, 'createFromSpecLazy');
+    let mockedCreateFromSpec: jest.Mock;
+
+    set(
+      indexPatterns,
+      'createFromSpecLazy',
+      (mockedCreateFromSpec = jest
+        .fn()
+        .mockImplementation((spec: DataViewSpec) =>
+          doWithTimeout(() => createFromSpecOriginal.call(indexPatterns, spec), 1000)
+        ))
+    );
+
+    // run creating in parallel
+    await Promise.all([
+      indexPatterns.createDataViewLazy({ id }),
+      indexPatterns.createDataViewLazy({ id }),
+      indexPatterns.createDataViewLazy({ id }),
+      doWithTimeout(() => indexPatterns.createDataViewLazy({ id }), 1),
+      doWithTimeout(() => indexPatterns.createDataViewLazy({ id }), 10),
+
+      doWithTimeout(() => indexPatterns.getDataViewLazy(id), 10),
+      doWithTimeout(() => indexPatterns.getDataViewLazy(id), 40),
+    ]).then((results) =>
+      results.forEach((value) => {
+        expect(value.id).toBe(id);
+      })
+    );
+
+    // tests after promise was resolved
+    expect((await indexPatterns.getDataViewLazy(id)).id).toBe(id);
+    expect((await indexPatterns.createDataViewLazy({ id })).id).toBe(id);
+
+    expect(mockedCreateFromSpec).toHaveBeenCalledTimes(1);
+    expect(mockedCreateFromSpec).toHaveBeenCalledWith({ id: '1' });
   });
 
   test('allowNoIndex flag preserves existing fields when index is missing', async () => {
@@ -289,6 +368,7 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBeDefined();
     await indexPatterns.delete(id);
     expect(indexPattern).not.toBe(await indexPatterns.get(id));
+    expect(indexPattern).not.toBe(await indexPatterns.getDataViewLazy(id));
   });
 
   test('delete will throw if insufficient access', async () => {
@@ -342,12 +422,31 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.refreshFields).toBeCalled();
     expect(dataView.id).toBeDefined();
     expect(dataView.isPersisted()).toBe(false);
+
+    const dataViewLazy = await indexPatterns.toDataViewLazy(dataView);
+    expect(dataViewLazy instanceof DataViewLazy).toBe(true);
+  });
+
+  test('create DataViewLazy', async () => {
+    const indexPattern = 'kibana-*';
+
+    const dataViewLazy = await indexPatterns.createDataViewLazy({ title: indexPattern });
+    expect(dataViewLazy).toBeInstanceOf(DataViewLazy);
+    expect(dataViewLazy.getIndexPattern()).toBe(indexPattern);
+
+    await indexPatterns.createDataViewLazy({ title: indexPattern });
+    expect(dataViewLazy.id).toBeDefined();
+    expect(dataViewLazy.isPersisted()).toBe(false);
+
+    const dataView = await indexPatterns.toDataView(dataViewLazy);
+    expect(dataView instanceof DataView).toBe(true);
   });
 
   test('createSavedObject', async () => {
     const title = 'kibana-*';
     const version = '8.4.0';
     const dataView = await indexPatterns.create({ title }, true);
+    const id = dataView.id;
 
     savedObjectsClient.find = jest.fn().mockResolvedValue([]);
     savedObjectsClient.create = jest.fn().mockResolvedValue({
@@ -360,11 +459,10 @@ describe('IndexPatterns', () => {
       },
     });
 
-    const indexPattern = await indexPatterns.createSavedObject(dataView);
-    expect(indexPattern).toBeInstanceOf(DataView);
-    expect(indexPattern.id).toBe(dataView.id);
-    expect(indexPattern.getIndexPattern()).toBe(title);
-    expect(indexPattern.isPersisted()).toBe(true);
+    await indexPatterns.createSavedObject(dataView);
+    expect(dataView.id).toBe(id);
+    expect(dataView.getIndexPattern()).toBe(title);
+    expect(dataView.isPersisted()).toBe(true);
   });
 
   test('find', async () => {
@@ -382,14 +480,22 @@ describe('IndexPatterns', () => {
 
   test('createAndSave', async () => {
     const title = 'kibana-*';
-
-    indexPatterns.createSavedObject = jest.fn(() =>
-      Promise.resolve({
-        id: 'id',
-      } as unknown as DataView)
-    );
+    indexPatterns.createSavedObject = jest.fn(() => Promise.resolve());
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({});
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
+    expect(indexPatterns.createSavedObject).toBeCalled();
+    expect(indexPatterns.setDefault).toBeCalled();
+  });
+
+  test('createAndSave DataViewLazy', async () => {
+    const title = 'kibana-*';
+    indexPatterns.createSavedObject = jest.fn(() => Promise.resolve());
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({});
+    indexPatterns.setDefault = jest.fn();
+    await indexPatterns.createAndSaveDataViewLazy({ title });
     expect(indexPatterns.createSavedObject).toBeCalled();
     expect(indexPatterns.setDefault).toBeCalled();
   });
@@ -398,6 +504,14 @@ describe('IndexPatterns', () => {
     const title = 'kibana-*';
 
     await expect(indexPatternsNoAccess.createAndSave({ title })).rejects.toMatchSnapshot();
+  });
+
+  test('createAndSaveDataViewLazy will throw if insufficient access', async () => {
+    const title = 'kibana-*';
+
+    await expect(
+      indexPatternsNoAccess.createAndSaveDataViewLazy({ title })
+    ).rejects.toMatchSnapshot();
   });
 
   test('updateSavedObject will throw if insufficient access', async () => {
@@ -438,6 +552,27 @@ describe('IndexPatterns', () => {
     expect(async () => await indexPatterns.get(id)).toBeDefined();
   });
 
+  test('failed requests are not cached for DataViewLazy', async () => {
+    savedObjectsClient.get = jest
+      .fn()
+      .mockImplementation(async (type, id) => {
+        return {
+          id: object.id,
+          version: object.version,
+          attributes: object.attributes,
+        };
+      })
+      .mockRejectedValueOnce({});
+
+    const id = '1';
+
+    // failed request!
+    expect(indexPatterns.getDataViewLazy(id)).rejects.toBeDefined();
+
+    // successful subsequent request
+    expect(async () => await indexPatterns.getDataViewLazy(id)).toBeDefined();
+  });
+
   test('can set and remove field format', async () => {
     const id = 'id';
     setDocsourcePayload(id, savedObject);
@@ -458,6 +593,35 @@ describe('IndexPatterns', () => {
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
+  describe('defaultDataViewExists', () => {
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+    });
+
+    test('return true if exists', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(true);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('return false if no default data view found', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.defaultDataViewExists()).toBe(false);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(0);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+  });
+
   describe('getDefaultDataView', () => {
     beforeEach(() => {
       indexPatterns.clearCache();
@@ -468,8 +632,21 @@ describe('IndexPatterns', () => {
       uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
       savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
       savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      jest.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('gets default data view lazy', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+
+      expect(await indexPatterns.getDefaultDataViewLazy()).toBeInstanceOf(DataViewLazy);
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
@@ -518,6 +695,13 @@ describe('IndexPatterns', () => {
       savedObjectsClient.find = jest.fn().mockResolvedValue([]);
 
       expect(await indexPatterns.getDefaultDataView()).toBeNull();
+    });
+
+    test('returns undefined if no data views exist - dataViewLazy', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+
+      expect(await indexPatterns.getDefaultDataViewLazy()).toBeNull();
     });
 
     test("default doesn't exist, grabs another data view", async () => {

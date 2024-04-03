@@ -27,7 +27,7 @@
         "label": "appendAppPath",
         "description": [],
         "signature": [
-          "(appBasePath: string, path?: string) => string"
+          "(appBasePath?: string, path?: string) => string"
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
         "deprecated": false,
@@ -362,7 +362,52 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.DEFAULT_APP_VISIBILITY",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_APP_VISIBILITY",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppDeepLinkLocations",
+            "text": "AppDeepLinkLocations"
+          },
+          "[]"
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser-internal",
+        "id": "def-common.DEFAULT_LINK_VISIBILITY",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_LINK_VISIBILITY",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppDeepLinkLocations",
+            "text": "AppDeepLinkLocations"
+          },
+          "[]"
+        ],
+        "path": "packages/core/application/core-application-browser-internal/src/utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

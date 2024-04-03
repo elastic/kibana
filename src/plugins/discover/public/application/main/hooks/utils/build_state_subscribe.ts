@@ -47,15 +47,26 @@ export const buildStateSubscribe =
     const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
     const prevQuery = savedSearch.searchSource.getField('query');
+    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
     const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+
+    if (
+      isTextBasedQueryLang &&
+      isEqualState(prevState, nextState, ['index', 'viewMode']) &&
+      !queryChanged
+    ) {
+      // When there's a switch from data view to es|ql, this just leads to a cleanup of index and viewMode
+      // And there's no subsequent action in this function required
+      addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
+      return;
+    }
     if (isEqualState(prevState, nextState) && !queryChanged) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
     }
     addLog('[appstate] subscribe triggered', nextState);
-    const { hideChart, interval, breakdownField, sort, index } = prevState;
+    const { hideChart, interval, breakdownField, sampleSize, sort, index } = prevState;
 
-    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
     if (isTextBasedQueryLang) {
       const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
       if (!isTextBasedQueryLangPrev) {
@@ -68,6 +79,7 @@ export const buildStateSubscribe =
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
     const chartIntervalChanged = nextState.interval !== interval && !isTextBasedQueryLang;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
+    const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
     const dataViewChanged = !isEqual(nextState.index, index) && !isTextBasedQueryLang;
     let savedSearchDataView;
@@ -101,11 +113,35 @@ export const buildStateSubscribe =
       chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
+      sampleSizeChanged ||
       docTableSortChanged ||
       dataViewChanged ||
       queryChanged
     ) {
-      addLog('[appstate] subscribe triggers data fetching');
+      const logData = {
+        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
+        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
+        breakdownFieldChanged: logEntry(
+          breakdownFieldChanged,
+          breakdownField,
+          nextState.breakdownField
+        ),
+        docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
+        dataViewChanged: logEntry(dataViewChanged, index, nextState.index),
+        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+      };
+
+      addLog(
+        '[buildStateSubscribe] state changes triggers data fetching',
+        JSON.stringify(logData, null, 2)
+      );
+
       dataState.fetch();
     }
   };
+
+const logEntry = <T>(changed: boolean, prevState: T, nextState: T) => ({
+  changed,
+  prevState,
+  nextState,
+});

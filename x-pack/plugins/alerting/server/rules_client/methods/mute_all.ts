@@ -8,11 +8,12 @@
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../../saved_objects';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
-import { clearUnscheduledSnooze } from '../common';
+import { updateMetaAttributes } from '../lib';
+import { clearUnscheduledSnoozeAttributes } from '../common';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function muteAll(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -24,7 +25,7 @@ export async function muteAll(context: RulesClientContext, { id }: { id: string 
 
 async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     id
   );
 
@@ -37,13 +38,13 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     });
 
     if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized('execute');
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
     }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.MUTE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -54,22 +55,22 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     ruleAuditEvent({
       action: RuleAuditAction.MUTE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const updateAttributes = updateMeta(context, {
+  const updateAttributes = updateMetaAttributes(context, {
     muteAll: true,
     mutedInstanceIds: [],
-    snoozeSchedule: clearUnscheduledSnooze(attributes),
+    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes as RuleAttributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });
   const updateOptions = { version };
 
-  await partiallyUpdateAlert(
+  await partiallyUpdateRule(
     context.unsecuredSavedObjectsClient,
     id,
     updateAttributes,

@@ -11,12 +11,11 @@ import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 
-import './add_message_variables.scss';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(
@@ -38,13 +37,14 @@ interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue?: string | null;
-  label: string;
+  label: React.ReactNode | string;
   errors?: string[];
-  areaLabel?: string;
+  ariaLabel?: string;
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
   onBlur?: () => void;
   showButtonTitle?: boolean;
+  dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
 }
 
@@ -62,11 +62,12 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   inputTargetValue,
   label,
   errors,
-  areaLabel,
+  ariaLabel,
   onDocumentsChange,
   helpText,
   onBlur,
   showButtonTitle,
+  dataTestSubj,
   euiCodeEditorProps = {},
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -155,7 +156,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   return (
     <EuiFormRow
-      data-test-subj="actionJsonEditor"
+      data-test-subj={dataTestSubj}
       fullWidth
       error={errors}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
@@ -192,7 +193,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           width="100%"
           height="200px"
           data-test-subj={`${paramsProperty}JsonEditor`}
-          aria-label={areaLabel}
+          aria-label={ariaLabel}
           {...euiCodeEditorProps}
           editorDidMount={onEditorMount}
           onChange={(xjson: string) => {

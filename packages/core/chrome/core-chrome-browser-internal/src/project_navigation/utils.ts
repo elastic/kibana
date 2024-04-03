@@ -6,8 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinition,
+  NodeDefinition,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
+  NavigationTreeDefinitionUI,
+  PresetDefinition,
+  GroupDefinition,
+  AppDeepLinkId,
+  SideNavNodeStatus,
+  CloudLinkId,
+  CloudLinks,
+  ItemDefinition,
+} from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
+import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
 
@@ -73,9 +89,12 @@ function serializeDeeplinkUrl(url?: string) {
  * @param key The key to extract parent paths from
  * @returns An array of parent paths
  */
-function extractParentPaths(key: string) {
+function extractParentPaths(key: string, navTree: Record<string, ChromeProjectNavigationNode>) {
   // Split the string on every '][' to get an array of values without the brackets.
   const arr = key.split('][');
+  if (arr.length === 1) {
+    return arr;
+  }
   // Add the brackets back in for the first and last elements, and all elements in between.
   arr[0] = `${arr[0]}]`;
   arr[arr.length - 1] = `[${arr[arr.length - 1]}`;
@@ -83,10 +102,12 @@ function extractParentPaths(key: string) {
     arr[i] = `[${arr[i]}]`;
   }
 
-  return arr.reduce<string[]>((acc, currentValue, currentIndex) => {
-    acc.push(arr.slice(0, currentIndex + 1).join(''));
-    return acc;
-  }, []);
+  return arr
+    .reduce<string[]>((acc, currentValue, currentIndex) => {
+      acc.push(arr.slice(0, currentIndex + 1).join(''));
+      return acc;
+    }, [])
+    .filter((k) => Boolean(navTree[k]));
 }
 
 /**
@@ -101,21 +122,21 @@ function extractParentPaths(key: string) {
 export const findActiveNodes = (
   currentPathname: string,
   navTree: Record<string, ChromeProjectNavigationNode>,
-  location?: Location
+  location?: Location,
+  prepend: (path: string) => string = (path) => path
 ): ChromeProjectNavigationNode[][] => {
   const activeNodes: ChromeProjectNavigationNode[][] = [];
   const matches: string[][] = [];
 
   const activeNodeFromKey = (key: string): ChromeProjectNavigationNode => ({
     ...navTree[key],
-    isActive: true,
   });
 
   Object.entries(navTree).forEach(([key, node]) => {
     if (node.getIsActive && location) {
-      const isActive = node.getIsActive(location);
+      const isActive = node.getIsActive({ pathNameSerialized: currentPathname, location, prepend });
       if (isActive) {
-        const keysWithParents = extractParentPaths(key);
+        const keysWithParents = extractParentPaths(key, navTree);
         activeNodes.push(keysWithParents.map(activeNodeFromKey));
       }
       return;
@@ -132,6 +153,9 @@ export const findActiveNodes = (
           matches[length] = [];
         }
         matches[length].push(key);
+        // If there are multiple node matches of the same URL path length, we want to order them by
+        // tree depth, so that the longest match (deepest node) comes first.
+        matches[length].sort((a, b) => b.length - a.length);
       }
     }
   });
@@ -139,10 +163,290 @@ export const findActiveNodes = (
   if (matches.length > 0) {
     const longestMatch = matches[matches.length - 1];
     longestMatch.forEach((key) => {
-      const keysWithParents = extractParentPaths(key);
+      const keysWithParents = extractParentPaths(key, navTree);
       activeNodes.push(keysWithParents.map(activeNodeFromKey));
     });
   }
 
   return activeNodes;
+};
+
+let uniqueId = 0;
+
+function generateUniqueNodeId() {
+  const id = `node${uniqueId++}`;
+  return id;
+}
+
+function isAbsoluteLink(link: string) {
+  return link.startsWith('http://') || link.startsWith('https://');
+}
+
+function getNavigationNodeId(
+  { id: _id, link }: Pick<NodeDefinition, 'id' | 'link'>,
+  idGenerator = generateUniqueNodeId
+): string {
+  const id = _id ?? link;
+  return id ?? idGenerator();
+}
+
+function getNavigationNodeHref({
+  href,
+  deepLink,
+}: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
+  return deepLink?.url ?? href;
+}
+
+/**
+ * We don't have currently a way to know if a user has access to a Cloud section.
+ * TODO: This function will have to be revisited once we have an API from Cloud to know the user
+ * permissions.
+ */
+function hasUserAccessToCloudLink(): boolean {
+  return true;
+}
+
+function getNodeStatus(
+  {
+    link,
+    deepLink,
+    cloudLink,
+    sideNavStatus,
+  }: {
+    link?: string;
+    deepLink?: ChromeNavLink;
+    cloudLink?: CloudLinkId;
+    sideNavStatus?: SideNavNodeStatus;
+  },
+  { cloudLinks }: { cloudLinks: CloudLinks }
+): SideNavNodeStatus | 'remove' {
+  if (link && !deepLink) {
+    // If a link is provided, but no deepLink is found, don't render anything
+    return 'remove';
+  }
+
+  if (cloudLink) {
+    if (!cloudLinks[cloudLink]) {
+      // Invalid cloudLinkId or link url has not been set in kibana.yml
+      return 'remove';
+    }
+    if (!hasUserAccessToCloudLink()) return 'remove';
+  }
+
+  return sideNavStatus ?? 'visible';
+}
+
+function getTitleForNode(
+  navNode: { title?: string; deepLink?: { title: string }; cloudLink?: CloudLinkId },
+  { deepLink, cloudLinks }: { deepLink?: ChromeNavLink; cloudLinks: CloudLinks }
+): string {
+  if (navNode.title) {
+    return navNode.title;
+  }
+
+  if (deepLink?.title) {
+    return deepLink.title;
+  }
+
+  if (navNode.cloudLink) {
+    return cloudLinks[navNode.cloudLink]?.title ?? '';
+  }
+
+  return '';
+}
+
+function validateNodeProps<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>({ id, link, href, cloudLink, renderAs }: NodeDefinition<LinkId, Id, ChildrenId>) {
+  if (link && cloudLink) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. Only one of "link" or "cloudLink" can be provided.`
+    );
+  }
+  if (href && cloudLink) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
+    );
+  }
+  if (renderAs === 'panelOpener' && !link) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
+    );
+  }
+  if (renderAs === 'item' && !link) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" must also be provided.`
+    );
+  }
+}
+
+const initNavNode = <
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(
+  node: NodeDefinition<LinkId, Id, ChildrenId>,
+  {
+    cloudLinks,
+    deepLinks,
+    parentNodePath,
+    index = 0,
+  }: {
+    cloudLinks: CloudLinks;
+    deepLinks: Record<string, ChromeNavLink>;
+    parentNodePath?: string;
+    index?: number;
+  }
+): ChromeProjectNavigationNode | null => {
+  validateNodeProps(node);
+
+  const { cloudLink, link, children, ...navNodeFromProps } = node;
+  const deepLink = link !== undefined ? deepLinks[link] : undefined;
+  const sideNavStatus = getNodeStatus(
+    {
+      link,
+      deepLink,
+      cloudLink,
+      sideNavStatus: navNodeFromProps.sideNavStatus,
+    },
+    { cloudLinks }
+  );
+
+  if (sideNavStatus === 'remove') {
+    return null;
+  }
+
+  const id = getNavigationNodeId(node, () => `node-${index}`) as Id;
+  const title = getTitleForNode(node, { deepLink, cloudLinks });
+  const isElasticInternalLink = cloudLink != null;
+  const href = isElasticInternalLink ? cloudLinks[cloudLink]?.href : node.href;
+  const path = parentNodePath ? `${parentNodePath}.${id}` : id;
+
+  if (href && !isAbsoluteLink(href)) {
+    throw new Error(`href must be an absolute URL. Node id [${id}].`);
+  }
+
+  const navNode: ChromeProjectNavigationNode = {
+    ...navNodeFromProps,
+    id,
+    href: getNavigationNodeHref({ href, deepLink }),
+    path,
+    title,
+    deepLink,
+    isElasticInternalLink,
+    sideNavStatus,
+  };
+
+  return navNode;
+};
+
+const isPresetDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is PresetDefinition => {
+  return (item as PresetDefinition).preset !== undefined;
+};
+
+const isGroupDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is GroupDefinition => {
+  return (
+    (item as GroupDefinition).type === 'navGroup' || (item as NodeDefinition).children !== undefined
+  );
+};
+
+const isRecentlyAccessedDefinition = (
+  item: RootNavigationItemDefinition | NodeDefinition
+): item is RecentlyAccessedDefinition => {
+  return (item as RootNavigationItemDefinition).type === 'recentlyAccessed';
+};
+
+export const parseNavigationTree = (
+  navigationTreeDef: NavigationTreeDefinition,
+  { deepLinks, cloudLinks }: { deepLinks: Record<string, ChromeNavLink>; cloudLinks: CloudLinks }
+): {
+  navigationTree: ChromeProjectNavigationNode[];
+  navigationTreeUI: NavigationTreeDefinitionUI;
+} => {
+  const navTreePresets = getPresets('all');
+
+  // The navigation tree that represents the global navigation and will be used by the Chrome service
+  const navigationTree: ChromeProjectNavigationNode[] = [];
+
+  // Contains UI layout information (body, footer) and render "special" blocks like recently accessed.
+  const navigationTreeUI: NavigationTreeDefinitionUI = { body: [] };
+
+  const initNodeAndChildren = (
+    node: GroupDefinition | ItemDefinition | NodeDefinition,
+    { index = 0, parentPath = [] }: { index?: number; parentPath?: string[] } = {}
+  ): ChromeProjectNavigationNode | RecentlyAccessedDefinition | null => {
+    if (isRecentlyAccessedDefinition(node)) {
+      return node;
+    }
+
+    let nodeSerialized: NodeDefinition | GroupDefinition | ItemDefinition = node;
+
+    if (isPresetDefinition(node)) {
+      // Get the navGroup definition from the preset
+      const { preset, type, ...rest } = node;
+      nodeSerialized = { ...navTreePresets[preset], type: 'navGroup', ...rest };
+    }
+
+    const navNode = initNavNode(nodeSerialized, {
+      cloudLinks,
+      deepLinks,
+      parentNodePath: parentPath.length > 0 ? parentPath.join('.') : undefined,
+      index,
+    });
+
+    if (navNode && isGroupDefinition(nodeSerialized) && nodeSerialized.children) {
+      navNode.children = nodeSerialized.children
+        .map((child, i) =>
+          initNodeAndChildren(child, {
+            index: i,
+            parentPath: [...parentPath, navNode.id],
+          })
+        )
+        .filter((child): child is ChromeProjectNavigationNode => child !== null);
+    }
+
+    return navNode;
+  };
+
+  const onNodeInitiated = (
+    navNode: ChromeProjectNavigationNode | RecentlyAccessedDefinition | null,
+    section: 'body' | 'footer' = 'body'
+  ) => {
+    if (navNode) {
+      if (!isRecentlyAccessedDefinition(navNode)) {
+        // Add the node to the global navigation tree
+        navigationTree.push(navNode);
+      }
+
+      // Add the node to the Side Navigation UI tree
+      if (!navigationTreeUI[section]) {
+        navigationTreeUI[section] = [];
+      }
+      navigationTreeUI[section]!.push(navNode);
+    }
+  };
+
+  const parseNodesArray = (
+    nodes?: RootNavigationItemDefinition[],
+    section: 'body' | 'footer' = 'body',
+    startIndex = 0
+  ): void => {
+    if (!nodes) return;
+
+    nodes.forEach((node, i) => {
+      const navNode = initNodeAndChildren(node, { index: startIndex + i });
+      onNodeInitiated(navNode, section);
+    });
+  };
+
+  parseNodesArray(navigationTreeDef.body, 'body');
+  parseNodesArray(navigationTreeDef.footer, 'footer', navigationTreeDef.body?.length ?? 0);
+
+  return { navigationTree, navigationTreeUI };
 };

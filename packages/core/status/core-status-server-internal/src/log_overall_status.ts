@@ -6,26 +6,52 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, pairwise, startWith, takeUntil, map } from 'rxjs/operators';
-import type { ServiceStatus } from '@kbn/core-status-common';
+import type { Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, pairwise, takeUntil, map, startWith } from 'rxjs';
+import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import type { Logger } from '@kbn/logging';
 
-export const getOverallStatusChanges = (
-  overall$: Observable<ServiceStatus>,
-  stop$: Observable<void>
-) => {
-  return overall$.pipe(
-    takeUntil(stop$),
-    distinctUntilChanged((previous, next) => {
-      return previous.level.toString() === next.level.toString();
-    }),
-    startWith(undefined),
-    pairwise(),
-    map(([oldStatus, newStatus]) => {
-      if (oldStatus) {
-        return `Kibana is now ${newStatus!.level.toString()} (was ${oldStatus!.level.toString()})`;
+interface LogOverallStatusChangesParams {
+  logger: Logger;
+  overall$: Observable<ServiceStatus>;
+  stop$: Observable<void>;
+}
+
+export const logOverallStatusChanges = ({
+  logger,
+  overall$,
+  stop$,
+}: LogOverallStatusChangesParams): Subscription => {
+  return overall$
+    .pipe(
+      takeUntil(stop$),
+      distinctUntilChanged((previous, next) => {
+        return previous.level.toString() === next.level.toString();
+      }),
+      startWith(undefined),
+      pairwise(),
+      map(([oldStatus, newStatus]) => {
+        const oldStatusMessage = oldStatus ? ` (was ${oldStatus!.level.toString()})` : '';
+        const reason =
+          newStatus?.level !== ServiceStatusLevels.available && newStatus?.summary
+            ? `: ${newStatus?.summary}`
+            : '';
+        return {
+          message: `Kibana is now ${newStatus!.level.toString()}${oldStatusMessage}${reason}`,
+          level: newStatus?.level,
+        };
+      })
+    )
+    .subscribe(({ message, level }) => {
+      switch (level) {
+        case ServiceStatusLevels.available:
+          logger.info(message);
+          break;
+        case ServiceStatusLevels.degraded:
+          logger.warn(message);
+          break;
+        default:
+          logger.error(message);
       }
-      return `Kibana is now ${newStatus!.level.toString()}`;
-    })
-  );
+    });
 };

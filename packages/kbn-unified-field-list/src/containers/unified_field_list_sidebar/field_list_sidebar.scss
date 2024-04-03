@@ -3,8 +3,20 @@
   margin: 0 !important;
   flex-grow: 1;
   padding: 0;
-  width: $euiSize * 19;
   height: 100%;
+
+  &--collapsed {
+    width: auto;
+    padding: $euiSizeS $euiSizeS 0;
+  }
+
+  &.unifiedFieldListSidebar--fullWidth {
+    min-width: 0 !important;
+  }
+
+  &:not(.unifiedFieldListSidebar--fullWidth) {
+    width: $euiSize * 19;
+  }
 
   @include euiBreakpoint('xs', 's') {
     width: 100%;
@@ -13,11 +25,29 @@
   }
 }
 
+// This code is responsible for making sure that:
+// * the shadow and focus rings are visible outside the accordion bounds,
+// * the dragged element has a padding to the left and right,
+
 .unifiedFieldListSidebar__list {
-  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+  padding: $euiSizeS $euiSizeXS 0 $euiSizeXS;
+
+  > *, .euiAccordion__triggerWrapper, .euiAccordion__children, .unifiedFieldListItemButton {
+    padding-left: $euiSizeXS;
+    padding-right: $euiSizeXS;
+  }
+
+  .unifiedFieldListSidebar__accordionContainer {
+    padding-left: 0;
+    padding-right: 0;
+  }
 
   @include euiBreakpoint('xs', 's') {
     padding: $euiSizeS 0 0 0;
+    > *, .euiAccordion__triggerWrapper, .unifiedFieldListSidebar__accordionContainer, .unifiedFieldListItemButton {
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 }
 
@@ -37,4 +67,16 @@
 
 .unifiedFieldListSidebar__flyoutHeader {
   align-items: center;
+}
+
+.unifiedFieldListSidebar .unifiedFieldListItemButton {
+  &.kbnFieldButton {
+    margin-bottom: calc($euiSizeXS / 2);
+    background: none;
+    box-shadow: none;
+  }
+}
+
+.unifiedFieldListItemButton__dragging {
+  background: $euiColorEmptyShade;
 }

@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -216,9 +216,14 @@ describe('MetricsService', () => {
               "eventLoopDelayHistogram": undefined,
               "eventLoopUtilization": undefined,
               "memory": Object {
+                "arrayBuffersInBytes": undefined,
+                "externalInBytes": undefined,
                 "heap": Object {
+                  "sizeLimit": undefined,
+                  "totalInBytes": undefined,
                   "usedInBytes": undefined,
                 },
+                "residentSetSizeInBytes": undefined,
               },
               "uptime": undefined,
             },

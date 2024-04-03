@@ -9,10 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { API_VERSIONS } from '../../common/constants';
-import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
-import type { ESTermQuery, ESExistsQuery } from '../../common/typed_json';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { Direction } from '../../common/search_strategy';
@@ -22,7 +20,7 @@ export interface UseAllLiveQueriesConfig {
   direction?: Direction;
   limit?: number;
   sortField?: string;
-  filterQuery?: ESTermQuery | ESExistsQuery | string;
+  kuery?: string;
   skip?: boolean;
   alertId?: string;
 }
@@ -35,7 +33,7 @@ export const useAllLiveQueries = ({
   direction = Direction.desc,
   limit = 100,
   sortField = '@timestamp',
-  filterQuery,
+  kuery,
   skip = false,
   alertId,
 }: UseAllLiveQueriesConfig) => {
@@ -53,7 +51,7 @@ export const useAllLiveQueries = ({
         {
           version: API_VERSIONS.public.v1,
           query: {
-            filterQuery: createFilter(filterQuery),
+            kuery,
             page: activePage,
             pageSize: limit,
             sort: sortField,

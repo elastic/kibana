@@ -10,15 +10,15 @@ import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
-import { DiscoverAppState } from '../services/discover_app_state_container';
-import { DiscoverServices } from '../../../build_services';
-import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
+} from '@kbn/discover-utils';
+import { DiscoverAppState } from '../services/discover_app_state_container';
+import { DiscoverServices } from '../../../build_services';
+import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import { isTextBasedQuery } from './is_text_based_query';
 import { getValidViewMode } from './get_valid_view_mode';
 
@@ -47,6 +47,7 @@ export function getStateDefaults({
   const dataView = searchSource.getField('index');
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+  const isTextBasedQueryMode = isTextBasedQuery(query);
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
@@ -61,7 +62,7 @@ export function getStateDefaults({
         )
       : sort,
     columns,
-    index: dataView?.id,
+    index: isTextBasedQueryMode ? undefined : dataView?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
@@ -69,10 +70,13 @@ export function getStateDefaults({
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
+    headerRowHeight: undefined,
     rowsPerPage: undefined,
+    sampleSize: undefined,
     grid: undefined,
     breakdownField: undefined,
   };
+
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
@@ -82,10 +86,13 @@ export function getStateDefaults({
   if (savedSearch.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
   }
+  if (savedSearch.headerRowHeight !== undefined) {
+    defaultState.headerRowHeight = savedSearch.headerRowHeight;
+  }
   if (savedSearch.viewMode) {
     defaultState.viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
-      isTextBasedQueryMode: isTextBasedQuery(query),
+      isTextBasedQueryMode,
     });
   }
   if (savedSearch.hideAggregatedPreview) {
@@ -94,7 +101,9 @@ export function getStateDefaults({
   if (savedSearch.rowsPerPage) {
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
   }
-
+  if (savedSearch.sampleSize) {
+    defaultState.sampleSize = savedSearch.sampleSize;
+  }
   if (savedSearch.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }

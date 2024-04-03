@@ -67,15 +67,20 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(async () => await render());
+    beforeEach(async () => {
+      await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    });
 
     it('should display agent policy usage count', async () => {
-      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
@@ -95,32 +100,35 @@ describe('when on integration detail', () => {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/150607
-  describe.skip('and the package is not installed and prerelease enabled', () => {
+  describe('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: true, id: '', fleet_server_hosts: [] },
+      });
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version select if prerelease setting enabled and prererelase version available', async () => {
-      await mockedApi.waitForApi();
       const versionSelect = renderResult.queryByTestId('versionSelect');
       expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
       expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
     });
 
     it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
-      await mockedApi.waitForApi();
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
       const calloutGABtn = renderResult.getByTestId('switchToGABtn');
@@ -137,20 +145,22 @@ describe('when on integration detail', () => {
         item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
       });
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version text and no callout if prerelease setting disabled', async () => {
-      await mockedApi.waitForApi();
       expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
@@ -158,7 +168,15 @@ describe('when on integration detail', () => {
 
   describe('and a custom UI extension is NOT registered', () => {
     beforeEach(async () => {
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+      });
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should show overview and settings tabs', () => {
@@ -189,6 +207,9 @@ describe('when on integration detail', () => {
 
     beforeEach(async () => {
       let setWasRendered: () => void;
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+      });
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
       });
@@ -256,6 +277,12 @@ describe('when on integration detail', () => {
       });
 
       await render();
+
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     afterEach(() => {
@@ -263,7 +290,7 @@ describe('when on integration detail', () => {
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "assets" tab in navigation', () => {
+    it('should display "assets" tab in navigation', async () => {
       expect(renderResult.getByTestId('tab-assets'));
     });
 
@@ -281,6 +308,11 @@ describe('when on integration detail', () => {
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should link to the create page', () => {

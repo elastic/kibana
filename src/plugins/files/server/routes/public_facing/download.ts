@@ -17,7 +17,7 @@ import {
 } from '../../file_share_service/errors';
 import type { FilesRouter } from '../types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
-import { getDownloadHeadersForFile } from '../common';
+import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
 import { fileNameWithExt } from '../common_schemas';
 import { CreateHandler } from '../types';
 
@@ -44,8 +44,9 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   try {
     const file = await fileService.asInternalUser().getByToken(token);
     const body: Readable = await file.downloadContent();
-    return res.ok({
+    return res.file({
       body,
+      filename: fileName ?? getDownloadedFileName(file),
       headers: getDownloadHeadersForFile({ file, fileName }),
     });
   } catch (e) {
@@ -73,6 +74,7 @@ export function register(router: FilesRouter) {
       validate: { ...rt },
       options: {
         authRequired: false,
+        access: 'public',
       },
     },
     handler

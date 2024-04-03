@@ -7,8 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import { GroupsDictionary } from './anomaly_detection_panel';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { GroupsDictionary } from './anomaly_detection_panel';
+import type {
+  MlSummaryJobs,
+  MlSummaryJob,
+} from '../../../../../common/types/anomaly_detection_jobs';
 
 export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   groups: GroupsDictionary;
@@ -74,7 +77,7 @@ export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   return { groups, count };
 }
 
-export function getStatsBarData(jobsList: any) {
+export function getStatsBarData(jobsList: MlSummaryJob[] | undefined, showNodeInfo: boolean) {
   const jobStats = {
     total: {
       label: i18n.translate('xpack.ml.overviewJobsList.statsBar.totalJobsLabel', {
@@ -108,14 +111,18 @@ export function getStatsBarData(jobsList: any) {
       show: false,
       group: 0,
     },
-    activeNodes: {
-      label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
-        defaultMessage: 'Active ML nodes',
-      }),
-      value: 0,
-      show: true,
-      group: 1,
-    },
+    ...(showNodeInfo
+      ? {
+          activeNodes: {
+            label: i18n.translate('xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel', {
+              defaultMessage: 'Active ML nodes',
+            }),
+            value: 0,
+            show: true,
+            group: 1,
+          },
+        }
+      : {}),
     activeDatafeeds: {
       label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
         defaultMessage: 'Active datafeeds',
@@ -162,7 +169,9 @@ export function getStatsBarData(jobsList: any) {
     jobStats.failed.show = false;
   }
 
-  jobStats.activeNodes.value = Object.keys(mlNodes).length;
+  if (showNodeInfo) {
+    jobStats.activeNodes!.value = Object.keys(mlNodes).length;
+  }
 
   if (jobStats.total.value === 0) {
     for (const [statKey, val] of Object.entries(jobStats)) {

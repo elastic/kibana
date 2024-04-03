@@ -6,15 +6,20 @@
  */
 
 import { CloudStart } from '@kbn/cloud-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
-import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 
 export interface ServerlessSearchContext {
   cloud: CloudStart;
+  console: ConsolePluginStart;
+  history: AppMountParameters['history'];
+  searchConnectors?: SearchConnectorsPluginStart;
   share: SharePluginStart;
-  userProfile: GetUserProfileResponse<UserProfileData>;
+  user?: AuthenticatedUser;
 }
 
 type ServerlessSearchKibanaContext = CoreStart & ServerlessSearchContext;

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBasicTableColumn,
+  EuiText,
   EuiBadge,
   EuiButtonIcon,
   EuiIcon,
@@ -17,6 +18,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import React from 'react';
+import moment from 'moment';
 import styled from 'styled-components';
 
 import { EMPTY_STAT, getIlmPhaseDescription, getIncompatibleStatColor } from '../../helpers';
@@ -41,6 +43,7 @@ export interface IndexSummaryTableItem {
   pattern: string;
   patternDocsCount: number;
   sizeInBytes: number;
+  checkedAt: number | undefined;
 }
 
 export const getResultToolTip = (incompatible: number | undefined): string => {
@@ -95,16 +98,40 @@ export const getToggleButtonId = ({
   pattern: string;
 }): string => (isExpanded ? `collapse${indexName}${pattern}` : `expand${indexName}${pattern}`);
 
+export const getSummaryTableILMPhaseColumn = (
+  isILMAvailable: boolean
+): Array<EuiBasicTableColumn<IndexSummaryTableItem>> =>
+  isILMAvailable
+    ? [
+        {
+          field: 'ilmPhase',
+          name: i18n.ILM_PHASE,
+          render: (_, { ilmPhase }) =>
+            ilmPhase != null ? (
+              <EuiToolTip content={getIlmPhaseDescription(ilmPhase)}>
+                <EuiBadge color="hollow" data-test-subj="ilmPhase">
+                  {ilmPhase}
+                </EuiBadge>
+              </EuiToolTip>
+            ) : null,
+          sortable: true,
+          truncateText: false,
+        },
+      ]
+    : [];
+
 export const getSummaryTableColumns = ({
   formatBytes,
   formatNumber,
   itemIdToExpandedRowMap,
+  isILMAvailable,
   pattern,
   toggleExpanded,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+  isILMAvailable: boolean;
   pattern: string;
   toggleExpanded: (indexName: string) => void;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
@@ -201,20 +228,7 @@ export const getSummaryTableColumns = ({
     sortable: true,
     truncateText: false,
   },
-  {
-    field: 'ilmPhase',
-    name: i18n.ILM_PHASE,
-    render: (_, { ilmPhase }) =>
-      ilmPhase != null ? (
-        <EuiToolTip content={getIlmPhaseDescription(ilmPhase)}>
-          <EuiBadge color="hollow" data-test-subj="ilmPhase">
-            {ilmPhase}
-          </EuiBadge>
-        </EuiToolTip>
-      ) : null,
-    sortable: true,
-    truncateText: false,
-  },
+  ...getSummaryTableILMPhaseColumn(isILMAvailable),
   {
     field: 'sizeInBytes',
     name: i18n.SIZE,
@@ -222,6 +236,17 @@ export const getSummaryTableColumns = ({
       <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
         <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
       </EuiToolTip>
+    ),
+    sortable: true,
+    truncateText: false,
+  },
+  {
+    field: 'checkedAt',
+    name: i18n.LAST_CHECK,
+    render: (_, { checkedAt }) => (
+      <EuiText size="xs">
+        {checkedAt && moment(checkedAt).isValid() ? moment(checkedAt).fromNow() : EMPTY_STAT}
+      </EuiText>
     ),
     sortable: true,
     truncateText: false,

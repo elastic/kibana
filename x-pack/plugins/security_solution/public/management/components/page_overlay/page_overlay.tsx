@@ -24,14 +24,16 @@ const OverlayRootContainer = styled.div`
   position: fixed;
   overflow: hidden;
 
-  top: calc((${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2));
+  top: var(--euiFixedHeadersOffset, 0);
   bottom: 0;
   right: 0;
 
-  height: calc(100% - ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2);
+  height: calc(100% - var(--euiFixedHeadersOffset, 0));
   width: 100%;
 
-  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
+  z-index: ${({ theme: { eui } }) =>
+    eui.euiZFlyout +
+    3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
 
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
 
@@ -253,7 +255,6 @@ export const PageOverlay = memo<PageOverlayProps>(
     useEffect(() => {
       if (
         isMounted() &&
-        onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
         openedOnPathName &&

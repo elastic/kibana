@@ -10,12 +10,13 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 
+import { IndexPrivilegeForm } from './index_privilege_form';
+import { IndexPrivileges } from './index_privileges';
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
 import { RoleValidator } from '../../validate_role';
-import { IndexPrivilegeForm } from './index_privilege_form';
-import { IndexPrivileges } from './index_privileges';
 
 // the IndexPrivileges post-mount hook kicks off some promises;
 // we need to wait for those promises to resolve to ensure any errors are properly caught

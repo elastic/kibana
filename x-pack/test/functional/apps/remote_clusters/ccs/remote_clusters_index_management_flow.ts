@@ -82,16 +82,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           body: { a: 'b' },
         });
         await pageObjects.common.navigateToApp('indexManagement');
-        await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
+        await retry.waitForWithTimeout('indices table to be visible', 15000, async () => {
           return await testSubjects.isDisplayed('indicesList');
         });
       });
       it('Verify that the follower index is duplicating from the remote.', async () => {
-        await pageObjects.indexManagement.clickIndiceAt(0);
-        await pageObjects.indexManagement.performIndexActionInDetailPanel('flush');
-        await testSubjects.click('euiFlyoutCloseButton');
+        await pageObjects.indexManagement.clickIndexAt(0);
+        await pageObjects.indexManagement.performIndexAction('flush');
+        await testSubjects.click('indexDetailsBackToIndicesButton');
         await pageObjects.common.navigateToApp('indexManagement');
-        await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
+        await retry.waitForWithTimeout('indices table to be visible', 15000, async () => {
           return await testSubjects.isDisplayed('indicesList');
           const indicesList = await pageObjects.indexManagement.getIndexList();
           const followerIndex = indicesList.filter(

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorSyncJob } from '../../../../../common/types/connectors';
+import { ConnectorSyncJob } from '@kbn/search-connectors';
+
 import { Paginate } from '../../../../../common/types/pagination';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';

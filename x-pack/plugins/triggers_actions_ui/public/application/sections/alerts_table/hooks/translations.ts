@@ -48,3 +48,18 @@ export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
     defaultMessage: 'All selected alerts are already attached to the case',
   }
 );
+
+export const MARK_AS_UNTRACKED = i18n.translate(
+  'xpack.triggersActionsUI.alerts.table.actions.markAsUntracked',
+  {
+    defaultMessage: 'Mark as untracked',
+  }
+);
+
+export const MUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.mute', {
+  defaultMessage: 'Mute',
+});
+
+export const UNMUTE = i18n.translate('xpack.triggersActionsUI.alerts.table.actions.unmute', {
+  defaultMessage: 'Unmute',
+});

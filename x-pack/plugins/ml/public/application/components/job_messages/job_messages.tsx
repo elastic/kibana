@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
-import {
-  EuiBasicTableColumn,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import { JobMessage } from '../../../../common/types/audit_message';
+import type { JobMessage } from '../../../../common/types/audit_message';
 
 import { blurButtonOnClick } from '../../util/component_utils';
 
 import { JobIcon } from '../job_message_icon';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface JobMessagesProps {
   messages: JobMessage[];
@@ -45,88 +42,96 @@ export const JobMessages: FC<JobMessagesProps> = ({
   refreshMessage,
   actionHandler,
 }) => {
-  const columns: Array<EuiBasicTableColumn<JobMessage>> = [
-    {
-      name: refreshMessage ? (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.jobMessages.refreshLabel', {
-            defaultMessage: 'Refresh',
-          })}
-        >
-          <EuiButtonIcon
-            onClick={blurButtonOnClick(() => {
-              refreshMessage();
-            })}
-            iconType="refresh"
-            aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
+  const { showNodeInfo } = useEnabledFeatures();
+  const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
+    const cols: Array<EuiBasicTableColumn<JobMessage>> = [
+      {
+        name: refreshMessage ? (
+          <EuiToolTip
+            content={i18n.translate('xpack.ml.jobMessages.refreshLabel', {
               defaultMessage: 'Refresh',
             })}
-          />
-        </EuiToolTip>
-      ) : (
-        ''
-      ),
-      render: (message: JobMessage) => <JobIcon message={message} />,
-      width: `${theme.euiSizeL}`,
-    },
-    {
-      field: 'timestamp',
-      name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
-        defaultMessage: 'Time',
-      }),
-      render: timeFormatter,
-      width: '120px',
-      sortable: true,
-    },
-    {
-      field: 'node_name',
-      name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
-        defaultMessage: 'Node',
-      }),
-      width: '150px',
-    },
-    {
-      field: 'message',
-      name: i18n.translate('xpack.ml.jobMessages.messageLabel', {
-        defaultMessage: 'Message',
-      }),
-      width: '50%',
-    },
-  ];
+          >
+            <EuiButtonIcon
+              onClick={blurButtonOnClick(() => {
+                refreshMessage();
+              })}
+              iconType="refresh"
+              aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
+                defaultMessage: 'Refresh',
+              })}
+            />
+          </EuiToolTip>
+        ) : (
+          ''
+        ),
+        render: (message: JobMessage) => <JobIcon message={message} />,
+        width: `${theme.euiSizeL}`,
+      },
+      {
+        field: 'timestamp',
+        name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
+          defaultMessage: 'Time',
+        }),
+        render: timeFormatter,
+        width: '120px',
+        sortable: true,
+      },
+      {
+        field: 'message',
+        name: i18n.translate('xpack.ml.jobMessages.messageLabel', {
+          defaultMessage: 'Message',
+        }),
+        width: '50%',
+      },
+    ];
 
-  if (typeof actionHandler === 'function') {
-    columns.push({
-      name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
-        defaultMessage: 'Actions',
-      }),
-      width: '10%',
-      actions: [
-        {
-          render: (message: JobMessage) => {
-            return (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.jobMessages.toggleInChartTooltipText"
-                    defaultMessage="Toggle in chart"
+    if (showNodeInfo) {
+      cols.splice(2, 0, {
+        field: 'node_name',
+        name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
+          defaultMessage: 'Node',
+        }),
+        width: '150px',
+      });
+    }
+
+    if (typeof actionHandler === 'function') {
+      cols.push({
+        name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
+          defaultMessage: 'Actions',
+        }),
+        width: '10%',
+        actions: [
+          {
+            render: (message: JobMessage) => {
+              return (
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.jobMessages.toggleInChartTooltipText"
+                      defaultMessage="Toggle in chart"
+                    />
+                  }
+                >
+                  <EuiButtonIcon
+                    size="xs"
+                    aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
+                      defaultMessage: 'Toggle in chart',
+                    })}
+                    iconType="visAreaStacked"
+                    onClick={() => actionHandler(message)}
                   />
-                }
-              >
-                <EuiButtonIcon
-                  size="xs"
-                  aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
-                    defaultMessage: 'Toggle in chart',
-                  })}
-                  iconType="visAreaStacked"
-                  onClick={() => actionHandler(message)}
-                />
-              </EuiToolTip>
-            );
+                </EuiToolTip>
+              );
+            },
           },
-        },
-      ],
-    });
-  }
+        ],
+      });
+    }
+
+    return cols;
+  }, [showNodeInfo, refreshMessage, actionHandler]);
 
   const defaultSorting = {
     sort: {

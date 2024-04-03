@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/core-theme-browser",
-    "@kbn/core-theme-browser-internal",
     "@kbn/core-i18n-browser",
     "@kbn/core-fatal-errors-browser",
     "@kbn/i18n-react",
@@ -23,6 +22,9 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/test-subj-selector",
     "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-context-root",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
   ],
   "exclude": [
     "target/**/*",

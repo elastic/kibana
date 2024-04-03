@@ -7,16 +7,18 @@
 
 import Boom from '@hapi/boom';
 
+import { AttachmentPatchRequestRt } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
-import type { Case } from '../../../common/api';
-import { CommentPatchRequestRt, decodeWithExcessOrThrow } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
+import { validateMaxUserActions } from '../../common/validators';
 
 /**
  * Update an attachment.
@@ -28,7 +30,7 @@ export async function update(
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
-    services: { attachmentService },
+    services: { attachmentService, userActionService },
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
@@ -39,7 +41,12 @@ export async function update(
       id: queryCommentId,
       version: queryCommentVersion,
       ...queryRestAttributes
-    } = decodeWithExcessOrThrow(CommentPatchRequestRt)(queryParams);
+    } = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(queryParams);
+    await validateMaxUserActions({
+      caseId: caseID,
+      userActionService,
+      userActionsToAdd: 1,
+    });
 
     decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
 

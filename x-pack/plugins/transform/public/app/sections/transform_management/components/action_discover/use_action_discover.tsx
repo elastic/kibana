@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 
 import { useSearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
@@ -18,9 +18,6 @@ import {
   discoverActionNameText,
   DiscoverActionName,
 } from './discover_action_name';
-
-const getDataViewTitleFromTargetIndex = (item: TransformListRow) =>
-  Array.isArray(item.config.dest.index) ? item.config.dest.index.join(',') : item.config.dest.index;
 
 export type DiscoverAction = ReturnType<typeof useDiscoverAction>;
 export const useDiscoverAction = (forceDisable: boolean) => {
@@ -48,8 +45,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
     (item: TransformListRow) => {
       const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
       if (!locator) return;
-      const dataViewTitle = getDataViewTitleFromTargetIndex(item);
-      const dataViewId = getDataViewIdByTitle(dataViewTitle);
+      const dataViewId = getDataViewIdByTitle(item.config.dest.index);
       locator.navigateSync({
         indexPatternId: dataViewId,
       });
@@ -59,8 +55,7 @@ export const useDiscoverAction = (forceDisable: boolean) => {
 
   const dataViewExists = useCallback(
     (item: TransformListRow) => {
-      const dataViewTitle = getDataViewTitleFromTargetIndex(item);
-      const dataViewId = getDataViewIdByTitle(dataViewTitle);
+      const dataViewId = getDataViewIdByTitle(item.config.dest.index);
       return dataViewId !== undefined;
     },
     [getDataViewIdByTitle]

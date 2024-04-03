@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import { APP_PATH, MANAGE_PATH } from '@kbn/security-solution-plugin/common';
+import { APP_PATH } from '@kbn/security-solution-plugin/common';
+import type { CoreSetup } from '@kbn/core/public';
+import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { subscribeNavigationTree } from './navigation_tree';
-import { getSecuritySideNavComponent } from './side_navigation';
+import { initSideNavigation } from './side_navigation';
+import { projectAppLinksSwitcher } from './links/app_links';
+import { formatProjectDeepLinks } from './links/deep_links';
+import { enableManagementCardsLanding } from './management_cards';
 
-const SECURITY_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}`;
+export const setupNavigation = (
+  _core: CoreSetup,
+  { securitySolution }: SecuritySolutionServerlessPluginSetupDeps
+) => {
+  securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+  securitySolution.setDeepLinksFormatter(formatProjectDeepLinks);
+};
 
-/**
- * Configures the serverless project navigation
- */
-export const setServerlessNavigation = (services: Services) => {
-  const { serverless, securitySolution, management } = services;
-  securitySolution.setIsSidebarEnabled(false);
-  management.setLandingPageRedirect(SECURITY_MANAGE_PATH);
-
+export const startNavigation = (services: Services) => {
+  const { serverless } = services;
   serverless.setProjectHome(APP_PATH);
-  serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+  initSideNavigation(services);
 
-  subscribeNavigationTree(services);
+  enableManagementCardsLanding(services);
+
   subscribeBreadcrumbs(services);
 };

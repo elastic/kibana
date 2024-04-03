@@ -39,7 +39,7 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     }),
     isBeta: true,
-    euiIconType: '/plugins/home/assets/logos/iis.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/iis.svg'),
     artifacts: {
       dashboards: [
         {
@@ -55,7 +55,7 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/iis_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/iis_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

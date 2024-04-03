@@ -26,6 +26,11 @@ export const DATES = {
       max: '2018-10-17T19:58:03.952Z',
       processesDataStartDate: '2023-03-28T18:20:00.000Z',
       processesDataEndDate: '2023-03-28T18:21:00.000Z',
+      kubernetesSectionStartDate: '2023-09-19T07:20:00.000Z',
+      kubernetesSectionEndDate: '2023-09-19T07:21:00.000Z',
+    },
+    pods: {
+      withData: '01/20/2022 5:10:00 PM',
     },
     stream: {
       startWithData: '2018-10-17T19:42:22.000Z',
@@ -45,4 +50,8 @@ export const ML_JOB_IDS = [
 
 export const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
+export const INVENTORY_PATH = 'metrics/inventory';
+export const NODE_DETAILS_PATH = 'detail/host';
 export const HOSTS_VIEW_PATH = 'metrics/hosts';
+
+export const DATE_PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

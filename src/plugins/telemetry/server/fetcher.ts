@@ -18,6 +18,10 @@ import {
   Subscription,
   takeUntil,
   timer,
+  catchError,
+  defer,
+  EMPTY,
+  retry,
 } from 'rxjs';
 import fetch from 'node-fetch';
 import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
@@ -105,7 +109,25 @@ export class FetcherTask {
         // Skip any further processing if already online
         filter(() => !this.isOnline$.value),
         // Fetch current state and configs
-        exhaustMap(async () => await this.getCurrentConfigs()),
+        exhaustMap(() => {
+          return defer(() => {
+            return this.getCurrentConfigs();
+          }).pipe(
+            // exp-backoff retries in case of errors fetching the config
+            retry({
+              count: 5,
+              delay: (error, retryIndex) => {
+                const retryDelay = 1000 * Math.min(Math.pow(2, retryIndex + 2), 64); // 5 retries -> 8s, 16s, 32s, 64s, 64s
+                return timer(retryDelay);
+              },
+            }),
+            // shallow errors if all retry failed, next time tick will continue the emission
+            catchError((err) => {
+              this.logger.error(`Cannot get the current config: ${err.message}`);
+              return EMPTY;
+            })
+          );
+        }),
         // Skip if opted-out, or should only send from the browser
         filter(
           ({ telemetryOptIn, telemetrySendUsageFrom }) =>

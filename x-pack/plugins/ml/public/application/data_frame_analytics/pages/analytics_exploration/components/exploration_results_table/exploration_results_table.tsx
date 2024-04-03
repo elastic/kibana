@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -16,22 +17,22 @@ import type {
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSectionResults } from '../expandable_section';
 
 import { useExplorationResults } from './use_exploration_results';
 
 interface Props {
-  indexPattern: DataView;
+  dataView: DataView;
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus?: DataFrameTaskStateType;
-  needsDestIndexPattern: boolean;
+  needsDestDataView: boolean;
   searchQuery: ResultsSearchQuery;
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
+  ({ dataView, jobConfig, needsDestDataView, searchQuery }) => {
     const {
       services: {
         mlServices: { mlApiServices },
@@ -39,7 +40,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     } = useMlKibana();
 
     const classificationData = useExplorationResults(
-      indexPattern,
+      dataView,
       jobConfig,
       searchQuery,
       getToastNotifications(),
@@ -54,10 +55,10 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
         <ExpandableSectionResults
           indexData={classificationData}
-          indexPattern={indexPattern}
+          dataView={dataView}
           resultsField={jobConfig?.dest.results_field}
           jobConfig={jobConfig}
-          needsDestIndexPattern={needsDestIndexPattern}
+          needsDestDataView={needsDestDataView}
           searchQuery={searchQuery}
         />
       </div>

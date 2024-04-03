@@ -9,13 +9,13 @@
 import { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
 
-export function getSerializeTransform() {
-  const buffer: ApmFields[] = [];
+export function getSerializeTransform<TFields = ApmFields>() {
+  const buffer: TFields[] = [];
 
   let cb: (() => void) | undefined;
 
-  function push(stream: Transform, events: ApmFields[], callback?: () => void) {
-    let event: ApmFields | undefined;
+  function push(stream: Transform, events: TFields[], callback?: () => void) {
+    let event: TFields | undefined;
     while ((event = events.shift())) {
       if (!stream.push(event)) {
         buffer.push(...events);
@@ -37,7 +37,8 @@ export function getSerializeTransform() {
         push(this, nextEvents, nextCallback);
       }
     },
-    write(chunk: Serializable<ApmFields>, encoding, callback) {
+    // @ts-expect-error upgrade typescript v4.9.5
+    write(chunk: Serializable<TFields>, encoding, callback) {
       push(this, chunk.serialize(), callback);
     },
   });

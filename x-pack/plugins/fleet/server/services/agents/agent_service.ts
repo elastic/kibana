@@ -13,6 +13,12 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
 
@@ -22,6 +28,7 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
+import { getLatestAvailableAgentVersion } from './versions';
 
 /**
  * A service for interacting with Agent data. See {@link AgentClient} for more information.
@@ -71,13 +78,23 @@ export interface AgentClient {
   listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
+      aggregations?: Record<string, AggregationsAggregationContainer>;
+      searchAfter?: SortResults;
+      pitId?: string;
+      getStatusSummary?: boolean;
     }
   ): Promise<{
     agents: Agent[];
     total: number;
     page: number;
     perPage: number;
+    aggregations?: Record<string, estypes.AggregationsAggregate>;
   }>;
+
+  /**
+   * Return the latest agent available version
+   */
+  getLatestAgentAvailableVersion(includeCurrentVersion?: boolean): Promise<string>;
 }
 
 /**
@@ -93,6 +110,7 @@ class AgentClientImpl implements AgentClient {
   public async listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
+      aggregations?: Record<string, AggregationsAggregationContainer>;
     }
   ) {
     await this.#runPreflight();
@@ -117,6 +135,11 @@ class AgentClientImpl implements AgentClient {
       agentPolicyId,
       filterKuery
     );
+  }
+
+  public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {
+    await this.#runPreflight();
+    return getLatestAvailableAgentVersion({ includeCurrentVersion });
   }
 
   #runPreflight = async () => {

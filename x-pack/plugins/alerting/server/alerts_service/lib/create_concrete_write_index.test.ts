@@ -6,7 +6,9 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createConcreteWriteIndex } from './create_concrete_write_index';
+import { getDataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
@@ -24,7 +26,7 @@ interface EsError extends Error {
 }
 
 const GetAliasResponse = {
-  real_index: {
+  '.internal.alerts-test.alerts-default-000001': {
     aliases: {
       alias_1: {
         is_hidden: true,
@@ -35,6 +37,10 @@ const GetAliasResponse = {
     },
   },
 };
+
+const GetDataStreamResponse = {
+  data_streams: ['any-content-here-means-already-exists'],
+} as unknown as IndicesGetDataStreamResponse;
 
 const SimulateTemplateResponse = {
   template: {
@@ -57,486 +63,656 @@ const IndexPatterns = {
   basePattern: '.alerts-test.alerts-*',
   alias: '.alerts-test.alerts-default',
   name: '.internal.alerts-test.alerts-default-000001',
+  validPrefixes: ['.internal.alerts-', '.alerts-'],
 };
 
 describe('createConcreteWriteIndex', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
-  });
+  for (const useDataStream of [false, true]) {
+    const label = useDataStream ? 'data streams' : 'aliases';
+    const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: useDataStream });
 
-  it(`should call esClient to put index template`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
+    beforeEach(() => {
+      jest.resetAllMocks();
+      jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
     });
 
-    expect(clusterClient.indices.create).toHaveBeenCalledWith({
-      index: '.internal.alerts-test.alerts-default-000001',
-      body: {
-        aliases: {
-          '.alerts-test.alerts-default': {
-            is_write_index: true,
-          },
-        },
-      },
-    });
-  });
+    describe(`using ${label} for alert indices`, () => {
+      it(`should call esClient to put index template`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
 
-  it(`should retry on transient ES errors`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    clusterClient.indices.create
-      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockResolvedValue({
-        index: '.internal.alerts-test.alerts-default-000001',
-        shards_acknowledged: true,
-        acknowledged: true,
+        if (useDataStream) {
+          expect(clusterClient.indices.createDataStream).toHaveBeenCalledWith({
+            name: '.alerts-test.alerts-default',
+          });
+        } else {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+        }
       });
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
 
-    expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
-  });
+      it(`should retry on transient ES errors`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.create
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockResolvedValue({
+            index: '.internal.alerts-test.alerts-default-000001',
+            shards_acknowledged: true,
+            acknowledged: true,
+          });
+        clusterClient.indices.createDataStream
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockResolvedValue({
+            acknowledged: true,
+          });
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
 
-  it(`should log and throw error if max retries exceeded`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    clusterClient.indices.create.mockRejectedValue(new EsErrors.ConnectionError('foo'));
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
+        if (useDataStream) {
+          expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(3);
+        } else {
+          expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
+        }
+      });
 
-    expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - foo`);
-    expect(clusterClient.indices.create).toHaveBeenCalledTimes(4);
-  });
+      it(`should log and throw error if max retries exceeded`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.create.mockRejectedValue(new EsErrors.ConnectionError('foo'));
+        clusterClient.indices.createDataStream.mockRejectedValue(
+          new EsErrors.ConnectionError('foo')
+        );
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
 
-  it(`should log and throw error if ES throws error`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    clusterClient.indices.create.mockRejectedValueOnce(new Error('generic error'));
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Error creating data stream .alerts-test.alerts-default - foo`
+            : `Error creating concrete write index - foo`
+        );
 
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+        if (useDataStream) {
+          expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(4);
+        } else {
+          expect(clusterClient.indices.create).toHaveBeenCalledTimes(4);
+        }
+      });
 
-    expect(logger.error).toHaveBeenCalledWith(
-      `Error creating concrete write index - generic error`
-    );
-  });
+      it(`should log and throw error if ES throws error`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.create.mockRejectedValueOnce(new Error('generic error'));
+        clusterClient.indices.createDataStream.mockRejectedValueOnce(new Error('generic error'));
 
-  it(`should log and return if ES throws resource_already_exists_exception error and existing index is already write index`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    const error = new Error(`fail`) as EsError;
-    error.meta = {
-      body: {
-        error: {
-          type: 'resource_already_exists_exception',
-        },
-      },
-    };
-    clusterClient.indices.create.mockRejectedValueOnce(error);
-    clusterClient.indices.get.mockImplementationOnce(async () => ({
-      '.internal.alerts-test.alerts-default-000001': {
-        aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
-      },
-    }));
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
 
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Error creating data stream .alerts-test.alerts-default - generic error`
+            : `Error creating concrete write index - generic error`
+        );
+      });
 
-    expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
-  });
+      it(`should log and return if ES throws resource_already_exists_exception error and existing index is already write index`, async () => {
+        if (useDataStream) return;
 
-  it(`should retry getting index on transient ES error`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    const error = new Error(`fail`) as EsError;
-    error.meta = {
-      body: {
-        error: {
-          type: 'resource_already_exists_exception',
-        },
-      },
-    };
-    clusterClient.indices.create.mockRejectedValueOnce(error);
-    clusterClient.indices.get
-      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockImplementationOnce(async () => ({
-        '.internal.alerts-test.alerts-default-000001': {
-          aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
-        },
-      }));
-
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.get).toHaveBeenCalledTimes(3);
-    expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
-  });
-
-  it(`should log and throw error if ES throws resource_already_exists_exception error and existing index is not the write index`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-    const error = new Error(`fail`) as EsError;
-    error.meta = {
-      body: {
-        error: {
-          type: 'resource_already_exists_exception',
-        },
-      },
-    };
-    clusterClient.indices.create.mockRejectedValueOnce(error);
-    clusterClient.indices.get.mockImplementationOnce(async () => ({
-      '.internal.alerts-test.alerts-default-000001': {
-        aliases: { '.alerts-test.alerts-default': { is_write_index: false } },
-      },
-    }));
-
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias"`
-    );
-    expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
-  });
-
-  it(`should call esClient to put index template if get alias throws 404`, async () => {
-    const error = new Error(`not found`) as EsError;
-    error.statusCode = 404;
-    clusterClient.indices.getAlias.mockRejectedValueOnce(error);
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.create).toHaveBeenCalledWith({
-      index: '.internal.alerts-test.alerts-default-000001',
-      body: {
-        aliases: {
-          '.alerts-test.alerts-default': {
-            is_write_index: true,
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        const error = new Error(`fail`) as EsError;
+        error.meta = {
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
           },
-        },
-      },
-    });
-  });
-
-  it(`should log and throw error if get alias throws non-404 error`, async () => {
-    const error = new Error(`fatal error`) as EsError;
-    error.statusCode = 500;
-    clusterClient.indices.getAlias.mockRejectedValueOnce(error);
-
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"fatal error"`);
-    expect(logger.error).toHaveBeenCalledWith(
-      `Error fetching concrete indices for .internal.alerts-test.alerts-default-* pattern - fatal error`
-    );
-  });
-
-  it(`should update underlying settings and mappings of existing concrete indices if they exist`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.create).toHaveBeenCalledWith({
-      index: '.internal.alerts-test.alerts-default-000001',
-      body: {
-        aliases: {
-          '.alerts-test.alerts-default': {
-            is_write_index: true,
+        };
+        clusterClient.indices.create.mockRejectedValueOnce(error);
+        clusterClient.indices.get.mockImplementationOnce(async () => ({
+          '.internal.alerts-test.alerts-default-000001': {
+            aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
           },
-        },
-      },
-    });
+        }));
 
-    expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
-    expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
-  });
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
 
-  it(`should retry simulateIndexTemplate on transient ES errors`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate
-      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockImplementation(async () => SimulateTemplateResponse);
+        expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+      });
 
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(4);
-  });
-
-  it(`should retry getting alias on transient ES errors`, async () => {
-    clusterClient.indices.getAlias
-      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.getAlias).toHaveBeenCalledTimes(3);
-  });
-
-  it(`should retry settings update on transient ES errors`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    clusterClient.indices.putSettings
-      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockResolvedValue({ acknowledged: true });
-
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
-  });
-
-  it(`should log and throw error on settings update if max retries exceeded`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    clusterClient.indices.putSettings.mockRejectedValue(new EsErrors.ConnectionError('foo'));
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
-    expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(7);
-    expect(logger.error).toHaveBeenCalledWith(
-      `Failed to PUT index.mapping.total_fields.limit settings for alias alias_1: foo`
-    );
-  });
-
-  it(`should log and throw error on settings update if ES throws error`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    clusterClient.indices.putSettings.mockRejectedValue(new Error('generic error'));
-
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
-
-    expect(logger.error).toHaveBeenCalledWith(
-      `Failed to PUT index.mapping.total_fields.limit settings for alias alias_1: generic error`
-    );
-  });
-
-  it(`should retry mappings update on transient ES errors`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    clusterClient.indices.putMapping
-      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockResolvedValue({ acknowledged: true });
-
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
-  });
-
-  it(`should log and throw error on mappings update if max retries exceeded`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    clusterClient.indices.putMapping.mockRejectedValue(new EsErrors.ConnectionError('foo'));
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
-    expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(7);
-    expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias alias_1: foo`);
-  });
-
-  it(`should log and throw error on mappings update if ES throws error`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-    clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
-
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
-
-    expect(logger.error).toHaveBeenCalledWith(
-      `Failed to PUT mapping for alias alias_1: generic error`
-    );
-  });
-
-  it(`should log and return when simulating updated mappings throws error`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockRejectedValueOnce(new Error('fail'));
-
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
-
-    expect(logger.error).toHaveBeenCalledWith(
-      `Ignored PUT mappings for alias alias_1; error generating simulated mappings: fail`
-    );
-
-    expect(clusterClient.indices.create).toHaveBeenCalledWith({
-      index: '.internal.alerts-test.alerts-default-000001',
-      body: {
-        aliases: {
-          '.alerts-test.alerts-default': {
-            is_write_index: true,
+      it(`should retry getting index on transient ES error`, async () => {
+        if (useDataStream) return;
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        const error = new Error(`fail`) as EsError;
+        error.statusCode = 404;
+        error.meta = {
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
           },
-        },
-      },
-    });
-  });
+        };
+        clusterClient.indices.create.mockRejectedValueOnce(error);
+        clusterClient.indices.get
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockImplementationOnce(async () => ({
+            '.internal.alerts-test.alerts-default-000001': {
+              aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
+            },
+          }));
 
-  it(`should log and return when simulating updated mappings returns null`, async () => {
-    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
-    clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
-      ...SimulateTemplateResponse,
-      template: { ...SimulateTemplateResponse.template, mappings: null },
-    }));
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
 
-    await createConcreteWriteIndex({
-      logger,
-      esClient: clusterClient,
-      indexPatterns: IndexPatterns,
-      totalFieldsLimit: 2500,
-    });
+        expect(clusterClient.indices.get).toHaveBeenCalledTimes(3);
+        expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+      });
 
-    expect(logger.error).toHaveBeenCalledWith(
-      `Ignored PUT mappings for alias alias_1; simulated mappings were empty`
-    );
+      it(`should log and throw error if ES throws resource_already_exists_exception error and existing index is not the write index`, async () => {
+        if (useDataStream) return;
 
-    expect(clusterClient.indices.create).toHaveBeenCalledWith({
-      index: '.internal.alerts-test.alerts-default-000001',
-      body: {
-        aliases: {
-          '.alerts-test.alerts-default': {
-            is_write_index: true,
+        clusterClient.indices.getAlias.mockImplementation(async () => ({}));
+        const error = new Error(`fail`) as EsError;
+        error.meta = {
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
           },
-        },
-      },
+        };
+        clusterClient.indices.create.mockRejectedValueOnce(error);
+        clusterClient.indices.get.mockImplementationOnce(async () => ({
+          '.internal.alerts-test.alerts-default-000001': {
+            aliases: { '.alerts-test.alerts-default': { is_write_index: false } },
+          },
+        }));
+
+        const ccwiPromise = createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        await expect(() => ccwiPromise).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias"`
+        );
+
+        expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+      });
+
+      it(`should call esClient to put index template if get alias throws 404`, async () => {
+        const error = new Error(`not found`) as EsError;
+        error.statusCode = 404;
+        clusterClient.indices.getAlias.mockRejectedValueOnce(error);
+        clusterClient.indices.getDataStream.mockRejectedValueOnce(error);
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        if (useDataStream) {
+          expect(clusterClient.indices.createDataStream).toHaveBeenCalledWith({
+            name: '.alerts-test.alerts-default',
+          });
+        } else {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+        }
+      });
+
+      it(`should log and throw error if get alias throws non-404 error`, async () => {
+        const error = new Error(`fatal error`) as EsError;
+        error.statusCode = 500;
+        clusterClient.indices.getAlias.mockRejectedValueOnce(error);
+        clusterClient.indices.getDataStream.mockRejectedValueOnce(error);
+
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"fatal error"`);
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Error fetching data stream for .alerts-test.alerts-default - fatal error`
+            : `Error fetching concrete indices for .internal.alerts-test.alerts-default-* pattern - fatal error`
+        );
+      });
+
+      it(`should update underlying settings and mappings of existing concrete indices if they exist`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        if (!useDataStream) {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+        }
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 1 : 2);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 1 : 2);
+      });
+
+      it(`should skip updating underlying settings and mappings of existing concrete indices if they follow an unexpected naming convention`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => ({
+          bad_index_name: {
+            aliases: {
+              alias_1: {
+                is_hidden: true,
+              },
+            },
+          },
+        }));
+
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        if (!useDataStream) {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Found unexpected concrete index name "bad_index_name" while expecting index with one of the following prefixes: [.internal.alerts-,.alerts-] Not updating mappings or settings for this index.`
+          );
+        }
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 1 : 0);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 1 : 0);
+      });
+
+      it(`should retry simulateIndexTemplate on transient ES errors`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockImplementation(async () => SimulateTemplateResponse);
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
+          useDataStream ? 3 : 4
+        );
+      });
+
+      it(`should retry getting alias on transient ES errors`, async () => {
+        clusterClient.indices.getAlias
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        if (useDataStream) {
+          expect(clusterClient.indices.getDataStream).toHaveBeenCalledTimes(3);
+        } else {
+          expect(clusterClient.indices.getAlias).toHaveBeenCalledTimes(3);
+        }
+      });
+
+      it(`should retry settings update on transient ES errors`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockResolvedValue({ acknowledged: true });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 3 : 4);
+      });
+
+      it(`should log and throw error on settings update if max retries exceeded`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockRejectedValue(new EsErrors.ConnectionError('foo'));
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 4 : 7);
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: foo`
+            : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: foo`
+        );
+      });
+
+      it(`should log and throw error on settings update if ES throws error`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockRejectedValue(new Error('generic error'));
+
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: generic error`
+            : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: generic error`
+        );
+      });
+
+      it(`should retry mappings update on transient ES errors`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putMapping
+          .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+          .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+          .mockResolvedValue({ acknowledged: true });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 3 : 4);
+      });
+
+      it(`should log and throw error on mappings update if max retries exceeded`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putMapping.mockRejectedValue(new EsErrors.ConnectionError('foo'));
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 4 : 7);
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Failed to PUT mapping for .alerts-test.alerts-default: foo`
+            : `Failed to PUT mapping for alias_1: foo`
+        );
+      });
+
+      it(`should log and throw error on mappings update if ES throws error`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
+
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Failed to PUT mapping for .alerts-test.alerts-default: generic error`
+            : `Failed to PUT mapping for alias_1: generic error`
+        );
+      });
+
+      it(`should log and return when simulating updated mappings throws error`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockRejectedValueOnce(new Error('fail'));
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Ignored PUT mappings for .alerts-test.alerts-default; error generating simulated mappings: fail`
+            : `Ignored PUT mappings for alias_1; error generating simulated mappings: fail`
+        );
+
+        if (useDataStream) {
+          expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+        } else {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+        }
+      });
+
+      it(`should log and return when simulating updated mappings returns null`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
+          ...SimulateTemplateResponse,
+          template: { ...SimulateTemplateResponse.template, mappings: null },
+        }));
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(logger.error).toHaveBeenCalledWith(
+          useDataStream
+            ? `Ignored PUT mappings for .alerts-test.alerts-default; simulated mappings were empty`
+            : `Ignored PUT mappings for alias_1; simulated mappings were empty`
+        );
+
+        if (useDataStream) {
+          expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+        } else {
+          expect(clusterClient.indices.create).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
+              },
+            },
+          });
+        }
+      });
+
+      it(`should throw error when there are concrete indices but none of them are the write index`, async () => {
+        if (useDataStream) return;
+
+        clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
+          '.internal.alerts-test.alerts-default-0001': {
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: false,
+                is_hidden: true,
+              },
+              alias_2: {
+                is_write_index: false,
+                is_hidden: true,
+              },
+            },
+          },
+        }));
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        await expect(() =>
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default"`
+        );
+      });
     });
-  });
-
-  it(`should throw error when there are concrete indices but none of them are the write index`, async () => {
-    clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-      '.internal.alerts-test.alerts-default-0001': {
-        aliases: {
-          '.alerts-test.alerts-default': {
-            is_write_index: false,
-            is_hidden: true,
-          },
-          alias_2: {
-            is_write_index: false,
-            is_hidden: true,
-          },
-        },
-      },
-    }));
-    clusterClient.indices.simulateIndexTemplate.mockImplementation(
-      async () => SimulateTemplateResponse
-    );
-
-    await expect(() =>
-      createConcreteWriteIndex({
-        logger,
-        esClient: clusterClient,
-        indexPatterns: IndexPatterns,
-        totalFieldsLimit: 2500,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default"`
-    );
-  });
+  }
 });

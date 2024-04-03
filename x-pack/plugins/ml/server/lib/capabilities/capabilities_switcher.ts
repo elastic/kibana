@@ -6,16 +6,17 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { MlFeatures } from '../../../common/constants/app';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import {
   type MlCapabilities,
   basicLicenseMlCapabilities,
   featureCapabilities,
 } from '../../../common/types/capabilities';
-import type { MlFeatures } from '../../types';
 
 export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,
@@ -23,7 +24,9 @@ export const setupCapabilitiesSwitcher = (
   enabledFeatures: MlFeatures,
   logger: Logger
 ) => {
-  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures));
+  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures), {
+    capabilityPath: 'ml.*',
+  });
 };
 
 function getSwitcher(
@@ -59,7 +62,7 @@ function getSwitcher(
         basicLicenseMlCapabilities.forEach((c) => (mlCaps[c] = originalCapabilities[c]));
       }
 
-      return { ml: applyEnabledFeatures(mlCaps, enabledFeatures) };
+      return { ml: mlCaps };
     } catch (e) {
       logger.debug(`Error updating capabilities for ML based on licensing: ${e}`);
       return {};
@@ -67,22 +70,26 @@ function getSwitcher(
   };
 }
 
-function applyEnabledFeatures(mlCaps: MlCapabilities, enabledFeatures: MlFeatures) {
-  mlCaps.isADEnabled = enabledFeatures.ad;
-  mlCaps.isDFAEnabled = enabledFeatures.dfa;
-  mlCaps.isNLPEnabled = enabledFeatures.nlp;
+function applyEnabledFeatures(mlCaps: MlCapabilities, { ad, dfa, nlp }: MlFeatures) {
+  mlCaps.isADEnabled = ad;
+  mlCaps.isDFAEnabled = dfa;
+  mlCaps.isNLPEnabled = nlp;
+  mlCaps.canViewMlNodes = mlCaps.canViewMlNodes && ad && dfa && nlp;
 
-  mlCaps.canViewMlNodes =
-    mlCaps.canViewMlNodes && mlCaps.isADEnabled && mlCaps.isDFAEnabled && mlCaps.isNLPEnabled;
-
-  if (enabledFeatures.ad === false) {
-    featureCapabilities.ad.forEach((c) => (mlCaps[c] = false));
+  if (ad === false) {
+    for (const c of featureCapabilities.ad) {
+      mlCaps[c] = false;
+    }
   }
-  if (enabledFeatures.dfa === false) {
-    featureCapabilities.dfa.forEach((c) => (mlCaps[c] = false));
+  if (dfa === false) {
+    for (const c of featureCapabilities.dfa) {
+      mlCaps[c] = false;
+    }
   }
-  if (enabledFeatures.nlp === false) {
-    featureCapabilities.nlp.forEach((c) => (mlCaps[c] = false));
+  if (nlp === false && dfa === false) {
+    for (const c of featureCapabilities.nlp) {
+      mlCaps[c] = false;
+    }
   }
 
   return mlCaps;

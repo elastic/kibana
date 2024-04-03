@@ -33,6 +33,7 @@ import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '@kbn/core/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
 
 import { setState, LensAppState } from '../state_management';
@@ -331,12 +332,11 @@ describe('Lens App', () => {
         props,
         services,
         preloadedState: {
-          isLinkedToOriginatingApp: true,
+          isLinkedToOriginatingApp: false,
         },
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
         {
           text: 'Visualize Library',
           href: '/testbasepath/app/visualize#/',
@@ -346,7 +346,12 @@ describe('Lens App', () => {
       ]);
 
       await act(async () => {
-        instance.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        instance.setProps({
+          initialInput: { savedObjectId: breadcrumbDocSavedObjectId },
+          preloadedState: {
+            isLinkedToOriginatingApp: true,
+          },
+        });
 
         lensStore.dispatch(
           setState({
@@ -356,7 +361,6 @@ describe('Lens App', () => {
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
         {
           text: 'Visualize Library',
           href: '/testbasepath/app/visualize#/',
@@ -364,6 +368,30 @@ describe('Lens App', () => {
         },
         { text: 'Daaaaaaadaumching!' },
       ]);
+    });
+
+    it('sets serverless breadcrumbs when the document title changes when serverless service is available', async () => {
+      const serverless = serverlessMock.createStart();
+      const { instance, services, lensStore } = await mountWith({
+        services: {
+          ...makeDefaultServices(),
+          serverless,
+        },
+      });
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+      expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Create' });
+
+      await act(async () => {
+        instance.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        lensStore.dispatch(
+          setState({
+            persistedDoc: breadcrumbDoc,
+          })
+        );
+      });
+
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+      expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Daaaaaaadaumching!' });
     });
   });
 
@@ -513,9 +541,10 @@ describe('Lens App', () => {
       }
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
-        await getButton(inst).run(inst.getDOMNode());
-        inst.update();
-        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave') as (
+        getButton(inst).run(inst.getDOMNode());
+        // wait a tick since SaveModalContainer initializes asynchronously
+        await new Promise(process.nextTick);
+        const handler = inst.update().find('SavedObjectSaveModalOrigin').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);
@@ -534,6 +563,10 @@ describe('Lens App', () => {
           initialInput: initialSavedObjectId
             ? { savedObjectId: initialSavedObjectId, id: '5678' }
             : undefined,
+        };
+
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
         };
 
         const services = makeDefaultServicesForApp();
@@ -563,6 +596,7 @@ describe('Lens App', () => {
           props,
           preloadedState: {
             isSaveable: true,
+            isLinkedToOriginatingApp: true,
             ...preloadedState,
           },
         });
@@ -627,7 +661,6 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServicesForApp();
-        services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
         props.incomingState = {
           originatingApp: 'ultraDashboard',
           valueInput: {
@@ -791,14 +824,22 @@ describe('Lens App', () => {
         const mockedConsoleDir = jest.spyOn(console, 'dir'); // mocked console.dir to avoid messages in the console when running tests
         mockedConsoleDir.mockImplementation(() => {});
 
+        const props = makeDefaultProps();
+
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
+
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
-        const { instance, props } = await mountWith({
+        const { instance } = await mountWith({
+          props,
           services,
           preloadedState: {
             isSaveable: true,
+            isLinkedToOriginatingApp: true,
           },
         });
 
@@ -866,15 +907,19 @@ describe('Lens App', () => {
       });
 
       it('checks for duplicate title before saving', async () => {
+        const props = makeDefaultProps();
+        props.incomingState = { originatingApp: 'coolContainer' };
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
         const { instance } = await mountWith({
+          props,
           services,
           preloadedState: {
             isSaveable: true,
             persistedDoc: { savedObjectId: '123' } as unknown as Document,
+            isLinkedToOriginatingApp: true,
           },
         });
         await act(async () => {
@@ -900,10 +945,47 @@ describe('Lens App', () => {
       });
 
       it('does not show the copy button on first save', async () => {
-        const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
+        const props = makeDefaultProps();
+        props.incomingState = { originatingApp: 'coolContainer' };
+        const { instance } = await mountWith({
+          props,
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+        });
         await act(async () => getButton(instance).run(instance.getDOMNode()));
         instance.update();
         expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
+      });
+
+      it('enables Save Query UI when user has app-level permissions', async () => {
+        const services = makeDefaultServicesForApp();
+        services.application = {
+          ...services.application,
+          capabilities: {
+            ...services.application.capabilities,
+            visualize: { saveQuery: true },
+          },
+        };
+        const { instance } = await mountWith({ services });
+        await act(async () => {
+          const topNavMenu = instance.find(services.navigation.ui.AggregateQueryTopNavMenu);
+          expect(topNavMenu.props().saveQueryMenuVisibility).toBe('allowed_by_app_privilege');
+        });
+      });
+
+      it('checks global save query permission when user does not have app-level permissions', async () => {
+        const services = makeDefaultServicesForApp();
+        services.application = {
+          ...services.application,
+          capabilities: {
+            ...services.application.capabilities,
+            visualize: { saveQuery: false },
+          },
+        };
+        const { instance } = await mountWith({ services });
+        await act(async () => {
+          const topNavMenu = instance.find(services.navigation.ui.AggregateQueryTopNavMenu);
+          expect(topNavMenu.props().saveQueryMenuVisibility).toBe('globally_managed');
+        });
       });
     });
   });
@@ -1162,7 +1244,7 @@ describe('Lens App', () => {
       };
       await mountWith({ services });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
-        expect.objectContaining({ showSaveQuery: false }),
+        expect.objectContaining({ saveQueryMenuVisibility: 'globally_managed' }),
         {}
       );
     });
@@ -1171,7 +1253,7 @@ describe('Lens App', () => {
       const { instance, services } = await mountWith({});
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
-          showSaveQuery: true,
+          saveQueryMenuVisibility: 'allowed_by_app_privilege',
           savedQuery: undefined,
           onSaved: expect.any(Function),
           onSavedQueryUpdated: expect.any(Function),
@@ -1187,6 +1269,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
@@ -1198,6 +1281,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1214,6 +1298,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1225,6 +1310,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1237,6 +1323,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1254,6 +1341,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: 'abc:def', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1304,6 +1392,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1315,6 +1404,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });

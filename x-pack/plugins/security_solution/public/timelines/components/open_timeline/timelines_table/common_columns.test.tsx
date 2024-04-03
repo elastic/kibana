@@ -18,6 +18,7 @@ import { getEmptyValue } from '../../../../common/components/empty_value';
 import type { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { NotePreviews } from '../note_previews';
+import { TimelineId } from '../../../../../common/types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 
@@ -206,7 +207,9 @@ describe('#getCommonColumns', () => {
 
       expect(onToggleShowNotes).toBeCalledWith({
         abc: <div />,
-        'saved-timeline-11': <NotePreviews notes={hasNotes[0].notes} />,
+        'saved-timeline-11': (
+          <NotePreviews notes={hasNotes[0].notes} timelineId={TimelineId.active} />
+        ),
       });
     });
 
@@ -271,7 +274,10 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper.find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`).first().text()
+        wrapper
+          .find(`[data-test-subj="timeline-title-${mockResults[0].savedObjectId}"]`)
+          .first()
+          .text()
       ).toEqual(mockResults[0].title);
     });
 
@@ -314,7 +320,10 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper.find(`[data-test-subj="title-${missingTitle[0].savedObjectId}"]`).first().text()
+        wrapper
+          .find(`[data-test-subj="timeline-title-${missingTitle[0].savedObjectId}"]`)
+          .first()
+          .text()
       ).toEqual(i18n.UNTITLED_TIMELINE);
     });
 
@@ -357,7 +366,7 @@ describe('#getCommonColumns', () => {
 
       expect(
         wrapper
-          .find(`[data-test-subj="title-${withJustWhitespaceTitle[0].savedObjectId}"]`)
+          .find(`[data-test-subj="timeline-title-${withJustWhitespaceTitle[0].savedObjectId}"]`)
           .first()
           .text()
       ).toEqual(i18n.UNTITLED_TIMELINE);
@@ -397,7 +406,10 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper.find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`).first().exists()
+        wrapper
+          .find(`[data-test-subj="timeline-title-${mockResults[0].savedObjectId}"]`)
+          .first()
+          .exists()
       ).toBe(true);
     });
 
@@ -418,7 +430,10 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper.find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`).first().exists()
+        wrapper
+          .find(`[data-test-subj="timeline-title-${mockResults[0].savedObjectId}"]`)
+          .first()
+          .exists()
       ).toBe(false);
     });
 
@@ -438,7 +453,7 @@ describe('#getCommonColumns', () => {
       );
 
       wrapper
-        .find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`)
+        .find(`[data-test-subj="timeline-title-${mockResults[0].savedObjectId}"]`)
         .last()
         .simulate('click');
 

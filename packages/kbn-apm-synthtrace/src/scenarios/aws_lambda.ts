@@ -10,12 +10,13 @@ import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const timestamps = range.ratePerMinute(180);
 
       const cloudFields: ApmFields = {
@@ -91,7 +92,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         ];
       });
 
-      return awsLambdaEvents;
+      return withClient(apmEsClient, awsLambdaEvents);
     },
   };
 };

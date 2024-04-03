@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { GroupByListSummary } from './list_summary';
 
@@ -24,8 +25,8 @@ describe('Transform: <GroupByListSummary />', () => {
       list: { 'the-options-data-id': item },
     };
 
-    const wrapper = shallow(<GroupByListSummary {...props} />);
+    const { container } = render(<GroupByListSummary {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toContain('the-options-data-id');
   });
 });

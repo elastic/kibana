@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsResponse } from '../../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../../common/types/api';
 import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 export class AlertUsers implements AggregationBuilder<SingleCaseMetricsResponse> {

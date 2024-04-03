@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { lazy } from 'react';
 import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
-import type { StartPlugins } from '../../../../../types';
+import type { FleetUiExtensionGetterOptions } from './types';
 
-export const getLazyEndpointPackageCustomExtension = (
-  coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
-) => {
+export const getLazyEndpointPackageCustomExtension = ({
+  coreStart,
+  depsStart,
+  services,
+}: FleetUiExtensionGetterOptions) => {
   return lazy<PackageCustomExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPackageCustomExtension }] = await Promise.all([
       import('./components/with_security_context/with_security_context'),
@@ -23,6 +23,7 @@ export const getLazyEndpointPackageCustomExtension = (
       default: withSecurityContext({
         coreStart,
         depsStart,
+        services,
         WrappedComponent: EndpointPackageCustomExtension,
       }),
     };

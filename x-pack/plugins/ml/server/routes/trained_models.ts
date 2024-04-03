@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { ErrorType } from '@kbn/ml-error-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { RouteInitialization } from '../types';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ElserVersion } from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -22,13 +28,78 @@ import {
   putTrainedModelQuerySchema,
   threadingParamsSchema,
   updateDeploymentParamsSchema,
+  createIngestPipelineSchema,
+  modelDownloadsQuery,
 } from './schemas/inference_schema';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type {
+  InferenceAPIConfigResponse,
+  PipelineDefinition,
+} from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
 
-export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
+export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
+
+export function filterForEnabledFeatureModels<
+  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
+>(models: T[], enabledFeatures: MlFeatures) {
+  let filteredModels = models;
+  if (enabledFeatures.nlp === false) {
+    filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
+  }
+
+  if (enabledFeatures.dfa === false) {
+    filteredModels = filteredModels.filter((m) => m.model_type !== 'tree_ensemble');
+  }
+
+  return filteredModels;
+}
+
+export const populateInferenceServicesProvider = (client: IScopedClusterClient) => {
+  return async function populateInferenceServices(
+    trainedModels: TrainedModelConfigResponse[],
+    asInternal: boolean = false
+  ) {
+    const esClient = asInternal ? client.asInternalUser : client.asCurrentUser;
+
+    try {
+      // Check if model is used by an inference service
+      const { models } = await esClient.transport.request<{
+        models: InferenceAPIConfigResponse[];
+      }>({
+        method: 'GET',
+        path: `/_inference/_all`,
+      });
+
+      const inferenceAPIMap = groupBy(
+        models,
+        (model) => model.service === 'elser' && model.service_settings.model_id
+      );
+
+      for (const model of trainedModels) {
+        const inferenceApis = inferenceAPIMap[model.model_id];
+        model.hasInferenceServices = !!inferenceApis;
+        if (model.hasInferenceServices && !asInternal) {
+          model.inference_apis = inferenceApis;
+        }
+      }
+    } catch (e) {
+      if (!asInternal && e.statusCode === 403) {
+        // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
+        await populateInferenceServices(trainedModels, true);
+      } else {
+        mlLog.error(e);
+      }
+    }
+  };
+};
+
+export function trainedModelsRoutes(
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
+  cloud: CloudSetup
+) {
   /**
    * @apiGroup TrainedModels
    *
@@ -57,16 +128,27 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const { with_pipelines: withPipelines, ...query } = request.query;
-          const body = await mlClient.getTrainedModels({
-            // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
-            size: 1000,
-            ...query,
+          const {
+            with_pipelines: withPipelines,
+            with_indices: withIndicesRaw,
+            ...getTrainedModelsRequestParams
+          } = request.query;
+
+          const withIndices =
+            request.query.with_indices === 'true' || request.query.with_indices === true;
+
+          const resp = await mlClient.getTrainedModels({
+            ...getTrainedModelsRequestParams,
             ...(modelId ? { model_id: modelId } : {}),
-          });
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          } as estypes.MlGetTrainedModelsRequest);
           // model_type is missing
           // @ts-ignore
-          const result = body.trained_model_configs as TrainedModelConfigResponse[];
+          const result = resp.trained_model_configs as TrainedModelConfigResponse[];
+
+          const populateInferenceServices = populateInferenceServicesProvider(client);
+          await populateInferenceServices(result, false);
+
           try {
             if (withPipelines) {
               // Also need to retrieve the list of deployment IDs from stats
@@ -97,20 +179,54 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                   ...Object.values(modelDeploymentsMap).flat(),
                 ])
               );
+              const modelsClient = modelsProvider(client, mlClient, cloud);
 
-              const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
-                modelIdsAndAliases
+              const modelsPipelinesAndIndices = await Promise.all(
+                modelIdsAndAliases.map(async (modelIdOrAlias) => {
+                  return {
+                    modelIdOrAlias,
+                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdOrAlias, {
+                      withIndices,
+                    }),
+                  };
+                })
               );
+
               for (const model of result) {
-                model.pipelines = {
-                  ...(pipelinesResponse.get(model.model_id) ?? {}),
-                  ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
-                    return Object.assign(acc, pipelinesResponse.get(alias) ?? {});
-                  }, {}),
-                  ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
-                    return Object.assign(acc, pipelinesResponse.get(deploymentId) ?? {});
-                  }, {}),
-                };
+                const modelAliases = model.metadata?.model_aliases ?? [];
+                const modelMap = modelsPipelinesAndIndices.find(
+                  (d) => d.modelIdOrAlias === model.model_id
+                )?.result;
+
+                const allRelatedModels = modelsPipelinesAndIndices
+                  .filter(
+                    (m) =>
+                      [
+                        model.model_id,
+                        ...modelAliases,
+                        ...(modelDeploymentsMap[model.model_id] ?? []),
+                      ].findIndex((alias) => alias === m.modelIdOrAlias) > -1
+                  )
+                  .map((r) => r?.result)
+                  .filter(isDefined);
+                const ingestPipelinesFromModelAliases = allRelatedModels
+                  .map((r) => r?.ingestPipelines)
+                  .filter(isDefined) as Array<Map<string, Record<string, PipelineDefinition>>>;
+
+                model.pipelines = ingestPipelinesFromModelAliases.reduce<
+                  Record<string, PipelineDefinition>
+                >((allPipelines, modelsToPipelines) => {
+                  for (const [, pipelinesObj] of modelsToPipelines?.entries()) {
+                    Object.entries(pipelinesObj).forEach(([pipelineId, pipelineInfo]) => {
+                      allPipelines[pipelineId] = pipelineInfo;
+                    });
+                  }
+                  return allPipelines;
+                }, {});
+
+                if (modelMap && withIndices) {
+                  model.indices = modelMap.indices;
+                }
               }
             }
           } catch (e) {
@@ -120,8 +236,38 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
             mlLog.debug(e);
           }
 
+          const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
+
+          try {
+            const jobIds = filteredModels
+              .map((model) => {
+                const id = model.metadata?.analytics_config?.id;
+                if (id) {
+                  return `${id}*`;
+                }
+              })
+              .filter((id) => id !== undefined);
+
+            if (jobIds.length) {
+              const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
+                id: jobIds.join(','),
+                allow_no_match: true,
+              });
+
+              filteredModels.forEach((model) => {
+                const dfaId = model?.metadata?.analytics_config?.id;
+                if (dfaId !== undefined) {
+                  // if this is a dfa model, set origin_job_exists
+                  model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
+                }
+              });
+            }
+          } catch (e) {
+            // Swallow error to prevent blocking trained models result
+          }
+
           return response.ok({
-            body: result,
+            body: filteredModels,
           });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -151,7 +297,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       },
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
-          const body = await mlClient.getTrainedModelsStats();
+          const body = await mlClient.getTrainedModelsStats({
+            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          });
           return response.ok({
             body,
           });
@@ -185,12 +333,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
           const body = await mlClient.getTrainedModelsStats({
             ...(modelId ? { model_id: modelId } : {}),
           });
+
           return response.ok({
             body,
           });
@@ -227,9 +376,83 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const { modelId } = request.params;
-          const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
+          const result = await modelsProvider(client, mlClient, cloud).getModelsPipelines(
+            modelId.split(',')
+          );
           return response.ok({
             body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/ingest_pipelines Get ingest pipelines
+   * @apiName GetIngestPipelines
+   * @apiDescription Retrieves pipelines
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'], // TODO: update permissions
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const body = await modelsProvider(client, mlClient, cloud).getPipelines();
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/create_inference_pipeline creates the pipeline with inference processor
+   * @apiName CreateInferencePipeline
+   * @apiDescription Creates the inference pipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createIngestPipelineSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const { pipeline, pipelineName } = request.body;
+          const body = await modelsProvider(client, mlClient, cloud).createInferencePipeline(
+            pipeline!,
+            pipelineName
+          );
+          return response.ok({
+            body,
           });
         } catch (e) {
           return response.customError(wrapError(e));
@@ -314,7 +537,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
 
           if (withPipelines) {
             // first we need to delete pipelines, otherwise ml api return an error
-            await modelsProvider(client).deleteModelPipelines(modelId.split(','));
+            await modelsProvider(client, mlClient, cloud).deleteModelPipelines(modelId.split(','));
           }
 
           const body = await mlClient.deleteTrainedModel({
@@ -551,5 +774,122 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           return response.customError(wrapError(e));
         }
       })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/model_downloads Gets available models for download
+   * @apiName GetTrainedModelDownloadList
+   * @apiDescription Gets available models for download with default and recommended flags based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, mlClient, client }) => {
+        try {
+          const body = await modelsProvider(client, mlClient, cloud).getModelDownloads();
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/elser_config Gets ELSER config for download
+   * @apiName GetElserConfig
+   * @apiDescription Gets ELSER config for download based on the cluster OS and CPU architecture.
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: modelDownloadsQuery,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ response, client, mlClient, request }) => {
+        try {
+          const { version } = request.query;
+
+          const body = await modelsProvider(client, mlClient, cloud).getELSER(
+            version ? { version: Number(version) as ElserVersion } : undefined
+          );
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/install_elastic_trained_model/:modelId Installs Elastic trained model
+   * @apiName InstallElasticTrainedModel
+   * @apiDescription Downloads and installs Elastic trained model.
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/{modelId}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: modelIdSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const { modelId } = request.params;
+            const body = await modelsProvider(client, mlClient, cloud).installElasticModel(
+              modelId,
+              mlSavedObjectService
+            );
+
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
     );
 }

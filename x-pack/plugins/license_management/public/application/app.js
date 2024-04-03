@@ -11,11 +11,7 @@ import { LicenseDashboard, UploadLicense } from './sections';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageBody,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiPageSection, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
 import { UPLOAD_LICENSE_ROUTE } from '../locator';
 
 export const App = ({
@@ -37,14 +33,14 @@ export const App = ({
 
   if (permissionsLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" grow={true}>
         <SectionLoading>
           <FormattedMessage
             id="xpack.licenseMgmt.app.loadingPermissionsDescription"
             defaultMessage="Checking permissions…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
@@ -52,8 +48,9 @@ export const App = ({
     const error = permissionsError?.data?.message;
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+      <EuiPageSection alignment="center" grow={true}>
         <EuiEmptyPrompt
+          color="danger"
           iconType="warning"
           title={
             <h1>
@@ -65,14 +62,15 @@ export const App = ({
           }
           body={error ? <p>{error}</p> : null}
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 
   if (!hasPermission) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageSection alignment="center" grow={true}>
         <EuiEmptyPrompt
+          color="subdued"
           iconType="securityApp"
           title={
             <h1>
@@ -94,7 +92,7 @@ export const App = ({
             </p>
           }
         />
-      </EuiPageContent>
+      </EuiPageSection>
     );
   }
 

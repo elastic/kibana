@@ -7,24 +7,22 @@
 
 import _ from 'lodash';
 import { Component } from 'react';
-import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
-import { i18n } from '@kbn/i18n';
-import { TileMetaFeature } from '../../../../common/descriptor_types';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { AJAXError, Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
+import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import { ILayer } from '../../../classes/layers/layer';
-import { IVectorSource } from '../../../classes/sources/vector_source';
-import { getTileKey } from '../../../classes/util/geo_tile_utils';
+import { isLayerGroup } from '../../../classes/layers/layer_group';
+import { isESVectorTileSource } from '../../../classes/sources/es_source';
+import { getTileKey as getCenterTileKey } from '../../../classes/util/geo_tile_utils';
+import { boundsToExtent } from '../../../classes/util/maplibre_utils';
 import { ES_MVT_META_LAYER_NAME } from '../../../classes/util/tile_meta_feature_utils';
+import { getErrorCacheTileKey, TileErrorCache } from './tile_error_cache';
 
 interface MbTile {
   // references internal object from mapbox
   aborted?: boolean;
 }
-
-type TileError = Error & {
-  status: number;
-  tileZXYKey: string; // format zoom/x/y
-};
 
 interface Tile {
   mbKey: string;
@@ -35,10 +33,12 @@ interface Tile {
 export interface Props {
   mbMap: MbMap;
   layerList: ILayer[];
-  setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
-  updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
-  clearTileLoadError: (layerId: string) => void;
-  setTileLoadError: (layerId: string, errorMessage: string) => void;
+  onTileStateChange: (
+    layerId: string,
+    areTilesLoaded: boolean,
+    tileMetaFeatures?: TileMetaFeature[],
+    tileErrors?: TileError[]
+  ) => void;
 }
 
 export class TileStatusTracker extends Component<Props> {
@@ -48,9 +48,7 @@ export class TileStatusTracker extends Component<Props> {
   // 'sourcedata' and 'error' events remove tile request from cache
   // Tile requests with 'aborted' status are removed from cache when reporting 'areTilesLoaded' status
   private _tileCache: Tile[] = [];
-  // Tile error cache tracks tile request errors per layer
-  // Error cache is cleared when map center tile changes
-  private _tileErrorCache: Record<string, TileError[]> = {};
+  private _tileErrorCache = new TileErrorCache();
   // Layer cache tracks layers that have requested one or more tiles
   // Layer cache is used so that only a layer that has requested one or more tiles reports 'areTilesLoaded' status
   // layer cache is never cleared
@@ -62,7 +60,20 @@ export class TileStatusTracker extends Component<Props> {
     this.props.mbMap.on('sourcedataloading', this._onSourceDataLoading);
     this.props.mbMap.on('error', this._onError);
     this.props.mbMap.on('sourcedata', this._onSourceData);
-    this.props.mbMap.on('move', this._onMove);
+    this.props.mbMap.on('moveend', this._onMoveEnd);
+  }
+
+  componentDidUpdate() {
+    this.props.layerList.forEach((layer) => {
+      if (isLayerGroup(layer)) {
+        return;
+      }
+
+      if (!isESVectorTileSource(layer.getSource())) {
+        // clear tile cache when layer is not tiled
+        this._tileErrorCache.clearLayer(layer.getId(), this._updateTileStatusForAllLayers);
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -70,7 +81,7 @@ export class TileStatusTracker extends Component<Props> {
     this.props.mbMap.off('error', this._onError);
     this.props.mbMap.off('sourcedata', this._onSourceData);
     this.props.mbMap.off('sourcedataloading', this._onSourceDataLoading);
-    this.props.mbMap.off('move', this._onMove);
+    this.props.mbMap.off('moveend', this._onMoveEnd);
     this._tileCache.length = 0;
   }
 
@@ -90,6 +101,12 @@ export class TileStatusTracker extends Component<Props> {
         this._layerCache.set(layerId, true);
       }
 
+      this._tileErrorCache.clearTileError(
+        layerId,
+        getErrorCacheTileKey(e.tile.tileID.canonical),
+        this._updateTileStatusForAllLayers
+      );
+
       const tracked = this._tileCache.find((tile) => {
         return (
           tile.mbKey === (e.tile.tileID.key as unknown as string) && tile.mbSourceId === e.sourceId
@@ -107,26 +124,56 @@ export class TileStatusTracker extends Component<Props> {
     }
   };
 
-  _onError = (e: MapSourceDataEvent & { error: Error & { status: number } }) => {
+  _onError = (e: MapSourceDataEvent & { error: { message: string } | AJAXError }) => {
     if (
       e.sourceId &&
       e.sourceId !== SPATIAL_FILTERS_LAYER_ID &&
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
+      this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
+
       const targetLayer = this.props.layerList.find((layer) => {
         return layer.ownsMbSourceId(e.sourceId);
       });
-      const layerId = targetLayer ? targetLayer.getId() : undefined;
-      if (layerId) {
-        const layerErrors = this._tileErrorCache[layerId] ? this._tileErrorCache[layerId] : [];
-        layerErrors.push({
-          ...e.error,
-          tileZXYKey: `${e.tile.tileID.canonical.z}/${e.tile.tileID.canonical.x}/${e.tile.tileID.canonical.y}`,
-        } as TileError);
-        this._tileErrorCache[layerId] = layerErrors;
+      if (!targetLayer) {
+        return;
       }
-      this._removeTileFromCache(e.sourceId, e.tile.tileID.key as unknown as string);
+
+      const layerId = targetLayer.getId();
+      const tileKey = getErrorCacheTileKey(e.tile.tileID.canonical);
+      const tileError = {
+        message: e.error.message,
+        tileKey,
+      };
+      this._tileErrorCache.setTileError(layerId, tileError);
+
+      const ajaxError =
+        'body' in e.error && 'statusText' in e.error ? (e.error as AJAXError) : undefined;
+
+      if (!ajaxError || !isESVectorTileSource(targetLayer.getSource())) {
+        this._updateTileStatusForAllLayers();
+        return;
+      }
+
+      ajaxError.body
+        .text()
+        .then((body) => {
+          if (this._tileErrorCache.hasTileError(layerId, tileKey)) {
+            const parsedJson = JSON.parse(body) as { error?: ErrorCause };
+            if (parsedJson.error && 'type' in parsedJson.error) {
+              this._tileErrorCache.setTileError(layerId, {
+                ...tileError,
+                error: parsedJson.error,
+              });
+              this._updateTileStatusForAllLayers();
+            }
+          }
+        })
+        .catch((processAjaxBodyError) => {
+          // ignore errors reading and parsing ajax request body
+          // Contents are used to provide better UI messaging and are not required
+        });
     }
   };
 
@@ -142,25 +189,23 @@ export class TileStatusTracker extends Component<Props> {
     }
   };
 
-  /*
-   * Clear errors when center tile changes.
-   * Tracking center tile provides the cleanest way to know when a new data fetching cycle is beginning
-   */
-  _onMove = () => {
+  _onMoveEnd = () => {
     const center = this.props.mbMap.getCenter();
     // Maplibre rounds zoom when 'source.roundZoom' is true and floors zoom when 'source.roundZoom' is false
     // 'source.roundZoom' is true for raster and video layers
     // 'source.roundZoom' is false for vector layers
     // Always floor zoom to keep logic as simple as possible and not have to track center tile by source.
     // We are mainly concerned with showing errors from Elasticsearch vector tile requests (which are vector sources)
-    const centerTileKey = getTileKey(
+    const centerTileKey = getCenterTileKey(
       center.lat,
       center.lng,
       Math.floor(this.props.mbMap.getZoom())
     );
     if (this._prevCenterTileKey !== centerTileKey) {
       this._prevCenterTileKey = centerTileKey;
-      this._tileErrorCache = {};
+      if (this._tileErrorCache.hasAny()) {
+        this._updateTileStatusForAllLayers();
+      }
     }
   };
 
@@ -189,73 +234,42 @@ export class TileStatusTracker extends Component<Props> {
           break;
         }
       }
-      const tileErrorMessages = this._tileErrorCache[layer.getId()]
-        ? this._tileErrorCache[layer.getId()].map((tileError) => {
-            return i18n.translate('xpack.maps.tileStatusTracker.tileErrorMsg', {
-              defaultMessage: `tile '{tileZXYKey}' failed to load: '{status} {message}'`,
-              values: {
-                tileZXYKey: tileError.tileZXYKey,
-                status: tileError.status,
-                message: tileError.message,
-              },
-            });
-          })
-        : [];
-      this._updateTileStatusForLayer(
-        layer,
+
+      this.props.onTileStateChange(
+        layer.getId(),
         !atLeastOnePendingTile,
-        tileErrorMessages.length
-          ? i18n.translate('xpack.maps.tileStatusTracker.layerErrorMsg', {
-              defaultMessage: `Unable to load {count} tiles: {tileErrors}`,
-              values: {
-                count: tileErrorMessages.length,
-                tileErrors: tileErrorMessages.join(', '),
-              },
-            })
-          : undefined
+        this._getTileMetaFeatures(layer),
+        this._tileErrorCache.getInViewTileErrors(
+          layer.getId(),
+          this.props.mbMap.getZoom(),
+          boundsToExtent(this.props.mbMap.getBounds())
+        )
       );
     }
   }, 100);
 
-  _updateTileStatusForLayer = (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
-    this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
-
-    if (errorMessage) {
-      this.props.setTileLoadError(layer.getId(), errorMessage);
-    } else {
-      this.props.clearTileLoadError(layer.getId());
-    }
-
-    const source = layer.getSource();
-    if (
-      layer.isVisible() &&
-      source.isESSource() &&
-      typeof (source as IVectorSource).isMvt === 'function' &&
-      (source as IVectorSource).isMvt()
-    ) {
-      // querySourceFeatures can return duplicated features when features cross tile boundaries.
-      // Tile meta will never have duplicated features since by their nature, tile meta is a feature contained within a single tile
-      const mbFeatures = this.props.mbMap.querySourceFeatures(layer.getMbSourceId(), {
-        sourceLayer: ES_MVT_META_LAYER_NAME,
-        filter: [],
-      });
-
-      const features = mbFeatures
-        .map((mbFeature) => {
-          try {
-            return {
-              type: 'Feature',
-              id: mbFeature?.id,
-              geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
-              properties: mbFeature?.properties,
-            } as TileMetaFeature;
-          } catch (e) {
-            return null;
-          }
-        })
-        .filter((mbFeature: TileMetaFeature | null) => mbFeature !== null) as TileMetaFeature[];
-      this.props.updateMetaFromTiles(layer.getId(), features);
-    }
+  _getTileMetaFeatures = (layer: ILayer) => {
+    return layer.isVisible() && isESVectorTileSource(layer.getSource())
+      ? // querySourceFeatures can return duplicated features when features cross tile boundaries.
+        // Tile meta will never have duplicated features since by their nature, tile meta is a feature contained within a single tile
+        (this.props.mbMap
+          .querySourceFeatures(layer.getMbSourceId(), {
+            sourceLayer: ES_MVT_META_LAYER_NAME,
+          })
+          .map((mbFeature) => {
+            try {
+              return {
+                type: 'Feature',
+                id: mbFeature?.id,
+                geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
+                properties: mbFeature?.properties,
+              } as TileMetaFeature;
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter((feature: TileMetaFeature | null) => feature !== null) as TileMetaFeature[])
+      : undefined;
   };
 
   _removeTileFromCache = (mbSourceId: string, mbKey: string) => {

@@ -1,0 +1,519 @@
+openapi: 3.0.0
+info:
+  title: Common Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleObjectId:
+      $ref: '../../../model/primitives.schema.yaml#/components/schemas/UUID'
+
+    RuleSignatureId:
+      type: string
+      description: Could be any string, not necessarily a UUID
+
+    RuleName:
+      type: string
+      minLength: 1
+
+    RuleDescription:
+      type: string
+      minLength: 1
+
+    RuleVersion:
+      type: integer
+      minimum: 1
+      description: The rule's version number.
+
+    QueryLanguage:
+      type: string
+      enum:
+        - kuery
+        - lucene
+        - eql
+        - esql
+
+    KqlQueryLanguage:
+      type: string
+      enum:
+        - kuery
+        - lucene
+
+    IsRuleImmutable:
+      type: boolean
+
+    IsRuleEnabled:
+      type: boolean
+      description: Determines whether the rule is enabled.
+
+    RuleInterval:
+      type: string
+      description: Frequency of rule execution, using a date math range. For example, "1h" means the rule runs every hour. Defaults to 5m (5 minutes).
+
+    RuleIntervalFrom:
+      type: string
+      description: Time from which data is analyzed each time the rule executes, using a date math range. For example, now-4200s means the rule analyzes data from 70 minutes before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+      format: date-math
+
+    RuleIntervalTo:
+      type: string
+
+    RiskScore:
+      type: integer
+      description: Risk score (0 to 100)
+      minimum: 0
+      maximum: 100
+
+    RiskScoreMapping:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          operator:
+            type: string
+            enum:
+              - equals
+          value:
+            type: string
+          risk_score:
+            $ref: '#/components/schemas/RiskScore'
+        required:
+          - field
+          - operator
+          - value
+      description: Overrides generated alerts' risk_score with a value from the source event
+
+    Severity:
+      type: string
+      enum: [low, medium, high, critical]
+      description: Severity of the rule
+
+    SeverityMapping:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          operator:
+            type: string
+            enum:
+              - equals
+          severity:
+            $ref: '#/components/schemas/Severity'
+          value:
+            type: string
+        required:
+          - field
+          - operator
+          - severity
+          - value
+      description: Overrides generated alerts' severity with values from the source event
+
+    RuleTagArray:
+      type: array
+      items:
+        type: string
+      description: String array containing words and phrases to help categorize, filter, and search rules. Defaults to an empty array.
+
+    RuleMetadata:
+      type: object
+      additionalProperties: true
+
+    RuleLicense:
+      type: string
+      description: The rule's license.
+
+    RuleAuthorArray:
+      type: array
+      items:
+        type: string
+
+    RuleFalsePositiveArray:
+      type: array
+      items:
+        type: string
+
+    RuleReferenceArray:
+      type: array
+      items:
+        type: string
+
+    InvestigationGuide:
+      type: string
+      description: Notes to help investigate alerts produced by the rule.
+
+    SetupGuide:
+      type: string
+
+    BuildingBlockType:
+      type: string
+      description: Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default.
+
+    AlertsIndex:
+      type: string
+      description: (deprecated) Has no effect.
+      deprecated: true
+
+    AlertsIndexNamespace:
+      type: string
+      description: Has no effect.
+
+    MaxSignals:
+      type: integer
+      minimum: 1
+
+    ThreatSubtechnique:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Subtechnique ID
+        name:
+          type: string
+          description: Subtechnique name
+        reference:
+          type: string
+          description: Subtechnique reference
+      required:
+        - id
+        - name
+        - reference
+
+    ThreatTechnique:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Technique ID
+        name:
+          type: string
+          description: Technique name
+        reference:
+          type: string
+          description: Technique reference
+        subtechnique:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreatSubtechnique'
+          description: Array containing more specific information on the attack technique
+      required:
+        - id
+        - name
+        - reference
+
+    ThreatTactic:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Tactic ID
+        name:
+          type: string
+          description: Tactic name
+        reference:
+          type: string
+          description: Tactic reference
+      required:
+        - id
+        - name
+        - reference
+
+    Threat:
+      type: object
+      properties:
+        framework:
+          type: string
+          description: Relevant attack framework
+        tactic:
+          $ref: '#/components/schemas/ThreatTactic'
+        technique:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreatTechnique'
+          description: Array containing information on the attack techniques (optional)
+      required:
+        - framework
+        - tactic
+
+    ThreatArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Threat'
+
+    IndexPatternArray:
+      type: array
+      items:
+        type: string
+
+    DataViewId:
+      type: string
+
+    SavedQueryId:
+      type: string
+
+    RuleQuery:
+      type: string
+
+    RuleFilterArray:
+      type: array
+      items: {} # unknown
+
+    RuleNameOverride:
+      type: string
+      description: Sets the source field for the alert's signal.rule.name value
+
+    TimestampOverride:
+      type: string
+      description: Sets the time field used to query indices
+
+    TimestampOverrideFallbackDisabled:
+      type: boolean
+      description: Disables the fallback to the event's @timestamp field
+
+    RequiredField:
+      type: object
+      properties:
+        name:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        type:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        ecs:
+          type: boolean
+      required:
+        - name
+        - type
+        - ecs
+
+    RequiredFieldArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/RequiredField'
+
+    TimelineTemplateId:
+      type: string
+      description: Timeline template ID
+
+    TimelineTemplateTitle:
+      type: string
+      description: Timeline template title
+
+    SavedObjectResolveOutcome:
+      type: string
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+
+    SavedObjectResolveAliasTargetId:
+      type: string
+
+    SavedObjectResolveAliasPurpose:
+      type: string
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
+
+    RelatedIntegration:
+      type: object
+      properties:
+        package:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        version:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        integration:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - package
+        - version
+
+    RelatedIntegrationArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/RelatedIntegration'
+
+    # Schema for fields relating to investigation fields, these are user defined fields we use to highlight in various features in the UI such as alert details flyout and exceptions auto-population from alert. Added in PR #163235
+    # Right now we only have a single field but anticipate adding more related fields to store various configuration states such as `override` - where a user might say if they want only these fields to display, or if they want these fields + the fields we select.
+    InvestigationFields:
+      type: object
+      properties:
+        field_names:
+          type: array
+          items:
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          minItems: 1
+      required:
+        - field_names
+
+    RuleActionThrottle:
+      description: Defines the interval on which a rule's actions are executed.
+      oneOf:
+        - type: string
+          enum:
+            - 'no_actions'
+            - 'rule'
+        - type: string
+          pattern: '^[1-9]\d*[smhd]$' # any number except zero followed by one of the suffixes 's', 'm', 'h', 'd'
+          description: Time interval in seconds, minutes, hours, or days.
+          example: '1h'
+
+    RuleActionNotifyWhen:
+      type: string
+      enum:
+        - 'onActiveAlert'
+        - 'onThrottleInterval'
+        - 'onActionGroupChange'
+      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
+
+    RuleActionFrequency:
+      type: object
+      description: The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
+      properties:
+        summary:
+          type: boolean
+          description: Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert
+        notifyWhen:
+          $ref: '#/components/schemas/RuleActionNotifyWhen'
+        throttle:
+          $ref: '#/components/schemas/RuleActionThrottle'
+          nullable: true
+      required:
+        - summary
+        - notifyWhen
+        - throttle
+
+    RuleActionAlertsFilter:
+      type: object
+      additionalProperties: true
+
+    RuleActionParams:
+      type: object
+      description: Object containing the allowed connector fields, which varies according to the connector type.
+      additionalProperties: true
+
+    RuleActionGroup:
+      type: string
+      description: Optionally groups actions by use cases. Use `default` for alert notifications.
+
+    RuleActionId:
+      type: string
+      description: The connector ID.
+
+    RuleAction:
+      type: object
+      properties:
+        action_type_id:
+          type: string
+          description: The action type used for sending notifications.
+        group:
+          $ref: '#/components/schemas/RuleActionGroup'
+        id:
+          $ref: '#/components/schemas/RuleActionId'
+        params:
+          $ref: '#/components/schemas/RuleActionParams'
+        uuid:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        alerts_filter:
+          $ref: '#/components/schemas/RuleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/RuleActionFrequency'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
+
+    ExceptionListType:
+      type: string
+      description: The exception type
+      enum:
+        - detection
+        - rule_default
+        - endpoint
+        - endpoint_trusted_apps
+        - endpoint_events
+        - endpoint_host_isolation_exceptions
+        - endpoint_blocklists
+
+    RuleExceptionList:
+      type: object
+      properties:
+        id:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: ID of the exception container
+        list_id:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: List ID of the exception container
+        type:
+          $ref: '#/components/schemas/ExceptionListType'
+        namespace_type:
+          type: string
+          description: Determines the exceptions validity in rule's Kibana space
+          enum:
+            - agnostic
+            - single
+      required:
+        - id
+        - list_id
+        - type
+        - namespace_type
+
+    AlertSuppressionDuration:
+      type: object
+      properties:
+        value:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum:
+            - s
+            - m
+            - h
+      required:
+        - value
+        - unit
+
+    AlertSuppressionMissingFieldsStrategy:
+      type: string
+      enum:
+        - doNotSuppress
+        - suppress
+      description: |-
+        Describes how alerts will be generated for documents with missing suppress by fields:
+        doNotSuppress - per each document a separate alert will be created
+        suppress - only alert will be created per suppress by bucket
+
+    AlertSuppressionGroupBy:
+      type: array
+      items:
+        type: string
+      minItems: 1
+      maxItems: 3
+
+    AlertSuppression:
+      type: object
+      properties:
+        group_by:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missing_fields_strategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - group_by
+
+    AlertSuppressionCamel:
+      type: object
+      properties:
+        groupBy:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missingFieldsStrategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - groupBy

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiIcon, EuiSideNavItemType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -19,71 +19,42 @@ import {
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ESRE_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
+  AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
-import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
+import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
+import {
+  PLAYGROUND_PATH,
+  CONNECTORS_PATH,
+  CRAWLERS_PATH,
+  SEARCH_INDICES_PATH,
+} from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
+  const indicesNavItems = useIndicesNav();
   if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
-      id: 'es_overview',
-      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-        defaultMessage: 'Overview',
-      }),
+      id: 'home',
+      name: (
+        <EuiText size="s">
+          {i18n.translate('xpack.enterpriseSearch.nav.homeTitle', {
+            defaultMessage: 'Home',
+          })}
+        </EuiText>
+      ),
       ...generateNavLink({
         shouldNotCreateHref: true,
+        shouldShowActiveForSubroutes: true,
         to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       }),
-      items: [
-        {
-          id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-            defaultMessage: 'Elasticsearch',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ELASTICSEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'esre',
-          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
-            defaultMessage: 'ESRE',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ESRE_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'vectorSearch',
-          name: VECTOR_SEARCH_PLUGIN.NAME,
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: VECTOR_SEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'searchExperiences',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-            defaultMessage: 'Search Experiences',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: SEARCH_EXPERIENCES_PLUGIN.URL,
-          }),
-        },
-      ],
     },
     {
       id: 'content',
@@ -94,26 +65,45 @@ export const useEnterpriseSearchNav = () => {
             defaultMessage: 'Indices',
           }),
           ...generateNavLink({
+            items: indicesNavItems,
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
           }),
         },
-        ...(productFeatures.hasDefaultIngestPipeline
-          ? [
-              {
-                id: 'settings',
-                name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
-                  defaultMessage: 'Settings',
-                }),
-                ...generateNavLink({
-                  shouldNotCreateHref: true,
-                  shouldShowActiveForSubroutes: true,
-                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
-                }),
-              },
-            ]
-          : []),
+        {
+          id: 'connectors',
+          name: i18n.translate('xpack.enterpriseSearch.nav.connectorsTitle', {
+            defaultMessage: 'Connectors',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CONNECTORS_PATH,
+          }),
+        },
+        {
+          id: 'crawlers',
+          name: i18n.translate('xpack.enterpriseSearch.nav.crawlersTitle', {
+            defaultMessage: 'Web crawlers',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
+          }),
+        },
+        {
+          id: 'playground',
+          name: i18n.translate('xpack.enterpriseSearch.nav.PlaygroundTitle', {
+            defaultMessage: 'Playground',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH,
+          }),
+        },
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',
@@ -129,7 +119,7 @@ export const useEnterpriseSearchNav = () => {
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: APPLICATIONS_PLUGIN.URL,
+            to: APPLICATIONS_PLUGIN.URL + SEARCH_APPLICATIONS_PATH,
           }),
         },
         {
@@ -145,6 +135,42 @@ export const useEnterpriseSearchNav = () => {
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
         defaultMessage: 'Applications',
+      }),
+    },
+    {
+      id: 'es_getting_started',
+      items: [
+        {
+          id: 'elasticsearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
+            defaultMessage: 'Elasticsearch',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'aiSearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
+            defaultMessage: 'AI Search',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: AI_SEARCH_PLUGIN.URL,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
+        defaultMessage: 'Getting started',
       }),
     },
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
@@ -222,13 +248,16 @@ export const useEnterpriseSearchApplicationNav = (
           }),
           items: [
             {
-              id: 'enterpriseSearchApplicationPreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.previewTitle', {
-                defaultMessage: 'Search Preview',
-              }),
+              id: 'enterpriseSearchApplicationDocsExplorer',
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.searchApplication.docsExplorerTitle',
+                {
+                  defaultMessage: 'Docs Explorer',
+                }
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${searchApplicationPath}/${SearchApplicationViewTabs.PREVIEW}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.DOCS_EXPLORER}`,
               }),
             },
             {

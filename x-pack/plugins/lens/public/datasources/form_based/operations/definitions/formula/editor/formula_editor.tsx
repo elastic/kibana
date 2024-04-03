@@ -29,8 +29,7 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
 import { ParamEditorProps } from '../..';
@@ -106,7 +105,6 @@ export function FormulaEditor({
   dataViews,
   toggleFullscreen,
   isFullscreen,
-  setIsCloseable,
   dateHistogramInterval,
   hasData,
   dateRange,
@@ -175,7 +173,6 @@ export function FormulaEditor({
   }, []);
 
   useUnmount(() => {
-    setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
       paramEditorUpdater(
@@ -792,20 +789,6 @@ export function FormulaEditor({
                   if (model) {
                     editorModel.current = model;
                   }
-                  disposables.current.push(
-                    editor.onDidFocusEditorWidget(() => {
-                      setTimeout(() => {
-                        setIsCloseable(false);
-                      });
-                    })
-                  );
-                  disposables.current.push(
-                    editor.onDidBlurEditorWidget(() => {
-                      setTimeout(() => {
-                        setIsCloseable(true);
-                      });
-                    })
-                  );
                   // If we ever introduce a second Monaco editor, we need to toggle
                   // the typing handler to the active editor to maintain the cursor
                   disposables.current.push(

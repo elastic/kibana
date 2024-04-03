@@ -30,3 +30,24 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Search by rule name',
   }
 );
+
+export const UPDATE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel',
+  {
+    defaultMessage: 'Update',
+  }
+);
+
+export const UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.perFieldTooltip',
+  {
+    defaultMessage: 'View changes field by field.',
+  }
+);
+
+export const UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewTooltip',
+  {
+    defaultMessage: 'View the latest rule changes in JSON format.',
+  }
+);

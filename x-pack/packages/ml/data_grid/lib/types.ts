@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridPaginationProps,
   EuiDataGridSorting,
@@ -16,10 +16,10 @@ import {
 } from '@elastic/eui';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { FeatureImportanceBaseline } from '@kbn/ml-data-frame-analytics-utils';
+import type { FeatureImportanceBaseline } from '@kbn/ml-data-frame-analytics-utils';
 
-import { INDEX_STATUS } from './common';
-import { ChartData } from './field_histograms';
+import type { INDEX_STATUS } from './common';
+import type { ChartData } from './field_histograms';
 
 interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -64,7 +64,7 @@ export interface RowCountInfo {
 /**
  * Type representing the pagination settings for an index.
  */
-export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
+export type IndexPagination = Required<Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>>;
 
 /**
  * Type for callback function for changing items per page.
@@ -158,9 +158,9 @@ export interface UseIndexDataReturnType
    */
   renderCellValue: RenderCellValue;
   /**
-   * Optional index pattern fields.
+   * Optional data view fields.
    */
-  indexPatternFields?: string[];
+  dataViewFields?: string[];
   /**
    * Optional time range.
    */

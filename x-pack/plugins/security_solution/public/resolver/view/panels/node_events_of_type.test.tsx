@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 
@@ -58,11 +59,13 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
   describe(`when the URL query string is showing a resolver with nodeID origin, panel view nodeEventsInCategory, and eventCategory registry`, () => {
     beforeEach(() => {
       simulator(); // Initialize simulator in beforeEach to use instance in tests
-      memoryHistory.push({
-        search: urlSearch(resolverComponentInstanceID, {
-          panelParameters: { nodeID: 'origin', eventCategory: 'registry' },
-          panelView: 'nodeEventsInCategory',
-        }),
+      act(() => {
+        memoryHistory.push({
+          search: urlSearch(resolverComponentInstanceID, {
+            panelParameters: { nodeID: 'origin', eventCategory: 'registry' },
+            panelView: 'nodeEventsInCategory',
+          }),
+        });
       });
     });
     it('should show the load more data button', async () => {

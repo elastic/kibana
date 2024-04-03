@@ -8,14 +8,15 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly browser = this.ctx.getService('browser');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -137,17 +138,28 @@ export class ConsolePageObject extends FtrService {
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
-    await textArea.clickMouseButton();
     await textArea.type(letter);
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
   public async isAutocompleteVisible() {
-    const element = await this.find.byCssSelector('.ace_autocomplete');
+    const element = await this.find.byCssSelector('.ace_autocomplete').catch(() => null);
     if (!element) return false;
 
     const attribute = await element.getAttribute('style');
     return !attribute.includes('display: none;');
+  }
+
+  public async getAutocompleteSuggestion(index: number = 0) {
+    const children1 = await this.find
+      .allByCssSelector('.ace_autocomplete .ace_line :nth-child(1)')
+      .catch(() => null);
+    const children2 = await this.find
+      .allByCssSelector('.ace_autocomplete .ace_line :nth-child(2)')
+      .catch(() => null);
+    if (!children1 || !children2) return null;
+
+    return (await children1[index].getVisibleText()) + (await children2[index].getVisibleText());
   }
 
   public async enterRequest(request: string = '\nGET _search') {
@@ -204,6 +216,26 @@ export class ConsolePageObject extends FtrService {
   public async pressEscape() {
     const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ESCAPE);
+  }
+
+  public async pressDown(shift: boolean = false) {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.DOWN] : Key.DOWN);
+  }
+
+  public async pressLeft(shift: boolean = false) {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
+  }
+
+  public async pressRight(shift: boolean = false) {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.RIGHT] : Key.RIGHT);
+  }
+
+  public async pressUp(shift: boolean = false) {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
   }
 
   public async clearTextArea() {
@@ -397,6 +429,14 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
   }
 
+  public async pressCtrlSpace() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.SPACE,
+    ]);
+  }
+
   public async clickContextMenu() {
     const contextMenu = await this.testSubjects.find('toggleConsoleMenu');
     await contextMenu.click();
@@ -460,6 +500,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequestQueryParams() {
+    await this.sleepForDebouncePeriod();
     const requestEditor = await this.getRequestEditor();
     const requestQueryParams = await requestEditor.findAllByCssSelector('.ace_url.ace_param');
 
@@ -491,6 +532,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequestLineHighlighting() {
+    await this.sleepForDebouncePeriod();
     const requestEditor = await this.getRequestEditor();
     const requestLine = await requestEditor.findAllByCssSelector('.ace_line > *');
     const line = [];
@@ -565,5 +607,17 @@ export class ConsolePageObject extends FtrService {
   public async closeHistory() {
     const closeButton = await this.testSubjects.find('consoleHistoryCloseButton');
     await closeButton.click();
+  }
+
+  public async sleepForDebouncePeriod(milliseconds: number = 100) {
+    // start to sleep after confirming JS engine responds
+    await this.retry.waitFor('pinging JS engine', () => this.browser.execute('return true;'));
+    await this.common.sleep(milliseconds);
+  }
+
+  async setAutocompleteTrace(flag: boolean) {
+    await this.browser.execute((f: boolean) => {
+      (window as any).autocomplete_trace = f;
+    }, flag);
   }
 }

@@ -162,6 +162,20 @@ export type AggregateOf<
       cardinality: {
         value: number;
       };
+      change_point: {
+        bucket?: {
+          key: string;
+        };
+        type: Record<
+          string,
+          {
+            change_point?: number;
+            r_value?: number;
+            trend?: string;
+            p_value: number;
+          }
+        >;
+      };
       children: {
         doc_count: number;
       } & SubAggregateOf<TAggregationContainer, TDocument>;
@@ -579,7 +593,8 @@ export type AggregateOf<
 
 export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
-    ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
+    ? // @ts-expect-error not sure how to fix this, anything I've tried causes errors upstream - Dario
+      AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
@@ -630,3 +645,30 @@ export type InferSearchResponseOf<
         >;
       };
   };
+
+export interface ESQLColumn {
+  name: string;
+  type: string;
+}
+
+export type ESQLRow = unknown[];
+
+export interface ESQLSearchReponse {
+  columns: ESQLColumn[];
+  // In case of ?drop_null_columns in the query, then
+  // all_columns will have available and empty fields
+  // while columns only the available ones (non nulls)
+  all_columns?: ESQLColumn[];
+  values: ESQLRow[];
+}
+
+export interface ESQLSearchParams {
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
+  query: string;
+  filter?: unknown;
+  locale?: string;
+  dropNullColumns?: boolean;
+}

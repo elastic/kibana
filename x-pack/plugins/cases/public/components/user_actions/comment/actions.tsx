@@ -8,7 +8,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import type { CommentResponseActionsType } from '../../../../common/api';
+import type { ActionsAttachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
@@ -21,7 +21,7 @@ type BuilderArgs = Pick<
   UserActionBuilderArgs,
   'userAction' | 'actionsNavigation' | 'userProfiles'
 > & {
-  comment: SnakeToCamelCase<CommentResponseActionsType>;
+  comment: SnakeToCamelCase<ActionsAttachment>;
 };
 
 export const createActionAttachmentUserActionBuilder = ({
@@ -30,8 +30,6 @@ export const createActionAttachmentUserActionBuilder = ({
   comment,
   actionsNavigation,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
   build: () => {
     const actionIconName = comment.actions.type === 'isolate' ? 'lock' : 'lockOpen';
     return [

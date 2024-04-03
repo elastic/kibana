@@ -40,7 +40,6 @@
     "@kbn/std",
     "@kbn/es-query",
     "@kbn/ml-agg-utils",
-    "@kbn/utility-types",
     "@kbn/ml-string-hash",
     "@kbn/ui-theme",
     "@kbn/field-types",
@@ -66,7 +65,16 @@
     "@kbn/ml-date-utils",
     "@kbn/saved-search-plugin",
     "@kbn/unified-field-list",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/content-management-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-plugins-server",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/ml-data-view-utils",
+    "@kbn/ml-creation-wizard-utils",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/code-editor",
+    "@kbn/rule-data-utils"
   ],
   "exclude": [
     "target/**/*",

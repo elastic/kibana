@@ -1,6 +1,6 @@
 post:
   summary: Runs a connector.
-  operationId: runConnector
+  operationId: runConnectorWithSpaceId
   description: >
     You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
     You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
@@ -16,32 +16,7 @@ post:
     content:
       application/json:
         schema:
-          title: Run connector request body properties
-          description: The properties vary depending on the connector type.
-          type: object
-          required: 
-            - params
-          properties:
-            params:
-              oneOf:
-                - $ref: '../components/schemas/run_connector_params_documents.yaml'
-                - $ref: '../components/schemas/run_connector_params_level_message.yaml'
-                - title: Subaction parameters
-                  description: Test an action that involves a subaction.
-                  oneOf:
-                    - $ref: '../components/schemas/run_connector_subaction_addevent.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_closealert.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_createalert.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_fieldsbyissuetype.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_getchoices.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_getfields.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_getincident.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_issue.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_issues.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_issuetypes.yaml'
-                    - $ref: '../components/schemas/run_connector_subaction_pushtoservice.yaml'
-                  discriminator:
-                    propertyName: subAction     
+          $ref: '../components/schemas/run_connector_request.yaml' 
         examples:
           runIndexConnectorRequest:
             $ref: '../components/examples/run_index_connector_request.yaml'
@@ -51,6 +26,8 @@ post:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
           runServiceNowITOMConnectorRequest:
             $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
+          runSlackConnectorRequest:
+            $ref: '../components/examples/run_slack_api_connector_request.yaml'
           runSwimlaneConnectorRequest:
             $ref: '../components/examples/run_swimlane_connector_request.yaml'
   responses:
@@ -76,6 +53,10 @@ post:
                     description: An array of information returned from the action.
                     items:
                       type: object
+              message:
+                type: string
+              service_message:
+                type: string
               status:
                 type: string
                 description: The status of the action.
@@ -91,11 +72,9 @@ post:
               $ref: '../components/examples/run_server_log_connector_response.yaml'
             runServiceNowITOMConnectorResponse:
               $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
+            runSlackConnectorResponse:
+              $ref: '../components/examples/run_slack_api_connector_response.yaml'
             runSwimlaneConnectorResponse:
               $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

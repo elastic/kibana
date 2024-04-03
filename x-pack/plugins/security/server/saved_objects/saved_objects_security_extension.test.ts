@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  SavedObjectReferenceWithContext,
+  SavedObjectsClient,
+  SavedObjectsFindResult,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   AuthorizeBulkGetObject,
@@ -14,21 +20,17 @@ import type {
   BulkResolveError,
 } from '@kbn/core-saved-objects-server';
 import type {
-  SavedObjectReferenceWithContext,
-  SavedObjectsClient,
-  SavedObjectsFindResult,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/server';
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
-import { auditLoggerMock } from '../audit/mocks';
-import type { CheckSavedObjectsPrivileges } from '../authorization';
-import { Actions } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 import {
   AuditAction,
   SavedObjectsSecurityExtension,
   SecurityAction,
 } from './saved_objects_security_extension';
+import { auditLoggerMock } from '../audit/mocks';
+import { Actions } from '../authorization';
 
 const checkAuthorizationSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,

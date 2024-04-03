@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
@@ -41,7 +42,9 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   baseline,
 }) => {
   const [currentClass, setCurrentClass] = useState<string>(
-    getStringBasedClassName(topClasses[0].class_name)
+    Array.isArray(topClasses) && topClasses.length > 0
+      ? getStringBasedClassName(topClasses[0].class_name)
+      : ''
   );
   const selectedClass = topClasses.find(
     (t) => getStringBasedClassName(t.class_name) === getStringBasedClassName(currentClass)

@@ -21,6 +21,9 @@
     "@kbn/utility-types",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/ebt-tools",
+    "@kbn/core-notifications-browser",
+    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

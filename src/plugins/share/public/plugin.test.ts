@@ -22,16 +22,26 @@ describe('SharePlugin', () => {
   describe('setup', () => {
     test('wires up and returns registry', async () => {
       const coreSetup = coreMock.createSetup();
-      const setup = await new SharePlugin(coreMock.createPluginInitializerContext()).setup(
-        coreSetup
-      );
+      const setup = new SharePlugin(
+        coreMock.createPluginInitializerContext({
+          new_version: {
+            enabled: false,
+          },
+        })
+      ).setup(coreSetup);
       expect(registryMock.setup).toHaveBeenCalledWith();
       expect(setup.register).toBeDefined();
     });
 
     test('registers redirect app', async () => {
       const coreSetup = coreMock.createSetup();
-      await new SharePlugin(coreMock.createPluginInitializerContext()).setup(coreSetup);
+      await new SharePlugin(
+        coreMock.createPluginInitializerContext({
+          new_version: {
+            enabled: false,
+          },
+        })
+      ).setup(coreSetup);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'short_url_redirect',
@@ -44,7 +54,13 @@ describe('SharePlugin', () => {
     describe('share menu', () => {
       test('wires up and returns show function, but not registry', async () => {
         const coreSetup = coreMock.createSetup();
-        const service = new SharePlugin(coreMock.createPluginInitializerContext());
+        const service = new SharePlugin(
+          coreMock.createPluginInitializerContext({
+            new_version: {
+              enabled: false,
+            },
+          })
+        );
         await service.setup(coreSetup);
         const start = await service.start({} as CoreStart);
         expect(registryMock.start).toHaveBeenCalled();
@@ -54,6 +70,8 @@ describe('SharePlugin', () => {
           expect.objectContaining({
             getShareMenuItems: expect.any(Function),
           }),
+          true, // disableEmbed - true because buildFlavor === 'serverless'
+          expect.anything(),
           undefined
         );
         expect(start.toggleShareContextMenu).toBeDefined();
@@ -61,7 +79,13 @@ describe('SharePlugin', () => {
 
       test('passes anonymous access service provider to the share menu manager when it is available', async () => {
         const coreSetup = coreMock.createSetup();
-        const service = new SharePlugin(coreMock.createPluginInitializerContext());
+        const service = new SharePlugin(
+          coreMock.createPluginInitializerContext({
+            new_version: {
+              enabled: false,
+            },
+          })
+        );
         const setup = await service.setup(coreSetup);
         const anonymousAccessServiceProvider = () => anonymousAccessMock.create();
         setup.setAnonymousAccessServiceProvider(anonymousAccessServiceProvider);
@@ -73,6 +97,8 @@ describe('SharePlugin', () => {
           expect.objectContaining({
             getShareMenuItems: expect.any(Function),
           }),
+          true, // disableEmbed - true because buildFlavor === 'serverless'
+          expect.anything(),
           anonymousAccessServiceProvider
         );
         expect(start.toggleShareContextMenu).toBeDefined();

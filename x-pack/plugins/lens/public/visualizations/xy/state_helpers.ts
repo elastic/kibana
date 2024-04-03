@@ -10,13 +10,13 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import {
   EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { v4 as uuidv4 } from 'uuid';
-import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import { validateQuery } from '@kbn/visualization-ui-components/public';
+import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
 import { FramePublicAPI, DatasourcePublicAPI, AnnotationGroups } from '../../types';
 import {
@@ -187,6 +187,11 @@ export function getPersistableState(state: XYState) {
         } else {
           const persistableLayer: XYPersistedLinkedByValueAnnotationLayerConfig = {
             persistanceType: 'linked',
+            cachedMetadata: layer.cachedMetadata || {
+              title: layer.__lastSaved.title,
+              description: layer.__lastSaved.description,
+              tags: layer.__lastSaved.tags,
+            },
             layerId: layer.layerId,
             layerType: layer.layerType,
             annotationGroupRef: referenceName,
@@ -298,6 +303,7 @@ export function injectReferences(
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
               annotations: cloneDeep(persistedLayer.annotations),
+              cachedMetadata: persistedLayer.cachedMetadata,
             };
           }
         }

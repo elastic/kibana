@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
 
 import type { CallOutProps } from './callout';
 import { CallOut } from './callout';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
-import { TestProviders } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { noCasesSettingsPermission, createAppMockRenderer } from '../../../common/mock';
+import userEvent from '@testing-library/user-event';
 
 describe('Callout', () => {
+  let appMockRenderer: AppMockRenderer;
+
   const handleButtonClick = jest.fn();
   const defaultProps: CallOutProps = {
     id: 'md5-hex',
@@ -31,50 +35,19 @@ describe('Callout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRenderer = createAppMockRenderer();
   });
 
   it('It renders the callout', () => {
-    const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="callout-onclick-md5-hex"]`).exists()).toBeTruthy();
+    appMockRenderer.render(<CallOut {...defaultProps} />);
+    expect(screen.getByTestId('case-callout-md5-hex')).toBeInTheDocument();
+    expect(screen.getByTestId('callout-messages-md5-hex')).toBeInTheDocument();
+    expect(screen.getByTestId('callout-onclick-md5-hex')).toBeInTheDocument();
   });
 
   it('does not shows any messages when the list is empty', () => {
-    const wrapper = mount(<CallOut {...defaultProps} messages={[]} />);
-    expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeFalsy();
-  });
-
-  it('transform the button color correctly - primary', () => {
-    const wrapper = mount(<CallOut {...defaultProps} />);
-    const className =
-      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
-      '';
-    expect(className.includes('primary')).toBeTruthy();
-  });
-
-  it('transform the button color correctly - success', () => {
-    const wrapper = mount(<CallOut {...defaultProps} type={'success'} />);
-    const className =
-      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
-      '';
-    expect(className.includes('success')).toBeTruthy();
-  });
-
-  it('transform the button color correctly - warning', () => {
-    const wrapper = mount(<CallOut {...defaultProps} type={'warning'} />);
-    const className =
-      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
-      '';
-    expect(className.includes('warning')).toBeTruthy();
-  });
-
-  it('transform the button color correctly - danger', () => {
-    const wrapper = mount(<CallOut {...defaultProps} type={'danger'} />);
-    const className =
-      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
-      '';
-    expect(className.includes('danger')).toBeTruthy();
+    appMockRenderer.render(<CallOut {...defaultProps} messages={[]} />);
+    expect(screen.queryByTestId('callout-messages-md5-hex')).not.toBeInTheDocument();
   });
 
   it('does not show the button when case is closed error is present', () => {
@@ -89,15 +62,9 @@ describe('Callout', () => {
       ],
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <CallOut {...props} />
-      </TestProviders>
-    );
+    appMockRenderer.render(<CallOut {...props} />);
 
-    expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
-      false
-    );
+    expect(screen.queryByTestId('callout-onclick-md5-hex')).not.toBeInTheDocument();
   });
 
   it('does not show the button when license error is present', () => {
@@ -106,22 +73,27 @@ describe('Callout', () => {
       hasLicenseError: true,
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <CallOut {...props} />
-      </TestProviders>
-    );
+    appMockRenderer.render(<CallOut {...props} />);
 
-    expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
-      false
-    );
+    expect(screen.queryByTestId('callout-onclick-md5-hex')).not.toBeInTheDocument();
+  });
+
+  it('does not show the button with no settings permissions', () => {
+    appMockRenderer = createAppMockRenderer({ permissions: noCasesSettingsPermission() });
+
+    appMockRenderer.render(<CallOut {...defaultProps} />);
+
+    expect(screen.queryByTestId('callout-onclick-md5-hex')).not.toBeInTheDocument();
   });
 
   // use this for storage if we ever want to bring that back
   it('onClick passes id and type', () => {
-    const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="callout-onclick-md5-hex"]`).exists()).toBeTruthy();
-    wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).simulate('click');
+    appMockRenderer.render(<CallOut {...defaultProps} />);
+
+    expect(screen.getByTestId('callout-onclick-md5-hex')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('callout-onclick-md5-hex'));
+
     expect(handleButtonClick.mock.calls[0][1]).toEqual('md5-hex');
     expect(handleButtonClick.mock.calls[0][2]).toEqual('primary');
   });

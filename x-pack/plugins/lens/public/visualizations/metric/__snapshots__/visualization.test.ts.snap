@@ -55,6 +55,7 @@ Object {
       "groupId": "max",
       "groupLabel": "Maximum value",
       "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
+      "isHidden": false,
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -100,6 +101,10 @@ Array [
     "dataType": "number",
     "isBucketed": false,
   },
+  Object {
+    "dataType": "string",
+    "isBucketed": false,
+  },
 ]
 `;
 
@@ -109,6 +114,10 @@ Array [
     "dataType": "number",
     "isBucketed": false,
   },
+  Object {
+    "dataType": "string",
+    "isBucketed": false,
+  },
 ]
 `;
 
@@ -116,6 +125,10 @@ exports[`metric visualization dimension groups configuration primary layer opera
 Array [
   Object {
     "dataType": "number",
+    "isBucketed": false,
+  },
+  Object {
+    "dataType": "string",
     "isBucketed": false,
   },
 ]

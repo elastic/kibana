@@ -5,46 +5,38 @@
  * 2.0.
  */
 
-import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { History } from 'history';
 import type { FC } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
-
-import { getComments } from '../assistant/get_comments';
-import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from '../assistant/helpers';
-import { useConversationStore } from '../assistant/use_conversation_store';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
 import type { State } from '../common/store';
-import { ASSISTANT_TITLE } from './translations';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from '../assistant/content/anonymization';
-import { PROMPT_CONTEXTS } from '../assistant/content/prompt_contexts';
-import { BASE_SECURITY_QUICK_PROMPTS } from '../assistant/content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from '../assistant/content/prompts/system';
-import { useAnonymizationStore } from '../assistant/use_anonymization_store';
+import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
+import { AssistantProvider } from '../assistant/provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -52,84 +44,61 @@ interface StartAppComponent {
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
   history,
-  setHeaderActionMenu,
   onAppLeave,
   store,
   theme$,
 }) => {
+  const services = useKibana().services;
   const {
     i18n,
+    analytics,
     application: { capabilities },
-    http,
-    triggersActionsUi: { actionTypeRegistry },
     uiActions,
-  } = useKibana().services;
+    upselling,
+  } = services;
 
-  const { conversations, setConversations } = useConversationStore();
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAnonymizationStore();
+  const darkMode = useDarkMode();
 
-  const getInitialConversation = useCallback(() => {
-    return conversations;
-  }, [conversations]);
-
-  const nameSpace = `${APP_ID}.${LOCAL_STORAGE_KEY}`;
-
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   return (
-    <EuiErrorBoundary>
-      <i18n.Context>
-        <ManageGlobalToaster>
-          <ReduxStoreProvider store={store}>
-            <KibanaThemeProvider theme$={theme$}>
-              <EuiThemeProvider darkMode={darkMode}>
-                <AssistantProvider
-                  actionTypeRegistry={actionTypeRegistry}
-                  augmentMessageCodeBlocks={augmentMessageCodeBlocks}
-                  defaultAllow={defaultAllow}
-                  defaultAllowReplacement={defaultAllowReplacement}
-                  baseAllow={DEFAULT_ALLOW}
-                  baseAllowReplacement={DEFAULT_ALLOW_REPLACEMENT}
-                  basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-                  baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
-                  baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}
-                  getInitialConversations={getInitialConversation}
-                  getComments={getComments}
-                  http={http}
-                  nameSpace={nameSpace}
-                  setConversations={setConversations}
-                  setDefaultAllow={setDefaultAllow}
-                  setDefaultAllowReplacement={setDefaultAllowReplacement}
-                  title={ASSISTANT_TITLE}
-                >
+    <KibanaErrorBoundaryProvider analytics={analytics}>
+      <KibanaErrorBoundary>
+        <i18n.Context>
+          <ManageGlobalToaster>
+            <ReduxStoreProvider store={store}>
+              <KibanaThemeProvider theme$={theme$}>
+                <EuiThemeProvider darkMode={darkMode}>
                   <MlCapabilitiesProvider>
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>
-                        <ReactQueryClientProvider>
-                          <CellActionsProvider
-                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                          >
-                            <PageRouter
-                              history={history}
-                              onAppLeave={onAppLeave}
-                              setHeaderActionMenu={setHeaderActionMenu}
+                        <NavigationProvider core={services}>
+                          <ReactQueryClientProvider>
+                            <CellActionsProvider
+                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                             >
-                              {children}
-                            </PageRouter>
-                          </CellActionsProvider>
-                        </ReactQueryClientProvider>
+                              <UpsellingProvider upsellingService={upselling}>
+                                <DiscoverInTimelineContextProvider>
+                                  <AssistantProvider>
+                                    <PageRouter history={history} onAppLeave={onAppLeave}>
+                                      {children}
+                                    </PageRouter>
+                                  </AssistantProvider>
+                                </DiscoverInTimelineContextProvider>
+                              </UpsellingProvider>
+                            </CellActionsProvider>
+                          </ReactQueryClientProvider>
+                        </NavigationProvider>
                       </ManageUserInfo>
                     </UserPrivilegesProvider>
                   </MlCapabilitiesProvider>
-                </AssistantProvider>
-              </EuiThemeProvider>
-            </KibanaThemeProvider>
-            <ErrorToastDispatcher />
-            <GlobalToaster />
-          </ReduxStoreProvider>
-        </ManageGlobalToaster>
-      </i18n.Context>
-    </EuiErrorBoundary>
+                </EuiThemeProvider>
+              </KibanaThemeProvider>
+              <ErrorToastDispatcher />
+              <GlobalToaster />
+            </ReduxStoreProvider>
+          </ManageGlobalToaster>
+        </i18n.Context>
+      </KibanaErrorBoundary>
+    </KibanaErrorBoundaryProvider>
   );
 };
 
@@ -140,7 +109,6 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
   theme$: AppMountParameters['theme$'];
 }
@@ -150,7 +118,6 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
-  setHeaderActionMenu,
   store,
   theme$,
 }) => {
@@ -164,13 +131,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       }}
     >
       <CloudProvider>
-        <StartApp
-          history={history}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          store={store}
-          theme$={theme$}
-        >
+        <StartApp history={history} onAppLeave={onAppLeave} store={store} theme$={theme$}>
           {children}
         </StartApp>
       </CloudProvider>

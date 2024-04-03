@@ -52,9 +52,16 @@ Kibana users benefit greatly from autocomplete suggestions since not all Elastic
 Autocomplete definitions are all created in the form of javascript objects loaded from `json` and `js` files. 
 
 ### Creating definitions
-The [`generated`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch REST API specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/README.md) file for more information on the `spec-to-console` script. 
+The [`generated`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
 
-Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides) folder contain fixes for generated files and additions for request body parameters.   
+Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
+are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
+should be addressed at the source. That means this should be fixed in Elasticsearch specifications and then 
+autocomplete definitions can be re-generated with the script. 
+
+If there are any endpoints missing completely from the `generated` folder, this should also be addressed at the source, i.e. 
+Elasticsearch specifications. If for some reason, that is not possible, then additional definitions files 
+can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/manual)).
 
 ### Top level keys
 Use following top level keys in the definitions objects.
@@ -66,7 +73,8 @@ Url to Elasticsearch REST API documentation for the endpoint (If the url contain
 Allowed http methods (`GET`, `POST` etc)
 
 #### `patterns`
-Array of API endpoints that contain variables like `{indices}` or `{fields}`. For example, `{indices}/_rollup/{rollup_index}`. See the [Variables](#variables) section below for more info.
+Array of API endpoints that contain dynamic parameters like `{index}` or `{fields}`. For example, `{index}/_rollup/{rollup_index}`. Dynamic parameters used in patterns are not always defined. For example, a pattern `_ilm/policy/{policy}` indicates that any string can be used as policy name. 
+See the [Dynamic parameters](#dynamic-parameters) section below for more info about dynamic parameters defined in the autocomplete engine, such as `{index}`.
 
 #### `url_params`
 Query url parameters and their values. See the [Query url parameters](#query-url-parameters) section below for more info. An example: 
@@ -89,6 +97,15 @@ Query url parameters and their values. See the [Query url parameters](#query-url
 
 #### `priority`
 Value for selecting one autocomplete definition, if several configurations are loaded from the files. The highest number takes precedence.
+
+#### `availability`
+A property that describes if an endpoint is available in stack and serverless environments. Endpoints with a `false` boolean value are filtered out in the corresponding environment. An example of an endpoint that is not available in the serverless environment:
+```json
+"availability": {
+  "stack": true,
+  "serverless": false
+}
+```
 
 #### `data_autocomplete_rules`
 Request body parameters and their values. Only used in `overrides` files because REST API specs don't contain any information about body request parameters.
@@ -134,7 +151,7 @@ GET /_some_endpoint?expand_wildcards=hi
 ```
 "hidden" is displayed for autocompletion. 
 
-Variables such as `{indices}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Variables](#variables) section below for more information.
+Dynamic parameters such as `{index}` or `{fields}` are accepted both as an url parameter and its value in the configuration object. See the [Dynamic parameters](#dynamic-parameters) section below for more information.
 
 ### Request body parameters
 Request body parameters are configured in form of an object, for example: 
@@ -168,7 +185,20 @@ PUT /_some_endpoint
 ```
 Object's values can contain objects for nested configuration because the engine can work recursively while searching for autocomplete suggestions. 
 
-Following values can be used in the configuration object: 
+Upper case strings are used to indicate that the property's name is a dynamic value that the user needs to define. For example, the autocomplete suggestion for aggregations displays the following object: 
+```json
+{
+  "aggs": {
+    "NAME": {
+      "AGG_TYPE": {}
+    }
+  }
+}
+```
+Both upper case strings `NAME` and `AGG_TYPE` indicate that those values need to be filled in by the user.
+
+**Following values can be used in the configuration object:**
+
 #### One value from the list (`__one_of: [..., ...]`)
 Use this configuration for a parameter with a list of allowed values, for example types of snapshot repository: 
 ```
@@ -255,11 +285,24 @@ For example:
 To provide a different set of autocomplete suggestions based on the value configured in the request. For example, when creating a snapshot repository of different types (`fs`, `url` etc) different properties are displayed in the suggestions list based on the type. See [snapshot.create_repository.json](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides/snapshot.create_repository.json) for an example.
 
 
-### Variables
+### Dynamic parameters
 Some autocomplete definitions need to be configured with dynamic values that can't be hard coded into a json or js file, for example a list of indices in the cluster. 
-A list of variables is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/kb/kb.js) file. The values of these variables are assigned dynamically for every cluster. 
-Use these variables with curly braces, for example `{indices}`, `{types}`, `{id}`, `{username}`, `{template}`, `{nodes}` etc.
+A list of dynamic parameters is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/kb/kb.js) file. The values of these parameters are assigned dynamically for every cluster. 
+Use these dynamic parameters with curly braces, for example `{index}`, `{fields}`, `{template}` etc.
 
+Dynamic parameters can be used in url patterns, for example `{index}/_search`. Url patterns can also contain unknown parameters just to indicate that any value can be used in the url, for example in the url `/_ilm/policy/{policy}` the value for `{policy}` can be any accepted policy name and the dynamic parameter `{policy}` is not defined in the autocomplete engine. 
+
+For request body parameters, only known dynamic properties are allowed. For example: 
+```json
+{
+  "data_autocomplete_rules": {
+    "query": {
+      "field": "{field}"
+    }
+  }
+}
+```
+If an unknown dynamic parameter (for example, `{my_param}`) is used in request body parameters, a warning will be logged in the browser: `[Console] no factory found for 'my_param'`.
 
 ### Architecture changes in 8.3 release (timeline: 07-04-2022 - 19-06-2022)
 One of the main changes in architecture is refactoring the retrieval of autocomplete suggestions. Console used to send a separate request to ES for each autocomplete entity (mappings, aliases, templates, data-streams etc) to retrieve the autocomplete suggestions via the original [hand-rolled ES proxy](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/routes/api/console/proxy/create_handler.ts). This had a few drawbacks:

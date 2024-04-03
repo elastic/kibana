@@ -12,15 +12,13 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_index.mock';
 
+import { SyncStatus, IngestionMethod, IngestionStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
 
-import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
 import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
-
-import { IngestionMethod, IngestionStatus } from '../../types';
 
 import { indexToViewIndex } from '../../utils/indices';
 

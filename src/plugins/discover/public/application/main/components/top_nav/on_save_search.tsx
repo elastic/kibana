@@ -12,9 +12,10 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DOC_TABLE_LEGACY } from '../../../../../common';
+import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 
 async function saveDataSource({
   savedSearch,
@@ -79,12 +80,14 @@ export async function onSaveSearch({
   savedSearch,
   services,
   state,
+  initialCopyOnSave,
   onClose,
   onSaveCb,
 }: {
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
+  initialCopyOnSave?: boolean;
   onClose?: () => void;
   onSaveCb?: () => void;
 }) {
@@ -110,6 +113,7 @@ export async function onSaveSearch({
     const currentTitle = savedSearch.title;
     const currentTimeRestore = savedSearch.timeRestore;
     const currentRowsPerPage = savedSearch.rowsPerPage;
+    const currentSampleSize = savedSearch.sampleSize;
     const currentDescription = savedSearch.description;
     const currentTags = savedSearch.tags;
     savedSearch.title = newTitle;
@@ -118,6 +122,15 @@ export async function onSaveSearch({
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
       : state.appState.getState().rowsPerPage;
+
+    // save the custom value or reset it if it's invalid
+    const appStateSampleSize = state.appState.getState().sampleSize;
+    const allowedSampleSize = getAllowedSampleSize(appStateSampleSize, uiSettings);
+    savedSearch.sampleSize =
+      appStateSampleSize && allowedSampleSize === appStateSampleSize
+        ? appStateSampleSize
+        : undefined;
+
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
@@ -144,6 +157,7 @@ export async function onSaveSearch({
       savedSearch.title = currentTitle;
       savedSearch.timeRestore = currentTimeRestore;
       savedSearch.rowsPerPage = currentRowsPerPage;
+      savedSearch.sampleSize = currentSampleSize;
       savedSearch.description = currentDescription;
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
@@ -161,9 +175,11 @@ export async function onSaveSearch({
       services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
+      initialCopyOnSave={initialCopyOnSave}
       description={savedSearch.description}
       timeRestore={savedSearch.timeRestore}
       tags={savedSearch.tags ?? []}
+      managed={savedSearch.managed}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
@@ -176,11 +192,13 @@ const SaveSearchObjectModal: React.FC<{
   services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
   description?: string;
   timeRestore?: boolean;
   tags: string[];
   onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
   onClose: () => void;
+  managed: boolean;
 }> = ({
   isTimeBased,
   services,
@@ -188,9 +206,11 @@ const SaveSearchObjectModal: React.FC<{
   description,
   tags,
   showCopyOnSave,
+  initialCopyOnSave,
   timeRestore: savedTimeRestore,
   onSave,
   onClose,
+  managed,
 }) => {
   const { savedObjectsTagging } = services;
   const [timeRestore, setTimeRestore] = useState<boolean>(
@@ -251,6 +271,7 @@ const SaveSearchObjectModal: React.FC<{
     <SavedObjectSaveModal
       title={title}
       showCopyOnSave={showCopyOnSave}
+      initialCopyOnSave={initialCopyOnSave}
       description={description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
         defaultMessage: 'search',
@@ -259,6 +280,14 @@ const SaveSearchObjectModal: React.FC<{
       options={options}
       onSave={onModalSave}
       onClose={onClose}
+      mustCopyOnSaveMessage={
+        managed
+          ? i18n.translate('discover.localMenu.mustCopyOnSave', {
+              defaultMessage:
+                'Elastic manages this saved search. Save any changes to a new saved search.',
+            })
+          : undefined
+      }
     />
   );
 };

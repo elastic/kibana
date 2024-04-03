@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@kbn/ecs';
+import { EcsFlat, EcsVersion } from '@elastic/ecs';
 
 import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { EMPTY_STAT } from '../../../../helpers';
@@ -97,11 +97,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
         httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -144,11 +147,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController,
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
         httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -166,11 +172,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata: null, // <--
         formatBytes,
         formatNumber,
         httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -219,11 +228,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
         httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -270,11 +282,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController: new AbortController(),
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
         httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,
@@ -329,11 +344,14 @@ describe('checkIndex', () => {
 
       await checkIndex({
         abortController,
+        batchId: 'batch-id',
+        checkAllStartTime: Date.now(),
         ecsMetadata,
         formatBytes,
         formatNumber,
         httpFetch,
         indexName,
+        isLastCheck: false,
         onCheckCompleted,
         pattern,
         version: EcsVersion,

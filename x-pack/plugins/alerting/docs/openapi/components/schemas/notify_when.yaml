@@ -1,11 +1,13 @@
 type: string
 description: >
+  Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead.
   Indicates how often alerts generate actions.
-  Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.
-  NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action.
+  NOTE: You cannot specify `notify_when` at both the rule and action level.
   If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
 enum:
   - onActionGroupChange
   - onActiveAlert
   - onThrottleInterval
-example: onActiveAlert
+deprecated: true
+examples:
+  - onActiveAlert

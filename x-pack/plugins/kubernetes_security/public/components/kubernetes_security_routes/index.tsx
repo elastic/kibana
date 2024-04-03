@@ -8,14 +8,7 @@
 import React, { useCallback } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -45,7 +38,6 @@ import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { ChartsToggle } from '../charts_toggle';
 import {
-  BETA,
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
@@ -55,6 +47,7 @@ import {
 import { ContainerNameWidget } from '../container_name_widget';
 
 const KubernetesSecurityRoutesComponent = ({
+  dataViewId,
   filter,
   indexPattern,
   globalFilter,
@@ -101,10 +94,7 @@ const KubernetesSecurityRoutesComponent = ({
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1 css={styles.titleText}>
-                {KUBERNETES_TITLE}
-                <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-              </h1>
+              <h1 css={styles.titleText}>{KUBERNETES_TITLE}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
@@ -169,6 +159,7 @@ const KubernetesSecurityRoutesComponent = ({
                 <EuiFlexGroup css={styles.widgetsBottomSpacing}>
                   <EuiFlexItem>
                     <PercentWidget
+                      dataViewId={dataViewId}
                       title={
                         <>
                           <EuiText size="xs" css={styles.percentageChartTitle}>
@@ -261,6 +252,7 @@ const KubernetesSecurityRoutesComponent = ({
                           shouldHideFilter: true,
                         },
                       }}
+                      dataViewId={dataViewId}
                       groupedBy={ENTRY_LEADER_USER_ID}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceRootAggs}
@@ -270,6 +262,7 @@ const KubernetesSecurityRoutesComponent = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.rightWidgetsGroup}>
                 <ContainerNameWidget
+                  dataViewId={dataViewId}
                   widgetKey="containerNameSessions"
                   indexPattern={indexPattern}
                   globalFilter={globalFilter}

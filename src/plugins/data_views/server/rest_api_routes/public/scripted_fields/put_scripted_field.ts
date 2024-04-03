@@ -70,14 +70,8 @@ export const registerPutScriptedFieldRoute = (
             throw new Error('Only scripted fields can be put.');
           }
 
-          const indexPattern = await indexPatternsService.get(id);
-
-          const oldFieldObject = indexPattern.fields.getByName(field.name);
-          if (!!oldFieldObject) {
-            indexPattern.fields.remove(oldFieldObject);
-          }
-
-          indexPattern.fields.add({
+          const indexPattern = await indexPatternsService.getDataViewLazy(id);
+          indexPattern.upsertScriptedField({
             ...field,
             runtimeField: undefined, // make sure not creating runttime field with scripted field endpoint
             aggregatable: true,
@@ -86,12 +80,12 @@ export const registerPutScriptedFieldRoute = (
 
           await indexPatternsService.updateSavedObject(indexPattern);
 
-          const fieldObject = indexPattern.fields.getByName(field.name);
+          const fieldObject = await indexPattern.getFieldByName(field.name);
           if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
           const body: IndexPatternsRuntimeResponseType = {
             field: fieldObject.toSpec(),
-            index_pattern: indexPattern.toSpec(),
+            index_pattern: await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({

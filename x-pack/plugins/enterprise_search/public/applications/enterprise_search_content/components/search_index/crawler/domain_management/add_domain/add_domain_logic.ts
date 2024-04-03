@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_META } from '../../../../../../shared/constants';
 import { generateEncodedPath } from '../../../../../../shared/encode_path_params';
 import { flashSuccessToast } from '../../../../../../shared/flash_messages';
 import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messages/handle_api_errors';
@@ -28,6 +29,7 @@ import {
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
 import { IndexNameLogic } from '../../../index_name_logic';
 import { CrawlerLogic } from '../../crawler_logic';
+import { DomainManagementLogic } from '../domain_management_logic';
 
 import {
   domainValidationFailureResultChange,
@@ -249,9 +251,12 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
           domainId: domain.id,
           indexName,
+          tabId: 'domain_management',
         })
       );
       CrawlerLogic.actions.fetchCrawlerData();
+      DomainManagementLogic.actions.getDomains(DEFAULT_META);
+      actions.clearDomainFormInputValue();
     },
     performDomainValidationStep: async ({ stepName, checks }) => {
       const { http } = HttpLogic.values;

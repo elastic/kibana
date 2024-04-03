@@ -19,11 +19,12 @@ import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import { convertPanelMapToSavedPanels } from '../../../../common';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator/locator';
+import { DashboardLocatorParams } from '../../../dashboard_container';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -50,7 +51,7 @@ export function ShowShareModal({
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
-    dashboardSessionStorage,
+    dashboardBackup,
     data: {
       query: {
         timefilter: {
@@ -58,7 +59,6 @@ export function ShowShareModal({
         },
       },
     },
-    initializerContext: { kibanaVersion },
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -121,8 +121,8 @@ export function ShowShareModal({
     );
   };
 
-  let unsavedStateForLocator: DashboardAppLocatorParams = {};
-  const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
+  let unsavedStateForLocator: DashboardLocatorParams = {};
+  const unsavedDashboardState = dashboardBackup.getState(savedObjectId);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
@@ -131,9 +131,8 @@ export function ShowShareModal({
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
-            unsavedDashboardState.panels,
-            kibanaVersion
-          ) as DashboardAppLocatorParams['panels'])
+            unsavedDashboardState.panels
+          ) as DashboardLocatorParams['panels'])
         : undefined,
 
       // options
@@ -145,7 +144,7 @@ export function ShowShareModal({
     };
   }
 
-  const locatorParams: DashboardAppLocatorParams = {
+  const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally

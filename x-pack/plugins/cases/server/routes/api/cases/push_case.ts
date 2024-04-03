@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { decodeWithExcessOrThrow, CasePushRequestParamsRt } from '../../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_PUSH_URL } from '../../../../common/constants';
 import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { caseApiV1 } from '../../../../common/types/api';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const pushCaseRoute: CaseRoute = createCasesRoute({
   method: 'post',
@@ -19,13 +21,14 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const params = decodeWithExcessOrThrow(CasePushRequestParamsRt)(request.params);
+      const params = decodeWithExcessOrThrow(caseApiV1.CasePushRequestParamsRt)(request.params);
+      const res: caseDomainV1.Case = await casesClient.cases.push({
+        caseId: params.case_id,
+        connectorId: params.connector_id,
+      });
 
       return response.ok({
-        body: await casesClient.cases.push({
-          caseId: params.case_id,
-          connectorId: params.connector_id,
-        }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

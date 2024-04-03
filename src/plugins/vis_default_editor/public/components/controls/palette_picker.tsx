@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { getActivePaletteName } from '@kbn/coloring';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,8 @@ export function PalettePicker<ParamName extends string>({
   paramName,
   setPalette,
 }: PalettePickerProps<ParamName>) {
+  const paletteName = getActivePaletteName(activePalette?.name);
+
   const palettesList: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
     .filter(({ internal }) => !internal)
@@ -35,10 +38,7 @@ export function PalettePicker<ParamName extends string>({
         value: id,
         title,
         type: 'fixed',
-        palette: getCategoricalColors(
-          10,
-          id === activePalette?.name ? activePalette?.params : undefined
-        ),
+        palette: getCategoricalColors(10, id === paletteName ? activePalette?.params : undefined),
       };
     });
 
@@ -61,7 +61,7 @@ export function PalettePicker<ParamName extends string>({
             name: palette?.value ?? DEFAULT_PALETTE,
           });
         }}
-        valueOfSelected={activePalette?.name || DEFAULT_PALETTE}
+        valueOfSelected={paletteName}
         selectionDisplay={'palette'}
       />
     </EuiFormRow>

@@ -9,21 +9,30 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiSelectableOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiScreenReaderOnly,
   EuiSelectable,
+  EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
-import { OptionsListStrings } from './options_list_strings';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
+import { OptionsListStrings } from './options_list_strings';
 
 export const OptionsListPopoverInvalidSelections = () => {
   const optionsList = useOptionsList();
 
-  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
   const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
+
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
+
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -31,10 +40,10 @@ export const OptionsListPopoverInvalidSelections = () => {
     const options: EuiSelectableOption[] = (invalidSelections ?? []).map((key) => {
       return {
         key,
-        label: key,
+        label: fieldFormatter(key),
         checked: 'on',
         className: 'optionsList__selectionInvalid',
-        'data-test-subj': `optionsList-control-ignored-selection-${key}`,
+        'data-test-subj': `optionsList-control-invalid-selection-${key}`,
         prepend: (
           <EuiScreenReaderOnly>
             <div>
@@ -46,7 +55,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       };
     });
     setSelectableOptions(options);
-  }, [invalidSelections]);
+  }, [fieldFormatter, invalidSelections]);
 
   return (
     <>
@@ -54,13 +63,25 @@ export const OptionsListPopoverInvalidSelections = () => {
       <EuiTitle
         size="xxs"
         className="optionsList-control-ignored-selection-title"
-        data-test-subj="optionList__ignoredSelectionLabel"
+        data-test-subj="optionList__invalidSelectionLabel"
       >
-        <label>
-          {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-            invalidSelections?.length ?? 0
-          )}
-        </label>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type="warning"
+              color="warning"
+              title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
+              size="s"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <label>
+              {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+                invalidSelections?.length ?? 0
+              )}
+            </label>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiTitle>
       <EuiSelectable
         aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
@@ -71,7 +92,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          optionsList.dispatch.deselectOption(changedOption.label);
+          optionsList.dispatch.deselectOption(changedOption.key ?? changedOption.label);
         }}
       >
         {(list) => list}

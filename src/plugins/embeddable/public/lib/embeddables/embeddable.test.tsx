@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { skip, take } from 'rxjs/operators';
+import { skip, take } from 'rxjs';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
@@ -40,6 +40,17 @@ class OutputTestEmbeddable extends Embeddable<EmbeddableInput, Output> {
     });
   }
 
+  reload() {}
+}
+
+class PhaseTestEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
+  public readonly type = 'phaseTest';
+  constructor() {
+    super({ id: 'phaseTest', viewMode: ViewMode.VIEW }, {});
+  }
+  public reportsEmbeddableLoad(): boolean {
+    return true;
+  }
   reload() {}
 }
 
@@ -102,6 +113,21 @@ test('updating output state retains instance information', async () => {
   outputTest.updateInput({ viewMode: ViewMode.EDIT });
   expect(outputTest.getOutput().inputUpdatedTimes).toBe(2);
   expect(outputTest.getOutput().testClass).toBeInstanceOf(TestClass);
+});
+
+test('fires phase events when output changes', async () => {
+  const phaseEventTest = new PhaseTestEmbeddable();
+  let phaseEventCount = 0;
+  phaseEventTest.onPhaseChange.subscribe((event) => {
+    if (event) {
+      phaseEventCount++;
+    }
+  });
+  expect(phaseEventCount).toBe(1); // loading is true by default which fires an event.
+  phaseEventTest.updateOutput({ loading: false });
+  expect(phaseEventCount).toBe(2);
+  phaseEventTest.updateOutput({ rendered: true });
+  expect(phaseEventCount).toBe(3);
 });
 
 test('updated$ called after reload and batches input/output changes', async () => {

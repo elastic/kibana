@@ -12,8 +12,8 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -108,9 +108,9 @@ export class SpacesGridPage extends Component<Props, State> {
   public getPageContent() {
     if (!this.props.capabilities.spaces.manage) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiPageSection alignment="center" color="danger">
           <UnauthorizedPrompt />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 

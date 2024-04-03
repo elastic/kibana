@@ -7,6 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import * as Rx from 'rxjs';
 import {
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistry,
@@ -25,6 +26,7 @@ const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> =>
     setup: jest.fn(),
     start: jest.fn(),
     get: jest.fn(() => []),
+    getFeatures$: jest.fn(() => Rx.of([])),
     getSolutions: jest.fn(() => []),
     removeFeature: jest.fn(),
   };

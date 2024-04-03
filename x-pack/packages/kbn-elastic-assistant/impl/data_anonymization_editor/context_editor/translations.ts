@@ -116,6 +116,12 @@ export const SELECTED_FIELDS = (selected: number) =>
     values: { selected },
     defaultMessage: 'Selected {selected} fields',
   });
+export const RESET = i18n.translate(
+  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.resetButton',
+  {
+    defaultMessage: 'Reset',
+  }
+);
 
 export const UNANONYMIZE = i18n.translate(
   'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.unanonymizeAction',

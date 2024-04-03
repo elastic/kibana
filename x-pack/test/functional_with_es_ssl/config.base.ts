@@ -82,7 +82,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           '../alerting_api_integration/common/plugins/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
-          'internalAlertsTable',
+          'globalAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,
@@ -143,6 +143,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               feature: {
                 actions: ['all'],
                 stackAlerts: ['all'],
+                logs: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
                 indexPatterns: ['all'],

@@ -13,7 +13,7 @@
  */
 
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { RuleExecutionStatus } from '../../../../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import {
   formatExecutionEventResponse,
@@ -1328,30 +1328,30 @@ describe('mapRuleStatusToPlatformStatus', () => {
     expect(mapRuleExecutionStatusToPlatformStatus([])).toEqual([]);
   });
 
-  test('should correctly translate RuleExecutionStatus.failed to `failure` platform status', () => {
-    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus.failed])).toEqual([
+  test('should correctly translate RuleExecutionStatusEnum.failed to `failure` platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatusEnum.failed])).toEqual([
       'failure',
     ]);
   });
 
-  test('should correctly translate RuleExecutionStatus.succeeded to `success` platform status', () => {
-    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus.succeeded])).toEqual([
+  test('should correctly translate RuleExecutionStatusEnum.succeeded to `success` platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatusEnum.succeeded])).toEqual([
       'success',
     ]);
   });
 
-  test('should correctly translate RuleExecutionStatus.["going to run"] to empty array platform status', () => {
-    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus['going to run']])).toEqual(
-      []
-    );
+  test('should correctly translate RuleExecutionStatusEnum.["going to run"] to empty array platform status', () => {
+    expect(
+      mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatusEnum['going to run']])
+    ).toEqual([]);
   });
 
   test("should correctly translate multiple RuleExecutionStatus's to platform statuses", () => {
     expect(
       mapRuleExecutionStatusToPlatformStatus([
-        RuleExecutionStatus.succeeded,
-        RuleExecutionStatus.failed,
-        RuleExecutionStatus['going to run'],
+        RuleExecutionStatusEnum.succeeded,
+        RuleExecutionStatusEnum.failed,
+        RuleExecutionStatusEnum['going to run'],
       ]).sort()
     ).toEqual(['failure', 'success']);
   });
@@ -1362,13 +1362,15 @@ describe('mapPlatformStatusToRuleExecutionStatus', () => {
     expect(mapPlatformStatusToRuleExecutionStatus('')).toEqual(undefined);
   });
 
-  test('should correctly translate `failure` platform status to `RuleExecutionStatus.failed`', () => {
-    expect(mapPlatformStatusToRuleExecutionStatus('failure')).toEqual(RuleExecutionStatus.failed);
+  test('should correctly translate `failure` platform status to `RuleExecutionStatusEnum.failed`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('failure')).toEqual(
+      RuleExecutionStatusEnum.failed
+    );
   });
 
-  test('should correctly translate `success` platform status to `RuleExecutionStatus.succeeded`', () => {
+  test('should correctly translate `success` platform status to `RuleExecutionStatusEnum.succeeded`', () => {
     expect(mapPlatformStatusToRuleExecutionStatus('success')).toEqual(
-      RuleExecutionStatus.succeeded
+      RuleExecutionStatusEnum.succeeded
     );
   });
 });

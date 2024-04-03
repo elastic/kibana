@@ -4,13 +4,10 @@
   "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "navigation",
-    "server": false,
+    "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "unifiedSearch"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "optionalPlugins": ["cloud","security"],
+    "requiredPlugins": ["unifiedSearch"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

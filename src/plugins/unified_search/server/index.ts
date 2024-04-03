@@ -8,7 +8,7 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
-import {
+import type {
   UnifiedSearchServerPlugin,
   UnifiedSearchServerPluginSetup,
   UnifiedSearchServerPluginStart,
@@ -21,7 +21,8 @@ import { autocompleteConfigDeprecationProvider } from './config_deprecations';
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
+export async function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  const { UnifiedSearchServerPlugin } = await import('./plugin');
   return new UnifiedSearchServerPlugin(initializerContext);
 }
 
@@ -29,7 +30,7 @@ export type {
   UnifiedSearchServerPluginSetup as PluginSetup,
   UnifiedSearchServerPluginStart as PluginStart,
 };
-export { UnifiedSearchServerPlugin as Plugin };
+export type { UnifiedSearchServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: autocompleteConfigDeprecationProvider,

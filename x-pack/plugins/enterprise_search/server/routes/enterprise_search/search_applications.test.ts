@@ -13,8 +13,13 @@ jest.mock('../../lib/search_applications/field_capabilities', () => ({
 jest.mock('../../lib/search_applications/fetch_indices_stats', () => ({
   fetchIndicesStats: jest.fn(),
 }));
+jest.mock('../../lib/search_applications/fetch_alias_indices', () => ({
+  fetchAliasIndices: jest.fn(),
+}));
+
 import { RequestHandlerContext } from '@kbn/core/server';
 
+import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_indices';
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
 
@@ -49,13 +54,11 @@ describe('engines routes', () => {
     });
 
     it('GET search applications API creates request', async () => {
-      mockClient.asCurrentUser.searchApplication.list.mockImplementation(() => ({}));
+      mockClient.asCurrentUser.searchApplication.list.mockImplementation(() => ({ results: [] }));
       const request = { query: {} };
-      await mockRouter.callRoute({});
+      await mockRouter.callRoute(request);
       expect(mockClient.asCurrentUser.searchApplication.list).toHaveBeenCalledWith(request.query);
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {},
-      });
+      expect(mockRouter.response.ok).toHaveBeenCalled();
     });
 
     it('validates query parameters', () => {
@@ -105,32 +108,40 @@ describe('engines routes', () => {
     });
 
     it('GET search application API creates request', async () => {
-      mockClient.asCurrentUser.searchApplication.get.mockImplementation(() => ({}));
-      await mockRouter.callRoute({
-        params: { engine_name: 'engine-name' },
-      });
-
-      expect(mockClient.asCurrentUser.searchApplication.get).toHaveBeenCalledWith({
-        name: 'engine-name',
-      });
-      const mock = jest.fn();
-
       const fetchIndicesStatsResponse = [
         { count: 5, health: 'green', name: 'test-index-name-1' },
         { count: 10, health: 'yellow', name: 'test-index-name-2' },
         { count: 0, health: 'red', name: 'test-index-name-3' },
       ];
+      const mock = jest.fn();
+      const fetchAliasIndicesResponse = mock([
+        'test-index-name-1',
+        'test-index-name-2',
+        'test-index-name-3',
+      ]);
+
       const engineResult = {
-        indices: mock(['test-index-name-1', 'test-index-name-2', 'test-index-name-3']),
-        name: 'test-engine-1',
+        indices: fetchAliasIndicesResponse,
+        name: 'engine-name',
         updated_at_millis: 1679847286355,
       };
 
+      (mockClient.asCurrentUser.searchApplication.get as jest.Mock).mockResolvedValueOnce(
+        engineResult
+      );
+
+      await mockRouter.callRoute({
+        params: { engine_name: engineResult.name },
+      });
+
+      (fetchAliasIndices as jest.Mock).mockResolvedValueOnce(fetchAliasIndicesResponse);
+      expect(fetchAliasIndices).toHaveBeenCalledWith(mockClient, engineResult.name);
+
       (fetchIndicesStats as jest.Mock).mockResolvedValueOnce(fetchIndicesStatsResponse);
-      expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, engineResult.indices);
+      expect(fetchIndicesStats).toHaveBeenCalledWith(mockClient, fetchAliasIndicesResponse);
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {},
+        body: engineResult,
       });
     });
 
@@ -194,6 +205,65 @@ describe('engines routes', () => {
         search_application: {
           indices: ['test-indices-1'],
           name: 'engine-name',
+          updated_at_millis: expect.any(Number),
+        },
+      });
+      const mock = jest.fn();
+      const mockResponse = mock({ result: 'created' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+        },
+      });
+    });
+
+    it('PUT - Upsert API request - create with template', async () => {
+      mockClient.asCurrentUser.searchApplication.put.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        body: {
+          indices: ['test-indices-1'],
+          template: {
+            script: {
+              source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
+              lang: 'mustache',
+              options: {
+                content_type: 'application/json;charset=utf-8',
+              },
+              params: {
+                field_name: 'hello',
+                field_value: 'world',
+              },
+            },
+          },
+        },
+        params: {
+          engine_name: 'engine-name',
+        },
+        query: { create: true },
+      });
+      expect(mockClient.asCurrentUser.searchApplication.put).toHaveBeenCalledWith({
+        create: true,
+        name: 'engine-name',
+        search_application: {
+          indices: ['test-indices-1'],
+          name: 'engine-name',
+          template: {
+            script: {
+              source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
+              lang: 'mustache',
+              options: {
+                content_type: 'application/json;charset=utf-8',
+              },
+              params: {
+                field_name: 'hello',
+                field_value: 'world',
+              },
+            },
+          },
           updated_at_millis: expect.any(Number),
         },
       });
@@ -548,9 +618,9 @@ describe('engines routes', () => {
       expect(mockRouter.response.customError).toHaveBeenCalledWith({
         body: {
           attributes: {
-            error_code: 'engine_not_found',
+            error_code: 'search_application_not_found',
           },
-          message: 'Could not find engine',
+          message: 'Could not find search application',
         },
         statusCode: 404,
       });
@@ -574,7 +644,7 @@ describe('engines routes', () => {
           attributes: {
             error_code: 'uncaught_exception',
           },
-          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+          message: 'Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
       });

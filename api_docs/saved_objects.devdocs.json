@@ -51,6 +51,14 @@
             "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
@@ -59,12 +67,12 @@
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/add_to_library_action.tsx"
           },
           {
             "plugin": "discover",
@@ -81,6 +89,14 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/components/save_modal.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/plugins/links/public/content_management/save_to_library.tsx"
+          },
+          {
+            "plugin": "links",
+            "path": "src/plugins/links/public/content_management/save_to_library.tsx"
           }
         ],
         "children": [
@@ -989,18 +1005,6 @@
           {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
           }
         ],
         "children": [

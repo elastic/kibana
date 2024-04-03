@@ -11,8 +11,11 @@ import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
+  CoreStart,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 
@@ -23,8 +26,12 @@ import type {
   SetupDependencies,
   StartDependencies,
 } from './types';
+import { registerConnectorsRoutes } from './routes/connectors_routes';
+import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
+import { registerMappingRoutes } from './routes/mapping_routes';
 
 export interface RouteDependencies {
+  http: CoreSetup<StartDependencies>['http'];
   logger: Logger;
   router: IRouter;
   security: SecurityPluginStart;
@@ -48,25 +55,60 @@ export class ServerlessSearchPlugin
     this.config = initializerContext.config.get<ServerlessSearchConfig>();
     this.logger = initializerContext.logger.get();
   }
+  private async createDefaultDataView(core: CoreStart, dataViews: DataViewsServerPluginStart) {
+    const dataViewsService = await dataViews.dataViewsServiceFactory(
+      core.savedObjects.createInternalRepository(),
+      core.elasticsearch.client.asInternalUser,
+      undefined,
+      true
+    );
+    const dataViewExists = await dataViewsService.get('default_all_data_id').catch(() => false);
+    if (!dataViewExists) {
+      const defaultDataViewExists = await dataViewsService.defaultDataViewExists();
+      if (!defaultDataViewExists) {
+        await dataViewsService.createAndSave({
+          allowNoIndex: false,
+          name: 'default:all-data',
+          title: '*,-.*',
+          id: 'default_all_data_id',
+        });
+      }
+    }
+    return;
+  }
 
   public setup(
     { getStartServices, http }: CoreSetup<StartDependencies>,
-    pluginsSetup: SetupDependencies
+    { serverless, usageCollection }: SetupDependencies
   ) {
     const router = http.createRouter();
     getStartServices().then(([, { security }]) => {
       this.security = security;
-      const dependencies = { logger: this.logger, router, security: this.security };
+      const dependencies = {
+        http,
+        logger: this.logger,
+        router,
+        security: this.security,
+      };
 
       registerApiKeyRoutes(dependencies);
+      registerConnectorsRoutes(dependencies);
       registerIndicesRoutes(dependencies);
+      registerMappingRoutes(dependencies);
     });
 
-    pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: true });
+    if (usageCollection) {
+      getStartServices().then(() => {
+        registerTelemetryUsageCollector(usageCollection, this.logger);
+      });
+    }
+
+    serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
     return {};
   }
 
-  public start() {
+  public start(core: CoreStart, { dataViews }: StartDependencies) {
+    this.createDefaultDataView(core, dataViews);
     return {};
   }
 

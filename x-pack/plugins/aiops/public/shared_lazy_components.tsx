@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
-import type { ExplainLogRateSpikesAppStateProps } from './components/explain_log_rate_spikes';
-import type { ExplainLogRateSpikesContentWrapperProps } from './components/explain_log_rate_spikes/explain_log_rate_spikes_content/explain_log_rate_spikes_content_wrapper';
+import type { LogRateAnalysisAppStateProps } from './components/log_rate_analysis';
+import type { LogRateAnalysisContentWrapperProps } from './components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper';
 import type { LogCategorizationAppStateProps } from './components/log_categorization';
 import type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
 
-const ExplainLogRateSpikesAppStateLazy = React.lazy(
-  () => import('./components/explain_log_rate_spikes')
-);
+const LogRateAnalysisAppStateLazy = React.lazy(() => import('./components/log_rate_analysis'));
 
-const ExplainLogRateSpikesContentWrapperLazy = React.lazy(
-  () => import('./components/explain_log_rate_spikes/explain_log_rate_spikes_content')
+const LogRateAnalysisContentWrapperLazy = React.lazy(
+  () => import('./components/log_rate_analysis/log_rate_analysis_content')
 );
 
 const LazyWrapper: FC = ({ children }) => (
@@ -28,22 +27,22 @@ const LazyWrapper: FC = ({ children }) => (
 );
 
 /**
- * Lazy-wrapped ExplainLogRateSpikesAppState React component
- * @param {ExplainLogRateSpikesAppStateProps}  props - properties specifying the data on which to run the analysis.
+ * Lazy-wrapped LogRateAnalysisAppState React component
+ * @param {LogRateAnalysisAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
-export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesAppStateProps> = (props) => (
+export const LogRateAnalysis: FC<LogRateAnalysisAppStateProps> = (props) => (
   <LazyWrapper>
-    <ExplainLogRateSpikesAppStateLazy {...props} />
+    <LogRateAnalysisAppStateLazy {...props} />
   </LazyWrapper>
 );
 
 /**
- * Lazy-wrapped ExplainLogRateSpikesContentWrapperReact component
- * @param {ExplainLogRateSpikesContentWrapperProps}  props - properties specifying the data on which to run the analysis.
+ * Lazy-wrapped LogRateAnalysisContentWrapperReact component
+ * @param {LogRateAnalysisContentWrapperProps}  props - properties specifying the data on which to run the analysis.
  */
-export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentWrapperProps> = (props) => (
+export const LogRateAnalysisContent: FC<LogRateAnalysisContentWrapperProps> = (props) => (
   <LazyWrapper>
-    <ExplainLogRateSpikesContentWrapperLazy {...props} />
+    <LogRateAnalysisContentWrapperLazy {...props} />
   </LazyWrapper>
 );
 

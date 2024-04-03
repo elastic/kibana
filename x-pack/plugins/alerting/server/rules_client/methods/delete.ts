@@ -12,7 +12,9 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { migrateLegacyActions } from '../lib';
+import { untrackRuleAlerts, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
   return await retryIfConflicts(
@@ -30,9 +32,13 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
 
   try {
     const decryptedAlert =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
     apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
@@ -43,7 +49,10 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
     // Still attempt to load the scheduledTaskId using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
     taskIdToRemove = alert.attributes.scheduledTaskId;
     attributes = alert.attributes;
   }
@@ -59,12 +68,14 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.DELETE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
     throw error;
   }
+
+  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
 
   // migrate legacy actions only for SIEM rules
   if (attributes.consumer === AlertConsumers.SIEM) {
@@ -75,10 +86,10 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     ruleAuditEvent({
       action: RuleAuditAction.DELETE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
-  const removeResult = await context.unsecuredSavedObjectsClient.delete('alert', id);
+  const removeResult = await context.unsecuredSavedObjectsClient.delete(RULE_SAVED_OBJECT_TYPE, id);
 
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,

@@ -6,7 +6,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
@@ -28,7 +29,12 @@ export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ re
 
       <EuiSpacer size="m" />
 
-      <EuiDescriptionList type="column" listItems={items} className="analysis-summary-list" />
+      <EuiDescriptionList
+        type="column"
+        columnWidths={[15, 85]}
+        listItems={items}
+        className="analysis-summary-list"
+      />
     </React.Fragment>
   );
 };

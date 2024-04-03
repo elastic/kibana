@@ -26,6 +26,9 @@ Object {
                 "isBucketed": false,
                 "label": "Unique count of dns.question.name",
                 "operationType": "unique_count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
                 "scale": "ratio",
                 "sourceField": "dns.question.name",
               },
@@ -35,6 +38,7 @@ Object {
                 "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
+                  "includeEmptyRows": true,
                   "interval": "auto",
                 },
                 "scale": "interval",

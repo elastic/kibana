@@ -6,212 +6,60 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-
-// TODO Remove this usage of the SavedObjectsStart contract.
-import { SavedObjectsStart } from '@kbn/core/public';
-
+import { apiCanDuplicatePanels, CanDuplicatePanels } from '@kbn/presentation-containers';
 import {
-  ViewMode,
-  PanelState,
-  IEmbeddable,
-  PanelNotFoundError,
-  EmbeddableInput,
-  SavedObjectEmbeddableInput,
-  isErrorEmbeddable,
-  isReferenceOrValueEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasUniqueId,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasParentApi,
+  PublishesBlockingError,
+  HasUniqueId,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { SavedObject } from '@kbn/saved-objects-plugin/public';
-
-import {
-  placePanelBeside,
-  IPanelPlacementBesideArgs,
-} from '../dashboard_container/component/panel/dashboard_panel_placement';
-import { type DashboardPanelState } from '../../common';
-import { pluginServices } from '../services/plugin_services';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
-import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
-export interface ClonePanelActionContext {
-  embeddable: IEmbeddable;
-}
+export type ClonePanelActionApi = CanAccessViewMode &
+  HasUniqueId &
+  HasParentApi<CanDuplicatePanels> &
+  Partial<PublishesBlockingError>;
 
-export class ClonePanelAction implements Action<ClonePanelActionContext> {
+const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
+  Boolean(
+    apiHasUniqueId(api) &&
+      apiCanAccessViewMode(api) &&
+      apiHasParentApi(api) &&
+      apiCanDuplicatePanels(api.parentApi)
+  );
+
+export class ClonePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
 
-  private toastsService;
+  constructor() {}
 
-  constructor(private savedObjects: SavedObjectsStart) {
-    ({
-      notifications: { toasts: this.toastsService },
-    } = pluginServices.getServices());
-  }
-
-  public getDisplayName({ embeddable }: ClonePanelActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardClonePanelActionStrings.getDisplayName();
   }
 
-  public getIconType({ embeddable }: ClonePanelActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'copy';
   }
 
-  public async isCompatible({ embeddable }: ClonePanelActionContext) {
-    return Boolean(
-      !isErrorEmbeddable(embeddable) &&
-        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-        embeddable.getOutput().editable
-    );
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) return false;
+    return Boolean(!embeddable.blockingError?.value && getInheritedViewMode(embeddable) === 'edit');
   }
 
-  public async execute({ embeddable }: ClonePanelActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
-
-    const dashboard = embeddable.getRoot() as DashboardContainer;
-    const panelToClone = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
-    if (!panelToClone) {
-      throw new PanelNotFoundError();
-    }
-
-    dashboard.showPlaceholderUntil(
-      this.cloneEmbeddable(panelToClone, embeddable),
-      placePanelBeside,
-      {
-        width: panelToClone.gridData.w,
-        height: panelToClone.gridData.h,
-        currentPanels: dashboard.getInput().panels,
-        placeBesideId: panelToClone.explicitInput.id,
-        scrollToPanel: true,
-      } as IPanelPlacementBesideArgs
-    );
-  }
-
-  private async getCloneTitle(embeddable: IEmbeddable, rawTitle: string) {
-    if (rawTitle === '') return ''; // If
-
-    const clonedTag = dashboardClonePanelActionStrings.getClonedTag();
-    const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
-    const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
-    const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
-    let similarTitles: string[];
-    if (
-      isReferenceOrValueEmbeddable(embeddable) ||
-      !_.has(embeddable.getExplicitInput(), 'savedObjectId')
-    ) {
-      const dashboard: DashboardContainer = embeddable.getRoot() as DashboardContainer;
-      similarTitles = _.filter(await dashboard.getPanelTitles(), (title: string) => {
-        return title.startsWith(baseTitle);
-      });
-    } else {
-      const perPage = 10;
-      const similarSavedObjects = await this.savedObjects.client.find<SavedObject>({
-        type: embeddable.type,
-        perPage,
-        fields: ['title'],
-        searchFields: ['title'],
-        search: `"${baseTitle}"`,
-      });
-      if (similarSavedObjects.total <= perPage) {
-        similarTitles = similarSavedObjects.savedObjects.map((savedObject) => {
-          return savedObject.get('title');
-        });
-      } else {
-        similarTitles = [baseTitle + ` (${clonedTag} ${similarSavedObjects.total - 1})`];
-      }
-    }
-
-    const cloneNumbers = _.map(similarTitles, (title: string) => {
-      if (title.match(cloneRegex)) return 0;
-      const cloneTag = title.match(cloneNumberRegex);
-      return cloneTag ? parseInt(cloneTag[0].replace(/[^0-9.]/g, ''), 10) : -1;
-    });
-    const similarBaseTitlesCount = _.max(cloneNumbers) || 0;
-
-    return similarBaseTitlesCount < 0
-      ? baseTitle + ` (${clonedTag})`
-      : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
-  }
-
-  private async addCloneToLibrary(
-    embeddable: IEmbeddable,
-    objectIdToClone: string
-  ): Promise<string> {
-    // TODO: Remove this entire functionality. See https://github.com/elastic/kibana/issues/158632 for more info.
-    const savedObjectToClone = await this.savedObjects.client.get<SavedObject>(
-      embeddable.type,
-      objectIdToClone
-    );
-
-    // Clone the saved object
-    const newTitle = await this.getCloneTitle(embeddable, savedObjectToClone.attributes.title);
-    const clonedSavedObject = await this.savedObjects.client.create(
-      embeddable.type,
-      {
-        ..._.cloneDeep(savedObjectToClone.attributes),
-        title: newTitle,
-      },
-      { references: _.cloneDeep(savedObjectToClone.references) }
-    );
-    return clonedSavedObject.id;
-  }
-
-  private async cloneEmbeddable(
-    panelToClone: DashboardPanelState,
-    embeddable: IEmbeddable
-  ): Promise<Partial<PanelState>> {
-    let panelState: PanelState<EmbeddableInput>;
-    if (isReferenceOrValueEmbeddable(embeddable)) {
-      const newTitle = await this.getCloneTitle(embeddable, embeddable.getTitle() || '');
-      panelState = {
-        type: embeddable.type,
-        explicitInput: {
-          ...(await embeddable.getInputAsValueType()),
-          id: uuidv4(),
-          title: newTitle,
-          hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
-        },
-        version: panelToClone.version,
-      };
-    } else {
-      panelState = {
-        type: embeddable.type,
-        explicitInput: {
-          ...panelToClone.explicitInput,
-          id: uuidv4(),
-        },
-        version: panelToClone.version,
-      };
-
-      // TODO Remove the entire `addCloneToLibrary` section from here.
-      if (panelToClone.explicitInput.savedObjectId) {
-        const clonedSavedObjectId = await this.addCloneToLibrary(
-          embeddable,
-          panelToClone.explicitInput.savedObjectId
-        );
-        (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId =
-          clonedSavedObjectId;
-      }
-    }
-    this.toastsService.addSuccess({
-      title: dashboardClonePanelActionStrings.getSuccessMessage(),
-      'data-test-subj': 'addObjectToContainerSuccess',
-    });
-    return panelState;
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    embeddable.parentApi.duplicatePanel(embeddable.uuid);
   }
 }

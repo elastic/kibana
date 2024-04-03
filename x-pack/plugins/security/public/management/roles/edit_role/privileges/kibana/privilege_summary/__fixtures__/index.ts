@@ -10,7 +10,7 @@ import type { ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '@kbn/test-jest-helpers';
 
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../../common';
 import { FeatureTableCell } from '../../feature_table_cell';
 import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 

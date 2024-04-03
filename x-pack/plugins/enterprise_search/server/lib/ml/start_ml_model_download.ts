@@ -11,10 +11,7 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
-import {
-  isNotFoundExceptionError,
-  throwIfNotAcceptableModelName,
-} from './ml_model_deployment_common';
+import { isNotFoundExceptionError } from './ml_model_deployment_common';
 
 export const startMlModelDownload = async (
   modelName: string,
@@ -23,10 +20,6 @@ export const startMlModelDownload = async (
   if (!trainedModelsProvider) {
     throw new Error('Machine Learning is not enabled');
   }
-
-  // before anything else, check our model name
-  // to ensure we only allow those names we want
-  throwIfNotAcceptableModelName(modelName);
 
   try {
     // try and get the deployment status of the model first
@@ -50,7 +43,6 @@ export const startMlModelDownload = async (
 
   // we're not downloaded yet - let's initiate that...
   const putRequest: MlPutTrainedModelRequest = {
-    // @ts-expect-error @elastic-elasticsearch inference_config can be optional
     body: {
       input: {
         field_names: ['text_field'],

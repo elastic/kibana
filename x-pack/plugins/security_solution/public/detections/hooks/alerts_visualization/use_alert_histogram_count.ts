@@ -24,7 +24,7 @@ export const useAlertHistogramCount = ({
   isChartEmbeddablesEnabled: boolean;
 }): string => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const visualizationResponse = useVisualizationResponse({ visualizationId });
+  const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
 
   const totalAlerts = useMemo(
     () =>

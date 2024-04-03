@@ -9,16 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { Status } from '../../../../../../../common/types/api';
-
 import {
   FilteringConfig,
-  FilteringPolicy,
   FilteringRule,
-  FilteringRuleRule,
   FilteringValidation,
   FilteringValidationState,
-} from '../../../../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { Status } from '../../../../../../../common/types/api';
+
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import {
@@ -89,15 +88,15 @@ interface ConnectorFilteringValues {
   status: Status;
 }
 
-function createDefaultRule(order: number) {
+function createDefaultRule(order: number): FilteringRule {
   const now = new Date().toISOString();
   return {
     created_at: now,
     field: '_',
     id: 'DEFAULT',
     order,
-    policy: FilteringPolicy.INCLUDE,
-    rule: FilteringRuleRule.REGEX,
+    policy: 'include',
+    rule: 'regex',
     updated_at: now,
     value: '.*',
   };
@@ -236,7 +235,7 @@ export const ConnectorFilteringLogic = kea<
       [],
       {
         addFilteringRule: (filteringRules, filteringRule) => {
-          const newFilteringRules = filteringRules.length
+          const newFilteringRules: FilteringRule[] = filteringRules.length
             ? [
                 ...filteringRules.slice(0, filteringRules.length - 1),
                 filteringRule,

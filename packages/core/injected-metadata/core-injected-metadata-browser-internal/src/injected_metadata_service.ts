@@ -48,6 +48,10 @@ export class InjectedMetadataService {
         return this.state.publicBaseUrl;
       },
 
+      getAssetsHrefBase: () => {
+        return this.state.assetsHrefBase;
+      },
+
       getAnonymousStatusPage: () => {
         return this.state.anonymousStatusPage;
       },

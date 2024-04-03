@@ -9,7 +9,7 @@
 import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, EcsVersion } from '@kbn/ecs';
+import { Ecs, EcsVersion } from '@elastic/ecs';
 import { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
@@ -53,12 +53,19 @@ export class JsonLayout implements Layout {
       },
       process: {
         pid: record.pid,
+        uptime: process.uptime(),
       },
       span: spanId ? { id: spanId } : undefined,
       trace: traceId ? { id: traceId } : undefined,
       transaction: transactionId ? { id: transactionId } : undefined,
     };
-    const output = record.meta ? merge({ ...record.meta }, log) : log;
+
+    let output = log;
+    if (record.meta) {
+      // @ts-expect-error toJSON not defined on `LogMeta`, but some structured meta can have it defined
+      const serializedMeta = record.meta.toJSON ? record.meta.toJSON() : { ...record.meta };
+      output = merge(serializedMeta, log);
+    }
 
     return JSON.stringify(output);
   }

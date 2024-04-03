@@ -6,17 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { SynthtraceGenerator, Timerange } from '@kbn/apm-synthtrace-client';
-import { Readable } from 'stream';
-import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
+import { Timerange } from '@kbn/apm-synthtrace-client';
 import { Logger } from '../lib/utils/create_logger';
 import { RunOptions } from './utils/parse_run_cli_flags';
+import { ApmSynthtraceEsClient, InfraSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
+import { ScenarioReturnType } from '../lib/utils/with_client';
 
 type Generate<TFields> = (options: {
   range: Timerange;
-}) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
+  clients: {
+    apmEsClient: ApmSynthtraceEsClient;
+    logsEsClient: LogsSynthtraceEsClient;
+    infraEsClient: InfraSynthtraceEsClient;
+  };
+}) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
-  bootstrap?: (options: { apmEsClient: ApmSynthtraceEsClient }) => Promise<void>;
+  bootstrap?: (options: {
+    apmEsClient: ApmSynthtraceEsClient;
+    logsEsClient: LogsSynthtraceEsClient;
+    infraEsClient: InfraSynthtraceEsClient;
+  }) => Promise<void>;
   generate: Generate<TFields>;
 }>;

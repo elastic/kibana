@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { StepDetailsExposedState } from './common';
+import type { StepDetailsExposedState } from './common';
 
 export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
   const {

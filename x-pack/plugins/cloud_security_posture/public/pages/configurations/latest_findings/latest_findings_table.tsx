@@ -4,117 +4,140 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import {
-  EuiBasicTable,
-  useEuiTheme,
-  type Pagination,
-  type EuiBasicTableProps,
-  type CriteriaWithPagination,
-  type EuiTableActionsColumnType,
-  type EuiTableFieldDataColumnType,
-} from '@elastic/eui';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+
+import React from 'react';
+import { Filter } from '@kbn/es-query';
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as TEST_SUBJECTS from '../test_subjects';
+import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { ErrorCallout } from '../layout/error_callout';
+import { CloudSecurityDataTable } from '../../../components/cloud_security_data_table';
+import { getDefaultQuery, defaultColumns } from './constants';
+import { useLatestFindingsTable } from './use_latest_findings_table';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import {
-  baseFindingsColumns,
-  createColumnWithFilters,
-  getExpandColumn,
-  type OnAddFilter,
-} from '../layout/findings_layout';
-import { getSelectedRowStyle } from '../utils/utils';
-import { EmptyState } from '../../../components/empty_state';
 
-type TableProps = Required<EuiBasicTableProps<CspFinding>>;
-
-interface Props {
-  loading: boolean;
-  items: CspFinding[];
-  pagination: Pagination;
-  sorting: TableProps['sorting'];
-  setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
-  onAddFilter: OnAddFilter;
-  onPaginateFlyout: (pageIndex: number) => void;
-  onCloseFlyout: () => void;
-  onOpenFlyout: (finding: CspFinding) => void;
-  flyoutFindingIndex: number;
-  onResetFilters: () => void;
+interface LatestFindingsTableProps {
+  groupSelectorComponent?: JSX.Element;
+  height?: number;
+  showDistributionBar?: boolean;
+  nonPersistedFilters?: Filter[];
 }
+/**
+ * Type Guard for checking if the given source is a CspFinding
+ */
+const isCspFinding = (source: Record<string, any> | undefined): source is CspFinding => {
+  return source?.result?.evaluation !== undefined;
+};
 
-const FindingsTableComponent = ({
-  loading,
-  items,
-  pagination,
-  sorting,
-  setTableOptions,
-  onAddFilter,
-  onOpenFlyout,
-  flyoutFindingIndex,
-  onPaginateFlyout,
-  onCloseFlyout,
-  onResetFilters,
-}: Props) => {
-  const { euiTheme } = useEuiTheme();
+/**
+ * This Wrapper component renders the children if the given row is a CspFinding
+ * it uses React's Render Props pattern
+ */
+const CspFindingRenderer = ({
+  row,
+  children,
+}: {
+  row: DataTableRecord;
+  children: ({ finding }: { finding: CspFinding }) => JSX.Element;
+}) => {
+  const source = row.raw._source;
+  const finding = isCspFinding(source) && (source as CspFinding);
+  if (!finding) return <></>;
+  return children({ finding });
+};
 
-  const selectedFinding = items[flyoutFindingIndex];
-
-  const getRowProps = (row: CspFinding) => ({
-    'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),
-    style: getSelectedRowStyle(euiTheme, row, selectedFinding),
-  });
-
-  const getCellProps = (row: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
-    'data-test-subj': TEST_SUBJECTS.getFindingsTableCellTestId(column.field, row.resource.id),
-  });
-
-  const columns: [
-    EuiTableActionsColumnType<CspFinding>,
-    ...Array<EuiTableFieldDataColumnType<CspFinding>>
-  ] = useMemo(
-    () => [
-      getExpandColumn<CspFinding>({ onClick: onOpenFlyout }),
-      createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
-      baseFindingsColumns['rule.benchmark.rule_number'],
-      createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['rule.section'], { onAddFilter }),
-      baseFindingsColumns['@timestamp'],
-    ],
-    [onOpenFlyout, onAddFilter]
-  );
-
-  if (!loading && !items.length) {
-    return <EmptyState onResetFilters={onResetFilters} />;
-  }
-
+/**
+ * Flyout component for the latest findings table
+ */
+const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
   return (
-    <>
-      <EuiBasicTable
-        loading={loading}
-        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
-        items={items}
-        columns={columns}
-        pagination={pagination}
-        sorting={sorting}
-        onChange={setTableOptions}
-        rowProps={getRowProps}
-        cellProps={getCellProps}
-        hasActions
-      />
-      {selectedFinding && (
-        <FindingsRuleFlyout
-          findings={selectedFinding}
-          onClose={onCloseFlyout}
-          findingsCount={pagination.totalItemCount}
-          flyoutIndex={flyoutFindingIndex + pagination.pageIndex * pagination.pageSize}
-          onPaginate={onPaginateFlyout}
-        />
-      )}
-    </>
+    <CspFindingRenderer row={row}>
+      {({ finding }) => <FindingsRuleFlyout findings={finding} onClose={onCloseFlyout} />}
+    </CspFindingRenderer>
   );
 };
 
-export const FindingsTable = React.memo(FindingsTableComponent);
+const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+  defaultMessage: 'Findings',
+});
+
+const customCellRenderer = (rows: DataTableRecord[]) => ({
+  'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <CspEvaluationBadge type={finding.result.evaluation} />}
+    </CspFindingRenderer>
+  ),
+  '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <TimestampTableCell timestamp={finding['@timestamp']} />}
+    </CspFindingRenderer>
+  ),
+});
+
+export const LatestFindingsTable = ({
+  groupSelectorComponent,
+  height,
+  showDistributionBar = true,
+  nonPersistedFilters,
+}: LatestFindingsTableProps) => {
+  const {
+    cloudPostureDataTable,
+    rows,
+    error,
+    isFetching,
+    fetchNextPage,
+    passed,
+    failed,
+    total,
+    canShowDistributionBar,
+    onDistributionBarClick,
+  } = useLatestFindingsTable({
+    getDefaultQuery,
+    nonPersistedFilters,
+    showDistributionBar,
+  });
+
+  return (
+    <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
+      {error ? (
+        <>
+          <EuiSpacer size="m" />
+          <ErrorCallout error={error} />
+        </>
+      ) : (
+        <>
+          {canShowDistributionBar && (
+            <>
+              <EuiSpacer size="m" />
+              <FindingsDistributionBar
+                distributionOnClick={onDistributionBarClick}
+                passed={passed}
+                failed={failed}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <CloudSecurityDataTable
+            data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
+            isLoading={isFetching}
+            defaultColumns={defaultColumns}
+            rows={rows}
+            total={total}
+            flyoutComponent={flyoutComponent}
+            cloudPostureDataTable={cloudPostureDataTable}
+            loadMore={fetchNextPage}
+            title={title}
+            customCellRenderer={customCellRenderer}
+            groupSelectorComponent={groupSelectorComponent}
+            height={height}
+          />
+        </>
+      )}
+    </EuiFlexItem>
+  );
+};

@@ -1,0 +1,2669 @@
+{
+  "id": "@kbn/visualization-ui-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ChartSwitchTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "ChartSwitchTrigger",
+        "description": [],
+        "signature": [
+          "({ label, icon, onClick, dataTestSubj, }: { label: string; icon?: ",
+          "IconType",
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ChartSwitchTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ label: string; icon?: ",
+              "IconType",
+              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ColorPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "ColorPicker",
+        "description": [],
+        "signature": [
+          "({ overwriteColor, defaultColor, isClearable, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; isClearable?: boolean | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ColorPicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  overwriteColor,\n  defaultColor,\n  isClearable,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.overwriteColor",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "overwriteColor",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.defaultColor",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "defaultColor",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.isClearable",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isClearable",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.setConfig",
+                "type": "Function",
+                "tags": [],
+                "label": "setConfig",
+                "description": [],
+                "signature": [
+                  "(config: { color?: string | undefined; }) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.ColorPicker.$1.setConfig.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "config",
+                    "description": [],
+                    "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/visualization-ui-components",
+                        "id": "def-public.ColorPicker.$1.setConfig.$1.color",
+                        "type": "string",
+                        "tags": [],
+                        "label": "color",
+                        "description": [],
+                        "signature": [
+                          "string | undefined"
+                        ],
+                        "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.label",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.disableHelpTooltip",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disableHelpTooltip",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.disabledMessage",
+                "type": "string",
+                "tags": [],
+                "label": "disabledMessage",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.ColorPicker.$1.showAlpha",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "showAlpha",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DebouncedInput",
+        "type": "Function",
+        "tags": [],
+        "label": "DebouncedInput",
+        "description": [
+          "\nWhen testing this component, mock the \"debounce\" function in lodash (see this module test for an example)"
+        ],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/debounced_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.DebouncedInput.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/debounced_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DimensionButton",
+        "type": "Function",
+        "tags": [],
+        "label": "DimensionButton",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          "DimensionButtonProps",
+          "> & { readonly type: ({ groupLabel, children, onClick, onRemoveClick, accessorConfig, label, message, ...otherProps }: ",
+          "DimensionButtonProps",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.DimensionButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DimensionEditorSection",
+        "type": "Function",
+        "tags": [],
+        "label": "DimensionEditorSection",
+        "description": [],
+        "signature": [
+          "({ children, title, }: { title?: string | undefined; children?: React.ReactNode | React.ReactNode[]; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.DimensionEditorSection.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  title,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DimensionEditorSection.$1.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DimensionEditorSection.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "React.ReactNode | React.ReactNode[]"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DimensionTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "DimensionTrigger",
+        "description": [],
+        "signature": [
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "Property",
+          ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.DimensionTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  label,\n  color,\n  dataTestSubj,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DimensionTrigger.$1.label",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DimensionTrigger.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DimensionTrigger.$1.color",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "color",
+                "description": [],
+                "signature": [
+                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "Property",
+                  ".Color | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DimensionTrigger.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DragDropBuckets",
+        "type": "Function",
+        "tags": [],
+        "label": "DragDropBuckets",
+        "description": [],
+        "signature": [
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.DragDropBuckets.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DragDropBuckets.$1.items",
+                "type": "Array",
+                "tags": [],
+                "label": "items",
+                "description": [],
+                "signature": [
+                  "T[]"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DragDropBuckets.$1.droppableId",
+                "type": "string",
+                "tags": [],
+                "label": "droppableId",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DragDropBuckets.$1.children",
+                "type": "Array",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>[]"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DragDropBuckets.$1.onDragStart",
+                "type": "Function",
+                "tags": [],
+                "label": "onDragStart",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DragDropBuckets.$1.onDragEnd",
+                "type": "Function",
+                "tags": [],
+                "label": "onDragEnd",
+                "description": [],
+                "signature": [
+                  "((items: T[]) => void) | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.DragDropBuckets.$1.onDragEnd.$1",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "items",
+                    "description": [],
+                    "signature": [
+                      "T[]"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.DragDropBuckets.$1.bgColor",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "bgColor",
+                "description": [],
+                "signature": [
+                  "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DraggableBucketContainer",
+        "type": "Function",
+        "tags": [],
+        "label": "DraggableBucketContainer",
+        "description": [],
+        "signature": [
+          "({ id, children, isInsidePanel, Container, ...bucketContainerProps }: ",
+          "Assign",
+          "<Omit<",
+          "BucketContainerProps",
+          ", \"draggableProvided\">, { id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+          "BucketContainerProps",
+          "> | undefined; }, ",
+          "Diff",
+          "<Omit<",
+          "BucketContainerProps",
+          ", \"draggableProvided\">, { id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+          "BucketContainerProps",
+          "> | undefined; }> & ",
+          "Intersection",
+          "<{ id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+          "BucketContainerProps",
+          "> | undefined; }, Omit<",
+          "BucketContainerProps",
+          ", \"draggableProvided\">> & ",
+          "Diff",
+          "<{ id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+          "BucketContainerProps",
+          "> | undefined; }, Omit<",
+          "BucketContainerProps",
+          ", \"draggableProvided\">>>) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.DraggableBucketContainer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  children,\n  isInsidePanel,\n  Container = DefaultBucketContainer,\n  ...bucketContainerProps\n}",
+            "description": [],
+            "signature": [
+              "Assign",
+              "<Omit<",
+              "BucketContainerProps",
+              ", \"draggableProvided\">, { id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+              "BucketContainerProps",
+              "> | undefined; }, ",
+              "Diff",
+              "<Omit<",
+              "BucketContainerProps",
+              ", \"draggableProvided\">, { id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+              "BucketContainerProps",
+              "> | undefined; }> & ",
+              "Intersection",
+              "<{ id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+              "BucketContainerProps",
+              "> | undefined; }, Omit<",
+              "BucketContainerProps",
+              ", \"draggableProvided\">> & ",
+              "Diff",
+              "<{ id: string; children: React.ReactNode; isInsidePanel?: boolean | undefined; Container?: React.FunctionComponent<",
+              "BucketContainerProps",
+              "> | undefined; }, Omit<",
+              "BucketContainerProps",
+              ", \"draggableProvided\">>>"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.EmptyDimensionButton",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyDimensionButton",
+        "description": [],
+        "signature": [
+          "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.EmptyDimensionButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  label,\n  ariaLabel,\n  onClick,\n  dataTestSubj,\n  iconType,\n  ...otherProps // from Drag&Drop integration\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.EmptyDimensionButton.$1.label",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.EmptyDimensionButton.$1.ariaLabel",
+                "type": "string",
+                "tags": [],
+                "label": "ariaLabel",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.EmptyDimensionButton.$1.onClick",
+                "type": "Function",
+                "tags": [],
+                "label": "onClick",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.EmptyDimensionButton.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.EmptyDimensionButton.$1.iconType",
+                "type": "string",
+                "tags": [],
+                "label": "iconType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.FieldPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldPicker",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldPickerProps",
+          "<T>) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FieldPicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldPickerProps",
+              "<T>"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.FieldsBucketContainer",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldsBucketContainer",
+        "description": [],
+        "signature": [
+          "({ idx, onRemoveClick, removeTitle, children, draggableProvided, isNotRemovable, isNotDraggable, isDragging, \"data-test-subj\": dataTestSubj, }: ",
+          "BucketContainerProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FieldsBucketContainer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  idx,\n  onRemoveClick,\n  removeTitle,\n  children,\n  draggableProvided,\n  isNotRemovable,\n  isNotDraggable,\n  isDragging,\n  'data-test-subj': dataTestSubj = 'lns-fieldsBucketContainer',\n}",
+            "description": [],
+            "signature": [
+              "BucketContainerProps"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.FilterQueryInput",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterQueryInput",
+        "description": [],
+        "signature": [
+          "({\n  inputFilter,\n  onChange,\n  dataView,\n  helpMessage,\n  label = filterByLabel,\n  initiallyOpen,\n  ['data-test-subj']: dataTestSubj,\n  queryInputServices,\n  appName,\n}: { inputFilter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined; onChange: (query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          ") => void; dataView: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          "; helpMessage?: string | null | undefined; label?: string | undefined; initiallyOpen?: boolean | undefined; \"data-test-subj\"?: string | undefined; queryInputServices: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.QueryInputServices",
+            "text": "QueryInputServices"
+          },
+          "; appName: string; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FilterQueryInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  inputFilter,\n  onChange,\n  dataView,\n  helpMessage,\n  label = filterByLabel,\n  initiallyOpen,\n  ['data-test-subj']: dataTestSubj,\n  queryInputServices,\n  appName,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.inputFilter",
+                "type": "Object",
+                "tags": [],
+                "label": "inputFilter",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(query: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  ") => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.FilterQueryInput.$1.onChange.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "query",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/es-query",
+                        "scope": "common",
+                        "docId": "kibKbnEsQueryPluginApi",
+                        "section": "def-common.Query",
+                        "text": "Query"
+                      }
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  "{ fields: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.DataViewFieldBase",
+                    "text": "DataViewFieldBase"
+                  },
+                  "[]; id?: string | undefined; title: string; }"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.helpMessage",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "helpMessage",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.label",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.initiallyOpen",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initiallyOpen",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.datatestsubj",
+                "type": "string",
+                "tags": [],
+                "label": "['data-test-subj']",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.queryInputServices",
+                "type": "Object",
+                "tags": [],
+                "label": "queryInputServices",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/visualization-ui-components",
+                    "scope": "public",
+                    "docId": "kibKbnVisualizationUiComponentsPluginApi",
+                    "section": "def-public.QueryInputServices",
+                    "text": "QueryInputServices"
+                  }
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.FilterQueryInput.$1.appName",
+                "type": "string",
+                "tags": [],
+                "label": "appName",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.IconSelect",
+        "type": "Function",
+        "tags": [],
+        "label": "IconSelect",
+        "description": [],
+        "signature": [
+          "({\n  value,\n  onChange,\n  customIconSet,\n  defaultIcon = 'empty',\n}: { value?: Icon | undefined; onChange: (newIcon: Icon) => void; customIconSet: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.IconSet",
+            "text": "IconSet"
+          },
+          "<Icon>; defaultIcon?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.IconSelect.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value,\n  onChange,\n  customIconSet,\n  defaultIcon = 'empty',\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelect.$1.value",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "Icon | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelect.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(newIcon: Icon) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.IconSelect.$1.onChange.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "newIcon",
+                    "description": [],
+                    "signature": [
+                      "Icon"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelect.$1.customIconSet",
+                "type": "Array",
+                "tags": [],
+                "label": "customIconSet",
+                "description": [],
+                "signature": [
+                  "{ value: Icon; label: string; icon?: ",
+                  "IconType",
+                  " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelect.$1.defaultIcon",
+                "type": "string",
+                "tags": [],
+                "label": "defaultIcon",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.IconSelectSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "IconSelectSetting",
+        "description": [],
+        "signature": [
+          "({\n  currentIcon,\n  setIcon,\n  customIconSet,\n  defaultIcon = 'empty',\n}: { currentIcon?: Icon | undefined; setIcon: (icon: Icon) => void; customIconSet: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.IconSet",
+            "text": "IconSet"
+          },
+          "<Icon>; defaultIcon?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.IconSelectSetting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  currentIcon,\n  setIcon,\n  customIconSet,\n  defaultIcon = 'empty',\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelectSetting.$1.currentIcon",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "currentIcon",
+                "description": [],
+                "signature": [
+                  "Icon | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelectSetting.$1.setIcon",
+                "type": "Function",
+                "tags": [],
+                "label": "setIcon",
+                "description": [],
+                "signature": [
+                  "(icon: Icon) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.IconSelectSetting.$1.setIcon.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "icon",
+                    "description": [],
+                    "signature": [
+                      "Icon"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelectSetting.$1.customIconSet",
+                "type": "Array",
+                "tags": [],
+                "label": "customIconSet",
+                "description": [],
+                "signature": [
+                  "{ value: Icon; label: string; icon?: ",
+                  "IconType",
+                  " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.IconSelectSetting.$1.defaultIcon",
+                "type": "string",
+                "tags": [],
+                "label": "defaultIcon",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.isFieldLensCompatible",
+        "type": "Function",
+        "tags": [],
+        "label": "isFieldLensCompatible",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-visualization-ui-components/util.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.isFieldLensCompatible.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/util.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.isQueryValid",
+        "type": "Function",
+        "tags": [],
+        "label": "isQueryValid",
+        "description": [],
+        "signature": [
+          "(input: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          ", dataView: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/query_input/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.isQueryValid.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.isQueryValid.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.LineStyleSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "LineStyleSettings",
+        "description": [],
+        "signature": [
+          "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.LineStyleSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  currentConfig,\n  setConfig,\n  idPrefix,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.LineStyleSettings.$1.currentConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "currentConfig",
+                "description": [],
+                "signature": [
+                  "LineStyleConfig | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.LineStyleSettings.$1.setConfig",
+                "type": "Function",
+                "tags": [],
+                "label": "setConfig",
+                "description": [],
+                "signature": [
+                  "(config: LineStyleConfig) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.LineStyleSettings.$1.setConfig.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "config",
+                    "description": [],
+                    "signature": [
+                      "LineStyleConfig"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.LineStyleSettings.$1.idPrefix",
+                "type": "string",
+                "tags": [],
+                "label": "idPrefix",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.NameInput",
+        "type": "Function",
+        "tags": [],
+        "label": "NameInput",
+        "description": [],
+        "signature": [
+          "({ value, onChange, defaultValue, }: { value: string; onChange: (value: string) => void; defaultValue?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.NameInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value,\n  onChange,\n  defaultValue,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.NameInput.$1.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.NameInput.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(value: string) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.NameInput.$1.onChange.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "value",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.NameInput.$1.defaultValue",
+                "type": "string",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.NewBucketButton",
+        "type": "Function",
+        "tags": [],
+        "label": "NewBucketButton",
+        "description": [],
+        "signature": [
+          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.NewBucketButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  label,\n  onClick,\n  isDisabled,\n  className,\n  'data-test-subj': dataTestSubj = 'lns-newBucket-add',\n}",
+            "description": [],
+            "signature": [
+              "NewBucketButtonProps"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.QueryInput",
+        "type": "Function",
+        "tags": [],
+        "label": "QueryInput",
+        "description": [],
+        "signature": [
+          "({ value, onChange, dataView, isInvalid, onSubmit, disableAutoFocus, [\"data-test-subj\"]: dataTestSubj, placeholder, appName, services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews }, }: { value: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          "; onChange: (input: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          ") => void; dataView: string | { type: \"id\" | \"title\"; value: string; }; isInvalid: boolean; onSubmit: () => void; disableAutoFocus?: boolean | undefined; 'data-test-subj'?: string | undefined; placeholder?: string | undefined; appName: string; services: ",
+          {
+            "pluginId": "@kbn/visualization-ui-components",
+            "scope": "public",
+            "docId": "kibKbnVisualizationUiComponentsPluginApi",
+            "section": "def-public.QueryInputServices",
+            "text": "QueryInputServices"
+          },
+          "; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value,\n  onChange,\n  dataView,\n  isInvalid,\n  onSubmit,\n  disableAutoFocus,\n  ['data-test-subj']: dataTestSubj,\n  placeholder,\n  appName,\n  services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews },\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.value",
+                "type": "Object",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "{ query: string | { [key: string]: any; }; language: string; }"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(input: ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  ") => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.QueryInput.$1.onChange.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "input",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/es-query",
+                        "scope": "common",
+                        "docId": "kibKbnEsQueryPluginApi",
+                        "section": "def-common.Query",
+                        "text": "Query"
+                      }
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.dataView",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  "string | { type: \"id\" | \"title\"; value: string; }"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.isInvalid",
+                "type": "boolean",
+                "tags": [],
+                "label": "isInvalid",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.onSubmit",
+                "type": "Function",
+                "tags": [],
+                "label": "onSubmit",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.disableAutoFocus",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disableAutoFocus",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.datatestsubj",
+                "type": "string",
+                "tags": [],
+                "label": "'data-test-subj'",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.placeholder",
+                "type": "string",
+                "tags": [],
+                "label": "placeholder",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.appName",
+                "type": "string",
+                "tags": [],
+                "label": "appName",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.QueryInput.$1.services",
+                "type": "Object",
+                "tags": [],
+                "label": "services",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/visualization-ui-components",
+                    "scope": "public",
+                    "docId": "kibKbnVisualizationUiComponentsPluginApi",
+                    "section": "def-public.QueryInputServices",
+                    "text": "QueryInputServices"
+                  }
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.TextDecorationSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "TextDecorationSetting",
+        "description": [],
+        "signature": [
+          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.TextDecorationSetting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.TextDecorationSetting.$1.idPrefix",
+                "type": "string",
+                "tags": [],
+                "label": "idPrefix",
+                "description": [],
+                "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.TextDecorationSetting.$1.currentConfig",
+                "type": "Object",
+                "tags": [],
+                "label": "currentConfig",
+                "description": [],
+                "signature": [
+                  "TextDecorationConfig | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.TextDecorationSetting.$1.setConfig",
+                "type": "Function",
+                "tags": [],
+                "label": "setConfig",
+                "description": [],
+                "signature": [
+                  "(config: TextDecorationConfig) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.TextDecorationSetting.$1.setConfig.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "config",
+                    "description": [],
+                    "signature": [
+                      "TextDecorationConfig"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.TextDecorationSetting.$1.isQueryBased",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isQueryBased",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.TextDecorationSetting.$1.children",
+                "type": "Function",
+                "tags": [],
+                "label": "children",
+                "description": [
+                  "A children render function for custom sub fields on textDecoration change"
+                ],
+                "signature": [
+                  "((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.TextDecorationSetting.$1.children.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "textDecoration",
+                    "description": [],
+                    "signature": [
+                      "\"none\" | \"name\" | \"field\""
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.useDebouncedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "useDebouncedValue",
+        "description": [
+          "\nDebounces value changes and updates inputValue on root state changes if no debounced changes\nare in flight because the user is currently modifying the value.\n\n* allowFalsyValue: update upstream with all falsy values but null or undefined\n\nWhen testing this function mock the \"debounce\" function in lodash (see this module test for an example)"
+        ],
+        "signature": [
+          "<T>({ onChange, value, defaultValue, }: { onChange: (val: T) => void; value: T; defaultValue?: T | undefined; }, { allowFalsyValue }?: { allowFalsyValue?: boolean | undefined; }) => { inputValue: T; handleInputChange: (val: T) => void; initialValue: T; }"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.useDebouncedValue.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    onChange,\n    value,\n    defaultValue,\n  }",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.useDebouncedValue.$1.onChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onChange",
+                "description": [],
+                "signature": [
+                  "(val: T) => void"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/visualization-ui-components",
+                    "id": "def-public.useDebouncedValue.$1.onChange.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "val",
+                    "description": [],
+                    "signature": [
+                      "T"
+                    ],
+                    "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.useDebouncedValue.$1.value",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.useDebouncedValue.$1.defaultValue",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultValue",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.useDebouncedValue.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ allowFalsyValue }",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/visualization-ui-components",
+                "id": "def-public.useDebouncedValue.$2.allowFalsyValue",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "allowFalsyValue",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/kbn-visualization-ui-components/components/debounced_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.validateQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "validateQuery",
+        "description": [],
+        "signature": [
+          "(input: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined, dataView: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewBase",
+            "text": "DataViewBase"
+          },
+          ") => { isValid: boolean; error: string | undefined; }"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/query_input/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.validateQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.validateQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewBase",
+                "text": "DataViewBase"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.AccessorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "AccessorConfig",
+        "description": [],
+        "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.AccessorConfig.columnId",
+            "type": "string",
+            "tags": [],
+            "label": "columnId",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.AccessorConfig.triggerIconType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "triggerIconType",
+            "description": [],
+            "signature": [
+              "\"none\" | \"color\" | \"aggregate\" | \"disabled\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.AccessorConfig.customIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "customIcon",
+            "description": [],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.AccessorConfig.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.AccessorConfig.palette",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              "string[] | { color: string; stop: number; }[] | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.FieldOptionValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldOptionValue",
+        "description": [],
+        "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FieldOptionValue.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"field\""
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FieldOptionValue.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FieldOptionValue.dataType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/visualization-ui-components",
+                "scope": "public",
+                "docId": "kibKbnVisualizationUiComponentsPluginApi",
+                "section": "def-public.DataType",
+                "text": "DataType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.QueryInputServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryInputServices",
+        "description": [],
+        "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IStorageWrapper",
+                "text": "IStorageWrapper"
+              },
+              "<any, void>"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.NotificationsStart",
+                "text": "NotificationsStart"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.QueryInputServices.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-common.DocLinksStart",
+                "text": "DocLinksStart"
+              }
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.DataType",
+        "type": "Type",
+        "tags": [],
+        "label": "DataType",
+        "description": [],
+        "signature": [
+          "\"string\" | \"number\" | \"boolean\" | \"date\" | FieldOnlyDataType"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.emptyTitleText",
+        "type": "string",
+        "tags": [],
+        "label": "emptyTitleText",
+        "description": [],
+        "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.FieldOption",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldOption",
+        "description": [],
+        "signature": [
+          "FieldValue<T> & ",
+          "EuiComboBoxOptionOption",
+          "<T>"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/field_picker/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.FormatFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "FormatFactory",
+        "description": [],
+        "signature": [
+          "(mapping?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined) => ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          }
+        ],
+        "path": "packages/kbn-visualization-ui-components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.FormatFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-visualization-ui-components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.IconSet",
+        "type": "Type",
+        "tags": [],
+        "label": "IconSet",
+        "description": [],
+        "signature": [
+          "{ value: T; label: string; icon?: ",
+          "IconType",
+          " | T | undefined; shouldRotate?: boolean | undefined; }[]"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.LineStyle",
+        "type": "Type",
+        "tags": [],
+        "label": "LineStyle",
+        "description": [],
+        "signature": [
+          "\"solid\" | \"dashed\" | \"dotted\""
+        ],
+        "path": "packages/kbn-visualization-ui-components/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

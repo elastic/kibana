@@ -19,16 +19,18 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/build_api_docs.sh
-    label: 'Build API Docs'
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
     agents:
-      queue: n2-4-spot
-    key: build_api_docs
+      queue: n2-2-spot
+    key: quick_checks
     timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
@@ -47,6 +49,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       queue: kibana-default
+    timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
@@ -55,45 +58,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
-  - command: SERVERLESS_ENVIRONMENT=observability .buildkite/scripts/steps/functional/serverless_ftr.sh
-    label: 'Serverless Observability Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    soft_fail:
-      - exit_status: 10
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: SERVERLESS_ENVIRONMENT=search .buildkite/scripts/steps/functional/serverless_ftr.sh
-    label: 'Serverless Search Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    soft_fail:
-      - exit_status: 10
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: SERVERLESS_ENVIRONMENT=security .buildkite/scripts/steps/functional/serverless_ftr.sh
-    label: 'Serverless Security Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 40
-    soft_fail:
-      - exit_status: 10
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
@@ -127,11 +91,12 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/check_types.sh
-    label: 'Check Types'
+  - command: .buildkite/scripts/steps/build_api_docs.sh
+    label: 'Check Types and Build API Docs'
     agents:
-      queue: n2-16-spot
-    timeout_in_minutes: 60
+      queue: n2-4-spot
+    key: build_api_docs
+    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'

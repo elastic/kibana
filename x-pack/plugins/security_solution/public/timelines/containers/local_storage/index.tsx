@@ -12,11 +12,13 @@ import type {
   DataTableModel,
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { tableEntity, TableEntityType, TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import { assigneesColumn } from '../../../detections/configurations/security_solution_detections/columns';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
+import { migrateEntityRiskLevelColumnTitle } from './migrates_risk_level_title';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
 const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
@@ -77,6 +79,18 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
   }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
+/*
+ *
+ *  This migraiton only works for upgrading from
+ *  8.7 -> 8.8. Please do not edit this migration for any
+ *  future release.
+ *
+ *  If there is a migration that is required to be done for
+ *  any future release. It should written as a saperate piece of code
+ *  and should be called after this migration
+ *
+ * **/
+
 export const migrateAlertTableStateToTriggerActionsState = (
   storage: Storage,
   legacyDataTableState: DataTableState['dataTable']['tableById']
@@ -100,7 +114,7 @@ export const migrateAlertTableStateToTriggerActionsState = (
           sort: legacyDataTableState[tableKey].sort.map((sortCandidate) => ({
             [sortCandidate.columnId]: { order: sortCandidate.sortDirection },
           })),
-          visibleColumns: legacyDataTableState[tableKey].columns.map((c) => c.id),
+          visibleColumns: legacyDataTableState[tableKey].columns,
         },
       };
     });
@@ -110,7 +124,47 @@ export const migrateAlertTableStateToTriggerActionsState = (
       storage.set(key, stateObj[key]);
     })
   );
-  return Object.assign(legacyDataTableState, triggersActionsState);
+};
+
+/*
+ *
+ * Used for migrating Alert Table from 8.8 => 8.9
+ * */
+export const migrateTriggerActionsVisibleColumnsAlertTable88xTo89 = (storage: Storage) => {
+  const localStorageKeys = [
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}-gridView`,
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}-gridView`,
+  ];
+
+  localStorageKeys.forEach((key) => {
+    const alertTableData = storage.get(key);
+    if (!alertTableData) {
+      return;
+    }
+    if ('visibleColumns' in alertTableData) {
+      const visibleColumns =
+        alertTableData.visibleColumns as DataTableState['dataTable']['tableById'][string]['columns'];
+      const v89CompliantFormat = visibleColumns.every((val: unknown) => typeof val === 'string');
+      if (v89CompliantFormat) {
+        return;
+      }
+      const newVisibleColumns = visibleColumns
+        .map((visibleCol) => {
+          if (typeof visibleCol === 'string') {
+            // if column format is 8.9 compliant already
+            return visibleCol;
+          }
+          // if column format is 8.8
+          return visibleCol.id;
+        })
+        .filter(Boolean);
+
+      storage.set(key, {
+        ...alertTableData,
+        visibleColumns: newVisibleColumns,
+      });
+    }
+  });
 };
 
 /**
@@ -143,6 +197,90 @@ export const migrateColumnLabelToDisplayAsText = (
     : {}),
 });
 
+/**
+ * Adds "Assignees" column and makes it visible in alerts table
+ */
+const addAssigneesColumnToAlertsTable = (storage: Storage) => {
+  const localStorageKeys = [
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}-gridView`,
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}-gridView`,
+  ];
+
+  localStorageKeys.forEach((key) => {
+    const alertTableData = storage.get(key);
+    if (!alertTableData) {
+      return;
+    }
+    // Make "Assignees" field selected in the table
+    if ('columns' in alertTableData) {
+      let updatedAlertsTableState = false;
+      const columns =
+        alertTableData.columns as DataTableState['dataTable']['tableById'][string]['columns'];
+      const hasAssigneesColumn = columns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
+      if (!hasAssigneesColumn) {
+        // Insert "Assignees" column at the index 1 to mimic behaviour of adding field to alerts table
+        alertTableData.columns.splice(1, 0, assigneesColumn);
+        updatedAlertsTableState = true;
+      }
+      // Make "Assignees" column visible in the table
+      if ('visibleColumns' in alertTableData) {
+        const visibleColumns = alertTableData.visibleColumns as string[];
+        const assigneesColumnExists =
+          visibleColumns.findIndex((col) => col === assigneesColumn.id) !== -1;
+        if (!assigneesColumnExists) {
+          alertTableData.visibleColumns.splice(1, 0, assigneesColumn.id);
+          updatedAlertsTableState = true;
+        }
+      }
+      if (updatedAlertsTableState) {
+        storage.set(key, alertTableData);
+      }
+    }
+  });
+};
+
+/**
+ * Adds "Assignees" column specs to table data model
+ */
+export const addAssigneesSpecsToSecurityDataTableIfNeeded = (
+  storage: Storage,
+  dataTableState: DataTableState['dataTable']['tableById']
+) => {
+  // Add "Assignees" column specs to the table data model
+  let updatedTableModel = false;
+  for (const [tableId, tableModel] of Object.entries(dataTableState)) {
+    // Only add "Assignees" column specs to alerts tables
+    if (tableEntity[tableId as TableId] !== TableEntityType.alert) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    // We added a new base column for "Assignees" in 8.12
+    // In order to show correct custom header label after user upgrades to 8.12 we need to make sure the appropriate specs are in the table model.
+    const columns = tableModel.columns;
+    if (Array.isArray(columns)) {
+      const hasAssigneesColumn = columns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
+      if (!hasAssigneesColumn) {
+        updatedTableModel = true;
+        tableModel.columns.push(assigneesColumn);
+      }
+    }
+    const defaultColumns = tableModel.defaultColumns;
+    if (defaultColumns) {
+      const hasAssigneesColumn =
+        defaultColumns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
+      if (!hasAssigneesColumn) {
+        updatedTableModel = true;
+        tableModel.defaultColumns.push(assigneesColumn);
+      }
+    }
+  }
+  if (updatedTableModel) {
+    storage.set(LOCAL_STORAGE_TABLE_KEY, dataTableState);
+    addAssigneesColumnToAlertsTable(storage);
+  }
+};
+
 export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdLiteral[]) => {
   let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
   const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
@@ -155,7 +293,10 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
     }
   }
 
-  allDataTables = migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
+  migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
+  migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+  addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
+  migrateEntityRiskLevelColumnTitle(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

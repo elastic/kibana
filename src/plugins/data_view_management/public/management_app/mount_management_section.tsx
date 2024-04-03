@@ -12,17 +12,20 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
 import { StartServicesAccessor } from '@kbn/core/public';
-
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
   CreateEditFieldContainer,
 } from '../components';
-import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
+import {
+  IndexPatternManagementStartDependencies,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+} from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
 
 const readOnlyBadge = {
@@ -37,10 +40,22 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
+  { noDataPage }: Pick<IndexPatternManagementSetupDependencies, 'noDataPage'>,
   params: ManagementAppMountParams
 ) {
   const [
-    { application, chrome, uiSettings, settings, notifications, overlays, http, docLinks, theme },
+    {
+      application,
+      chrome,
+      uiSettings,
+      settings,
+      notifications,
+      overlays,
+      http,
+      docLinks,
+      theme,
+      i18n: coreI18n,
+    },
     {
       data,
       dataViewFieldEditor,
@@ -77,35 +92,38 @@ export async function mountManagementSection(
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
-    spaces,
+    spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
     theme,
     savedObjectsManagement,
+    noDataPage,
   };
 
+  const editPath = '/dataView/:id/field/:fieldName';
+  const createPath = '/dataView/:id/create-field/';
+  const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
+
   ReactDOM.render(
-    <KibanaContextProvider services={deps}>
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <Router history={params.history}>
-            <Routes>
-              <Route path={['/create']}>
-                <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
-              </Route>
-              <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
-                <CreateEditFieldContainer />
-              </Route>
-              <Route path={['/dataView/:id']}>
-                <EditIndexPatternContainer />
-              </Route>
-              <Redirect path={'/patterns*'} to={'dataView*'} />
-              <Route path={['/']}>
-                <IndexPatternTableWithRouter canSave={canSave} />
-              </Route>
-            </Routes>
-          </Router>
-        </I18nProvider>
-      </KibanaThemeProvider>
-    </KibanaContextProvider>,
+    <KibanaRenderContextProvider theme={theme} i18n={coreI18n}>
+      <KibanaContextProvider services={deps}>
+        <Router history={params.history}>
+          <Routes>
+            <Route path={['/create']}>
+              <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
+            </Route>
+            <Route path={createEditPath}>
+              <CreateEditFieldContainer />
+            </Route>
+            <Route path={['/dataView/:id']}>
+              <EditIndexPatternContainer />
+            </Route>
+            <Redirect path={'/patterns*'} to={'dataView*'} />
+            <Route path={['/']}>
+              <IndexPatternTableWithRouter canSave={canSave} />
+            </Route>
+          </Routes>
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     params.element
   );
 

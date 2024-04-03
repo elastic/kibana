@@ -46,15 +46,16 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import { CriteriaField } from './results_service';
+import type { CriteriaField } from './results_service';
 import type { CombinedJob, Datafeed } from '../../shared';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
-import { CHART_TYPE, ChartType } from '../../../common/constants/charts';
+import type { ChartType } from '../../../common/constants/charts';
+import { CHART_TYPE } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import { MlJob } from '../..';
+import type { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
@@ -526,9 +527,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
       // TODO - work out how best to display results from detectors with just an over field.
       const firstFieldName =
-        record.partition_field_name || record.by_field_name || record.over_field_name;
+        record.partition_field_name ?? record.by_field_name ?? record.over_field_name;
       const firstFieldValue =
-        record.partition_field_value || record.by_field_value || record.over_field_value;
+        record.partition_field_value ?? record.by_field_value ?? record.over_field_value;
       if (firstFieldName !== undefined && firstFieldValue !== undefined) {
         const groupsForDetector = detectorsForJob[detectorIndex];
 
@@ -544,7 +545,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
         let isSecondSplit = false;
         if (record.partition_field_name !== undefined) {
-          const splitFieldName = record.over_field_name || record.by_field_name;
+          const splitFieldName = record.over_field_name ?? record.by_field_name;
           if (splitFieldName !== undefined) {
             isSecondSplit = true;
           }
@@ -562,8 +563,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           }
         } else {
           // Aggregate another level for the over or by field.
-          const secondFieldName = record.over_field_name || record.by_field_name;
-          const secondFieldValue = record.over_field_value || record.by_field_value;
+          const secondFieldName = record.over_field_name ?? record.by_field_name;
+          const secondFieldValue = record.over_field_value ?? record.by_field_value;
 
           if (secondFieldName !== undefined && secondFieldValue !== undefined) {
             if (dataForGroupValue[secondFieldName] === undefined) {
@@ -766,12 +767,12 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
-    let functionLabel = `${config.metricFunction}`;
+    let functionLabel = `${fullSeriesConfig.metricFunction ?? config.metricFunction}`;
     if (
       fullSeriesConfig.metricFieldName !== undefined &&
       fullSeriesConfig.metricFieldName !== null
     ) {
-      functionLabel += ` ${fullSeriesConfig.metricFieldName}`;
+      functionLabel += `(${fullSeriesConfig.metricFieldName})`;
     }
 
     fullSeriesConfig.infoTooltip = {
@@ -1044,7 +1045,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       let chartData: ChartPoint[] = [];
       if (metricData !== undefined) {
         if (records.length > 0) {
-          const filterField = records[0].by_field_value || records[0].over_field_value;
+          const filterField = records[0].by_field_value ?? records[0].over_field_value;
           if (eventDistribution && eventDistribution.length > 0) {
             chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
           }
@@ -1143,7 +1144,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         chartType === CHART_TYPE.POPULATION_DISTRIBUTION
       ) {
         return chartData.filter((d) => {
-          return d.entity === (record && (record.by_field_value || record.over_field_value));
+          return d.entity === (record && (record.by_field_value ?? record.over_field_value));
         });
       }
 

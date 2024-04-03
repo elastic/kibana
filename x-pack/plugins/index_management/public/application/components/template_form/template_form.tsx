@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { allowAutoCreateRadioIds } from '../../../../common/constants';
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import {
@@ -21,6 +22,7 @@ import {
 } from '../shared';
 import { documentationService } from '../../services/documentation';
 import { SectionError } from '../section_error';
+import { serializeAsESLifecycle } from '../../../../common/lib/data_stream_serialization';
 import {
   SimulateTemplateFlyoutContent,
   SimulateTemplateProps,
@@ -115,12 +117,14 @@ export const TemplateForm = ({
   const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
+    dataStream: {},
     template: {},
     _kbnMeta: {
       type: 'default',
       hasDatastream: false,
       isLegacy,
     },
+    allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
   };
 
   const {
@@ -190,6 +194,9 @@ export const TemplateForm = ({
       if (Object.keys(outputTemplate.template).length === 0) {
         delete outputTemplate.template;
       }
+      if (outputTemplate.lifecycle) {
+        delete outputTemplate.lifecycle;
+      }
     }
 
     return outputTemplate;
@@ -201,15 +208,19 @@ export const TemplateForm = ({
         const outputTemplate = {
           ...wizardData.logistics,
           _kbnMeta: initialTemplate._kbnMeta,
+          deprecated: initialTemplate.deprecated,
           composedOf: wizardData.components,
           template: {
             settings: wizardData.settings,
             mappings: wizardData.mappings,
             aliases: wizardData.aliases,
+            lifecycle: wizardData.logistics.lifecycle
+              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
+              : undefined,
           },
         };
 
-        return cleanupTemplateObject(outputTemplate);
+        return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
       },
     []
   );

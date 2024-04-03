@@ -11,5 +11,6 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 export interface JoinState {
   dataHasChanged: boolean;
   join: InnerJoin;
-  propertiesMap?: PropertiesMap;
+  joinIndex: number;
+  joinMetrics?: PropertiesMap;
 }

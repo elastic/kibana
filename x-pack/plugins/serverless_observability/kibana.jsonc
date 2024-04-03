@@ -1,14 +1,26 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-observability",
-  "owner": ["@elastic/appex-sharedux", "@elastic/apm-ui"],
+  "owner": "@elastic/obs-ux-management-team",
   "description": "Serverless customizations for observability.",
   "plugin": {
     "id": "serverlessObservability",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "serverless", "observability"],
-    "requiredPlugins": ["serverless", "observabilityShared", "kibanaReact", "management", "ml"],
+    "configPath": [
+      "xpack",
+      "serverless",
+      "observability"
+    ],
+    "requiredPlugins": [
+      "data",
+      "serverless",
+      "observability",
+      "observabilityShared",
+      "management",
+      "discover",
+      "security",
+    ],
     "optionalPlugins": [],
     "requiredBundles": []
   }

@@ -30,16 +30,9 @@ import { useCreateSavedQuery } from './use_create_saved_query';
 interface AddQueryFlyoutProps {
   defaultValue: SavedQuerySOFormData;
   onClose: () => void;
-  isExternal?: boolean;
 }
 
-const additionalZIndexStyle = { style: 'z-index: 6000' };
-
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
-  defaultValue,
-  onClose,
-  isExternal,
-}) => {
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const hooksForm = useSavedQueryForm({
@@ -67,7 +60,6 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
-        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
@@ -95,7 +87,12 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
+              <EuiButton
+                data-test-subj="savedQueryFlyoutSaveButton"
+                isLoading={isSubmitting}
+                onClick={handleSubmit(onSubmit)}
+                fill
+              >
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

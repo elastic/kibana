@@ -18,17 +18,12 @@ export const unique = <T>(arr: T[] = []): T[] => [...new Set(arr)];
 const merge = (a: any, b: any): { [k: string]: any } =>
   unique([...Object.keys(a), ...Object.keys(b)]).reduce((acc, key) => {
     if (isObject(a[key]) && isObject(b[key]) && !Array.isArray(a[key]) && !Array.isArray(b[key])) {
-      return {
-        ...acc,
-        [key]: merge(a[key], b[key]),
-      };
+      acc[key] = merge(a[key], b[key]);
+    } else {
+      acc[key] = b[key] === undefined ? a[key] : b[key];
     }
-
-    return {
-      ...acc,
-      [key]: b[key] === undefined ? a[key] : b[key],
-    };
-  }, {});
+    return acc;
+  }, {} as { [k: string]: any });
 
 export const mergeAll = (...sources: any[]) =>
   sources.filter(isObject).reduce((acc, source) => merge(acc, source));

@@ -95,7 +95,7 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
         [action.id]: {
           ...state.tableById[action.id],
           expandedDetail: {
-            ...state.tableById[action.id].expandedDetail,
+            ...state.tableById[action.id]?.expandedDetail,
             ...updateTableDetailsPanel(action),
           },
         },

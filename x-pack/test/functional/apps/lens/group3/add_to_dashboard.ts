@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const createAndSaveDashboard = async (dashboardName: string) => {
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await PageObjects.dashboard.clickNewDashboard();
     await dashboardAddPanel.clickOpenAddPanel();
     await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
@@ -258,7 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.waitForVisualization('heatmapChart');
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
-      await PageObjects.lens.openPalettePanel('lnsHeatmap');
+      await PageObjects.lens.openPalettePanel();
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

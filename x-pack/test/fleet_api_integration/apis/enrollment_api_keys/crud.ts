@@ -52,11 +52,34 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .get(`/api/fleet/enrollment_api_keys`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .expect(403);
+      it('should return 200 if the passed kuery is correct', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('should return 200 if the passed kuery does not have prefix fleet-enrollment-api-keys', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery=policy_id:policy1`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is not correct', async () => {
+        await supertest
+          .get(
+            `/api/fleet/enrollment_api_keys?kuery=fleet-enrollment-api-keys.non_existent_parameter:test`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is invalid', async () => {
+        await supertest
+          .get(`/api/fleet/enrollment_api_keys?kuery='test%3A'`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
       });
     });
 
@@ -74,13 +97,6 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/enrollment_api_keys/${ENROLLMENT_KEY_ID}`)
           .auth(testUsers.setup.username, testUsers.setup.password)
           .expect(200);
-      });
-
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .get(`/api/fleet/enrollment_api_keys/${ENROLLMENT_KEY_ID}`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .expect(403);
       });
     });
 
@@ -110,14 +126,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiKeys).length(1);
         expect(apiKeys[0].invalidated).eql(true);
       });
-
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .delete(`/api/fleet/enrollment_api_keys/${keyId}`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .set('kbn-xsrf', 'xxx')
-          .expect(403);
-      });
     });
 
     describe('POST /fleet/enrollment_api_keys', () => {
@@ -131,14 +139,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return a 400 if the policy_id is not a valid policy', async () => {
+      it('should return a 404 if the policy_id does not exist', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment_api_keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'idonotexists',
           })
-          .expect(400);
+          .expect(404);
 
         expect(apiResponse.message).to.be('Agent policy "idonotexists" not found');
       });
@@ -153,17 +161,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponse.item).to.have.keys('id', 'api_key', 'api_key_id', 'name', 'policy_id');
-      });
-
-      it('should return 403 if the user does not have correct permissions', async () => {
-        await supertestWithoutAuth
-          .post(`/api/fleet/enrollment_api_keys`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            policy_id: 'policy1',
-          })
-          .expect(403);
       });
 
       it('should allow to create an enrollment api key with agent policy and unique name', async () => {
@@ -192,11 +189,11 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something',
           })
-          .expect(400);
+          .expect(409);
 
         expect(noSpacesDupe).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          statusCode: 409,
+          error: 'Conflict',
           message: 'An enrollment key named something already exists for agent policy policy1',
         });
 
@@ -207,10 +204,10 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something else',
           })
-          .expect(400);
+          .expect(409);
         expect(hasSpacesDupe).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          statusCode: 409,
+          error: 'Conflict',
           message: 'An enrollment key named something else already exists for agent policy policy1',
         });
       });
@@ -302,8 +299,11 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should get and delete with deprecated API', async () => {
-        await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
-        await supertest.get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`).expect(200);
+        await supertest.get(`/api/fleet/enrollment-api-keys`).set('kbn-xsrf', 'xxx').expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
         await supertest
           .delete(`/api/fleet/enrollment-api-keys/${keyId}`)

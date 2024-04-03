@@ -87,3 +87,5 @@ export function getEditPath(
 export function getFullPath(id?: string) {
   return `/app/${PLUGIN_ID}${id ? getEditPath(id) : getBasePath()}`;
 }
+
+export const COLOR_MAPPING_OFF_BY_DEFAULT = false;

@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
 import {
-  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiContextMenu,
@@ -20,14 +19,16 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiConfirmModal,
-  EuiCheckbox,
 } from '@elastic/eui';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
-import { INDEX_OPEN } from '../../../../../../common/constants';
-import { AppContextConsumer } from '../../../../app_context';
+import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
+import { getIndexDetailsLink } from '../../../../services/routing';
+import { AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
+  static contextType = AppContext;
+
   constructor(props) {
     super(props);
 
@@ -46,25 +47,28 @@ export class IndexActionsContextMenu extends Component {
   confirmAction = (isActionConfirmed) => {
     this.setState({ isActionConfirmed });
   };
-  panels({ services: { extensionsService }, core: { getUrlForApp } }) {
+  panels() {
+    const {
+      services: { extensionsService },
+      core: { getUrlForApp },
+      history,
+      config: { enableIndexActions },
+    } = this.context;
+
     const {
       closeIndices,
       openIndices,
       flushIndices,
       refreshIndices,
       clearCacheIndices,
-      editIndex,
-      showMapping,
-      showStats,
-      showSettings,
-      detailPanel,
+      isOnListView,
       indexNames,
       indexStatusByName,
       performExtensionAction,
       indices,
       reloadIndices,
       unfreezeIndices,
-      hasSystemIndex,
+      indicesListURLParams,
     } = this.props;
     const allOpen = every(indexNames, (indexName) => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -72,53 +76,55 @@ export class IndexActionsContextMenu extends Component {
     const allFrozen = every(indices, (index) => index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
-    if (!detailPanel && selectedIndexCount === 1) {
+    if (isOnListView && selectedIndexCount === 1) {
+      items.push({
+        'data-test-subj': 'showOverviewIndexMenuButton',
+        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexOverviewLabel', {
+          defaultMessage: 'Show index overview',
+        }),
+        onClick: () => {
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Overview)
+          );
+        },
+      });
       items.push({
         'data-test-subj': 'showSettingsIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel', {
-          defaultMessage:
-            'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
-          values: { selectedIndexCount },
+          defaultMessage: 'Show index settings',
         }),
         onClick: () => {
-          this.closePopoverAndExecute(showSettings);
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Settings)
+          );
         },
       });
       items.push({
         'data-test-subj': 'showMappingsIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel', {
-          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
-          values: { selectedIndexCount },
+          defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          this.closePopoverAndExecute(showMapping);
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Mappings)
+          );
         },
       });
-      if (allOpen) {
+      if (allOpen && enableIndexActions) {
         items.push({
           'data-test-subj': 'showStatsIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel', {
-            defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
-            values: { selectedIndexCount },
+            defaultMessage: 'Show index stats',
           }),
           onClick: () => {
-            this.closePopoverAndExecute(showStats);
+            history.push(
+              getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Stats)
+            );
           },
         });
       }
-      items.push({
-        'data-test-subj': 'editIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel', {
-          defaultMessage:
-            'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
-          values: { selectedIndexCount },
-        }),
-        onClick: () => {
-          this.closePopoverAndExecute(editIndex);
-        },
-      });
     }
-    if (allOpen) {
+    if (allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'closeIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndexLabel', {
@@ -126,11 +132,6 @@ export class IndexActionsContextMenu extends Component {
           values: { selectedIndexCount },
         }),
         onClick: () => {
-          if (hasSystemIndex) {
-            this.closePopover();
-            this.setState({ renderConfirmModal: this.renderConfirmCloseModal });
-            return;
-          }
           this.closePopoverAndExecute(closeIndices);
         },
       });
@@ -187,7 +188,7 @@ export class IndexActionsContextMenu extends Component {
           },
         });
       }
-    } else {
+    } else if (!allOpen && enableIndexActions) {
       items.push({
         'data-test-subj': 'openIndexMenuButton',
         name: i18n.translate('xpack.idxMgmt.indexActionsMenu.openIndexLabel', {
@@ -200,6 +201,7 @@ export class IndexActionsContextMenu extends Component {
       });
     }
     items.push({
+      'data-test-subj': 'deleteIndexMenuButton',
       name: i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndexLabel', {
         defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
         values: { selectedIndexCount },
@@ -374,6 +376,7 @@ export class IndexActionsContextMenu extends Component {
             helpText={helpText}
           >
             <EuiFieldNumber
+              data-test-subj="indexActionsForcemergeNumSegments"
               onChange={(event) => {
                 this.setState({ forcemergeSegments: event.target.value });
               }}
@@ -387,8 +390,7 @@ export class IndexActionsContextMenu extends Component {
   };
 
   renderConfirmDeleteModal = () => {
-    const { deleteIndices, indexNames, hasSystemIndex, isSystemIndexByName } = this.props;
-    const { isActionConfirmed } = this.state;
+    const { deleteIndices, indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
 
     const standardIndexModalBody = (
@@ -416,69 +418,6 @@ export class IndexActionsContextMenu extends Component {
       </Fragment>
     );
 
-    const systemIndexModalBody = (
-      <Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
-            defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
-            values={{ selectedIndexCount }}
-          />
-        </p>
-
-        <ul>
-          {indexNames.map((indexName) => (
-            <li key={indexName}>
-              {indexName}
-              {isSystemIndexByName[indexName] ? (
-                <Fragment>
-                  {' '}
-                  <EuiBadge iconType="warning" color="hollow">
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexActionsMenu.deleteIndex.systemIndexLabel"
-                      defaultMessage="System index"
-                    />
-                  </EuiBadge>
-                </Fragment>
-              ) : (
-                ''
-              )}
-            </li>
-          ))}
-        </ul>
-
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutTitle',
-            {
-              defaultMessage: 'Deleting a system index can break Kibana',
-            }
-          )}
-          color="danger"
-          iconType="warning"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.deleteIndex.proceedWithCautionCallOutDescription"
-              defaultMessage="System indices are critical for internal operations.
-                If you delete a system index, you can't recover it. Make sure you have appropriate backups."
-            />
-          </p>
-          <EuiCheckbox
-            id="confirmDeleteIndicesCheckbox"
-            label={
-              <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.deleteIndex.checkboxLabel"
-                defaultMessage="I understand the consequences of deleting a system index"
-              />
-            }
-            checked={isActionConfirmed}
-            onChange={(e) => this.confirmAction(e.target.checked)}
-          />
-        </EuiCallOut>
-      </Fragment>
-    );
-
     return (
       <EuiConfirmModal
         title={i18n.translate(
@@ -494,7 +433,7 @@ export class IndexActionsContextMenu extends Component {
         }}
         onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
         buttonColor="danger"
-        confirmButtonDisabled={hasSystemIndex ? !isActionConfirmed : false}
+        confirmButtonDisabled={false}
         cancelButtonText={i18n.translate(
           'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
           {
@@ -509,165 +448,63 @@ export class IndexActionsContextMenu extends Component {
           }
         )}
       >
-        {hasSystemIndex ? systemIndexModalBody : standardIndexModalBody}
-      </EuiConfirmModal>
-    );
-  };
-
-  renderConfirmCloseModal = () => {
-    const { closeIndices, indexNames, isSystemIndexByName } = this.props;
-    const { isActionConfirmed } = this.state;
-    const selectedIndexCount = indexNames.length;
-
-    return (
-      <EuiConfirmModal
-        title={i18n.translate('xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.modalTitle', {
-          defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {# indices} }',
-          values: { selectedIndexCount },
-        })}
-        onCancel={() => {
-          this.confirmAction(false);
-          this.closeConfirmModal();
-        }}
-        onConfirm={() => this.closePopoverAndExecute(closeIndices)}
-        buttonColor="danger"
-        confirmButtonDisabled={!isActionConfirmed}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.closeIndex.confirmModal.confirmButtonText',
-          {
-            defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
-            values: { selectedIndexCount },
-          }
-        )}
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexActionsMenu.closeIndex.closeDescription"
-            defaultMessage="You are about to close {selectedIndexCount, plural, one {this index} other {these indices} }:"
-            values={{ selectedIndexCount }}
-          />
-        </p>
-
-        <ul>
-          {indexNames.map((indexName) => (
-            <li key={indexName}>
-              {indexName}
-              {isSystemIndexByName[indexName] ? (
-                <Fragment>
-                  {' '}
-                  <EuiBadge iconType="warning" color="hollow">
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexActionsMenu.closeIndex.systemIndexLabel"
-                      defaultMessage="System index"
-                    />
-                  </EuiBadge>
-                </Fragment>
-              ) : (
-                ''
-              )}
-            </li>
-          ))}
-        </ul>
-
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutTitle',
-            {
-              defaultMessage: 'Closing a system index can break Kibana',
-            }
-          )}
-          color="danger"
-          iconType="warning"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.closeIndex.proceedWithCautionCallOutDescription"
-              defaultMessage="System indices are critical for internal operations.
-                  You can reopen the index using the Open Index API."
-            />
-          </p>
-          <EuiCheckbox
-            id="confirmCloseIndicesCheckbox"
-            label={
-              <FormattedMessage
-                id="xpack.idxMgmt.indexActionsMenu.closeIndex.checkboxLabel"
-                defaultMessage="I understand the consequences of closing a system index"
-              />
-            }
-            checked={isActionConfirmed}
-            onChange={(e) => this.confirmAction(e.target.checked)}
-          />
-        </EuiCallOut>
+        {standardIndexModalBody}
       </EuiConfirmModal>
     );
   };
 
   render() {
+    const { indexNames } = this.props;
+    const selectedIndexCount = indexNames.length;
+    const {
+      iconSide = 'right',
+      anchorPosition = 'rightUp',
+      label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
+        defaultMessage:
+          'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
+        values: { selectedIndexCount },
+      }),
+      iconType = 'arrowDown',
+      fill = true,
+      isLoading = false,
+    } = this.props;
+
+    const panels = this.panels();
+
+    const button = (
+      <EuiButton
+        data-test-subj="indexActionsContextMenuButton"
+        iconSide={iconSide}
+        aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
+          defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
+          values: { selectedIndexCount },
+        })}
+        onClick={this.onButtonClick}
+        iconType={iconType}
+        fill={fill}
+        isLoading={isLoading}
+      >
+        {label}
+      </EuiButton>
+    );
+
     return (
-      <AppContextConsumer>
-        {(appDependencies) => {
-          const { indexNames } = this.props;
-          const selectedIndexCount = indexNames.length;
-          const {
-            iconSide = 'right',
-            anchorPosition = 'rightUp',
-            label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
-              defaultMessage:
-                'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
-              values: { selectedIndexCount },
-            }),
-            iconType = 'arrowDown',
-          } = this.props;
-
-          const panels = this.panels(appDependencies);
-
-          const button = (
-            <EuiButton
-              data-test-subj="indexActionsContextMenuButton"
-              iconSide={iconSide}
-              aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
-                defaultMessage:
-                  '{selectedIndexCount, plural, one {index} other {indices} } options',
-                values: { selectedIndexCount },
-              })}
-              onClick={this.onButtonClick}
-              iconType={iconType}
-              fill
-            >
-              {label}
-            </EuiButton>
-          );
-
-          return (
-            <div>
-              {this.state.renderConfirmModal
-                ? this.state.renderConfirmModal(this.closeConfirmModal)
-                : null}
-              <EuiPopover
-                id="contextMenuIndices"
-                button={button}
-                isOpen={this.state.isPopoverOpen}
-                closePopover={this.closePopover}
-                panelPaddingSize="none"
-                anchorPosition={anchorPosition}
-                repositionOnScroll
-              >
-                <EuiContextMenu
-                  data-test-subj="indexContextMenu"
-                  initialPanelId={0}
-                  panels={panels}
-                />
-              </EuiPopover>
-            </div>
-          );
-        }}
-      </AppContextConsumer>
+      <div>
+        {this.state.renderConfirmModal
+          ? this.state.renderConfirmModal(this.closeConfirmModal)
+          : null}
+        <EuiPopover
+          id="contextMenuIndices"
+          button={button}
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this.closePopover}
+          panelPaddingSize="none"
+          anchorPosition={anchorPosition}
+          repositionOnScroll
+        >
+          <EuiContextMenu data-test-subj="indexContextMenu" initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      </div>
     );
   }
 }

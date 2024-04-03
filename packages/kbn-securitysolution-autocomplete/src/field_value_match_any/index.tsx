@@ -38,6 +38,7 @@ interface AutocompleteFieldMatchAnyProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string[]) => void;
   onError?: (arg: boolean) => void;
+  'aria-label'?: string;
 }
 
 export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatchAnyProps> = ({
@@ -53,6 +54,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   onChange,
   onError,
   autocompleteService,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
@@ -184,28 +186,31 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
           onSearchChange={handleSearchChange}
           onCreateOption={handleCreateOption}
           isInvalid={selectedField != null && error != null}
+          isCaseSensitive
           onBlur={setIsTouchedValue}
           data-test-subj="valuesAutocompleteMatchAny"
+          aria-label={ariaLabel}
           fullWidth
           async
         />
       </EuiFormRow>
     );
   }, [
-    comboOptions,
-    error,
-    handleCreateOption,
-    handleSearchChange,
-    handleValuesChange,
-    inputPlaceholder,
-    isClearable,
-    isDisabled,
-    isLoadingState,
     rowLabel,
-    selectedComboOptions,
+    error,
     selectedField,
     showSpacesWarning,
+    inputPlaceholder,
+    isLoadingState,
+    isClearable,
+    isDisabled,
+    comboOptions,
+    selectedComboOptions,
+    handleValuesChange,
+    handleSearchChange,
+    handleCreateOption,
     setIsTouchedValue,
+    ariaLabel,
   ]);
 
   if (!isSuggestingValues && selectedField != null) {
@@ -231,6 +236,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
               isInvalid={selectedField != null && error != null}
               onFocus={setIsTouchedValue}
               data-test-subj="valuesAutocompleteMatchAnyNumber"
+              aria-label={ariaLabel}
               fullWidth
             />
           </EuiFormRow>

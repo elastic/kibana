@@ -14,8 +14,6 @@ enum DurationUnit {
   'Day' = 'd',
   'Week' = 'w',
   'Month' = 'M',
-  'Quarter' = 'Q',
-  'Year' = 'Y',
 }
 
 class Duration {
@@ -55,6 +53,14 @@ class Duration {
   format(): string {
     return `${this.value}${this.unit}`;
   }
+
+  asSeconds(): number {
+    return moment.duration(this.value, toMomentUnitOfTime(this.unit)).asSeconds();
+  }
+
+  asMinutes(): number {
+    return moment.duration(this.value, toMomentUnitOfTime(this.unit)).asMinutes();
+  }
 }
 
 const toDurationUnit = (unit: string): DurationUnit => {
@@ -69,10 +75,6 @@ const toDurationUnit = (unit: string): DurationUnit => {
       return DurationUnit.Week;
     case 'M':
       return DurationUnit.Month;
-    case 'Q':
-      return DurationUnit.Quarter;
-    case 'y':
-      return DurationUnit.Year;
     default:
       throw new Error('invalid duration unit');
   }
@@ -90,10 +92,6 @@ const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
       return 'weeks';
     case DurationUnit.Month:
       return 'months';
-    case DurationUnit.Quarter:
-      return 'quarters';
-    case DurationUnit.Year:
-      return 'years';
     default:
       assertNever(unit);
   }

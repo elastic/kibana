@@ -79,6 +79,19 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.buildFlavor",
+            "type": "string",
+            "tags": [],
+            "label": "buildFlavor",
+            "description": [
+              "\nWhether the environment is 'serverless' or 'traditional'"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.prebuiltRulesPackageVersion",
             "type": "string",
             "tags": [],
@@ -101,7 +114,21 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly assistantStreamingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.configSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "configSettings",
+            "description": [],
+            "signature": [
+              "ConfigSettings"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -315,7 +342,7 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "() => {}"
+              "() => void"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
@@ -390,256 +417,77 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-public.UpsellingService",
-        "type": "Class",
-        "tags": [],
-        "label": "UpsellingService",
-        "description": [],
-        "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.sections$",
-            "type": "Object",
-            "tags": [],
-            "label": "sections$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<Map<\"entity_analytics_panel\", React.ComponentType<{}>>>"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.pages$",
-            "type": "Object",
-            "tags": [],
-            "label": "pages$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<Map<",
-              {
-                "pluginId": "securitySolution",
-                "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
-                "section": "def-common.SecurityPageName",
-                "text": "SecurityPageName"
-              },
-              ", React.ComponentType<{}>>>"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerSections",
-            "type": "Function",
-            "tags": [],
-            "label": "registerSections",
-            "description": [],
-            "signature": [
-              "(sections: Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>) => void"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerSections.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "sections",
-                "description": [],
-                "signature": [
-                  "Partial<Record<\"entity_analytics_panel\", React.ComponentType<{}>>>"
-                ],
-                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.registerPages",
-            "type": "Function",
-            "tags": [],
-            "label": "registerPages",
-            "description": [],
-            "signature": [
-              "(pages: Partial<Record<",
-              {
-                "pluginId": "securitySolution",
-                "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
-                "section": "def-common.SecurityPageName",
-                "text": "SecurityPageName"
-              },
-              ", React.ComponentType<{}>>>) => void"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.registerPages.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "pages",
-                "description": [],
-                "signature": [
-                  "Partial<Record<",
-                  {
-                    "pluginId": "securitySolution",
-                    "scope": "common",
-                    "docId": "kibSecuritySolutionPluginApi",
-                    "section": "def-common.SecurityPageName",
-                    "text": "SecurityPageName"
-                  },
-                  ", React.ComponentType<{}>>>"
-                ],
-                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.isPageUpsellable",
-            "type": "Function",
-            "tags": [],
-            "label": "isPageUpsellable",
-            "description": [],
-            "signature": [
-              "(id: ",
-              {
-                "pluginId": "securitySolution",
-                "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
-                "section": "def-common.SecurityPageName",
-                "text": "SecurityPageName"
-              },
-              ") => boolean"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.isPageUpsellable.$1",
-                "type": "Enum",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "securitySolution",
-                    "scope": "common",
-                    "docId": "kibSecuritySolutionPluginApi",
-                    "section": "def-common.SecurityPageName",
-                    "text": "SecurityPageName"
-                  }
-                ],
-                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.UpsellingService.getPageUpselling",
-            "type": "Function",
-            "tags": [],
-            "label": "getPageUpselling",
-            "description": [],
-            "signature": [
-              "(id: ",
-              {
-                "pluginId": "securitySolution",
-                "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
-                "section": "def-common.SecurityPageName",
-                "text": "SecurityPageName"
-              },
-              ") => React.ComponentType<{}> | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "securitySolution",
-                "id": "def-public.UpsellingService.getPageUpselling.$1",
-                "type": "Enum",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "securitySolution",
-                    "scope": "common",
-                    "docId": "kibSecuritySolutionPluginApi",
-                    "section": "def-common.SecurityPageName",
-                    "text": "SecurityPageName"
-                  }
-                ],
-                "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/upselling_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-public.NavigationLink",
+        "id": "def-public.FetchRulesResponse",
         "type": "Interface",
         "tags": [],
-        "label": "NavigationLink",
+        "label": "FetchRulesResponse",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.FetchRulesResponse.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.FetchRulesResponse.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.FetchRulesResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.FetchRulesResponse.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "({ id: string; type: \"eql\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; query: string; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"eql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; index?: string[] | undefined; data_view_id?: string | undefined; filters?: unknown[] | undefined; event_category_override?: string | undefined; tiebreaker_field?: string | undefined; timestamp_field?: string | undefined; } | { id: string; type: \"query\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; query: string; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; index?: string[] | undefined; filters?: unknown[] | undefined; data_view_id?: string | undefined; saved_id?: string | undefined; response_actions?: ({ params: { query?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { field?: string | undefined; value?: string | string[] | undefined; }, { field?: string | undefined; value?: string | string[] | undefined; }>, \"strip\"> | undefined; queries?: { id: string; query: string; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { field?: string | undefined; value?: string | string[] | undefined; }, { field?: string | undefined; value?: string | string[] | undefined; }>, \"strip\"> | undefined; version?: string | undefined; platform?: string | undefined; removed?: boolean | undefined; snapshot?: boolean | undefined; }[] | undefined; pack_id?: string | undefined; saved_query_id?: string | undefined; timeout?: number | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"h\" | \"s\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"saved_query\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; saved_id: string; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; index?: string[] | undefined; query?: string | undefined; filters?: unknown[] | undefined; data_view_id?: string | undefined; response_actions?: ({ params: { query?: string | undefined; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { field?: string | undefined; value?: string | string[] | undefined; }, { field?: string | undefined; value?: string | string[] | undefined; }>, \"strip\"> | undefined; queries?: { id: string; query: string; ecs_mapping?: Zod.objectOutputType<{}, Zod.ZodObject<{ field: Zod.ZodOptional<Zod.ZodString>; value: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodArray<Zod.ZodString, \"many\">]>>; }, \"strip\", Zod.ZodTypeAny, { field?: string | undefined; value?: string | string[] | undefined; }, { field?: string | undefined; value?: string | string[] | undefined; }>, \"strip\"> | undefined; version?: string | undefined; platform?: string | undefined; removed?: boolean | undefined; snapshot?: boolean | undefined; }[] | undefined; pack_id?: string | undefined; saved_query_id?: string | undefined; timeout?: number | undefined; }; action_type_id: \".osquery\"; } | { params: { command: \"isolate\"; comment?: string | undefined; } | { config: { field: string; overwrite: boolean; }; command: \"kill-process\" | \"suspend-process\"; comment?: string | undefined; }; action_type_id: \".endpoint\"; })[] | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"h\" | \"s\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; } | { id: string; type: \"threshold\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; query: string; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; threshold: { value: number; field: (string | string[]) & (string | string[] | undefined); cardinality?: { value: number; field: string; }[] | undefined; }; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; index?: string[] | undefined; filters?: unknown[] | undefined; data_view_id?: string | undefined; saved_id?: string | undefined; alert_suppression?: { duration: { value: number; unit: \"m\" | \"h\" | \"s\"; }; } | undefined; } | { id: string; type: \"threat_match\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; query: string; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; threat_query: string; threat_mapping: { entries: { type: \"mapping\"; value: string; field: string; }[]; }[]; threat_index: string[]; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; index?: string[] | undefined; filters?: unknown[] | undefined; data_view_id?: string | undefined; saved_id?: string | undefined; alert_suppression?: { group_by: string[]; duration?: { value: number; unit: \"m\" | \"h\" | \"s\"; } | undefined; missing_fields_strategy?: \"doNotSuppress\" | \"suppress\" | undefined; } | undefined; threat_filters?: unknown[] | undefined; threat_indicator_path?: string | undefined; threat_language?: \"lucene\" | \"kuery\" | undefined; concurrent_searches?: number | undefined; items_per_search?: number | undefined; } | { id: string; type: \"machine_learning\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; anomaly_threshold: number; machine_learning_job_id: (string | string[]) & (string | string[] | undefined); namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; } | { id: string; type: \"new_terms\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; query: string; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"kuery\" | \"lucene\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; new_terms_fields: string[]; history_window_start: string; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; index?: string[] | undefined; filters?: unknown[] | undefined; data_view_id?: string | undefined; } | { id: string; type: \"esql\"; name: string; actions: { params: {} & { [k: string]: unknown; }; id: string; group: string; action_type_id: string; uuid?: string | undefined; alerts_filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; frequency?: { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; } | undefined; }[]; tags: string[]; setup: string; enabled: boolean; revision: number; query: string; version: number; references: string[]; interval: string; description: string; risk_score: number; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; from: string; to: string; language: \"esql\"; created_at: string; created_by: string; updated_at: string; updated_by: string; author: string[]; immutable: boolean; rule_id: string; threat: { framework: string; tactic: { id: string; name: string; reference: string; }; technique?: { id: string; name: string; reference: string; subtechnique?: { id: string; name: string; reference: string; }[] | undefined; }[] | undefined; }[]; risk_score_mapping: { value: string; field: string; operator: \"equals\"; risk_score?: number | undefined; }[]; severity_mapping: { value: string; field: string; severity: \"medium\" | \"high\" | \"low\" | \"critical\"; operator: \"equals\"; }[]; exceptions_list: { id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; namespace_type: \"single\" | \"agnostic\"; }[]; false_positives: string[]; max_signals: number; related_integrations: { version: string; package: string; integration?: string | undefined; }[]; required_fields: { type: string; name: string; ecs: boolean; }[]; namespace?: string | undefined; license?: string | undefined; throttle?: string | undefined; outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; alias_target_id?: string | undefined; alias_purpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; meta?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; note?: string | undefined; rule_name_override?: string | undefined; timestamp_override?: string | undefined; timestamp_override_fallback_disabled?: boolean | undefined; timeline_id?: string | undefined; timeline_title?: string | undefined; building_block_type?: string | undefined; output_index?: string | undefined; investigation_fields?: { field_names: string[]; } | undefined; execution_summary?: { last_execution: { message: string; date: string; status: \"running\" | \"succeeded\" | \"failed\" | \"going to run\" | \"partial failure\"; metrics: { total_search_duration_ms?: number | undefined; total_indexing_duration_ms?: number | undefined; total_enrichment_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; }; status_order: number; }; } | undefined; })[]"
+            ],
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management/logic/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.LinkItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "LinkItem",
         "description": [],
         "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
         "deprecated": false,
@@ -647,25 +495,44 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.categories",
+            "id": "def-public.LinkItem.capabilities",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [
+              "\nCapabilities strings (using object dot notation) to enable the link.\n\nThe format of defining features supports OR and AND mechanism. To specify features in an OR fashion\nthey can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features\nis satisfied the link would be included. To require that the features be AND'd together a second level array\ncan be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify\nfeatures that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean\noperation feature1 && feature2.\n\nThe final format is to specify a single feature, this would be like: features: feature1, which is the same as\nfeatures: [feature1]"
+            ],
+            "signature": [
+              "RequiredCapabilities",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.categories",
             "type": "Object",
             "tags": [],
             "label": "categories",
-            "description": [],
+            "description": [
+              "\nCategories to display in the navigation"
+            ],
             "signature": [
               "readonly ",
               {
-                "pluginId": "@kbn/security-solution-side-nav",
+                "pluginId": "@kbn/security-solution-navigation",
                 "scope": "common",
-                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "docId": "kibKbnSecuritySolutionNavigationPluginApi",
                 "section": "def-common.LinkCategory",
                 "text": "LinkCategory"
               },
               "<",
               {
-                "pluginId": "securitySolution",
+                "pluginId": "@kbn/deeplinks-security",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibKbnDeeplinksSecurityPluginApi",
                 "section": "def-common.SecurityPageName",
                 "text": "SecurityPageName"
               },
@@ -677,11 +544,13 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.description",
+            "id": "def-public.LinkItem.description",
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": [],
+            "description": [
+              "\nThe description of the link content"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -691,11 +560,45 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.disabled",
+            "id": "def-public.LinkItem.experimentalKey",
             "type": "CompoundType",
             "tags": [],
-            "label": "disabled",
-            "description": [],
+            "label": "experimentalKey",
+            "description": [
+              "\nExperimental flag needed to enable the link"
+            ],
+            "signature": [
+              "\"assistantModelEvaluation\" | \"assistantStreamingEnabled\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.globalNavPosition",
+            "type": "number",
+            "tags": [],
+            "label": "globalNavPosition",
+            "description": [
+              "\nGlobal navigation position number.\nDefine this property only if the link needs to be visible within\nthe Security section of the Kibana collapsible global navigation"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.globalSearchDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "globalSearchDisabled",
+            "description": [
+              "\nDisables link in the global search. Defaults to false."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -705,16 +608,66 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.id",
+            "id": "def-public.LinkItem.globalSearchKeywords",
+            "type": "Array",
+            "tags": [],
+            "label": "globalSearchKeywords",
+            "description": [
+              "\nKeywords for the global search to search."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.hideTimeline",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTimeline",
+            "description": [
+              "\nDisables the timeline call to action on the bottom of the page. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.hideWhenExperimentalKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideWhenExperimentalKey",
+            "description": [
+              "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
+            ],
+            "signature": [
+              "\"assistantModelEvaluation\" | \"assistantStreamingEnabled\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.id",
             "type": "Enum",
             "tags": [],
             "label": "id",
-            "description": [],
+            "description": [
+              "\nLink id. Refers to a SecurityPageName"
+            ],
             "signature": [
               {
-                "pluginId": "securitySolution",
+                "pluginId": "@kbn/deeplinks-security",
                 "scope": "common",
-                "docId": "kibSecuritySolutionPluginApi",
+                "docId": "kibKbnDeeplinksSecurityPluginApi",
                 "section": "def-common.SecurityPageName",
                 "text": "SecurityPageName"
               }
@@ -725,11 +678,45 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.landingIcon",
+            "id": "def-public.LinkItem.isBeta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBeta",
+            "description": [
+              "\nDisplays the \"Beta\" badge. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.betaOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "betaOptions",
+            "description": [
+              "\nCustomize the \"Beta\" badge content."
+            ],
+            "signature": [
+              "{ text: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.landingIcon",
             "type": "CompoundType",
             "tags": [],
             "label": "landingIcon",
-            "description": [],
+            "description": [
+              "\nIcon that is displayed on menu navigation landing page.\nOnly required for pages that are displayed inside a landing page."
+            ],
             "signature": [
               "IconType",
               " | undefined"
@@ -740,11 +727,13 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.landingImage",
+            "id": "def-public.LinkItem.landingImage",
             "type": "string",
             "tags": [],
             "label": "landingImage",
-            "description": [],
+            "description": [
+              "\nImage that is displayed on menu navigation landing page.\nOnly required for pages that are displayed inside a landing page."
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -754,18 +743,36 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.links",
+            "id": "def-public.LinkItem.licenseType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "licenseType",
+            "description": [
+              "\nMinimum license required to enable the link"
+            ],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.links",
             "type": "Array",
             "tags": [],
             "label": "links",
-            "description": [],
+            "description": [
+              "\nNested links"
+            ],
             "signature": [
               {
                 "pluginId": "securitySolution",
                 "scope": "public",
                 "docId": "kibSecuritySolutionPluginApi",
-                "section": "def-public.NavigationLink",
-                "text": "NavigationLink"
+                "section": "def-public.LinkItem",
+                "text": "LinkItem"
               },
               "[] | undefined"
             ],
@@ -775,22 +782,42 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.title",
+            "id": "def-public.LinkItem.path",
             "type": "string",
             "tags": [],
-            "label": "title",
-            "description": [],
+            "label": "path",
+            "description": [
+              "\nLink path relative to security root"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.sideNavIcon",
+            "id": "def-public.LinkItem.sideNavDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sideNavDisabled",
+            "description": [
+              "\nDisables link in the side navigation. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.sideNavIcon",
             "type": "CompoundType",
             "tags": [],
             "label": "sideNavIcon",
-            "description": [],
+            "description": [
+              "\nIcon that is displayed on the side navigation menu."
+            ],
             "signature": [
               "IconType",
               " | undefined"
@@ -801,11 +828,13 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.skipUrlState",
+            "id": "def-public.LinkItem.skipUrlState",
             "type": "CompoundType",
             "tags": [],
             "label": "skipUrlState",
-            "description": [],
+            "description": [
+              "\nDisables the state query string in the URL. Defaults to false."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -815,11 +844,26 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.unauthorized",
+            "id": "def-public.LinkItem.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nTitle of the link"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.unauthorized",
             "type": "CompoundType",
             "tags": [],
             "label": "unauthorized",
-            "description": [],
+            "description": [
+              "\nReserved for links management, this property is set automatically"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -829,27 +873,22 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.isBeta",
-            "type": "CompoundType",
+            "id": "def-public.LinkItem.visibleIn",
+            "type": "Array",
             "tags": [],
-            "label": "isBeta",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
+            "label": "visibleIn",
+            "description": [
+              "\nLocations where the link is visible in the UI"
             ],
-            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.NavigationLink.betaOptions",
-            "type": "Object",
-            "tags": [],
-            "label": "betaOptions",
-            "description": [],
             "signature": [
-              "{ text: string; } | undefined"
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLinkLocations",
+                "text": "AppDeepLinkLocations"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -865,7 +904,7 @@
         "tags": [],
         "label": "TimelineModel",
         "description": [],
-        "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+        "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -881,7 +920,7 @@
             "signature": [
               "TimelineTabs"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -895,7 +934,7 @@
             "signature": [
               "TimelineTabs"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -912,7 +951,7 @@
               "ScrollToTopEvent",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -928,7 +967,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,7 +980,7 @@
             "description": [
               "A summary of the events and notes in this timeline"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -961,7 +1000,7 @@
                 "text": "EqlOptionsSelected"
               }
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -978,7 +1017,7 @@
               "TimelineEventsType",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -994,7 +1033,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1010,7 +1049,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1023,7 +1062,7 @@
             "description": [
               "The chronological history of actions related to this timeline"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1036,7 +1075,7 @@
             "description": [
               "When true, this timeline was marked as \"favorite\" by the user"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1049,7 +1088,7 @@
             "description": [
               "When true, the timeline will update as new data arrives"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1065,7 +1104,7 @@
             "signature": [
               "\"search\" | \"filter\""
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1078,7 +1117,7 @@
             "description": [
               "Title"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1094,7 +1133,7 @@
             "signature": [
               "TimelineType"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,7 +1149,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1126,7 +1165,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1142,7 +1181,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1158,7 +1197,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1174,7 +1213,7 @@
               "PinnedEvent",
               "; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1189,7 +1228,7 @@
               "ResolveTimelineConfig",
               " | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1203,7 +1242,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1217,7 +1256,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1232,7 +1271,7 @@
               "SessionViewConfig",
               " | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1245,7 +1284,7 @@
             "description": [
               "When true, show the timeline flyover"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1261,7 +1300,7 @@
             "signature": [
               "TimelineStatus"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1277,7 +1316,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1293,7 +1332,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1306,7 +1345,7 @@
             "description": [
               "timeline is saving"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1320,7 +1359,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,7 +1373,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1348,7 +1387,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1365,7 +1404,7 @@
               "SortColumnTimeline",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1382,7 +1421,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1397,7 +1436,7 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1420,7 +1459,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1436,7 +1475,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1452,7 +1491,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1463,7 +1502,7 @@
             "tags": [],
             "label": "documentType",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1478,28 +1517,28 @@
               "RowRendererId",
               "[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.filterManager",
-            "type": "Object",
+            "id": "def-public.TimelineModel.filters",
+            "type": "Array",
             "tags": [],
-            "label": "filterManager",
+            "label": "filters",
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.FilterManager",
-                "text": "FilterManager"
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
               },
-              " | undefined"
+              "[] | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1513,7 +1552,7 @@
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1527,7 +1566,7 @@
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1541,7 +1580,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1569,9 +1608,11 @@
               "ExpandedDetailType",
               " | undefined; securityAssistant?: ",
               "ExpandedDetailType",
+              " | undefined; esql?: ",
+              "ExpandedDetailType",
               " | undefined; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1587,7 +1628,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1601,7 +1642,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1614,7 +1655,7 @@
             "description": [
               "The number of items to show in a single page of results"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1630,7 +1671,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1648,7 +1689,7 @@
               "SerializedFilterQuery",
               " | null; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1664,7 +1705,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1680,7 +1721,7 @@
             "signature": [
               "{ start: string; end: string; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1693,28 +1734,7 @@
             "description": [
               "Uniquely identifies the timeline"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1736,7 +1756,7 @@
               },
               "[]; }"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1749,7 +1769,7 @@
             "description": [
               "If selectAll checkbox in header is checked"
             ],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1760,7 +1780,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1771,7 +1791,110 @@
             "tags": [],
             "label": "selectAll",
             "description": [],
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/model.ts",
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.savedSearchId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearchId",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.savedSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.SavedSearch",
+                "text": "SavedSearch"
+              },
+              " | null"
+            ],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.isDataProviderVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDataProviderVisible",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.changed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "changed",
+            "description": [
+              "used to mark the timeline as unsaved in the UI"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.rowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.TimelineModel.confirmingNoteId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "confirmingNoteId",
+            "description": [
+              "the note id pending deletion"
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1783,45 +1906,72 @@
     "misc": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-public.PageUpsellings",
-        "type": "Type",
+        "id": "def-public.AddIntegrationsSteps",
+        "type": "string",
         "tags": [],
-        "label": "PageUpsellings",
+        "label": "AddIntegrationsSteps",
         "description": [],
-        "signature": [
-          "{ administration?: React.ComponentType<{}> | undefined; alerts?: React.ComponentType<{}> | undefined; blocklist?: React.ComponentType<{}> | undefined; cases?: React.ComponentType<{}> | undefined; cases_configure?: React.ComponentType<{}> | undefined; cases_create?: React.ComponentType<{}> | undefined; \"cloud_security_posture-benchmarks\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-dashboard\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-findings\"?: React.ComponentType<{}> | undefined; \"cloud_security_posture-rules\"?: React.ComponentType<{}> | undefined; \"cloud_defend-policies\"?: React.ComponentType<{}> | undefined; dashboards?: React.ComponentType<{}> | undefined; data_quality?: React.ComponentType<{}> | undefined; detections?: React.ComponentType<{}> | undefined; detection_response?: React.ComponentType<{}> | undefined; endpoints?: React.ComponentType<{}> | undefined; event_filters?: React.ComponentType<{}> | undefined; exceptions?: React.ComponentType<{}> | undefined; explore?: React.ComponentType<{}> | undefined; host_isolation_exceptions?: React.ComponentType<{}> | undefined; hosts?: React.ComponentType<{}> | undefined; \"hosts-anomalies\"?: React.ComponentType<{}> | undefined; \"hosts-risk\"?: React.ComponentType<{}> | undefined; \"hosts-events\"?: React.ComponentType<{}> | undefined; investigate?: React.ComponentType<{}> | undefined; kubernetes?: React.ComponentType<{}> | undefined; get_started?: React.ComponentType<{}> | undefined; network?: React.ComponentType<{}> | undefined; \"network-anomalies\"?: React.ComponentType<{}> | undefined; \"network-dns\"?: React.ComponentType<{}> | undefined; \"network-events\"?: React.ComponentType<{}> | undefined; \"network-http\"?: React.ComponentType<{}> | undefined; \"network-tls\"?: React.ComponentType<{}> | undefined; \"\"?: React.ComponentType<{}> | undefined; overview?: React.ComponentType<{}> | undefined; policy?: React.ComponentType<{}> | undefined; response_actions_history?: React.ComponentType<{}> | undefined; rules?: React.ComponentType<{}> | undefined; \"rules-add\"?: React.ComponentType<{}> | undefined; \"rules-create\"?: React.ComponentType<{}> | undefined; \"rules-landing\"?: React.ComponentType<{}> | undefined; sessions?: React.ComponentType<{}> | undefined; \"threat_intelligence-indicators\"?: React.ComponentType<{}> | undefined; timelines?: React.ComponentType<{}> | undefined; \"timelines-templates\"?: React.ComponentType<{}> | undefined; trusted_apps?: React.ComponentType<{}> | undefined; uncommon_processes?: React.ComponentType<{}> | undefined; users?: React.ComponentType<{}> | undefined; \"users-anomalies\"?: React.ComponentType<{}> | undefined; \"users-authentications\"?: React.ComponentType<{}> | undefined; \"users-events\"?: React.ComponentType<{}> | undefined; \"users-risk\"?: React.ComponentType<{}> | undefined; \"entity-analytics\"?: React.ComponentType<{}> | undefined; \"entity-analytics-management\"?: React.ComponentType<{}> | undefined; \"coverage-overview\"?: React.ComponentType<{}> | undefined; }"
-        ],
-        "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "securitySolution",
-        "id": "def-public.SectionUpsellings",
-        "type": "Type",
+        "id": "def-public.CreateProjectSteps",
+        "type": "string",
         "tags": [],
-        "label": "SectionUpsellings",
+        "label": "CreateProjectSteps",
         "description": [],
-        "signature": [
-          "{ entity_analytics_panel?: React.ComponentType<{}> | undefined; }"
-        ],
-        "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "securitySolution",
-        "id": "def-public.UpsellingSectionId",
-        "type": "Type",
+        "id": "def-public.EnablePrebuiltRulesSteps",
+        "type": "string",
         "tags": [],
-        "label": "UpsellingSectionId",
+        "label": "EnablePrebuiltRulesSteps",
         "description": [],
-        "signature": [
-          "\"entity_analytics_panel\""
-        ],
-        "path": "x-pack/plugins/security_solution/public/common/lib/upsellings/types.ts",
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.OverviewSteps",
+        "type": "string",
+        "tags": [],
+        "label": "OverviewSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.ViewAlertsSteps",
+        "type": "string",
+        "tags": [],
+        "label": "ViewAlertsSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.ViewDashboardSteps",
+        "type": "string",
+        "tags": [],
+        "label": "ViewDashboardSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1859,23 +2009,85 @@
         },
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginSetup.upselling",
+          "id": "def-public.PluginSetup.experimentalFeatures",
           "type": "Object",
           "tags": [],
-          "label": "upselling",
+          "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            {
-              "pluginId": "securitySolution",
-              "scope": "public",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-public.UpsellingService",
-              "text": "UpsellingService"
-            }
+            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly assistantStreamingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.setAppLinksSwitcher",
+          "type": "Function",
+          "tags": [],
+          "label": "setAppLinksSwitcher",
+          "description": [],
+          "signature": [
+            "(appLinksSwitcher: ",
+            "AppLinksSwitcher",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginSetup.setAppLinksSwitcher.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "appLinksSwitcher",
+              "description": [],
+              "signature": [
+                "AppLinksSwitcher"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.setDeepLinksFormatter",
+          "type": "Function",
+          "tags": [],
+          "label": "setDeepLinksFormatter",
+          "description": [],
+          "signature": [
+            "(deepLinksFormatter: ",
+            "DeepLinksFormatter",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginSetup.setDeepLinksFormatter.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "deepLinksFormatter",
+              "description": [],
+              "signature": [
+                "DeepLinksFormatter"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1903,13 +2115,7 @@
             "() => ",
             "Observable",
             "<",
-            {
-              "pluginId": "securitySolution",
-              "scope": "public",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-public.NavigationLink",
-              "text": "NavigationLink"
-            },
+            "NavigationLink",
             "[]>"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
@@ -1920,13 +2126,15 @@
         },
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.setIsSidebarEnabled",
+          "id": "def-public.PluginStart.setExtraRoutes",
           "type": "Function",
           "tags": [],
-          "label": "setIsSidebarEnabled",
+          "label": "setExtraRoutes",
           "description": [],
           "signature": [
-            "(isSidebarEnabled: boolean) => void"
+            "(extraRoutes: ",
+            "RouteProps",
+            "<string, { [x: string]: string | undefined; }>[]) => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -1934,13 +2142,14 @@
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-public.PluginStart.setIsSidebarEnabled.$1",
-              "type": "boolean",
+              "id": "def-public.PluginStart.setExtraRoutes.$1",
+              "type": "Array",
               "tags": [],
-              "label": "isSidebarEnabled",
+              "label": "extraRoutes",
               "description": [],
               "signature": [
-                "boolean"
+                "RouteProps",
+                "<string, { [x: string]: string | undefined; }>[]"
               ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,
@@ -1952,35 +2161,34 @@
         },
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.setGetStartedPage",
+          "id": "def-public.PluginStart.setComponents",
           "type": "Function",
           "tags": [],
-          "label": "setGetStartedPage",
+          "label": "setComponents",
           "description": [],
           "signature": [
-            "(getStartedComponent: React.ComponentType<{}>) => void"
+            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; }>) => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
+          "returnComment": [],
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-public.PluginStart.setGetStartedPage.$1",
-              "type": "CompoundType",
+              "id": "def-public.PluginStart.setComponents.$1",
+              "type": "Object",
               "tags": [],
-              "label": "getStartedComponent",
+              "label": "components",
               "description": [],
               "signature": [
-                "React.ComponentType<{}>"
+                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; }"
               ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "path": "x-pack/plugins/security_solution/public/contract_components.ts",
               "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
+              "trackAdoption": false
             }
-          ],
-          "returnComment": []
+          ]
         },
         {
           "parentPluginId": "securitySolution",
@@ -2001,6 +2209,37 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getUpselling",
+          "type": "Function",
+          "tags": [],
+          "label": "getUpselling",
+          "description": [],
+          "signature": [
+            "() => ",
+            "UpsellingService"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setOnboardingPageSettings",
+          "type": "Object",
+          "tags": [],
+          "label": "setOnboardingPageSettings",
+          "description": [],
+          "signature": [
+            "OnboardingPageService"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -2771,6 +3010,40 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getRiskScoreDataClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getRiskScoreDataClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "RiskScoreDataClient"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getAssetCriticalityDataClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getAssetCriticalityDataClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AssetCriticalityDataClient"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2786,7 +3059,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskPackagePolicyUpdateBatchSize: number; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
+          "Omit<Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; enableUiSettingsValidations: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskTimeout: string; packagerTaskPackagePolicyUpdateBatchSize: number; completeExternalResponseActionsTaskInterval: string; completeExternalResponseActionsTaskTimeout: string; maxUploadResponseActionFileBytes: number; offeringSettings: Record<string, boolean>; entityAnalytics: Readonly<{} & { riskEngine: Readonly<{} & { alertSampleSizePerShard: number; }>; }>; }>, \"offeringSettings\"> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -2794,7 +3067,9 @@
             "section": "def-common.ExperimentalFeatures",
             "text": "ExperimentalFeatures"
           },
-          "; }"
+          "; settings: ",
+          "ConfigSettings",
+          "; enableUiSettingsValidations: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,
@@ -2816,22 +3091,16 @@
       "children": [
         {
           "parentPluginId": "securitySolution",
-          "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures",
+          "id": "def-server.SecuritySolutionPluginSetup.setProductFeaturesConfigurator",
           "type": "Function",
           "tags": [],
-          "label": "setAppFeatures",
+          "label": "setProductFeaturesConfigurator",
           "description": [
-            "\nSets the app features that are available to the Security Solution"
+            "\nSets the configurations for app features that are available to the Security Solution"
           ],
           "signature": [
-            "(appFeatureKeys: ",
-            {
-              "pluginId": "securitySolution",
-              "scope": "common",
-              "docId": "kibSecuritySolutionPluginApi",
-              "section": "def-common.AppFeatureKeys",
-              "text": "AppFeatureKeys"
-            },
+            "(configurator: ",
+            "ProductFeaturesConfigurator",
             ") => void"
           ],
           "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
@@ -2841,26 +3110,35 @@
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-server.SecuritySolutionPluginSetup.setAppFeatures.$1",
-              "type": "Array",
+              "id": "def-server.SecuritySolutionPluginSetup.setProductFeaturesConfigurator.$1",
+              "type": "Object",
               "tags": [],
-              "label": "appFeatureKeys",
+              "label": "configurator",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "securitySolution",
-                  "scope": "common",
-                  "docId": "kibSecuritySolutionPluginApi",
-                  "section": "def-common.AppFeatureKey",
-                  "text": "AppFeatureKey"
-                },
-                "[]"
+                "ProductFeaturesConfigurator"
               ],
-              "path": "x-pack/plugins/security_solution/server/lib/app_features/app_features.ts",
+              "path": "x-pack/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
               "deprecated": false,
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-server.SecuritySolutionPluginSetup.experimentalFeatures",
+          "type": "Object",
+          "tags": [],
+          "label": "experimentalFeatures",
+          "description": [
+            "\nThe security solution generic experimental features"
+          ],
+          "signature": [
+            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly assistantStreamingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
+          ],
+          "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -2893,7 +3171,7 @@
         "tags": [],
         "label": "SecurityPageName",
         "description": [],
-        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "path": "packages/deeplinks/security/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2964,45 +3242,6 @@
       },
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKey",
-        "type": "Type",
-        "tags": [],
-        "label": "AppFeatureKey",
-        "description": [],
-        "signature": [
-          "AppFeatureSecurityKey",
-          " | ",
-          "AppFeatureCasesKey"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKeys",
-        "type": "Type",
-        "tags": [],
-        "label": "AppFeatureKeys",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "securitySolution",
-            "scope": "common",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-common.AppFeatureKey",
-            "text": "AppFeatureKey"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
         "id": "def-common.CASES_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -3010,6 +3249,21 @@
         "description": [],
         "signature": [
           "\"securitySolutionCases\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.DETECTION_ENGINE_RULES_URL_FIND",
+        "type": "string",
+        "tags": [],
+        "label": "DETECTION_ENGINE_RULES_URL_FIND",
+        "description": [],
+        "signature": [
+          "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
@@ -3035,13 +3289,28 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.ENABLED_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLED_FIELD",
+        "description": [],
+        "signature": [
+          "\"alert.attributes.enabled\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.ExperimentalFeatures",
         "type": "Type",
         "tags": [],
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly assistantStreamingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -3082,25 +3351,6 @@
     "objects": [
       {
         "parentPluginId": "securitySolution",
-        "id": "def-common.ALL_APP_FEATURE_KEYS",
-        "type": "Object",
-        "tags": [],
-        "label": "ALL_APP_FEATURE_KEYS",
-        "description": [],
-        "signature": [
-          "readonly (",
-          "AppFeatureSecurityKey",
-          " | ",
-          "AppFeatureCasesKey",
-          ".casesConnectors)[]"
-        ],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
         "id": "def-common.allowedExperimentalValues",
         "type": "Object",
         "tags": [],
@@ -3109,53 +3359,11 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
+          "{ readonly tGridEnabled: true; readonly tGridEventRenderedViewEnabled: true; readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: true; readonly chartEmbeddablesEnabled: true; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly insightsRelatedAlertsByProcessAncestry: true; readonly extendedRuleExecutionLoggingEnabled: false; readonly assistantStreamingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsEnabled: true; readonly endpointResponseActionsEnabled: true; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: false; readonly alertsPageChartsEnabled: true; readonly alertTypeEnabled: false; readonly expandableFlyoutInCreateRuleEnabled: true; readonly expandableEventFlyoutEnabled: false; readonly expandableTimelineFlyoutEnabled: false; readonly alertsPageFiltersEnabled: true; readonly assistantModelEvaluation: false; readonly newUserDetailsFlyout: true; readonly newUserDetailsFlyoutManagedUser: false; readonly newHostDetailsFlyout: true; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: false; readonly jsonPrebuiltRulesDiffingEnabled: true; readonly timelineEsqlTabDisabled: false; readonly unifiedComponentsInTimelineEnabled: false; readonly analyzerDatePickersAndSourcererDisabled: false; readonly perFieldPrebuiltRulesDiffingEnabled: true; readonly malwareOnWriteScanOptionAvailable: false; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "securitySolution",
-        "id": "def-common.AppFeatureKey",
-        "type": "Object",
-        "tags": [],
-        "label": "AppFeatureKey",
-        "description": [],
-        "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-common.AppFeatureKey.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/security_solution/common/types/app_features.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ]

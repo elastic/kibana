@@ -9,7 +9,7 @@
 import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
+import { filter, first } from 'rxjs';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
   logger.asLoggerFactory.mockClear();
   logger.stop.mockClear();
   rawConfigService.getConfig$.mockClear();
@@ -136,6 +136,21 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(someFatalError);
   expect(logger.stop).toHaveBeenCalledTimes(1);
+  expect(mockServer.stop).toHaveBeenCalledTimes(1);
+});
+
+test('only shutdowns once', async () => {
+  const mockOnShutdown = jest.fn();
+  const root = new Root(rawConfigService, env, mockOnShutdown);
+
+  await root.preboot();
+  await root.setup();
+  await root.start();
+
+  await root.shutdown();
+  await root.shutdown();
+
+  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 });
 

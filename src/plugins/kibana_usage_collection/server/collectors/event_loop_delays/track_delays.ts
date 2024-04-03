@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { takeUntil, finalize, map } from 'rxjs/operators';
-import { Observable, timer } from 'rxjs';
+import { takeUntil, finalize, map } from 'rxjs';
+import { Observable, timer, switchMap } from 'rxjs';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
@@ -46,17 +46,18 @@ export function startTrackingEventLoopDelaysUsage(
     .pipe(
       map((i) => (i + 1) % resetOnCount === 0),
       takeUntil(stopMonitoringEventLoop$),
-      finalize(() => eventLoopDelaysMonitor.stop())
+      finalize(() => eventLoopDelaysMonitor.stop()),
+      switchMap(async (shouldReset) => {
+        const histogram = eventLoopDelaysMonitor.collect();
+        if (shouldReset) {
+          eventLoopDelaysMonitor.reset();
+        }
+        try {
+          await storeHistogram(histogram, internalRepository, instanceUuid);
+        } catch (e) {
+          // do not crash if cannot store a histogram.
+        }
+      })
     )
-    .subscribe(async (shouldReset) => {
-      const histogram = eventLoopDelaysMonitor.collect();
-      if (shouldReset) {
-        eventLoopDelaysMonitor.reset();
-      }
-      try {
-        await storeHistogram(histogram, internalRepository, instanceUuid);
-      } catch (e) {
-        // do not crash if cannot store a histogram.
-      }
-    });
+    .subscribe();
 }

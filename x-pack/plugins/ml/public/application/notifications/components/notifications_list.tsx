@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiBadge,
-  EuiCallOut,
-  EuiBasicTable,
-  EuiSearchBar,
-  EuiSpacer,
-  IconColor,
-  Query,
-  SearchFilterConfig,
-} from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { IconColor, Query, SearchFilterConfig } from '@elastic/eui';
+import { EuiBadge, EuiCallOut, EuiBasicTable, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
 import useMount from 'react-use/lib/useMount';
@@ -33,13 +26,14 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { ListingPageUrlState } from '../../../../common/types/common';
+import type { ListingPageUrlState } from '../../../../common/types/common';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   MlNotificationMessageLevel,
   NotificationItem,
 } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR]: 'danger',
@@ -65,6 +59,9 @@ export const NotificationsList: FC = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
+
   const { displayErrorToast } = useToastNotificationService();
 
   const { lastCheckedAt, setLastCheckedAt, notificationsCounts, latestRequestedAt } =
@@ -132,7 +129,7 @@ export const NotificationsList: FC = () => {
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.notifications.fetchFailedError', {
-          defaultMessage: 'Fetch notifications failed',
+          defaultMessage: 'Error loading list of notifications',
         })
       );
     }
@@ -221,6 +218,39 @@ export const NotificationsList: FC = () => {
   }, [dateFormatter]);
 
   const filters: SearchFilterConfig[] = useMemo<SearchFilterConfig[]>(() => {
+    const jobTypeOptions = [];
+    if (isADEnabled === true) {
+      jobTypeOptions.push({
+        value: 'anomaly_detector',
+        name: i18n.translate('xpack.ml.notifications.filters.type.anomalyDetector', {
+          defaultMessage: 'Anomaly Detection',
+        }),
+      });
+    }
+    if (isDFAEnabled === true) {
+      jobTypeOptions.push({
+        value: 'data_frame_analytics',
+        name: i18n.translate('xpack.ml.notifications.filters.type.dfa', {
+          defaultMessage: 'Data Frame Analytics',
+        }),
+      });
+    }
+    if (isNLPEnabled === true || isDFAEnabled === true) {
+      jobTypeOptions.push({
+        value: 'inference',
+        name: i18n.translate('xpack.ml.notifications.filters.type.inference', {
+          defaultMessage: 'Inference',
+        }),
+      });
+    }
+
+    jobTypeOptions.push({
+      value: 'system',
+      name: i18n.translate('xpack.ml.notifications.filters.type.system', {
+        defaultMessage: 'System',
+      }),
+    });
+
     return [
       {
         type: 'field_value_selection',
@@ -260,39 +290,14 @@ export const NotificationsList: FC = () => {
           defaultMessage: 'Type',
         }),
         multiSelect: 'or',
-        options: [
-          {
-            value: 'anomaly_detector',
-            name: i18n.translate('xpack.ml.notifications.filters.type.anomalyDetector', {
-              defaultMessage: 'Anomaly Detection',
-            }),
-          },
-          {
-            value: 'data_frame_analytics',
-            name: i18n.translate('xpack.ml.notifications.filters.type.dfa', {
-              defaultMessage: 'Data Frame Analytics',
-            }),
-          },
-          {
-            value: 'inference',
-            name: i18n.translate('xpack.ml.notifications.filters.type.inference', {
-              defaultMessage: 'Inference',
-            }),
-          },
-          {
-            value: 'system',
-            name: i18n.translate('xpack.ml.notifications.filters.type.system', {
-              defaultMessage: 'System',
-            }),
-          },
-        ],
+        options: jobTypeOptions,
       },
       {
         type: 'custom_component',
         component: EntityFilter,
       },
     ];
-  }, []);
+  }, [isADEnabled, isDFAEnabled, isNLPEnabled]);
 
   const newNotificationsCount = Object.values(notificationsCounts).reduce((a, b) => a + b);
 

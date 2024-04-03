@@ -36,7 +36,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
-import { getEditBreadcrumbs } from './breadcrumbs';
+import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
@@ -117,6 +117,7 @@ export const getTopNavConfig = (
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
+    serverless,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -202,7 +203,11 @@ export const getTopNavConfig = (
             stateTransfer.clearEditorState(VisualizeConstants.APP_ID);
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
-          chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
+          } else {
+            chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+          }
 
           if (id !== visualizationIdFromUrl) {
             history.replace({
@@ -253,7 +258,7 @@ export const getTopNavConfig = (
 
   const navigateToOriginatingApp = () => {
     if (originatingApp) {
-      application.navigateToApp(originatingApp);
+      application.navigateToApp(originatingApp, { path: originatingPath });
     }
   };
 
@@ -304,6 +309,8 @@ export const getTopNavConfig = (
                 vis,
                 data.query.timefilter.timefilter
               );
+              const searchFilters = data.query.filterManager.getAppFilters();
+              const searchQuery = data.query.queryString.getQuery();
               const updatedWithMeta = {
                 ...navigateToLensConfig,
                 embeddableId,
@@ -314,6 +321,8 @@ export const getTopNavConfig = (
                 description: visInstance?.panelDescription || vis.description,
                 panelTimeRange: visInstance?.panelTimeRange,
                 isEmbeddable: Boolean(originatingApp),
+                ...(searchFilters && { searchFilters }),
+                ...(searchQuery && { searchQuery }),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();
@@ -596,6 +605,14 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    mustCopyOnSaveMessage={
+                      savedVis.managed
+                        ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
+                            defaultMessage:
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
+                          })
+                        : undefined
+                    }
                   />
                 );
               }

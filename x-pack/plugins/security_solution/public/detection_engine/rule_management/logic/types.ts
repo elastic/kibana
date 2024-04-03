@@ -5,97 +5,26 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import * as z from 'zod';
 
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import {
-  RiskScore,
-  RiskScoreMapping,
-  RuleActionArray,
-  RuleActionThrottle,
-  RuleInterval,
-  RuleIntervalFrom,
-  RuleIntervalTo,
-  Severity,
-  SeverityMapping,
-  threat_filters,
-  threat_index,
-  threat_indicator_path,
-  threat_language,
-  threat_mapping,
-  threat_query,
-  type,
-} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { WarningSchema } from '../../../../common/api/detection_engine';
+import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
-import type { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
-import {
-  AlertSuppression,
-  AlertsIndex,
-  BuildingBlockType,
-  DataViewId,
-  EventCategoryOverride,
-  ExceptionListArray,
-  IndexPatternArray,
-  InvestigationGuide,
-  IsRuleEnabled,
-  IsRuleImmutable,
-  MaxSignals,
-  RelatedIntegrationArray,
-  RequiredFieldArray,
-  RuleAuthorArray,
-  RuleDescription,
-  RuleFalsePositiveArray,
-  RuleFilterArray,
-  RuleLicense,
-  RuleName,
-  RuleNameOverride,
-  RuleObjectId,
-  RuleQuery,
-  RuleReferenceArray,
-  RuleSignatureId,
-  RuleTagArray,
-  RuleVersion,
-  SavedObjectResolveAliasPurpose,
-  SavedObjectResolveAliasTargetId,
-  SavedObjectResolveOutcome,
-  SetupGuide,
-  ThreatArray,
-  Threshold,
-  TiebreakerField,
-  TimelineTemplateId,
-  TimelineTemplateTitle,
-  TimestampField,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-} from '../../../../common/detection_engine/rule_schema';
-
-import type { PatchRuleRequestBody } from '../../../../common/detection_engine/rule_management';
-import { FindRulesSortField } from '../../../../common/detection_engine/rule_management';
+import { SortOrder } from '../../../../common/api/detection_engine';
 import type {
   RuleCreateProps,
+  RuleResponse,
   RuleUpdateProps,
-} from '../../../../common/detection_engine/rule_schema';
-import { SortOrder } from '../../../../common/detection_engine/schemas/common';
-
-/**
- * Params is an "record", since it is a type of RuleActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/rule.ts
- * @deprecated Use the one from @kbn/security-io-ts-alerting-types
- */
-export const action = t.exact(
-  t.type({
-    group: t.string,
-    id: t.string,
-    action_type_id: t.string,
-    params: t.record(t.string, t.any),
-  })
-);
+} from '../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  CoverageOverviewFilter,
+  PatchRuleRequestBody,
+} from '../../../../common/api/detection_engine/rule_management';
+import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 
 export interface CreateRulesProps {
   rule: RuleCreateProps;
@@ -117,100 +46,13 @@ export interface PatchRuleProps {
   signal?: AbortSignal;
 }
 
-const MetaRule = t.intersection([
-  t.type({
-    from: t.string,
-  }),
-  t.partial({
-    throttle: t.string,
-    kibana_siem_app_url: t.string,
-  }),
-]);
+export type Rule = RuleResponse;
 
-export const RuleSchema = t.intersection([
-  t.type({
-    author: RuleAuthorArray,
-    created_at: t.string,
-    created_by: t.string,
-    description: RuleDescription,
-    enabled: IsRuleEnabled,
-    false_positives: RuleFalsePositiveArray,
-    from: RuleIntervalFrom,
-    id: RuleObjectId,
-    interval: RuleInterval,
-    immutable: IsRuleImmutable,
-    name: RuleName,
-    max_signals: MaxSignals,
-    references: RuleReferenceArray,
-    related_integrations: RelatedIntegrationArray,
-    required_fields: RequiredFieldArray,
-    risk_score: RiskScore,
-    risk_score_mapping: RiskScoreMapping,
-    rule_id: RuleSignatureId,
-    severity: Severity,
-    severity_mapping: SeverityMapping,
-    setup: SetupGuide,
-    tags: RuleTagArray,
-    type,
-    to: RuleIntervalTo,
-    threat: ThreatArray,
-    updated_at: t.string,
-    updated_by: t.string,
-    actions: RuleActionArray,
-    throttle: t.union([RuleActionThrottle, t.null]),
-  }),
-  t.partial({
-    outcome: SavedObjectResolveOutcome,
-    alias_target_id: SavedObjectResolveAliasTargetId,
-    alias_purpose: SavedObjectResolveAliasPurpose,
-    building_block_type: BuildingBlockType,
-    anomaly_threshold: t.number,
-    filters: RuleFilterArray,
-    index: IndexPatternArray,
-    data_view_id: DataViewId,
-    language: t.string,
-    license: RuleLicense,
-    meta: MetaRule,
-    machine_learning_job_id: t.array(t.string),
-    new_terms_fields: t.array(t.string),
-    history_window_start: t.string,
-    output_index: AlertsIndex,
-    query: RuleQuery,
-    rule_name_override: RuleNameOverride,
-    saved_id: t.string,
-    threshold: Threshold,
-    threat_query,
-    threat_filters,
-    threat_index,
-    threat_indicator_path,
-    threat_mapping,
-    threat_language,
-    timeline_id: TimelineTemplateId,
-    timeline_title: TimelineTemplateTitle,
-    timestamp_override: TimestampOverride,
-    timestamp_override_fallback_disabled: TimestampOverrideFallbackDisabled,
-    event_category_override: EventCategoryOverride,
-    timestamp_field: TimestampField,
-    tiebreaker_field: TiebreakerField,
-    note: InvestigationGuide,
-    exceptions_list: ExceptionListArray,
-    uuid: t.string,
-    version: RuleVersion,
-    execution_summary: RuleExecutionSummary,
-    alert_suppression: AlertSuppression,
-  }),
-]);
-
-export const RulesSchema = t.array(RuleSchema);
-
-export type Rule = t.TypeOf<typeof RuleSchema>;
-export type Rules = t.TypeOf<typeof RulesSchema>;
-
-export type PaginationOptions = t.TypeOf<typeof PaginationOptions>;
-export const PaginationOptions = t.type({
-  page: PositiveInteger,
-  perPage: PositiveInteger,
-  total: PositiveInteger,
+export type PaginationOptions = z.infer<typeof PaginationOptions>;
+export const PaginationOptions = z.object({
+  page: z.number().int().min(0),
+  perPage: z.number().int().min(0),
+  total: z.number().int().min(0),
 });
 
 export interface FetchRulesProps {
@@ -238,8 +80,8 @@ export interface RulesSnoozeSettingsBatchResponse {
   data: RuleSnoozeSettingsResponse[];
 }
 
-export type SortingOptions = t.TypeOf<typeof SortingOptions>;
-export const SortingOptions = t.type({
+export type SortingOptions = z.infer<typeof SortingOptions>;
+export const SortingOptions = z.object({
   field: FindRulesSortField,
   order: SortOrder,
 });
@@ -258,7 +100,7 @@ export interface FetchRulesResponse {
   page: number;
   perPage: number;
   total: number;
-  data: Rule[];
+  data: RuleResponse[];
 }
 
 export interface FetchRuleProps {
@@ -271,6 +113,11 @@ export interface FetchRuleSnoozingProps {
   signal?: AbortSignal;
 }
 
+export interface FetchCoverageOverviewProps {
+  filter: CoverageOverviewFilter;
+  signal?: AbortSignal;
+}
+
 export interface BasicFetchProps {
   signal: AbortSignal;
 }
@@ -280,7 +127,7 @@ export interface ImportDataProps {
   overwrite?: boolean;
   overwriteExceptions?: boolean;
   overwriteActionConnectors?: boolean;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ImportRulesResponseError {

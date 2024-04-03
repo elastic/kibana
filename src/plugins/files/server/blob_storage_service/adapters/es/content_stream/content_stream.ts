@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import cuid from 'cuid';
+import { createId } from '@paralleldrive/cuid2';
 import * as cborx from 'cbor-x';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -225,7 +225,7 @@ export class ContentStream extends Duplex {
 
   private getId(): string {
     if (!this.id) {
-      this.id = cuid();
+      this.id = createId();
     }
     return this.id;
   }
@@ -271,6 +271,7 @@ export class ContentStream extends Duplex {
    * of holding, at most, 2 full chunks in memory.
    */
   private indexRequestBuffer: undefined | IndexRequestParams;
+
   private async writeChunk(data: Buffer) {
     const chunkId = this.getChunkId(this.chunksWritten);
 

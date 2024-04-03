@@ -37,7 +37,7 @@ export function checkNodeForExistingDataTestSubjProp(
   const variable = getScope().variables.find((v) => v.name === name); // the variable definition of the spreaded variable
 
   return variable && variable.defs.length > 0
-    ? variable.defs[0].node.init.properties.find((property: TSESTree.Property) => {
+    ? variable.defs[0].node.init?.properties?.find((property: TSESTree.Property) => {
         if ('value' in property.key) {
           return property.key.value === 'data-test-subj';
         }

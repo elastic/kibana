@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -30,7 +31,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
     it('should handle unsnooze rule request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}}/api/actions/connector`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'MY action',
@@ -58,7 +59,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      const response = await alertUtils.getSnoozeRequest(createdAlert.id);
+      const response = await alertUtils.getUnsnoozeRequest(createdAlert.id);
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
@@ -73,7 +74,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdAlert.id,
       });
     });

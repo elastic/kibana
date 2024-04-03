@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type {
-  AutocompleteDefinition,
-  AutocompleteUrlParams,
-  AutocompleteBodyParams,
-} from './autocomplete_definition_types';
-
 export * as SpecificationTypes from './specification_types';

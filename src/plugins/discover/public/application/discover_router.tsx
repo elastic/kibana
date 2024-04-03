@@ -12,20 +12,22 @@ import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ExperimentalFeatures } from '../../common/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { CustomizationCallback } from '../customizations';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 
-interface DiscoverRoutesProps {
+export interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
-  isDev: boolean;
+  customizationContext: DiscoverCustomizationContext;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -66,7 +68,8 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
 
 interface CustomDiscoverRoutesProps {
   profileRegistry: DiscoverProfileRegistry;
-  isDev: boolean;
+  customizationContext: DiscoverCustomizationContext;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
@@ -92,8 +95,9 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
 export interface DiscoverRouterProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
+  customizationContext: DiscoverCustomizationContext;
+  experimentalFeatures: ExperimentalFeatures;
   history: History;
-  isDev: boolean;
 }
 
 export const DiscoverRouter = ({

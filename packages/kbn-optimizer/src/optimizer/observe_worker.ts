@@ -10,7 +10,7 @@ import { inspect } from 'util';
 
 import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
-import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
 import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
@@ -61,6 +61,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
       const proc = fork(require.resolve('../worker/run_worker'), [], {
         execArgv: [
           `--require=@kbn/babel-register/install`,
+          '--openssl-legacy-provider',
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),

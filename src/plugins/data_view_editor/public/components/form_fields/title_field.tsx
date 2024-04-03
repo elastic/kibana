@@ -197,6 +197,7 @@ export const TitleField = ({
               data-test-subj="createIndexPatternTitleInput"
               append={<TitleDocsPopover />}
               placeholder="example-*"
+              data-is-validating={field.isValidating ? '1' : '0'}
             />
           </EuiFormRow>
         );

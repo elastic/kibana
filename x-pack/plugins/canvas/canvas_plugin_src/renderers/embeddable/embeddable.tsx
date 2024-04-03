@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import {
-  IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
+  EmbeddablePanel,
+  IEmbeddable,
   isErrorEmbeddable,
+  reactEmbeddableRegistryHasKey,
+  ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableContainerContext } from '@kbn/embeddable-plugin/public';
-import { StartDeps } from '../../plugin';
-import { EmbeddableExpression } from '../../expression_types/embeddable';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import React, { FC } from 'react';
+import ReactDOM from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
+import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
+import {
+  CanvasContainerApi,
+  EmbeddableInput,
+  RendererFactory,
+  RendererHandlers,
+} from '../../../types';
+import { EmbeddableExpression } from '../../expression_types/embeddable';
+import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
-import { RendererFactory, EmbeddableInput } from '../../../types';
-import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -30,6 +39,39 @@ const { embeddable: strings } = RendererStrings;
 const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
+
+const renderReactEmbeddable = ({
+  type,
+  uuid,
+  input,
+  container,
+  handlers,
+}: {
+  type: string;
+  uuid: string;
+  input: EmbeddableInput;
+  container: CanvasContainerApi;
+  handlers: RendererHandlers;
+}) => {
+  return (
+    <ReactEmbeddableRenderer
+      type={type}
+      maybeId={uuid}
+      parentApi={container as unknown as PresentationContainer}
+      key={`${type}_${uuid}`}
+      state={{ rawState: input }}
+      onAnyStateChange={(newState) => {
+        const newExpression = embeddableInputToExpression(
+          newState.rawState as unknown as EmbeddableInput,
+          type,
+          undefined,
+          true
+        );
+        if (newExpression) handlers.onEmbeddableInputChange(newExpression);
+      }}
+    />
+  );
+};
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
@@ -40,21 +82,19 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
       return null;
     }
 
-    const embeddableContainerContext: EmbeddableContainerContext = {
+    const canvasAppContext: EmbeddableAppContext = {
       getCurrentPath: () => {
         const urlToApp = core.application.getUrlForApp(currentAppId);
         const inAppPath = window.location.pathname.replace(urlToApp, '');
 
         return inAppPath + window.location.search + window.location.hash;
       },
+      currentAppId: CANVAS_APP,
     };
 
-    return (
-      <plugins.embeddable.EmbeddablePanel
-        embeddable={embeddable}
-        containerContext={embeddableContainerContext}
-      />
-    );
+    embeddable.getAppContext = () => canvasAppContext;
+
+    return <EmbeddablePanel embeddable={embeddable} />;
   };
 
   return (embeddableObject: IEmbeddable) => {
@@ -64,7 +104,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
-          <KibanaThemeProvider theme$={core.theme.theme$}>
+          <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>
             <EmbeddableRenderer embeddable={embeddableObject} />
           </KibanaThemeProvider>
         </I18nContext>
@@ -76,20 +116,43 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
 export const embeddableRendererFactory = (
   core: CoreStart,
   plugins: StartDeps
-): RendererFactory<EmbeddableExpression<EmbeddableInput>> => {
+): RendererFactory<EmbeddableExpression<EmbeddableInput> & { canvasApi: CanvasContainerApi }> => {
   const renderEmbeddable = renderEmbeddableFactory(core, plugins);
   return () => ({
     name: 'embeddable',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
-    render: async (domNode, { input, embeddableType }, handlers) => {
+    render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      if (!embeddablesRegistry[uniqueId]) {
+      if (reactEmbeddableRegistryHasKey(embeddableType)) {
+        /**
+         * Prioritize React embeddables
+         */
+        ReactDOM.render(
+          renderReactEmbeddable({
+            input,
+            handlers,
+            uuid: uniqueId,
+            type: embeddableType,
+            container: canvasApi,
+          }),
+          domNode,
+          () => handlers.done()
+        );
+
+        handlers.onDestroy(() => {
+          handlers.onEmbeddableDestroyed();
+          return ReactDOM.unmountComponentAtNode(domNode);
+        });
+      } else if (!embeddablesRegistry[uniqueId]) {
+        /**
+         * Handle legacy embeddables - embeddable does not exist in registry
+         */
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
@@ -156,6 +219,9 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
+        /**
+         * Handle legacy embeddables - embeddable already exists in registry
+         */
         const embeddable = embeddablesRegistry[uniqueId];
 
         // updating embeddable input with changes made to expression or filters

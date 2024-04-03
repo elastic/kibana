@@ -10,6 +10,7 @@ import buffer from 'buffer';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { createInitialState } from './initial_state';
@@ -17,7 +18,11 @@ import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
 import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
-import { indexTypesMapMock, savedObjectTypeRegistryMock } from './run_resilient_migrator.fixtures';
+import {
+  hashToVersionMapMock,
+  indexTypesMapMock,
+  savedObjectTypeRegistryMock,
+} from './run_resilient_migrator.fixtures';
 import type { InitState, State } from './state';
 import type { Next } from './state_action_machine';
 
@@ -69,8 +74,10 @@ describe('runResilientMigrator', () => {
       kibanaVersion: options.kibanaVersion,
       waitForMigrationCompletion: options.waitForMigrationCompletion,
       mustRelocateDocuments: options.mustRelocateDocuments,
+      indexTypes: options.indexTypes,
       indexTypesMap: options.indexTypesMap,
-      targetMappings: options.targetMappings,
+      hashToVersionMap: options.hashToVersionMap,
+      targetIndexMappings: options.targetIndexMappings,
       preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
       coreMigrationVersionPerType: options.coreMigrationVersionPerType,
@@ -79,6 +86,7 @@ describe('runResilientMigrator', () => {
       typeRegistry: options.typeRegistry,
       docLinks: options.docLinks,
       logger: options.logger,
+      esCapabilities: options.esCapabilities,
     });
 
     // store the created initial state
@@ -115,8 +123,10 @@ const mockOptions = (): RunResilientMigratorParams => {
     kibanaVersion: '8.8.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
+    indexTypes: ['a', 'c'],
     indexTypesMap: indexTypesMapMock,
-    targetMappings: {
+    hashToVersionMap: hashToVersionMapMock,
+    targetIndexMappings: {
       properties: {
         a: { type: 'keyword' },
         c: { type: 'long' },
@@ -153,5 +163,6 @@ const mockOptions = (): RunResilientMigratorParams => {
     },
     typeRegistry: savedObjectTypeRegistryMock,
     docLinks: docLinksServiceMock.createSetupContract(),
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
 };

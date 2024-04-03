@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ElasticsearchGuide } from './components/elasticsearch_guide';
+import { ElasticsearchGuide } from './components/elasticsearch_guide/elasticsearch_guide';
 
 import { Elasticsearch } from '.';
 

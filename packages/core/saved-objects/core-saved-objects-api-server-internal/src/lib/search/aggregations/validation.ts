@@ -98,13 +98,14 @@ const validateAggregationContainer = (
 ) => {
   return Object.entries(container).reduce<estypes.AggregationsAggregationContainer>(
     (memo, [aggName, aggregation]) => {
-      if (aggregationKeys.includes(aggName)) {
-        return memo;
+      if (!aggregationKeys.includes(aggName)) {
+        (memo as Record<string, unknown>)[aggName] = validateAggregationType(
+          aggName,
+          aggregation,
+          childContext(context, aggName)
+        );
       }
-      return {
-        ...memo,
-        [aggName]: validateAggregationType(aggName, aggregation, childContext(context, aggName)),
-      };
+      return memo;
     },
     {}
   );

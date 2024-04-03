@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
+import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EqlSearchRequest as EqlSearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 
-export type EqlRequestParams = EqlSearchRequest;
+export type EqlRequestParams = EqlSearchRequest | EqlSearchRequestWithBody;
 
 export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
   /**
@@ -22,4 +23,4 @@ export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlReques
   options?: TransportRequestOptions;
 }
 
-export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<TransportResult<T>>;
+export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<T>;

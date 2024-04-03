@@ -12,7 +12,7 @@ import { TestProviders } from '../../common/mock';
 import type { MappingProps } from './mapping';
 import { Mapping } from './mapping';
 import { mappings } from './__mock__';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 describe('Mapping', () => {
   const props: MappingProps = {

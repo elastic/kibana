@@ -25,6 +25,7 @@ export function pluginManifestFromPluginPackage(
     optionalPlugins: manifest.plugin.optionalPlugins ?? [],
     requiredBundles: manifest.plugin.requiredBundles ?? [],
     requiredPlugins: manifest.plugin.requiredPlugins ?? [],
+    runtimePluginDependencies: manifest.plugin.runtimePluginDependencies ?? [],
     owner: {
       name: manifest.owner.join(' & '),
     },

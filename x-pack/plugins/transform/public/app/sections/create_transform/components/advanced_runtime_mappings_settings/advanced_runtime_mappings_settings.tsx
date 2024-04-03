@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -19,13 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
-import { StepDefineFormHook } from '../step_define';
+import type { StepDefineFormHook } from '../step_define';
 import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
 import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
-import {
-  isPivotGroupByConfigWithUiSupport,
-  PivotAggsConfigWithUiSupport,
-} from '../../../../common';
+import type { PivotAggsConfigWithUiSupport } from '../../../../common';
+import { isPivotGroupByConfigWithUiSupport } from '../../../../common';
 import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
 
 const advancedEditorsSidebarWidth = '220px';

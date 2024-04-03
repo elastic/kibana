@@ -9,40 +9,18 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageBody } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
-import { ElasticRequestState } from '../types';
-import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
+import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
+import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DataTableRecord } from '../../../types';
 
-export interface DocProps {
-  /**
-   * Id of the doc in ES
-   */
-  id: string;
-  /**
-   * Index in ES to query
-   */
-  index: string;
-  /**
-   * DataView entity
-   */
-  dataView: DataView;
-  /**
-   * If set, will always request source, regardless of the global `fieldsFromSource` setting
-   */
-  requestSource?: boolean;
+export interface DocProps extends EsDocSearchProps {
   /**
    * Discover main view url
    */
   referrer?: string;
-  /**
-   * Records fetched from text based query
-   */
-  textBasedHits?: DataTableRecord[];
 }
 
 export function Doc(props: DocProps) {
@@ -53,10 +31,11 @@ export function Doc(props: DocProps) {
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ breadcrumb: props.referrer, services }),
-      { text: `${props.index}#${props.id}` },
-    ]);
+    setBreadcrumbs({
+      services,
+      titleBreadcrumbText: `${props.index}#${props.id}`,
+      rootBreadcrumbPath: props.referrer,
+    });
   }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (
@@ -71,7 +50,7 @@ export function Doc(props: DocProps) {
           values: { id: props.id },
         })}
       </h1>
-      <EuiPageBody panelled paddingSize="l" panelProps={{ role: 'main' }}>
+      <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"
@@ -140,7 +119,7 @@ export function Doc(props: DocProps) {
 
         {reqState === ElasticRequestState.Found && hit !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <DocViewer hit={hit} dataView={dataView} />
+            <UnifiedDocViewer hit={hit} dataView={dataView} hideActionsColumn />
           </div>
         )}
       </EuiPageBody>

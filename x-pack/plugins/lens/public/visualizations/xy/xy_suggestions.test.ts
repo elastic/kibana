@@ -18,7 +18,7 @@ import { generateId } from '../../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import type { PaletteOutput } from '@kbn/coloring';
+import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -757,7 +757,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
-      mainPalette,
+      mainPalette: { type: 'legacyPalette', value: mainPalette },
     });
 
     expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(mainPalette);
@@ -773,7 +773,7 @@ describe('xy_suggestions', () => {
         changeType: 'unchanged',
       },
       keptLayerIds: [],
-      mainPalette,
+      mainPalette: { type: 'legacyPalette', value: mainPalette },
     });
 
     expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(undefined);
@@ -913,7 +913,13 @@ describe('xy_suggestions', () => {
     expect(suggestions[0].state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
-      layers: [{ ...currentState.layers[0], seriesType: 'line' }],
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'line',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+        },
+      ],
     });
     expect(suggestions[0].title).toEqual('Line chart');
   });
@@ -954,15 +960,27 @@ describe('xy_suggestions', () => {
     expect(seriesSuggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
-      layers: [{ ...currentState.layers[0], seriesType: 'line' }],
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'line',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+        },
+      ],
     });
     expect(stackSuggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'bar_stacked',
-      layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
+      layers: [
+        {
+          ...currentState.layers[0],
+          seriesType: 'bar_stacked',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
+        },
+      ],
     });
     expect(seriesSuggestion.title).toEqual('Line chart');
-    expect(stackSuggestion.title).toEqual('Stacked');
+    expect(stackSuggestion.title).toEqual('Bar vertical stacked');
   });
 
   test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
@@ -1035,7 +1053,7 @@ describe('xy_suggestions', () => {
     const visibleSuggestions = suggestions.filter((suggestion) => !suggestion.hide);
     expect(visibleSuggestions).toContainEqual(
       expect.objectContaining({
-        title: 'Stacked',
+        title: 'Bar vertical stacked',
         state: expect.objectContaining({ preferredSeriesType: 'bar_stacked' }),
       })
     );
@@ -1081,6 +1099,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'product',
           splitAccessor: 'category',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1126,6 +1145,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'category',
           splitAccessor: 'product',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
     });
@@ -1172,6 +1192,7 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'timestamp',
           splitAccessor: 'product',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
     });

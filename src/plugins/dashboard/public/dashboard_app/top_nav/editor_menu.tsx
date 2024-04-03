@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import './editor_menu.scss';
+
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -17,19 +19,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
-
-interface Props {
-  /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-  /** Handler for creating a new embeddable of a specified type */
-  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void;
-}
-
+import { ADD_PANEL_TRIGGER } from '../../triggers';
+import { getAddPanelActionMenuItems } from './add_panel_action_menu_items';
 interface FactoryGroup {
   id: string;
   appName: string;
@@ -43,7 +41,17 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
+export const EditorMenu = ({
+  createNewVisType,
+  isDisabled,
+  api,
+}: {
+  api: PresentationContainer;
+  isDisabled?: boolean;
+  /** Handler for creating new visualization of a specified type */
+  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
+}) => {
+  const isMounted = useRef(false);
   const {
     embeddable,
     visualizations: {
@@ -51,6 +59,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       getByGroup: getVisTypesByGroup,
       showNewVisModal,
     },
+    uiActions,
   } = pluginServices.getServices();
 
   const { euiTheme } = useEuiTheme();
@@ -62,6 +71,10 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
     UnwrappedEmbeddableFactory[]
   >([]);
+
+  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>> | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     Promise.all(
@@ -103,10 +116,11 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = getVisTypeAliases().sort(
-    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
+  const visTypeAliases = getVisTypeAliases()
+    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-  );
+    )
+    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
@@ -118,6 +132,27 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const aggBasedPanelID = 1;
 
   let panelCount = 1 + aggBasedPanelID;
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Retrieve ADD_PANEL_TRIGGER actions
+  useEffect(() => {
+    async function loadPanelActions() {
+      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
+        embeddable: api,
+      });
+      if (isMounted.current) {
+        setAddPanelActions(registeredActions);
+      }
+    }
+    loadPanelActions();
+  }, [uiActions, api]);
 
   factories.forEach(({ factory }) => {
     const { grouping } = factory;
@@ -209,7 +244,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       toolTipContent,
       onClick: async () => {
         closePopover();
-        createNewEmbeddable(factory);
+        api.addNewPanel({ panelType: factory.type }, true);
       },
       'data-test-subj': `createNew-${factory.type}`,
     };
@@ -222,6 +257,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const getEditorMenuPanels = (closePopover: () => void) => {
     const initialPanelItems = [
       ...visTypeAliases.map(getVisTypeAliasMenuItem),
+      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
       ...toolVisTypes.map(getVisTypeMenuItem),
       ...ungroupedFactories.map((factory) => {
         return getEmbeddableFactoryMenuItem(factory, closePopover);
@@ -232,7 +268,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
         panel: panelId,
         'data-test-subj': `dashboardEditorMenu-${id}Group`,
       })),
-
       ...promotedVisTypes.map(getVisTypeMenuItem),
     ];
     if (aggsBasedVisTypes.length > 0) {
@@ -273,6 +308,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
+      isDisabled={isDisabled}
       size="s"
       iconType="plusInCircle"
       panelPaddingSize="none"

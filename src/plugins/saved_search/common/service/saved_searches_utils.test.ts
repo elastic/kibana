@@ -25,6 +25,9 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: false,
         usesAdHocDataView: false,
+        rowsPerPage: 250,
+        sampleSize: 1000,
+        breakdownField: 'extension.keyword',
       };
 
       expect(
@@ -34,25 +37,29 @@ describe('saved_searches_utils', () => {
           ['tags-1', 'tags-2'],
           [],
           createSearchSourceMock(),
-          {}
+          {},
+          false
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
+          "breakdownField": "extension.keyword",
           "columns": Array [
             "a",
             "b",
           ],
           "description": "foo",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "managed": false,
           "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
-          "rowsPerPage": undefined,
+          "rowsPerPage": 250,
+          "sampleSize": 1000,
           "searchSource": SearchSource {
             "dependencies": Object {
               "aggs": Object {
@@ -60,6 +67,7 @@ describe('saved_searches_utils', () => {
               },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
+              "scriptedFieldsEnabled": true,
               "search": [MockFunction],
             },
             "fields": Object {},
@@ -101,6 +109,7 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: true,
         usesAdHocDataView: false,
+        managed: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -112,6 +121,7 @@ describe('saved_searches_utils', () => {
           ],
           "description": "description",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "isTextBasedQuery": true,
@@ -121,6 +131,7 @@ describe('saved_searches_utils', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "sort": Array [
             Array [
               "a",

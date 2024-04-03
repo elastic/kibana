@@ -16,6 +16,7 @@ import type {
 
 export interface FleetConfigType {
   enabled: boolean;
+  isAirGapped?: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -23,6 +24,7 @@ export interface FleetConfigType {
     elasticsearch: {
       hosts?: string[];
       ca_sha256?: string;
+      ca_trusted_fingerprint?: string;
     };
     fleet_server?: {
       hosts?: string[];
@@ -38,18 +40,30 @@ export interface FleetConfigType {
   };
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
+    uninstallTokenVerificationBatchSize?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
     testSecretsIndex?: string;
+    disableBundledPackagesCache?: boolean;
   };
   internal?: {
     disableILMPolicies: boolean;
-    disableProxies: boolean;
     fleetServerStandalone: boolean;
+    onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
+    retrySetupOnBoot: boolean;
+    registry: {
+      kibanaVersionCheckEnabled: boolean;
+      capabilities: string[];
+      spec?: {
+        min?: string;
+        max?: string;
+      };
+      excludePackages: string[];
+    };
   };
   createArtifactsBulkBatchSize?: number;
 }

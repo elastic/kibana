@@ -1,0 +1,10 @@
+description: >
+  The type of units for the time window: seconds, minutes, hours, or days.
+type: string
+enum:
+  - s
+  - m
+  - h
+  - d
+examples:
+  - "m"

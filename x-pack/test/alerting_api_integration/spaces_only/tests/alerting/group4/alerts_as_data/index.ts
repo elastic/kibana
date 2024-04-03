@@ -13,5 +13,7 @@ export default function alertsAsDataTests({ loadTestFile }: FtrProviderContext) 
     loadTestFile(require.resolve('./install_resources'));
     loadTestFile(require.resolve('./alerts_as_data'));
     loadTestFile(require.resolve('./alerts_as_data_flapping'));
+    loadTestFile(require.resolve('./alerts_as_data_conflicts'));
+    loadTestFile(require.resolve('./alerts_as_data_alert_delay'));
   });
 }

@@ -94,4 +94,8 @@ export const commonDataLayerArgs: Omit<
     help: strings.getPaletteHelp(),
     default: '{palette}',
   },
+  colorMapping: {
+    types: ['string'],
+    help: strings.getColorMappingHelp(),
+  },
 };

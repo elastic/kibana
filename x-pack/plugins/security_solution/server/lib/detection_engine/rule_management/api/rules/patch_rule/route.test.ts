@@ -6,7 +6,7 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { getPatchRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_management/mocks';
+import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
@@ -200,7 +200,7 @@ describe('Patch rule route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", type: Invalid literal value, expected "threshold", and 5 more'
       );
     });
 
@@ -226,7 +226,7 @@ describe('Patch rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
 });

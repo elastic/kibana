@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,12 +14,11 @@ import { escapeKuery } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
+import type { EuiDataGridColumn, EuiDataGridProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridColumn,
-  EuiDataGridProps,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -28,13 +28,8 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
-import {
-  type DataGridItem,
-  DataGrid,
-  RowCountRelation,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '@kbn/ml-data-grid';
+import type { RowCountRelation, UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import { type DataGridItem, DataGrid, INDEX_STATUS } from '@kbn/ml-data-grid';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -42,11 +37,12 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
+import type { useColorRange } from '../../../../../components/color_range_legend';
+import { ColorRangeLegend } from '../../../../../components/color_range_legend';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
@@ -58,8 +54,9 @@ import {
 import { replaceStringTokens } from '../../../../../util/string_utils';
 import { parseInterval } from '../../../../../../../common/util/parse_interval';
 
-import { ExpandableSection, ExpandableSectionProps, HEADER_ITEMS_LOADING } from '.';
-import { IndexPatternPrompt } from '../index_pattern_prompt';
+import type { ExpandableSectionProps } from '.';
+import { ExpandableSection, HEADER_ITEMS_LOADING } from '.';
+import { DataViewPrompt } from '../data_view_prompt';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -121,9 +118,9 @@ const getResultsSectionHeaderItems = (
 interface ExpandableSectionResultsProps {
   colorRange?: ReturnType<typeof useColorRange>;
   indexData: UseIndexDataReturnType;
-  indexPattern?: DataView;
+  dataView?: DataView;
   jobConfig?: DataFrameAnalyticsConfig;
-  needsDestIndexPattern: boolean;
+  needsDestDataView: boolean;
   resultsField?: string;
   searchQuery: estypes.QueryDslQueryContainer;
 }
@@ -131,9 +128,9 @@ interface ExpandableSectionResultsProps {
 export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   colorRange,
   indexData,
-  indexPattern,
+  dataView,
   jobConfig,
-  needsDestIndexPattern,
+  needsDestDataView,
   resultsField,
   searchQuery,
 }) => {
@@ -146,7 +143,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     },
   } = useMlKibana();
 
-  const dataViewId = indexPattern?.id;
+  const dataViewId = dataView?.id;
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -206,7 +203,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
 
       if (discoverLocator !== undefined) {
         const url = await discoverLocator.getRedirectUrl({
-          indexPatternId: dataViewId,
+          dataViewId,
           timeRange: data.query.timefilter.timefilter.getTime(),
           filters: data.query.filterManager.getFilters(),
           query: {
@@ -239,7 +236,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     if (timeRangeInterval !== null) {
       // Create a copy of the record as we are adding properties into it.
       const record = cloneDeep(item);
-      const timestamp = record[indexPattern!.timeFieldName!];
+      const timestamp = record[dataView!.timeFieldName!];
       const configuredUrlValue = customUrl.url_value;
 
       if (configuredUrlValue.includes('$earliest$')) {
@@ -373,9 +370,9 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
 
   const resultsSectionContent = (
     <>
-      {jobConfig !== undefined && needsDestIndexPattern && (
+      {jobConfig !== undefined && needsDestDataView && (
         <div className="mlExpandableSection-contentPadding">
-          <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+          <DataViewPrompt destIndex={jobConfig.dest.index} />
         </div>
       )}
       {jobConfig !== undefined &&
@@ -386,7 +383,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
           </EuiText>
         )}
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
-        indexPattern !== undefined && (
+        dataView !== undefined && (
           <>
             {columnsWithCharts.length > 0 &&
               (tableItems.length > 0 || status === INDEX_STATUS.LOADED) && (

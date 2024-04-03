@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
-import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { AppMountParameters } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type { SharePluginSetup } from '../shared_imports';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 
+import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { RedirectApp } from './redirect_app';
 
 interface MountParams extends AppMountParameters {

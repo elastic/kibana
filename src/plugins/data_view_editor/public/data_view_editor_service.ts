@@ -37,12 +37,24 @@ export const matchedIndiciesDefault = {
   visibleIndices: [],
 };
 
+/**
+ * ConstructorArgs for DataViewEditorService
+ */
 export interface DataViewEditorServiceConstructorArgs {
+  /**
+   * Dependencies for the DataViewEditorService
+   */
   services: {
     http: HttpSetup;
     dataViews: DataViewsServicePublic;
   };
+  /**
+   * Whether service requires requireTimestampField
+   */
   requireTimestampField?: boolean;
+  /**
+   * Initial type, indexPattern, and name to populate service
+   */
   initialValues: {
     name?: string;
     type?: INDEX_PATTERN_TYPE;
@@ -296,8 +308,12 @@ export class DataViewEditorService {
     getFieldsOptions: GetFieldsOptions,
     requireTimestampField: boolean
   ) => {
-    const fields = await ensureMinimumTime(this.dataViews.getFieldsForWildcard(getFieldsOptions));
-    return extractTimeFields(fields as DataViewField[], requireTimestampField);
+    try {
+      const fields = await ensureMinimumTime(this.dataViews.getFieldsForWildcard(getFieldsOptions));
+      return extractTimeFields(fields as DataViewField[], requireTimestampField);
+    } catch (e) {
+      return [];
+    }
   };
 
   private getTimestampOptionsForWildcardCached = async (
@@ -330,6 +346,7 @@ export class DataViewEditorService {
 
     const getFieldsOptions: GetFieldsOptions = {
       pattern: this.indexPattern,
+      allowHidden: this.allowHidden,
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
@@ -361,7 +378,7 @@ export class DataViewEditorService {
     );
 
     // necessary to get new observable value if the field hasn't changed
-    this.loadIndices();
+    await this.loadIndices();
 
     // Wait until we have fetched the indices.
     // The result will then be sent to the field validator(s) (when calling await provider(););

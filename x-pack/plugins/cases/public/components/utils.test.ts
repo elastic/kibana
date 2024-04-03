@@ -7,6 +7,7 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { elasticUser, getCaseUsersMockResponse } from '../containers/mock';
 import {
   connectorDeprecationValidator,
   convertEmptyValuesToNull,
@@ -18,6 +19,8 @@ import {
   removeItemFromSessionStorage,
   parseURL,
   stringifyToURL,
+  parseCaseUsers,
+  convertCustomFieldValue,
 } from './utils';
 
 describe('Utils', () => {
@@ -253,6 +256,276 @@ describe('Utils', () => {
 
     it('stringifies empty object correctly into URL', () => {
       expect(stringifyToURL({})).toBe('');
+    });
+  });
+
+  describe('parseCaseUsers', () => {
+    it('should define userProfiles and reporters correctly', () => {
+      const caseUsers = getCaseUsersMockResponse();
+      const { userProfiles, reporterAsArray } = parseCaseUsers({
+        caseUsers,
+        createdBy: elasticUser,
+      });
+
+      expect(userProfiles).toMatchInlineSnapshot(`
+        Map {
+          "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "user": Object {
+              "email": null,
+              "full_name": null,
+              "username": "elastic",
+            },
+          },
+          "u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0",
+            "user": Object {
+              "email": "fuzzy_marten@profiles.elastic.co",
+              "full_name": "Fuzzy Marten",
+              "username": "fuzzy_marten",
+            },
+          },
+          "u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0",
+            "user": Object {
+              "email": "misty_mackerel@profiles.elastic.co",
+              "full_name": "Misty Mackerel",
+              "username": "misty_mackerel",
+            },
+          },
+          "participant_4_uid" => Object {
+            "data": Object {
+              "avatar": Object {
+                "initials": "P4",
+              },
+            },
+            "uid": "participant_4_uid",
+            "user": Object {
+              "email": null,
+              "full_name": null,
+              "username": "participant_4",
+            },
+          },
+          "participant_5_uid" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "participant_5_uid",
+            "user": Object {
+              "email": "participant_5@elastic.co",
+              "full_name": "Participant 5",
+              "username": "participant_5",
+            },
+          },
+          "reporter_1_uid" => Object {
+            "data": Object {
+              "avatar": Object {
+                "initials": "R1",
+              },
+            },
+            "uid": "reporter_1_uid",
+            "user": Object {
+              "email": "reporter_1@elastic.co",
+              "full_name": "Reporter 1",
+              "username": "reporter_1",
+            },
+          },
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+            "user": Object {
+              "email": "",
+              "full_name": "",
+              "username": "cases_no_connectors",
+            },
+          },
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            "user": Object {
+              "email": "valid_chimpanzee@profiles.elastic.co",
+              "full_name": "Valid Chimpanzee",
+              "username": "valid_chimpanzee",
+            },
+          },
+        }
+      `);
+      expect(reporterAsArray).toEqual([
+        {
+          uid: 'reporter_1_uid',
+          avatar: {
+            initials: 'R1',
+          },
+          user: {
+            email: 'reporter_1@elastic.co',
+            full_name: 'Reporter 1',
+            username: 'reporter_1',
+          },
+        },
+      ]);
+    });
+
+    it('should define a reporter without uid correctly', () => {
+      const caseUsers = getCaseUsersMockResponse();
+      const { userProfiles, reporterAsArray } = parseCaseUsers({
+        caseUsers: {
+          ...caseUsers,
+          reporter: {
+            user: {
+              email: 'reporter_no_uid@elastic.co',
+              full_name: 'Reporter No UID',
+              username: 'reporter_no_uid',
+            },
+          },
+        },
+        createdBy: elasticUser,
+      });
+
+      expect(userProfiles).toMatchInlineSnapshot(`
+        Map {
+          "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+            "user": Object {
+              "email": null,
+              "full_name": null,
+              "username": "elastic",
+            },
+          },
+          "u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0",
+            "user": Object {
+              "email": "fuzzy_marten@profiles.elastic.co",
+              "full_name": "Fuzzy Marten",
+              "username": "fuzzy_marten",
+            },
+          },
+          "u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0",
+            "user": Object {
+              "email": "misty_mackerel@profiles.elastic.co",
+              "full_name": "Misty Mackerel",
+              "username": "misty_mackerel",
+            },
+          },
+          "participant_4_uid" => Object {
+            "data": Object {
+              "avatar": Object {
+                "initials": "P4",
+              },
+            },
+            "uid": "participant_4_uid",
+            "user": Object {
+              "email": null,
+              "full_name": null,
+              "username": "participant_4",
+            },
+          },
+          "participant_5_uid" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "participant_5_uid",
+            "user": Object {
+              "email": "participant_5@elastic.co",
+              "full_name": "Participant 5",
+              "username": "participant_5",
+            },
+          },
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+            "user": Object {
+              "email": "",
+              "full_name": "",
+              "username": "cases_no_connectors",
+            },
+          },
+          "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+            "data": Object {
+              "avatar": undefined,
+            },
+            "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+            "user": Object {
+              "email": "valid_chimpanzee@profiles.elastic.co",
+              "full_name": "Valid Chimpanzee",
+              "username": "valid_chimpanzee",
+            },
+          },
+        }
+      `);
+      expect(reporterAsArray).toEqual([
+        {
+          user: {
+            email: 'reporter_no_uid@elastic.co',
+            full_name: 'Reporter No UID',
+            username: 'reporter_no_uid',
+          },
+        },
+      ]);
+    });
+
+    it('uses the fallback reporter correctly', () => {
+      const { userProfiles, reporterAsArray } = parseCaseUsers({
+        createdBy: elasticUser,
+      });
+
+      expect(userProfiles).toMatchInlineSnapshot(`Map {}`);
+      expect(reporterAsArray).toEqual([
+        {
+          uid: undefined,
+          user: {
+            email: 'leslie.knope@elastic.co',
+            full_name: 'Leslie Knope',
+            username: 'lknope',
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('convertCustomFieldValue ', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns the string when the value is a non-empty string', async () => {
+      expect(convertCustomFieldValue('my text value')).toMatchInlineSnapshot(`"my text value"`);
+    });
+
+    it('returns null when value is empty string', async () => {
+      expect(convertCustomFieldValue('')).toMatchInlineSnapshot('null');
+    });
+
+    it('returns value as it is when value is true', async () => {
+      expect(convertCustomFieldValue(true)).toMatchInlineSnapshot('true');
+    });
+
+    it('returns value as it is when value is false', async () => {
+      expect(convertCustomFieldValue(false)).toMatchInlineSnapshot('false');
     });
   });
 });

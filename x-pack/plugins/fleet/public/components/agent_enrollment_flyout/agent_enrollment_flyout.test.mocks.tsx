@@ -15,6 +15,10 @@ jest.mock('../../hooks', () => {
     ...jest.requireActual('../../hooks'),
     useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
+    useAgentVersion: jest.fn().mockReturnValue('8.1.0'),
+    sendGetAllFleetServerAgents: jest.fn().mockResolvedValue({
+      fleetServerAgentsCount: 1,
+    }),
   };
 });
 
@@ -42,9 +46,6 @@ jest.mock('../../hooks/use_request', () => {
     }),
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { package_policies: [] } },
-    }),
-    useGetAgents: jest.fn().mockReturnValue({
-      data: { items: [{ policy_id: 'fleet-server-policy' }] },
     }),
     useGetAgentPolicies: jest.fn(),
   };

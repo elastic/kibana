@@ -7,8 +7,9 @@
  */
 
 import { defer, Subject } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { finalize, map, delayWhen, filter } from 'rxjs';
 import { once } from 'lodash';
+import { createPageVisibility$ } from './page_visibility';
 
 export type AutoRefreshDoneFn = () => void;
 
@@ -17,6 +18,8 @@ export type AutoRefreshDoneFn = () => void;
  * It has a "confirmation" mechanism:
  * When auto refresh loop emits, it won't continue automatically,
  * until each subscriber calls received `done` function.
+ *
+ * Also, it will pause when the page is not visible.
  *
  * @internal
  */
@@ -51,6 +54,12 @@ export const createAutoRefreshLoop = () => {
     _timeoutHandle = -1;
   }
 
+  const pageVisible$ = createPageVisibility$().pipe(
+    filter((visibility) => visibility === 'visible')
+  );
+
+  const tickWhenVisible$ = tick.pipe(delayWhen(() => pageVisible$));
+
   return {
     stop: () => {
       _timeout = 0;
@@ -65,7 +74,7 @@ export const createAutoRefreshLoop = () => {
     loop$: defer(() => {
       subscribersCount++;
       start(); // restart the loop on a new subscriber
-      return tick.pipe(map((doneCb) => once(doneCb))); // each subscriber allowed to call done only once
+      return tickWhenVisible$.pipe(map((doneCb) => once(doneCb))); // each subscriber allowed to call done only once
     }).pipe(
       finalize(() => {
         subscribersCount--;

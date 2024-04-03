@@ -13,6 +13,8 @@ interface GetComponentTemplateNameOpts {
   context?: string;
   name?: string;
 }
+export const VALID_ALERT_INDEX_PREFIXES = ['.ds-.alerts-', '.internal.alerts-', '.alerts-'];
+
 export const getComponentTemplateName = ({ context, name }: GetComponentTemplateNameOpts = {}) =>
   `.alerts-${context ? `${context}.alerts` : name ? name : 'framework'}-mappings`;
 
@@ -22,6 +24,7 @@ export interface IIndexPatternString {
   alias: string;
   name: string;
   basePattern: string;
+  validPrefixes?: string[];
   secondaryAlias?: string;
 }
 
@@ -45,6 +48,7 @@ export const getIndexTemplateAndPattern = ({
     basePattern: `.alerts-${pattern}-*`,
     name: `.internal.alerts-${patternWithNamespace}-000001`,
     alias: `.alerts-${patternWithNamespace}`,
+    validPrefixes: VALID_ALERT_INDEX_PREFIXES,
     ...(secondaryAlias ? { secondaryAlias: `${secondaryAlias}-${concreteNamespace}` } : {}),
   };
 };

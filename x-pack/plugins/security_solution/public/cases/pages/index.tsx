@@ -8,6 +8,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
@@ -17,9 +21,14 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
-import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
-import { timelineActions } from '../../timelines/store/timeline';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
+import {
+  APP_ID,
+  CASES_PATH,
+  ENABLE_EXPANDABLE_FLYOUT_SETTING,
+  SecurityPageName,
+} from '../../../common/constants';
+import { timelineActions } from '../../timelines/store';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
@@ -45,13 +54,15 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases } = useKibana().services;
+  const { cases, telemetry } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
   );
+  const { openFlyout } = useExpandableFlyoutApi();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   const getDetectionsRuleDetailsHref = useCallback(
     (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
@@ -60,18 +71,38 @@ const CaseContainerComponent: React.FC = () => {
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      dispatch(
-        timelineActions.toggleDetailPanel({
-          panelView: 'eventDetail',
-          id: TimelineId.casePage,
-          params: {
-            eventId: alertId,
-            indexName: index,
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: alertId,
+              indexName: index,
+              scopeId: TimelineId.casePage,
+            },
           },
-        })
-      );
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          tableId: TimelineId.casePage,
+          panel: 'right',
+        });
+      }
+      // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+      // support of old flyout in cases page
+      else {
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
+            id: TimelineId.casePage,
+            params: {
+              eventId: alertId,
+              indexName: index,
+            },
+          })
+        );
+      }
     },
-    [dispatch]
+    [dispatch, isSecurityFlyoutEnabled, openFlyout, telemetry]
   );
 
   const endpointDetailsHref = (endpointId: string) =>
@@ -81,19 +112,6 @@ const CaseContainerComponent: React.FC = () => {
         selected_endpoint: endpointId,
       }),
     });
-  // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
-  const onComponentInitialized = useCallback(() => {
-    dispatch(
-      timelineActions.createTimeline({
-        id: TimelineId.casePage,
-        columns: [],
-        dataViewId: null,
-        indexNames: [],
-        expandedDetail: {},
-        show: false,
-      })
-    );
-  }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
   const { activeStep, endTourStep, isTourShown } = useTourContext();
@@ -107,6 +125,20 @@ const CaseContainerComponent: React.FC = () => {
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
   }, [endTourStep, isTourActive]);
 
+  useEffect(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.casePage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        expandedDetail: {},
+        show: false,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
@@ -114,11 +146,16 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
-            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            metrics: [
+              CaseMetricsFeature.ALERTS_COUNT,
+              CaseMetricsFeature.ALERTS_USERS,
+              CaseMetricsFeature.ALERTS_HOSTS,
+              CaseMetricsFeature.CONNECTORS,
+              CaseMetricsFeature.LIFESPAN,
+            ],
             alerts: { isExperimental: false },
           },
           refreshRef,
-          onComponentInitialized,
           actionsNavigation: {
             href: endpointDetailsHref,
             onClick: (endpointId: string, e) => {

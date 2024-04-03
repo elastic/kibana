@@ -12,10 +12,7 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
-import {
-  isNotFoundExceptionError,
-  throwIfNotAcceptableModelName,
-} from './ml_model_deployment_common';
+import { isNotFoundExceptionError } from './ml_model_deployment_common';
 
 export const startMlModelDeployment = async (
   modelName: string,
@@ -24,10 +21,6 @@ export const startMlModelDeployment = async (
   if (!trainedModelsProvider) {
     throw new Error('Machine Learning is not enabled');
   }
-
-  // before anything else, check our model name
-  // to ensure we only allow those names we want
-  throwIfNotAcceptableModelName(modelName);
 
   try {
     // try and get the deployment status of the model first
@@ -50,7 +43,7 @@ export const startMlModelDeployment = async (
   // we're downloaded already, but not deployed yet - let's deploy it
   const startRequest: MlStartTrainedModelDeploymentRequest = {
     model_id: modelName,
-    wait_for: 'started',
+    wait_for: 'starting',
   };
 
   await trainedModelsProvider.startTrainedModelDeployment(startRequest);

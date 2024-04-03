@@ -7,7 +7,7 @@
  */
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
@@ -251,7 +251,7 @@ export class CoreUsageDataService
           pingTimeoutMs: es.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
             es.requestHeadersWhitelist,
-            ['authorization']
+            ['authorization', 'es-client-authentication']
           ),
           requestTimeoutMs: es.requestTimeout.asMilliseconds(),
           shardTimeoutMs: es.shardTimeout.asMilliseconds(),

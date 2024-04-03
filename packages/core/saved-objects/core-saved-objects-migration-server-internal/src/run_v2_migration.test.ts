@@ -9,6 +9,7 @@
 import buffer from 'buffer';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   type MigrationResult,
   SavedObjectsSerializer,
@@ -26,7 +27,11 @@ import {
   waitGroup,
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
-import { indexTypesMapMock, savedObjectTypeRegistryMock } from './run_resilient_migrator.fixtures';
+import {
+  hashToVersionMapMock,
+  indexTypesMapMock,
+  savedObjectTypeRegistryMock,
+} from './run_resilient_migrator.fixtures';
 
 jest.mock('./core', () => {
   const actual = jest.requireActual('./core');
@@ -247,6 +252,7 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     typeRegistry,
     kibanaIndexPrefix: '.my_index',
     defaultIndexTypesMap: indexTypesMapMock,
+    hashToVersionMap: hashToVersionMapMock,
     migrationConfig: {
       algorithm: 'v2' as const,
       batchSize: 20,
@@ -271,5 +277,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     }),
     serializer: new SavedObjectsSerializer(typeRegistry),
     mappingProperties: buildTypesMappings(typeRegistry.getAllTypes()),
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
 };

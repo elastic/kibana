@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/rollup-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "rollup",
     "server": true,
@@ -13,13 +13,14 @@
     "requiredPlugins": [
       "management",
       "licensing",
-      "features"
+      "features",
+      "dataViews",
+      "data"
     ],
     "optionalPlugins": [
       "home",
       "indexManagement",
-      "usageCollection",
-      "visTypeTimeseries"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils",

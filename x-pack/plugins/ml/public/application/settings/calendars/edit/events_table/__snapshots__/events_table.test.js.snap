@@ -58,6 +58,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
     }
     responsive={true}
     rowProps={[Function]}
+    searchFormat="eql"
     sorting={
       Object {
         "sort": Object {
@@ -137,7 +138,6 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
-            color="primary"
             data-test-subj="mlCalendarNewEventButton"
             iconType="plusInCircle"
             isDisabled={false}
@@ -151,7 +151,6 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             />
           </EuiButton>,
           <EuiButton
-            color="primary"
             data-test-subj="mlCalendarImportEventsButton"
             iconType="importAction"
             isDisabled={false}
@@ -167,6 +166,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         ],
       }
     }
+    searchFormat="eql"
     sorting={
       Object {
         "sort": Object {

@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import semver from 'semver';
-import { isEqual, isEmpty, chunk, keyBy } from 'lodash';
+import { isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
-import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import { stringify } from '../../../utils/stringify';
+import { QueueProcessor } from '../../../utils/queue_processor';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
-import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+import {
+  manifestDispatchSchema,
+  type ManifestSchema,
+} from '../../../../../common/endpoint/schema/manifest';
 
-import type { ArtifactListId } from '../../../lib/artifacts';
 import {
   ArtifactConstants,
+  type ArtifactListId,
   buildArtifact,
+  convertExceptionsToEndpointFormat,
   getAllItemsFromEndpointExceptionList,
   getArtifactId,
   Manifest,
-  convertExceptionsToEndpointFormat,
 } from '../../../lib/artifacts';
-import type {
-  InternalArtifactCompleteSchema,
-  WrappedTranslatedExceptionList,
+
+import {
+  internalArtifactCompleteSchema,
+  type InternalArtifactCompleteSchema,
+  type WrappedTranslatedExceptionList,
 } from '../../../schemas/artifacts';
-import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
@@ -54,6 +54,7 @@ interface ArtifactsBuildResult {
 interface BuildArtifactsForOsOptions {
   listId: ArtifactListId;
   name: string;
+  exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
 }
 
 const iterateArtifactsBuildResult = (
@@ -71,24 +72,6 @@ const iterateArtifactsBuildResult = (
   }
 };
 
-const iterateAllListItems = async <T>(
-  pageSupplier: (page: number, perPage: number) => Promise<ListResult<T>>,
-  itemCallback: (items: T[]) => void
-) => {
-  let paging = true;
-  let page = 1;
-  const perPage = 1000;
-
-  while (paging) {
-    const { items, total } = await pageSupplier(page, perPage);
-
-    itemCallback(items);
-
-    paging = (page - 1) * perPage + items.length < total;
-    page++;
-  }
-};
-
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
@@ -98,6 +81,7 @@ export interface ManifestManagerContext {
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
   esClient: ElasticsearchClient;
+  productFeaturesService: ProductFeaturesService;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -119,6 +103,7 @@ export class ManifestManager {
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
+  protected productFeaturesService: ProductFeaturesService;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -132,6 +117,7 @@ export class ManifestManager {
     this.packagerTaskPackagePolicyUpdateBatchSize =
       context.packagerTaskPackagePolicyUpdateBatchSize;
     this.esClient = context.esClient;
+    this.productFeaturesService = context.productFeaturesService;
   }
 
   /**
@@ -152,19 +138,33 @@ export class ManifestManager {
     os,
     policyId,
     schemaVersion,
+    exceptionItemDecorator,
   }: {
     elClient: ExceptionListClient;
     listId: ArtifactListId;
     os: string;
     policyId?: string;
     schemaVersion: string;
+    exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
-      const itemsByListId = await getAllItemsFromEndpointExceptionList({
-        elClient,
-        os,
-        listId,
-      });
+      let itemsByListId: ExceptionListItemSchema[] = [];
+      if (
+        (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointResponseActions)) ||
+        (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
+          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
+      ) {
+        itemsByListId = await getAllItemsFromEndpointExceptionList({
+          elClient,
+          os,
+          listId,
+        });
+
+        if (exceptionItemDecorator) {
+          itemsByListId = itemsByListId.map(exceptionItemDecorator);
+        }
+      }
       this.cachedExceptionsListsByOs.set(`${listId}-${os}`, itemsByListId);
     }
 
@@ -194,6 +194,7 @@ export class ManifestManager {
     name,
     os,
     policyId,
+    exceptionItemDecorator,
   }: {
     os: string;
     policyId?: string;
@@ -205,6 +206,7 @@ export class ManifestManager {
         os,
         policyId,
         listId,
+        exceptionItemDecorator,
       }),
       this.schemaVersion,
       os,
@@ -223,23 +225,13 @@ export class ManifestManager {
     osOptions: BuildArtifactsForOsOptions
   ): Promise<Record<string, InternalArtifactCompleteSchema[]>> {
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
-    await pMap(
-      allPolicyIds,
-      async (policyId) => {
-        for (const os of supportedOSs) {
-          policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
-          policySpecificArtifacts[policyId].push(
-            await this.buildArtifactsForOs({ os, policyId, ...osOptions })
-          );
-        }
-      },
-      {
-        concurrency: 5,
-        /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
-         * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
-        stopOnError: false,
+    for (const policyId of allPolicyIds)
+      for (const os of supportedOSs) {
+        policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
+        policySpecificArtifacts[policyId].push(
+          await this.buildArtifactsForOs({ os, policyId, ...osOptions })
+        );
       }
-    );
 
     return policySpecificArtifacts;
   }
@@ -256,9 +248,27 @@ export class ManifestManager {
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    const decorateWildcardOnlyExceptionItem = (item: ExceptionListItemSchema) => {
+      const isWildcardOnly = item.entries.every(({ type }) => type === 'wildcard');
+
+      // add `event.module=endpoint` to make endpoints older than 8.2 work when only `wildcard` is used
+      if (isWildcardOnly) {
+        item.entries.push({
+          type: 'match',
+          operator: 'included',
+          field: 'event.module',
+          value: 'endpoint',
+        });
+      }
+
+      return item;
+    };
+
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_LIST_ID,
       name: ArtifactConstants.GLOBAL_ALLOWLIST_NAME,
+      exceptionItemDecorator: decorateWildcardOnlyExceptionItem,
     };
 
     for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
@@ -279,7 +289,7 @@ export class ManifestManager {
   protected async buildTrustedAppsArtifacts(allPolicyIds: string[]): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       name: ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME,
     };
 
@@ -307,7 +317,7 @@ export class ManifestManager {
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       name: ArtifactConstants.GLOBAL_EVENT_FILTERS_NAME,
     };
 
@@ -333,7 +343,7 @@ export class ManifestManager {
   protected async buildBlocklistArtifacts(allPolicyIds: string[]): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       name: ArtifactConstants.GLOBAL_BLOCKLISTS_NAME,
     };
 
@@ -362,7 +372,7 @@ export class ManifestManager {
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       name: ArtifactConstants.GLOBAL_HOST_ISOLATION_EXCEPTIONS_NAME,
     };
 
@@ -381,7 +391,7 @@ export class ManifestManager {
   }
 
   /**
-   * Writes new artifact SOs.
+   * Writes new artifact to Fleet
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
    * @param newManifest A Manifest representing the new manifest
@@ -392,7 +402,6 @@ export class ManifestManager {
     newManifest: Manifest
   ): Promise<Error[]> {
     const errors: Error[] = [];
-
     const artifactsToCreate: InternalArtifactCompleteSchema[] = [];
 
     for (const artifact of artifacts) {
@@ -407,26 +416,56 @@ export class ManifestManager {
       return errors;
     }
 
+    this.logger.debug(`Creating [${artifactsToCreate.length}] artifacts`);
+
     const { artifacts: fleetArtifacts, errors: createErrors } =
       await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+
+    this.logger.info(`Count of artifacts created: ${fleetArtifacts?.length ?? 0}`);
 
     if (createErrors) {
       errors.push(...createErrors);
     }
 
+    const newArtifactsAddedToManifest: string[] = [];
+    const artifactsNotCreated: string[] = [];
+
     if (fleetArtifacts) {
-      const fleetArtfactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+      const fleetArtifactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+
       fleetArtifacts.forEach((fleetArtifact) => {
-        fleetArtfactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
+        fleetArtifactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
       });
+
       artifactsToCreate.forEach((artifact) => {
         const artifactId = getArtifactId(artifact);
-        const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
+        const fleetArtifact = fleetArtifactsByIdentifier[artifactId];
 
-        if (!fleetArtifact) return;
+        if (!fleetArtifact) {
+          artifactsNotCreated.push(artifactId);
+
+          return;
+        }
+
         newManifest.replaceArtifact(fleetArtifact);
-        this.logger.debug(`New created artifact ${artifactId} added to the manifest`);
+        newArtifactsAddedToManifest.push(artifactId);
       });
+    }
+
+    if (artifactsNotCreated.length) {
+      this.logger.debug(
+        `A total of [${
+          artifactsNotCreated.length
+        }] artifacts were not created. Prior version of the artifact will remain in manifest.\n${artifactsNotCreated.join(
+          '\n'
+        )}`
+      );
+    }
+
+    if (newArtifactsAddedToManifest.length !== 0) {
+      this.logger.debug(
+        `Newly created artifacts added to the manifest:\n${newArtifactsAddedToManifest.join('\n')}`
+      );
     }
 
     return errors;
@@ -443,15 +482,24 @@ export class ManifestManager {
       if (isEmpty(artifactIds)) {
         return [];
       }
+
       const errors = await this.artifactClient.bulkDeleteArtifacts(artifactIds);
+
       if (!isEmpty(errors)) {
         return errors;
       }
-      for (const artifactId of artifactIds) {
-        this.logger.info(`Cleaned up artifact ${artifactId}`);
+
+      this.logger.info(`Count of cleaned up artifacts: ${artifactIds.length}`);
+
+      if (artifactIds.length !== 0) {
+        this.logger.debug(`Deleted artifacts from cleanup:\n${artifactIds.join('\n  ')}`);
       }
+
       return [];
     } catch (err) {
+      this.logger.error(
+        `Attempted to delete [${artifactIds.length}] outdated artifacts failed with: ${err.message}\n${err.stack}`
+      );
       return [err];
     }
   }
@@ -482,20 +530,33 @@ export class ManifestManager {
 
       const fleetArtifacts = await this.listAllArtifacts();
       const fleetArtifactsById = keyBy(fleetArtifacts, (artifact) => getArtifactId(artifact));
+      const invalidArtifactIds: string[] = [];
 
+      // Ensure that all artifacts currently defined in the Manifest have a valid artifact in fleet,
+      // and remove any that does not have an actual artifact from the manifest
       for (const entry of manifestSo.attributes.artifacts) {
         const artifact = fleetArtifactsById[entry.artifactId];
 
         if (!artifact) {
-          this.logger.error(
-            new InvalidInternalManifestError(`artifact id [${entry.artifactId}] not found!`, {
-              entry,
-              action: 'removed from internal ManifestManger tracking map',
-            })
-          );
+          invalidArtifactIds.push(entry.artifactId);
         } else {
           manifest.addEntry(artifact, entry.policyId);
         }
+      }
+
+      if (invalidArtifactIds.length) {
+        this.logger.warn(
+          `Missing artifacts detected! Internal artifact manifest (SavedObject version [${
+            manifestSo.version
+          }]) references [${
+            invalidArtifactIds.length
+          }] artifact IDs that don't exist.\nFirst 10 below (run with logging set to 'debug' to see all):\n${invalidArtifactIds
+            .slice(0, 10)
+            .join('\n')}`
+        );
+        this.logger.debug(
+          `Artifact ID references that are missing:\n${stringify(invalidArtifactIds)}`
+        );
       }
 
       return manifest;
@@ -543,15 +604,10 @@ export class ManifestManager {
 
     for (const result of results) {
       iterateArtifactsBuildResult(result, (artifact, policyId) => {
-        const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
-        if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
-          throw new EndpointError(
-            `Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`,
-            artifactToAdd
-          );
-        }
-
-        manifest.addEntry(artifactToAdd, policyId);
+        manifest.addEntry(
+          baselineManifest.getArtifact(getArtifactId(artifact)) || artifact,
+          policyId
+        );
       });
     }
 
@@ -566,81 +622,93 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
-    const allPackagePolicies: PackagePolicy[] = [];
-    await iterateAllListItems(
-      (page, perPage) => this.listEndpointPolicies(page, perPage),
-      (packagePoliciesBatch) => {
-        allPackagePolicies.push(...packagePoliciesBatch);
-      }
-    );
-
-    const packagePoliciesToUpdate: PackagePolicy[] = [];
-
     const errors: Error[] = [];
-    allPackagePolicies.forEach((packagePolicy) => {
-      const { id } = packagePolicy;
-      if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
-        const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
-          value: {},
-        };
-
-        const newManifestVersion = manifest.getSemanticVersion();
-        if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-          const serializedManifest = manifest.toPackagePolicyManifest(id);
-
-          if (!manifestDispatchSchema.is(serializedManifest)) {
-            errors.push(new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest));
-          } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
-            packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
-            packagePoliciesToUpdate.push(packagePolicy);
-          } else {
-            this.logger.debug(
-              `No change in manifest content for package policy: ${id}. Staying on old version`
-            );
-          }
-        } else {
-          this.logger.debug(`No change in manifest version for package policy: ${id}`);
-        }
-      } else {
-        errors.push(
-          new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+    const updatedPolicies: string[] = [];
+    const unChangedPolicies: string[] = [];
+    const manifestVersion = manifest.getSemanticVersion();
+    const execId = Math.random().toString(32).substring(3, 8);
+    const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
+      batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
+      logger: this.logger,
+      key: `tryDispatch.${execId}`,
+      batchHandler: async ({ data: currentBatch }) => {
+        const response = await this.packagePolicyService.bulkUpdate(
+          this.savedObjectsClient,
+          this.esClient,
+          currentBatch
         );
-      }
+
+        if (!isEmpty(response.failedPolicies)) {
+          errors.push(
+            ...response.failedPolicies.map((failedPolicy) => {
+              if (failedPolicy.error instanceof Error) {
+                return failedPolicy.error;
+              } else {
+                return new Error(failedPolicy.error.message);
+              }
+            })
+          );
+        }
+
+        if (response.updatedPolicies) {
+          updatedPolicies.push(
+            ...response.updatedPolicies.map((policy) => {
+              return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
+            })
+          );
+        }
+      },
     });
 
-    // Split updates in batches with batch size: packagerTaskPackagePolicyUpdateBatchSize
-    const updateBatches = chunk(
-      packagePoliciesToUpdate,
-      this.packagerTaskPackagePolicyUpdateBatchSize
+    for await (const policies of this.fetchAllPolicies()) {
+      for (const packagePolicy of policies) {
+        const { id, name } = packagePolicy;
+
+        if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
+          const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
+            value: {},
+          };
+
+          const newManifestVersion = manifest.getSemanticVersion();
+
+          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
+            const serializedManifest = manifest.toPackagePolicyManifest(id);
+
+            if (!manifestDispatchSchema.is(serializedManifest)) {
+              errors.push(
+                new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest)
+              );
+            } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+              packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+              policyUpdateBatchProcessor.addToQueue(packagePolicy);
+            } else {
+              unChangedPolicies.push(`[${id}][${name}] No change in manifest content`);
+            }
+          } else {
+            unChangedPolicies.push(`[${id}][${name}] No change in manifest version`);
+          }
+        } else {
+          errors.push(
+            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+          );
+        }
+      }
+    }
+
+    await policyUpdateBatchProcessor.complete();
+
+    this.logger.debug(
+      `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies: updated: [${
+        updatedPolicies.length
+      }], un-changed: [${unChangedPolicies.length}]`
     );
 
-    for (const currentBatch of updateBatches) {
-      const response = await this.packagePolicyService.bulkUpdate(
-        this.savedObjectsClient,
-        this.esClient,
-        currentBatch
-      );
+    if (updatedPolicies.length) {
+      this.logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
+    }
 
-      // Update errors
-      if (!isEmpty(response.failedPolicies)) {
-        errors.push(
-          ...response.failedPolicies.map((failedPolicy) => {
-            if (failedPolicy.error instanceof Error) {
-              return failedPolicy.error;
-            } else {
-              return new Error(failedPolicy.error.message);
-            }
-          })
-        );
-      }
-      // Log success updates
-      for (const updatedPolicy of response.updatedPolicies || []) {
-        this.logger.debug(
-          `Updated package policy ${
-            updatedPolicy.id
-          } with manifest version ${manifest.getSemanticVersion()}`
-        );
-      }
+    if (unChangedPolicies.length) {
+      this.logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
     }
 
     return errors;
@@ -667,34 +735,27 @@ export class ManifestManager {
       });
     }
 
-    this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
+    this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
-  private async listEndpointPolicies(
-    page: number,
-    perPage: number
-  ): Promise<ListResult<PackagePolicy>> {
-    return this.packagePolicyService.list(this.savedObjectsClient, {
-      page,
-      perPage,
+  private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {
+    return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
   }
 
   private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
-    await iterateAllListItems(
-      (page, perPage) => {
-        return this.packagePolicyService.listIds(this.savedObjectsClient, {
-          page,
-          perPage,
-          kuery: 'ingest-package-policies.package.name:endpoint',
-        });
-      },
-      (packagePolicyIdsBatch) => {
-        allPolicyIds.push(...packagePolicyIdsBatch);
-      }
-    );
+    const idFetcher = this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+      kuery: 'ingest-package-policies.package.name:endpoint',
+    });
+
+    for await (const itemIds of idFetcher) {
+      allPolicyIds.push(...itemIds);
+    }
+
+    this.logger.debug(`Retrieved [${allPolicyIds.length}] endpoint integration policy IDs`);
+
     return allPolicyIds;
   }
 
@@ -707,70 +768,71 @@ export class ManifestManager {
    * @returns Artifact[]
    */
   private async listAllArtifacts(): Promise<Artifact[]> {
-    const fleetArtifacts = [];
-    const perPage = 100;
-    let page = 1;
+    const fleetArtifacts: Artifact[] = [];
+    let total = 0;
 
-    let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
-      perPage,
-      page,
-    });
-    fleetArtifacts.push(...fleetArtifactsResponse.items);
-
-    while (
-      fleetArtifactsResponse.total > fleetArtifacts.length &&
-      !isEmpty(fleetArtifactsResponse.items)
-    ) {
-      page += 1;
-      fleetArtifactsResponse = await this.artifactClient.listArtifacts({
-        perPage,
-        page,
-      });
-      fleetArtifacts.push(...fleetArtifactsResponse.items);
+    for await (const artifacts of this.artifactClient.fetchAll()) {
+      fleetArtifacts.push(...artifacts);
+      total += artifacts.length;
     }
+
+    this.logger.debug(`Count of current stored artifacts: ${total}`);
+
     return fleetArtifacts;
   }
 
   /**
-   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   * Pulls in all artifacts from Fleet and checks to ensure they are all being referenced
+   * by the Manifest. If any are found to not be in the current Manifest (orphan), they
+   * are cleaned up (deleted)
    */
   public async cleanup(manifest: Manifest) {
-    try {
-      const fleetArtifacts = await this.listAllArtifacts();
-      if (isEmpty(fleetArtifacts)) {
-        return;
-      }
+    const badArtifactIds: string[] = [];
+    const errors: string[] = [];
+    const artifactDeletionProcess = new QueueProcessor<string>({
+      batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
+      logger: this.logger,
+      key: 'cleanup',
+      batchHandler: async ({ batch, data }) => {
+        const deleteErrors = await this.artifactClient.bulkDeleteArtifacts(data);
 
-      const badArtifacts = [];
-      const badArtifactIds = [];
+        badArtifactIds.push(...data);
 
-      const manifestArtifactsIds = manifest
-        .getAllArtifacts()
-        .map((artifact) => getArtifactId(artifact));
+        if (deleteErrors.length) {
+          errors.push(
+            `Delete batch #[${batch}] with [${data.length}] items:\n${stringify(deleteErrors)}`
+          );
+        }
+      },
+    });
 
-      for (const fleetArtifact of fleetArtifacts) {
-        const artifactId = getArtifactId(fleetArtifact);
-        const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
+    const validArtifactIds = manifest.getAllArtifacts().map((artifact) => getArtifactId(artifact));
+
+    for await (const artifacts of this.artifactClient.fetchAll()) {
+      for (const artifact of artifacts) {
+        const artifactId = getArtifactId(artifact);
+        const isArtifactInManifest = validArtifactIds.includes(artifactId);
 
         if (!isArtifactInManifest) {
-          badArtifacts.push(fleetArtifact);
-          badArtifactIds.push(artifactId);
+          artifactDeletionProcess.addToQueue(artifactId);
         }
       }
+    }
 
-      if (isEmpty(badArtifacts)) {
-        return;
-      }
+    await artifactDeletionProcess.complete();
 
+    if (errors.length > 0) {
       this.logger.error(
-        new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
+        `The following errors were encountered while attempting to delete [${
+          badArtifactIds.length
+        }] orphaned artifacts:\n${stringify(errors)}`
       );
-
-      await this.artifactClient.bulkDeleteArtifacts(badArtifactIds);
-
-      this.logger.info(`All orphan artifacts has been removed successfully`);
-    } catch (error) {
-      this.logger.error(new EndpointError('There was an error cleaning orphan artifacts', error));
+    } else if (badArtifactIds.length > 0) {
+      this.logger.debug(
+        `Count of orphan artifacts cleaned up: ${badArtifactIds.length}\n${stringify(
+          badArtifactIds
+        )}`
+      );
     }
   }
 }

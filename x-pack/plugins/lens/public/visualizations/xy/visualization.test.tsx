@@ -7,6 +7,7 @@
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
+import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 import {
   Operation,
   OperationDescriptor,
@@ -40,7 +41,7 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
@@ -221,8 +222,27 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
+              "colorMapping": Object {
+                "assignments": Array [],
+                "colorMode": Object {
+                  "type": "categorical",
+                },
+                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "type": "loop",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
               "layerId": "l1",
               "layerType": "data",
+              "palette": undefined,
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
@@ -437,6 +457,11 @@ describe('xy_visualization', () => {
           annotations: [], // different from the persisted group
         },
         {
+          cachedMetadata: {
+            title: 'Local title',
+            description: '',
+            tags: [],
+          },
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           persistanceType: 'linked',
@@ -478,6 +503,7 @@ describe('xy_visualization', () => {
         {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          cachedMetadata: persistedAnnotationLayers[1].cachedMetadata,
           annotationGroupId: annotationGroupId2,
           ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[1].annotations,
@@ -679,7 +705,7 @@ describe('xy_visualization', () => {
       let frame: ReturnType<typeof createMockFramePublicAPI>;
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
@@ -708,12 +734,14 @@ describe('xy_visualization', () => {
           },
         };
       });
+
       it('when there is no date histogram annotation layer is disabled', () => {
         const supportedAnnotationLayer = xyVisualization
           .getSupportedLayers(exampleState())
           .find((a) => a.type === 'annotations');
         expect(supportedAnnotationLayer?.disabled).toBeTruthy();
       });
+
       it('for data with date histogram annotation layer is enabled and calculates initial dimensions', () => {
         const supportedAnnotationLayer = xyVisualization
           .getSupportedLayers(exampleState(), frame)
@@ -746,7 +774,7 @@ describe('xy_visualization', () => {
           indexPatterns: { indexPattern1: createMockedIndexPattern() },
         }),
       });
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -1556,7 +1584,7 @@ describe('xy_visualization', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -1656,7 +1684,7 @@ describe('xy_visualization', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -2324,7 +2352,7 @@ describe('xy_visualization', () => {
     describe('annotations', () => {
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
@@ -2568,7 +2596,7 @@ describe('xy_visualization', () => {
 
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
           dataType: 'string',
@@ -2967,7 +2995,7 @@ describe('xy_visualization', () => {
         }
 
         function getFrameMock() {
-          const datasourceMock = createMockDatasource('testDatasource');
+          const datasourceMock = createMockDatasource();
           datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
             id === DATE_HISTORGRAM_COLUMN_ID
               ? ({
@@ -3110,7 +3138,7 @@ describe('xy_visualization', () => {
 
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
           { columnId: 'd', fields: [] },
@@ -3193,8 +3221,36 @@ describe('xy_visualization', () => {
     });
 
     describe('info', () => {
+      function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
+        return {
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: DATE_HISTORGRAM_COLUMN_ID,
+              accessors: ['b'],
+            },
+            {
+              layerId: 'layerId',
+              layerType: 'annotations',
+              indexPatternId: 'first',
+              annotations: [
+                {
+                  label: 'Event',
+                  id: '1',
+                  type: 'query',
+                  timeField: 'start_date',
+                  ...annotation,
+                },
+              ],
+            },
+          ],
+        } as XYState;
+      }
       function getFrameMock() {
-        const datasourceMock = createMockDatasource('testDatasource');
+        const datasourceMock = createMockDatasource();
         datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
           id === DATE_HISTORGRAM_COLUMN_ID
             ? ({
@@ -3216,21 +3272,47 @@ describe('xy_visualization', () => {
         });
       }
 
-      it('should return an info message if annotation layer is ignoring the global filters', () => {
-        const initialState = exampleState();
+      it('should not return an info message if annotation layer is ignoring the global filters but contains only manual annotations', () => {
+        const initialState = createStateWithAnnotationProps({});
         const state: State = {
           ...initialState,
           layers: [
-            ...initialState.layers,
+            // replace the existing annotation layers with a new one
+            ...initialState.layers.filter(({ layerType }) => layerType !== layerTypes.ANNOTATIONS),
             {
               layerId: 'annotation',
               layerType: layerTypes.ANNOTATIONS,
-              annotations: [exampleAnnotation2],
+              annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'an3' }],
               ignoreGlobalFilters: true,
               indexPatternId: 'myIndexPattern',
             },
           ],
         };
+        expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toHaveLength(0);
+      });
+
+      it("should return an info message if the annotation layer is ignoring filters and there's at least a query annotation", () => {
+        const state = createStateWithAnnotationProps({
+          filter: {
+            language: 'kuery',
+            query: 'agent.keyword: *',
+            type: 'kibana_query',
+          },
+          id: 'newColId',
+          key: {
+            type: 'point_in_time',
+          },
+          label: 'agent.keyword: *',
+          timeField: 'timestamp',
+          type: 'query',
+        });
+
+        const annotationLayer = state.layers.find(
+          ({ layerType }) => layerType === layerTypes.ANNOTATIONS
+        )! as XYAnnotationLayerConfig;
+        annotationLayer.ignoreGlobalFilters = true;
+        annotationLayer.annotations.push(exampleAnnotation2);
+
         expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toContainEqual(
           expect.objectContaining({
             displayLocations: [{ id: 'embeddableBadge' }],
@@ -3240,6 +3322,30 @@ describe('xy_visualization', () => {
             uniqueId: 'ignoring-global-filters-layers',
           })
         );
+      });
+
+      it('should not return an info message if annotation layer is not ignoring the global filters', () => {
+        const state = createStateWithAnnotationProps({
+          filter: {
+            language: 'kuery',
+            query: 'agent.keyword: *',
+            type: 'kibana_query',
+          },
+          id: 'newColId',
+          key: {
+            type: 'point_in_time',
+          },
+          label: 'agent.keyword: *',
+          timeField: 'timestamp',
+          type: 'query',
+        });
+
+        const annotationLayer = state.layers.find(
+          ({ layerType }) => layerType === layerTypes.ANNOTATIONS
+        )! as XYAnnotationLayerConfig;
+        annotationLayer.ignoreGlobalFilters = false;
+        annotationLayer.annotations.push(exampleAnnotation2);
+        expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toHaveLength(0);
       });
     });
   });
@@ -3615,6 +3721,12 @@ describe('xy_visualization', () => {
           layerId: 'layer-id',
           layerType: 'annotations',
           persistanceType: 'linked',
+          // stores "cached" or "local" metadata
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[0].annotations,
           ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
         },
@@ -3623,6 +3735,11 @@ describe('xy_visualization', () => {
           layerId: 'layer-id2',
           layerType: 'annotations',
           persistanceType: 'linked',
+          cachedMetadata: {
+            description: 'some description',
+            tags: [],
+            title: 'My saved object title',
+          },
           annotations: layers[1].annotations,
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },

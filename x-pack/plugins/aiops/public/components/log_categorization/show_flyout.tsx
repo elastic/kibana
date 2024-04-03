@@ -6,24 +6,22 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  toMountPoint,
-  wrapWithTheme,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { AiopsPluginStartDeps } from '../../types';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
@@ -32,9 +30,12 @@ export async function showCategorizeFlyout(
   field: DataViewField,
   dataView: DataView,
   coreStart: CoreStart,
-  plugins: AiopsPluginStartDeps
+  plugins: AiopsPluginStartDeps,
+  originatingApp: string,
+  additionalFilter?: CategorizationAdditionalFilter
 ): Promise<void> {
-  const { http, theme, overlays, application, notifications, uiSettings } = coreStart;
+  const { analytics, http, theme, overlays, application, notifications, uiSettings, i18n } =
+    coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -43,44 +44,45 @@ export async function showCategorizeFlyout(
         resolve();
       };
 
-      const appDependencies = {
+      const appDependencies: AiopsAppDependencies = {
+        analytics,
         notifications,
         uiSettings,
         http,
         theme,
         application,
+        i18n,
         ...plugins,
       };
-      const datePickerDeps = {
+      const datePickerDeps: DatePickerDependencies = {
         ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
-        toMountPoint,
-        wrapWithTheme,
+        i18n,
         uiSettingsKeys: UI_SETTINGS,
       };
 
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
-          wrapWithTheme(
-            <KibanaContextProvider
-              services={{
-                ...coreStart,
-              }}
-            >
-              <AiopsAppContext.Provider value={appDependencies}>
-                <DatePickerContextProvider {...datePickerDeps}>
-                  <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                    <LogCategorizationFlyout
-                      dataView={dataView}
-                      savedSearch={null}
-                      selectedField={field}
-                      onClose={onFlyoutClose}
-                    />
-                  </StorageContextProvider>
-                </DatePickerContextProvider>
-              </AiopsAppContext.Provider>
-            </KibanaContextProvider>,
-            theme.theme$
-          )
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+            }}
+          >
+            <AiopsAppContext.Provider value={appDependencies}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                  <LogCategorizationFlyout
+                    dataView={dataView}
+                    savedSearch={null}
+                    selectedField={field}
+                    onClose={onFlyoutClose}
+                    embeddingOrigin={originatingApp}
+                    additionalFilter={additionalFilter}
+                  />
+                </StorageContextProvider>
+              </DatePickerContextProvider>
+            </AiopsAppContext.Provider>
+          </KibanaContextProvider>,
+          { theme, i18n }
         ),
         {
           'data-test-subj': 'aiopsCategorizeFlyout',

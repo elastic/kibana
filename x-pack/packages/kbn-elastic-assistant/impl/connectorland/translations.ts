@@ -31,10 +31,17 @@ export const WELCOME_SECURITY = i18n.translate(
   }
 );
 
+export const PRECONFIGURED_CONNECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.preconfiguredTitle',
+  {
+    defaultMessage: 'Preconfigured',
+  }
+);
+
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel',
   {
-    defaultMessage: 'Conversation Selector',
+    defaultMessage: 'Connector Selector',
   }
 );
 
@@ -42,6 +49,20 @@ export const ADD_NEW_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.newConnectorOptions',
   {
     defaultMessage: 'Add new Connector...',
+  }
+);
+
+export const INLINE_CONNECTOR_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorLabel',
+  {
+    defaultMessage: 'Connector:',
+  }
+);
+
+export const INLINE_CONNECTOR_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorPlaceholder',
+  {
+    defaultMessage: 'Select a Connector',
   }
 );
 
@@ -59,17 +80,17 @@ export const ADD_CONNECTOR_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CONNECTOR_ADDED_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedTitle',
+export const ADD_CONNECTOR_MISSING_PRIVILEGES_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.missingPrivilegesTitle',
   {
-    defaultMessage: 'Generative AI Connector added!',
+    defaultMessage: 'Generative AI Connector Required',
   }
 );
 
-export const CONNECTOR_ADDED_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedDescription',
+export const ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.addConnectorButton.missingPrivilegesDescription',
   {
-    defaultMessage: 'Ready to continue the conversation...',
+    defaultMessage: 'Please contact your administrator to enable a Generative AI Connector.',
   }
 );
 
@@ -98,5 +119,26 @@ export const CONNECTOR_SETUP_SKIP = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
   {
     defaultMessage: 'Click to skip...',
+  }
+);
+
+export const CONNECTOR_SETUP_COMPLETE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.setup.complete',
+  {
+    defaultMessage: 'Connector setup complete!',
+  }
+);
+
+export const MISSING_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutTitle',
+  {
+    defaultMessage: 'The current conversation is missing a connector configuration',
+  }
+);
+
+export const MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.conversationSettingsLink',
+  {
+    defaultMessage: 'Conversation Settings',
   }
 );

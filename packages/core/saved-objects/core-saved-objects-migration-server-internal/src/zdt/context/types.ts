@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -15,9 +18,9 @@ import type {
 import type {
   VirtualVersionMap,
   SavedObjectsMigrationConfigType,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
-import { VersionedTransformer } from '../../document_migrator';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
@@ -42,7 +45,7 @@ export interface MigratorContext {
   /** SO serializer to use for migration */
   readonly serializer: ISavedObjectsSerializer;
   /** The doc migrator to use */
-  readonly documentMigrator: VersionedTransformer;
+  readonly documentMigrator: IDocumentMigrator;
   /** The SO type registry to use for the migration */
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */
@@ -53,4 +56,6 @@ export interface MigratorContext {
   readonly discardCorruptObjects: boolean;
   /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
+  /** Capabilities of the ES cluster we're using */
+  readonly esCapabilities: ElasticsearchCapabilities;
 }

@@ -12,6 +12,7 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getILMExplainRoute } from './get_ilm_explain';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchILMExplain: jest.fn(),
@@ -20,6 +21,8 @@ jest.mock('../lib', () => ({
 describe('getILMExplainRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
+  let logger: MockedLogger;
+
   const req = requestMock.create({
     method: 'get',
     path: GET_ILM_EXPLAIN,
@@ -32,9 +35,10 @@ describe('getILMExplainRoute route', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
+    logger = loggerMock.create();
     ({ context } = requestContextMock.createTools());
 
-    getILMExplainRoute(server.router);
+    getILMExplainRoute(server.router, logger);
   });
 
   test('Returns index ilm information', async () => {
@@ -91,11 +95,13 @@ describe('getILMExplainRoute route', () => {
 
 describe('request validation', () => {
   let server: ReturnType<typeof serverMock.create>;
+  let logger: MockedLogger;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggerMock.create();
 
-    getILMExplainRoute(server.router);
+    getILMExplainRoute(server.router, logger);
   });
 
   test('disallows invalid pattern', () => {

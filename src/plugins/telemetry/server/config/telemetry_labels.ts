@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 /**
  * Labels to enrich the context of the telemetry generated.
@@ -19,6 +19,7 @@ export const labelsSchema = schema.object(
     ciBuildJobId: schema.maybe(schema.string()),
     ciBuildId: schema.maybe(schema.string()),
     ciBuildNumber: schema.maybe(schema.number()),
+    environment: schema.maybe(schema.string()),
     ftrConfig: schema.maybe(schema.string()),
     gitRev: schema.maybe(schema.string()),
     isPr: schema.maybe(schema.boolean()),
@@ -27,13 +28,12 @@ export const labelsSchema = schema.object(
     testBuildId: schema.maybe(schema.string()),
     testJobId: schema.maybe(schema.string()),
     ciBuildName: schema.maybe(schema.string()),
+    performancePhase: schema.maybe(schema.string()),
     /**
      * The serverless project type.
      * Flagging it as maybe because these settings should never affect how Kibana runs.
      */
-    serverless: schema.maybe(
-      schema.conditional(schema.contextRef('serverless'), true, schema.string(), schema.never())
-    ),
+    serverless: offeringBasedSchema({ serverless: schema.maybe(schema.string()) }),
   },
   { defaultValue: {} }
 );

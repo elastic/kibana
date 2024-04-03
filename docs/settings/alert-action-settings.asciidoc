@@ -138,15 +138,18 @@ WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not 
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`,  `.gen-ai`,  `.bedrock`,  `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
-`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
-Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
+`xpack.actions.microsoftExchangeUrl`::
+The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication. Default: `https://login.microsoftonline.com`.
 
-`xpack.actions.preconfigured`::
-Specifies preconfigured connector IDs and configs. Default: {}.
+`xpack.actions.microsoftGraphApiUrl`::
+The URL for the Microsoft Graph API endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/v1.0`.
+
+`xpack.actions.microsoftGraphApiScope`::
+The URL for the Microsoft Graph API scope endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/.default`.
 
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
@@ -166,10 +169,26 @@ curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
 --
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
-Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
+----
++
+By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyOnlyHosts` {ess-icon}::
-Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
+Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings. Example:
++
+[source,yaml]
+----
+# If applicable, include the subdomain in the hostname
+xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
+----
++
+By default, no hosts will use the proxy, but if an action's hostname is in this list, the proxy will be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
 
 `xpack.actions.proxyHeaders` {ess-icon}::
 Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
@@ -217,6 +236,345 @@ xpack.actions.run:
           maxAttempts: 5
 --
 
+`xpack.actions.queued.max` {ess-icon}::
+Specifies the maximum number of actions that can be queued. Default: 1000000
+
+[float]
+[[preconfigured-connector-settings]]
+=== Preconfigured connector settings
+
+These settings vary depending on which type of preconfigured connector you're adding.
+For example:
+
+[source,yaml]
+----------------------------------------
+xpack.actions.preconfigured:
+  my-server-log:
+    name: preconfigured-server-log-connector-type
+    actionTypeId: .server-log
+----------------------------------------
+
+For more examples, go to <<pre-configured-connectors>>.
+
+`xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
+Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
+
+`xpack.actions.preconfigured`::
+Specifies configuration details that are specific to the type of preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.actionTypeId`::
+The type of preconfigured connector.
+For example: `.email`, `.index`, `.opsgenie`, `.server-log`, `.resilient`, `.slack`, and `.webhook`.
+
+`xpack.actions.preconfigured.<connector-id>.config`::
+The configuration details, which are specific to the type of preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.config.apiProvider`::
+For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
+
+`xpack.actions.preconfigured.<connector-id>.config.apiUrl`::
+A configuration URL that varies by connector:
++
+--
+* For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
+* For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
+* For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
+* For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
+* For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
+* For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>> specifies the ServiceNow instance URL.
+* For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
+
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.appId`::
+An application ID that varies by connector:
++
+--
+* For a <<swimlane-action-type,{swimlane} connector>>, specifies a {swimlane} application identifier.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.clientId`::
+A client identifier that varies by connector:
++
+--
+* For an <<email-action-type,email connector>>, specifies a GUID format value that corresponds to the client ID, which is a part of OAuth 2.0 client credentials authentication.
+* For a <<servicenow-itom-action-type,{sn-itom}>>, <<servicenow-action-type,{sn-itsm}>>, or <<servicenow-sir-action-type,{sn-sir} connector>> specifies the client identifier assigned to the OAuth application.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.configUrl`::
+For an <<xmatters-action-type,xMatters connector>> with basic authentication, specifies the request URL for the Elastic Alerts trigger in xMatters.
+
+`xpack.actions.preconfigured.<connector-id>.config.createCommentJson`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment. The required variable is `case.description`.
++
+NOTE: The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
+
+`xpack.actions.preconfigured.<connector-id>.config.createCommentMethod`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to create a case comment in the third-party system.
+For example: `post`, `put`(default), or `patch`.
+
+`xpack.actions.preconfigured.<connector-id>.config.createCommentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string to create a case comment by ID in the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentJson`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create case URL to create a case. Required variables are `case.title` and `case.description`.
++
+NOTE: The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to create a case in the third-party system, either `post`(default), `put`, or `patch`.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string to create a case in the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the create case method that corresponds to the external service identifier.
+
+`xpack.actions.preconfigured.<connector-id>.config.defaultModel`::
+The default model to use for requests, which varies by connector:
++
+--
+* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-sonnet-20240229-v1:0`.
+* For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
+For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
+
+`xpack.actions.preconfigured.<connector-id>.config.from`::
+For an <<email-action-type,email connector>>, specifies the from address for all emails sent by the connector.
+It must be specified in `user@host-name` format.
+
+`xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the get case method that corresponds to the external service title.
+
+`xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string with an external service ID Mustache variable to get the case from the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts. 
+
+`xpack.actions.preconfigured.<connector-id>.config.hasAuth`::
+For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies whether a user and password are required inside the secrets configuration. Defaults to `true`.
+
+`xpack.actions.preconfigured.<connector-id>.config.headers`::
+For a <<webhook-action-type,webhook>> or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a set of key-value pairs sent as headers with the request.
+
+`xpack.actions.preconfigured.<connector-id>.config.host`::
+For an <<email-action-type,email connector>>, specifies the host name of the service provider.
+
+`xpack.actions.preconfigured.<connector-id>.config.index`::
+For an <<index-action-type,index connector>>, specifies the {es} index.
+
+`xpack.actions.preconfigured.<connector-id>.config.isOAuth`::
+For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies whether to use basic or OAuth authentication.
+
+`xpack.actions.preconfigured.<connector-id>.config.jwtKeyId`::
+For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the key ID assigned to the JWT verifier map of your OAuth application. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings`::
+For a <<swimlane-action-type,Swimlane connector>>, specifies field mappings.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the alert identifier.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case identifier.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case name.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case comments.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case description.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the rule name.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, specifies a field mapping for the severity.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.method`::
+For a <<webhook-action-type,webhook connector>>, specifies the HTTP request method, either `post` or `put`. Defaults to `post`.
+
+`xpack.actions.preconfigured.<connector-id>.config.orgId`::
+For an <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} organization identifier.
+
+`xpack.actions.preconfigured.<connector-id>.config.port`::
+For an <<email-action-type,email connector>>, specifies the port to connect to on the service provider.
+
+`xpack.actions.preconfigured.<connector-id>.config.projectKey`::
+For a <<jira-action-type,Jira connector>>, specifies the Jira project key.
+
+`xpack.actions.preconfigured.<connector-id>.config.secure`::
+For an <<email-action-type,email connector>>, specifies whether the connection will use TLS when connecting to the service provider. If not true, the connection will initially connect over TCP then attempt to switch to TLS via the SMTP STARTTLS command.
+
+`xpack.actions.preconfigured.<connector-id>.config.service`::
+For an <<email-action-type,email connector>>, specifies the name of the email service. For example, `elastic_cloud`, `exchange_server`, `gmail`, `other`, `outlook365`, or `ses`.
+
+`xpack.actions.preconfigured.<connector-id>.config.tenantId`::
+For an <<email-action-type,email connector>>, specifies a GUID format value that corresponds to a tenant ID, which is a part of OAuth 2.0 client credentials authentication.
+
+`xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the update case URL to update a case. Required variables are `case.title` and `case.description`.
++
+NOTE: The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
+
+`xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to update the case in the third-party system.
+For example: `post`, `put`(default), or `patch`.
+
+`xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API URL to update the case by ID in the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+
+`xpack.actions.preconfigured.<connector-id>.config.url`::
+A configuration URL that varies by connector:
++
+--
+* For a <<d3security-action-type,D3 Security connector>>, specifies the D3 Security API request URL.
+* For a <<tines-action-type,Tines connector>>, specifies the Tines tenant URL.
+* For a <<webhook-action-type,webhook connector>>, specifies the web service request URL.
+
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue`::
+For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the user identifier. It is required when required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+
+`xpack.actions.preconfigured.<connector-id>.config.usesBasic`::
+For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HTTP basic authentication. Defaults to `true`.
+
+`xpack.actions.preconfigured.<connector-id>.config.usesTableApi`::
+For a <<servicenow-action-type,{sn-itsm}>> or <<servicenow-sir-action-type,{sn-sir} connector>>, specifies whether the connector uses the Table API or the Import Set API.
+If set to `false`, the Elastic application should be installed in ServiceNow.
+
+`xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
+
+`xpack.actions.preconfigured.<connector-id>.config.webhookIntegrationUrl`::
+For a <<torq-action-type,Torq connector>>, specifies the endpoint URL of the Elastic Security integration in Torq.
+
+`xpack.actions.preconfigured.<connector-id>.name`::
+The name of the preconfigured connector.
+
+`xpack.actions.preconfigured.<connector-id>.secrets`::
+Sensitive configuration details, such as username, password, and keys, which are specific to the connector type.
++
+TIP: Sensitive properties, such as passwords, should be stored in the <<creating-keystore,{kib} keystore>>.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.accessKey`::
+For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS access key for authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.apikey`::
+An API key secret that varies by connector:
++
+--
+* For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI or Azure OpenAI API key for authentication.
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} API authentication key for HTTP basic authentication.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.apiKeyId`::
+For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication key ID for HTTP basic authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.apiKeySecret`::
+For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication key secret for HTTP basic authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.apiToken`::
+For a <<jira-action-type,Jira>> or <<swimlane-action-type,{swimlane} connector>>, specifies the API authentication token for HTTP basic authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.clientSecret`::
+A client secret that varies by connector:
++
+--
+* For an <<email-action-type,email connector>>, specifies the client secret that you generated for your app in the app registration portal. It is required when the email service is `exchange_server`, which uses OAuth 2.0 client credentials authentication.
+* For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the client secret assigned to the OAuth application. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+
+NOTE: The client secret must be URL-encoded.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.email`::
+An email address that varies by connector:
++
+--
+* For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP basic authentication.
+* For a <<tines-action-type,Tines connector>>, specifies the email used to sign in to Tines.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.password`::
+A password secret that varies by connector:
++
+--
+
+* For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+* For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
+* For an <<xmatters-action-type,xMatters connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.privateKey`::
+For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the RSA private key. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.privateKeyPassword`::
+For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the password for the RSA private key.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.routingKey`::
+For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.secret`::
+For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS secret for authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl`::
+For an <<xmatters-action-type,xMatters connector>> with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
+It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `false`.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.token`::
+A token secret that varies by connector:
++
+--
+* For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security token.
+* For a <<slack-action-type,Slack connector>>, specifies the Slack bot user OAuth token.
+* For a <<tines-action-type,Tines connector>>, specifies the Tines API token.
+* For a <<torq-action-type,Torq connector>>, specifies the secret of the webhook authentication header.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.user`::
+A user name secret that varies by connector:
++
+--
+* For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+* For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl`::
+A URL that varies by connector:
++
+--
+* For a <<teams-action-type,Microsoft Teams>>, specifies the URL of the incoming webhook.
+For a <<slack-action-type,Slack connector>>, specifies the Slack webhook URL.
+
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+--
+
+`xpack.actions.preconfigured.<connector-id>.secrets.username`::
+For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
+
 [float]
 [[alert-settings]]
 === Alerting settings
@@ -232,6 +590,9 @@ Specifies whether to skip writing alerts and scheduling actions if rule
 processing was cancelled due to a timeout. Default: `true`. This setting can be
 overridden by individual rule types.
 
+`xpack.alerting.rules.maxScheduledPerMinute`::
+Specifies the maximum number of rules to run per minute. Default: 10000
+
 `xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::
 Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value.
 The time is formatted as a number and a time unit (`s`, `m`, `h`, or `d`). 
@@ -245,6 +606,8 @@ Specifies the maximum number of actions that a rule can generate each time detec
 
 `xpack.alerting.rules.run.alerts.max` {ess-icon}::
 Specifies the maximum number of alerts that a rule can generate each time detection checks run. Default: 1000.
++
+WARNING: The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload, however setting a value higher than the default (`1000`) is not recommended or supported. Doing so could strain system resources and lead to performance issues, delays in alert processing, and potential disruptions during high alert activity periods.
 
 `xpack.alerting.rules.run.timeout` {ess-icon}::
 Specifies the default timeout for tasks associated with all types of rules.

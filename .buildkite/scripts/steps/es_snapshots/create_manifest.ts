@@ -103,6 +103,7 @@ interface ManifestEntry {
       set -euo pipefail
 
       echo '--- Upload files to GCS'
+      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
       cd "${destination}"
       gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json

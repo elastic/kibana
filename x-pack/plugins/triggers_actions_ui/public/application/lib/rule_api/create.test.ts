@@ -47,12 +47,21 @@ describe('createRule', () => {
             summary: false,
           },
         },
+        {
+          id: '.test-system-action',
+          params: {},
+          connector_type_id: '.system-action',
+        },
       ],
       scheduled_task_id: '1',
       execution_status: { status: 'pending', last_execution_date: '2021-04-01T21:33:13.250Z' },
       create_at: '2021-04-01T21:33:13.247Z',
       updated_at: '2021-04-01T21:33:13.247Z',
+      alert_delay: {
+        active: 10,
+      },
     };
+
     const ruleToCreate: Omit<
       RuleUpdates,
       'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
@@ -82,7 +91,7 @@ describe('createRule', () => {
           params: {
             level: 'info',
             message:
-              "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
+              "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
           },
           actionTypeId: '.server-log',
           frequency: {
@@ -91,11 +100,19 @@ describe('createRule', () => {
             summary: false,
           },
         },
+        {
+          id: '.test-system-action',
+          params: {},
+          actionTypeId: '.system-action',
+        },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
       revision: 0,
+      alertDelay: {
+        active: 10,
+      },
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 
@@ -115,6 +132,11 @@ describe('createRule', () => {
             throttle: null,
             summary: false,
           },
+        },
+        {
+          id: '.test-system-action',
+          params: {},
+          actionTypeId: '.system-action',
         },
       ],
       ruleTypeId: '.index-threshold',
@@ -148,6 +170,9 @@ describe('createRule', () => {
       tags: [],
       updatedAt: '2021-04-01T21:33:13.247Z',
       updatedBy: undefined,
+      alertDelay: {
+        active: 10,
+      },
     });
   });
 });

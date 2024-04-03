@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { getAdvancedButton } from '../screens/integrations';
+import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
+import { ServerlessRoleName } from '../support/roles';
+import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -23,14 +26,32 @@ export const selectAllAgents = () => {
 };
 
 export const clearInputQuery = () =>
-  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
+  cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.get(LIVE_QUERY_EDITOR).type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).type(query, options);
+
+export const inputQueryInFlyout = (
+  query: string,
+  options?: { parseSpecialCharSequences: boolean }
+) => cy.get(OSQUERY_FLYOUT_BODY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
   cy.contains('Submit').click();
+};
+
+export const fillInQueryTimeout = (timeout: string) => {
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').clear().type(timeout);
+  });
+};
+
+export const verifyQueryTimeout = (timeout: string) => {
+  getAdvancedButton().click();
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').should('have.value', timeout);
+  });
 };
 
 // sometimes the results get stuck in the tests, this is a workaround
@@ -49,7 +70,12 @@ export const checkResults = () => {
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
-  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+  cy
+    .getBySel('osqueryColumnValueSelect')
+    .eq(index)
+    .within(() => {
+      cy.getBySel('comboBoxInput').type(text);
+    });
 
 export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
   cy.getBySel(`osquery-result-type-select-${index}`).click();
@@ -62,22 +88,14 @@ export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', in
   }
 };
 
-export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
-  cy.react('EuiFormRow', { props: { label } }).type(`${text}{downArrow}{enter}`);
-};
-
 export const deleteAndConfirm = (type: string) => {
-  cy.react('EuiButton').contains(`Delete ${type}`).click();
+  cy.get('span').contains(`Delete ${type}`).click();
   cy.contains(`Are you sure you want to delete this ${type}?`);
-  cy.react('EuiButton').contains('Confirm').click();
+  cy.get('span').contains('Confirm').click();
   cy.get('[data-test-subj="globalToastList"]')
     .first()
     .contains('Successfully deleted')
     .contains(type);
-};
-
-export const findAndClickButton = (text: string) => {
-  cy.react('EuiButton').contains(text).click();
 };
 
 export const toggleRuleOffAndOn = (ruleName: string) => {
@@ -95,20 +113,10 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules');
-  cy.contains(ruleName).click();
-  cy.getBySel('alertsTable').within(() => {
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
-  });
+  clickRuleName(ruleName);
+  waitForAlertsToPopulate();
 };
 
 export const addToCase = (caseId: string) => {
@@ -118,8 +126,8 @@ export const addToCase = (caseId: string) => {
 };
 
 export const addLiveQueryToCase = (actionId: string, caseId: string) => {
-  cy.react('ActionsTableComponent').within(() => {
-    cy.getBySel(`row-${actionId}`).react('ActionTableResultsButton').click();
+  cy.getBySel(`row-${actionId}`).within(() => {
+    cy.get('[aria-label="Details"]').click();
   });
   cy.contains('Live query details');
   addToCase(caseId);
@@ -162,4 +170,8 @@ export const takeOsqueryActionWithParams = () => {
   cy.wait(1000);
   submitQuery();
   cy.getBySel('dataGridHeader').should('contain', 'tags', { timeout: 6000000 });
+};
+
+export const clickRuleName = (ruleName: string) => {
+  cy.contains('a[data-test-subj="ruleName"]', ruleName).click({ force: true });
 };

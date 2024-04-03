@@ -1,0 +1,190 @@
+oneOf:
+  - type: object
+    x-technical-preview: true
+    description: >
+      The parameters for an Elasticsearch query rule that uses ES|QL to define the query.
+      This functionality is in technical pre view and may be changed or removed in a future release.
+      Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+    required:
+      - esqlQuery
+      - searchType
+      - size
+      - threshold
+      - thresholdComparator
+      - timeWindowSize
+      - timeWindowUnit
+    properties:
+      aggField:
+        $ref: 'aggfield.yaml'
+      aggType:
+        $ref: 'aggtype.yaml'
+      esqlQuery:
+        type: object
+        required:
+          - esql
+        properties:
+          esql:
+            description: The query definition, which uses Elasticsearch Query Language.
+            type: string
+      excludeHitsFromPreviousRun:
+        $ref: 'excludehitsfrompreviousrun.yaml'
+      groupBy:
+        $ref: 'groupby.yaml'
+      searchType:
+        description: The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).
+        type: string
+        enum:
+          - esqlQuery
+        examples:
+          - esqlQuery
+      size:
+        type: integer
+        description: >
+          When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
+        examples:
+          - 0
+      termSize:
+        $ref: 'termsize.yaml'
+      threshold:
+        type: array
+        items:
+          type: integer
+          minimum: 0
+          maximum: 0
+        description: >
+          The threshold value that is used with the `thresholdComparator`.
+          When `searchType` is `esqlQuery`, this property is required and must be set to zero.
+      thresholdComparator:
+        type: string
+        description: >
+          The comparison function for the threshold.
+          When `searchType` is `esqlQuery`, this property is required and must be set to ">".
+          Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
+        enum:
+          - ">"
+        examples:
+          - ">"
+      timeField:
+        $ref: 'timefield.yaml'
+      timeWindowSize:
+        $ref: 'timewindowsize.yaml'
+      timeWindowUnit:
+        $ref: 'timewindowunit.yaml'
+  - type: object
+    description: The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.
+    required:
+      - searchType
+      - size
+      - threshold
+      - thresholdComparator
+      - timeWindowSize
+      - timeWindowUnit
+    properties:
+      aggField:
+        $ref: 'aggfield.yaml'
+      aggType:
+        $ref: 'aggtype.yaml'
+      excludeHitsFromPreviousRun:
+        $ref: 'excludehitsfrompreviousrun.yaml'
+      groupBy:
+        $ref: 'groupby.yaml'
+      searchConfiguration:
+        description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
+        type: object
+        properties:
+          filter:
+            type: array
+            items:
+              $ref: 'filter.yaml'
+          index:
+            description: The indices to query.
+            oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+          query:
+            type: object
+            properties:
+              language:
+                type: string
+                examples:
+                  - kuery
+              query:
+                type: string
+      searchType:
+        description: The type of query, in this case a text-based query that uses KQL or Lucene.
+        type: string
+        enum:
+          - searchSource
+        examples:
+          - searchSource
+      size:
+        $ref: 'size.yaml'
+      termField:
+        $ref: 'termfield.yaml'
+      termSize:
+        $ref: 'termsize.yaml'
+      threshold:
+        $ref: 'threshold.yaml'
+      thresholdComparator:
+        $ref: 'thresholdcomparator.yaml'
+      timeField:
+        $ref: 'timefield.yaml'
+      timeWindowSize:
+        $ref: 'timewindowsize.yaml'
+      timeWindowUnit:
+        $ref: 'timewindowunit.yaml'
+  - type: object
+    description: The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.
+    required:
+      - esQuery
+      - index
+      - threshold
+      - thresholdComparator
+      - timeField
+      - timeWindowSize
+      - timeWindowUnit
+    properties:
+      aggField:
+        $ref: 'aggfield.yaml'
+      aggType:
+        $ref: 'aggtype.yaml'
+      esQuery:
+        description: The query definition, which uses Elasticsearch Query DSL.
+        type: string
+      excludeHitsFromPreviousRun:
+        $ref: 'excludehitsfrompreviousrun.yaml'
+      groupBy:
+        $ref: 'groupby.yaml'
+      index:
+        description: The indices to query.
+        oneOf:
+          - type: array
+            items:
+              type: string
+          - type: string
+      searchType:
+        description:  The type of query, in this case a query that uses Elasticsearch Query DSL.
+        type: string
+        enum:
+          - esQuery
+        default: esQuery
+        examples:
+          - esQuery
+      size:
+        $ref: 'size.yaml'
+      termField:
+        $ref: 'termfield.yaml'
+      termSize:
+        $ref: 'termsize.yaml'
+      threshold:
+        $ref: 'threshold.yaml'
+      thresholdComparator:
+        $ref: 'thresholdcomparator.yaml'
+      timeField:
+        $ref: 'timefield.yaml'
+      timeWindowSize:
+        $ref: 'timewindowsize.yaml'
+      timeWindowUnit:
+        $ref: 'timewindowunit.yaml'

@@ -14,6 +14,10 @@ import semver, { coerce } from 'semver';
  * 2. Older versions of ES won't work with newer versions of Kibana.
  */
 export function esVersionCompatibleWithKibana(esVersion: string, kibanaVersion: string) {
+  if (!semver.valid(esVersion)) {
+    return false;
+  }
+
   const esVersionNumbers = {
     major: semver.major(esVersion),
     minor: semver.minor(esVersion),

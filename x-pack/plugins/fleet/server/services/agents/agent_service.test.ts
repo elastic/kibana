@@ -8,6 +8,7 @@
 jest.mock('../security');
 jest.mock('./crud');
 jest.mock('./status');
+jest.mock('./versions');
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -20,17 +21,20 @@ import { FleetUnauthorizedError } from '../../errors';
 
 import { getAuthzFromRequest } from '../security';
 import type { FleetAuthz } from '../../../common';
+import { createFleetAuthzMock } from '../../../common/mocks';
 
 import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
+import { getLatestAvailableAgentVersion } from './versions';
 
 const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock<Promise<FleetAuthz>>;
 const mockGetAgentsByKuery = getAgentsByKuery as jest.Mock;
 const mockGetAgentById = getAgentById as jest.Mock;
 const mockGetAgentStatusById = getAgentStatusById as jest.Mock;
 const mockGetAgentStatusForAgentPolicy = getAgentStatusForAgentPolicy as jest.Mock;
+const mockgetLatestAvailableAgentVersion = getLatestAvailableAgentVersion as jest.Mock;
 
 describe('AgentService', () => {
   beforeEach(() => {
@@ -50,8 +54,15 @@ describe('AgentService', () => {
             fleet: {
               all: false,
               setup: false,
+              readAgents: false,
               readEnrollmentTokens: false,
               readAgentPolicies: false,
+              allAgentPolicies: false,
+              allAgents: false,
+              allSettings: false,
+              readSettings: false,
+              addAgents: false,
+              addFleetServers: false,
             },
             integrations: {
               readPackageInfo: false,
@@ -100,6 +111,14 @@ describe('AgentService', () => {
           )
         );
       });
+
+      it('rejects on getLatestAgentAvailableVersion', async () => {
+        await expect(agentClient.getLatestAgentAvailableVersion()).rejects.toThrowError(
+          new FleetUnauthorizedError(
+            `User does not have adequate permissions to access Fleet agents.`
+          )
+        );
+      });
     });
 
     describe('with required privilege', () => {
@@ -110,28 +129,7 @@ describe('AgentService', () => {
       );
 
       beforeEach(() =>
-        mockGetAuthzFromRequest.mockReturnValue(
-          Promise.resolve({
-            fleet: {
-              all: true,
-              setup: true,
-              readEnrollmentTokens: true,
-              readAgentPolicies: true,
-            },
-            integrations: {
-              readPackageInfo: true,
-              readInstalledPackages: true,
-              installPackages: true,
-              upgradePackages: true,
-              uploadPackages: true,
-              removePackages: true,
-              readPackageSettings: true,
-              writePackageSettings: true,
-              readIntegrationPolicies: true,
-              writeIntegrationPolicies: true,
-            },
-          })
-        )
+        mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()))
       );
 
       expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
@@ -187,5 +185,13 @@ function expectApisToCallServicesSuccessfully(
       'foo-id',
       'foo-filter'
     );
+  });
+
+  test('client.getLatestAgentAvailableVersion calls getLatestAvailableAgentVersion and returns results', async () => {
+    mockgetLatestAvailableAgentVersion.mockResolvedValue('getLatestAvailableAgentVersion success');
+    await expect(agentClient.getLatestAgentAvailableVersion()).resolves.toEqual(
+      'getLatestAvailableAgentVersion success'
+    );
+    expect(mockgetLatestAvailableAgentVersion).toHaveBeenCalledTimes(1);
   });
 }

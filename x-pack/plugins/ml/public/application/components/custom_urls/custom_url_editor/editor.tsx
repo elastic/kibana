@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useState, useRef, useEffect, FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { type Moment } from 'moment';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,16 +27,18 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { DashboardItems } from '../../../services/dashboard_service';
-import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
+import type { CustomUrlSettings } from './utils';
+import { isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
 
-import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
+import type { TimeRangeType } from './constants';
+import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomTimeRangePicker } from './custom_time_range_picker';
 import { useMlKibana } from '../../../contexts/kibana';
 import { getDropDownOptions } from './get_dropdown_options';
@@ -72,6 +75,7 @@ interface CustomUrlEditorProps {
   dataViewListItems: DataViewListItem[];
   showCustomTimeRangeSelector: boolean;
   job: Job | DataFrameAnalyticsConfig;
+  isPartialDFAJob?: boolean;
 }
 
 /*
@@ -85,6 +89,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   dataViewListItems,
   showCustomTimeRangeSelector,
   job,
+  isPartialDFAJob,
 }) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
   const [hasTimefield, setHasTimefield] = useState<boolean>(false);
@@ -111,7 +116,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       if (dataViewToUse && dataViewToUse.timeFieldName) {
         setHasTimefield(true);
       }
-      const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
+      const dropDownOptions = await getDropDownOptions(
+        isFirst.current,
+        job,
+        dataViewToUse,
+        isPartialDFAJob
+      );
       setQueryEntityFieldNames(dropDownOptions);
 
       if (isFirst.current) {
@@ -122,7 +132,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     if (job !== undefined) {
       getQueryEntityDropdownOptions();
     }
-  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId]);
+  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId, isPartialDFAJob]);
 
   useEffect(() => {
     if (addIntervalTimerange === false) {

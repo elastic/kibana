@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Get agents schema
+  version: '1'
+paths: { }
+components:
+  parameters:
+   GetAgentsRequestQueryParameter:
+      name: query
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/GetAgentsRequestParams'
+  schemas:
+    GetAgentsRequestParams:
+      type: object
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

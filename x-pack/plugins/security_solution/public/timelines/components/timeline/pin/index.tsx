@@ -9,8 +9,8 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline/api';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 import * as i18n from '../body/translations';
 
@@ -54,7 +54,7 @@ export const Pin = React.memo<Props>(
       isTemplate,
       isPinned: pinned,
     });
-    const pinAriaLabel = ariaLabel != null ? ariaLabel : defaultAriaLabel;
+    const pinAriaLabel = ariaLabel != null && !isTemplate ? ariaLabel : defaultAriaLabel;
 
     return (
       <EuiButtonIcon

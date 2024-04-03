@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
@@ -25,11 +24,9 @@ import type { State } from '../../../common/store/types';
 
 export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer.analyzerById[id])(nodeID))
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
-  const nodeStats = useSelector((state: State) =>
-    selectors.nodeStats(state.analyzer.analyzerById[id])(nodeID)
-  );
+  const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 
   if (processEvent === undefined || nodeStats === undefined) {
     return (
@@ -64,6 +61,7 @@ export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
+// eslint-disable-next-line react/display-name
 const EventCategoryLinks = memo(function ({
   id,
   nodeID,
@@ -97,15 +95,22 @@ const EventCategoryLinks = memo(function ({
           defaultMessage: 'Count',
         }),
         'data-test-subj': 'resolver:panel:node-events:event-type-count',
-        width: '20%',
+        width: '25%',
         sortable: true,
+        render(count: number) {
+          return (
+            <EuiToolTip position="top" content={count}>
+              <FormattedCount count={count} />
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'eventType',
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.eventType', {
           defaultMessage: 'Event Type',
         }),
-        width: '80%',
+        width: '75%',
         sortable: true,
         render(eventType: string) {
           return (
@@ -121,6 +126,7 @@ const EventCategoryLinks = memo(function ({
   return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsBreadcrumbs = memo(function ({
   id,
   nodeID,
@@ -171,6 +177,7 @@ const NodeEventsBreadcrumbs = memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsLink = memo(
   ({
     id,

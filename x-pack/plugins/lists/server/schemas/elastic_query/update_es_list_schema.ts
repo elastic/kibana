@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { version } from '@kbn/securitysolution-io-ts-types';
 import {
   descriptionOrUndefined,
   metaOrUndefined,
@@ -21,6 +22,7 @@ export const updateEsListSchema = t.exact(
     name: nameOrUndefined,
     updated_at,
     updated_by,
+    version,
   })
 );
 

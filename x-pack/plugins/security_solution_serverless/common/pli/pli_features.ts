@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import type { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
-import uniq from 'lodash/fp/uniq';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { SecurityProductTypes } from '../config';
-import { PLI_APP_FEATURES } from './pli_config';
+import { ProductTier } from '../product';
+import { PLI_PRODUCT_FEATURES } from './pli_config';
 
 /**
  * Returns the U (union) of all PLIs from the enabled productTypes in a single array.
  */
-export const getProductAppFeatures = (productTypes: SecurityProductTypes): AppFeatureKeys => {
-  const appFeatureKeys = productTypes.reduce<AppFeatureKeys>(
-    (appFeatures, { product_line: line, product_tier: tier }) => {
-      if (tier === 'complete') {
-        // Adding all "essentials" PLIs when tier is "complete"
-        appFeatures.push(...PLI_APP_FEATURES[line].essentials);
+export const getProductProductFeatures = (
+  productTypes: SecurityProductTypes
+): ProductFeatureKeys => {
+  const productFeatureKeys = productTypes.reduce<ProductFeatureKeys>(
+    (productFeatures, { product_line: line, product_tier: tier }) => {
+      if (tier === ProductTier.complete) {
+        productFeatures.push(...PLI_PRODUCT_FEATURES[line][ProductTier.essentials]);
       }
-      appFeatures.push(...PLI_APP_FEATURES[line][tier]);
-      return appFeatures;
+      productFeatures.push(...PLI_PRODUCT_FEATURES[line][tier]);
+      return productFeatures;
     },
     []
   );
-  return uniq(appFeatureKeys);
+  return productFeatureKeys;
 };

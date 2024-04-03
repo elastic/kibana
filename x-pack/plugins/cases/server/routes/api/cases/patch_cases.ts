@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CasesPatchRequest } from '../../../../common/api';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseApiV1 } from '../../../../common/types/api';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const patchCaseRoute = createCasesRoute({
   method: 'patch',
@@ -17,10 +18,12 @@ export const patchCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const cases = request.body as CasesPatchRequest;
+      const cases = request.body as caseApiV1.CasesPatchRequest;
+
+      const res: caseDomainV1.Cases = await casesClient.cases.update(cases);
 
       return response.ok({
-        body: await casesClient.cases.update(cases),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

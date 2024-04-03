@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import {
   EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
-import { useNotifications } from '../contexts/kibana';
 import { ml } from '../services/ml_api_service';
+import { useToastNotificationService } from '../services/toast_notification_service';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
@@ -36,7 +36,7 @@ export const AnomalyDetectionSettings: FC = () => {
     AnomalyDetectionSettingsContext
   );
 
-  const { toasts } = useNotifications();
+  const { displayErrorToast } = useToastNotificationService();
   const redirectToCalendarList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
   const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
   const redirectToFilterLists = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_MANAGE);
@@ -54,7 +54,8 @@ export const AnomalyDetectionSettings: FC = () => {
         const calendars = await ml.calendars();
         setCalendarsCount(calendars.length);
       } catch (e) {
-        toasts.addDanger(
+        displayErrorToast(
+          e,
           i18n.translate('xpack.ml.settings.anomalyDetection.loadingCalendarsCountErrorMessage', {
             defaultMessage: 'An error occurred obtaining the count of calendars',
           })
@@ -67,7 +68,8 @@ export const AnomalyDetectionSettings: FC = () => {
         const filterLists = await ml.filters.filtersStats();
         setFilterListsCount(filterLists.length);
       } catch (e) {
-        toasts.addDanger(
+        displayErrorToast(
+          e,
           i18n.translate('xpack.ml.settings.anomalyDetection.loadingFilterListCountErrorMessage', {
             defaultMessage: 'An error occurred obtaining the count of filter lists',
           })
@@ -78,16 +80,14 @@ export const AnomalyDetectionSettings: FC = () => {
 
   return (
     <Fragment>
-      <EuiPageContentHeader>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
-              defaultMessage="Anomaly Detection"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiPageContentHeader>
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
+            defaultMessage="Anomaly Detection"
+          />
+        </h2>
+      </EuiTitle>
 
       <EuiSpacer size="m" />
 

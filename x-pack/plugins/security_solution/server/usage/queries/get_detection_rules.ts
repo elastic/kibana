@@ -14,6 +14,7 @@ import type {
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
@@ -40,6 +41,7 @@ export const getDetectionRules = async ({
   const filter = [
     `${filterAttribute}: ${SIGNALS_ID}`,
     `${filterAttribute}: ${EQL_RULE_TYPE_ID}`,
+    `${filterAttribute}: ${ESQL_RULE_TYPE_ID}`,
     `${filterAttribute}: ${ML_RULE_TYPE_ID}`,
     `${filterAttribute}: ${QUERY_RULE_TYPE_ID}`,
     `${filterAttribute}: ${SAVED_QUERY_RULE_TYPE_ID}`,

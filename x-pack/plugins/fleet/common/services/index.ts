@@ -7,6 +7,7 @@
 
 export * from './routes';
 export * as AgentStatusKueryHelper from './agent_status';
+export * from './package_helpers';
 export {
   packageToPackagePolicyInputs,
   packageToPackagePolicy,
@@ -18,7 +19,7 @@ export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limite
 export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
-export { isAgentUpgradeable } from './is_agent_upgradeable';
+export * from './is_agent_upgradeable';
 export {
   isAgentRequestDiagnosticsSupported,
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
@@ -63,7 +64,12 @@ export {
 export { getAllowedOutputTypeForPolicy } from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
-export { policyHasFleetServer, policyHasAPMIntegration } from './agent_policies_helpers';
+export {
+  policyHasFleetServer,
+  policyHasAPMIntegration,
+  policyHasEndpointSecurity,
+  policyHasSyntheticsIntegration,
+} from './agent_policies_helpers';
 
 export {
   generateNewAgentPolicyWithDefaults,
@@ -74,3 +80,8 @@ export {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from './agent_policy_config';
+
+export {
+  getFleetServerVersionMessage,
+  isAgentVersionLessThanFleetServer,
+} from './check_fleet_server_versions';

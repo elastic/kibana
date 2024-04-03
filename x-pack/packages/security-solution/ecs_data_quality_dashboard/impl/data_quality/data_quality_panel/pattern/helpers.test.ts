@@ -30,6 +30,7 @@ import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbea
 import { mockStats } from '../../mock/stats/mock_stats';
 import { IndexSummaryTableItem } from '../summary_table/helpers';
 import { DataQualityCheckResult } from '../../types';
+import { getIndexNames, getTotalDocsCount } from '../../helpers';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {
   index: '.ds-packetbeat-8.6.1-2023.02.04-000001',
@@ -169,25 +170,26 @@ describe('helpers', () => {
   });
 
   describe('getIlmPhase', () => {
+    const isILMAvailable = true;
     test('it returns undefined when the `ilmExplainRecord` is undefined', () => {
-      expect(getIlmPhase(undefined)).toBeUndefined();
+      expect(getIlmPhase(undefined, isILMAvailable)).toBeUndefined();
     });
 
     describe('when the `ilmExplainRecord` is a `IlmExplainLifecycleLifecycleExplainManaged` record', () => {
       Object.keys(managed).forEach((phase) =>
         test(`it returns the expected phase when 'phase' is '${phase}'`, () => {
-          expect(getIlmPhase(managed[phase])).toEqual(phase);
+          expect(getIlmPhase(managed[phase], isILMAvailable)).toEqual(phase);
         })
       );
 
       test(`it returns undefined when the 'phase' is unknown`, () => {
-        expect(getIlmPhase(other)).toBeUndefined();
+        expect(getIlmPhase(other, isILMAvailable)).toBeUndefined();
       });
     });
 
     describe('when the `ilmExplainRecord` is a `IlmExplainLifecycleLifecycleExplainUnmanaged` record', () => {
       test('it returns `unmanaged`', () => {
-        expect(getIlmPhase(unmanaged)).toEqual('unmanaged');
+        expect(getIlmPhase(unmanaged, isILMAvailable)).toEqual('unmanaged');
       });
     });
   });
@@ -271,14 +273,18 @@ describe('helpers', () => {
           '\n#### Incompatible field mappings - auditbeat-custom-index-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - auditbeat-custom-index-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2),\n`theory` (1) |\n\n',
         ],
         pattern: 'auditbeat-*',
+        sameFamily: 0,
+        checkedAt: 1706526408000,
       },
     };
+    const isILMAvailable = true;
 
     test('it returns the expected summary table items', () => {
       expect(
         getSummaryTableItems({
           ilmExplain: mockIlmExplain,
           indexNames,
+          isILMAvailable,
           pattern,
           patternDocsCount,
           results,
@@ -295,6 +301,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 733175040,
+          checkedAt: undefined,
         },
         {
           docsCount: 1628343,
@@ -304,6 +311,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 731583142,
+          checkedAt: undefined,
         },
         {
           docsCount: 4,
@@ -313,6 +321,54 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 28413,
+          checkedAt: 1706526408000,
+        },
+      ]);
+    });
+
+    test('it returns the expected summary table items when isILMAvailable is false', () => {
+      expect(
+        getSummaryTableItems({
+          ilmExplain: mockIlmExplain,
+          indexNames,
+          isILMAvailable: false,
+          pattern,
+          patternDocsCount,
+          results,
+          sortByColumn: defaultSort.sort.field,
+          sortByDirection: defaultSort.sort.direction,
+          stats: mockStats,
+        })
+      ).toEqual([
+        {
+          docsCount: 1630289,
+          ilmPhase: undefined,
+          incompatible: undefined,
+          indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
+          pattern: 'auditbeat-*',
+          patternDocsCount: 4,
+          sizeInBytes: 733175040,
+          checkedAt: undefined,
+        },
+        {
+          docsCount: 1628343,
+          ilmPhase: undefined,
+          incompatible: undefined,
+          indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          pattern: 'auditbeat-*',
+          patternDocsCount: 4,
+          sizeInBytes: 731583142,
+          checkedAt: undefined,
+        },
+        {
+          docsCount: 4,
+          ilmPhase: undefined,
+          incompatible: 3,
+          indexName: 'auditbeat-custom-index-1',
+          pattern: 'auditbeat-*',
+          patternDocsCount: 4,
+          sizeInBytes: 28413,
+          checkedAt: 1706526408000,
         },
       ]);
     });
@@ -322,6 +378,7 @@ describe('helpers', () => {
         getSummaryTableItems({
           ilmExplain: mockIlmExplain,
           indexNames,
+          isILMAvailable,
           pattern,
           patternDocsCount,
           results,
@@ -338,6 +395,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 28413,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 1628343,
@@ -347,6 +405,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 731583142,
+          checkedAt: undefined,
         },
         {
           docsCount: 1630289,
@@ -356,6 +415,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 733175040,
+          checkedAt: undefined,
         },
       ]);
     });
@@ -365,6 +425,7 @@ describe('helpers', () => {
         getSummaryTableItems({
           ilmExplain: null, // <-- no data
           indexNames,
+          isILMAvailable,
           pattern,
           patternDocsCount,
           results: undefined, // <-- no data
@@ -381,6 +442,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 0,
+          checkedAt: undefined,
         },
         {
           docsCount: 0,
@@ -390,6 +452,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 0,
+          checkedAt: undefined,
         },
         {
           docsCount: 0,
@@ -399,6 +462,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 0,
+          checkedAt: undefined,
         },
       ]);
     });
@@ -410,12 +474,27 @@ describe('helpers', () => {
       '.ds-packetbeat-8.5.3-2023.02.04-000001',
       'auditbeat-custom-index-1',
     ];
+    const isILMAvailable = true;
 
     test('returns true when `indexNames` does NOT exist, and the required `stats` and `ilmExplain` are available', () => {
       expect(
         shouldCreateIndexNames({
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
+          isILMAvailable,
+          newIndexNames: [],
+          stats: mockStats,
+        })
+      ).toBe(true);
+    });
+
+    test('returns true when `isILMAvailable` is false, and the required `stats` is available,  and `ilmExplain` is not available', () => {
+      expect(
+        shouldCreateIndexNames({
+          ilmExplain: null,
+          indexNames: undefined,
+          isILMAvailable: false,
+          newIndexNames: [],
           stats: mockStats,
         })
       ).toBe(true);
@@ -426,6 +505,8 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: mockIlmExplain,
           indexNames,
+          isILMAvailable,
+          newIndexNames: indexNames,
           stats: mockStats,
         })
       ).toBe(false);
@@ -436,6 +517,8 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: mockIlmExplain,
           indexNames: undefined,
+          isILMAvailable,
+          newIndexNames: [],
           stats: null,
         })
       ).toBe(false);
@@ -446,6 +529,8 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames: undefined,
+          isILMAvailable,
+          newIndexNames: [],
           stats: mockStats,
         })
       ).toBe(false);
@@ -456,6 +541,8 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames: undefined,
+          isILMAvailable,
+          newIndexNames: [],
           stats: null,
         })
       ).toBe(false);
@@ -466,6 +553,8 @@ describe('helpers', () => {
         shouldCreateIndexNames({
           ilmExplain: null,
           indexNames,
+          isILMAvailable,
+          newIndexNames: [],
           stats: null,
         })
       ).toBe(false);
@@ -473,22 +562,47 @@ describe('helpers', () => {
   });
 
   describe('shouldCreatePatternRollup', () => {
-    test('it returns false when the `patternRollup` already exists', () => {
+    const isILMAvailable = true;
+    const newIndexNames = getIndexNames({
+      stats: mockStats,
+      ilmExplain: mockIlmExplain,
+      ilmPhases: ['hot', 'unmanaged'],
+      isILMAvailable,
+    });
+    const newDocsCount = getTotalDocsCount({ indexNames: newIndexNames, stats: mockStats });
+    test('it returns false when the `patternRollup.docsCount` equals newDocsCount', () => {
       expect(
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
+          newDocsCount: auditbeatWithAllResults.docsCount as number,
           patternRollup: auditbeatWithAllResults,
           stats: mockStats,
         })
       ).toBe(false);
     });
 
-    test('it returns true when all data was loaded', () => {
+    test('it returns true when all data and ILMExplain were loaded', () => {
       expect(
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
+          newDocsCount,
+          patternRollup: undefined,
+          stats: mockStats,
+        })
+      ).toBe(true);
+    });
+
+    test('it returns true when all data was loaded and ILM is not available', () => {
+      expect(
+        shouldCreatePatternRollup({
+          error: null,
+          ilmExplain: null,
+          isILMAvailable: false,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -500,6 +614,8 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: null,
+          isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -511,6 +627,8 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: null,
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: null,
         })
@@ -522,6 +640,8 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'whoops',
           ilmExplain: null,
+          isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: null,
         })
@@ -533,6 +653,8 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'something went',
           ilmExplain: null,
+          isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -544,6 +666,8 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'horribly wrong',
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: null,
         })
@@ -555,6 +679,8 @@ describe('helpers', () => {
         shouldCreatePatternRollup({
           error: 'over here',
           ilmExplain: mockIlmExplain,
+          isILMAvailable,
+          newDocsCount,
           patternRollup: undefined,
           stats: mockStats,
         })
@@ -588,6 +714,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 43357342,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 48068,
@@ -597,6 +724,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 32460397,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 48064,
@@ -606,6 +734,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 42782794,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47868,
@@ -615,6 +744,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 31575964,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47827,
@@ -624,6 +754,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 44130657,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47642,
@@ -633,6 +764,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 42412521,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47545,
@@ -642,6 +774,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41423244,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47531,
@@ -651,6 +784,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 32394133,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47530,
@@ -660,6 +794,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 43015519,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47520,
@@ -669,6 +804,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 42230604,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47496,
@@ -678,6 +814,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41710968,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47486,
@@ -687,6 +824,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 42295944,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47486,
@@ -696,6 +834,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41761321,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47460,
@@ -705,6 +844,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 30481198,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47439,
@@ -714,6 +854,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41554041,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47395,
@@ -723,6 +864,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 42815907,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47394,
@@ -732,6 +874,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41157112,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47372,
@@ -741,6 +884,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 31626792,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47369,
@@ -750,6 +894,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41828969,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47348,
@@ -759,6 +904,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 40010773,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47339,
@@ -768,6 +914,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 43480570,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47325,
@@ -777,6 +924,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 41822475,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 47294,
@@ -786,6 +934,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 43018490,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 24276,
@@ -795,6 +944,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 23579440,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 4,
@@ -804,6 +954,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 28409,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 0,
@@ -813,6 +964,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 1118155,
           sizeInBytes: 247,
+          checkedAt: 1706526408000,
         },
       ],
       pageSize: 10,

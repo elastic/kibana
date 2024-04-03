@@ -1,9 +1,17 @@
 {
   "transform.delete_transform": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "force": "__flag__",
       "delete_dest_index": "__flag__",
-      "timeout": ""
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "DELETE"
@@ -11,6 +19,10 @@
     "patterns": [
       "_transform/{transform_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-transform.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-transform.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

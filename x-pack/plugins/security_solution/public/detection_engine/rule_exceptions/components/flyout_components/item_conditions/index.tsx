@@ -27,7 +27,7 @@ import type {
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
+import { hasEqlSequenceQuery } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -85,11 +85,6 @@ interface ExceptionsFlyoutConditionsComponentProps {
   onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
-  onFilterIndexPatterns: (
-    patterns: DataViewBase,
-    type: ExceptionListType,
-    osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
-  ) => DataViewBase;
 
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
@@ -107,7 +102,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onOsChange,
   onExceptionItemAdd,
   onSetErrorExists,
-  onFilterIndexPatterns,
   getExtendedFields,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
@@ -117,7 +111,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   );
   const includesRuleWithEQLSequenceStatement = useMemo((): boolean => {
     return (
-      rules != null && rules.some((rule) => isEqlRule(rule.type) && hasEqlSequenceQuery(rule.query))
+      rules != null && rules.some((rule) => rule.type === 'eql' && hasEqlSequenceQuery(rule.query))
     );
   }, [rules]);
 
@@ -260,7 +254,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         osTypes,
         listId: listIdToUse,
         listNamespaceType,
-        listTypeSpecificIndexPatternFilter: onFilterIndexPatterns,
         exceptionItemName,
         indexPatterns,
         isOrDisabled: isExceptionBuilderFormDisabled,

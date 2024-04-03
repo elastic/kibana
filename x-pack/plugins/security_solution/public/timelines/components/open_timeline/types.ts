@@ -6,9 +6,7 @@
  */
 
 import type React from 'react';
-import type { AllTimelinesVariables } from '../../containers/all';
-import type { TimelineModel } from '../../store/timeline/model';
-import type { Note } from '../../../../common/types/timeline/note/api';
+import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
   SingleTimelineResolveResponse,
@@ -17,7 +15,8 @@ import type {
   TimelineStatus,
   TemplateTimelineTypeLiteral,
   TimelineStatusLiteralWithNull,
-} from '../../../../common/types/timeline/api';
+  Note,
+} from '../../../../common/api/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -59,6 +58,7 @@ export interface OpenTimelineResult {
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
   queryType?: { hasEql: boolean; hasQuery: boolean };
   savedObjectId?: string | null;
+  savedSearchId?: string | null;
   status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
@@ -77,7 +77,7 @@ export interface EuiSearchBarQuery {
 }
 
 /** Performs IO to delete the specified timelines */
-export type DeleteTimelines = (timelineIds: string[], variables?: AllTimelinesVariables) => void;
+export type DeleteTimelines = (timelineIds: string[], searchIds?: string[]) => void;
 
 /** Invoked when the user clicks the action create rule from timeline */
 export type OnCreateRuleFromTimeline = (savedObjectId: string) => void;
@@ -225,19 +225,10 @@ export interface UpdateTimeline {
   to: string;
   ruleNote?: string;
   ruleAuthor?: string;
+  preventSettingQuery?: boolean;
 }
 
-export type DispatchUpdateTimeline = ({
-  duplicate,
-  id,
-  from,
-  notes,
-  resolveTimelineConfig,
-  timeline,
-  to,
-  ruleNote,
-  ruleAuthor,
-}: UpdateTimeline) => () => void;
+export type DispatchUpdateTimeline = (args: UpdateTimeline) => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',

@@ -11,39 +11,64 @@ import { WriteOperations, AlertingAuthorizationEntity } from '../../authorizatio
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { recoverRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
-export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
+export async function disable(
+  context: RulesClientContext,
+  {
+    id,
+    untrack = false,
+  }: {
+    id: string;
+    untrack?: boolean;
+  }
+): Promise<void> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.disable('${id}')`,
-    async () => await disableWithOCC(context, { id })
+    async () => await disableWithOCC(context, { id, untrack })
   );
 }
 
-async function disableWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function disableWithOCC(
+  context: RulesClientContext,
+  {
+    id,
+    untrack = false,
+  }: {
+    id: string;
+    untrack?: boolean;
+  }
+) {
   let attributes: RawRule;
   let version: string | undefined;
   let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
     references = decryptedAlert.references;
   } catch (e) {
     context.logger.error(`disable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
     attributes = alert.attributes;
     version = alert.version;
     references = alert.references;
   }
-
-  await recoverRuleAlerts(context, id, attributes);
 
   try {
     await context.authorization.ensureAuthorized({
@@ -56,18 +81,22 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.DISABLE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
     throw error;
   }
 
+  if (untrack) {
+    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  }
+
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.DISABLE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -82,7 +111,7 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     });
 
     await context.unsecuredSavedObjectsClient.update(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       id,
       updateMeta(context, {
         ...attributes,
@@ -102,6 +131,9 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
           : {}),
       }
     );
+    const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(
+      attributes.alertTypeId
+    );
 
     // If the scheduledTaskId does not match the rule id, we should
     // remove the task, otherwise mark the task as disabled
@@ -109,7 +141,10 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       if (attributes.scheduledTaskId !== id) {
         await context.taskManager.removeIfExists(attributes.scheduledTaskId);
       } else {
-        await context.taskManager.bulkDisable([attributes.scheduledTaskId]);
+        await context.taskManager.bulkDisable(
+          [attributes.scheduledTaskId],
+          Boolean(isLifecycleAlert)
+        );
       }
     }
   }

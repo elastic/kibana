@@ -15,20 +15,16 @@
       "actions",
       "data",
       "embeddable",
-      "esUiShared",
       "lens",
       "licensing",
       "features",
-      "kibanaReact",
-      "kibanaUtils",
       "triggersActionsUi",
       "management",
       "security",
       "notifications",
       "ruleRegistry",
       "files",
-      "savedObjectsFinder",
-      "savedObjectsManagement",
+      "contentManagement",
       "uiActions",
     ],
     "optionalPlugins": [
@@ -38,7 +34,12 @@
       "spaces",
       "serverless",
     ],
-    "requiredBundles": [],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact",
+      "kibanaUtils",
+      "savedObjectsFinder",
+    ],
     "extraPublicDirs": [
       "common"
     ]

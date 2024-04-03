@@ -14,9 +14,12 @@ import type {
   PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
   PostRequestBulkDiagnosticsRequest,
+  PostRequestDiagnosticsRequest,
   PostRequestDiagnosticsResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
+
+import { API_VERSIONS } from '../../../common/constants';
 
 import { agentRouteService } from '../../services';
 
@@ -62,6 +65,7 @@ export function useGetOneAgent(
   return useRequest<GetOneAgentResponse>({
     path: agentRouteService.getInfoPath(agentId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -70,22 +74,25 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
   return useRequest<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
+    version: API_VERSIONS.public.v1,
     query,
     ...options,
   });
 }
-
 export function useGetAgentsQuery(
   query: GetAgentsRequest['query'],
   options: Partial<{ enabled: boolean }> = {}
 ) {
-  return useQuery(['agents', query], () => sendGetAgents(query), { enabled: options.enabled });
+  return useQuery(['agents', query], () => sendGetAgents(query), {
+    enabled: options.enabled,
+  });
 }
 
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequest<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
+    version: API_VERSIONS.public.v1,
     query,
     ...options,
   });
@@ -95,6 +102,7 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
   return useRequest<GetAgentStatusResponse>({
     method: 'get',
     path: agentRouteService.getStatusPath(),
+    version: API_VERSIONS.public.v1,
     query,
     ...options,
   });
@@ -104,6 +112,7 @@ export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['que
     method: 'get',
     path: agentRouteService.getIncomingDataPath(),
     query,
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -115,6 +124,7 @@ export function sendGetAgentStatus(
     method: 'get',
     path: agentRouteService.getStatusPath(),
     query,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -124,6 +134,7 @@ export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: Req
     method: 'get',
     path: agentRouteService.getListTagsPath(),
     query,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -137,6 +148,7 @@ export function sendPostAgentReassign(
     method: 'post',
     path: agentRouteService.getReassignPath(agentId),
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -149,6 +161,7 @@ export function sendPostBulkAgentReassign(
     method: 'post',
     path: agentRouteService.getBulkReassignPath(),
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -162,6 +175,7 @@ export function sendPostAgentUnenroll(
     path: agentRouteService.getUnenrollPath(agentId),
     method: 'post',
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -174,6 +188,7 @@ export function sendPostBulkAgentUnenroll(
     path: agentRouteService.getBulkUnenrollPath(),
     method: 'post',
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -187,14 +202,21 @@ export function sendPostAgentUpgrade(
     path: agentRouteService.getUpgradePath(agentId),
     method: 'post',
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
 
-export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+export function sendPostRequestDiagnostics(
+  agentId: string,
+  body: PostRequestDiagnosticsRequest['body'],
+  options?: RequestOptions
+) {
   return sendRequest<PostRequestDiagnosticsResponse>({
     path: agentRouteService.getRequestDiagnosticsPath(agentId),
     method: 'post',
+    body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -207,6 +229,7 @@ export function sendPostBulkRequestDiagnostics(
     path: agentRouteService.getBulkRequestDiagnosticsPath(),
     method: 'post',
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -215,6 +238,7 @@ export function sendGetAgentUploads(agentId: string, options?: RequestOptions) {
   return sendRequest<GetAgentUploadsResponse>({
     path: agentRouteService.getListAgentUploads(agentId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -223,6 +247,7 @@ export const useGetAgentUploads = (agentId: string, options?: RequestOptions) =>
   return useRequest<GetAgentUploadsResponse>({
     path: agentRouteService.getListAgentUploads(agentId),
     method: 'get',
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 };
@@ -236,6 +261,7 @@ export function sendPostAgentAction(
     path: agentRouteService.getCreateActionPath(agentId),
     method: 'post',
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -248,6 +274,7 @@ export function sendPostBulkAgentUpgrade(
     path: agentRouteService.getBulkUpgradePath(),
     method: 'post',
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -256,6 +283,7 @@ export function sendGetActionStatus() {
   return sendRequest<GetActionStatusResponse>({
     path: agentRouteService.getActionStatusPath(),
     method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -263,6 +291,7 @@ export function sendPostCancelAction(actionId: string) {
   return sendRequest<GetCurrentUpgradesResponse>({
     path: agentRouteService.getCancelActionPath(actionId),
     method: 'post',
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -270,6 +299,7 @@ export function sendPostRetrieveAgentsByActions(body: PostRetrieveAgentsByAction
   return sendRequest<PostRetrieveAgentsByActionsResponse>({
     path: agentRouteService.getAgentsByActionsPath(),
     method: 'post',
+    version: API_VERSIONS.public.v1,
     body,
   });
 }
@@ -283,6 +313,7 @@ export function sendPutAgentTagsUpdate(
     method: 'put',
     path: agentRouteService.getUpdatePath(agentId),
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -295,6 +326,7 @@ export function sendPostBulkAgentTagsUpdate(
     method: 'post',
     path: agentRouteService.getBulkUpdateTagsPath(),
     body,
+    version: API_VERSIONS.public.v1,
     ...options,
   });
 }
@@ -303,5 +335,6 @@ export function sendGetAgentsAvailableVersions() {
   return sendRequest<GetAvailableVersionsResponse>({
     method: 'get',
     path: agentRouteService.getAvailableVersionsPath(),
+    version: API_VERSIONS.public.v1,
   });
 }

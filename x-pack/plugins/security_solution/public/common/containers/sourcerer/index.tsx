@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
@@ -18,7 +18,7 @@ import type {
 } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import {
   ALERTS_PATH,
   HOSTS_PATH,
@@ -36,6 +36,7 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
+import type { State } from '../../store';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
@@ -54,14 +55,8 @@ export const useInitSourcerer = (
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { defaultDataView, signalIndexName: signalIndexNameSourcerer } = useDeepEqualSelector(
-    (state) => getDataViewsSelector(state)
-  );
-
+  const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
   const { addError, addWarning } = useAppToasts();
 
   useEffect(() => {
@@ -83,19 +78,29 @@ export const useInitSourcerer = (
     getTimelineSelector(state, TimelineId.active)
   );
 
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const {
-    sourcererScope: { selectedDataViewId: scopeDataViewId, selectedPatterns, missingPatterns },
-  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, scopeId));
+  const scopeDataViewId = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
+  });
+  const selectedPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, scopeId);
+  });
+  const missingPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeMissingPatterns(state, scopeId);
+  });
 
-  const {
-    selectedDataView: timelineSelectedDataView,
-    sourcererScope: {
-      selectedDataViewId: timelineDataViewId,
-      selectedPatterns: timelineSelectedPatterns,
-      missingPatterns: timelineMissingPatterns,
-    },
-  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, SourcererScopeName.timeline));
+  const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
+  const timelineDataViewId = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.timeline);
+  });
+  const timelineSelectedPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.timeline);
+  });
+  const timelineMissingPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeMissingPatterns(state, SourcererScopeName.timeline);
+  });
+  const timelineSelectedDataView = useMemo(() => {
+    return kibanaDataViews.find((dataView) => dataView.id === timelineDataViewId);
+  }, [kibanaDataViews, timelineDataViewId]);
 
   const { indexFieldsSearch } = useDataView();
 
@@ -207,6 +212,18 @@ export const useInitSourcerer = (
           ),
         })
       );
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.analyzer,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            SourcererScopeName.analyzer,
+            signalIndexName,
+            true
+          ),
+        })
+      );
     } else if (
       signalIndexNameSourcerer != null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
@@ -221,6 +238,18 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
+            signalIndexNameSourcerer,
+            true
+          ),
+        })
+      );
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.analyzer,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            SourcererScopeName.analyzer,
             signalIndexNameSourcerer,
             true
           ),
@@ -363,26 +392,23 @@ export const useInitSourcerer = (
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
 ): SelectedDataView => {
-  const { getDataViewsSelector, getSourcererDataViewSelector, getScopeSelector } = useMemo(
-    () => ({
-      getDataViewsSelector: sourcererSelectors.getSourcererDataViewsSelector(),
-      getSourcererDataViewSelector: sourcererSelectors.sourcererDataViewSelector(),
-      getScopeSelector: sourcererSelectors.scopeIdSelector(),
-    }),
-    []
-  );
-  const {
-    defaultDataView,
-    signalIndexName,
-    selectedDataView,
-    sourcererScope: { missingPatterns, selectedPatterns: scopeSelectedPatterns, loading },
-  }: sourcererSelectors.SourcererScopeSelector = useDeepEqualSelector((state) => {
-    const sourcererScope = getScopeSelector(state, scopeId);
-    return {
-      ...getDataViewsSelector(state),
-      selectedDataView: getSourcererDataViewSelector(state, sourcererScope.selectedDataViewId),
-      sourcererScope,
-    };
+  const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
+  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const selectedDataViewId = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
+  });
+  const selectedDataView = useMemo(() => {
+    return kibanaDataViews.find((dataView) => dataView.id === selectedDataViewId);
+  }, [kibanaDataViews, selectedDataViewId]);
+  const loading = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeIsLoading(state, scopeId);
+  });
+  const scopeSelectedPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, scopeId);
+  });
+  const missingPatterns = useSelector((state: State) => {
+    return sourcererSelectors.sourcererScopeMissingPatterns(state, scopeId);
   });
 
   const selectedPatterns = useMemo(
@@ -425,26 +451,26 @@ export const useSourcererDataView = (
     [legacyDataView, missingPatterns.length, selectedDataView]
   );
 
-  const indicesExist = useMemo(
-    () =>
-      loading || sourcererDataView.loading
-        ? true
-        : checkIfIndicesExist({
-            scopeId,
-            signalIndexName,
-            patternList: sourcererDataView.patternList,
-            isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
-          }),
-    [
-      defaultDataView.id,
-      loading,
-      scopeId,
-      signalIndexName,
-      sourcererDataView.id,
-      sourcererDataView.loading,
-      sourcererDataView.patternList,
-    ]
-  );
+  const indicesExist = useMemo(() => {
+    if (loading || sourcererDataView.loading) {
+      return true;
+    } else {
+      return checkIfIndicesExist({
+        scopeId,
+        signalIndexName,
+        patternList: sourcererDataView.patternList,
+        isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
+      });
+    }
+  }, [
+    defaultDataView.id,
+    loading,
+    scopeId,
+    signalIndexName,
+    sourcererDataView.id,
+    sourcererDataView.loading,
+    sourcererDataView.patternList,
+  ]);
 
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(

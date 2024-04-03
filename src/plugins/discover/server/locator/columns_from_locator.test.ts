@@ -15,7 +15,8 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';
-import { DiscoverAppLocatorParams, DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
+import { DiscoverAppLocatorParams } from '../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { columnsFromLocatorFactory } from './columns_from_locator';
 
 const mockSavedSearchId = 'abc-test-123';

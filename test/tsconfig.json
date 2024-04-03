@@ -18,7 +18,7 @@
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
-  ],
+    , "../x-pack/test_serverless/functional/test_suites/common/saved_objects_management/export_transform copy.ts"  ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -67,6 +67,11 @@
     "@kbn/enterprise-search-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/discover-plugin",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/event-annotation-plugin",
+    "@kbn/event-annotation-common",
+    "@kbn/links-plugin",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/monaco",
   ]
 }

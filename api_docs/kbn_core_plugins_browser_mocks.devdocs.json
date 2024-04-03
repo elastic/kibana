@@ -52,14 +52,14 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser-mocks",
-            "id": "def-common.pluginsServiceMock.createSetupContract",
+            "id": "def-common.pluginsServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
-            "label": "createSetupContract",
+            "label": "createInternalSetupContract",
             "description": [],
             "signature": [
               "() => ",
-              "PluginsServiceSetup"
+              "InternalPluginsServiceSetup"
             ],
             "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
@@ -69,14 +69,14 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser-mocks",
-            "id": "def-common.pluginsServiceMock.createStartContract",
+            "id": "def-common.pluginsServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
-            "label": "createStartContract",
+            "label": "createInternalStartContract",
             "description": [],
             "signature": [
               "() => ",
-              "PluginsServiceSetup"
+              "InternalPluginsServiceSetup"
             ],
             "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
@@ -92,7 +92,15 @@
             "label": "createPluginInitializerContext",
             "description": [],
             "signature": [
-              "(config?: unknown) => ",
+              "(config?: unknown, { buildFlavor }?: { buildFlavor?: ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.BuildFlavor",
+                "text": "BuildFlavor"
+              },
+              " | undefined; }) => ",
               {
                 "pluginId": "@kbn/core-plugins-browser",
                 "scope": "common",
@@ -116,6 +124,28 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-browser-mocks",
+                "id": "def-common.pluginsServiceMock.createPluginInitializerContext.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "__1",
+                "description": [],
+                "signature": [
+                  "{ buildFlavor?: ",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.BuildFlavor",
+                    "text": "BuildFlavor"
+                  },
+                  " | undefined; }"
                 ],
                 "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
                 "deprecated": false,

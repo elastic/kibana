@@ -1,21 +1,59 @@
 {
   "cat.ml_datafeeds": {
     "url_params": {
-      "allow_no_match": "__flag__",
-      "format": "",
-      "h": [],
-      "help": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
+      "format": [
+        "text"
       ],
-      "v": "__flag__"
+      "h": [
+        "ae",
+        "bc",
+        "id",
+        "na",
+        "ne",
+        "ni",
+        "nn",
+        "sba",
+        "sc",
+        "seah",
+        "st",
+        "s"
+      ],
+      "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "s": [
+        "ae",
+        "bc",
+        "id",
+        "na",
+        "ne",
+        "ni",
+        "nn",
+        "sba",
+        "sc",
+        "seah",
+        "st",
+        "s"
+      ],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
     },
     "methods": [
       "GET"
@@ -24,6 +62,10 @@
       "_cat/ml/datafeeds",
       "_cat/ml/datafeeds/{datafeed_id}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/cat-datafeeds.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-datafeeds.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

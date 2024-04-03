@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiSkeletonText } from '@elastic/eui';
 
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
 import type { ExceptionsAddToListsComponentProps } from './use_add_to_lists_table';
 import { useAddToSharedListTable } from './use_add_to_lists_table';
 

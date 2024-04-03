@@ -12,7 +12,7 @@ import {
   getTotalIncompatible,
   getTotalIndices,
   getTotalIndicesChecked,
-  onPatternRollupUpdated,
+  getTotalSameFamily,
   updateResultOnCheckCompleted,
 } from './helpers';
 import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
@@ -21,10 +21,12 @@ import {
   packetbeatNoResults,
   packetbeatWithSomeErrors,
 } from '../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { PatternRollup } from '../types';
+import { DataQualityCheckResult, PatternRollup } from '../types';
 import { EMPTY_STAT } from '../helpers';
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { alertIndexWithAllResults } from '../mock/pattern_rollup/mock_alerts_pattern_rollup';
+import { EcsVersion } from '@elastic/ecs';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -48,6 +50,45 @@ describe('helpers', () => {
 
   afterAll(() => {
     global.fetch = originalFetch;
+  });
+
+  describe('getTotalSameFamily', () => {
+    const defaultDataQualityCheckResult: DataQualityCheckResult = {
+      docsCount: 26093,
+      error: null,
+      ilmPhase: 'hot',
+      incompatible: 0,
+      indexName: '.internal.alerts-security.alerts-default-000001',
+      markdownComments: ['foo', 'bar', 'baz'],
+      pattern: '.alerts-security.alerts-default',
+      sameFamily: 7,
+      checkedAt: 1706526408000,
+    };
+
+    const alertIndexWithSameFamily: PatternRollup = {
+      ...alertIndexWithAllResults,
+      results: {
+        '.internal.alerts-security.alerts-default-000001': {
+          ...defaultDataQualityCheckResult,
+        },
+      },
+    };
+
+    const withSameFamily: Record<string, PatternRollup> = {
+      '.internal.alerts-security.alerts-default-000001': alertIndexWithSameFamily,
+    };
+
+    test('it returns the expected count when patternRollups has sameFamily', () => {
+      expect(getTotalSameFamily(withSameFamily)).toEqual(7);
+    });
+
+    test('it returns undefined when patternRollups is empty', () => {
+      expect(getTotalSameFamily({})).toBeUndefined();
+    });
+
+    test('it returns zero when none of the rollups have same family', () => {
+      expect(getTotalSameFamily(patternRollups)).toEqual(0);
+    });
   });
 
   describe('getTotalIndices', () => {
@@ -126,21 +167,6 @@ describe('helpers', () => {
     });
   });
 
-  describe('onPatternRollupUpdated', () => {
-    test('it returns a new collection with the updated rollup', () => {
-      const before: Record<string, PatternRollup> = {
-        'auditbeat-*': auditbeatWithAllResults,
-      };
-
-      expect(
-        onPatternRollupUpdated({
-          patternRollup: mockPacketbeatPatternRollup,
-          patternRollups: before,
-        })
-      ).toEqual(patternRollups);
-    });
-  });
-
   describe('updateResultOnCheckCompleted', () => {
     const packetbeatStats861: IndicesStatsIndicesStats =
       mockPacketbeatPatternRollup.stats != null
@@ -158,6 +184,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -229,11 +256,13 @@ describe('helpers', () => {
               markdownComments: [
                 '### .ds-packetbeat-8.6.1-2023.02.04-000001\n',
                 '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | .ds-packetbeat-8.6.1-2023.02.04-000001 | 1,628,343 (50.0%) | 3 | `hot` | 697.7MB |\n\n',
-                '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-                "#### 3 incompatible fields, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 8.6.1.\n\nIncompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.\n\nWhen an incompatible field is not in the same family:\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
+                '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+                `#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
                 '\n#### Incompatible field mappings - .ds-packetbeat-8.6.1-2023.02.04-000001\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - .ds-packetbeat-8.6.1-2023.02.04-000001\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
               ],
               pattern: 'packetbeat-*',
+              sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -257,6 +286,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -328,11 +358,13 @@ describe('helpers', () => {
               markdownComments: [
                 '### .ds-packetbeat-8.6.1-2023.02.04-000001\n',
                 '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | .ds-packetbeat-8.6.1-2023.02.04-000001 | 1,628,343 () | 3 | `hot` | 697.7MB |\n\n',
-                '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-                "#### 3 incompatible fields, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 8.6.1.\n\nIncompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.\n\nWhen an incompatible field is not in the same family:\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
+                '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+                `#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
                 '\n#### Incompatible field mappings - .ds-packetbeat-8.6.1-2023.02.04-000001\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - .ds-packetbeat-8.6.1-2023.02.04-000001\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
               ],
               pattern: 'packetbeat-*',
+              sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -351,6 +383,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: null, // <--
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -421,6 +454,7 @@ describe('helpers', () => {
               indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
               markdownComments: [],
               pattern: 'packetbeat-*',
+              checkedAt: undefined,
             },
           },
           sizeInBytes: 1464758182,
@@ -444,6 +478,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'packetbeat-*',
           patternRollups: {
@@ -474,11 +509,13 @@ describe('helpers', () => {
               markdownComments: [
                 '### .ds-packetbeat-8.6.1-2023.02.04-000001\n',
                 '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | .ds-packetbeat-8.6.1-2023.02.04-000001 | 1,628,343 (50.0%) | 3 | -- | 697.7MB |\n\n',
-                '### **Incompatible fields** `3` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-                "#### 3 incompatible fields, 0 fields with mappings in the same family\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 8.6.1.\n\nIncompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.\n\nWhen an incompatible field is not in the same family:\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
+                '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+                `#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version ${EcsVersion}.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n`,
                 '\n#### Incompatible field mappings - .ds-packetbeat-8.6.1-2023.02.04-000001\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text`  |\n| source.ip | `ip` | `text`  |\n\n#### Incompatible field values - .ds-packetbeat-8.6.1-2023.02.04-000001\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
               ],
               pattern: 'packetbeat-*',
+              sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -501,6 +538,7 @@ describe('helpers', () => {
           formatBytes,
           formatNumber,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+          isILMAvailable: true,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           pattern: 'this-pattern-is-not-in-pattern-rollups', // <--
           patternRollups: shouldNotBeModified,

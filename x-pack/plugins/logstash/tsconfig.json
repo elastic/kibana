@@ -21,9 +21,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
-    "@kbn/es-ui-shared-plugin",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

@@ -6,17 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { Navigation } from './components';
+export { Navigation } from './navigation';
+export type { Props as NavigationProps } from './navigation';
 
-export { DefaultNavigation } from './default_navigation';
+export { RecentlyAccessed } from './components';
 
-export { getPresets } from './nav_tree_presets';
-
-export type {
-  GroupDefinition,
-  NavigationGroupPreset,
-  NavigationTreeDefinition,
-  ProjectNavigationDefinition,
-  RecentlyAccessedDefinition,
-  RootNavigationItemDefinition,
-} from './types';
+export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';

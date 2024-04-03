@@ -36,9 +36,12 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
+  ENABLE_EXPANDABLE_FLYOUT_SETTING,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { LogLevelSetting } from '../common/detection_engine/rule_monitoring';
+import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
@@ -56,7 +59,8 @@ const orderSettings = (settings: SettingsConfig): SettingsConfig => {
 
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  validationsEnabled: boolean
 ) => {
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
@@ -114,7 +118,9 @@ export const initUiSettings = (
       }),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.arrayOf(schema.string()),
+      schema: validationsEnabled
+        ? schema.arrayOf(schema.string(), { maxSize: 50 })
+        : schema.arrayOf(schema.string()),
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -131,7 +137,9 @@ export const initUiSettings = (
       ),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.arrayOf(schema.string()),
+      schema: validationsEnabled
+        ? schema.arrayOf(schema.string(), { maxSize: 10 })
+        : schema.arrayOf(schema.string()),
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -148,7 +156,7 @@ export const initUiSettings = (
       ),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.number(),
+      schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
@@ -158,6 +166,59 @@ export const initUiSettings = (
       description: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedDescription', {
         defaultMessage: '<p>Enables the News feed</p>',
       }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_EXPANDABLE_FLYOUT_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableExpandableFlyoutLabel', {
+        defaultMessage: 'Expandable flyout',
+      }),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableExpandableFlyoutDescription',
+        {
+          defaultMessage: '<p>Enables the expandable flyout</p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_ASSET_CRITICALITY_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetCriticalityTitle', {
+        defaultMessage: 'Asset Criticality',
+      }),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetCriticalityDescription',
+        {
+          defaultMessage:
+            '<p>Enables asset criticality assignment workflows and its contributions to entity risk </p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer',
+        {
+          defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
+        }
+      ),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
+        {
+          defaultMessage:
+            '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+        }
+      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,

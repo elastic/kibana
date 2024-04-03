@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { ActionsPlugin } from './plugin';
 import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
@@ -24,8 +23,9 @@ export type {
   ActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  FindActionResult,
 } from './types';
+
+export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
@@ -36,7 +36,10 @@ export {
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
-export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { ActionsPlugin } = await import('./plugin');
+  return new ActionsPlugin(initContext);
+};
 
 export { SubActionConnector } from './sub_action_framework/sub_action_connector';
 export { CaseConnector } from './sub_action_framework/case';

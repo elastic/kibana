@@ -35,6 +35,14 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
+export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
+  {
+    defaultMessage:
+      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
+  }
+);
+
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
@@ -400,13 +408,6 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
-  {
-    defaultMessage: 'Selection contains immutable rules which cannot be deleted',
-  }
-);
-
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
   {
@@ -543,6 +544,13 @@ export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
   }
 );
 
@@ -858,17 +866,24 @@ export const IMPORT_FAILED_DETAILED = (message: string) =>
     }
   );
 
-export const DELETE_CONFIRMATION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationTitle',
+export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
     defaultMessage: 'Confirm bulk deletion',
+  }
+);
+
+export const SINGLE_DELETE_CONFIRMATION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.singleDeleteConfirmationTitle',
+  {
+    defaultMessage: 'Confirm deletion',
   }
 );
 
 export const DELETE_CONFIRMATION_CONFIRM = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationConfirm',
   {
-    defaultMessage: 'Confirm',
+    defaultMessage: 'Delete',
   }
 );
 
@@ -876,14 +891,6 @@ export const DELETE_CONFIRMATION_CANCEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationCancel',
   {
     defaultMessage: 'Cancel',
-  }
-);
-
-export const DELETE_CONFIRMATION_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationBody',
-  {
-    defaultMessage:
-      'This action will delete all rules that match current filter query. Click "Confirm" to continue.',
   }
 );
 
@@ -1204,6 +1211,14 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
     defaultMessage: 'Install rule',
   }
 );
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
 
 export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',

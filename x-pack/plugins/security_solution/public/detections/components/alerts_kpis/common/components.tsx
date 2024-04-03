@@ -98,7 +98,13 @@ export const StackByComboBox = React.forwardRef(
       return [{ label: selected, value: selected }];
     }, [selected]);
 
-    const stackOptions = useStackByFields(useLensCompatibleFields);
+    const getExpensiveFields = useStackByFields(useLensCompatibleFields);
+
+    const options = useMemo(
+      () => dropDownoptions ?? getExpensiveFields(),
+      [dropDownoptions, getExpensiveFields]
+    );
+
     const singleSelection = useMemo(() => {
       return { asPlainText: true };
     }, []);
@@ -115,7 +121,7 @@ export const StackByComboBox = React.forwardRef(
           singleSelection={singleSelection}
           isClearable={false}
           sortMatchesBy="startsWith"
-          options={dropDownoptions ?? stackOptions}
+          options={options}
           selectedOptions={selectedOptions}
           compressed
           onChange={onChange}

@@ -22,20 +22,27 @@ import {
   EuiIcon,
   EuiPagination,
   EuiFlyoutFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import type { HttpSetup } from '@kbn/core/public';
+import { generatePath } from 'react-router-dom';
+import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import { TakeAction } from '../../../components/take_action';
 import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import type { BenchmarkId } from '../../../../common/types';
+import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
-import { BenchmarkName } from '../../../../common/types';
+import { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT } from '../test_subjects';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 
 const tabs = [
   {
@@ -73,16 +80,16 @@ type FindingsTab = typeof tabs[number];
 interface FindingFlyoutProps {
   onClose(): void;
   findings: CspFinding;
-  flyoutIndex: number;
-  findingsCount: number;
-  onPaginate: (pageIndex: number) => void;
+  flyoutIndex?: number;
+  findingsCount?: number;
+  onPaginate?: (pageIndex: number) => void;
 }
 
 export const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
 );
 
-export const Markdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
+export const CspFlyoutMarkdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (props) => (
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
@@ -95,7 +102,9 @@ export const CisKubernetesIcons = ({
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiIcon type={cisLogoIcon} size="xxl" />
+      <EuiToolTip content="Center for Internet Security">
+        <EuiIcon type={cisLogoIcon} size="xl" />
+      </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <CISBenchmarkIcon type={benchmarkId} name={benchmarkName} />
@@ -104,11 +113,21 @@ export const CisKubernetesIcons = ({
 );
 
 const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
+  const { application } = useKibana().services;
+
+  const ruleFlyoutLink = application.getUrlForApp('security', {
+    path: generatePath(benchmarksNavigation.rules.path, {
+      benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
+      benchmarkId: findings.rule.benchmark.id,
+      ruleId: findings.rule.id,
+    }),
+  });
+
   switch (tab.id) {
     case 'overview':
-      return <OverviewTab data={findings} />;
+      return <OverviewTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'rule':
-      return <RuleTab data={findings} />;
+      return <RuleTab data={findings} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'table':
       return <TableTab data={findings} />;
     case 'json':
@@ -126,6 +145,9 @@ export const FindingsRuleFlyout = ({
   onPaginate,
 }: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
+
+  const createMisconfigurationRuleFn = async (http: HttpSetup) =>
+    await createDetectionRuleFromBenchmarkRule(http, findings.rule);
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>
@@ -160,15 +182,24 @@ export const FindingsRuleFlyout = ({
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
+          justifyContent={onPaginate ? 'spaceBetween' : 'flexEnd'}
+        >
+          {onPaginate && (
+            <EuiFlexItem grow={false}>
+              <EuiPagination
+                aria-label={PAGINATION_LABEL}
+                pageCount={findingsCount}
+                activePage={flyoutIndex}
+                onPageClick={onPaginate}
+                compressed
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiPagination
-              aria-label={PAGINATION_LABEL}
-              pageCount={findingsCount}
-              activePage={flyoutIndex}
-              onPageClick={onPaginate}
-              compressed
-            />
+            <TakeAction createRuleFn={createMisconfigurationRuleFn} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

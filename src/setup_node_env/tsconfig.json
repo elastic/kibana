@@ -6,12 +6,14 @@
   "include": [
     "harden/**/*",
     "root/**/*",
+    "openssl_legacy_provider/**/*",
     "*.js",
     "*.ts",
   ],
   "kbn_references": [
     { "path": "../../tsconfig.json" },
     "@kbn/babel-register",
+    "@kbn/security-hardening",
   ],
   "exclude": [
     "target/**/*",

@@ -7,6 +7,8 @@ properties:
     type: boolean
   is_default_monitoring:
     type: boolean
+  is_internal:
+    type: boolean
   name:
     type: string
   type:
@@ -35,6 +37,9 @@ properties:
         type: string
       key:
         type: string
+      verification_mode:
+        type: string
+        enum: ['none', 'full', 'certificate', 'strict']
   proxy_id:
     type: string
   shipper:
@@ -66,6 +71,9 @@ properties:
     type: string
   auth_type:
     type: string
+  connection_type:
+    type: string
+    enum: ['plaintext', 'encryption']
   username:
     type: string
   password:
@@ -87,7 +95,11 @@ properties:
     properties:
       group_events:
         type: number
+  topic:
+    type: string
   topics:
+    deprecated: true
+    description: Use topic instead.
     type: array
     items:
       type: object
@@ -95,6 +107,8 @@ properties:
         topic:
           type: string
         when:
+          deprecated: true
+          description: Deprecated, kafka output do not support conditionnal topics anymore.
           type: object
           properties:
             type:
@@ -114,9 +128,7 @@ properties:
     type: number
   broker_timeout:
     type: number
-  broker_ack_reliability:
-    type: string
-  broker_buffer_size:
+  required_acks:
     type: number
 required:
   - name

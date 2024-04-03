@@ -21,5 +21,6 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/exploratory-view-plugin",
+    "@kbn/shared-ux-link-redirect-app",
   ]
 }

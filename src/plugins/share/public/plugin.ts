@@ -22,10 +22,11 @@ import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_c
 import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
-import type { BrowserUrlService } from './types';
+import { registrations } from './lib/registrations';
+import type { BrowserUrlService, ClientConfigType } from './types';
 
 /** @public */
-export type SharePluginSetup = ShareMenuRegistrySetup & {
+export type SharePublicSetup = ShareMenuRegistrySetup & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -44,7 +45,7 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
 };
 
 /** @public */
-export type SharePluginStart = ShareMenuManagerStart & {
+export type SharePublicStart = ShareMenuManagerStart & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -57,18 +58,34 @@ export type SharePluginStart = ShareMenuManagerStart & {
   navigate(options: RedirectOptions): void;
 };
 
-export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicStartDependencies {}
+
+export class SharePlugin
+  implements
+    Plugin<
+      SharePublicSetup,
+      SharePublicStart,
+      SharePublicSetupDependencies,
+      SharePublicStartDependencies
+    >
+{
+  private config: ClientConfigType;
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
-
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ClientConfigType>();
+  }
 
-  public setup(core: CoreSetup): SharePluginSetup {
-    const { http } = core;
+  public setup(core: CoreSetup): SharePublicSetup {
+    const { analytics, http } = core;
     const { basePath } = http;
 
     this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
@@ -106,6 +123,8 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     this.redirectManager.registerLocatorRedirectApp(core);
     this.redirectManager.registerLegacyShortUrlRedirectApp(core);
 
+    registrations.setup({ analytics });
+
     return {
       ...this.shareMenuRegistry.setup(),
       url: this.url,
@@ -119,11 +138,14 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     };
   }
 
-  public start(core: CoreStart): SharePluginStart {
+  public start(core: CoreStart): SharePublicStart {
+    const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
       this.shareMenuRegistry.start(),
+      disableEmbed,
+      this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider
     );
 

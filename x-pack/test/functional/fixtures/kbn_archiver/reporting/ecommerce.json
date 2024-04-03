@@ -92,6 +92,10 @@
       [
         "order_date",
         "desc"
+      ],
+      [
+        "order_id",
+        "desc"
       ]
     ],
     "title": "Ecommerce Data",
@@ -321,6 +325,44 @@
   "type": "dashboard",
   "updated_at": "2021-09-20T23:42:15.675Z",
   "version": "WzE2MiwxXQ=="
+}
+
+{
+  "id": "6a331b00-3ae5-11ee-9cce-f5072c4752b5",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-08-14T20:59:09.872Z",
+  "created_at": "2023-08-14T20:59:09.872Z",
+  "version": "WzM0LDFd",
+  "attributes": {
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "description": "saved search panel with custom time range that does not intersect with dashboard time range",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "timeRestore": true,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.10.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":41,\"h\":20,\"i\":\"e80a3ff4-cb4a-479e-971d-438eeedd8b29\"},\"panelIndex\":\"e80a3ff4-cb4a-479e-971d-438eeedd8b29\",\"embeddableConfig\":{\"enhancements\":{},\"hidePanelTitles\":false,\"timeRange\":{\"from\":\"2019-06-15T00:00:00.000Z\",\"to\":\"2019-06-15T01:00:00.000Z\"}},\"panelRefName\":\"panel_e80a3ff4-cb4a-479e-971d-438eeedd8b29\"}]",
+    "timeFrom": "2019-06-19T07:00:00.000Z",
+    "title": "Ecom Dashboard - 3 Day Period - custom time range",
+    "timeTo": "2019-06-22T07:00:00.000Z",
+    "version": 1
+  },
+  "references": [
+    {
+      "name": "e80a3ff4-cb4a-479e-971d-438eeedd8b29:panel_e80a3ff4-cb4a-479e-971d-438eeedd8b29",
+      "type": "search",
+      "id": "6091ead0-1c6d-11ea-a100-8589bb9d7c6b"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
 }
 
 {
@@ -768,6 +810,7 @@
   "attributes": {
     "columns": [
       "category",
+      "order_id",
       "customer_full_name",
       "taxful_total_price",
       "currency"
@@ -781,6 +824,10 @@
     "sort": [
       [
         "order_date",
+        "desc"
+      ],
+      [
+        "order_id",
         "desc"
       ]
     ],

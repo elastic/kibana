@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import {
+  ENTERPRISE_SEARCH_APP_ID,
+  ENTERPRISE_SEARCH_CONTENT_APP_ID,
+  ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
+  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
+  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
+} from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { ProductFeatures } from './types';
-import { IngestPipelineParams } from './types/connectors';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
   defaultMessage: 'Search',
@@ -18,7 +27,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
 });
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
-  ID: 'enterpriseSearch',
+  ID: ENTERPRISE_SEARCH_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
@@ -31,7 +40,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
 };
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
-  ID: 'enterpriseSearchContent',
+  ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
     defaultMessage: 'Content',
@@ -45,24 +54,24 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
-export const ESRE_PLUGIN = {
-  ID: 'enterpriseSearchEsre',
-  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
-    defaultMessage: 'ESRE',
+export const AI_SEARCH_PLUGIN = {
+  ID: 'enterpriseSearchAISearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
+    defaultMessage: 'AI Search',
   }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
-    defaultMessage: 'ESRE',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.aiSearch.navTitle', {
+    defaultMessage: 'AI Search',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.aiSearch.description', {
     defaultMessage:
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),
-  URL: '/app/enterprise_search/esre',
+  URL: '/app/enterprise_search/ai_search',
   LOGO: 'logoEnterpriseSearch',
 };
 
 export const ANALYTICS_PLUGIN = {
-  ID: 'enterpriseSearchAnalytics',
+  ID: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
     defaultMessage: 'Behavioral Analytics',
   }),
@@ -79,7 +88,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'elasticsearch',
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -91,7 +100,7 @@ export const ELASTICSEARCH_PLUGIN = {
 };
 
 export const APP_SEARCH_PLUGIN = {
-  ID: 'appSearch',
+  ID: ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
     defaultMessage: 'App Search',
   }),
@@ -104,7 +113,7 @@ export const APP_SEARCH_PLUGIN = {
 };
 
 export const WORKPLACE_SEARCH_PLUGIN = {
-  ID: 'workplaceSearch',
+  ID: ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
     defaultMessage: 'Workplace Search',
   }),
@@ -138,7 +147,7 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 };
 
 export const APPLICATIONS_PLUGIN = {
-  ID: 'enterpriseSearchApplications',
+  ID: ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
     defaultMessage: 'Applications',
@@ -186,6 +195,7 @@ export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
+export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
 
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
@@ -196,7 +206,21 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
+};
+
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: DEFAULT_PIPELINE_VALUES.extract_binary_content,
+  default_name: DEFAULT_PIPELINE_NAME,
+  default_reduce_whitespace: DEFAULT_PIPELINE_VALUES.reduce_whitespace,
+  default_run_ml_inference: DEFAULT_PIPELINE_VALUES.run_ml_inference,
 };
 
 export enum INGESTION_METHOD_IDS {
@@ -215,3 +239,7 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
+export const PLUGIN_ID = 'enterpriseSearch';
+
+export const CONNECTOR_NATIVE_TYPE = 'native';
+export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';

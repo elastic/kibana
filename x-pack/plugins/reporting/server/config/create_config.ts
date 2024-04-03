@@ -7,9 +7,10 @@
 
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
-import type { CoreSetup, Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
-import { ReportingConfigType } from './schema';
+
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 
 /*
  * Set up dynamic config defaults
@@ -44,11 +45,7 @@ export function createConfig(
     ipaddr.isValid(kibanaServerHostname) &&
     !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
   ) {
-    logger.warn(
-      `Found 'server.host: "0.0.0.0"' in Kibana configuration. Reporting is not able to use this as the Kibana server hostname.` +
-        ` To enable PNG/PDF Reporting to work, 'xpack.reporting.kibanaServer.hostname: localhost' is automatically set in the configuration.` +
-        ` You can prevent this message by adding 'xpack.reporting.kibanaServer.hostname: localhost' in kibana.yml.`
-    );
+    // A silent override to use "localhost" instead of "0.0.0.0" for connection of the headless browser
     kibanaServerHostname = 'localhost';
   }
   // kibanaServer.port, default to server.port

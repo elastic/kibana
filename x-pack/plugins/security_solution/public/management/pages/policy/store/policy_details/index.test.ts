@@ -12,7 +12,7 @@ import type { PolicyDetailsAction } from '.';
 import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
 import { policyConfig } from './selectors';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
+import type { PolicyConfig, PolicyData } from '../../../../../../common/endpoint/types';
 import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test_utils';
 import { createSpyMiddleware } from '../../../../../common/store/test_utils';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
@@ -269,7 +269,15 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
-                  meta: { license: '', cloud: false },
+                  global_manifest_version: 'latest',
+                  meta: {
+                    license: '',
+                    cloud: false,
+                    license_uuid: '',
+                    cluster_name: '',
+                    cluster_uuid: '',
+                    serverless: false,
+                  },
                   windows: {
                     events: {
                       credential_access: true,
@@ -281,9 +289,13 @@ describe('policy details: ', () => {
                       registry: true,
                       security: true,
                     },
-                    malware: { mode: 'prevent', blocklist: true },
+                    malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     memory_protection: { mode: 'off', supported: false },
-                    behavior_protection: { mode: 'off', supported: false },
+                    behavior_protection: {
+                      mode: 'off',
+                      supported: false,
+                      reputation_service: false,
+                    },
                     ransomware: { mode: 'off', supported: false },
                     attack_surface_reduction: {
                       credential_hardening: {
@@ -315,8 +327,12 @@ describe('policy details: ', () => {
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
-                    malware: { mode: 'prevent', blocklist: true },
-                    behavior_protection: { mode: 'off', supported: false },
+                    malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
+                    behavior_protection: {
+                      mode: 'off',
+                      supported: false,
+                      reputation_service: false,
+                    },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -347,8 +363,12 @@ describe('policy details: ', () => {
                       tty_io: false,
                     },
                     logging: { file: 'info' },
-                    malware: { mode: 'prevent', blocklist: true },
-                    behavior_protection: { mode: 'off', supported: false },
+                    malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
+                    behavior_protection: {
+                      mode: 'off',
+                      supported: false,
+                      reputation_service: false,
+                    },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
@@ -368,7 +388,7 @@ describe('policy details: ', () => {
                       capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
                   },
-                },
+                } as PolicyConfig,
               },
             },
           },

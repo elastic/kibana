@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 
-import { AggListSummary, AggListSummaryProps } from './list_summary';
+import type { AggListSummaryProps } from './list_summary';
+import { AggListSummary } from './list_summary';
 
 describe('Transform: <AggListSummary />', () => {
   test('Minimal initialization', () => {
@@ -26,8 +27,8 @@ describe('Transform: <AggListSummary />', () => {
       list: { 'the-agg': item },
     };
 
-    const wrapper = shallow(<AggListSummary {...props} />);
+    const { container } = render(<AggListSummary {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toBe('the-agg');
   });
 });

@@ -13,7 +13,12 @@ import type {
   SavedObjectsRawDoc,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
-import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  IndexMapping,
+  IndexTypesMap,
+  VirtualVersionMap,
+} from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
@@ -158,6 +163,18 @@ export interface BaseState extends ControlState {
    */
   readonly knownTypes: string[];
   /**
+   * Contains a list of the SO types that are currently assigned to this migrator's index
+   */
+  readonly indexTypes: string[];
+  /**
+   * Contains information about the most recent model version where each type has been modified
+   */
+  readonly latestMappingsVersions: VirtualVersionMap;
+  /**
+   * Contains a map holding information about [md5 => modelVersion] equivalence
+   */
+  readonly hashToVersionMap: Record<string, string>;
+  /**
    * All exclude filter hooks registered for types on this index. Keyed by type name.
    */
   readonly excludeFromUpgradeFilterHooks: Record<
@@ -169,14 +186,12 @@ export interface BaseState extends ControlState {
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   readonly waitForMigrationCompletion: boolean;
-
   /**
    * This flag tells the migrator that SO documents must be redistributed,
    * i.e. stored in different system indices, compared to where they are currently stored.
    * This requires reindexing documents.
    */
   readonly mustRelocateDocuments: boolean;
-
   /**
    * This object holds a relation of all the types that are stored in each index, e.g.:
    * {
@@ -186,6 +201,8 @@ export interface BaseState extends ControlState {
    * }
    */
   readonly indexTypesMap: IndexTypesMap;
+  /** Capabilities of the ES cluster we're using */
+  readonly esCapabilities: ElasticsearchCapabilities;
 }
 
 export interface InitState extends BaseState {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 
 import type {
   EsAssetReference,
@@ -38,12 +38,14 @@ import { AssetsAccordion } from './assets_accordion';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
+  refetchPackageInfo: () => void;
 }
 
-export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
+export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps) => {
   const { name, version } = packageInfo;
+
   const pkgkey = `${name}-${version}`;
-  const { spaces } = useStartServices();
+  const { spaces, docLinks } = useStartServices();
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
   const canReadPackageSettings = useAuthz().integrations.readPackageInfo;
@@ -59,6 +61,12 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
 
   const [fetchError, setFetchError] = useState<undefined | Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const forceRefreshAssets = useCallback(() => {
+    if (refetchPackageInfo) {
+      refetchPackageInfo();
+    }
+  }, [refetchPackageInfo]);
 
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
@@ -164,14 +172,32 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
     );
   } else if (!assetsInstalledInCurrentSpace) {
     content = (
-      <EuiTitle>
-        <h2>
+      <EuiCallOut
+        heading="h2"
+        title={
           <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpace"
-            defaultMessage="This integration is installed, but no assets are available in this space"
+            id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceTitle"
+            defaultMessage="Assets not available in this space"
           />
-        </h2>
-      </EuiTitle>
+        }
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpaceBody"
+            defaultMessage="This integration is installed, but no assets are available in this space. {learnMoreLink}."
+            values={{
+              learnMoreLink: (
+                <EuiLink href={docLinks.links.fleet.installAndUninstallIntegrationAssets} external>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetails.assets.assetsNotAvailableInCurrentSpace.learnMore"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiCallOut>
     );
   } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {
@@ -227,6 +253,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       <DeferredAssetsSection
         deferredInstallations={deferredInstallations}
         packageInfo={packageInfo}
+        forceRefreshAssets={forceRefreshAssets}
       />
       <EuiSpacer size="m" />
     </>

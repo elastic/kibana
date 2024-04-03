@@ -8,13 +8,8 @@
 import './main.scss';
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-} from '@elastic/eui';
-import { first, pluck } from 'rxjs/operators';
+import { EuiPage, EuiPageBody, EuiPageSection, EuiPageHeader } from '@elastic/eui';
+import { first, pluck } from 'rxjs';
 import { IInterpreterRenderHandlers, ExpressionValue } from '@kbn/expressions-plugin/public';
 import { ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
@@ -89,11 +84,11 @@ class Main extends React.Component<{}, State> {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent data-test-subj="pluginContent">
-            <EuiPageContentHeader>runPipeline tests are running ...</EuiPageContentHeader>
+          <EuiPageSection data-test-subj="pluginContent">
+            <EuiPageHeader>runPipeline tests are running ...</EuiPageHeader>
             <div data-test-subj="pluginChart" ref={this.chartRef} style={pStyle} />
             <div>{this.state.expression}</div>
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     );

@@ -8,9 +8,9 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { JOB_STATUS } from '@kbn/reporting-common/constants';
 
-import type { Job } from '../../lib/job';
-import { JOB_STATUSES } from '../../../common/constants';
+import { Job } from '@kbn/reporting-public';
 import { jobHasIssues } from '../utils';
 
 interface Props {
@@ -60,7 +60,7 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
   let statusText: string;
 
   switch (job.status) {
-    case JOB_STATUSES.COMPLETED:
+    case JOB_STATUS.COMPLETED:
       if (hasIssues) {
         icon = <EuiIcon type="warning" color="warning" />;
         statusText = i18nTexts.completedWithWarnings;
@@ -69,19 +69,19 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
       icon = <EuiIcon type="checkInCircleFilled" color="success" />;
       statusText = i18nTexts.completed;
       break;
-    case JOB_STATUSES.WARNINGS:
+    case JOB_STATUS.WARNINGS:
       icon = <EuiIcon type="warning" color="warning" />;
       statusText = i18nTexts.completedWithWarnings;
       break;
-    case JOB_STATUSES.PENDING:
+    case JOB_STATUS.PENDING:
       icon = <EuiLoadingSpinner />;
       statusText = i18nTexts.pending;
       break;
-    case JOB_STATUSES.PROCESSING:
+    case JOB_STATUS.PROCESSING:
       icon = <EuiLoadingSpinner />;
       statusText = i18nTexts.processing({ attempt: job.attempts, of: job.max_attempts });
       break;
-    case JOB_STATUSES.FAILED:
+    case JOB_STATUS.FAILED:
       icon = <EuiIcon type="error" color="danger" />;
       statusText = i18nTexts.failed;
       break;

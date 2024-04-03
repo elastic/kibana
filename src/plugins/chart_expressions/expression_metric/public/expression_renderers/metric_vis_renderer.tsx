@@ -101,7 +101,6 @@ export const getMetricVisRenderer = (
               config={visConfig}
               renderComplete={renderComplete}
               fireEvent={handlers.event}
-              renderMode={handlers.getRenderMode()}
               filterable={filterable}
               overrides={overrides}
             />

@@ -15,6 +15,7 @@ import { getMockSearchConfig } from '../../../../config.mock';
 
 const getMockEqlResponse = () => ({
   body: {
+    id: 'my-search-id',
     is_partial: false,
     is_running: false,
     took: 162,
@@ -54,6 +55,7 @@ describe('EQL search strategy', () => {
   describe('search()', () => {
     let mockEqlSearch: jest.Mock;
     let mockEqlGet: jest.Mock;
+    let mockEqlDelete: jest.Mock;
     let mockDeps: SearchStrategyDependencies;
     let params: Required<EqlSearchStrategyRequest>['params'];
     let options: Required<EqlSearchStrategyRequest>['options'];
@@ -61,6 +63,8 @@ describe('EQL search strategy', () => {
     beforeEach(() => {
       mockEqlSearch = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
       mockEqlGet = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
+      mockEqlDelete = jest.fn();
+
       mockDeps = {
         uiSettingsClient: {
           get: jest.fn(),
@@ -70,6 +74,7 @@ describe('EQL search strategy', () => {
             eql: {
               get: mockEqlGet,
               search: mockEqlSearch,
+              delete: mockEqlDelete,
             },
           },
         },
@@ -124,6 +129,34 @@ describe('EQL search strategy', () => {
       });
     });
 
+    it('should delete when aborted', async () => {
+      const response = getMockEqlResponse();
+      mockEqlSearch.mockReset().mockResolvedValueOnce({
+        ...response,
+        body: {
+          ...response.body,
+          is_running: true,
+        },
+      });
+      const eqlSearch = await eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+      const abortController = new AbortController();
+      const abortSignal = abortController.signal;
+
+      // Abort after an incomplete first response is returned
+      setTimeout(() => abortController.abort(), 100);
+
+      let err: any;
+      try {
+        await eqlSearch.search({ options, params }, { abortSignal }, mockDeps).toPromise();
+      } catch (e) {
+        err = e;
+      }
+
+      expect(mockEqlSearch).toBeCalled();
+      expect(err).not.toBeUndefined();
+      expect(mockEqlDelete).toBeCalled();
+    });
+
     describe('arguments', () => {
       it('sends along async search options', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
@@ -157,7 +190,6 @@ describe('EQL search strategy', () => {
               options,
               params: {
                 ...params,
-                // @ts-expect-error not allowed at top level when using `typesWithBodyKey`
                 wait_for_completion_timeout: '5ms',
                 keep_on_completion: false,
               },
@@ -244,6 +276,48 @@ describe('EQL search strategy', () => {
 
         expect(requestOptions).toEqual({ ignore: [400], meta: true, signal: undefined });
       });
+
+      describe('EQL-specific arguments', () => {
+        it('passes along a timestamp_field argument', async () => {
+          const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+          const request: EqlSearchStrategyRequest = {
+            params: { index: 'all', timestamp_field: 'timestamp' },
+          };
+
+          await firstValueFrom(eqlSearch.search(request, {}, mockDeps));
+          const [[actualParams]] = mockEqlSearch.mock.calls;
+
+          expect(actualParams).toEqual(expect.objectContaining({ timestamp_field: 'timestamp' }));
+        });
+
+        it('passes along an event_category_field argument', async () => {
+          const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+          const request: EqlSearchStrategyRequest = {
+            params: { index: 'all', event_category_field: 'event_category' },
+          };
+
+          await firstValueFrom(eqlSearch.search(request, {}, mockDeps));
+          const [[actualParams]] = mockEqlSearch.mock.calls;
+
+          expect(actualParams).toEqual(
+            expect.objectContaining({ event_category_field: 'event_category' })
+          );
+        });
+
+        it('passes along a tiebreaker_field argument', async () => {
+          const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+          const request: EqlSearchStrategyRequest = {
+            params: { index: 'all', tiebreaker_field: 'event_category' },
+          };
+
+          await firstValueFrom(eqlSearch.search(request, {}, mockDeps));
+          const [[actualParams]] = mockEqlSearch.mock.calls;
+
+          expect(actualParams).toEqual(
+            expect.objectContaining({ tiebreaker_field: 'event_category' })
+          );
+        });
+      });
     });
 
     describe('response', () => {
@@ -255,7 +329,7 @@ describe('EQL search strategy', () => {
 
         expect(response).toEqual(
           expect.objectContaining({
-            rawResponse: expect.objectContaining(getMockEqlResponse()),
+            rawResponse: expect.objectContaining(getMockEqlResponse().body),
           })
         );
       });

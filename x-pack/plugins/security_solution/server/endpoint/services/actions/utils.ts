@@ -7,11 +7,15 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EcsError } from '@kbn/ecs';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { EcsError } from '@elastic/ecs';
+import moment from 'moment/moment';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import {
-  ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTIONS_DS,
   failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
 import type {
@@ -22,13 +26,16 @@ import type {
   EndpointAction,
   EndpointActionDataParameterTypes,
   EndpointActionResponse,
+  EndpointActionResponseDataOutput,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  WithAllKeys,
 } from '../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 import type { EndpointMetadataService } from '../metadata';
+
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
  * @param item
@@ -44,14 +51,15 @@ export const isLogsEndpointAction = (
  * @param item
  */
 export const isLogsEndpointActionResponse = (
-  item: EndpointActionResponse | LogsEndpointActionResponse
-): item is LogsEndpointActionResponse => {
+  item: EndpointActionResponse | LogsEndpointActionResponse<EndpointActionResponseDataOutput>
+): item is LogsEndpointActionResponse<EndpointActionResponseDataOutput> => {
   return 'EndpointActions' in item && 'agent' in item;
 };
 
-interface NormalizedActionRequest {
+export interface NormalizedActionRequest {
   id: string;
   type: 'ACTION_REQUEST';
+  agentType: ResponseActionAgentType;
   expiration: string;
   agents: string[];
   createdBy: string;
@@ -63,6 +71,8 @@ interface NormalizedActionRequest {
   ruleId?: string;
   ruleName?: string;
   error?: EcsError;
+  /** Host info that might have been stored along with the Action Request (ex. 3rd party EDR actions) */
+  hosts: ActionDetails['hosts'];
 }
 
 /**
@@ -80,6 +90,7 @@ export const mapToNormalizedActionRequest = (
       agents: Array.isArray(actionRequest.agent.id)
         ? actionRequest.agent.id
         : [actionRequest.agent.id],
+      agentType: actionRequest.EndpointActions.input_type,
       command: actionRequest.EndpointActions.data.command,
       comment: actionRequest.EndpointActions.data.comment,
       createdBy: actionRequest.user.id,
@@ -92,12 +103,14 @@ export const mapToNormalizedActionRequest = (
       ruleId: actionRequest.rule?.id,
       ruleName: actionRequest.rule?.name,
       error: actionRequest.error,
+      hosts: actionRequest.EndpointActions.data.hosts ?? {},
     };
   }
 
   // Else, it's a Fleet Endpoint Action record
   return {
     agents: actionRequest.agents,
+    agentType: actionRequest.input_type,
     command: actionRequest.data.command,
     comment: actionRequest.data.comment,
     createdBy: actionRequest.user_id,
@@ -106,6 +119,7 @@ export const mapToNormalizedActionRequest = (
     id: actionRequest.action_id,
     type,
     parameters: actionRequest.data.parameters,
+    hosts: {},
   };
 };
 
@@ -114,11 +128,15 @@ type ActionCompletionInfo = Pick<
   'isCompleted' | 'completedAt' | 'wasSuccessful' | 'errors' | 'outputs' | 'agentState'
 >;
 
-export const getActionCompletionInfo = (
+export const getActionCompletionInfo = <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+>(
   /** The normalized action request */
   action: NormalizedActionRequest,
   /** List of action Log responses received for the action */
-  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
+  actionResponses: Array<
+    ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>
+  >
 ): ActionCompletionInfo => {
   const agentIds = action.agents;
   const completedInfo: ActionCompletionInfo = {
@@ -235,13 +253,15 @@ export const getActionStatus = ({
   return { isExpired, status };
 };
 
-interface NormalizedAgentActionResponse {
+interface NormalizedAgentActionResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+> {
   isCompleted: boolean;
   completedAt: undefined | string;
   wasSuccessful: boolean;
   errors: undefined | string[];
   fleetResponse: undefined | ActivityLogActionResponse;
-  endpointResponse: undefined | EndpointActivityLogActionResponse;
+  endpointResponse: undefined | EndpointActivityLogActionResponse<TOutputContent>;
 }
 
 type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
@@ -251,8 +271,12 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
  * value is a object having information about the action responses associated with that agent id
  * @param actionResponses
  */
-const mapActionResponsesByAgentId = (
-  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
+const mapActionResponsesByAgentId = <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+>(
+  actionResponses: Array<
+    ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>
+  >
 ): ActionResponseByAgentId => {
   const response: ActionResponseByAgentId = {};
 
@@ -337,7 +361,9 @@ const mapActionResponsesByAgentId = (
  * @param actionResponse
  */
 const getAgentIdFromActionResponse = (
-  actionResponse: ActivityLogActionResponse | EndpointActivityLogActionResponse
+  actionResponse:
+    | ActivityLogActionResponse
+    | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
 ): string => {
   const responseData = actionResponse.item.data;
 
@@ -523,4 +549,52 @@ export const getAgentHostNamesWithIds = async ({
   }, {});
 
   return agentsMetadataInfo;
+};
+
+export const createActionDetailsRecord = <T extends ActionDetails = ActionDetails>(
+  actionRequest: NormalizedActionRequest,
+  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>,
+  agentHostInfo: Record<string, string>
+): T => {
+  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+    getActionCompletionInfo(actionRequest, actionResponses);
+
+  const { isExpired, status } = getActionStatus({
+    expirationDate: actionRequest.expiration,
+    isCompleted,
+    wasSuccessful,
+  });
+
+  const actionDetails: WithAllKeys<ActionDetails> = {
+    action: actionRequest.id,
+    id: actionRequest.id,
+    agentType: actionRequest.agentType,
+    agents: actionRequest.agents,
+    hosts: actionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+      acc[id] = { name: agentHostInfo[id] || actionRequest.hosts[id]?.name || '' };
+      return acc;
+    }, {}),
+    command: actionRequest.command,
+    startedAt: actionRequest.createdAt,
+    isCompleted,
+    completedAt,
+    wasSuccessful,
+    errors,
+    isExpired,
+    status,
+    outputs,
+    agentState,
+    createdBy: actionRequest.createdBy,
+    comment: actionRequest.comment,
+    parameters: actionRequest.parameters,
+    alertIds: actionRequest.alertIds,
+    ruleId: actionRequest.ruleId,
+    ruleName: actionRequest.ruleName,
+  };
+
+  return actionDetails as T;
+};
+
+export const getActionRequestExpiration = (): string => {
+  return moment().add(2, 'weeks').toISOString();
 };

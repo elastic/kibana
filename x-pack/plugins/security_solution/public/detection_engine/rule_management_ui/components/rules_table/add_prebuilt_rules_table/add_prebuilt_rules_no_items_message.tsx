@@ -30,6 +30,7 @@ const AddPrebuiltRulesTableNoItemsMessageComponent = () => {
           title={<h3>{i18n.NO_RULES_AVAILABLE_FOR_INSTALL}</h3>}
           titleSize="s"
           body={i18n.NO_RULES_AVAILABLE_FOR_INSTALL_BODY}
+          data-test-subj="noPrebuiltRulesAvailableForInstall"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

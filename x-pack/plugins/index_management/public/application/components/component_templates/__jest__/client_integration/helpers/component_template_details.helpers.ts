@@ -78,6 +78,7 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'summaryTabContent.usedByTitle'
   | 'summaryTabContent.versionTitle'
   | 'summaryTabContent.metaTitle'
+  | 'summaryTabContent.dataRetentionTitle'
   | 'notInUseCallout'
   | 'aliasesTabContent'
   | 'noAliasesCallout'
@@ -85,6 +86,7 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'noMappingsCallout'
   | 'settingsTabContent'
   | 'noSettingsCallout'
+  | 'deprecatedComponentTemplateBadge'
   | 'manageComponentTemplateButton'
   | 'manageComponentTemplateContextMenu'
   | 'manageComponentTemplateContextMenu.action';

@@ -65,7 +65,6 @@ export const useIndicators = ({
     },
   } = useKibana();
   const { selectedPatterns } = useSourcererDataView();
-
   const { inspectorAdapters } = useInspector();
 
   const onChangeItemsPerPage = useCallback(

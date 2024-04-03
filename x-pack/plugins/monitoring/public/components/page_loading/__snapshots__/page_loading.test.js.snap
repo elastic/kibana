@@ -8,21 +8,20 @@ exports[`PageLoading should show a simple page loading component 1`] = `
   <div
     class="euiPageBody emotion-euiPageBody"
   >
-    <div
-      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content emotion-euiPanel-grow-m-l-plain-hasShadow"
-      role="main"
+    <section
+      class="emotion-euiPageSection-grow-l-center-transparent"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceAround-stretch-row"
+        class="emotion-euiPageSection__content-l-center"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
+          class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+            class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
                 aria-label="Loading"
@@ -31,14 +30,18 @@ exports[`PageLoading should show a simple page loading component 1`] = `
               />
             </div>
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
             >
-              Loading…
+              <div
+                class="euiText emotion-euiText-m-euiTextColor-subdued"
+              >
+                Loading…
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </div>
 `;
