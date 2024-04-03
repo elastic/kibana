@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, memo } from 'react';
+import React, { ElementType, FC, memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -23,11 +23,11 @@ interface EntryContentProps {
   index: number;
   isNestedEntry?: boolean;
   dataTestSubj?: string;
-  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>;
+  showValueListModal: ElementType;
 }
 
 export const EntryContent: FC<EntryContentProps> = memo(
-  ({ entry, index, isNestedEntry = false, dataTestSubj, ShowValueListModal }) => {
+  ({ entry, index, isNestedEntry = false, dataTestSubj, showValueListModal }) => {
     const { field, type } = entry;
     const value = getValue(entry);
     const operator = 'operator' in entry ? entry.operator : '';
@@ -53,7 +53,7 @@ export const EntryContent: FC<EntryContentProps> = memo(
                   type as ListOperatorTypeEnum,
                   operator,
                   value,
-                  ShowValueListModal
+                  showValueListModal
                 )}
               </div>
             </EuiFlexGroup>
@@ -70,7 +70,7 @@ export const EntryContent: FC<EntryContentProps> = memo(
                 type as ListOperatorTypeEnum,
                 operator,
                 value,
-                ShowValueListModal
+                showValueListModal
               )}
             </>
           )}

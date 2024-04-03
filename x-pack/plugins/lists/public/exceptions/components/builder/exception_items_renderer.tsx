@@ -96,7 +96,7 @@ export interface ExceptionBuilderProps {
   exceptionItemName?: string;
   allowCustomFieldOptions?: boolean;
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
-  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>;
+  showValueListModal: ElementType;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -120,7 +120,7 @@ export const ExceptionBuilderComponent = ({
   operatorsList,
   allowCustomFieldOptions = false,
   getExtendedFields,
-  ShowValueListModal
+  showValueListModal
 }: ExceptionBuilderProps): JSX.Element => {
   const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
@@ -468,7 +468,7 @@ export const ExceptionBuilderComponent = ({
                 operatorsList={operatorsList}
                 allowCustomOptions={allowCustomFieldOptions}
                 getExtendedFields={getExtendedFields}
-                ShowValueListModal={ShowValueListModal}
+                showValueListModal={showValueListModal}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

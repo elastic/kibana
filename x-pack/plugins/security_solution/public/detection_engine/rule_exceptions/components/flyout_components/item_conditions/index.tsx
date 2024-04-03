@@ -266,7 +266,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         isDisabled: isExceptionBuilderFormDisabled,
         allowCustomFieldOptions: !isEndpointException,
         getExtendedFields,
-        ShowValueListModal,
+        showValueListModal: ShowValueListModal,
       })}
     </>
   );

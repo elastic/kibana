@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ElementType } from 'react';
 import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ValueWithSpaceWarning } from '../../../..';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';
 
-const getEntryValue = (
-  type: string,
-  value: string | string[],
-  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>
-) => {
+const getEntryValue = (type: string, value: string | string[], showValueListModal: ElementType) => {
+  const ShowValueListModal = showValueListModal;
   if (type === 'match_any' && Array.isArray(value)) {
     return value.map((currentValue, index) => (
       <EuiBadge key={index} data-test-subj={`matchAnyBadge${index}`} color="hollow">
@@ -51,12 +48,12 @@ export const getValueExpression = (
   type: ListOperatorTypeEnum,
   operator: string,
   value: string | string[],
-  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>
+  showValueListModal: ElementType
 ) => (
   <>
     <EuiExpression
       description={getEntryOperator(type, operator)}
-      value={getEntryValue(type, value, ShowValueListModal)}
+      value={getEntryValue(type, value, showValueListModal)}
       data-test-subj="entryValueExpression"
     />
     <ValueWithSpaceWarning value={value} />

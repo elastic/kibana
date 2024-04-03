@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { ElementType, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -62,7 +62,7 @@ interface BuilderExceptionListItemProps {
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
-  ShowValueListModal: React.ComponentType<{ listId: string; children: React.ReactNode }>;
+  showValueListModal: ElementType;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
@@ -86,7 +86,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     operatorsList,
     allowCustomOptions = false,
     getExtendedFields,
-    ShowValueListModal,
+    showValueListModal,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -161,7 +161,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           allowCustomOptions={allowCustomOptions}
                           getExtendedFields={getExtendedFields}
                           exceptionItemIndex={exceptionItemIndex}
-                          ShowValueListModal={ShowValueListModal}
+                          showValueListModal={showValueListModal}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

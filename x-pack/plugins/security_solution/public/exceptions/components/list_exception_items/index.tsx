@@ -105,7 +105,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
             />
           )
         }
-        ShowValueListModal={ShowValueListModal}
+        showValueListModal={ShowValueListModal}
       />
     </>
   );
