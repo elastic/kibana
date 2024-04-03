@@ -18,8 +18,6 @@ export function MachineLearningSettingsCalendarProvider(
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
-  const localeCompare = (a: string, b: string) => a.localeCompare(b);
-
   return {
     async assertCalendarRowJobs(
       calendarId: string,
@@ -27,16 +25,13 @@ export function MachineLearningSettingsCalendarProvider(
     ): Promise<void> {
       await this.filterWithSearchString(calendarId, 1); // makes sure the table only has the one row we want to check
       const calendarRow = (await this.parseCalendarTable())[0];
-      const sortedActual: string[] = calendarRow.jobs
-        .replaceAll(',', '')
-        .split(' ')
-        .sort(localeCompare);
+      const sortedActual: string[] = calendarRow.jobs.replaceAll(',', '').split(' ').sort();
 
-      const sortedExpected = expectedConnectedJobs.sort(localeCompare);
+      const sortedExpected = expectedConnectedJobs.sort();
 
       expect(sortedActual).to.eql(
         sortedExpected,
-        `Expect [${sortedActual}] to eql [${sortedExpected}]`
+        `Expected job column entries for calendar [${calendarId}] to be [${sortedExpected}], got [${sortedActual}]`
       );
     },
 

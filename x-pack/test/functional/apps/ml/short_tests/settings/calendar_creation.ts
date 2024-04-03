@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToAnomalyDetection();
 
       await ml.jobTable.assertJobRowCalendars('test_calendar_ad_1', [calendarId]);
-      await ml.jobTable.assertCalendarSettingsPage('test_calendar_ad_1', calendarId);
+      await ml.jobTable.clickJobRowCalendarWithAssertion('test_calendar_ad_1', calendarId);
 
       await ml.testExecution.logTestStep(
         'created calendars can be connected to job groups after creation'

@@ -50,25 +50,23 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
-    public async assertCalendarSettingsPage(jobId: string, calendarId: string): Promise<void> {
-      await this.withDetailsOpen(
-        jobId,
-        async function openCalendarSettingsPageAndAssertTitle() {
-          const calendarSelector = `mlJobDetailsCalendar-${calendarId}`;
-          await testSubjects.existOrFail(calendarSelector, {
-            timeout: 3_000,
-          });
-          await testSubjects.click(calendarSelector, 3_000);
-          await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', {
-            timeout: 3_000,
-          });
-          const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
-          expect(calendarTitleVisibleText).to.contain(
-            calendarId,
-            `Expect [${calendarTitleVisibleText}] to contain [${calendarId}]`
-          );
-        },
-        false
+    public async clickJobRowCalendarWithAssertion(
+      jobId: string,
+      calendarId: string
+    ): Promise<void> {
+      await this.ensureDetailsOpen(jobId);
+      const calendarSelector = `mlJobDetailsCalendar-${calendarId}`;
+      await testSubjects.existOrFail(calendarSelector, {
+        timeout: 3_000,
+      });
+      await testSubjects.click(calendarSelector, 3_000);
+      await testSubjects.existOrFail('mlPageCalendarEdit > mlCalendarFormEdit', {
+        timeout: 3_000,
+      });
+      const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
+      expect(calendarTitleVisibleText).to.contain(
+        calendarId,
+        `Expect [${calendarTitleVisibleText}] to contain [${calendarId}]`
       );
     }
 
