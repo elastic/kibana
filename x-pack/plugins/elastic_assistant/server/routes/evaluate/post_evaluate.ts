@@ -149,7 +149,7 @@ export const postEvaluateRoute = (
               allow: [],
               allowReplacement: [],
               subAction: 'invokeAI',
-              replacements: [],
+              replacements: {},
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
@@ -195,7 +195,7 @@ export const postEvaluateRoute = (
                       ],
                       tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                     },
-                    replacements: [],
+                    replacements: {},
                   }),
                 metadata: {
                   connectorName,

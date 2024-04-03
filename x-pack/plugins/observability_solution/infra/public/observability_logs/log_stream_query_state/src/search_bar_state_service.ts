@@ -6,7 +6,7 @@
  */
 
 import { FilterManager, QueryStringContract } from '@kbn/data-plugin/public';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { InvokeCreator } from 'xstate';
 import type { LogStreamQueryContext, LogStreamQueryEvent } from './types';
 

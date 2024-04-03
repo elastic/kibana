@@ -14,7 +14,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { EventReporter } from '../telemetry';
 import { SearchBar } from './search_bar';
 
