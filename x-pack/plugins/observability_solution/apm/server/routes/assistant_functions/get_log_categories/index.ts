@@ -7,6 +7,8 @@
 
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
+import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import {
   SERVICE_NAME,
   CONTAINER_ID,
@@ -23,9 +25,11 @@ export type LogCategories =
 
 export async function getLogCategories({
   esClient,
+  coreContext,
   arguments: args,
 }: {
   esClient: ElasticsearchClient;
+  coreContext: CoreRequestHandlerContext;
   arguments: {
     start: string;
     end: string;
@@ -43,9 +47,14 @@ export async function getLogCategories({
     { field: HOST_NAME, value: args['host.name'] },
   ]);
 
+  const index =
+    (await coreContext.uiSettings.client.get<string>(
+      aiAssistantLogsIndexPattern
+    )) ?? 'logs-*';
+
   const search = getTypedSearch(esClient);
   const res = await search({
-    index: '*:logs-*,logs-*,*:filebeat*,filebeat*', // TODO: make this configurable somehow (UI, kibana config?)
+    index,
     size: 0,
     track_total_hits: 0,
     timeout: '5s',

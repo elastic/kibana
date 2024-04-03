@@ -74,16 +74,13 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
     const [
       apmEventClient,
       annotationsClient,
-      esClient,
+      coreContext,
       apmAlertsClient,
       mlClient,
     ] = await Promise.all([
       getApmEventClient(resources),
       plugins.observability.setup.getScopedAnnotationsClient(context, request),
-      context.core.then(
-        (coreContext): ElasticsearchClient =>
-          coreContext.elasticsearch.client.asCurrentUser
-      ),
+      context.core,
       getApmAlertsClient(resources),
       getMlClient(resources),
       getRandomSampler({
@@ -92,8 +89,10 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
         request: resources.request,
       }),
     ]);
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     return getApmAlertDetailsContext({
+      coreContext,
       alertStartedAt,
       annotationsClient,
       apmAlertsClient,

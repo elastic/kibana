@@ -262,7 +262,6 @@ export function Insight({
   }, [updateInitialMessagesOnce, isInsightOpen]);
 
   const connectors = useGenAIConnectors();
-
   const service = useObservabilityAIAssistant();
 
   const chatService = useAbortableAsync(

@@ -7,7 +7,7 @@
 
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/core/server';
+import type { CoreRequestHandlerContext, Logger } from '@kbn/core/server';
 import moment from 'moment';
 import * as t from 'io-ts';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -41,6 +41,7 @@ export const apmAlertDetailsContextRt = t.intersection([
 ]);
 
 export async function getApmAlertDetailsContext({
+  coreContext,
   alertStartedAt,
   annotationsClient,
   apmAlertsClient,
@@ -50,6 +51,7 @@ export async function getApmAlertDetailsContext({
   mlClient,
   query,
 }: {
+  coreContext: CoreRequestHandlerContext;
   annotationsClient?: ScopedAnnotationsClient;
   apmAlertsClient: ApmAlertsClient;
   alertStartedAt: string;
@@ -86,10 +88,10 @@ export async function getApmAlertDetailsContext({
 
   const logCategoriesPromise = getLogCategories({
     esClient,
+    coreContext,
     arguments: {
       start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
       end: alertStartedAt,
-
       'service.name': query['service.name'],
       'host.name': query['host.name'],
       'container.id': query['container.id'],
