@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { FunctionComponent, ReactNode } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { EuiBadgeProps } from '@elastic/eui';
-import type { IndexDetailsTab } from '../../common/constants';
-import { Index } from '..';
+import { IndexDetailsTab } from '../home_sections';
+import { Index } from '../types';
 
 export interface IndexContent {
   renderContent: (args: {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExtensionsService } from '../../../services';
+import { ExtensionsService } from '@kbn/index-management';
 import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
 
 export const NoMatch = ({

@@ -9,6 +9,7 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
+import { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
 import {
   SQLLang,
   monaco,
@@ -22,7 +23,6 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   type LanguageDocumentationSections,
@@ -124,11 +124,23 @@ export interface TextBasedLanguagesEditorProps {
   hideQueryHistory?: boolean;
 }
 
+export interface SerializedEnrichPolicy {
+  type: EnrichPolicyType;
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
+  query?: Record<string, any>;
+}
+
 interface TextBasedEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  getAllEnrichPolicies: () => Promise<{
+    data: SerializedEnrichPolicy[] | null;
+    error?: string | null;
+  }>;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -184,7 +196,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
+  const { dataViews, expressions, getAllEnrichPolicies, application, docLinks, core } =
     kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
@@ -416,8 +428,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       },
       getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
-        const { data: policies, error } =
-          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
+        const { data: policies, error } = (await getAllEnrichPolicies()) || {};
         if (error || !policies) {
           return [];
         }
@@ -427,7 +438,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [
       dataViews,
       expressions,
-      indexManagementApiService,
+      getAllEnrichPolicies,
       esqlFieldsCache,
       memoizedFieldsFromESQL,
       abortController,

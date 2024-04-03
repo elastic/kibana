@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management';
 
 export let core: CoreStart;
 
@@ -19,7 +19,7 @@ interface ServiceDeps {
   darkMode: boolean;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
+  getAllEnrichPolicies: IndexManagementPluginSetup['apiService']['getAllEnrichPolicies'];
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -42,13 +42,16 @@ export const setKibanaServices = (
   indexManagement?: IndexManagementPluginSetup
 ) => {
   core = kibanaCore;
+  const getAllEnrichPolicies = indexManagement
+    ? indexManagement?.apiService.getAllEnrichPolicies
+    : async () => ({ data: null, error: null });
   core.theme.theme$.subscribe(({ darkMode }) => {
     servicesReady$.next({
       core,
       darkMode,
       dataViews,
       expressions,
-      indexManagementApiService: indexManagement?.apiService,
+      getAllEnrichPolicies,
     });
   });
 };

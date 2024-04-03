@@ -25,7 +25,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { ExtensionsService } from '../services';
+import { ExtensionsService } from '@kbn/index-management';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
 

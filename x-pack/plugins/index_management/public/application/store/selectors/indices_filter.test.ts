@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '../../../services';
+import { ExtensionsService } from '@kbn/index-management';
 import { getFilteredIndices } from '.';
 // @ts-ignore
 import { defaultTableState } from '../reducers/table_state';

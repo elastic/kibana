@@ -6,7 +6,7 @@
  */
 
 import { Index } from '../../../common';
-import { ExtensionsService } from '../../services/extensions_service';
+import { ExtensionsService } from '@kbn/index-management';
 import { sortTable } from './sort_table';
 describe('sortTable', () => {
   describe('sorts by name', () => {

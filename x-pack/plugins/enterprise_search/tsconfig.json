@@ -72,6 +72,6 @@
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
     "@kbn/utility-types",
-    "@kbn/index-management-plugin"
+    "@kbn/index-management"
   ]
 }

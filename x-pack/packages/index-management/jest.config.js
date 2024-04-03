@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '@kbn/index-management';
-
-export declare function setExtensionsService(extensionsService: ExtensionsService): any;
-
-export const getFilteredIndices: (state: any) => any;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/index-management'],
+};

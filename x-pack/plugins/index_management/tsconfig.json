@@ -46,8 +46,9 @@
     "@kbn/monaco",
     "@kbn/console-plugin",
     "@kbn/shared-ux-utility",
+    "@kbn/index-management"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

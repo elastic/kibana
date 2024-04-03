@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../plugins/index_management/public/services/public_api_service.mock.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": []
+}

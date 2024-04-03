@@ -23,7 +23,7 @@ import { httpService } from '../../public/application/services/http';
 import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
-import { ExtensionsService } from '../../public/services';
+import { ExtensionsService } from '@kbn/index-management';
 import { kibanaVersion } from '../client_integration/helpers';
 
 import { notificationServiceMock, executionContextServiceMock } from '@kbn/core/public/mocks';

@@ -4,9 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ExtensionsService } from '@kbn/index-management';
-
-export declare function setExtensionsService(extensionsService: ExtensionsService): any;
-
-export const getFilteredIndices: (state: any) => any;
+export * from './extensions_service';
+export * from './public_api_service';

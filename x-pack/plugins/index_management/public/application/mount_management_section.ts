@@ -13,10 +13,9 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { Observable } from 'rxjs';
+import { ExtensionsService, StartDependencies } from '@kbn/index-management';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
-import { ExtensionsService } from '../services';
-import { StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';

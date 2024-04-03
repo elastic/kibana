@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '@kbn/index-management';
-
-export declare function setExtensionsService(extensionsService: ExtensionsService): any;
-
-export const getFilteredIndices: (state: any) => any;
+export * from './src/types';
+export * from './src/home_sections';
+export * from './src/services';

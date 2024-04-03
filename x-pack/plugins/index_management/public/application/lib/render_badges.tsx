@@ -9,7 +9,7 @@ import React, { Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, Query } from '@elastic/eui';
 
-import { ExtensionsService } from '../../services';
+import { ExtensionsService } from '@kbn/index-management';
 import { Index } from '../..';
 
 export const renderBadges = (

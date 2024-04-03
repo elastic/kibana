@@ -508,6 +508,7 @@
     "@kbn/iframe-embedded-plugin": "link:x-pack/test/functional_embedded/plugins/iframe_embedded",
     "@kbn/image-embeddable-plugin": "link:src/plugins/image_embeddable",
     "@kbn/index-lifecycle-management-plugin": "link:x-pack/plugins/index_lifecycle_management",
+    "@kbn/index-management": "link:x-pack/packages/index-management",
     "@kbn/index-management-plugin": "link:x-pack/plugins/index_management",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
     "@kbn/infra-forge": "link:x-pack/packages/kbn-infra-forge",
