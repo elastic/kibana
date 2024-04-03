@@ -19,7 +19,6 @@ jest.mock('../../../rule_management/logic/crud/patch_rules');
 
 describe('updatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  const isRuleCustomizedDuringUpgrade = false;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
@@ -37,11 +36,7 @@ describe('updatePrebuiltRules', () => {
     const prepackagedRule = getPrebuiltRuleMock();
     rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-    await upgradePrebuiltRules(
-      rulesClient,
-      [{ ...prepackagedRule, actions }],
-      isRuleCustomizedDuringUpgrade
-    );
+    await upgradePrebuiltRules(rulesClient, [{ ...prepackagedRule, actions }]);
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -72,11 +67,7 @@ describe('updatePrebuiltRules', () => {
       data: [getRuleMock(getThreatRuleParams())],
     });
 
-    await upgradePrebuiltRules(
-      rulesClient,
-      [{ ...prepackagedRule, ...updatedThreatParams }],
-      isRuleCustomizedDuringUpgrade
-    );
+    await upgradePrebuiltRules(rulesClient, [{ ...prepackagedRule, ...updatedThreatParams }]);
 
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({

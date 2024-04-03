@@ -53,49 +53,6 @@ components:
 
     IsRuleImmutable:
       type: boolean
-      description: '[DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).'
-
-    IsExternalRuleCustomized:
-      type: boolean
-      description: Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
-
-    ExternalSourceUpdatedAt:
-      type: string
-      format: date-time
-      description: The date and time that the external/prebuilt rule was last updated in its source repository.
-
-    InternalRuleSource:
-      description: Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - internal
-      required:
-        - type
-
-    ExternalRuleSource:
-      description: Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - external
-        is_customized:
-          $ref: '#/components/schemas/IsExternalRuleCustomized'
-        source_updated_at:
-          $ref: '#/components/schemas/ExternalSourceUpdatedAt'
-      required:
-        - type
-        - is_customized
-
-    RuleSource:
-      description: Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
-      oneOf:
-        - $ref: '#/components/schemas/ExternalRuleSource'
-        - $ref: '#/components/schemas/InternalRuleSource'
 
     IsRuleEnabled:
       type: boolean

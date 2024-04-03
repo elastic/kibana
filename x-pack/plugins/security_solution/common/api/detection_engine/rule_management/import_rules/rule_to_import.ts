@@ -29,6 +29,6 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    version: RuleVersion,
+    immutable: z.literal(false).default(false),
   })
 );

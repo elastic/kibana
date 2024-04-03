@@ -102,15 +102,6 @@ export const importRules = async ({
                   id: undefined,
                 });
 
-                const isPrebuilt = Boolean(parsedRule.prebuilt) || parsedRule.immutable;
-                if (isPrebuilt && !parsedRule.version) {
-                  createBulkErrorObject({
-                    ruleId: parsedRule.rule_id,
-                    statusCode: 409,
-                    message: `rule_id: "${parsedRule.rule_id}" is prebuilt but no version was provided`,
-                  });
-                }
-
                 if (rule == null) {
                   await createRules({
                     rulesClient,
@@ -118,7 +109,6 @@ export const importRules = async ({
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },
-                    isPrebuilt,
                     allowMissingConnectorSecrets,
                   });
                   resolve({

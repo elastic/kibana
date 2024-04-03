@@ -107,7 +107,6 @@ export const createRuleRoute = (
           const createdRule = await createRules({
             rulesClient,
             params: request.body,
-            isPrebuilt: false,
           });
 
           return response.ok({

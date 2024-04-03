@@ -161,8 +161,6 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
         immutable:
           $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleImmutable'
-        rule_source:
-          $ref: './common_attributes.schema.yaml#/components/schemas/RuleSource'
         updated_at:
           type: string
           format: date-time

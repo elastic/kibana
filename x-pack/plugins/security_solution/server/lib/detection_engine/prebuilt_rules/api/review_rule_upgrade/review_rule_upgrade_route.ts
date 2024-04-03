@@ -113,7 +113,6 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       revision: installedCurrentVersion.revision,
       current_rule: installedCurrentVersion,
       target_rule: targetRule,
-      merged_rule: ruleVersions.mergedVersion,
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,

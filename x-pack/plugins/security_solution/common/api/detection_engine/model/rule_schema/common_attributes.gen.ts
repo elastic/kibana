@@ -63,47 +63,8 @@ export const KqlQueryLanguage = z.enum(['kuery', 'lucene']);
 export type KqlQueryLanguageEnum = typeof KqlQueryLanguage.enum;
 export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
 
-/**
- * [DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).
- */
 export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
 export const IsRuleImmutable = z.boolean();
-
-/**
- * Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
- */
-export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
-export const IsExternalRuleCustomized = z.boolean();
-
-/**
- * The date and time that the external/prebuilt rule was last updated in its source repository.
- */
-export type ExternalSourceUpdatedAt = z.infer<typeof ExternalSourceUpdatedAt>;
-export const ExternalSourceUpdatedAt = z.string().datetime();
-
-/**
- * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
- */
-export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
-export const InternalRuleSource = z.object({
-  type: z.literal('internal'),
-});
-
-/**
- * Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
- */
-export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
-export const ExternalRuleSource = z.object({
-  type: z.literal('external'),
-  is_customized: IsExternalRuleCustomized,
-  source_updated_at: ExternalSourceUpdatedAt.optional(),
-});
-
-/**
- * Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
- */
-export type RuleSource = z.infer<typeof RuleSource>;
-export const RuleSource = z.union([ExternalRuleSource, InternalRuleSource]);
 
 /**
  * Determines whether the rule is enabled.

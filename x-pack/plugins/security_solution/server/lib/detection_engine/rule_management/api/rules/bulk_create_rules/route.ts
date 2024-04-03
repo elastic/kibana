@@ -127,7 +127,6 @@ export const bulkCreateRulesRoute = (
                   const createdRule = await createRules({
                     rulesClient,
                     params: payloadRule,
-                    isPrebuilt: false,
                   });
 
                   return transformValidateBulkError(createdRule.params.ruleId, createdRule);

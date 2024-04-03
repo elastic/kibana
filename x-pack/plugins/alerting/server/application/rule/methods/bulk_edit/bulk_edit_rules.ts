@@ -78,7 +78,6 @@ import {
   transformRuleDomainToRule,
 } from '../../transforms';
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
-import { migratePrebuiltSchemaOnRuleBulkEdit } from './schemas/migrate_prebuilt_schema_on_bulk_edit';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -513,13 +512,9 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       updatedRule.revision += 1;
     }
 
-    const isRuleUpdated = !(isAttributesUpdateSkipped && isParamsUpdateSkipped);
-
-    migratePrebuiltSchemaOnRuleBulkEdit(ruleParams, isRuleUpdated);
-
     // If neither attributes nor parameters were updated, mark
     // the rule as skipped and continue to the next rule.
-    if (!isRuleUpdated) {
+    if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
       skipped.push({
         id: rule.id,
         name: rule.attributes.name,

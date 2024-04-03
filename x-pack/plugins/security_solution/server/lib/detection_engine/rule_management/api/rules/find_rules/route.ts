@@ -14,6 +14,7 @@ import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
+
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -62,11 +63,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           });
 
           const transformed = transformFindAlerts(rules);
-
-          return response.ok({
-            body: transformed ?? {},
-            headers: { 'Deprecation-Info': 'Warning 22' },
-          });
+          return response.ok({ body: transformed ?? {} });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

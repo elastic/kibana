@@ -13,17 +13,12 @@ import {
   ENABLED_FIELD,
   LAST_RUN_OUTCOME_FIELD,
   PARAMS_IMMUTABLE_FIELD,
-  PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD,
-  PARAMS_TYPE_FIELD,
+    PARAMS_TYPE_FIELD,
   RULE_NAME_FIELD,
   RULE_PARAMS_FIELDS,
   TAGS_FIELD,
 } from './rule_fields';
 
-// KQL does not allow to search for existence of the prebuilt object field, since params is unmapped
-// so we can search for the existence of the isCustomized subfield instead, which is required
-export const KQL_FILTER_PREBUILT_RULES = `${PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD}: *`;
-export const KQL_FILTER_CUSTOM_RULES = `NOT ${PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD}: *`;
 export const KQL_FILTER_IMMUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: true`;
 export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;
 export const KQL_FILTER_ENABLED_RULES = `${ENABLED_FIELD}: true`;
@@ -64,11 +59,9 @@ export function convertRulesFilterToKQL({
   if (showCustomRules && showElasticRules) {
     // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
   } else if (showElasticRules) {
-    kql.push(`${KQL_FILTER_PREBUILT_RULES}`);
-    // kql.push(`(${KQL_FILTER_PREBUILT_RULES} OR ${KQL_FILTER_IMMUTABLE_RULES})`);
+    kql.push(KQL_FILTER_IMMUTABLE_RULES);
   } else if (showCustomRules) {
-    kql.push(`${KQL_FILTER_CUSTOM_RULES}`);
-    // kql.push(`(${KQL_FILTER_CUSTOM_RULES} OR ${KQL_FILTER_MUTABLE_RULES})`);
+    kql.push(KQL_FILTER_MUTABLE_RULES);
   }
 
   if (enabled !== undefined) {

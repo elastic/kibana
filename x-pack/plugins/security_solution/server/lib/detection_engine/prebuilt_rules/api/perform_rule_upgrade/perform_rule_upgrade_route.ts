@@ -144,20 +144,16 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
                 break;
               case PickVersionValues.TARGET:
                 targetRules.push(target);
-              case PickVersionValues.MERGE:
-                targetRules.push(target);
                 break;
               default:
                 assertUnreachable(rulePickVersion);
             }
           });
 
-          const isRuleCustomizedDuringUpgrade = false;
           // Perform the upgrade
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
             rulesClient,
-            targetRules,
-            isRuleCustomizedDuringUpgrade
+            targetRules
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];
 

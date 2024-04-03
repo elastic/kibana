@@ -107,7 +107,7 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => !rule.prebuilt,
+      enabled: (rule: Rule) => !rule.immutable,
     },
     {
       type: 'icon',

@@ -53,7 +53,6 @@ export const bulkEditRules = async ({
         edit: actions,
         immutable: ruleParams.immutable,
       });
-
       return ruleParamsModifier(ruleParams, paramsActions);
     },
   });

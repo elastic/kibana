@@ -86,6 +86,13 @@ export const validateBulkEditRule = async ({
   immutable,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
+
+  // if rule can't be edited error will be thrown
+  const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
+  await throwDryRunError(
+    () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
+    BulkActionsDryRunErrCode.IMMUTABLE
+  );
 };
 
 /**

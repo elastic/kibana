@@ -33,8 +33,7 @@ export interface CalculateRuleDiffResult {
       base?: DiffableRule;
       target: DiffableRule;
     };
-    mergedVersion: RuleResponse; // ADDED in POC
-  };
+      };
 }
 
 /**
@@ -75,16 +74,6 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     current_version: diffableCurrentVersion,
     target_version: diffableTargetVersion,
   });
-
-  const mergedVersion = Object.entries(fieldsDiff).reduce((acc, field) => {
-
-    debugger;
-    const ungroupedFields = getUngroupedFields(field);
-    return {
-      ...acc,
-      ...ungroupedFields,
-    };
-  }, {});
 
   const hasAnyFieldConflict = Object.values<ThreeWayDiff<unknown>>(fieldsDiff).some(
     (fieldDiff) => fieldDiff.has_conflict

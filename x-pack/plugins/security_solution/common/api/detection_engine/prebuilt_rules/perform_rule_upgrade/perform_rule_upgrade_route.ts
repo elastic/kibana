@@ -15,7 +15,6 @@ export enum PickVersionValues {
   BASE = 'BASE',
   CURRENT = 'CURRENT',
   TARGET = 'TARGET',
-  MERGE = 'MERGE',
 }
 
 export const TPickVersionValues = enumeration('PickVersionValues', PickVersionValues);

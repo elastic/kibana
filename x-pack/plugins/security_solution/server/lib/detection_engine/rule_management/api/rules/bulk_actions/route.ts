@@ -257,31 +257,25 @@ export const performBulkActionRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
-        // function delay(ms) {
-        //   return new Promise((resolve) => setTimeout(resolve, ms));
-        // }
-
-        // await delay(5000); // Wait for 2000 milliseconds (2 seconds)
-
-        // return siemResponse.error({
-        //   body: 'error.message',
-        //   statusCode: 500,
-        // });
         const { body } = request;
         const siemResponse = buildSiemResponse(response);
+
         if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
           return siemResponse.error({
             body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
             statusCode: 400,
           });
         }
+
         if (body?.ids && body.query !== undefined) {
           return siemResponse.error({
             body: `Both query and ids are sent. Define either ids or query in request payload.`,
             statusCode: 400,
           });
         }
+
         const isDryRun = request.query.dry_run;
+
         // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
         if (isDryRun && body.action === BulkActionTypeEnum.export) {
           return siemResponse.error({
@@ -289,7 +283,9 @@ export const performBulkActionRoute = (
             statusCode: 400,
           });
         }
+
         const abortController = new AbortController();
+
         // subscribing to completed$, because it handles both cases when request was completed and aborted.
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
@@ -302,20 +298,26 @@ export const performBulkActionRoute = (
             'lists',
             'actions',
           ]);
+
           const rulesClient = ctx.alerting.getRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = (await ctx.actions)?.getActionsClient();
+
           const { getExporter, getClient } = (await ctx.core).savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
+
           const exporter = getExporter(client);
+
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,
             ml,
             request,
             savedObjectsClient,
           });
+
           const query = body.query !== '' ? body.query : undefined;
+
           // handling this action before switch statement as bulkEditRules fetch rules within
           // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
           if (body.action === BulkActionTypeEnum.edit && !isDryRun) {
@@ -326,23 +328,27 @@ export const performBulkActionRoute = (
               actions: body.edit,
               mlAuthz,
             });
+
             return buildBulkResponse(response, {
               updated: rules,
               skipped,
               errors,
             });
           }
+
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
             rulesClient,
             query,
             ids: body.ids,
             abortSignal: abortController.signal,
           });
+
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
           let bulkActionOutcome: PromisePoolOutcome<RuleAlertType, RuleAlertType | null>;
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
+
           switch (body.action) {
             case BulkActionTypeEnum.enable:
               bulkActionOutcome = await initPromisePool({
@@ -350,13 +356,16 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkEnableRule({ mlAuthz, rule });
+
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
                     return rule;
                   }
+
                   if (!rule.enabled) {
                     await rulesClient.enable({ id: rule.id });
                   }
+
                   return {
                     ...rule,
                     enabled: true,
@@ -374,13 +383,16 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkDisableRule({ mlAuthz, rule });
+
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
                     return rule;
                   }
+
                   if (rule.enabled) {
                     await rulesClient.disable({ id: rule.id });
                   }
+
                   return {
                     ...rule,
                     enabled: false,
@@ -392,6 +404,7 @@ export const performBulkActionRoute = (
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
+
             case BulkActionTypeEnum.delete:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
@@ -401,10 +414,12 @@ export const performBulkActionRoute = (
                   if (isDryRun) {
                     return null;
                   }
+
                   await deleteRules({
                     ruleId: rule.id,
                     rulesClient,
                   });
+
                   return null;
                 },
                 abortSignal: abortController.signal,
@@ -413,22 +428,26 @@ export const performBulkActionRoute = (
                 .map(({ item }) => item)
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
+
             case BulkActionTypeEnum.duplicate:
               bulkActionOutcome = await initPromisePool({
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
                 executor: async (rule) => {
                   await validateBulkDuplicateRule({ mlAuthz, rule });
+
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
                     return rule;
                   }
+
                   let shouldDuplicateExceptions = true;
                   let shouldDuplicateExpiredExceptions = true;
                   if (body.duplicate !== undefined) {
                     shouldDuplicateExceptions = body.duplicate.include_exceptions;
                     shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
                   }
+
                   const duplicateRuleToCreate = await duplicateRule({
                     rule,
                   });
@@ -436,6 +455,7 @@ export const performBulkActionRoute = (
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
                   });
+
                   // we try to create exceptions after rule created, and then update rule
                   const exceptions = shouldDuplicateExceptions
                     ? await duplicateExceptions({
@@ -445,6 +465,7 @@ export const performBulkActionRoute = (
                         exceptionsClient,
                       })
                     : [];
+
                   const updatedRule = await rulesClient.update({
                     id: createdRule.id,
                     data: {
@@ -456,6 +477,7 @@ export const performBulkActionRoute = (
                     },
                     shouldIncrementRevision: () => false,
                   });
+
                   // TODO: figureout why types can't return just updatedRule
                   return { ...createdRule, ...updatedRule };
                 },
@@ -465,6 +487,7 @@ export const performBulkActionRoute = (
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
               break;
+
             case BulkActionTypeEnum.export:
               const exported = await getExportByObjectIds(
                 rulesClient,
@@ -474,7 +497,9 @@ export const performBulkActionRoute = (
                 request,
                 actionsClient
               );
+
               const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.actionConnectors}${exported.exportDetails}`;
+
               return response.ok({
                 headers: {
                   'Content-Disposition': `attachment; filename="rules_export.ndjson"`,
@@ -482,6 +507,7 @@ export const performBulkActionRoute = (
                 },
                 body: responseBody,
               });
+
             // will be processed only when isDryRun === true
             // during dry run only validation is getting performed and rule is not saved in ES
             case BulkActionTypeEnum.edit:
@@ -490,6 +516,7 @@ export const performBulkActionRoute = (
                 items: rules,
                 executor: async (rule) => {
                   await dryRunValidateBulkEditRule({ mlAuthz, rule, edit: body.edit });
+
                   return rule;
                 },
                 abortSignal: abortController.signal,
@@ -498,9 +525,11 @@ export const performBulkActionRoute = (
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
           }
+
           if (abortController.signal.aborted === true) {
             throw new AbortError('Bulk action was aborted');
           }
+
           return buildBulkResponse(response, {
             updated,
             deleted,
