@@ -11,7 +11,7 @@ import {
   InfraSaveCustomDashboardsRequestPayloadRT,
   InfraSaveCustomDashboardsRequestPayload,
   InfraSaveCustomDashboardsResponseBodyRT,
-  InfraGetCustomDashboardsRequestParamsRT,
+  InfraGetCustomDashboardsRequestPathParamsRT,
 } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -20,7 +20,7 @@ import { handleRouteErrors } from '../../utils/handle_route_errors';
 
 export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
   const validatePayload = createRouteValidationFunction(InfraSaveCustomDashboardsRequestPayloadRT);
-  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestParamsRT);
+  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestPathParamsRT);
 
   framework.registerRoute(
     {

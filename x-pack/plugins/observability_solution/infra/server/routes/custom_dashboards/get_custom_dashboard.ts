@@ -7,7 +7,7 @@
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
-  InfraGetCustomDashboardsRequestParamsRT,
+  InfraGetCustomDashboardsRequestPathParamsRT,
   InfraGetCustomDashboardsResponseBodyRT,
 } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
@@ -16,7 +16,7 @@ import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enab
 import { findCustomDashboard } from './lib/find_custom_dashboard';
 
 export function initGetCustomDashboardRoute(framework: KibanaFramework) {
-  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestParamsRT);
+  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestPathParamsRT);
 
   framework.registerRoute(
     {

@@ -30,10 +30,12 @@ const savedObjectIdRT = rt.type({
 /**
  GET endpoint
 */
-export const InfraGetCustomDashboardsRequestParamsRT = AssetTypeRT;
-export const InfraGetCustomDashboardsResponseBodyRT = rt.array(InfraCustomDashboardRT);
+export const InfraGetCustomDashboardsRequestPathParamsRT = AssetTypeRT;
+export const InfraGetCustomDashboardsResponseBodyRT = rt.array(
+  rt.intersection([InfraCustomDashboardRT, existingIdRT])
+);
 export type InfraGetCustomDashboardsRequestParams = rt.TypeOf<
-  typeof InfraGetCustomDashboardsRequestParamsRT
+  typeof InfraGetCustomDashboardsRequestPathParamsRT
 >;
 export type InfraGetCustomDashboardsResponseBody = rt.TypeOf<
   typeof InfraGetCustomDashboardsResponseBodyRT
