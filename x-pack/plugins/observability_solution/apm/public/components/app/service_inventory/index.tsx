@@ -295,7 +295,7 @@ export function ServiceInventory() {
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
-  const { fields, isSaving, saveSingleSetting } = useEditableSettings('apm', [
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([
     apmEnableServiceInventoryTableSearchBar,
   ]);
 
