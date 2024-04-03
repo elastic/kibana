@@ -28,10 +28,10 @@ describe('Color Format', () => {
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
       expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">100</span>'
+        '<span style="color: blue; background-color: yellow;">100</span>'
       );
       expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">150</span>'
+        '<span style="color: blue; background-color: yellow;">150</span>'
       );
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
     });
@@ -74,22 +74,22 @@ describe('Color Format', () => {
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AAA</span>'
+        '<span style="color: blue; background-color: yellow;">AAA</span>'
       );
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB</span>'
+        '<span style="color: blue; background-color: yellow;">AB</span>'
       );
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
       expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AAA</span>'
+        '<span style="color: blue; background-color: yellow;">AAA</span>'
       );
       expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB</span>'
+        '<span style="color: blue; background-color: yellow;">AB</span>'
       );
       expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB &lt;</span>'
+        '<span style="color: blue; background-color: yellow;">AB &lt;</span>'
       );
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
     });
