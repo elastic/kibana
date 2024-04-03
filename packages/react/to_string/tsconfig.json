@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "dom",
+      "node",
       "react"
     ]
   },
