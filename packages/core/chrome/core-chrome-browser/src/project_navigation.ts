@@ -25,6 +25,9 @@ import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
+import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
+import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
+import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
@@ -37,7 +40,10 @@ export type AppId =
   | MlApp
   | ManagementApp
   | SearchApp
-  | ObservabilityApp;
+  | ObservabilityApp
+  | SecurityApp
+  | FleetApp
+  | SharedApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -46,7 +52,10 @@ export type AppDeepLinkId =
   | MlLink
   | ManagementLink
   | SearchLink
-  | ObservabilityLink;
+  | ObservabilityLink
+  | SecurityLink
+  | FleetLink
+  | SharedLink;
 
 /** @public */
 export type CloudLinkId =

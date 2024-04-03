@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -98,12 +98,13 @@ export class ElasticsearchService
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      internalClient: this.client.asInternalUser,
-      log: this.log,
-      ignoreVersionMismatch: config.ignoreVersionMismatch,
-      esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
-    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
+      ignoreVersionMismatch: config.ignoreVersionMismatch,
+      healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      log: this.log,
+      internalClient: this.client.asInternalUser,
+    }).pipe(takeUntil(this.stop$));
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 

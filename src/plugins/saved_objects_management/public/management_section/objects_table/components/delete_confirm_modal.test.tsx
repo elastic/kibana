@@ -200,34 +200,6 @@ describe('DeleteConfirmModal', () => {
     });
   });
 
-  it('excludes the managed objects from the table and displays a callout', () => {
-    const objs = [
-      createObject({ managed: true }),
-      createObject({ managed: false }),
-      createObject({ managed: true }),
-      createObject({ hiddenType: true }),
-    ];
-
-    const wrapper = mountWithIntl(
-      <DeleteConfirmModal
-        isDeleting={false}
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-        selectedObjects={objs}
-        allowedTypes={allowedTypes}
-      />
-    );
-
-    expect(wrapper.find('.euiTableRow')).toHaveLength(1);
-
-    const callout = findTestSubject(wrapper, 'cannotDeleteObjectsConfirmWarning');
-    expect(callout).toHaveLength(1);
-
-    expect(callout.text()).toMatchInlineSnapshot(
-      `"Some objects have been excluded1 object is hidden and cannot be deleted.2 objects are managed by Elastic and cannot be deleted."`
-    );
-  });
-
   describe('shared objects warning', () => {
     it('does not display a callout when no objects are shared', () => {
       const objs = [

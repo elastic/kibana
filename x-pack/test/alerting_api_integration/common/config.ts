@@ -72,6 +72,7 @@ const enabledActionTypes = [
   'test.capped',
   'test.system-action',
   'test.system-action-kibana-privileges',
+  'test.system-action-connector-adapter',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -191,7 +192,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
-            'smtp.live.com',
+            'smtp-mail.outlook.com',
             'slack.com',
           ])}`,
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
