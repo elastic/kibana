@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -29,6 +30,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kbnDirectory = config.get('esTestCluster.ccs')
     ? remoteArchiveDirectory
     : localArchiveDirectory;
+
+  const createDataView = async (dataViewName: string) => {
+    await PageObjects.discover.clickIndexPatternActions();
+    await testSubjects.click('dataview-create-new');
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await testSubjects.click('saveIndexPatternButton');
+  };
 
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
@@ -52,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creating a new data view', async function () {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
-      await PageObjects.discover.createAdHocDataView(dataViewToCreate, true);
+      await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',
