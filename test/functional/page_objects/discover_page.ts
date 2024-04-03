@@ -471,7 +471,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickIndexPatternActions() {
-    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.retry.try(async () => {
+      await this.testSubjects.click('discover-dataView-switch-link');
+    });
   }
 
   public async clickAddNewField() {
@@ -481,18 +483,8 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async createDataView(dataViewName: string) {
-    await this.clickIndexPatternActions();
-    await this.unifiedSearch.clickCreateNewDataView();
-    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await this.testSubjects.click('saveIndexPatternButton');
-  }
-
   async createAdHocDataView(name: string, hasTimeField = false) {
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
     await this.retry.waitFor('flyout to get closed', async () => {
       return !(await this.testSubjects.exists('indexPatternEditor__form'));
@@ -500,7 +492,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   async clickAddField() {
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.testSubjects.existOrFail('indexPattern-add-field');
     await this.testSubjects.click('indexPattern-add-field');
   }
@@ -556,9 +548,9 @@ export class DiscoverPageObject extends FtrService {
 
   public async isAdHocDataViewSelected() {
     const dataView = await this.getCurrentlySelectedDataView();
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     return hasBadge;
   }
 
@@ -566,7 +558,7 @@ export class DiscoverPageObject extends FtrService {
     indexPattern: string,
     waitUntilLoadingHasFinished: boolean = true
   ) {
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
@@ -577,16 +569,16 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getIndexPatterns() {
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher');
     const li = await indexPatternSwitcher.findAllByTagName('li');
     const items = await Promise.all(li.map((lis) => lis.getVisibleText()));
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     return items;
   }
 
   public async selectTextBaseLang() {
-    await this.clickIndexPatternActions();
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.testSubjects.click('select-text-based-language-panel');
     await this.header.waitUntilLoadingHasFinished();
   }

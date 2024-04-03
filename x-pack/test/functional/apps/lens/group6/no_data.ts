@@ -14,7 +14,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker']);
+
+  const createDataView = async (dataViewName: string) => {
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await testSubjects.click('saveIndexPatternButton');
+  };
 
   describe('lens no data', () => {
     before(async function () {
@@ -50,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const dataViewToCreate = 'logstash';
-      await PageObjects.discover.createDataView(dataViewToCreate);
+      await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',
