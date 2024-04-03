@@ -130,7 +130,6 @@ export const getConversationMock = (
     connectorId: '1',
     defaultSystemPromptId: 'Default',
   },
-  replacements: [],
   title: 'test',
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',
