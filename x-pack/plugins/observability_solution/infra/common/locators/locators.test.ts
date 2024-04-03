@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { InfraLogsLocatorDefinition } from './logs_locator';
+import { InfraLogsLocatorDefinition, InfraLogsLocatorDependencies } from './logs_locator';
 import { InfraNodeLogsLocatorDefinition } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
@@ -17,10 +17,9 @@ import {
   LogsLocatorParams,
   NodeLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
-import { InfraLocatorDependencies } from '.';
 
 const setupLogsLocator = async () => {
-  const deps: InfraLocatorDependencies = {
+  const deps: InfraLogsLocatorDependencies = {
     core: coreMock.createSetup(),
   };
   const logsLocator = new InfraLogsLocatorDefinition(deps);
@@ -32,7 +31,7 @@ const setupLogsLocator = async () => {
   };
 };
 
-describe('Logs Locators', () => {
+describe('Infra Locators', () => {
   const APP_ID = 'logs';
   const FILTER_QUERY = 'trace.id:1234';
   const nodeType = 'host';

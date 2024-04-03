@@ -7,11 +7,13 @@
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { INFRA_LOGS_LOCATOR_ID, LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { InfraLocatorDependencies } from '.';
+import type { InfraClientCoreSetup } from '../../public/types';
 
 export type InfraLogsLocator = LocatorPublic<LogsLocatorParams>;
 
-export type InfraLogsLocatorDependencies = InfraLocatorDependencies;
+export interface InfraLogsLocatorDependencies {
+  core: InfraClientCoreSetup;
+}
 
 export class InfraLogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
   public readonly id = INFRA_LOGS_LOCATOR_ID;
