@@ -10,6 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
 import { RuleFormPage } from '@kbn/alerts-ui-shared';
+import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../common';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
@@ -19,6 +20,8 @@ interface MatchParams {
 
 export interface CreateRuleLocationState {
   referrer: string;
+  consumer: RuleCreationValidConsumer;
+  validConsumers?: RuleCreationValidConsumer[];
 }
 
 export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
@@ -28,6 +31,8 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   location,
   history,
 }) => {
+  const { referrer, consumer, validConsumers } = (location.state ?? {}) as CreateRuleLocationState;
+
   const { setBreadcrumbs, ruleTypeRegistry, docLinks, charts, data, dataViews, unifiedSearch } =
     useKibana().services;
   const {
@@ -46,7 +51,6 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
     [ruleTypeId, ruleTypeRegistry]
   );
 
-  const { referrer } = (location.state ?? {}) as CreateRuleLocationState;
   const onClickReturn = useCallback(() => {
     history.push(referrer);
   }, [referrer, history]);
@@ -127,10 +131,12 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
       />
     );
   }
+
   return (
     <RuleFormPage
       ruleTypeModel={{
         name: ruleTypeFromServer.name,
+        authorizedConsumers: ruleTypeFromServer.authorizedConsumers,
         ...registeredRuleType,
       }}
       expressionPlugins={{
@@ -142,6 +148,7 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
       docLinks={docLinks}
       onClickReturn={onClickReturn}
       referrerHref={referrer}
+      appContext={{ consumer, validConsumers, canShowConsumerSelection: true }}
     />
   );
 };

@@ -1005,7 +1005,10 @@ export const RulesList = ({
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
               if (isRuleFormV2Enabled) {
-                history.push(`/rule/create/${ruleTypeId}`, { referrer: window.location.href });
+                history.push(`/rule/create/${ruleTypeId}`, {
+                  referrer: window.location.href,
+                  consumer: initialSelectedConsumer,
+                });
               } else {
                 setRuleTypeModalVisibility(false);
                 setRuleTypeIdToCreate(ruleTypeId);

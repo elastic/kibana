@@ -6,20 +6,51 @@
  * Side Public License, v 1.
  */
 
+import { useRef } from 'react';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ruleDetailsReducer } from './features/rule_details/slice';
-import { ruleDefinitionReducer } from './features/rule_definition/slice';
+import {
+  ruleDefinitionReducer,
+  initializeAndValidateConsumer,
+} from './features/rule_definition/slice';
 
 const rootReducer = combineReducers({
   ruleDefinition: ruleDefinitionReducer,
   ruleDetails: ruleDetailsReducer,
 });
 
-export const initializeStore = (preloadedState: RuleFormRootState) =>
-  configureStore({
+const initializeStore = (
+  partialInitialState: {
+    [K in keyof RuleFormRootState]?: Partial<RuleFormRootState[K]>;
+  },
+  validConsumers?: RuleCreationValidConsumer[]
+) => {
+  const preloadedState: RuleFormRootState = rootReducer(undefined, { type: 'INIT' });
+  if (partialInitialState.ruleDefinition) {
+    preloadedState.ruleDefinition = {
+      ...preloadedState.ruleDefinition,
+      ...partialInitialState.ruleDefinition,
+    };
+  }
+  if (partialInitialState.ruleDetails) {
+    preloadedState.ruleDetails = {
+      ...preloadedState.ruleDetails,
+      ...partialInitialState.ruleDetails,
+    };
+  }
+
+  const store = configureStore({
     reducer: rootReducer,
     preloadedState,
   });
+  // Dispatch an initial action for reducers to correct the preloadedState
+  store.dispatch(initializeAndValidateConsumer(validConsumers));
+  return store;
+};
+
+export const useStore = (...args: Parameters<typeof initializeStore>) =>
+  useRef(initializeStore(...args)).current;
 
 export type RuleFormRootState = ReturnType<typeof rootReducer>;
 export type RuleFormDispatch = ReturnType<typeof initializeStore>['dispatch'];

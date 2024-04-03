@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiFieldNumber, EuiSelect } from '@elastic/eui';
+import { parseDuration, formatDuration } from '../../../common/helpers/parse_duration';
 import { getTimeOptions } from '../../../common/helpers/get_time_options';
 import {
   useSelectIntervalUnit,
@@ -15,31 +17,33 @@ import {
   setIntervalNumber,
   setIntervalUnit,
 } from './slice';
-import { useRuleFormDispatch } from '../../hooks';
+import { useConfigContext, useRuleFormDispatch, useRuleFormSelector } from '../../hooks';
+import { RuleFormConfig } from '../../types';
+import { INTEGER_REGEX } from '../../common/constants';
 
-const INTEGER_REGEX = /^[1-9][0-9]*$/;
+interface RuleScheduleFieldProps {
+  errors: Record<string, string[]>;
+}
 
-const getHelpTextForInterval = () => {
-  if (!config || !config.minimumScheduleInterval) {
+const getHelpTextForInterval = (
+  currentInterval: string,
+  minimumScheduleInterval: RuleFormConfig['minimumScheduleInterval']
+) => {
+  if (!minimumScheduleInterval) {
     return '';
   }
 
-  // No help text if there is an error
-  if (errors['schedule.interval'].length > 0) {
-    return '';
-  }
-
-  if (config.minimumScheduleInterval.enforce) {
+  if (minimumScheduleInterval.enforce) {
     // Always show help text if minimum is enforced
     return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
       defaultMessage: 'Interval must be at least {minimum}.',
       values: {
-        minimum: formatDuration(config.minimumScheduleInterval.value, true),
+        minimum: formatDuration(minimumScheduleInterval.value, true),
       },
     });
   } else if (
-    rule.schedule.interval &&
-    parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+    currentInterval &&
+    parseDuration(currentInterval) < parseDuration(minimumScheduleInterval.value)
   ) {
     // Only show help text if current interval is less than suggested
     return i18n.translate(
@@ -48,7 +52,7 @@ const getHelpTextForInterval = () => {
         defaultMessage:
           'Intervals less than {minimum} are not recommended due to performance considerations.',
         values: {
-          minimum: formatDuration(config.minimumScheduleInterval.value, true),
+          minimum: formatDuration(minimumScheduleInterval.value, true),
         },
       }
     );
@@ -57,10 +61,29 @@ const getHelpTextForInterval = () => {
   }
 };
 
-export const RuleScheduleField = ({ errors }) => {
+const labelForRuleChecked = [
+  i18n.translate('alertsUIShared.ruleForm.ruleDefinition.ruleScheduleField.checkFieldLabel', {
+    defaultMessage: 'Every',
+  }),
+];
+
+export const RuleScheduleField: React.FC<RuleScheduleFieldProps> = ({ errors }) => {
   const ruleIntervalNumber = useSelectIntervalNumber();
   const ruleIntervalUnit = useSelectIntervalUnit();
+  const currentInterval = useRuleFormSelector((state) => state.ruleDefinition.interval);
   const dispatch = useRuleFormDispatch();
+  const { minimumScheduleInterval } = useConfigContext();
+
+  const intervalError = errors['schedule.interval'] ?? '';
+  const hasIntervalError = useMemo(() => intervalError.length > 0, [intervalError]);
+
+  const helpText = useMemo(
+    () =>
+      minimumScheduleInterval && !hasIntervalError // No help text if there is an error
+        ? getHelpTextForInterval(currentInterval, minimumScheduleInterval)
+        : '',
+    [currentInterval, minimumScheduleInterval, hasIntervalError]
+  );
 
   return (
     <EuiFlexItem>
@@ -68,9 +91,9 @@ export const RuleScheduleField = ({ errors }) => {
         fullWidth
         data-test-subj="intervalFormRow"
         display="rowCompressed"
-        helpText={getHelpTextForInterval()}
-        isInvalid={errors['schedule.interval'].length > 0}
-        error={errors['schedule.interval']}
+        helpText={helpText}
+        isInvalid={hasIntervalError}
+        error={intervalError}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={2}>
@@ -78,7 +101,7 @@ export const RuleScheduleField = ({ errors }) => {
               prepend={labelForRuleChecked}
               fullWidth
               min={1}
-              isInvalid={errors['schedule.interval'].length > 0}
+              isInvalid={hasIntervalError}
               value={ruleIntervalNumber || ''}
               name="interval"
               data-test-subj="intervalInput"
@@ -95,7 +118,7 @@ export const RuleScheduleField = ({ errors }) => {
             <EuiSelect
               fullWidth
               value={ruleIntervalUnit}
-              options={getTimeOptions(ruleInterval ?? 1)}
+              options={getTimeOptions(ruleIntervalNumber ?? 1)}
               onChange={(e) => {
                 dispatch(setIntervalUnit(e.target.value));
               }}

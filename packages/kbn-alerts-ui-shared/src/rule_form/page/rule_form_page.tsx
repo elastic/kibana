@@ -9,6 +9,7 @@
 import React from 'react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EuiPageTemplate, EuiSteps } from '@elastic/eui';
+import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useRuleFormSelector, useRuleFormDispatch } from '../hooks';
 import { setRuleName } from '../features/rule_details/slice';
 import { RuleFormPageHeader } from './header';
@@ -22,6 +23,8 @@ export interface RuleFormPageProps {
   onClickReturn: () => void;
   referrerHref?: string;
   docLinks: DocLinksStart;
+  canShowConsumerSelection?: boolean;
+  authorizedConsumers?: RuleCreationValidConsumer[];
 }
 
 export const RuleFormPage: React.FC<RuleFormPageProps> = ({
@@ -30,6 +33,8 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   ruleTypeModel,
   expressionPlugins,
   docLinks,
+  canShowConsumerSelection,
+  authorizedConsumers,
 }) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
@@ -52,12 +57,20 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
                   ruleTypeModel={ruleTypeModel}
                   expressionPlugins={expressionPlugins}
                   docLinks={docLinks}
+                  canShowConsumerSelection={canShowConsumerSelection}
+                  authorizedConsumers={authorizedConsumers}
                 />
               ),
             },
             {
               title: 'Actions',
-              children: <div>Step 2</div>,
+              children: (
+                // TODO: Actions form will be implemented in a later PR
+                <div>
+                  Action form is WIP. You can only create a rule without actions in this version of
+                  the form.
+                </div>
+              ),
             },
             {
               title: 'Rule details',

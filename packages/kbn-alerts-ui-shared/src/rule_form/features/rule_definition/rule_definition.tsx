@@ -17,30 +17,64 @@ import {
   EuiLink,
   EuiDescribedFormGroup,
   EuiFormRow,
+  EuiIconTip,
+  EuiAccordion,
+  EuiPanel,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { Suspense, useMemo } from 'react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import {
+  RuleCreationValidConsumer,
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { useRuleFormSelector, useRuleFormDispatch } from '../../hooks';
 import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../../types';
-import { setParam, replaceParams } from './slice';
+import { setParam, replaceParams, useSelectAreAdvancedOptionsSet } from './slice';
+import { RuleScheduleField } from './rule_schedule_field';
+import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
+import { RuleAlertDelayField } from './rule_alert_delay_field';
 
 interface RuleDefinitionProps {
   ruleTypeModel: RuleTypeModel;
   expressionPlugins: RuleTypeParamsExpressionPlugins;
   docLinks: DocLinksStart;
+  canShowConsumerSelection?: boolean;
+  authorizedConsumers?: RuleCreationValidConsumer[];
 }
+
+const MULTI_CONSUMER_RULE_TYPE_IDS = [
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+];
 
 export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   ruleTypeModel,
   expressionPlugins,
   docLinks,
+  canShowConsumerSelection = false,
+  authorizedConsumers = [],
 }) => {
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
   const dispatch = useRuleFormDispatch();
 
   const { euiTheme } = useEuiTheme();
+
+  // TODO: Hide this in edit mode
+  const shouldShowConsumerSelect = useMemo(() => {
+    if (!canShowConsumerSelection) {
+      return false;
+    }
+    if (!authorizedConsumers.length) {
+      return false;
+    }
+    return !!ruleTypeModel.id && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeModel.id);
+  }, [authorizedConsumers, ruleTypeModel, canShowConsumerSelection]);
 
   const RuleParamsExpressionComponent = ruleTypeModel.ruleParamsExpression ?? null;
 
@@ -52,6 +86,8 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
         : ruleTypeModel.documentationUrl,
     [ruleTypeModel, docLinks]
   );
+
+  const advancedOptionsInitialIsOpen = useSelectAreAdvancedOptionsSet();
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder>
@@ -72,7 +108,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
                 <EuiLink href={docsUrl} target="_blank">
-                  {i18n.translate('alertsUIShared.ruleFormPage.documentationLink', {
+                  {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.documentationLink', {
                     defaultMessage: 'View documentation',
                   })}
                 </EuiLink>
@@ -86,7 +122,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
           fallback={
             <EuiEmptyPrompt
               title={<EuiLoadingSpinner size="xl" />}
-              body={i18n.translate('alertsUIShared.ruleFormPage.loadingRuleTypeParams', {
+              body={i18n.translate('alertsUIShared.ruleForm.ruleDefinition.loadingRuleTypeParams', {
                 defaultMessage: 'Loading rule type params',
               })}
             />
@@ -118,45 +154,100 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
           fullWidth
           title={
             <h3>
-              {i18n.translate('alertsUIShared.ruleFormPage.ruleDefinition.scheduleTitle', {
+              {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.scheduleTitle', {
                 defaultMessage: 'Rule schedule',
               })}
             </h3>
           }
           description={
             <p>
-              {i18n.translate('alertsUIShared.ruleFormPage.ruleDefinition.scheduleDescription', {
+              {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.scheduleDescription', {
                 defaultMessage: 'Set the frequency to check the alert conditions',
-              })}
+              })}{' '}
+              <EuiIconTip
+                position="right"
+                type="questionInCircle"
+                content={i18n.translate(
+                  'alertsUIShared.ruleForm.ruleDefinition.ruleScheduleTooltip',
+                  {
+                    defaultMessage:
+                      'Checks are queued; they run as close to the defined value as capacity allows.',
+                  }
+                )}
+              />
             </p>
           }
         >
           <EuiFormRow fullWidth>
-            <div />
+            <RuleScheduleField errors={{}} />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-        <EuiDescribedFormGroup
-          fullWidth
-          title={
-            <h3>
-              {i18n.translate('alertsUIShared.ruleFormPage.ruleDefinition.scopeTitle', {
-                defaultMessage: 'Rule scope',
-              })}
-            </h3>
-          }
-          description={
-            <p>
-              {i18n.translate('alertsUIShared.ruleFormPage.ruleDefinition.scopeDescription', {
-                defaultMessage:
-                  'Select the applications to associate the corresponding role privilege',
-              })}
-            </p>
-          }
-        >
-          <EuiFormRow fullWidth>
-            <div />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
+        {shouldShowConsumerSelect && (
+          <EuiDescribedFormGroup
+            fullWidth
+            title={
+              <h3>
+                {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.scopeTitle', {
+                  defaultMessage: 'Rule scope',
+                })}
+              </h3>
+            }
+            description={
+              <p>
+                {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.scopeDescription', {
+                  defaultMessage:
+                    'Select the applications to associate the corresponding role privilege',
+                })}
+              </p>
+            }
+          >
+            <EuiFormRow fullWidth>
+              <RuleFormConsumerSelection validConsumers={authorizedConsumers} />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        )}
+        <EuiFlexItem>
+          <EuiAccordion
+            id="advancedOptionsAccordion"
+            data-test-subj="advancedOptionsAccordion"
+            initialIsOpen={advancedOptionsInitialIsOpen}
+            buttonContent={
+              <EuiText size="s">
+                {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.advancedOptionsLabel', {
+                  defaultMessage: 'Advanced options',
+                })}
+              </EuiText>
+            }
+          >
+            <EuiSpacer size="s" />
+            <EuiPanel hasShadow={false} hasBorder color="subdued">
+              <EuiDescribedFormGroup
+                fullWidth
+                title={
+                  <h4>
+                    {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.alertDelayTitle', {
+                      defaultMessage: 'Alert delay',
+                    })}
+                  </h4>
+                }
+                description={
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.scopeDescription', {
+                        defaultMessage:
+                          'Set the number of consecutive runs for which this rule must meet the alert conditions before an alert occurs',
+                      })}
+                    </p>
+                  </EuiText>
+                }
+              >
+                <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
+                  <RuleAlertDelayField />
+                </EuiFormRow>
+              </EuiDescribedFormGroup>
+            </EuiPanel>
+          </EuiAccordion>
+        </EuiFlexItem>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

@@ -31,18 +31,18 @@ export const RuleDetails: React.FC = () => {
       fullWidth
       title={
         <h3>
-          {i18n.translate('alertsUIShared.ruleForm.ruleDetailsTitle', {
+          {i18n.translate('alertsUIShared.ruleForm.ruleDetails.title', {
             defaultMessage: 'Rule name and tags',
           })}
         </h3>
       }
-      description={i18n.translate('alertsUIShared.ruleForm.ruleDetailsDescription', {
+      description={i18n.translate('alertsUIShared.ruleForm.ruleDetails.description', {
         defaultMessage: 'Define a name and tags for your rule.',
       })}
     >
       <EuiFormRow
         fullWidth
-        label={i18n.translate('alertsUIShared.ruleForm.ruleNameFieldLabel', {
+        label={i18n.translate('alertsUIShared.ruleForm.ruleDetails.ruleNameFieldLabel', {
           defaultMessage: 'Rule name',
         })}
       >
@@ -58,7 +58,7 @@ export const RuleDetails: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('alertsUIShared.ruleForm.ruleTagsFieldLabel', {
+        label={i18n.translate('alertsUIShared.ruleForm.ruleDetails.ruleTagsFieldLabel', {
           defaultMessage: 'Tags',
         })}
       >

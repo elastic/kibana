@@ -6,22 +6,47 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { RuleFormPage } from './rule_form_page';
-import { initializeStore } from '../store';
+import { useStore } from '../store';
 import type { RuleFormPageProps } from './rule_form_page';
+import { ConfigProvider, useAuthorizedConsumers, DEFAULT_CONFIG } from '../hooks';
+import { RuleFormAppContext, RuleFormConfig } from '../types';
 
-export const RuleFormPageComponent: React.FC<RuleFormPageProps> = ({ ruleTypeModel, ...props }) => {
-  const store = useRef(
-    initializeStore({
+interface RuleFormPageComponentProps extends RuleFormPageProps {
+  config?: RuleFormConfig;
+  appContext: RuleFormAppContext;
+}
+
+export const RuleFormPageComponent: React.FC<RuleFormPageComponentProps> = ({
+  ruleTypeModel,
+  config = DEFAULT_CONFIG,
+  appContext: { consumer, validConsumers, canShowConsumerSelection },
+  ...rest
+}) => {
+  const initialState = useMemo(
+    () => ({
       ruleDetails: { name: `${ruleTypeModel.name} rule`, tags: [] },
-    })
+      ruleDefinition: { consumer },
+    }),
+    [ruleTypeModel.name, consumer]
   );
 
+  const authorizedConsumers = useAuthorizedConsumers(ruleTypeModel, validConsumers);
+
+  const store = useStore(initialState, authorizedConsumers);
+
   return (
-    <Provider store={store.current}>
-      <RuleFormPage ruleTypeModel={ruleTypeModel} {...props} />
+    <Provider store={store}>
+      <ConfigProvider value={config}>
+        <RuleFormPage
+          ruleTypeModel={ruleTypeModel}
+          canShowConsumerSelection={canShowConsumerSelection}
+          authorizedConsumers={authorizedConsumers}
+          {...rest}
+        />
+      </ConfigProvider>
     </Provider>
   );
 };

@@ -7,10 +7,14 @@
  */
 
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { ComponentType } from 'react';
 
 export interface ValidationResult {
   errors: Record<string, any>;
+}
+export interface IErrorObject {
+  [key: string]: string | string[] | IErrorObject;
 }
 
 type RuleTypeParams = Record<string, unknown>;
@@ -52,6 +56,7 @@ export interface RuleTypeParamsExpressionProps<
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   name: string;
+  authorizedConsumers?: Record<AlertConsumers, { read: boolean; all: boolean }>;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
@@ -62,4 +67,17 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
   defaultSummaryMessage?: string;
+}
+
+export interface RuleFormConfig {
+  isUsingSecurity: boolean;
+  minimumScheduleInterval?: {
+    value: string;
+    enforce: boolean;
+  };
+}
+export interface RuleFormAppContext {
+  consumer: RuleCreationValidConsumer;
+  validConsumers?: RuleCreationValidConsumer[];
+  canShowConsumerSelection?: boolean;
 }
