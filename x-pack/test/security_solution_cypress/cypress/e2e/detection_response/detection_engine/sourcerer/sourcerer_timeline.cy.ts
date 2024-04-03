@@ -31,6 +31,7 @@ import {
   saveSourcerer,
 } from '../../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
+import { waitForFleetSetup } from '../../../../tasks/fleet_integrations';
 import { SOURCERER } from '../../../../screens/sourcerer';
 import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
@@ -41,11 +42,7 @@ const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
 describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
-    cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true').as('fleetSetup');
-    cy.clearLocalStorage();
-    login();
-    visitGetStartedPage();
-    cy.wait('@fleetSetup');
+    waitForFleetSetup();
   });
   beforeEach(() => {
     cy.clearLocalStorage();
