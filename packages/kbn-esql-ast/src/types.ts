@@ -78,6 +78,17 @@ export interface ESQLLiteral extends ESQLAstBaseItem {
   value: string | number;
 }
 
+export interface ESQLStringLiteral extends ESQLLiteral {
+  type: 'literal';
+  literalType: 'string';
+  value: string;
+}
+
+export const isESQLStringLiteral = (literal: ESQLLiteral): literal is ESQLStringLiteral =>
+  literal.literalType === 'string';
+
+export const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
+
 export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;

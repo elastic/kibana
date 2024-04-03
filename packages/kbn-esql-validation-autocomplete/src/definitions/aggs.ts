@@ -185,7 +185,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       signatures: [
         {
           params: [{ name: 'expression', type: 'any', noNestingFunctions: true }],
-          returnType: 'any[]',
+          returnType: 'any',
           examples: [
             'from index | stats all_agents=values(agents.keyword)',
             'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',

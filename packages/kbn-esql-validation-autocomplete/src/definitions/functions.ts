@@ -925,6 +925,30 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'mv_sort',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvAvgDoc', {
+      defaultMessage: 'Sorts a multivalue expression in lexicographical order.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'any' },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+            literalOptions: ['asc', 'desc'],
+          },
+        ],
+        returnType: 'any',
+        examples: [
+          'row a = [4, 2, -3, 2] | eval sorted = mv_sort(a)',
+          'row a = ["b", "c", "a"] | sorted = mv_sort(a, "DESC")',
+        ],
+      },
+    ],
+  },
+  {
     name: 'mv_avg',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvAvgDoc', {
       defaultMessage:

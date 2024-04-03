@@ -19,9 +19,11 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@kbn/esql-ast';
+import { isESQLStringLiteral, unwrapStringLiteralQuotes } from '@kbn/esql-ast/src/types';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
+  FunctionArg,
   FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
@@ -75,12 +77,33 @@ import {
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: SignatureArgType,
+  argDef: FunctionArg,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
+    if (
+      // currently only supporting literalOptions with string literals
+      isESQLStringLiteral(actualArg) &&
+      argDef.literalOptions &&
+      !argDef.literalOptions
+        .map((option) => option.toLowerCase())
+        .includes(unwrapStringLiteralQuotes(actualArg.value).toLowerCase())
+    ) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unsupportedLiteralOption',
+          values: {
+            name: astFunction.name,
+            value: actualArg.value,
+            supportedOptions: argDef.literalOptions.map((option) => `"${option}"`).join(', '),
+          },
+          locations: actualArg.location,
+        })
+      );
+    }
+
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
