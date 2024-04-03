@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/aiops-log-pattern-analysis",
+  "owner": "@elastic/ml-ui"
+}

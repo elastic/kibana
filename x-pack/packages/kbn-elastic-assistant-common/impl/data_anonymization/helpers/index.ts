@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Replacement } from '../../schemas';
+import { Replacements } from '../../schemas';
 
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
   typeof rawData !== 'string';
@@ -29,12 +29,12 @@ export const replaceAnonymizedValuesWithOriginalValues = ({
   replacements,
 }: {
   messageContent: string;
-  replacements: Replacement[];
+  replacements: Replacements;
 }): string =>
   replacements != null
-    ? replacements.reduce((acc, replacement) => {
-        const value = replacement.value;
-        return replacement.uuid && value ? acc.replaceAll(replacement.uuid, value) : acc;
+    ? Object.keys(replacements).reduce((acc, key) => {
+        const value = replacements[key];
+        return acc.replaceAll(key, value);
       }, messageContent)
     : messageContent;
 
@@ -43,11 +43,11 @@ export const replaceOriginalValuesWithUuidValues = ({
   replacements,
 }: {
   messageContent: string;
-  replacements: Replacement[];
+  replacements: Replacements;
 }): string =>
   replacements != null
-    ? replacements.reduce((acc, replacement) => {
-        const value = replacement.value;
-        return replacement.uuid && value ? acc.replaceAll(value, replacement.uuid) : acc;
+    ? Object.keys(replacements).reduce((acc, key) => {
+        const value = replacements[key];
+        return value ? acc.replaceAll(value, key) : acc;
       }, messageContent)
     : messageContent;

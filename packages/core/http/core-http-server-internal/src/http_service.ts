@@ -7,7 +7,7 @@
  */
 
 import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { pick } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';
