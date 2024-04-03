@@ -8,7 +8,7 @@
 import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -336,7 +336,7 @@ export class FleetPlugin
                         name: 'All',
                         ui: ['agents_read', 'agents_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -373,7 +373,7 @@ export class FleetPlugin
                         name: 'All',
                         ui: ['agent_policies_read', 'agent_policies_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',
@@ -407,7 +407,7 @@ export class FleetPlugin
                         name: 'All',
                         ui: ['settings_read', 'settings_all'],
                         savedObject: {
-                          all: [],
+                          all: allSavedObjectTypes,
                           read: allSavedObjectTypes,
                         },
                         includeIn: 'all',

@@ -151,7 +151,7 @@ export class DataGridService extends FtrService {
 
   public async getFields(options?: SelectOptions) {
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await this.find.allByCssSelector(selector);
 
@@ -215,7 +215,7 @@ export class DataGridService extends FtrService {
     }
 
     const selector = options?.isAnchorRow
-      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await table.findAllByCssSelector(selector);
 
@@ -370,9 +370,16 @@ export class DataGridService extends FtrService {
     const buttonGroup = await this.testSubjects.find(
       'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
     );
-    return (
-      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
-    ).getVisibleText();
+    let value = '';
+    await this.retry.waitFor('row height value not to be empty', async () => {
+      // to prevent flakiness
+      const selectedButton = await buttonGroup.findByCssSelector(
+        '.euiButtonGroupButton-isSelected'
+      );
+      value = await selectedButton.getVisibleText();
+      return value !== '';
+    });
+    return value;
   }
 
   public async changeRowHeightValue(newValue: string) {
