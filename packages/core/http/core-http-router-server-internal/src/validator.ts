@@ -7,7 +7,7 @@
  */
 
 import { Stream } from 'stream';
-import { ValidationError, Type, schema, isConfigSchema } from '@kbn/config-schema';
+import { ValidationError, schema, isConfigSchema } from '@kbn/config-schema';
 import type {
   RouteValidationSpec,
   RouteValidationFunction,
@@ -17,15 +17,6 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
-
-// Ugly as hell but we need this conditional typing to have proper type inference
-type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
-  T extends RouteValidationFunction<any>
-    ? ReturnType<T>['value']
-    : T extends Type<any>
-    ? T['type']
-    : undefined
->;
 
 /**
  * Route validator class to define the validation logic for each new route.
@@ -92,9 +83,9 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     unsafe?: boolean,
     data?: unknown,
     namespace?: string
-  ): RouteValidationResultType<typeof validationRule> {
+  ): T {
     if (typeof validationRule === 'undefined') {
-      return {};
+      return {} as T;
     }
     let precheckedData = this.preValidateSchema(data).validate(data, {}, namespace);
 
@@ -125,12 +116,10 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     validationRule: RouteValidationSpec<T>,
     data?: unknown,
     namespace?: string
-  ): RouteValidationResultType<typeof validationRule> {
+  ): T {
     if (isConfigSchema(validationRule)) {
-      // @ts-expect-error upgrade typescript v4.9.5
       return validationRule.validate(data, {}, namespace);
     } else if (typeof validationRule === 'function') {
-      // @ts-expect-error upgrade typescript v4.9.5
       return this.validateFunction(validationRule, data, namespace);
     } else {
       throw new ValidationError(
