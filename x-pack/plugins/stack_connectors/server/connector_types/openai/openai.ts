@@ -73,6 +73,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             defaultHeaders: { 'api-key': this.secrets.apiKey },
           })
         : new OpenAI({
+            baseURL: this.config.apiUrl,
             // default to empty string for unit tests x-pack/plugins/actions/server/integration_tests/connector_types.test.ts
             apiKey: this.secrets.apiKey ?? '',
             // without, this test fails x-pack/plugins/actions/server/integration_tests/connector_types.test.ts
