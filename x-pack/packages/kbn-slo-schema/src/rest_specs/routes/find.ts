@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { sloWithSummaryResponseSchema } from '../slo';
+import { allOrAnyString, groupingsSchema, sloDefinitionSchema, summarySchema } from '../../schema';
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
 const sortBySchema = t.union([
@@ -26,15 +26,26 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
+const sloWithDataResponseSchema = t.intersection([
+  sloDefinitionSchema,
+  t.partial({
+    instanceId: allOrAnyString,
+    remoteName: t.string,
+    kibanaUrl: t.string,
+  }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema }),
+]);
+
 const findSLOResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(sloWithSummaryResponseSchema),
+  results: t.array(sloWithDataResponseSchema),
 });
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
+type SLOWithDataResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { findSLOParamsSchema, findSLOResponseSchema };
-export type { FindSLOParams, FindSLOResponse };
+export type { FindSLOParams, FindSLOResponse, SLOWithDataResponse };
