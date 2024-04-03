@@ -15,7 +15,7 @@ export class UserHelper {
     this.securityExtension = securityExtension;
   }
 
-  getCurrentUserId(): string | null {
-    return this.securityExtension?.getCurrentUser()?.profile_uid ?? null;
+  getCurrentUserProfileUid(): string | undefined {
+    return this.securityExtension?.getCurrentUser()?.profile_uid;
   }
 }

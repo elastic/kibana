@@ -84,7 +84,7 @@ export const performBulkCreate = async <T>(
     managed: optionsManaged,
   } = options;
   const time = getCurrentTime();
-  const createdBy = userHelper.getCurrentUserId();
+  const createdBy = userHelper.getCurrentUserProfileUid();
 
   let preflightCheckIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {

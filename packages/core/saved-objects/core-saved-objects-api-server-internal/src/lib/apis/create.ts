@@ -70,7 +70,7 @@ export const performCreate = async <T>(
   validationHelper.validateOriginId(type, options);
 
   const time = getCurrentTime();
-  const createdBy = userHelper.getCurrentUserId();
+  const createdBy = userHelper.getCurrentUserProfileUid();
   let savedObjectNamespace: string | undefined;
   let savedObjectNamespaces: string[] | undefined;
   let existingOriginId: string | undefined;

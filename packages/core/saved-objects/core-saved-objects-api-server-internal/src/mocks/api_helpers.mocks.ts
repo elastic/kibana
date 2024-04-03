@@ -109,7 +109,7 @@ export type UserHelperMock = jest.Mocked<PublicMethodsOf<UserHelper>>;
 
 const createUserHelperMock = (): UserHelperMock => {
   const mock: UserHelperMock = {
-    getCurrentUserId: jest.fn(() => null),
+    getCurrentUserProfileUid: jest.fn(),
   };
 
   return mock;
