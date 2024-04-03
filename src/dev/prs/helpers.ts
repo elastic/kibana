@@ -8,7 +8,7 @@
 
 import { Readable } from 'stream';
 import * as Rx from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 
 /**
  * Convert a Readable stream to an observable of lines

@@ -13,8 +13,8 @@ import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
 
-import { getSnappedWindowParameters } from '@kbn/aiops-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import { getSnappedWindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
 import './dual_brush.scss';
 

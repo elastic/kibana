@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 import type { MlFieldFormatService } from '../../services/field_format_service';
 import { mlJobService } from '../../services/job_service';
