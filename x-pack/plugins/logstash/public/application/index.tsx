@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';

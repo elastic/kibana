@@ -10,7 +10,7 @@
 import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 
