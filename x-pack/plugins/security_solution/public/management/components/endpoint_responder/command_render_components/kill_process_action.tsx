@@ -13,13 +13,17 @@ import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 
 export const KillProcessActionResult = memo<
-  ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>
+  ActionRequestComponentProps<{ pid?: string[]; entityId?: string[]; processName?: string[] }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendKillProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const parameters = parsedPidOrEntityIdParameter(command.args.args);
+    let parameters = parsedPidOrEntityIdParameter(command.args.args);
+
+    if (command.args.args.processName) {
+      parameters = { process_name: command.args.args.processName[0] };
+    }
 
     return endpointId
       ? {

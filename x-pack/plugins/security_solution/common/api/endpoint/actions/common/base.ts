@@ -78,6 +78,8 @@ export const KillOrSuspendProcessRequestSchema = {
     parameters: schema.oneOf([
       schema.object({ pid: schema.number({ min: 1 }) }),
       schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+      // For S1 - process name
+      schema.object({ process_name: schema.string({ minLength: 1 }) }),
     ]),
   }),
 };

@@ -227,7 +227,8 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator(agentType),
+      validate:
+        agentType === 'sentinel_one' ? undefined : capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -235,20 +236,32 @@ export const getEndpointConsoleCommands = ({
           allowMultiples: false,
           about: COMMENT_ARG_ABOUT,
         },
-        pid: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.killProcess.args.pid.about,
-          validate: pidValidator,
-        },
-        entityId: {
-          required: false,
-          allowMultiples: false,
-          exclusiveOr: true,
-          about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
-          validate: emptyArgumentValidator,
-        },
+        ...(agentType === 'sentinel_one'
+          ? {
+              processName: {
+                required: false,
+                allowMultiples: false,
+                exclusiveOr: true,
+                about: 'The process name (POC code)',
+                mustHaveValue: 'non-empty-string',
+              },
+            }
+          : {
+              pid: {
+                required: false,
+                allowMultiples: false,
+                exclusiveOr: true,
+                about: CONSOLE_COMMANDS.killProcess.args.pid.about,
+                validate: pidValidator,
+              },
+              entityId: {
+                required: false,
+                allowMultiples: false,
+                exclusiveOr: true,
+                about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
+                validate: emptyArgumentValidator,
+              },
+            }),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
