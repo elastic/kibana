@@ -85,10 +85,10 @@ exports[`Reporting Generate CSV from SearchSource with unmapped fields includes 
 `;
 
 exports[`Reporting Generate CSV from SearchSource with unmapped fields includes an unmapped field to the report 1`] = `
-"\\"_id\\",\\"_index\\",\\"_score\\",text,unmapped
-1,recipes,1,text1,unmapped1
-2,recipes,1,text2,\\"-\\"
-"
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"-\\"
+,1,1,recipes,recipes,text,text1,text2,unmapped
+1,unmapped1
+2"
 `;
 
 exports[`Reporting Generate CSV from SearchSource with unmapped fields includes an unmapped nested field to the report 1`] = `

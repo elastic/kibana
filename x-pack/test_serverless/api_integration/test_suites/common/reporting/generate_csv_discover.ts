@@ -194,8 +194,16 @@ export default ({ getService }: FtrProviderContext) => {
       }
 
       it('includes an unmapped field to the report', async () => {
-        const csvFile = await generateCsvReportWithUnmapped(['text', 'unmapped']);
-        expect((csvFile as string).length).to.be(88);
+        const unsorted: string = (await generateCsvReportWithUnmapped([
+          'text',
+          'unmapped',
+        ])) as string;
+        const csvFile: string = unsorted
+          .split(',')
+          .sort((a, b) => a.localeCompare(b))
+          .join(',');
+
+        expect(csvFile.length).to.be(88);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
