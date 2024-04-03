@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { random, times } from 'lodash';
+import { random } from 'lodash';
 import {
   apm,
   log,
@@ -28,65 +28,60 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
     generate: ({ range, clients: { apmEsClient, logsEsClient } }) => {
       const serviceNames = ['spikey-frontend', 'spikey-backend'];
 
-      const CLUSTER_COUNT = 3;
-      const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
-      const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
-      const CLUSTERS = times(CLUSTER_COUNT).map((index) => ({
+      const clusters = [
+        { provider: 'gcp', region: 'eu-central-1' },
+        { provider: 'aws', region: 'us-east-1' },
+        { provider: 'azure', region: 'area-51' },
+      ].map((cluster, index) => ({
         clusterName: `synth-cluster-${index}`,
         clusterId: generateShortId(),
         projectId: generateShortId(),
         ressourceId: generateShortId(),
         instanceId: generateShortId(),
-        cloudProvider: CLOUD_PROVIDERS[index],
-        cloudRegion: CLOUD_REGION[index],
+        cloudProvider: cluster.provider,
+        cloudRegion: cluster.region,
       }));
+
       const containerId = `spiked-${generateShortId()}`;
       const hostName = `spiked-${generateShortId()}`;
 
       function buildLogs(serviceName: string) {
         return range
           .interval('1m')
-          .rate(1)
+          .rate(100)
           .generator((timestamp) => {
-            return Array(20)
-              .fill(0)
-              .map(() => {
-                const clusterIndex = Math.floor(Math.random() * CLUSTER_COUNT);
-                const {
-                  clusterId,
-                  clusterName,
-                  projectId,
-                  ressourceId,
-                  instanceId,
-                  cloudRegion,
-                  cloudProvider,
-                } = CLUSTERS[clusterIndex];
+            const clusterIndex = Math.floor(Math.random() * clusters.length);
+            const {
+              clusterId,
+              clusterName,
+              projectId,
+              ressourceId,
+              instanceId,
+              cloudRegion,
+              cloudProvider,
+            } = clusters[clusterIndex];
 
-                const logMessage = `Error message #${generateShortId()} from ${serviceName}`;
-                const logLevel = 'error';
-
-                return log
-                  .create()
-                  .message(logMessage)
-                  .logLevel(logLevel)
-                  .service(serviceName)
-                  .containerId(containerId)
-                  .hostName(hostName)
-                  .defaults({
-                    'trace.id': generateShortId(),
-                    'agent.name': 'synth-agent',
-                    'orchestrator.cluster.name': clusterName,
-                    'orchestrator.cluster.id': clusterId,
-                    'orchestrator.resource.id': ressourceId,
-                    'cloud.provider': cloudProvider,
-                    'cloud.region': cloudRegion,
-                    'cloud.availability_zone': `${CLOUD_REGION[clusterIndex]}a`,
-                    'cloud.project.id': projectId,
-                    'cloud.instance.id': instanceId,
-                    'log.file.path': `/logs/${generateLongId()}/error.txt`,
-                  })
-                  .timestamp(timestamp);
-              });
+            return log
+              .create()
+              .message(`Error message #${generateShortId()} from ${serviceName}`)
+              .logLevel('error')
+              .service(serviceName)
+              .containerId(containerId)
+              .hostName(hostName)
+              .defaults({
+                'trace.id': generateShortId(),
+                'agent.name': 'synth-agent',
+                'orchestrator.cluster.name': clusterName,
+                'orchestrator.cluster.id': clusterId,
+                'orchestrator.resource.id': ressourceId,
+                'cloud.provider': cloudProvider,
+                'cloud.region': cloudRegion,
+                'cloud.availability_zone': `${cloudRegion}`,
+                'cloud.project.id': projectId,
+                'cloud.instance.id': instanceId,
+                'log.file.path': `/logs/${generateLongId()}/error.txt`,
+              })
+              .timestamp(timestamp);
           });
       }
 

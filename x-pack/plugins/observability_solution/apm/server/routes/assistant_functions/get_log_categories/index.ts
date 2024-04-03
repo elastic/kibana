@@ -42,9 +42,9 @@ export async function getLogCategories({
   const end = datemath.parse(args.end)?.valueOf()!;
 
   const keyValueFilters = getShouldMatchOrNotExistFilter([
-    { field: SERVICE_NAME, value: args['service.name'] },
-    { field: CONTAINER_ID, value: args['container.id'] },
-    { field: HOST_NAME, value: args['host.name'] },
+    { field: SERVICE_NAME, value: args[SERVICE_NAME] },
+    { field: CONTAINER_ID, value: args[CONTAINER_ID] },
+    { field: HOST_NAME, value: args[HOST_NAME] },
   ]);
 
   const index =
@@ -53,38 +53,56 @@ export async function getLogCategories({
     )) ?? 'logs-*';
 
   const search = getTypedSearch(esClient);
-  const res = await search({
+
+  const query = {
+    bool: {
+      filter: [
+        ...keyValueFilters,
+        { exists: { field: 'message' } },
+        {
+          range: {
+            '@timestamp': {
+              gte: start,
+              lte: end,
+            },
+          },
+        },
+      ],
+    },
+  };
+
+  const hitCountRes = await search({
+    index,
+    size: 0,
+    track_total_hits: true,
+    query,
+  });
+  const totalDocCount = hitCountRes.hits.total.value;
+  const samplingProbability = Math.min(100_000 / totalDocCount, 1);
+
+  const categorizedLogsRes = await search({
     index,
     size: 0,
     track_total_hits: 0,
-    timeout: '5s',
-    query: {
-      bool: {
-        filter: [
-          ...keyValueFilters,
-          { exists: { field: 'message' } },
-          {
-            range: {
-              '@timestamp': {
-                gte: start,
-                lte: end,
-              },
+    query,
+    aggs: {
+      sampling: {
+        random_sampler: {
+          probability: samplingProbability,
+        },
+        aggs: {
+          categories: {
+            categorize_text: {
+              field: 'message',
+              size: 500,
             },
           },
-        ],
-      },
-    },
-    aggs: {
-      categories: {
-        categorize_text: {
-          field: 'message',
-          size: 500,
         },
       },
     },
   });
 
-  return res.aggregations?.categories?.buckets.map(
+  return categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
     ({ doc_count: docCount, key }) => {
       return { key: key as string, docCount };
     }
