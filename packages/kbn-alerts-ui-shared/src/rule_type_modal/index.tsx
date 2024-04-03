@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './use_alert_data_view';
-export * from './use_rule_aad_fields';
+export { RuleTypeModalComponent as RuleTypeModal } from './components';

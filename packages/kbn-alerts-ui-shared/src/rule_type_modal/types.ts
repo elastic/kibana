@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './use_alert_data_view';
-export * from './use_rule_aad_fields';
+export type { RuleTypeWithDescription, RuleTypeIndexWithDescriptions } from '../common/types';
+export interface RuleTypeCountsByProducer {
+  total: number;
+  [x: string]: number;
+}

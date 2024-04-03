@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './use_alert_data_view';
-export * from './use_rule_aad_fields';
+import { RuleType } from '@kbn/triggers-actions-ui-types';
+
+export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
+
+export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
