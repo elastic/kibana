@@ -45,11 +45,11 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   }, [dispatch, http, toasts, trackUiMetric]);
   const [value, setValue] = useState(initialTextValue);
 
-  const setInitialValue = useSetInitialValue({ initialTextValue, setValue, toasts });
+  const setInitialValue = useSetInitialValue;
 
   useEffect(() => {
-    setInitialValue();
-  }, [setInitialValue]);
+    setInitialValue({ initialTextValue, setValue, toasts });
+  }, [initialTextValue, setInitialValue, toasts]);
 
   return (
     <div
