@@ -15,5 +15,14 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-application-browser",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/usage-collection-plugin",
+    "@kbn/management-plugin",
+    "@kbn/share-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/console-plugin",
+  ]
 }
