@@ -328,6 +328,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
+        'xpack.alerting.rules.run.alerts.max',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
