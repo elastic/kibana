@@ -14,18 +14,39 @@ import {
   EuiPopover,
   EuiLoadingSpinner,
   EuiSelectable,
+  EuiCodeBlock,
+  EuiText,
+  EuiAccordion,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { ActionRequestComponentProps } from '../types';
 import { useHttp } from '../../../../common/lib/kibana';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../../common/endpoint/constants';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 
-export const SentineloneRunScriptAction = memo((props) => {
-  return <div>{'SentineloneRunScriptAction placeholder'}</div>;
-});
+export const SentineloneRunScriptAction = memo<ActionRequestComponentProps>(
+  ({ ResultComponent, command }) => {
+    const simpleAccordionId = useGeneratedHtmlId({ prefix: 'simpleAccordion' });
+
+    return (
+      <ResultComponent showAs="pending">
+        <EuiText>{`Running Sentinelone Script: ${command.args.args.script[0].scriptName}`}</EuiText>
+
+        <div>
+          <EuiAccordion id={simpleAccordionId} buttonContent={'Show SentinelOne script definition'}>
+            <EuiCodeBlock language="JavaScript">
+              {JSON.stringify(command.args.args.script[0], null, 2)}
+            </EuiCodeBlock>
+          </EuiAccordion>
+        </div>
+      </ResultComponent>
+    );
+  }
+);
 SentineloneRunScriptAction.displayName = 'SentineloneRunScriptAction';
 
 export const SentineloneScriptSelector = memo<

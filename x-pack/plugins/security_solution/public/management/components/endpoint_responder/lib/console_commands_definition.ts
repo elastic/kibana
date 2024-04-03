@@ -528,7 +528,7 @@ export const getEndpointConsoleCommands = ({
           required: true,
           allowMultiples: false,
           about: 'Select a SentinelOne defined script to run',
-          mustHaveValue: 'non-empty-string',
+          mustHaveValue: 'truthy',
           SelectorComponent: SentineloneScriptSelector,
         },
       },
