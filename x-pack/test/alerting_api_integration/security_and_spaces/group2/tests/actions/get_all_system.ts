@@ -132,7 +132,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action',
+                  name: 'Test system action',
                   referenced_by_count: 0,
                 },
                 {
@@ -141,7 +141,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action-connector-adapter',
+                  name: 'Test system action with a connector adapter set',
                   referenced_by_count: 0,
                 },
                 {
@@ -150,7 +150,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action-kibana-privileges',
+                  name: 'Test system action with kibana privileges',
                   referenced_by_count: 0,
                 },
                 {
@@ -319,7 +319,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action',
+                  name: 'Test system action',
                   referenced_by_count: 0,
                 },
                 {
@@ -328,7 +328,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action-connector-adapter',
+                  name: 'Test system action with a connector adapter set',
                   referenced_by_count: 0,
                 },
                 {
@@ -337,7 +337,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action-kibana-privileges',
+                  name: 'Test system action with kibana privileges',
                   referenced_by_count: 0,
                 },
                 {
@@ -469,7 +469,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action',
+                  name: 'Test system action',
                   referenced_by_count: 0,
                 },
                 {
@@ -478,7 +478,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action-connector-adapter',
+                  name: 'Test system action with a connector adapter set',
                   referenced_by_count: 0,
                 },
                 {
@@ -487,7 +487,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test.system-action-kibana-privileges',
+                  name: 'Test system action with kibana privileges',
                   referenced_by_count: 0,
                 },
                 {
