@@ -55,7 +55,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const defaultNActions = 20;
   const [nActions, setNActions] = useState(defaultNActions);
   const [dateFilter, setDateFilter] = useState<moment.Moment | null>(null);
-  const { currentActions, abortUpgrade, isFirstLoading } = useActionStatus(
+  const { currentActions, abortUpgrade, isFirstLoading, areActionsFullyLoaded } = useActionStatus(
     onAbortSuccess,
     refreshAgentActivity,
     nActions,
@@ -99,6 +99,10 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         }),
       });
     }
+  };
+
+  const onClickShowMore = () => {
+    setNActions(nActions + 10);
   };
 
   const onChangeDateFilter = (date: moment.Moment | null) => {
@@ -149,7 +153,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           currentActions={currentActionsEnriched}
           abortUpgrade={abortUpgrade}
           onClickViewAgents={onClickViewAgents}
-          onClickShowMore={() => setNActions(nActions + 10)}
+          areActionsFullyLoaded={areActionsFullyLoaded}
+          onClickShowMore={onClickShowMore}
           dateFilter={dateFilter}
           onChangeDateFilter={onChangeDateFilter}
         />

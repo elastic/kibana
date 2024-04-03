@@ -20,6 +20,7 @@ export function useActionStatus(
 ) {
   const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
   const [isFirstLoading, setIsFirstLoading] = useState(true);
+  const [areActionsFullyLoaded, setAreActionsFullyLoaded] = useState(false);
   const { notifications, overlays } = useStartServices();
 
   const loadActions = useCallback(async () => {
@@ -32,11 +33,10 @@ export function useActionStatus(
       if (res.error) {
         throw res.error;
       }
-
       if (!res.data) {
         throw new Error('No data');
       }
-
+      setAreActionsFullyLoaded(currentActions.length === res.data.items.length);
       setCurrentActions(res.data.items);
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -45,7 +45,8 @@ export function useActionStatus(
         }),
       });
     }
-  }, [notifications.toasts, nActions, dateFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nActions, dateFilter, notifications.toasts]);
 
   if (isFirstLoading) {
     loadActions();
@@ -99,5 +100,6 @@ export function useActionStatus(
     currentActions,
     abortUpgrade,
     isFirstLoading,
+    areActionsFullyLoaded,
   };
 }

@@ -41,6 +41,7 @@ export const FlyoutBody: React.FunctionComponent<{
   currentActions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => Promise<void>;
+  areActionsFullyLoaded: boolean;
   onClickShowMore: () => void;
   dateFilter: moment.Moment | null;
   onChangeDateFilter: (date: moment.Moment | null) => void;
@@ -49,17 +50,19 @@ export const FlyoutBody: React.FunctionComponent<{
   currentActions,
   abortUpgrade,
   onClickViewAgents,
+  areActionsFullyLoaded,
   onClickShowMore,
   dateFilter,
   onChangeDateFilter,
 }) => {
-  function dateButtons() {
+  function buttons() {
     return (
       <ButtonsFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="m"
             onClick={onClickShowMore}
+            disabled={areActionsFullyLoaded}
             flush="left"
             data-test-subj="agentActivityFlyout.showMoreButton"
           >
@@ -136,7 +139,7 @@ export const FlyoutBody: React.FunctionComponent<{
               }
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{dateButtons()}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{buttons()}</EuiFlexItem>
         </EuiFlexGroup>
       </FullHeightFlyoutBody>
     );
@@ -190,7 +193,7 @@ export const FlyoutBody: React.FunctionComponent<{
             ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>{dateButtons()}</EuiFlexItem>
+        <EuiFlexItem>{buttons()}</EuiFlexItem>
       </EuiFlexGroup>
     </FullHeightFlyoutBody>
   );
