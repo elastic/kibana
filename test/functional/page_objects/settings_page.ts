@@ -1059,13 +1059,4 @@ export class SettingsPageObject extends FtrService {
       [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
     );
   }
-
-  async createNewDataView(dataViewName: string) {
-    await this.testSubjects.click('createDataViewButton');
-    await this.testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await this.testSubjects.click('saveIndexPatternButton');
-  }
 }

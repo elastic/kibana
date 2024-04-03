@@ -9,11 +9,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const find = getService('find');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects(['common', 'lens', 'header', 'timePicker', 'discover']);
 
   describe('lens no data', () => {
     before(async function () {
@@ -41,10 +42,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
       await PageObjects.common.navigateToApp('lens');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const button = await testSubjects.find('createDataViewButton');
+      button.click();
+      await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
+        return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
+      });
 
       const dataViewToCreate = 'logstash';
-      await PageObjects.settings.createNewDataView(dataViewToCreate);
+      await PageObjects.discover.createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',

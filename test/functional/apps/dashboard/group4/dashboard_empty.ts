@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'dashboard', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'dashboard', 'header', 'timePicker']);
 
   describe('dashboard empty state', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboards', { hash: '/create' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const dataViewToCreate = 'logstash';
-      await PageObjects.settings.createNewDataView(dataViewToCreate);
+      await PageObjects.discover.createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'filter manager to be able to create a filter with the new data view',
