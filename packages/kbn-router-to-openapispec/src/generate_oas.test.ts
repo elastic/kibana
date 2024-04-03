@@ -37,8 +37,8 @@ describe('generateOpenApiDocument', () => {
       ipType: schema.ip({ versions: ['ipv4'] }),
       literalType: schema.literal('literallythis'),
       neverType: schema.never(),
-      map: schema.mapOf(schema.string(), schema.string()), // not really gonna go well...
-      record: schema.recordOf(schema.string(), schema.string()), // not really gonna go well...
+      map: schema.mapOf(schema.string(), schema.string()),
+      record: schema.recordOf(schema.string(), schema.string()),
       union: schema.oneOf([
         schema.string({ maxLength: 1, description: 'Union string' }),
         schema.number({ min: 0, description: 'Union number' }),

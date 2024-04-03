@@ -19,7 +19,6 @@ import {
   getPathParameters,
   extractValidationSchemaFromVersionedHandler,
   extractValidationSchemaFromRoute,
-  getJSONContentString,
   getVersionedHeaderParam,
   getVersionedContentString,
 } from './util';

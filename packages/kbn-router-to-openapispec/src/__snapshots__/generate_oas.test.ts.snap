@@ -155,6 +155,9 @@ Object {
                     "type": "string",
                   },
                   "map": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
                     "type": "object",
                   },
                   "maybeNumber": Object {
@@ -163,6 +166,9 @@ Object {
                     "type": "number",
                   },
                   "record": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
                     "type": "object",
                   },
                   "string": Object {

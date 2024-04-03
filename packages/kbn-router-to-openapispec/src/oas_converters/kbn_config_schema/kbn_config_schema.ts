@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import joiToJsonParse from 'joi-to-json';
 import joi from 'joi';
 import { isConfigSchema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
@@ -14,12 +13,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters, OpenAPIConverter } from '../../type';
 import { isReferenceObject } from '../common';
 import * as mutations from './post_process_mutations';
-
-const parse = (schema: joi.Schema) => {
-  const result = joiToJsonParse(schema, 'open-api');
-  postProcess(result);
-  return result;
-};
+import { parse } from './parse';
 
 const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
   return schema.type === 'object';
@@ -108,7 +102,7 @@ const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
-const postProcess = (oasSchema: OpenAPIV3.SchemaObject) => {
+export const postProcessMutations = (oasSchema: OpenAPIV3.SchemaObject) => {
   if (!oasSchema) return;
   walkSchema(oasSchema);
 };
