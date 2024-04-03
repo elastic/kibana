@@ -445,7 +445,7 @@ beta:[] Enables faster searching in APM tables by adding a handy search bar with
 preview:[] Display Amazon Lambda metrics in the service metrics tab.
 
 [[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
-Determines whether the <<service-time-comparison, comparison feature>> is enabled or disabled by default in the APM app.
+Determines whether the comparison feature is enabled or disabled by default in the APM app.
 
 [[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
 Enables the Infrastructure view in the APM app.

@@ -4862,7 +4862,7 @@ you make the necessary updates after you upgrade to 8.3.0.
 Removes the `apm_user` role. For more information, check {kibana-pull}132790[#132790].
 
 *Impact* +
-In the link:https://www.elastic.co/guide/en/kibana/8.3/xpack-apm.html[APM documentation], the `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
+The `apm_user`role is replaced with the `viewer` and `editor` built-in roles.
 ====
 
 [discrete]
