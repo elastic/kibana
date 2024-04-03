@@ -30,9 +30,14 @@ export const KillProcessActionResult = memo<
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
+          agent_type: command.commandDefinition?.meta?.agentType,
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
+  }, [
+    command.args.args,
+    command.commandDefinition?.meta?.agentType,
+    command.commandDefinition?.meta?.endpointId,
+  ]);
 
   return useConsoleActionSubmitter<KillOrSuspendProcessRequestBody>({
     ResultComponent,
