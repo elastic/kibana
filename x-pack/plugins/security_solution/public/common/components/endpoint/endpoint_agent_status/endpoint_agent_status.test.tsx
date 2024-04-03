@@ -9,12 +9,11 @@ import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
 import type { EndpointAgentStatusProps } from './endpoint_agent_status';
 import { EndpointAgentStatus } from './endpoint_agent_status';
-import { HostStatus } from '../../../../../common/endpoint/types';
+import { HostStatus, type AgentStatuses } from '../../../../../common/endpoint/types';
 import React from 'react';
 import { fireEvent, waitFor, within } from '@testing-library/react';
 import { useAgentStatus } from '../../../hooks/use_agent_status';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { AgentStatuses } from '../../../../../server/endpoint/services';
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../hooks/use_agent_status');

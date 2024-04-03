@@ -6,9 +6,10 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type { AgentStatuses } from '../../../../../../common/endpoint/types/agents';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
-import type { AgentStatusClientInterface, AgentStatuses } from './types';
+import type { AgentStatusClientInterface } from './types';
 import { AgentStatusClientError, AgentStatusNotSupportedError } from '../errors';
 import { HOST_NOT_ENROLLED } from '../../../actions/clients/lib/base_response_actions_client';
 

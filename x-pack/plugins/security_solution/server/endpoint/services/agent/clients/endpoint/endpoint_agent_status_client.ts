@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { HostStatus } from '../../../../../../common/endpoint/types';
-import type { AgentStatuses } from '../lib/types';
+import { HostStatus, type AgentStatuses } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { getPendingActionsSummary } from '../../../actions';
