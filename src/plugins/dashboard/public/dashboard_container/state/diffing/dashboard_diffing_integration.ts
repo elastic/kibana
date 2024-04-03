@@ -161,8 +161,6 @@ export function startDiffingDashboardState(
       this.controlGroup?.unsavedChanges ??
         (of(undefined) as Observable<PersistableControlGroupInput | undefined>),
     ]).subscribe(([dashboardChanges, reactEmbeddableChanges, controlGroupChanges]) => {
-      console.log('dashboard changes', dashboardChanges);
-      console.log('react embeddable changes', reactEmbeddableChanges);
       // calculate unsaved changes
       const hasUnsavedChanges =
         Object.keys(omit(dashboardChanges, keysNotConsideredUnsavedChanges)).length > 0 ||

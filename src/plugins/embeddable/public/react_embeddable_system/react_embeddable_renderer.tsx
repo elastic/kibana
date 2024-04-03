@@ -55,8 +55,8 @@ export const ReactEmbeddableRenderer = <
     | 'hideInspector'
   >;
   /**
-   * This `onAnyStateChange` callback allows the parent to track the state of the embeddable.
-   * This is not expected to change over the lifetime of the component.
+   * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
+   * as it changes. This is **not** expected to change over the lifetime of the component.
    */
   onAnyStateChange?: (state: SerializedPanelState<StateType>) => void;
 }) => {
