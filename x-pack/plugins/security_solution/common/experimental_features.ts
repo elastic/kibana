@@ -228,6 +228,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Apr 23, 2024
    */
   perFieldPrebuiltRulesDiffingEnabled: true,
+
+  /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

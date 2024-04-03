@@ -6,8 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { skip, tap, throttleTime } from 'rxjs/operators';
+import { BehaviorSubject, skip, tap, throttleTime } from 'rxjs';
 
 import type {
   HttpFetchOptionsWithPath,
