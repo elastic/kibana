@@ -14,10 +14,13 @@ import { SecurityPageName } from '../../../../app/types';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { mockAlertSearchResponse } from './mock_data';
-import { AlertsHistogramPanel } from '.';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+
+import { AlertsHistogramPanel } from '.';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { allowedExperimentalValues } from '../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -95,7 +98,11 @@ jest.mock('../common/hooks', () => {
   };
 });
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = jest.fn((feature: keyof ExperimentalFeatures) => {
+  if (feature === 'alertsPageChartsEnabled') return false;
+  return allowedExperimentalValues[feature];
+});
+
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => ({
   useAlertHistogramCount: jest.fn().mockReturnValue(999),
@@ -117,6 +124,10 @@ describe('AlertsHistogramPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+      mockUseIsExperimentalFeatureEnabled
+    );
   });
 
   test('renders correctly', () => {
