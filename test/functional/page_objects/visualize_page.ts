@@ -84,8 +84,10 @@ export class VisualizePageObject extends FtrService {
     }
   }
 
-  public async gotoVisualizationLandingPage() {
-    if (!(await this.clickOnVisualizeLibraryBreadcrumb())) {
+  public async gotoVisualizationLandingPage(
+    { forceRefresh }: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    if (forceRefresh || !(await this.clickOnVisualizeLibraryBreadcrumb())) {
       await this.common.navigateToApp('visualize');
     }
   }
@@ -162,8 +164,15 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async navigateToNewVisualization() {
-    await this.gotoVisualizationLandingPage();
+  /**
+   * Navigation now happens without URL refresh by default
+   * so a new "forceRefresh" option has been passed in order to
+   * address those scenarios where a full refresh is required (i.e. changing default settings)
+   */
+  public async navigateToNewVisualization(
+    options: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
