@@ -513,10 +513,11 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: 'run --script ...args',
+      exampleUsage: 'run --script=foo ...args',
       exampleInstruction: 'run --script=foo --one=1',
       validate: undefined,
       mustHaveArgs: true,
+      allowUnknownArgs: true,
       args: {
         comment: {
           required: false,

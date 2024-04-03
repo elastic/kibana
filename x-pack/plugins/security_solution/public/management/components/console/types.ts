@@ -116,6 +116,12 @@ export interface CommandDefinition<TMeta = any> {
   mustHaveArgs?: boolean;
 
   /**
+   * If `true`, then user will be allowed to enter unknown arguments (arguments not
+   * defined in the command `args` object.
+   */
+  allowUnknownArgs?: boolean;
+
+  /**
    * Displayed in the input hint area when the user types the command. The Command usage will be
    * appended to this value
    */

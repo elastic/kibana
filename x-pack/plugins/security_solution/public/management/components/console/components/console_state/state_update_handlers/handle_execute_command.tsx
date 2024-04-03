@@ -230,7 +230,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
-    if (unknownInputArgs.length) {
+    if (unknownInputArgs.length && !commandDefinition.allowUnknownArgs) {
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
@@ -290,6 +290,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
       // Unknown argument
       if (!argDefinition) {
+        if (commandDefinition.allowUnknownArgs) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
         return updateStateWithNewCommandHistoryItem(
           state,
           createCommandHistoryEntry(
