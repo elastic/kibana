@@ -128,6 +128,7 @@ test('creates a rules client with proper constructor arguments when security is 
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
     uiSettings: rulesClientFactoryParams.uiSettings,
+    maxAlertsPerRun: 1000,
   });
 });
 
@@ -175,6 +176,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
     uiSettings: rulesClientFactoryParams.uiSettings,
+    maxAlertsPerRun: 1000,
   });
 });
 
