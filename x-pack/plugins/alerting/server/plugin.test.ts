@@ -27,6 +27,8 @@ import {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { schema } from '@kbn/config-schema';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
@@ -37,7 +39,6 @@ jest.mock('./alerts_service/alerts_service', () => ({
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
-import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {
   id: 'test',
@@ -238,6 +239,32 @@ describe('Alerting Plugin', () => {
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
             await setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
+          });
+        });
+
+        describe('registerConnectorAdapter()', () => {
+          let setup: PluginSetupContract;
+
+          beforeEach(async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+
+            plugin = new AlertingPlugin(context);
+            setup = await plugin.setup(setupMocks, mockPlugins);
+          });
+
+          it('should register a connector adapter', () => {
+            const adapter = {
+              connectorTypeId: '.test',
+              ruleActionParamsSchema: schema.object({}),
+              buildActionParams: jest.fn(),
+            };
+
+            setup.registerConnectorAdapter(adapter);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.connectorAdapterRegistry.get('.test')).toEqual(adapter);
           });
         });
       });
