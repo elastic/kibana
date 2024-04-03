@@ -488,9 +488,9 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         _.some(
           // only fail the job if retry failed as well
           runResults,
-          (result) =>
-            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-            (result as CypressCommandLine.CypressRunResult)?.totalFailed
+          (runResult) =>
+            (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
         );
 
       const hasFailedInitialTests = hasFailedTests(initialResults);

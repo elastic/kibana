@@ -655,6 +655,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
                   await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
                 } catch (error) {
+                  // False positive
+                  // eslint-disable-next-line require-atomic-updates
                   result = error;
                   failedSpecFilePaths.push(filePath);
                 }
@@ -695,9 +697,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         _.some(
           // only fail the job if retry failed as well
           runResults,
-          (result) =>
-            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-            (result as CypressCommandLine.CypressRunResult)?.totalFailed
+          (runResult) =>
+            (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
         );
 
       const hasFailedInitialTests = hasFailedTests(initialResults);
