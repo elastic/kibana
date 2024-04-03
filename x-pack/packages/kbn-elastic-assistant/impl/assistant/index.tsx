@@ -5,9 +5,19 @@
  * 2.0.
  */
 
+// remove after isFlyoutMode is gone
 /* eslint-disable complexity */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -72,6 +82,7 @@ export interface Props {
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
+  setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
   isFlyoutMode?: boolean;
 }
@@ -86,6 +97,7 @@ const AssistantComponent: React.FC<Props> = ({
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
+  setConversationTitle,
   onCloseFlyout,
   isFlyoutMode = false,
 }) => {
@@ -158,6 +170,12 @@ const AssistantComponent: React.FC<Props> = ({
         : WELCOME_CONVERSATION_TITLE,
     })
   );
+
+  useEffect(() => {
+    if (setConversationTitle) {
+      setConversationTitle(currentConversation.title);
+    }
+  }, [currentConversation.title, setConversationTitle]);
 
   const refetchCurrentConversation = useCallback(
     async (cId?: string) => {

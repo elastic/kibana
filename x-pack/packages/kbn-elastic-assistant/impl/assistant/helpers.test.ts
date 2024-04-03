@@ -170,7 +170,7 @@ describe('helpers', () => {
       expect(result).toBe(connectors[0]);
     });
 
-    it('should return undefined if there are multiple connectors', () => {
+    it('should return the connector id if there are multiple connectors', () => {
       const connectors: AIConnector[] = [
         {
           actionTypeId: '.gen-ai',
@@ -204,7 +204,7 @@ describe('helpers', () => {
         },
       ];
       const result = getDefaultConnector(connectors);
-      expect(result).toBeUndefined();
+      expect(result).toBe(connectors[0]);
     });
   });
 
