@@ -165,7 +165,7 @@ export const LinkContent = ({
     } else {
       tempUrl = getSavedObjectUrl();
     }
-    return url === '' ? setUrl(tempUrl!) : createShortUrl(tempUrl!);
+    return url === '' || objectType === 'lens' ? setUrl(tempUrl!) : createShortUrl(tempUrl!);
   }, [getSavedObjectUrl, getSnapshotUrl, createShortUrl, objectType, url]);
 
   useEffect(() => {

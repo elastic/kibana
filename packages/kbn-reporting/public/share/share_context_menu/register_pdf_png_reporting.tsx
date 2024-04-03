@@ -230,6 +230,8 @@ export const reportingExportModalProvider = ({
   license,
   application,
   usesUiCapabilities,
+  toasts,
+  theme,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -302,9 +304,15 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       tabType: 'Export',
-      reportType: [jobProviderOptions],
+      jobProviderOptions,
       reportingAPIClient: apiClient,
       requiresSavedState,
+      helpText: (
+        <FormattedMessage
+          id="reporting.modalContent.helpText"
+          defaultMessage="Exports can take a few minutes to generate."
+        />
+      ),
       generateReportButton: (
         <FormattedMessage
           id="reporting.modalContent.generateButtonLabel"
@@ -313,6 +321,9 @@ export const reportingExportModalProvider = ({
       ),
       createReportingJob: generateReportingJobPNGPDF,
       getJobParams,
+      layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
+      toasts,
+      theme,
     });
 
     return shareActions;

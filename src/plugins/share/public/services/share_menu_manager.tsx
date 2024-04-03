@@ -154,6 +154,7 @@ export class ShareMenuManager {
           toMountPoint(
             <ShareMenuV2
               shareContext={{
+                i18n,
                 allowEmbed,
                 allowShortUrl,
                 objectId,

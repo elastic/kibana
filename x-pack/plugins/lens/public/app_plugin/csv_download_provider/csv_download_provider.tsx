@@ -6,11 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormatFactory } from '../../../common/types';
+import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 declare global {
@@ -23,7 +25,7 @@ declare global {
   }
 }
 
-export const downloadCSVs = async ({
+async function downloadCSVs({
   activeData,
   title,
   formatFactory,
@@ -35,7 +37,7 @@ export const downloadCSVs = async ({
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
   columnsSorting?: string[];
-}) => {
+}) {
   if (!activeData) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
       window.ELASTIC_LENS_CSV_CONTENT = undefined;
@@ -70,7 +72,7 @@ export const downloadCSVs = async ({
   if (content) {
     downloadMultipleAs(content);
   }
-};
+}
 
 function getWarnings(activeData: TableInspectorAdapter) {
   const messages = [];
@@ -94,11 +96,13 @@ function getWarnings(activeData: TableInspectorAdapter) {
 interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
+  atLeastGold: boolean;
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
+  atLeastGold,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
@@ -115,35 +119,51 @@ export const downloadCsvShareProvider = ({
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
       {
-        defaultMessage: 'Export',
+        defaultMessage: 'CSV Download',
       }
     );
 
-    return [
-      {
-        shareMenuItem: {
-          name: panelTitle,
-          icon: 'document',
-          disabled: !csvEnabled,
-          sortOrder: 1,
-        },
-        id: 'lens csv',
-        tabType: 'Export',
-        name: 'Export',
-        reportType: ['CSV'],
-        isDisabled: !csvEnabled,
-        warnings: getWarnings(activeData),
-        createReportingJob: async () => {
-          await downloadCSVs({
-            title,
-            formatFactory: formatFactoryFn(),
-            activeData,
-            uiSettings,
-            columnsSorting,
-          });
-        },
-      },
-    ];
+    return atLeastGold
+      ? [
+          {
+            downloadCSVLens: async () => {
+              await downloadCSVs({
+                title,
+                formatFactory: formatFactoryFn(),
+                activeData,
+                uiSettings,
+                columnsSorting,
+              });
+              onClose?.();
+            },
+          },
+        ]
+      : [
+          {
+            shareMenuItem: {
+              name: panelTitle,
+              icon: 'document',
+              disabled: !csvEnabled,
+              sortOrder: 1,
+            },
+            content: (
+              <DownloadPanelContent
+                isDisabled={!csvEnabled}
+                warnings={getWarnings(activeData)}
+                onClick={async () => {
+                  await downloadCSVs({
+                    title,
+                    formatFactory: formatFactoryFn(),
+                    activeData,
+                    uiSettings,
+                    columnsSorting,
+                  });
+                  onClose?.();
+                }}
+              />
+            ),
+          },
+        ];
   };
 
   return {

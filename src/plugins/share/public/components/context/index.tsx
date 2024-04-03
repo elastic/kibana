@@ -7,6 +7,7 @@
  */
 
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
+import { I18nStart } from '@kbn/core/public';
 import { createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
@@ -28,6 +29,7 @@ export interface IShareContext extends ShareContext {
   objectTypeTitle?: string;
   isEmbedded: boolean;
   theme: ThemeServiceSetup;
+  i18n: I18nStart;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);

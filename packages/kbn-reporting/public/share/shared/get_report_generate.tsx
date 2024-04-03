@@ -12,16 +12,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import type { ReportingAPIClient } from '../..';
 
-export const generateReportingJobPNGPDF = (
-  intl: InjectedIntl,
-  apiClient: ReportingAPIClient,
-  getJobParams: () => any,
-  reportType: string,
-  toasts: ToastsSetup,
-  objectType: string,
-  onClose: () => void,
-  theme: ThemeServiceSetup
-) => {
+export const generateReportingJobPNGPDF = () => {
   const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
   return apiClient
     .createReportingJob(reportType, decoratedJobParams)

@@ -9,7 +9,7 @@
 import { ComponentType, ReactElement } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities } from '@kbn/core/public';
+import type { Capabilities, IToasts, ThemeServiceSetup } from '@kbn/core/public';
 import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
@@ -73,7 +73,7 @@ export interface ShareContextMenuPanelItem
  * directly in the context menu. If the item is clicked, the `panel` is shown.
  * */
 export interface ShareMenuItem {
-  shareMenuItem: ShareContextMenuPanelItem;
+  shareMenuItem?: ShareContextMenuPanelItem;
   // needed for Canvas
   panel?: EuiContextMenuPanelDescriptor;
   reportType?: Array<string | JobParamsProviderOptions>;
@@ -83,8 +83,13 @@ export interface ShareMenuItem {
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
   generateReportButton?: ReactElement;
   getJobParams?: Function;
-  createReportingJob?: Function;
   reportingAPIClient?: ReportingAPIClient;
+  jobProviderOptions?: JobParamsProviderOptions;
+  layoutOption?: 'print';
+  toasts?: IToasts;
+  theme?: ThemeServiceSetup;
+  downloadCSVLens?: Function;
+  content?: ReactElement;
 }
 
 /**

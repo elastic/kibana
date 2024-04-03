@@ -21,33 +21,56 @@ const exportTabReducer: IExportTab['reducer'] = (state, action) => {
   }
 };
 
-const ExportTabContent: NonNullable<IExportTab['content']> = ({ state, dispatch }) => {
-  const { shareMenuItems, objectType, isDirty, objectId, theme, onClose } = useShareTabsContext()!;
+function ExportTabContent() {
+  const {
+    shareMenuItems,
+    objectType,
+    isDirty,
+    objectId,
+    onClose,
+    i18n: i18nStart,
+  } = useShareTabsContext()!;
 
   return shareMenuItems.map((shareMenuItem, index) => {
-    const { getJobParams, createReportingJob, helpText, reportType, reportingAPIClient } =
-      shareMenuItem;
+    if (objectType === 'lens' && shareMenuItem.content) {
+      return shareMenuItem.content;
+    }
 
+    const {
+      getJobParams,
+      jobProviderOptions,
+      helpText,
+      layoutOption,
+      reportingAPIClient,
+      generateReportButton,
+      toasts,
+      theme,
+      downloadCSVLens,
+    } = shareMenuItem;
     return (
       // @ts-ignore props show undefined because of v1 share design modal needed the props to be optional for congruency with Canvas
       <ExportContent
         {...{
           getJobParams,
-          createReportingJob,
           helpText,
-          reportType,
           isDirty,
           objectType,
           objectId,
           theme,
           onClose,
           reportingAPIClient,
+          generateReportButton,
+          jobProviderOptions,
+          layoutOption,
+          toasts,
+          downloadCSVLens,
+          i18nStart,
         }}
         key={index}
       />
     );
   });
-};
+}
 
 export const exportTab: IExportTab = {
   id: 'export',
@@ -55,5 +78,6 @@ export const exportTab: IExportTab = {
     defaultMessage: 'Export',
   }),
   reducer: exportTabReducer,
+  // @ts-ignore
   content: ExportTabContent,
 };
