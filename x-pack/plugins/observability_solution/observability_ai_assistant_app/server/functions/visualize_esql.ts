@@ -6,6 +6,8 @@
  */
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLSearchReponse } from '@kbn/es-types';
+import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
@@ -17,6 +19,25 @@ export function registerVisualizeESQLFunction({
   functions.registerFunction(
     visualizeESQLFunction,
     async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
+      const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
+        ignoreOnMissingCallbacks: true,
+      });
+
+      if (errors.length) {
+        const errorMessages = errors.map((error) => {
+          return 'text' in error ? error.text : error.message;
+        });
+
+        return {
+          data: {
+            columns: [],
+            errorMessages,
+          },
+          content: {
+            message: 'The query has syntax errors',
+          },
+        };
+      }
       // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;

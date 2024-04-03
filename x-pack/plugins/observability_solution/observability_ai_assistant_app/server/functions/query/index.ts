@@ -357,7 +357,6 @@ export function registerQueryFunction({
           if (msg.message.function_call.name) {
             return msg;
           }
-
           const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];
