@@ -14,8 +14,10 @@ export interface ContextValue extends StartDependencies {
   application: CoreStart['application'];
   http: HttpSetup;
   notifications: CoreStart['notifications'];
+  docLinks: CoreStart['docLinks'];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   uiSettings: CoreStart['uiSettings'];
+  settings: CoreStart['settings'];
 }
 
 export const AppContext = createContext<ContextValue>(null as any);

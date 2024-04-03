@@ -37,6 +37,9 @@ const addErrorMock = jest.fn();
 
 jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   services: {
+    uiSettings: {
+      get: jest.fn(),
+    },
     notifications: {
       toasts: {
         addError: addErrorMock,
