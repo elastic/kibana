@@ -22,6 +22,7 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
@@ -55,9 +56,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 setGlobalDate();
