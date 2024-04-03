@@ -247,21 +247,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
       },
       {
         field: 'description',
-        name: (
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.table.descriptionColumnTitle"
-            defaultMessage="Description"
-          />
-        ),
+        sortable: true,
+        name: i18n.translate('xpack.ingestPipelines.list.table.descriptionColumnTitle', {
+          defaultMessage: 'Description',
+        }),
       },
       {
         width: '120px',
-        name: (
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.table.preprocessorsColumnTitle"
-            defaultMessage="Preprocessors"
-          />
-        ),
+        name: i18n.translate('xpack.ingestPipelines.list.table.preprocessorsColumnTitle', {
+          defaultMessage: 'Preprocessors',
+        }),
         align: 'right',
         dataType: 'number',
         sortable: ({ processors }: Pipeline) => processors.length,
