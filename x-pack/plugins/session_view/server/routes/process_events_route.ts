@@ -113,6 +113,7 @@ export const fetchEventsAndScopedAlerts = async (
                 should: [
                   { term: { [EVENT_ACTION]: 'fork' } },
                   { term: { [EVENT_ACTION]: 'exec' } },
+                  { term: { [EVENT_ACTION]: 'executed' } },
                   { term: { [EVENT_ACTION]: 'end' } },
                 ],
               },

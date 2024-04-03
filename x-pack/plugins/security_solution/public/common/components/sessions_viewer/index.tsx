@@ -38,7 +38,8 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           bool: {
             // show sessions table results by filtering events where event.action is fork, exec, or end
             should: [
-              { term: { [EVENT_ACTION]: 'exec' } },
+              { term: { [EVENT_ACTION]: 'exec' } }, // exec event.action is used by Endpoint and Cloud Defend
+              { term: { [EVENT_ACTION]: 'executed' } }, // executed event.action is used by auditbeat
               { term: { [EVENT_ACTION]: 'fork' } },
               { term: { [EVENT_ACTION]: 'end' } },
             ],

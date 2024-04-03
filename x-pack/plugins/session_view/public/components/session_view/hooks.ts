@@ -74,7 +74,10 @@ export const useFetchSessionViewProcessEvents = (
             const action = event.event?.action as EventAction;
             return (
               action &&
-              (action.includes('fork') || action.includes('exec') || action.includes('end'))
+              (action.includes('fork') ||
+                action.includes('exec') ||
+                action.includes('executed') ||
+                action.includes('end'))
             );
           });
 
@@ -92,7 +95,11 @@ export const useFetchSessionViewProcessEvents = (
         const filtered = firstPage.events.filter((event) => {
           const action = event.event?.action as EventAction;
           return (
-            action && (action.includes('fork') || action.includes('exec') || action.includes('end'))
+            action &&
+            (action.includes('fork') ||
+              action.includes('exec') ||
+              action.includes('executed') ||
+              action.includes('end'))
           );
         });
 

@@ -37,7 +37,14 @@ import {
   useFetchGetTotalIOBytes,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
-import { CLOUD_DEFEND_INDEX, ENDPOINT_INDEX } from '../../methods';
+import {
+  AUDITBEAT_DATA_SOURCE,
+  AUDITBEAT_INDEX,
+  CLOUD_DEFEND_DATA_SOURCE,
+  CLOUD_DEFEND_INDEX,
+  ELASTIC_DEFEND_DATA_SOURCE,
+  ENDPOINT_INDEX,
+} from '../../methods';
 import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
@@ -67,9 +74,11 @@ export const SessionView = ({
     let source = '';
     // append 'app' details (which telemtry source is this from?)
     if (index === CLOUD_DEFEND_INDEX) {
-      source += 'cloud-defend';
+      source += CLOUD_DEFEND_DATA_SOURCE;
     } else if (index === ENDPOINT_INDEX) {
-      source += 'endpoint';
+      source += ELASTIC_DEFEND_DATA_SOURCE;
+    } else if (index === AUDITBEAT_INDEX) {
+      source += AUDITBEAT_DATA_SOURCE;
     } else {
       // any telemetry producers setting process.entry_leader.entity_id will cause sessionview action to appear in timeline tables.
       source += 'unknown';
@@ -467,6 +476,7 @@ export const SessionView = ({
                 css={styles.detailPanel}
               >
                 <SessionViewDetailPanel
+                  index={index}
                   alerts={alerts}
                   alertsCount={alertsCount}
                   isFetchingAlerts={isFetchingAlerts}

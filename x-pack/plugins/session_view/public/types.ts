@@ -25,6 +25,8 @@ export interface SessionViewPluginSetupDeps {
 
 // the following are all the reportUiCounter click tracking events we send up.
 export type SessionViewTelemetryKey =
+  | 'loaded_from_auditbeat_log'
+  | 'loaded_from_auditbeat_alert'
   | 'loaded_from_cloud_defend_log'
   | 'loaded_from_cloud_defend_alert'
   | 'loaded_from_endpoint_log'
