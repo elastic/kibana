@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  SentineloneRunScriptAction,
+  SentineloneScriptSelector,
+} from '../command_render_components/sentinelone_run_script_action';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
@@ -494,6 +498,42 @@ export const getEndpointConsoleCommands = ({
         commandName: 'upload',
         privileges: endpointPrivileges,
       }),
+    });
+  }
+
+  if (agentType === 'sentinel_one') {
+    consoleCommands.push({
+      //
+      name: 'run',
+      about: 'Run a script from sentinelone',
+      RenderComponent: SentineloneRunScriptAction,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'run --script ...args',
+      exampleInstruction: 'run --script foo --one=1',
+      validate: undefined,
+      mustHaveArgs: false,
+      args: {
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+        script: {
+          required: false,
+          allowMultiples: false,
+          about: 'Select a SentinelOne defined script to run',
+          mustHaveValue: 'non-empty-string',
+          SelectorComponent: SentineloneScriptSelector,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 4,
     });
   }
 

@@ -11,7 +11,7 @@ import type { EndpointAppContext } from '../../../types';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../../with_endpoint_authz';
 
-const SENTINEL_ONE_ACTIONS_GET_SCRIPTS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/sentinel_one/scripts`;
+const SENTINEL_ONE_ACTIONS_GET_SCRIPTS_ROUTE = `/internal${BASE_ENDPOINT_ACTION_ROUTE}/sentinel_one/scripts`;
 
 export const registerSentinelOneRoutes = (
   router: SecuritySolutionPluginRouter,

@@ -83,6 +83,11 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             endpointPrivileges,
           }).map((command) => {
             if (command.name !== 'status') {
+              // POC code
+              if (command.name === 'run') {
+                return command;
+              }
+
               return {
                 ...command,
                 helpHidden: !isResponseActionSupported(
