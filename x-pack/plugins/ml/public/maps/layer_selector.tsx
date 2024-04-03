@@ -7,9 +7,11 @@
 
 import React, { Component } from 'react';
 
-import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ML_ANOMALY_LAYERS, MlAnomalyLayersType } from './util';
+import type { MlAnomalyLayersType } from './util';
+import { ML_ANOMALY_LAYERS } from './util';
 import { ACTUAL_LABEL, TYPICAL_LABEL, TYPICAL_TO_ACTUAL } from './anomaly_source_field';
 
 interface Props {

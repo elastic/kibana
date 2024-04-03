@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { App, ExpressionsContext } from './app';
 import { countEvent, getEvents, pluck } from './functions';
@@ -33,7 +33,7 @@ export class PartialResultsExamplePlugin implements Plugin<void, void, SetupDeps
     application.register({
       id: 'partialResultsExample',
       title: 'Partial Results Example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: async ({ element }: AppMountParameters) => {
         ReactDOM.render(
           <ExpressionsContext.Provider value={expressionsStart}>

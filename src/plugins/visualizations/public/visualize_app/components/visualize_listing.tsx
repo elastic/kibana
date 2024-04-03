@@ -64,6 +64,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
   return {
     id: savedObject.id as string,
     updatedAt: savedObject.updatedAt as string,
+    managed: savedObject.managed as boolean,
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
     icon: savedObject.icon as string,
@@ -90,7 +91,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'itemIsEditable'
+  | 'rowItemActions'
 >;
 
 const useTableListViewProps = (
@@ -260,7 +261,23 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
+    rowItemActions: ({ managed, attributes: { readOnly } }) =>
+      !visualizeCapabilities.save || readOnly
+        ? {
+            edit: {
+              enabled: false,
+              reason: managed
+                ? i18n.translate('visualizations.managedLegacyVisMessage', {
+                    defaultMessage:
+                      'Elastic manages this visualisation. Changing it is not possible.',
+                  })
+                : i18n.translate('visualizations.readOnlyLegacyVisMessage', {
+                    defaultMessage:
+                      "These details can't be edited because this visualization is no longer supported.",
+                  }),
+            },
+          }
+        : undefined,
   };
 
   return props;
@@ -386,9 +403,9 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            onClickTitle={(item) => {
-              tableViewProps.editItem?.(item);
-            }}
+            getOnClickTitle={(item) =>
+              item.attributes.readOnly ? undefined : () => tableViewProps.editItem?.(item)
+            }
             getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
               readOnly || (editor && 'onEdit' in editor)
                 ? undefined

@@ -21,10 +21,19 @@ export const useInvalidateRiskEngineStatusQuery = () => {
   }, [queryClient]);
 };
 
-export const useIsNewRiskScoreModuleInstalled = () => {
-  const { data: riskEngineStatus } = useRiskEngineStatus();
+interface RiskScoreModuleStatus {
+  isLoading: boolean;
+  installed?: boolean;
+}
 
-  return riskEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+export const useIsNewRiskScoreModuleInstalled = (): RiskScoreModuleStatus => {
+  const { data: riskEngineStatus, isLoading } = useRiskEngineStatus();
+
+  if (isLoading) {
+    return { isLoading: true };
+  }
+
+  return { isLoading: false, installed: !!riskEngineStatus?.isNewRiskScoreModuleInstalled };
 };
 
 export const useRiskEngineStatus = () => {

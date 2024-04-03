@@ -87,6 +87,8 @@ import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 
+const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -95,27 +97,53 @@ export async function isPackageInstalled(options: {
   return installedPackage !== undefined;
 }
 
+// Error used to retry in isPackageVersionOrLaterInstalled
+class CurrentlyInstallingError extends Error {}
+
+/**
+ * Check if a package is currently installed,
+ * if the package is currently installing it will retry until MAX_ENSURE_INSTALL_TIME is reached
+ */
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
-}): Promise<{ package: Installation; installType: InstallType } | false> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedPackage = installedPackageObject?.attributes;
-  if (
-    installedPackage &&
-    (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
-  ) {
-    let installType: InstallType;
-    try {
-      installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
-    } catch (e) {
-      installType = 'unknown';
+}): Promise<{ package: Installation } | false> {
+  return pRetry(
+    async () => {
+      const { savedObjectsClient, pkgName, pkgVersion } = options;
+      const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+      const installedPackage = installedPackageObject?.attributes;
+      if (
+        installedPackage &&
+        (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
+      ) {
+        if (installedPackage.install_status === 'installing') {
+          throw new CurrentlyInstallingError(
+            `Package ${pkgName}-${pkgVersion} is currently installing`
+          );
+        } else if (installedPackage.install_status === 'install_failed') {
+          return false;
+        }
+
+        return { package: installedPackage };
+      }
+      return false;
+    },
+    {
+      maxRetryTime: MAX_ENSURE_INSTALL_TIME,
+      onFailedAttempt: (error) => {
+        if (!(error instanceof CurrentlyInstallingError)) {
+          throw error;
+        }
+      },
     }
-    return { package: installedPackage, installType };
-  }
-  return false;
+  ).catch((err): false => {
+    if (err instanceof CurrentlyInstallingError) {
+      return false;
+    }
+    throw err;
+  });
 }
 
 export async function ensureInstalledPackage(options: {
@@ -147,6 +175,7 @@ export async function ensureInstalledPackage(options: {
     pkgName: pkgKeyProps.name,
     pkgVersion: pkgKeyProps.version,
   });
+
   if (installedPackageResult) {
     return installedPackageResult.package;
   }

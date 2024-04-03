@@ -53,7 +53,7 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'exceptions');
+    cy.task('esArchiverUnload', { archiveName: 'exceptions' });
   });
 
   it('Creates exception item', () => {

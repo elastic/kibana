@@ -26,8 +26,10 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
-  const { data, isLoading, isSuccess, mutate } = useMutation({
+  const [showSyncCallOut, setShowSyncCallOut] = useState(false);
+  const { data, isLoading, mutate } = useMutation({
     mutationFn: async ({ inputName, sync }: { inputName: string | null; sync?: boolean }) => {
+      setShowSyncCallOut(false);
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
         await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
@@ -36,6 +38,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
       }
       if (sync) {
         await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+        setShowSyncCallOut(true);
       }
       return inputName;
     },
@@ -115,7 +118,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isSuccess && (
+      {showSyncCallOut && (
         <>
           <EuiSpacer />
           <SyncScheduledCallOut />

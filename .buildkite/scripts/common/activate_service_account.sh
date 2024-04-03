@@ -4,18 +4,18 @@ set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
 
-BUCKET_OR_EMAIL="${1:-}"
+CALL_ARGUMENT="${1:-}"
 GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
 GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
-if [[ -z "$BUCKET_OR_EMAIL" ]]; then
+if [[ -z "$CALL_ARGUMENT" ]]; then
   echo "Usage: $0 <bucket_name|email>"
   exit 1
-elif [[ "$BUCKET_OR_EMAIL" == "--unset-impersonation" ]]; then
+elif [[ "$CALL_ARGUMENT" == "--unset-impersonation" ]]; then
   echo "Unsetting impersonation"
   gcloud config unset auth/impersonate_service_account
   exit 0
-elif [[ "$BUCKET_OR_EMAIL" == "--logout-gcloud" ]]; then
+elif [[ "$CALL_ARGUMENT" == "--logout-gcloud" ]]; then
   echo "Logging out of gcloud"
   if [[ -x "$(command -v gcloud)" ]] && [[ "$(gcloud auth list 2>/dev/null | grep $GCLOUD_SA_PROXY_EMAIL)" != "" ]]; then
     gcloud auth revoke $GCLOUD_SA_PROXY_EMAIL --no-user-output-enabled
@@ -48,12 +48,12 @@ fi
 
 # Check if the arg is a service account e-mail or a bucket name
 EMAIL=""
-if [[ "$BUCKET_OR_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-  EMAIL="$BUCKET_OR_EMAIL"
-elif [[ "$BUCKET_OR_EMAIL" =~ ^gs://* ]]; then
-  BUCKET_NAME="${BUCKET_OR_EMAIL:5}"
+if [[ "$CALL_ARGUMENT" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  EMAIL="$CALL_ARGUMENT"
+elif [[ "$CALL_ARGUMENT" =~ ^gs://* ]]; then
+  BUCKET_NAME="${CALL_ARGUMENT:5}"
 else
-  BUCKET_NAME="$BUCKET_OR_EMAIL"
+  BUCKET_NAME="$CALL_ARGUMENT"
 fi
 
 if [[ -z "$EMAIL" ]]; then
@@ -62,7 +62,10 @@ if [[ -z "$EMAIL" ]]; then
       EMAIL="kibana-ci-access-coverage@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-ci-es-snapshots-daily")
-      EMAIL="kibana-ci-access-es-snapshots@$GCLOUD_EMAIL_POSTFIX"
+      EMAIL="kibana-ci-access-es-daily@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ci-es-snapshots-permanent")
+      EMAIL="kibana-ci-access-es-permanent@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "kibana-so-types-snapshots")
       EMAIL="kibana-ci-access-so-snapshots@$GCLOUD_EMAIL_POSTFIX"

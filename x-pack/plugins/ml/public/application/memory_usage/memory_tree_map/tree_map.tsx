@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Chart,
   Settings,
@@ -15,12 +16,13 @@ import {
   LIGHT_THEME,
 } from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
-import { MemoryUsageInfo } from '../../../../common/types/trained_models';
-import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
+import type { MemoryUsageInfo } from '../../../../common/types/trained_models';
+import type { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
 import { useFieldFormatter, useMlKibana } from '../../contexts/kibana';

@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable, timer } from 'rxjs';
-import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
+import { mergeMap, map, filter, switchMap, catchError } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';

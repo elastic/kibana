@@ -9,7 +9,11 @@ import { type Subject, ReplaySubject } from 'rxjs';
 import { ResourceInstaller } from './resource_installer';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  IndicesGetDataStreamResponse,
+  IndicesDataStreamIndex,
+  IndicesDataStream,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
@@ -45,10 +49,10 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       generation: 1,
       timestamp_field: { name: 'ignored' },
       hidden: true,
-      indices: [{ index_name: 'ignored', index_uuid: 'ignored' }],
+      indices: [{ index_name: 'ignored', index_uuid: 'ignored' } as IndicesDataStreamIndex],
       status: 'green',
       template: 'ignored',
-    },
+    } as IndicesDataStream,
   ],
 };
 

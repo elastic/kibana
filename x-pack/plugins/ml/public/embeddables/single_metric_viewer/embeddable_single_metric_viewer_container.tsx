@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import moment from 'moment';
 import { EuiResizeObserver } from '@elastic/eui';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { throttle } from 'lodash';
-import { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useToastNotificationService } from '../../application/services/toast_notification_service';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
@@ -48,18 +50,7 @@ export interface EmbeddableSingleMetricViewerContainerProps {
 
 export const EmbeddableSingleMetricViewerContainer: FC<
   EmbeddableSingleMetricViewerContainerProps
-> = ({
-  id,
-  embeddableContext,
-  embeddableInput,
-  services,
-  refresh,
-  onInputChange,
-  onOutputChange,
-  onRenderComplete,
-  onError,
-  onLoading,
-}) => {
+> = ({ id, embeddableContext, embeddableInput, services, refresh, onRenderComplete }) => {
   useEmbeddableExecutionContext<SingleMetricViewerEmbeddableInput>(
     services[0].executionContext,
     embeddableInput,
@@ -69,11 +60,11 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [zoom, setZoom] = useState<AppStateZoom | undefined>();
   const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
-  const [detectorIndex, setDetectorIndex] = useState<number>(0);
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
+  const [jobsLoaded, setJobsLoaded] = useState(false);
 
-  const { mlApiServices } = services[2];
+  const { mlApiServices, mlJobService } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
     embeddableInput,
     refresh,
@@ -81,12 +72,25 @@ export const EmbeddableSingleMetricViewerContainer: FC<
     onRenderComplete
   );
   const selectedJobId = data?.jobIds[0];
+  // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,
+  // otherwise anomaly table data will not be loaded.
+  const functionDescription =
+    (data?.functionDescription ?? '') === '' ? undefined : data.functionDescription;
   const previousRefresh = usePrevious(lastRefresh ?? 0);
   const mlTimeSeriesExplorer = useTimeSeriesExplorerService();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
   const toastNotificationService = useToastNotificationService();
+
+  useEffect(function setUpJobsLoaded() {
+    async function loadJobs() {
+      await mlJobService.loadJobsWrapper();
+      setJobsLoaded(true);
+    }
+    loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     function setUpSelectedJob() {
@@ -135,10 +139,6 @@ export const EmbeddableSingleMetricViewerContainer: FC<
        */
 
       switch (action) {
-        case APP_STATE_ACTION.SET_DETECTOR_INDEX:
-          setDetectorIndex(payload);
-          break;
-
         case APP_STATE_ACTION.SET_FORECAST_ID:
           setSelectedForecastId(payload);
           setZoom(undefined);
@@ -154,7 +154,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
       }
     },
 
-    [setZoom, setDetectorIndex, setSelectedForecastId]
+    [setZoom, setSelectedForecastId]
   );
 
   const containerPadding = 10;
@@ -174,7 +174,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
           ref={resizeRef}
           className="ml-time-series-explorer"
         >
-          {data !== undefined && autoZoomDuration !== undefined && (
+          {data !== undefined && autoZoomDuration !== undefined && jobsLoaded && (
             <TimeSeriesExplorerEmbeddableChart
               chartWidth={chartWidth - containerPadding}
               dataViewsService={services[1].data.dataViews}
@@ -182,14 +182,17 @@ export const EmbeddableSingleMetricViewerContainer: FC<
               appStateHandler={appStateHandler}
               autoZoomDuration={autoZoomDuration}
               bounds={bounds}
+              dateFormatTz={moment.tz.guess()}
               lastRefresh={lastRefresh ?? 0}
               previousRefresh={previousRefresh}
               selectedJobId={selectedJobId}
-              selectedDetectorIndex={detectorIndex}
+              selectedDetectorIndex={data.selectedDetectorIndex}
               selectedEntities={data.selectedEntities}
               selectedForecastId={selectedForecastId}
+              tableInterval="auto"
+              tableSeverity={0}
               zoom={zoom}
-              functionDescription={data.functionDescription}
+              functionDescription={functionDescription}
               selectedJob={selectedJob}
             />
           )}

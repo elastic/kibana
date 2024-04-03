@@ -6,26 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { v4 } from 'uuid';
-import { omit } from 'lodash';
-import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
-import deepEqual from 'fast-deep-equal';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
+  DefaultEmbeddableApi,
   EmbeddableFactoryNotFoundError,
   isExplicitInputWithAttributes,
-  DefaultEmbeddableApi,
   PanelNotFoundError,
-  ReactEmbeddableParentContext,
   reactEmbeddableRegistryHasKey,
   ViewMode,
   type EmbeddableFactory,
@@ -33,17 +27,25 @@ import {
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-
+import deepEqual from 'fast-deep-equal';
+import { omit } from 'lodash';
+import React, { createContext, useContext } from 'react';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
+import { v4 } from 'uuid';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
+import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_LOADED_EVENT,
@@ -55,6 +57,7 @@ import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
 import { placePanel } from '../component/panel_placement';
+import { panelPlacementStrategies } from '../component/panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
@@ -80,8 +83,6 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
-import { panelPlacementStrategies } from '../component/panel_placement/place_new_panel_strategies';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -140,7 +141,6 @@ export class DashboardContainer
 
   // performance monitoring
   private dashboardCreationStartTime?: number;
-  private savedObjectLoadTime?: number;
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
@@ -160,6 +160,7 @@ export class DashboardContainer
   // new embeddable framework
   public reactEmbeddableChildren: BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }> =
     new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({});
+  public savedObjectReferences: Reference[] = [];
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -266,8 +267,6 @@ export class DashboardContainer
         value2: panelCount,
         key3: 'total_load_time',
         value3: totalDuration,
-        key4: 'saved_object_load_time',
-        value4: this.savedObjectLoadTime,
       });
     }
   }
@@ -301,9 +300,7 @@ export class DashboardContainer
         >
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardContainerContext.Provider value={this}>
-              <ReactEmbeddableParentContext.Provider value={{ parentApi: this }}>
-                <DashboardViewport />
-              </ReactEmbeddableParentContext.Provider>
+              <DashboardViewport />
             </DashboardContainerContext.Provider>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
@@ -600,10 +597,8 @@ export class DashboardContainer
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      if (this.controlGroup && loadDashboardReturn?.dashboardInput.controlGroupInput) {
-        this.controlGroup.dispatch.setLastSavedInput(
-          loadDashboardReturn?.dashboardInput.controlGroupInput
-        );
+      if (this.controlGroup) {
+        this.controlGroup.setSavedState(loadDashboardReturn.dashboardInput?.controlGroupInput);
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
@@ -662,10 +657,7 @@ export class DashboardContainer
     for (const [id, panel] of Object.entries(this.getInput().panels)) {
       const title = await (async () => {
         if (reactEmbeddableRegistryHasKey(panel.type)) {
-          return (
-            this.reactEmbeddableChildren.value[id]?.panelTitle?.value ??
-            this.reactEmbeddableChildren.value[id]?.defaultPanelTitle?.value
-          );
+          return getPanelTitle(this.reactEmbeddableChildren.value[id]);
         }
         await this.untilEmbeddableLoaded(id);
         const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(id);
@@ -716,6 +708,7 @@ export class DashboardContainer
 
   public setFocusedPanelId = (id: string | undefined) => {
     this.dispatch.setFocusedPanelId(id);
+    this.setScrollToPanelId(id);
   };
 
   // ------------------------------------------------------------------------------------------------------
@@ -736,8 +729,8 @@ export class DashboardContainer
     } = this.getState();
     const panel: DashboardPanelState | undefined = panels[childId];
 
-    // TODO Embeddable refactor. References here
-    return { rawState: panel?.explicitInput, version: panel?.version, references: [] };
+    const references = getReferencesForPanelId(childId, this.savedObjectReferences);
+    return { rawState: panel?.explicitInput, version: panel?.version, references };
   };
 
   public removePanel(id: string) {

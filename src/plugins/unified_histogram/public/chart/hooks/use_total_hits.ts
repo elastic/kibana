@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Datatable, isExpressionValueError } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { MutableRefObject, useEffect, useRef } from 'react';
-import { catchError, filter, lastValueFrom, map, Observable, of, pluck } from 'rxjs';
+import { catchError, filter, lastValueFrom, map, Observable, of } from 'rxjs';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
@@ -96,6 +94,10 @@ const fetchTotalHits = async ({
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   isPlainRecord?: boolean;
 }) => {
+  if (isPlainRecord) {
+    // skip, it will be handled by Discover code
+    return;
+  }
   abortController.current?.abort();
   abortController.current = undefined;
 
@@ -109,24 +111,15 @@ const fetchTotalHits = async ({
 
   abortController.current = newAbortController;
 
-  const response = isPlainRecord
-    ? await fetchTotalHitsTextBased({
-        services,
-        abortController: newAbortController,
-        dataView,
-        request,
-        query,
-        timeRange,
-      })
-    : await fetchTotalHitsSearchSource({
-        services,
-        abortController: newAbortController,
-        dataView,
-        request,
-        filters,
-        query,
-        timeRange,
-      });
+  const response = await fetchTotalHitsSearchSource({
+    services,
+    abortController: newAbortController,
+    dataView,
+    request,
+    filters,
+    query,
+    timeRange,
+  });
 
   if (!response) {
     return;
@@ -217,62 +210,4 @@ const fetchTotalHitsSearchSource = async ({
       : UnifiedHistogramFetchStatus.complete;
 
   return { resultStatus, result };
-};
-
-const fetchTotalHitsTextBased = async ({
-  services: { expressions },
-  abortController,
-  dataView,
-  request,
-  query,
-  timeRange,
-}: {
-  services: UnifiedHistogramServices;
-  abortController: AbortController;
-  dataView: DataView;
-  request: UnifiedHistogramRequestContext | undefined;
-  query: Query | AggregateQuery;
-  timeRange: TimeRange;
-}) => {
-  const ast = await textBasedQueryStateToAstWithValidation({
-    query,
-    time: timeRange,
-    dataView,
-  });
-
-  if (abortController.signal.aborted) {
-    return undefined;
-  }
-
-  if (!ast) {
-    return {
-      resultStatus: UnifiedHistogramFetchStatus.error,
-      result: new Error('Invalid text based query'),
-    };
-  }
-
-  const result = await lastValueFrom(
-    expressions
-      .run<null, Datatable>(ast, null, {
-        inspectorAdapters: { requests: request?.adapter },
-        searchSessionId: request?.searchSessionId,
-        executionContext: {
-          description: 'fetch total hits',
-        },
-      })
-      .pipe(pluck('result'))
-  );
-
-  if (abortController.signal.aborted) {
-    return undefined;
-  }
-
-  if (isExpressionValueError(result)) {
-    return {
-      resultStatus: UnifiedHistogramFetchStatus.error,
-      result: new Error(result.error.message),
-    };
-  }
-
-  return { resultStatus: UnifiedHistogramFetchStatus.complete, result: result.rows.length };
 };

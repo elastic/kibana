@@ -117,6 +117,16 @@ export const closeRulePreview = () => {
   cy.get(INSTALL_PREBUILT_RULE_PREVIEW).should('not.exist');
 };
 
+export const selectPreviewTab = (tabTitle: string) =>
+  cy.get(UPDATE_PREBUILT_RULE_PREVIEW).find('.euiTab').contains(tabTitle).click();
+
+export const assertSelectedPreviewTab = (tabTitle: string) =>
+  cy
+    .get(UPDATE_PREBUILT_RULE_PREVIEW)
+    .find('.euiTab-isSelected')
+    .invoke('text')
+    .should('eq', tabTitle);
+
 export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsset>) => {
   cy.get(AUTHOR_PROPERTY_TITLE).should('have.text', 'Author');
   cy.get(AUTHOR_PROPERTY_VALUE_ITEM).then((items) => {

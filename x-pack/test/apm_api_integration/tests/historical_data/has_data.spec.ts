@@ -15,6 +15,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177385
   registry.when('Historical data ', { config: 'basic', archives: [] }, () => {
     describe('when there is not data', () => {
       it('returns hasData=false', async () => {

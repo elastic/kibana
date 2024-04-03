@@ -6,10 +6,11 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { combineLatest, from, Observable, Subject, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { combineLatest, from, Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
-import { mergeMap, switchMap } from 'rxjs/operators';
+import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
 import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';

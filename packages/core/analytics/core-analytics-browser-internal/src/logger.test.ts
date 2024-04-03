@@ -7,16 +7,17 @@
  */
 
 import type { LogRecord } from '@kbn/logging';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { createLogger } from './logger';
 
 describe('createLogger', () => {
   // Calling `.mockImplementation` on all of them to avoid jest logging the console usage
-  const logErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-  const logWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-  const logInfoSpy = jest.spyOn(console, 'info').mockImplementation();
-  const logDebugSpy = jest.spyOn(console, 'debug').mockImplementation();
-  const logTraceSpy = jest.spyOn(console, 'trace').mockImplementation();
-  const logLogSpy = jest.spyOn(console, 'log').mockImplementation();
+  const logErrorSpy = jest.spyOn(unsafeConsole, 'error').mockImplementation();
+  const logWarnSpy = jest.spyOn(unsafeConsole, 'warn').mockImplementation();
+  const logInfoSpy = jest.spyOn(unsafeConsole, 'info').mockImplementation();
+  const logDebugSpy = jest.spyOn(unsafeConsole, 'debug').mockImplementation();
+  const logTraceSpy = jest.spyOn(unsafeConsole, 'trace').mockImplementation();
+  const logLogSpy = jest.spyOn(unsafeConsole, 'log').mockImplementation();
 
   beforeEach(() => {
     jest.clearAllMocks();

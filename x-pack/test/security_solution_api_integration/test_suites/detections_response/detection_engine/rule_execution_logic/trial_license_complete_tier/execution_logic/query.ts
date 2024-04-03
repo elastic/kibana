@@ -43,6 +43,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import moment from 'moment';
@@ -50,12 +51,8 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 import {
   createExceptionList,
   createExceptionListItem,
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   getOpenAlerts,
   getPreviewAlerts,
-  getRuleForAlertTesting,
   getSimpleRule,
   previewRule,
   setAlertStatus,
@@ -65,6 +62,12 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   dataGeneratorFactory,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -87,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
@@ -94,7 +98,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Query type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/177101
+  describe.skip('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
@@ -283,6 +288,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
       });
 
       after(async () => {
@@ -296,8 +304,8 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('important');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('very_important');
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
       });
     });
 

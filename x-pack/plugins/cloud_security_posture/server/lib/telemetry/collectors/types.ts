@@ -77,9 +77,11 @@ export interface CloudSecurityAccountsStats {
   cloud_provider: string | null;
   package_policy_id: string | null;
   posture_management_stats?: CloudPostureAccountsStats;
+  posture_management_stats_enabled_rules?: CloudPostureAccountsStats;
   kspm_stats?: KSPMAccountsStats;
   latest_doc_count: number;
   latest_doc_updated_timestamp: string;
+  has_muted_rules?: boolean;
 }
 export interface CloudPostureAccountsStats {
   posture_score: number;
@@ -141,6 +143,7 @@ export interface CloudSecurityInstallationStats {
   created_at: string;
   agent_count: number;
   is_setup_automatic: boolean;
+  is_agentless: boolean;
   account_type?: 'single-account' | 'organization-account';
   setup_access_option: SetupAccessOption;
 }

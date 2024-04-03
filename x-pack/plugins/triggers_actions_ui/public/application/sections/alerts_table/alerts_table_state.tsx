@@ -14,9 +14,16 @@ import {
   EuiEmptyPrompt,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
+  EuiButton,
+  EuiCode,
+  EuiCopy,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
@@ -37,11 +44,18 @@ import {
   Alert,
   Alerts,
   AlertsTableConfigurationRegistry,
+  AlertsTableConfigurationRegistryContract,
   AlertsTableProps,
   RowSelectionState,
   TableUpdateHandlerArgs,
 } from '../../../types';
-import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+import {
+  ALERTS_TABLE_CONF_ERROR_MESSAGE,
+  ALERTS_TABLE_CONF_ERROR_TITLE,
+  ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
+  ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
+  ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
+} from './translations';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
@@ -49,8 +63,8 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
-import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -58,7 +72,7 @@ const DefaultPagination = {
 };
 
 export type AlertsTableStateProps = {
-  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
+  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
@@ -126,10 +140,37 @@ const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
 
+const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
+  return (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      title={<h2>{ALERTS_TABLE_UNKNOWN_ERROR_TITLE}</h2>}
+      body={
+        <>
+          <p>{ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE}</p>
+          {error.message && <EuiCode>{error.message}</EuiCode>}
+        </>
+      }
+      actions={
+        <EuiCopy textToCopy={[error.message, error.stack].filter(Boolean).join('\n')}>
+          {(copy) => (
+            <EuiButton onClick={copy} color="danger" fill>
+              {ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL}
+            </EuiButton>
+          )}
+        </EuiCopy>
+      }
+    />
+  );
+};
+
 const AlertsTableState = (props: AlertsTableStateProps) => {
   return (
     <QueryClientProvider client={alertsTableQueryClient} context={AlertsTableQueryContext}>
-      <AlertsTableStateWithQueryProvider {...props} />
+      <ErrorBoundary fallback={ErrorBoundaryFallback}>
+        <AlertsTableStateWithQueryProvider {...props} />
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 };
@@ -256,14 +297,16 @@ const AlertsTableStateWithQueryProvider = ({
   });
 
   const { data: mutedAlerts } = useGetMutedAlerts([
-    ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
+    ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0])),
   ]);
 
   useEffect(() => {
-    alertsTableConfigurationRegistry.update(configurationId, {
-      ...alertsTableConfiguration,
-      actions: { toggleColumn: onToggleColumn },
-    });
+    if (hasAlertsTableConfiguration) {
+      alertsTableConfigurationRegistry.update(configurationId, {
+        ...alertsTableConfiguration,
+        actions: { toggleColumn: onToggleColumn },
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onToggleColumn]);
 
@@ -444,7 +487,18 @@ const AlertsTableStateWithQueryProvider = ({
     ]
   );
 
-  return hasAlertsTableConfiguration ? (
+  if (!hasAlertsTableConfiguration) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertsTableNoConfiguration"
+        iconType="watchesApp"
+        title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+        body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+      />
+    );
+  }
+
+  return (
     <AlertsTableContext.Provider
       value={{
         mutedAlerts: mutedAlerts ?? {},
@@ -474,13 +528,6 @@ const AlertsTableStateWithQueryProvider = ({
       )}
       {alertsCount !== 0 && !isCasesContextAvailable && <AlertsTable {...tableProps} />}
     </AlertsTableContext.Provider>
-  ) : (
-    <EuiEmptyPrompt
-      data-test-subj="alertsTableNoConfiguration"
-      iconType="watchesApp"
-      title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
-      body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
-    />
   );
 };
 

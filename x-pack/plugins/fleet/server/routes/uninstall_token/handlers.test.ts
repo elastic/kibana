@@ -61,9 +61,24 @@ describe('uninstall token handlers', () => {
 
   describe('getUninstallTokensMetadataHandler', () => {
     const uninstallTokensFixture: UninstallTokenMetadata[] = [
-      { id: 'id-1', policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-2', policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-3', policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
+      {
+        id: 'id-1',
+        policy_id: 'policy-id-1',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
+      {
+        id: 'id-2',
+        policy_id: 'policy-id-2',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
+      {
+        id: 'id-3',
+        policy_id: 'policy-id-3',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
     ];
 
     const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
@@ -135,6 +150,7 @@ describe('uninstall token handlers', () => {
     const uninstallTokenFixture: UninstallToken = {
       id: 'id-1',
       policy_id: 'policy-id-1',
+      policy_name: null,
       created_at: '2023-06-15T16:46:48.274Z',
       token: '123456789',
     };

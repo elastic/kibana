@@ -119,11 +119,16 @@ describe(
 
         cy.getByTestSubj(RESPONSE_ACTIONS_ERRORS).within(() => {
           cy.contains(
-            'Custom field name is a required field when process.pid toggle is turned off'
+            'Custom field name selection is required when the process.pid toggle is disabled.'
           );
         });
-
+        // field name can be cleared out
         cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
+          cy.getByTestSubj('config-custom-field-name').should('have.text', '');
+          cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
+          cy.getByTestSubj('config-custom-field-name').should('contain', 'process.entity_id');
+          cy.getByTestSubj('comboBoxClearButton').click();
+          cy.getByTestSubj('config-custom-field-name').should('not.contain', 'process.entity_id');
           cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
         });
 
@@ -208,7 +213,7 @@ describe(
       it('response actions are disabled', () => {
         fillUpNewRule(ruleName, ruleDescription);
         cy.getByTestSubj('response-actions-wrapper').within(() => {
-          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
             'be.disabled'
           );
         });
@@ -234,7 +239,7 @@ describe(
         cy.getByTestSubj('edit-rule-actions-tab').click();
 
         cy.getByTestSubj('response-actions-wrapper').within(() => {
-          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
             'be.disabled'
           );
         });

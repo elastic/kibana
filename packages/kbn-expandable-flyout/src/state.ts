@@ -8,7 +8,7 @@
 
 import { FlyoutPanelProps } from './types';
 
-export interface State {
+export interface FlyoutState {
   /**
    * Panel to render in the left section
    */
@@ -20,8 +20,16 @@ export interface State {
   /**
    * Panels to render in the preview section
    */
-  preview: FlyoutPanelProps[];
+  preview: FlyoutPanelProps[] | undefined;
+}
 
+export interface State {
+  /**
+   * Store the panels for multiple flyouts
+   */
+  byId: {
+    [id: string]: FlyoutState;
+  };
   /**
    * Is the flyout in sync with external storage (eg. url)?
    * This value can be used in useEffect for example, to control whether we should
@@ -31,8 +39,6 @@ export interface State {
 }
 
 export const initialState: State = {
-  left: undefined,
-  right: undefined,
-  preview: [],
+  byId: {},
   needsSync: false,
 };

@@ -9,3 +9,4 @@
 export * from './logs_explorer';
 export * from './observability_logs_explorer';
 export * from './observability_onboarding';
+export * from './dataset_quality';

@@ -27,16 +27,18 @@ export type PresentationContainer = Partial<PublishesViewMode> &
     removePanel: (panelId: string) => void;
     canRemovePanels?: () => boolean;
     replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
+    getChildIds: () => string[];
+    getChild: (childId: string) => unknown;
   };
 
-export const apiIsPresentationContainer = (
-  unknownApi: unknown | null
-): unknownApi is PresentationContainer => {
+export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
-    (unknownApi as PresentationContainer)?.removePanel !== undefined &&
-      (unknownApi as PresentationContainer)?.registerPanelApi !== undefined &&
-      (unknownApi as PresentationContainer)?.replacePanel !== undefined &&
-      (unknownApi as PresentationContainer)?.addNewPanel !== undefined
+    typeof (api as PresentationContainer)?.removePanel === 'function' &&
+      typeof (api as PresentationContainer)?.registerPanelApi === 'function' &&
+      typeof (api as PresentationContainer)?.replacePanel === 'function' &&
+      typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
+      typeof (api as PresentationContainer)?.getChildIds === 'function' &&
+      typeof (api as PresentationContainer)?.getChild === 'function'
   );
 };
 

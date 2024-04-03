@@ -246,6 +246,7 @@
     "controlGroupInput.controlStyle",
     "controlGroupInput.ignoreParentSettingsJSON",
     "controlGroupInput.panelsJSON",
+    "controlGroupInput.showApplySelections",
     "description",
     "hits",
     "kibanaSavedObjectMeta",
@@ -459,6 +460,11 @@
     "title",
     "type"
   ],
+  "infra-custom-dashboards": [
+    "assetType",
+    "dashboardIdList",
+    "kuery"
+  ],
   "infrastructure-monitoring-log-view": [
     "name"
   ],
@@ -549,6 +555,7 @@
     "shipper",
     "ssl",
     "timeout",
+    "topic",
     "topics",
     "topics.topic",
     "topics.when",
@@ -716,9 +723,11 @@
   ],
   "query": [
     "description",
-    "title"
+    "title",
+    "titleKeyword"
   ],
   "risk-engine-configuration": [
+    "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
     "filter",

@@ -88,6 +88,22 @@ export class UnifiedFieldListPageObject extends FtrService {
     );
   }
 
+  public async openSidebarSection(sectionName: SidebarSectionName) {
+    const openedSectionSelector = `${this.getSidebarSectionSelector(
+      sectionName,
+      true
+    )}.euiAccordion-isOpen`;
+
+    if (await this.find.existsByCssSelector(openedSectionSelector)) {
+      return;
+    }
+
+    await this.retry.waitFor(`${sectionName} fields section to open`, async () => {
+      await this.toggleSidebarSection(sectionName);
+      return await this.find.existsByCssSelector(openedSectionSelector);
+    });
+  }
+
   public async waitUntilFieldPopoverIsOpen() {
     await this.retry.waitFor('popover is open', async () => {
       return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
@@ -97,6 +113,13 @@ export class UnifiedFieldListPageObject extends FtrService {
   public async waitUntilFieldPopoverIsLoaded() {
     await this.retry.waitFor('popover is loaded', async () => {
       return !(await this.find.existsByCssSelector('[data-test-subj*="-statsLoading"]'));
+    });
+  }
+
+  public async closeFieldPopover() {
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.retry.waitFor('popover is closed', async () => {
+      return !(await this.testSubjects.exists('fieldPopoverHeader_fieldDisplayName'));
     });
   }
 

@@ -11,27 +11,28 @@ import { i18n } from '@kbn/i18n';
 import { useEffect, useReducer, useState } from 'react';
 import { chunk } from 'lodash';
 import { useCancellableSearch } from '@kbn/ml-cancellable-search';
+import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import type { DataStatsFetchProgress, FieldStats } from '../../../../../common/types/field_stats';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-import { isESQLQuery, getSafeESQLLimitSize } from '../../search_strategy/requests/esql_utils';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { Column } from './use_esql_overall_stats_data';
 import { getESQLNumericFieldStats } from '../../search_strategy/esql_requests/get_numeric_field_stats';
 import { getESQLKeywordFieldStats } from '../../search_strategy/esql_requests/get_keyword_fields';
 import { getESQLDateFieldStats } from '../../search_strategy/esql_requests/get_date_field_stats';
 import { getESQLBooleanFieldStats } from '../../search_strategy/esql_requests/get_boolean_field_stats';
-import { getESQLTextFieldStats } from '../../search_strategy/esql_requests/get_text_field_stats';
+import { getESQLExampleFieldValues } from '../../search_strategy/esql_requests/get_text_field_stats';
 
 export const useESQLFieldStatsData = <T extends Column>({
   searchQuery,
   columns: allColumns,
   filter,
-  limitSize,
+  limit,
 }: {
   searchQuery?: AggregateQuery;
   columns?: T[];
   filter?: QueryDslQueryContainer;
-  limitSize?: string;
+  limit: number;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
@@ -56,16 +57,16 @@ export const useESQLFieldStatsData = <T extends Column>({
       const fetchFieldStats = async () => {
         cancelRequest();
 
-        if (!isESQLQuery(searchQuery) || !allColumns) return;
-
         setFetchState({
           ...getInitialProgress(),
           isRunning: true,
           error: undefined,
         });
+        if (!isESQLQuery(searchQuery) || !allColumns) return;
+
         try {
           // By default, limit the source data to 100,000 rows
-          const esqlBaseQuery = searchQuery.esql + getSafeESQLLimitSize(limitSize);
+          const esqlBaseQuery = getESQLWithSafeLimit(searchQuery.esql, limit);
 
           const totalFieldsCnt = allColumns.length;
           const processedFieldStats = new Map<string, FieldStats>();
@@ -114,8 +115,13 @@ export const useESQLFieldStatsData = <T extends Column>({
             }).then(addToProcessedFieldStats);
 
             // GETTING STATS FOR TEXT FIELDS
-            await getESQLTextFieldStats({
-              columns: columns.filter((f) => f.secondaryType === 'text'),
+            await getESQLExampleFieldValues({
+              columns: columns.filter(
+                (f) =>
+                  f.secondaryType === 'text' ||
+                  f.secondaryType === 'geo_point' ||
+                  f.secondaryType === 'geo_shape'
+              ),
               filter,
               runRequest,
               esqlBaseQuery,
@@ -163,7 +169,7 @@ export const useESQLFieldStatsData = <T extends Column>({
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allColumns, JSON.stringify({ filter }), limitSize]
+    [allColumns, JSON.stringify({ filter }), limit]
   );
 
   return { fieldStats, fieldStatsProgress: fetchState, cancelFieldStatsRequest: cancelRequest };

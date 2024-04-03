@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 
 import {
   getAllSameFamilyMarkdownComments,

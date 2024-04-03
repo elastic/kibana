@@ -9,7 +9,7 @@ import {
   availableControlsPanels,
   controlPanelConfigs,
   ControlPanels,
-  hydrateDatasetSelection,
+  hydrateDataSourceSelection,
 } from '../../common';
 import {
   DEFAULT_CONTEXT,
@@ -26,7 +26,7 @@ export const getPublicStateFromContext = (
 ): LogsExplorerPublicState => {
   return {
     chart: context.chart,
-    datasetSelection: context.datasetSelection.toPlainSelection(),
+    dataSourceSelection: context.dataSourceSelection.toPlainSelection(),
     grid: context.grid,
     filters: context.filters,
     query: context.query,
@@ -45,10 +45,10 @@ export const getContextFromPublicState = (
     ...publicState.chart,
   },
   controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
-  datasetSelection:
-    publicState.datasetSelection != null
-      ? hydrateDatasetSelection(publicState.datasetSelection)
-      : DEFAULT_CONTEXT.datasetSelection,
+  dataSourceSelection:
+    publicState.dataSourceSelection != null
+      ? hydrateDataSourceSelection(publicState.dataSourceSelection)
+      : DEFAULT_CONTEXT.dataSourceSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,
     ...publicState.grid,

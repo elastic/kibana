@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('runtime fields', function () {
-    this.tags(['skipFirefox']);
-
+    // Bug: https://github.com/elastic/kibana/issues/178939
+    this.tags('failsOnMKI');
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

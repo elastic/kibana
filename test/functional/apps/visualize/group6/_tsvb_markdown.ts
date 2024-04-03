@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const html = '<h1>hello world</h1>';
         await visualBuilder.enterMarkdown(html);
         const markdownText = await visualBuilder.getMarkdownText();
-        expect(markdownText).to.be(html);
+        expect(markdownText).to.be('');
       });
 
       it('markdown variables should be clickable', async () => {

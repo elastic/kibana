@@ -20,7 +20,6 @@ import {
   AppMountParameters,
   AppUpdater,
   AppStatus,
-  AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
@@ -55,21 +54,15 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const config = this.initializerContext.config.get();
-    const navLinkStatus =
-      AppNavLinkStatus[config.deeplinks.navLinkStatus as keyof typeof AppNavLinkStatus];
-
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        navLinkStatus,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
-          navLinkStatus,
         })),
       })
     );
@@ -145,6 +138,12 @@ export class ManagementPlugin
       },
     });
 
+    core.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
       sections: this.managementSections.setup(),
       locator,
@@ -161,14 +160,12 @@ export class ManagementPlugin
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
       });
     }
 
     return {
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };

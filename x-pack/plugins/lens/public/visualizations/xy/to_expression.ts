@@ -57,6 +57,7 @@ import {
   getDataLayers,
   getReferenceLayers,
   getAnnotationsLayers,
+  isTimeChart,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import {
@@ -338,7 +339,8 @@ export const buildXYExpression = (
     fillOpacity: state.fillOpacity ?? 0.3,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
-    addTimeMarker: state.showCurrentTimeMarker ?? false,
+    addTimeMarker:
+      (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
     valuesInLegend: state.valuesInLegend ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),

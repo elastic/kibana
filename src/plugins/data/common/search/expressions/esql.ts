@@ -7,18 +7,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type {
-  Datatable,
-  DatatableColumnType,
-  ExpressionFunctionDefinition,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
@@ -59,21 +55,6 @@ interface EsqlFnArguments {
 interface EsqlStartDependencies {
   search: ISearchGeneric;
   uiSettings: UiSettingsCommon;
-}
-
-function normalizeType(type: string): DatatableColumnType {
-  switch (type) {
-    case ES_FIELD_TYPES._INDEX:
-    case ES_FIELD_TYPES.GEO_POINT:
-    case ES_FIELD_TYPES.IP:
-      return KBN_FIELD_TYPES.STRING;
-    case '_version':
-      return KBN_FIELD_TYPES.NUMBER;
-    case 'datetime':
-      return KBN_FIELD_TYPES.DATE;
-    default:
-      return castEsToKbnFieldTypeName(type) as DatatableColumnType;
-  }
 }
 
 function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
@@ -252,7 +233,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: normalizeType(type) },
+              meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 

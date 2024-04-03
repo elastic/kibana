@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,28 +15,31 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { throttle } from 'lodash';
-import {
+import type {
   BrushEndListener,
-  Chart,
   ElementClickListener,
   CustomTooltip,
-  Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
   HeatmapStyle,
   PartialTheme,
+  TooltipProps,
+  TooltipValue,
+} from '@elastic/charts';
+import {
+  Chart,
+  Heatmap,
   Position,
   ScaleType,
   Settings,
-  TooltipProps,
-  TooltipValue,
   Tooltip,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import {
   getFormattedSeverityScore,
@@ -44,10 +48,15 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
+import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
-import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
-import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
-import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
+import type {
+  AppStateSelectedCells,
+  OverallSwimlaneData,
+  ViewBySwimLaneData,
+} from './explorer_utils';
+import type { SwimlaneType } from './explorer_constants';
+import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
@@ -432,8 +441,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           <EuiFlexItem
             css={{
               width: '100%',
-              'overflow-y': 'auto',
-              'overflow-x': 'hidden',
+              overflowY: 'auto',
+              overflowX: 'hidden',
             }}
             grow={false}
           >

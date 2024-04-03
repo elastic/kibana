@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineActions } from '../store';
@@ -20,6 +20,8 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 export interface UseCreateTimelineParams {
   /**
@@ -45,11 +47,14 @@ export const useCreateTimeline = ({
   timelineId,
   timelineType,
   onClick,
-}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => void) => {
+}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
-  const { id: dataViewId, patternList: selectedPatterns } =
-    useDeepEqualSelector(defaultDataViewSelector);
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+  const { id: dataViewId, patternList: selectedPatterns } = useSelector(
+    sourcererSelectors.defaultDataView
+  ) ?? { id: '', patternList: [] };
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
@@ -72,7 +77,7 @@ export const useCreateTimeline = ({
       );
       dispatch(
         timelineActions.createTimeline({
-          columns: defaultHeaders,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
@@ -89,14 +94,14 @@ export const useCreateTimeline = ({
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
       }
 
-      if (timerange.kind === 'absolute') {
+      if (timerange?.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...timerange,
             id: InputsModelId.timeline,
           })
         );
-      } else if (timerange.kind === 'relative') {
+      } else if (timerange?.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...timerange,
@@ -113,16 +118,17 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
+      unifiedComponentsInTimelineEnabled,
     ]
   );
 
   return useCallback(
-    (options?: { timeRange?: TimeRange }) => {
+    async (options?: { timeRange?: TimeRange }) => {
+      await resetDiscoverAppState();
       createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
       }
-      resetDiscoverAppState();
     },
     [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
   );

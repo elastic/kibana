@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  title: KnowledgeBase API endpoints
+  version: '2023-10-31'
+paths:
+  /internal/elastic_assistant/knowledge_base/{resource}:
+    post:
+      operationId: CreateKnowledgeBase
+      x-codegen-enabled: true
+      summary: Create a KnowledgeBase
+      description: Create a KnowledgeBase
+      tags:
+        - KnowledgeBase API
+      parameters:
+        - name: resource
+          in: path
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    get:
+      operationId: ReadKnowledgeBase
+      x-codegen-enabled: true
+      description: Read a single KB
+      summary: Read a KnowledgeBase
+      tags:
+        - KnowledgeBase API
+      parameters:
+        - name: resource
+          in: path
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elser_exists:
+                    type: boolean
+                  index_exists:
+                    type: boolean
+                  pipeline_exists:
+                    type: boolean
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    delete:
+      operationId: DeleteKnowledgeBase
+      x-codegen-enabled: true
+      description: Deletes KnowledgeBase with the `resource` field.
+      summary: Deletes a KnowledgeBase
+      tags:
+        - KnowledgeBase API
+      parameters:
+        - name: resource
+          in: path
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    KnowledgeBaseResponse:
+      type: object
+      description: AI assistant KnowledgeBase.
+      properties:
+        success:
+          type: boolean
+          description: Identify the success of the method execution.

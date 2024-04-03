@@ -11,7 +11,7 @@ import { pkgToPkgKey } from '../../../registry';
 
 import type { CustomPackageDatasetConfiguration } from '../../install';
 
-import { createAgentFields, createBaseFields, createDatasetManifest } from './dataset';
+import { createBaseFields, createDatasetManifest } from './dataset';
 import { createDefaultPipeline } from './dataset/ingest_pipeline';
 import { createManifest } from './manifest';
 
@@ -44,10 +44,6 @@ export const createAssets = (assetOptions: AssetOptions) => {
               version,
             })}/data_stream/${datasetName}/fields/base-fields.yml`,
             content: Buffer.from(createBaseFields()),
-          },
-          {
-            path: `${pkgToPkgKey({ name, version })}/data_stream/${datasetName}/fields/agent.yml`,
-            content: Buffer.from(createAgentFields()),
           },
           {
             path: `${pkgToPkgKey({

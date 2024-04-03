@@ -9,10 +9,18 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { isEqual } from 'lodash';
+import { get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
-import { Subject, Subscription, forkJoin } from 'rxjs';
-import { debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  Subject,
+  Subscription,
+  forkJoin,
+  map,
+  debounceTime,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
@@ -32,6 +40,7 @@ import {
 } from '@elastic/eui';
 import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
 
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -75,6 +84,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
+    tableInterval: PropTypes.string,
+    tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
     dataViewsService: PropTypes.object,
@@ -240,6 +251,74 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     this.contextChart$.next(selection);
     this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
+  };
+
+  loadAnomaliesTableData = (earliestMs, latestMs) => {
+    const {
+      dateFormatTz,
+      selectedDetectorIndex,
+      selectedJob,
+      tableInterval,
+      tableSeverity,
+      functionDescription,
+    } = this.props;
+    const entityControls = this.getControlsForDetector();
+
+    return this.context.services.mlServices.mlApiServices.results
+      .getAnomaliesTableData(
+        [selectedJob.job_id],
+        this.getCriteriaFields(selectedDetectorIndex, entityControls),
+        [],
+        tableInterval,
+        tableSeverity,
+        earliestMs,
+        latestMs,
+        dateFormatTz,
+        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+        undefined,
+        undefined,
+        functionDescription
+      )
+      .pipe(
+        map((resp) => {
+          const { mlJobService } = this.context.services.mlServices;
+          const anomalies = resp.anomalies;
+          const detectorsByJob = mlJobService.detectorsByJob;
+          anomalies.forEach((anomaly) => {
+            // Add a detector property to each anomaly.
+            // Default to functionDescription if no description available.
+            // TODO - when job_service is moved server_side, move this to server endpoint.
+            const jobId = anomaly.jobId;
+            const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
+            anomaly.detector = get(
+              detector,
+              ['detector_description'],
+              anomaly.source.function_description
+            );
+
+            // For detectors with rules, add a property with the rule count.
+            const customRules = detector.custom_rules;
+            if (customRules !== undefined) {
+              anomaly.rulesLength = customRules.length;
+            }
+
+            // Add properties used for building the links menu.
+            // TODO - when job_service is moved server_side, move this to server endpoint.
+            if (has(mlJobService.customUrlsByJob, jobId)) {
+              anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
+            }
+          });
+
+          return {
+            tableData: {
+              anomalies,
+              interval: resp.interval,
+              examplesByJobId: resp.examplesByJobId,
+              showViewSeriesLink: false,
+            },
+          };
+        })
+      );
   };
 
   setForecastId = (forecastId) => {
@@ -562,7 +641,26 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             }
           }),
           switchMap((selection) => {
-            return forkJoin([this.getFocusData(selection)]);
+            // Calculate the aggregation interval for the focus chart.
+            const bounds = { min: moment(selection.from), max: moment(selection.to) };
+
+            // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
+            // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
+            // to some extent with all detector functions if not searching complete buckets.
+            const searchBounds = this.getBoundsRoundedToInterval(
+              bounds,
+              this.getFocusAggregationInterval({
+                from: selection.from,
+                to: selection.to,
+              }),
+              false
+            );
+
+            return forkJoin([
+              this.getFocusData(selection),
+              // Load the data for the anomalies table.
+              this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf()),
+            ]);
           }),
           withLatestFrom(this.contextChart$)
         )
@@ -674,11 +772,13 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       showModelBounds,
       showModelBoundsCheckbox,
       swimlaneData,
+      tableData,
       zoomFrom,
       zoomTo,
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       chartDataError,
+      sourceIndicesWithGeoFields,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -888,6 +988,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 showForecast={showForecast}
                 showModelBounds={showModelBounds}
                 lastRefresh={lastRefresh}
+                tableData={tableData}
+                sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
               />
             </div>
           )}

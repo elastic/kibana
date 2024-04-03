@@ -43,6 +43,7 @@ export default function (ftrContext: FtrProviderContext) {
                 description: 'Tag 2 in default space',
                 color: '#77CC11',
                 relationCount: 0,
+                managed: false,
               },
             ],
             total: 1,

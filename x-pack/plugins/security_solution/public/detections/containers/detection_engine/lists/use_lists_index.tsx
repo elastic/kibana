@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsPrivileges } from './use_lists_privileges';
+
+/**
+ * Determines whether an error response from the `readListIndex`
+ * API call indicates that the index is not yet created.
+ */
+const isIndexNotCreatedError = (err: unknown) => {
+  return isSecurityAppError(err) && err.body.status_code === 404;
+};
 
 export interface UseListsIndexReturn {
   createIndex: () => void;
@@ -21,82 +29,58 @@ export interface UseListsIndexReturn {
 }
 
 export const useListsIndex = (): UseListsIndexReturn => {
-  const [indexExists, setIndexExists] = useState<boolean | null>(null);
-  const [error, setError] = useState<unknown>(null);
   const { lists } = useKibana().services;
   const http = useHttp();
   const { addError } = useAppToasts();
   const { canReadIndex, canManageIndex, canWriteIndex } = useListsPrivileges();
-  const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
   const {
     loading: createLoading,
     start: createListIndex,
-    ...createListIndexState
-  } = useCreateListIndex();
-  const loading = readLoading || createLoading;
+    error: createListError,
+  } = useCreateListIndex({
+    http,
+    onError: (err) => {
+      if (err != null) {
+        addError(err, { title: i18n.LISTS_INDEX_CREATE_FAILURE });
+      }
+    },
+  });
 
-  // read route utilizes `esClient.indices.getAlias` which requires
-  // management privileges
-  const readIndex = useCallback(() => {
-    if (lists && canReadIndex && canManageIndex) {
-      readListIndex({ http });
-    }
-  }, [http, lists, readListIndex, canReadIndex, canManageIndex]);
+  const {
+    loading: readLoading,
+    result: readResult,
+    error: readError,
+  } = useReadListIndex({
+    http,
+    isEnabled: Boolean(lists && canReadIndex && canManageIndex && !createLoading),
+    onError: (err) => {
+      if (isIndexNotCreatedError(err)) {
+        return;
+      }
+
+      addError(err, { title: i18n.LISTS_INDEX_FETCH_FAILURE });
+    },
+  });
+
+  const loading = readLoading || createLoading;
 
   const createIndex = useCallback(() => {
     if (lists && canManageIndex && canWriteIndex) {
-      createListIndex({ http });
+      createListIndex();
     }
-  }, [createListIndex, http, lists, canManageIndex, canWriteIndex]);
+  }, [createListIndex, lists, canManageIndex, canWriteIndex]);
 
-  // initial read list
-  useEffect(() => {
-    if (!readLoading && !error && indexExists === null) {
-      readIndex();
+  const indexExists = useMemo(() => {
+    if (isIndexNotCreatedError(readError)) {
+      return false;
     }
-  }, [error, indexExists, readIndex, readLoading]);
 
-  // handle read result
-  useEffect(() => {
-    if (readListIndexState.result != null) {
-      setIndexExists(
-        readListIndexState.result.list_index && readListIndexState.result.list_item_index
-      );
-    }
-  }, [readListIndexState.result]);
-
-  // refetch index after creation
-  useEffect(() => {
-    if (createListIndexState.result != null) {
-      readIndex();
-    }
-  }, [createListIndexState.result, readIndex]);
-
-  // handle read error
-  useEffect(() => {
-    const err = readListIndexState.error;
-    if (err != null) {
-      if (isSecurityAppError(err) && err.body.status_code === 404) {
-        setIndexExists(false);
-      } else {
-        setError(err);
-        addError(err, { title: i18n.LISTS_INDEX_FETCH_FAILURE });
-      }
-    }
-  }, [addError, readListIndexState.error]);
-
-  // handle create error
-  useEffect(() => {
-    const err = createListIndexState.error;
-    if (err != null) {
-      setError(err);
-      addError(err, { title: i18n.LISTS_INDEX_CREATE_FAILURE });
-    }
-  }, [addError, createListIndexState.error]);
+    return readResult != null ? readResult.list_index && readResult.list_item_index : null;
+  }, [readError, readResult]);
 
   return {
     createIndex,
-    error,
+    error: createListError || isIndexNotCreatedError(readError) ? undefined : readError,
     indexExists,
     loading,
   };

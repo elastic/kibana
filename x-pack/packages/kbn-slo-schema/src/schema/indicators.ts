@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString, dateRangeSchema } from './common';
+import { allOrAnyString, dateRangeSchema, querySchema } from './common';
 
 const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = t.type({
@@ -21,7 +21,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -38,7 +38,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -49,12 +49,12 @@ const kqlCustomIndicatorSchema = t.type({
   params: t.intersection([
     t.type({
       index: t.string,
-      good: t.string,
-      total: t.string,
+      good: querySchema,
+      total: querySchema,
       timestampField: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -83,7 +83,7 @@ const timesliceMetricBasicMetricWithField = t.intersection([
     field: t.string,
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -93,7 +93,7 @@ const timesliceMetricDocCountMetric = t.intersection([
     aggregation: t.literal('doc_count'),
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -105,7 +105,7 @@ const timesliceMetricPercentileMetric = t.intersection([
     percentile: t.number,
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -131,7 +131,7 @@ const timesliceMetricIndicatorSchema = t.type({
       timestampField: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -142,7 +142,7 @@ const metricCustomDocCountMetric = t.intersection([
     aggregation: t.literal('doc_count'),
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -153,7 +153,7 @@ const metricCustomBasicMetric = t.intersection([
     field: t.string,
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -172,7 +172,7 @@ const metricCustomIndicatorSchema = t.type({
       timestampField: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
     }),
   ]),
 });
@@ -186,7 +186,7 @@ const rangeBasedHistogramMetricDef = t.intersection([
     to: t.number,
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -197,7 +197,7 @@ const valueCountBasedHistogramMetricDef = t.intersection([
     aggregation: valueCountHistogramMetricType,
   }),
   t.partial({
-    filter: t.string,
+    filter: querySchema,
   }),
 ]);
 
@@ -217,7 +217,27 @@ const histogramIndicatorSchema = t.type({
       total: histogramMetricDef,
     }),
     t.partial({
-      filter: t.string,
+      filter: querySchema,
+    }),
+  ]),
+});
+
+const syntheticsParamSchema = t.type({
+  value: allOrAnyString,
+  label: allOrAnyString,
+});
+const syntheticsAvailabilityIndicatorTypeSchema = t.literal('sli.synthetics.availability');
+const syntheticsAvailabilityIndicatorSchema = t.type({
+  type: syntheticsAvailabilityIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      monitorIds: t.array(syntheticsParamSchema),
+      index: t.string,
+    }),
+    t.partial({
+      tags: t.array(syntheticsParamSchema),
+      projects: t.array(syntheticsParamSchema),
+      filter: querySchema,
     }),
   ]),
 });
@@ -231,6 +251,7 @@ const indicatorDataSchema = t.type({
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  syntheticsAvailabilityIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
   timesliceMetricIndicatorTypeSchema,
@@ -259,6 +280,7 @@ const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
 const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
   timesliceMetricIndicatorSchema,
@@ -270,6 +292,8 @@ export {
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  syntheticsAvailabilityIndicatorSchema,
+  syntheticsAvailabilityIndicatorTypeSchema,
   kqlCustomIndicatorSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,

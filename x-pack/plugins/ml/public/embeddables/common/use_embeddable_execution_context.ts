@@ -6,13 +6,13 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
-import { KibanaExecutionContext } from '@kbn/core/types';
+import { map } from 'rxjs';
+import type { KibanaExecutionContext } from '@kbn/core/types';
 import { useMemo } from 'react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { ExecutionContextStart } from '@kbn/core/public';
+import type { ExecutionContextStart } from '@kbn/core/public';
 
 /**
  * Use execution context for ML embeddables.

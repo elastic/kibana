@@ -86,6 +86,9 @@ export interface EditConfigPanelProps {
   onApplyCb?: (input: TypedLensByValueInput['attributes']) => void;
   /** Optional callback for cancel flyout button */
   onCancelCb?: () => void;
+  // in cases where the embeddable is not filtered by time
+  // (e.g. through unified search) set this property to true
+  hideTimeFilterInfo?: boolean;
 }
 
 export interface LayerConfigurationProps {
@@ -99,4 +102,5 @@ export interface LayerConfigurationProps {
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
   getUserMessages: UserMessagesGetter;
+  onlyAllowSwitchToSubtypes?: boolean;
 }

@@ -9,7 +9,7 @@
 import type { SerializedVis } from './vis';
 import type { VisParams } from '../common';
 
-export const createVisAsync = async <TVisParams = VisParams>(
+export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   visType: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
