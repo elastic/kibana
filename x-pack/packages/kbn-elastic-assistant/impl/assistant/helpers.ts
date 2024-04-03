@@ -80,9 +80,7 @@ export const getBlockBotConversation = (
 export const getDefaultConnector = (
   connectors: AIConnector[] | undefined
 ): AIConnector | undefined => {
-  const validConnectors = connectors?.filter(
-    (connector) => connector.apiProvider && !connector.isMissingSecrets
-  );
+  const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
   if (validConnectors?.length) {
     return validConnectors[0];
   }

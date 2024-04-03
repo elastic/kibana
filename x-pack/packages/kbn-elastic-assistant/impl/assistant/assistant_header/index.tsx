@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { isEmpty } from 'lodash';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -131,7 +132,7 @@ export const AssistantHeader: React.FC<Props> = ({
                     data-test-subj="showAnonymizedValues"
                     checked={showAnonymizedValuesChecked}
                     compressed={true}
-                    disabled={currentConversation.replacements == null}
+                    disabled={isEmpty(currentConversation.replacements)}
                     label={i18n.SHOW_ANONYMIZED}
                     onChange={onToggleShowAnonymizedValues}
                   />

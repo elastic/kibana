@@ -54,7 +54,7 @@ export const ChatSend: React.FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="none"
-      alignItems="center"
+      alignItems={isFlyoutMode ? 'center' : 'flexStart'}
       css={css`
         position: relative;
       `}
