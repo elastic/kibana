@@ -75,6 +75,7 @@ import {
   assetCriticalityGetRoute,
   assetCriticalityDeleteRoute,
   assetCriticalityPrivilegesRoute,
+  assetCriticalityCSVUploadRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 
@@ -178,6 +179,7 @@ export const initRoutes = (
   assetCriticalityGetRoute(router, logger);
   assetCriticalityDeleteRoute(router, logger);
   assetCriticalityPrivilegesRoute(router, getStartServices, logger);
+  assetCriticalityCSVUploadRoute(router, logger);
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);

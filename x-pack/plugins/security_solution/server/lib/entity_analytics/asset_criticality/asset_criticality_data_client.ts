@@ -8,6 +8,7 @@ import type { ESFilter } from '@kbn/es-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { AssetCriticalityUpsert } from './types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
@@ -17,12 +18,6 @@ interface AssetCriticalityClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
-}
-
-interface AssetCriticalityUpsert {
-  idField: AssetCriticalityRecord['id_field'];
-  idValue: AssetCriticalityRecord['id_value'];
-  criticalityLevel: AssetCriticalityRecord['criticality_level'];
 }
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
@@ -134,6 +129,139 @@ export class AssetCriticalityDataClient {
 
     return doc;
   }
+
+  public async bulkUpsert(
+    records: AssetCriticalityUpsert[]
+  ): Promise<
+    Array<
+      | { id: string; error: string }
+      | { record: AssetCriticalityRecord; result: 'created' | 'updated' }
+    >
+  > {
+    if (records.length === 0) {
+      return [];
+    }
+
+    const docs = records.map((record) => ({
+      _id: createId(record),
+      doc: {
+        id_field: record.idField,
+        id_value: record.idValue,
+        criticality_level: record.criticalityLevel,
+        '@timestamp': new Date().toISOString(),
+      },
+    }));
+
+    const body = docs.flatMap(({ doc, _id }) => [
+      { update: { _id } },
+      { doc, doc_as_upsert: true },
+    ]);
+
+    const response = await this.options.esClient.bulk({
+      body,
+      index: this.getIndex(),
+    });
+
+    return response.items.map((item, index) => {
+      const doc = docs[index];
+      if (item.update && item.update.error) {
+        return { id: doc._id, error: item.update.error.reason || item.update.error.type };
+      } else {
+        if (item?.update?.result === 'created') {
+          return { record: doc.doc, result: 'created' };
+        } else {
+          return { record: doc.doc, result: 'updated' };
+        }
+      }
+    });
+  }
+
+  public bulkUpsertFromStream = async ({
+    recordsStream,
+    batchSize,
+  }: {
+    recordsStream: NodeJS.ReadableStream;
+    batchSize: number;
+  }): Promise<{
+    errors: Array<{ message: string; index: number }>;
+    results: {
+      updated: number;
+      created: number;
+      errors: number;
+      total: number;
+    };
+  }> => {
+    return new Promise((resolve, reject) => {
+      let index = 0;
+      let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
+      const errors: Array<{ index: number; message: string }> = [];
+      const results = { updated: 0, created: 0, errors: 0, total: 0 };
+      const batchPromises: Array<Promise<void>> = [];
+
+      const upsertBatch = async (
+        batch: Array<{ record: AssetCriticalityUpsert; index: number }>
+      ) => {
+        if (batch.length === 0) {
+          return;
+        }
+
+        try {
+          const upsertResult = await this.bulkUpsert(batch.map((b) => b.record));
+          const startIndex = batch[0].index;
+          upsertResult.forEach((result, resultIndex) => {
+            results.total++;
+            if ('error' in result) {
+              errors.push({
+                message: result.error,
+                index: startIndex + resultIndex,
+              });
+              results.errors++;
+            } else {
+              results[result.result]++;
+            }
+          });
+        } catch (error) {
+          batch.forEach((b) => {
+            errors.push({
+              message: error.message,
+              index: b.index,
+            });
+          });
+          results.errors += batch.length;
+        }
+      };
+
+      const processRecord = (record: AssetCriticalityUpsert | Error) => {
+        if (record instanceof Error) {
+          errors.push({
+            message: record.message,
+            index,
+          });
+          return;
+        }
+
+        const batchRecord = { record, index };
+        currentBatch.push(batchRecord);
+
+        if (currentBatch.length === batchSize) {
+          batchPromises.push(upsertBatch(currentBatch));
+          currentBatch = [];
+        }
+        index++;
+      };
+
+      const finish = async () => {
+        if (currentBatch.length > 0) {
+          batchPromises.push(upsertBatch(currentBatch));
+        }
+
+        await Promise.all(batchPromises);
+        resolve({ errors, results });
+      };
+
+      recordsStream.on('data', processRecord).on('end', finish).on('error', reject);
+    });
+  };
 
   public async delete(idParts: AssetCriticalityIdParts) {
     await this.options.esClient.delete({
