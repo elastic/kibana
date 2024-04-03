@@ -525,7 +525,7 @@ export class ManifestManager {
     try {
       let manifestSo;
       if (this.experimentalFeatures.unifiedManifestEnabled) {
-        const unifiedManifestsSo = await this.fetchAllUnifiedManifestsSOToCache();
+        const unifiedManifestsSo = await this.getAllUnifiedManifestsSOFromCache();
         manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
       } else {
         manifestSo = await this.getManifestClient().getManifest();
@@ -872,7 +872,7 @@ export class ManifestManager {
     return new UnifiedManifestClient(this.savedObjectsClient);
   }
 
-  protected async fetchAllUnifiedManifestsSOToCache(): Promise<InternalUnifiedManifestSchema[]> {
+  protected async getAllUnifiedManifestsSOFromCache(): Promise<InternalUnifiedManifestSchema[]> {
     // Fetch Unified Manifests from SO on getLatestManifest, cache them and remove on successful commit.
     // This is to avoid fetching Unified Manifests from SO on every getLatestManifest call which is every task run (1 minute).
     if (!this.cachedUnifiedManifestsSO.length) {
@@ -893,59 +893,6 @@ export class ManifestManager {
     this.logger.info(`Cleared cached Unified Manifests`);
   }
 
-  public async migrateLegacyManifestToUnifiedManifest(): Promise<void> {
-    const legacyManifestSo = await this.getManifestClient().getManifest();
-    if (!legacyManifestSo.version) {
-      this.logger.info('No Legacy Manifest found to migrate');
-      return;
-    }
-    this.logger.info('Legacy Manifest found to migrate');
-    await this.commitUnified(legacyManifestSo.attributes);
-    this.logger.info('Migrated Legacy Manifest to Unified Manifest');
-    await this.getManifestClient().deleteManifest();
-    this.logger.info('Deleted Legacy Manifest after migration');
-  }
-
-  public async migrateUnifiedManifestsToLegacyManifests(): Promise<void> {
-    const unifiedManifestsSo = await this.fetchAllUnifiedManifestsSOToCache();
-    if (!unifiedManifestsSo.length) {
-      this.logger.info('No Unified Manifests found to migrate');
-      return;
-    }
-    this.logger.info(`Unified Manifests found to migrate: ${unifiedManifestsSo.length}`);
-    const legacyManifestsSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
-    const unifiedManifestsSoIds = unifiedManifestsSo.map((manifest) => manifest.id);
-
-    const existingLegacyManifestSo = await this.getManifestClient().getManifest();
-
-    if (!existingLegacyManifestSo.version) {
-      await this.getManifestClient().createManifest({
-        artifacts: legacyManifestsSo.attributes.artifacts,
-        semanticVersion: legacyManifestsSo.attributes.semanticVersion,
-        schemaVersion: this.schemaVersion,
-      });
-      this.logger.info('Created new Legacy Manifest from Unified Manifests');
-    } else {
-      await this.getManifestClient().updateManifest(
-        {
-          artifacts: legacyManifestsSo.attributes.artifacts,
-          semanticVersion: legacyManifestsSo.attributes.semanticVersion,
-          schemaVersion: this.schemaVersion,
-        },
-        {
-          version: existingLegacyManifestSo.version,
-        }
-      );
-      this.logger.info('Updated Legacy Manifest from Unified Manifests');
-    }
-
-    await asyncForEach(chunk(unifiedManifestsSoIds, 100), async (unifiedManifestsBatch) => {
-      await this.getUnifiedManifestClient().deleteUnifiedManifestByIds(unifiedManifestsBatch);
-    });
-    this.logger.info('Deleted Unified Manifests after migration');
-    this.clearCachedUnifiedManifestsSO();
-  }
-
   public transformUnifiedManifestSOtoLegacyManifestSO(
     unifiedManifestsSo: InternalUnifiedManifestSchema[]
   ): {
@@ -957,17 +904,15 @@ export class ManifestManager {
       semanticVersion: string;
     };
   } {
-    // version and semanticVersion are hardcoded since we take care of the versioning in the unified manifest
+    const globalUnifiedManifest = unifiedManifestsSo.find((a) => a.policyId === '.global');
     return {
-      version: 'WzQ3NzAsMV0=',
+      version: 'WzQ3NzAsMV0=', // version is hardcoded since it was used only to determine whether to create a new manifest or update an existing one
       attributes: {
         artifacts: [
-          ...(unifiedManifestsSo
-            .find((a) => a.policyId === '.global')
-            ?.artifactIds.map((artifactId) => ({
-              artifactId,
-              policyId: undefined,
-            })) ?? []),
+          ...(globalUnifiedManifest?.artifactIds.map((artifactId) => ({
+            artifactId,
+            policyId: undefined,
+          })) ?? []),
           ...unifiedManifestsSo.reduce(
             (acc: Array<{ artifactId: string; policyId: string }>, unifiedManifest) => {
               if (unifiedManifest.policyId === '.global') {
@@ -984,7 +929,7 @@ export class ManifestManager {
             []
           ),
         ],
-        semanticVersion: '1.0.0',
+        semanticVersion: globalUnifiedManifest?.semanticVersion ?? '1.0.0', //
       },
     };
   }
@@ -1005,6 +950,7 @@ export class ManifestManager {
           const existingUnifiedManifestSo = unifiedManifestsSo.find(
             (item) => item.policyId === policyId
           );
+
           acc.push({
             policyId,
             artifactIds: [artifactId],
@@ -1035,7 +981,7 @@ export class ManifestManager {
           const existingUnifiedManifest = existingUnifiedManifestsSo.find(
             (item) => item.id === unifiedManifest.id
           );
-          // If artifactIds are different, update so
+          // Update SO if the artifactIds changed.
           if (
             !existingUnifiedManifest ||
             !isEqual(existingUnifiedManifest.artifactIds, unifiedManifest.artifactIds)
@@ -1046,7 +992,7 @@ export class ManifestManager {
             } as InternalUnifiedManifestUpdateSchema);
           }
         } else {
-          // Manifest with id does not exist in SO, create new so
+          // Manifest with id does not exist in SO, create new SO
           acc.unifiedManifestsToCreate.push(unifiedManifest);
         }
 
@@ -1070,8 +1016,29 @@ export class ManifestManager {
     return { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete };
   }
 
+  public async bumpGlobalUnifiedManifestVersion() {
+    const globalUnifiedManifestSO =
+      await this.getUnifiedManifestClient().getUnifiedManifestByPolicyId('.global');
+    if (!globalUnifiedManifestSO.saved_objects.length) {
+      this.logger.warn('No Global Unified Manifest found to bump version');
+      return;
+    }
+    const globalUnifiedManifest = globalUnifiedManifestSO.saved_objects[0];
+    this.logger.info(
+      `Global Unified Manifest found to bump version: ${globalUnifiedManifest.attributes.semanticVersion}`
+    );
+    const newSemanticVersion =
+      this.setNewSemanticVersion(globalUnifiedManifest.attributes.semanticVersion) || '1.0.0';
+    await this.getUnifiedManifestClient().updateUnifiedManifest({
+      ...globalUnifiedManifest.attributes,
+      id: globalUnifiedManifest.id,
+      semanticVersion: newSemanticVersion,
+    });
+    this.logger.info(`Bumped Global Unified Manifest version to ${newSemanticVersion}`);
+  }
+
   public async commitUnified(manifestSo: InternalManifestSchema): Promise<void> {
-    const existingUnifiedManifestsSo = await this.fetchAllUnifiedManifestsSOToCache();
+    const existingUnifiedManifestsSo = await this.getAllUnifiedManifestsSOFromCache();
 
     const unifiedManifestSO = this.transformLegacyManifestSOtoUnifiedManifestSO(
       manifestSo,
@@ -1103,6 +1070,7 @@ export class ManifestManager {
       await asyncForEach(chunk(unifiedManifestsToUpdate, 100), async (unifiedManifestsBatch) => {
         await this.getUnifiedManifestClient().updateUnifiedManifests(unifiedManifestsBatch);
       });
+
       this.logger.info(`Updated ${unifiedManifestsToUpdate.length} unified manifests`);
     }
 
@@ -1110,9 +1078,26 @@ export class ManifestManager {
       await asyncForEach(chunk(unifiedManifestsToDelete, 100), async (unifiedManifestsBatch) => {
         await this.getUnifiedManifestClient().deleteUnifiedManifestByIds(unifiedManifestsBatch);
       });
+
       this.logger.info(`Deleted ${unifiedManifestsToDelete.length} unified manifests`);
     }
 
-    this.clearCachedUnifiedManifestsSO();
+    if (
+      unifiedManifestsToCreate.length ||
+      unifiedManifestsToUpdate.length ||
+      unifiedManifestsToDelete.length
+    ) {
+      // If global manifest is not in the list of manifests to create or update, we need to bump its version
+      // We use it to set schemaVersion of the legacy manifest we are going to create so that its being picked up when populating agent policy
+      const hasGlobalManifest = [...unifiedManifestsToCreate, ...unifiedManifestsToUpdate].some(
+        (manifest) => manifest.policyId === '.global'
+      );
+
+      if (!hasGlobalManifest || unifiedManifestsToDelete.length) {
+        await this.bumpGlobalUnifiedManifestVersion();
+      }
+      // Clear fetched Unified Manifests from cache since they are not up to date anymore
+      this.clearCachedUnifiedManifestsSO();
+    }
   }
 }
