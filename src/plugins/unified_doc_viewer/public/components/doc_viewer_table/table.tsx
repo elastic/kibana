@@ -38,7 +38,11 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import {
+  fieldNameWildcardMatcher,
+  getFieldSearchMatchingHighlight,
+  getTextBasedColumnIconType,
+} from '@kbn/field-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -106,7 +110,7 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
-  columnTypes,
+  columnsMeta,
   hit,
   dataView,
   hideActionsColumn,
@@ -171,8 +175,10 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = columnTypes
-        ? columnTypes[field] // for text-based results types come separately
+      const columnMeta = columnsMeta?.[field];
+      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const fieldType = columnIconType
+        ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
@@ -216,7 +222,7 @@ export const DocViewerTable = ({
       onToggleColumn,
       filter,
       columns,
-      columnTypes,
+      columnsMeta,
       flattened,
       pinnedFields,
       onTogglePinned,

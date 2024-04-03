@@ -71,8 +71,8 @@ export class JourneyFtrHarness {
 
   // journey can be run to collect EBT/APM metrics or just as a functional test
   // TEST_INGEST_ES_DATA is defined via scripts/run_perfomance.js run only
-  private readonly isPerformanceRun = process.env.TEST_PERFORMANCE_PHASE || false;
-  private readonly shouldIngestEsData = !!process.env.TEST_INGEST_ES_DATA;
+  private readonly isPerformanceRun = !!process.env.TEST_PERFORMANCE_PHASE;
+  private readonly shouldIngestEsData = process.env.TEST_INGEST_ES_DATA === 'true' || false;
 
   // Update the Telemetry and APM global labels to link traces with journey
   private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {

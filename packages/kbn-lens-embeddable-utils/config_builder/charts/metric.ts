@@ -98,7 +98,7 @@ function buildFormulaLayer(
   layer: LensMetricConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'] {
   const baseLayer: PersistedIndexPatternLayer = {
     columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],
@@ -196,8 +196,10 @@ function getValueColumns(layer: LensMetricConfig) {
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, layer.value),
-    ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
+    getValueColumn(ACCESSOR, layer.value, 'number'),
+    ...(layer.queryMaxValue
+      ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue, 'number')]
+      : []),
     ...(layer.querySecondaryMetric
       ? [getValueColumn(getAccessorName('secondary'), layer.querySecondaryMetric)]
       : []),

@@ -14,7 +14,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
@@ -233,7 +233,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: esFieldTypeToKibanaFieldType(type) },
+              meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 

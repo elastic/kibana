@@ -213,6 +213,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         taskManager: plugins.taskManager,
         telemetry: core.analytics,
+        entityAnalyticsConfig: config.entityAnalytics,
       });
     }
 
@@ -644,6 +645,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsClient,
+      connectorActions: plugins.actions,
     });
 
     if (plugins.taskManager) {
