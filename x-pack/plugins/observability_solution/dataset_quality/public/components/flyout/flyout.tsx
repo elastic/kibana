@@ -31,6 +31,7 @@ import { FlyoutSummary } from './flyout_summary/flyout_summary';
 export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
   const {
     dataStreamStat,
+    dataStreamSettings,
     dataStreamDetails,
     dataStreamDetailsLoading,
     fieldFormats,
@@ -66,7 +67,11 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
               <DatasetSummaryLoading />
             ) : dataStreamStat ? (
               <Fragment>
-                <DatasetSummary dataStreamDetails={dataStreamDetails} fieldFormats={fieldFormats} />
+                <DatasetSummary
+                  dataStreamSettings={dataStreamSettings}
+                  dataStreamDetails={dataStreamDetails}
+                  fieldFormats={fieldFormats}
+                />
 
                 {dataStreamStat.integration && (
                   <>

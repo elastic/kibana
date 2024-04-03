@@ -12,6 +12,7 @@ import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
   DashboardType,
+  DataStreamSettings,
   DataStreamDetails,
   DataStreamStat,
   GetDataStreamsStatsQuery,
@@ -24,6 +25,7 @@ import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { generateDatasets } from '../../../utils';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
+  fetchDatasetSettingsFailedNotifier,
   fetchDatasetDetailsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
@@ -173,6 +175,27 @@ export const createPureDatasetQualityControllerStateMachine = (
             initializing: {
               type: 'parallel',
               states: {
+                dataStreamSettings: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadDataStreamSettings',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeDataStreamSettings'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['notifyFetchDatasetSettingsFailed'],
+                        },
+                      },
+                    },
+                    done: {
+                      type: 'final',
+                    },
+                  },
+                },
                 dataStreamDetails: {
                   initial: 'fetching',
                   states: {
@@ -190,7 +213,12 @@ export const createPureDatasetQualityControllerStateMachine = (
                       },
                     },
                     done: {
-                      type: 'final',
+                      on: {
+                        UPDATE_INSIGHTS_TIME_RANGE: {
+                          target: 'fetching',
+                          actions: ['storeFlyoutOptions'],
+                        },
+                      },
                     },
                   },
                 },
@@ -367,6 +395,16 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeDataStreamSettings: assign((context, event) => {
+          return 'data' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  datasetSettings: (event.data ?? {}) as DataStreamSettings,
+                },
+              }
+            : {};
+        }),
         storeDatasetDetails: assign((context, event) => {
           return 'data' in event
             ? {
@@ -439,6 +477,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetStatsFailedNotifier(toasts, event.data),
       notifyFetchDegradedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDegradedStatsFailedNotifier(toasts, event.data),
+      notifyFetchDatasetSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDatasetSettingsFailedNotifier(toasts, event.data),
       notifyFetchDatasetDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDatasetDetailsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
@@ -465,6 +505,23 @@ export const createDatasetQualityControllerStateMachine = ({
       loadIntegrations: (context) => {
         return dataStreamStatsClient.getIntegrations({
           type: context.type as GetIntegrationsParams['query']['type'],
+        });
+      },
+      loadDataStreamSettings: (context) => {
+        if (!context.flyout.dataset) {
+          fetchDatasetSettingsFailedNotifier(toasts, new Error(noDatasetSelected));
+
+          return Promise.resolve({});
+        }
+
+        const { type, name: dataset, namespace } = context.flyout.dataset;
+
+        return dataStreamDetailsClient.getDataStreamSettings({
+          dataStream: dataStreamPartsToIndexName({
+            type: type as DataStreamType,
+            dataset,
+            namespace,
+          }),
         });
       },
       loadDataStreamDetails: (context) => {

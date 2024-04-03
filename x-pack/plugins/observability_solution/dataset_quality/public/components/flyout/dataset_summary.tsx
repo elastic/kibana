@@ -8,7 +8,7 @@
 import React from 'react';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DataStreamDetails } from '../../../common/data_streams_stats';
+import { DataStreamDetails, DataStreamSettings } from '../../../common/data_streams_stats';
 import {
   flyoutDatasetCreatedOnText,
   flyoutDatasetDetailsText,
@@ -18,18 +18,23 @@ import { FieldsList, FieldsListLoading } from './fields_list';
 
 interface DatasetSummaryProps {
   fieldFormats: FieldFormatsStart;
+  dataStreamSettings?: DataStreamSettings;
   dataStreamDetails?: DataStreamDetails;
 }
 
-export function DatasetSummary({ dataStreamDetails, fieldFormats }: DatasetSummaryProps) {
+export function DatasetSummary({
+  dataStreamSettings,
+  dataStreamDetails,
+  fieldFormats,
+}: DatasetSummaryProps) {
   const dataFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
   const formattedLastActivity = dataStreamDetails?.lastActivity
     ? dataFormatter.convert(dataStreamDetails?.lastActivity)
     : '-';
-  const formattedCreatedOn = dataStreamDetails?.createdOn
-    ? dataFormatter.convert(dataStreamDetails.createdOn)
+  const formattedCreatedOn = dataStreamSettings?.createdOn
+    ? dataFormatter.convert(dataStreamSettings.createdOn)
     : '-';
 
   return (

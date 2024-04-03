@@ -105,6 +105,8 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
   })
 );
 
+export const getDataStreamsSettingsResponseRt = rt.exact(dataStreamSettingsRt);
+
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({

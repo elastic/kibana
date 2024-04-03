@@ -30,6 +30,11 @@ export type GetDataStreamsDegradedDocsStatsResponse =
 export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
 export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];
 
+export type GetDataStreamSettingsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/settings`>['params']['path'];
+export type GetDataStreamSettingsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/{dataStream}/settings`>;
+
 type GetDataStreamDetailsPathParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>['params']['path'];
 type GetDataStreamDetailsQueryParams =
@@ -51,4 +56,4 @@ export type GetIntegrationDashboardsResponse =
 export type DashboardType = GetIntegrationDashboardsResponse['dashboards'][0];
 
 export type { DataStreamStat } from './data_stream_stat';
-export type { DataStreamDetails } from '../api_types';
+export type { DataStreamDetails, DataStreamSettings } from '../api_types';

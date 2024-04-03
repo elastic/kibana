@@ -39,7 +39,7 @@ export function FlyoutSummary({
         timeRange: {
           from: start,
           to: end,
-          refresh: refreshInterval,
+          refresh: { ...DEFAULT_DATEPICKER_REFRESH, value: refreshInterval },
         },
       });
     },
@@ -49,7 +49,7 @@ export function FlyoutSummary({
   const handleTimeChange = useCallback(
     ({ isInvalid, ...timeRangeProps }: OnTimeChangeProps) => {
       if (!isInvalid) {
-        updateTimeRange({ refreshInterval: timeRange.refresh, ...timeRangeProps });
+        updateTimeRange({ refreshInterval: timeRange.refresh.value, ...timeRangeProps });
       }
     },
     [updateTimeRange, timeRange.refresh]
@@ -57,10 +57,10 @@ export function FlyoutSummary({
 
   const handleRefresh = useCallback(
     (refreshProps: OnRefreshProps) => {
-      handleTimeChange(refreshProps);
+      updateTimeRange(refreshProps);
       setLastReloadTime(Date.now());
     },
-    [handleTimeChange]
+    [updateTimeRange]
   );
 
   return (

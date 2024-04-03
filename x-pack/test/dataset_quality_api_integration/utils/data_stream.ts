@@ -17,8 +17,8 @@ export async function getDataStreamSettingsOfEarliestIndex(es: Client, name: str
   const matchingIndexes = Object.keys(matchingIndexesObj ?? {});
   matchingIndexes.sort((a, b) => {
     return (
-      Number(matchingIndexesObj[a].settings.index.creation_date) -
-      Number(matchingIndexesObj[b].settings.index.creation_date)
+      Number(matchingIndexesObj[a].settings?.index?.creation_date) -
+      Number(matchingIndexesObj[b].settings?.index?.creation_date)
     );
   });
 
