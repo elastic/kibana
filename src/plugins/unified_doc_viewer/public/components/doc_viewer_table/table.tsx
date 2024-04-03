@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +23,8 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
-  useIsWithinBreakpoints,
+  useResizeObserver,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -118,11 +119,12 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const isWithinBreakpoints = useIsWithinBreakpoints(['xl'], true);
-  const flyoutWidth = useElementWidth('euiFlyout');
-  const isFlyoutWide = !flyoutWidth || flyoutWidth > 800;
-
-  const showActionsInsideTableCell = isWithinBreakpoints && isFlyoutWide;
+  const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const showActionsInsideTableCell = dimensions?.width
+    ? dimensions.width > euiTheme.breakpoint.m
+    : false;
 
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -411,7 +413,12 @@ export const DocViewerTable = ({
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      ref={(node) => setRef(node)}
+    >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>
@@ -464,38 +471,3 @@ export const DocViewerTable = ({
     </EuiFlexGroup>
   );
 };
-
-function useElementWidth(className: string) {
-  // State to store the element's width
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    // Select the first element with the given class name
-    const element = document.getElementsByClassName(className)[0];
-
-    if (!element) {
-      return;
-    }
-
-    // Function to update the width state
-    const updateWidth = debounce(() => {
-      const newWidth = element.getBoundingClientRect().width;
-      setWidth(newWidth); // Update the width in state
-    }, 300); // Debounce time in milliseconds
-
-    // Update width initially
-    updateWidth();
-
-    // Create a ResizeObserver instance and observe the element
-    const resizeObserver = new ResizeObserver(updateWidth);
-    resizeObserver.observe(element);
-
-    // Cleanup function to unobserve the element and cancel the debounced function
-    return () => {
-      updateWidth.cancel(); // Cancel any pending debounced function
-      resizeObserver.unobserve(element);
-    };
-  }, [className]); // Effect dependencies
-
-  return width; // Return the current width
-}
