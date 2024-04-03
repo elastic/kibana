@@ -11,7 +11,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 
 import { login } from '../../../../tasks/login';
-import { visitWithTimeRange, visitGetStartedPage } from '../../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../../urls/navigation';
 import {
