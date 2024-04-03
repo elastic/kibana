@@ -16,7 +16,6 @@ export function HeaderMenu(): React.ReactElement | null {
   const { http, theme } = useKibana().services;
 
   const { appMountParameters } = usePluginContext();
-
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}

@@ -22,7 +22,7 @@ import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { map, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { map, distinctUntilChanged, startWith } from 'rxjs';
 import { v4 } from 'uuid';
 import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';

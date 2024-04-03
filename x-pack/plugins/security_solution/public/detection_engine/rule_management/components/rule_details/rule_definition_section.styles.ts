@@ -9,37 +9,29 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
-export const useFiltersStyles = () => {
-  return useMemo(
-    () => ({
-      flexGroup: css`
-        max-width: 600px;
-      `,
-    }),
-    []
-  );
+export const filtersStyles = {
+  flexGroup: css`
+    max-width: 600px;
+  `,
 };
 
-export const useQueryStyles = () => {
-  return useMemo(
-    () => ({
-      content: css`
-        white-space: pre-wrap;
-      `,
-    }),
-    []
-  );
+export const queryStyles = {
+  content: css`
+    white-space: pre-wrap;
+  `,
 };
 
 export const useRequiredFieldsStyles = () => {
   const { euiTheme } = useEuiTheme();
+  const { font } = euiTheme;
+
   return useMemo(
     () => ({
-      fieldTypeText: css({
-        fontFamily: euiTheme.font.familyCode,
-        display: 'inline',
-      }),
+      fieldNameText: css`
+        font-family: ${font.familyCode ?? font.family};
+        display: inline;
+      `,
     }),
-    [euiTheme.font.familyCode]
+    [font.familyCode, font.family]
   );
 };

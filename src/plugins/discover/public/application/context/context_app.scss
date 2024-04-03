@@ -14,7 +14,7 @@
   flex: 1 1 100%;
   overflow: auto;
 
-  &__cell--highlight {
+  .unifiedDataTable__cell--highlight {
     background-color: tintOrShade($euiColorPrimary, 90%, 70%);
   }
 }
