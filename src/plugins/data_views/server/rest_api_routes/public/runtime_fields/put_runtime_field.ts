@@ -47,9 +47,9 @@ export const putRuntimeField = async ({
   runtimeField,
 }: PutRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
-  const oldFieldObject = dataView.fields.getByName(name);
+  const oldFieldObject = await dataView.getFieldByName(name);
 
   if (oldFieldObject && !oldFieldObject.runtimeField) {
     throw new Error('Only runtime fields can be updated');
@@ -59,7 +59,7 @@ export const putRuntimeField = async ({
     dataView.removeRuntimeField(name);
   }
 
-  const fields = dataView.addRuntimeField(name, runtimeField);
+  const fields = await dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
@@ -127,7 +127,11 @@ const putRuntimeFieldRouteFactory =
           counterName: `${req.route.method} ${path}`,
         });
 
-        const response: RuntimeResponseType = responseFormatter({ serviceKey, dataView, fields });
+        const response: RuntimeResponseType = await responseFormatter({
+          serviceKey,
+          dataView,
+          fields,
+        });
 
         return res.ok(response);
       })

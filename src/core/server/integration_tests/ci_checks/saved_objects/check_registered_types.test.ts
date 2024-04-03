@@ -110,7 +110,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest-agent-policies": "7633e578f60c074f8267bc50ec4763845e431437",
         "ingest-download-sources": "279a68147e62e4d8858c09ad1cf03bd5551ce58d",
         "ingest-outputs": "daafff49255ab700e07491376fe89f04fc998b91",
-        "ingest-package-policies": "f4c2767e852b700a8b82678925b86bac08958b43",
+        "ingest-package-policies": "8a99e165aab00c6c365540427a3abeb7bea03f31",
         "ingest_manager_settings": "91445219e7115ff0c45d1dabd5d614a80b421797",
         "inventory-view": "b8683c8e352a286b4aca1ab21003115a4800af83",
         "kql-telemetry": "93c1d16c1a0dfca9c8842062cf5ef8f62ae401ad",
