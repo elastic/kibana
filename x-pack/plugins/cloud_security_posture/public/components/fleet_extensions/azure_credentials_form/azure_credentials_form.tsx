@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import {
   EuiLink,
   EuiSpacer,
@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import { PackagePolicyInputVarField } from '../package_policy_input_var_field';
+import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,
@@ -34,6 +34,7 @@ import { SetupFormat, useAzureCredentialsForm } from './hooks';
 import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
+import { CspLoadingState } from '../../csp_loading_state';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -279,20 +280,22 @@ export const AzureInputVarFields = ({
                   }
                 `}
               >
-                <PackagePolicyInputVarField
-                  varDef={{
-                    ...findVariableDef(packageInfo, field.id)!,
-                    required: true,
-                    type: 'password',
-                  }}
-                  value={field.value || ''}
-                  onChange={(value) => {
-                    onChange(field.id, value);
-                  }}
-                  errors={[]}
-                  forceShowErrors={false}
-                  isEditPage={true}
-                />
+                <Suspense fallback={<CspLoadingState />}>
+                  <PackagePolicyInputVarField
+                    varDef={{
+                      ...findVariableDef(packageInfo, field.id)!,
+                      required: true,
+                      type: 'password',
+                    }}
+                    value={field.value || ''}
+                    onChange={(value) => {
+                      onChange(field.id, value);
+                    }}
+                    errors={[]}
+                    forceShowErrors={false}
+                    isEditPage={true}
+                  />
+                </Suspense>
               </div>
             </>
           )}

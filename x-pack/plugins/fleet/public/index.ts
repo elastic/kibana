@@ -7,6 +7,8 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 
+import { lazy } from 'react';
+
 import { FleetPlugin } from './plugin';
 
 export type { FleetSetup, FleetStart, FleetStartServices } from './plugin';
@@ -64,9 +66,8 @@ export { PackagePolicyEditorDatastreamMappings } from './applications/fleet/sect
 export type { PackagePolicyEditorDatastreamMappingsProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings';
 export type { DynamicPagePathValues } from './constants';
 
-export { MultiTextInput } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/multi_text_input';
-export { DatasetComboBox } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/dataset_combo';
-export type { DataStream, RegistryVarsEntry } from './types';
-export { DATASET_VAR_NAME } from '../common/constants';
-export { ExperimentalFeaturesService } from './services';
-export { useStartServices } from './hooks';
+export const PackagePolicyInputVarField = lazy(() =>
+  import(
+    './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
+  ).then((module) => ({ default: module.PackagePolicyInputVarField }))
+);
