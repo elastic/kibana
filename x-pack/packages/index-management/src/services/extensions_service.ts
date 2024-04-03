@@ -80,7 +80,7 @@ export class ExtensionsService {
       matchIndex: (index) => {
         return index.isFrozen;
       },
-      label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
+      label: i18n.translate('xpack.idxMgmtPackage.frozenBadgeLabel', {
         defaultMessage: 'Frozen',
       }),
       filterExpression: 'isFrozen:true',
@@ -92,7 +92,7 @@ export class ExtensionsService {
       matchIndex: (index) => {
         return index.hidden;
       },
-      label: i18n.translate('xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel', {
+      label: i18n.translate('xpack.idxMgmtPackage.indexTable.hiddenIndicesSwitchLabel', {
         defaultMessage: 'Include hidden indices',
       }),
       name: 'includeHiddenIndices',
