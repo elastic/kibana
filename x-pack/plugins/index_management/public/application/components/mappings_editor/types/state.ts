@@ -8,6 +8,7 @@
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
 import {
   Field,
+  FieldWithSemanticTextInfo,
   NormalizedFields,
   NormalizedRuntimeField,
   NormalizedRuntimeFields,
@@ -109,7 +110,7 @@ export type Action =
   | { type: 'field.add'; value: Field }
   | {
       type: 'field.addSemanticText';
-      value: { name: string; referenceField: string; inferenceId: string };
+      value: FieldWithSemanticTextInfo;
     }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }

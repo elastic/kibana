@@ -9,7 +9,6 @@ import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,6 +17,7 @@ import {
   EuiOutsideClickDetector,
   EuiSpacer,
 } from '@elastic/eui';
+import { FieldWithSemanticTextInfo } from '../../../../types';
 
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
@@ -79,7 +79,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 }: Props) {
   const dispatch = useDispatch();
 
-  const { form } = useForm<any>({
+  const { form } = useForm<FieldWithSemanticTextInfo>({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
   });

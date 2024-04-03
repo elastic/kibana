@@ -19,11 +19,15 @@ interface Props {
   'data-test-subj'?: string;
 }
 
+interface InferenceModel {
+  data: InferenceAPIConfigResponse[];
+}
+
 export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
   const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
   const { subscribe } = form;
   const { api } = useComponentTemplatesContext();
-  const [inferenceModels, setInferenceModels] = useState<any>([]);
+  const [inferenceModels, setInferenceModels] = useState<InferenceModel>({ data: [] });
 
   const fieldConfigModelId = getFieldConfig('inference_id');
   const defaultInferenceIds: SuperSelectOption[] = [

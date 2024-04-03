@@ -195,6 +195,11 @@ type FieldParams = {
 
 export type Field = FieldBasic & Partial<FieldParams>;
 
+export interface FieldWithSemanticTextInfo extends Field {
+  referenceField?: string;
+  inferenceId?: string;
+}
+
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
   canHaveChildFields: boolean;
