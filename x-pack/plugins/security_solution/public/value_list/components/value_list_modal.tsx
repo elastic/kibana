@@ -140,7 +140,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 {canWriteIndex && (
-                  <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexGroup alignItems="flexStart" justifyContent="flexEnd">
                     <AddListItemPopover listId={listId} />
                     <UploadListItem listId={listId} type={list.type} />
                   </EuiFlexGroup>
