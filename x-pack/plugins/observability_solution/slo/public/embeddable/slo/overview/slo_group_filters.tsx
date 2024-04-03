@@ -141,17 +141,17 @@ export function SloGroupFilters({ onSelected }: Props) {
 
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.slo.sloGroupConfiguration.groupTypeLabel', {
+        label={i18n.translate('xpack.slo.sloGroupConfiguration.groupByLabel', {
           defaultMessage: '{ selectedGroupByLabel }',
           values: { selectedGroupByLabel },
         })}
       >
         <EuiComboBox
-          aria-label={i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.ariaLabel', {
+          aria-label={i18n.translate('xpack.slo.sloGroupConfiguration.sloSelector.ariaLabel', {
             defaultMessage: '{ selectedGroupByLabel }',
             values: { selectedGroupByLabel },
           })}
-          placeholder={i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.placeholder', {
+          placeholder={i18n.translate('xpack.slo.sloGroupConfiguration.sloSelector.placeholder', {
             defaultMessage: 'Select a {selectedGroupByLabel}',
             values: { selectedGroupByLabel },
           })}
