@@ -8,13 +8,14 @@
 
 import { apiHasParentApi, PublishesViewMode } from '@kbn/presentation-publishing';
 import { PublishesLastSavedState } from './last_saved_state';
+import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage {
   panelType: string;
   initialState?: object;
 }
 
-export type PresentationContainer = Partial<PublishesViewMode> &
+export type PresentationContainer = Partial<PublishesViewMode & PublishesSettings> &
   PublishesLastSavedState & {
     addNewPanel: <ApiType extends unknown = unknown>(
       panel: PanelPackage,
