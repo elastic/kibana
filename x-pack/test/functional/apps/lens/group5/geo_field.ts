@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should visualize geo fields in maps', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      // as navigation does not happen via URL refresh by default, force a reset via URL navigation
+      await PageObjects.visualize.navigateToNewVisualization({ forceRefresh: true });
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.switchDataPanelIndexPattern('logstash-*');
       await PageObjects.header.waitUntilLoadingHasFinished();
