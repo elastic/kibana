@@ -7,4 +7,4 @@
  */
 
 export { TabbedModal } from './src/tabbed_modal';
-export type { ITabDeclaration } from './src/context';
+export type { IModalTabDeclaration } from './src/tabbed_modal';

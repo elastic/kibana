@@ -44,7 +44,7 @@ interface IModalContext<T extends Array<ITabDeclaration<Record<string, any>>>> {
     meta: IMetaState;
     [index: string]: any;
   };
-  dispatch: Dispatch<IDispatchAction>;
+  dispatch?: Dispatch<IDispatchAction>;
 }
 
 const createStateContext = once(<T extends Array<ITabDeclaration<Record<string, any>>>>() =>

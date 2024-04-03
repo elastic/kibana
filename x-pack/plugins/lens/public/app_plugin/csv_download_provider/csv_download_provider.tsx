@@ -132,6 +132,7 @@ export const downloadCsvShareProvider = ({
         name: 'Export',
         reportType: ['CSV'],
         isDisabled: !csvEnabled,
+        warnings: getWarnings(activeData),
         createReportingJob: async () => {
           await downloadCSVs({
             title,

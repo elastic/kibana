@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, Fragment, type ComponentProps, type FC, type ReactElement } from 'react';
+import React, {
+  useMemo,
+  Fragment,
+  type ComponentProps,
+  type FC,
+  type ReactElement,
+  useCallback,
+} from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -28,8 +35,8 @@ import {
 } from './context';
 
 export type IModalTabContent<S> = (props: {
-  state: S | null;
-  dispatch: IDispatchFunction;
+  state?: S;
+  dispatch?: IDispatchFunction;
 }) => ReactElement;
 
 interface IModalTabActionBtn<S> extends CommonProps {
@@ -44,7 +51,7 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   description?: string;
   'data-test-subj'?: string;
   content: IModalTabContent<S>;
-  modalActionBtn: IModalTabActionBtn<S>;
+  modalActionBtn?: IModalTabActionBtn<S>;
 }
 
 interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
@@ -66,13 +73,15 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
 
-  const onSelectedTabChanged = (id: string) => {
-    dispatch({ type: 'META_selectedTabId', payload: id });
-  };
+  const onSelectedTabChanged = useCallback(
+    (id: string) => {
+      dispatch!({ type: 'META_selectedTabId', payload: id });
+    },
+    [dispatch]
+  );
 
-  const renderTabs = () => {
+  const renderTabs = useCallback(() => {
     return tabs.map((tab, index) => {
-      console.log(tab);
       return (
         <EuiTab
           key={index}
@@ -86,7 +95,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
         </EuiTab>
       );
     });
-  };
+  }, [onSelectedTabChanged, selectedTabId, tabs]);
 
   return (
     <EuiModal
@@ -113,6 +122,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
             data-test-subj={modalActionBtn.dataTestSubj}
             data-share-url={state.url}
             onClick={() => {
+              // @ts-ignore state will not be null because of the modalActionBtn check
               modalActionBtn!.handler!({ state: selectedTabId });
             }}
           >

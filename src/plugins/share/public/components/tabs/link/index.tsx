@@ -52,7 +52,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
 
   const setDashboardLink = useCallback(
     (url: string) => {
-      dispatch({ type: LINK_TAB_ACTIONS.SET_DASHBOARD_URL, payload: url });
+      dispatch!({ type: LINK_TAB_ACTIONS.SET_DASHBOARD_URL, payload: url });
     },
     [dispatch]
   );
@@ -68,7 +68,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         shareableUrlForSavedObject,
         urlService,
         shareableUrlLocatorParams,
-        dashboardLink: state.dashboardUrl,
+        dashboardLink: state?.dashboardUrl,
         setDashboardLink,
       }}
     />
@@ -79,9 +79,6 @@ export const linkTab: ILinkTab = {
   id: 'link',
   name: i18n.translate('share.contextMenu.permalinksTab', {
     defaultMessage: 'Links',
-  }),
-  description: i18n.translate('share.dashboard.link.description', {
-    defaultMessage: 'Share a direct link to this search.',
   }),
   content: LinkTabContent,
   reducer: linkTabReducer,

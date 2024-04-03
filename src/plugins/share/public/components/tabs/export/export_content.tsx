@@ -10,6 +10,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 
+import { EuiButton, EuiModalBody, EuiModalFooter, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'theme' | 'isDirty' | 'objectId'> & {
@@ -37,7 +39,7 @@ export const ExportContent = ({
   objectId,
   reportType,
 }: ExportProps) => {
-  // const isSaved = Boolean(objectId);
+  const isSaved = Boolean(objectId);
   // const isMounted = useMountedState();
   // const [absoluteUrl, setAbsoluteUrl] = useState('');
 
@@ -65,8 +67,7 @@ export const ExportContent = ({
 
   return (
     <>
-      test
-      {/* <EuiModalBody>{helpText}</EuiModalBody>
+      <EuiModalBody>{helpText}</EuiModalBody>
       <EuiModalFooter>
         {!isSaved ? (
           <EuiToolTip
@@ -95,7 +96,7 @@ export const ExportContent = ({
             isLoading={Boolean(createReportingJob)}
           />
         )}
-      </EuiModalFooter> */}
+      </EuiModalFooter>
     </>
   );
 };

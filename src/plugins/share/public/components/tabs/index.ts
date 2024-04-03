@@ -8,4 +8,4 @@
 
 export { linkTab } from './link';
 export { embedTab } from './embed';
-export { ExportContent } from './export/export_content';
+export { exportTab } from './export';
