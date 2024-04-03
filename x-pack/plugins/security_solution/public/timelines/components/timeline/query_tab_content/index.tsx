@@ -275,7 +275,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [columns, defaultColumns]
   );
 
-  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
+  const augumentedColumnHeaders = useMemo(
+    () => memoizedGetColumnHeaders(localColumns, browserFields, false),
+    [localColumns, browserFields]
+  );
 
   const getTimelineQueryFields = () => {
     const columnFields = augumentedColumnHeaders.map((c) => c.id);

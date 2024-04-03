@@ -259,6 +259,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   });
 
   const columnHeaders = isEmpty(columns) ? defaultHeaders : columns;
+  console.log('Header :', { columnHeaders });
   const esQueryConfig = getEsQueryConfig(uiSettings);
 
   const filterQuery = useMemo(

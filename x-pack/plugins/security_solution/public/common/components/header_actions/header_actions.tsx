@@ -121,7 +121,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   );
 
   const onSortColumns = useCallback(
-    (cols: EuiDataGridSorting['columns']) =>
+    (cols: EuiDataGridSorting['columns']) => {
+      console.log('Header Actions Sort : ', { cols });
       dispatch(
         timelineActions.updateSort({
           id: timelineId,
@@ -138,7 +139,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
             };
           }),
         })
-      ),
+      );
+    },
     [columnHeaders, dispatch, timelineId]
   );
 
@@ -170,6 +172,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       })) ?? [],
     [columnHeaders]
   );
+
+  console.log('Header : ', { myColumns });
 
   const onResetColumns = useCallback(() => {
     dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultColumns }));

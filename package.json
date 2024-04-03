@@ -928,6 +928,7 @@
     "@turf/distance": "6.0.1",
     "@turf/helpers": "6.0.1",
     "@turf/length": "^6.0.2",
+    "@welldone-software/why-did-you-render": "^8.0.1",
     "@xstate/react": "^3.2.2",
     "adm-zip": "^0.5.9",
     "ai": "^2.2.33",
