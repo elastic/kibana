@@ -9,7 +9,6 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { InfraCustomDashboard } from '../../../common/custom_dashboards';
 import {
   InfraSaveCustomDashboardsRequestPayloadRT,
-  InfraSaveCustomDashboardsRequestPayload,
   InfraSaveCustomDashboardsResponseBodyRT,
   InfraGetCustomDashboardsRequestPathParamsRT,
 } from '../../../common/http_api/custom_dashboards_api';
@@ -39,7 +38,7 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const payload: InfraSaveCustomDashboardsRequestPayload = {
+      const payload = {
         ...request.body,
       };
 
