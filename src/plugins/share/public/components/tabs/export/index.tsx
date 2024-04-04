@@ -23,7 +23,7 @@ const exportTabReducer: IExportTab['reducer'] = (state, action) => {
 };
 
 const ExportTabContent = () => {
-  const { shareMenuItems, objectType, isDirty, onClose, toasts } = useShareTabsContext()!;
+  const { shareMenuItems, objectType, isDirty, onClose, toasts, intl } = useShareTabsContext()!;
   const aggregateReportTypes: ShareMenuItem[] = [];
 
   shareMenuItems.map((shareMenuItem) => {
@@ -40,6 +40,7 @@ const ExportTabContent = () => {
       absoluteUrl,
       generateCopyUrl,
       renderCopyURLButton,
+      showRadios,
     } = shareMenuItem;
 
     aggregateReportTypes.push({
@@ -55,6 +56,7 @@ const ExportTabContent = () => {
       absoluteUrl,
       generateCopyUrl,
       renderCopyURLButton,
+      showRadios,
     });
   });
 
@@ -65,6 +67,7 @@ const ExportTabContent = () => {
         isDirty,
         onClose,
         toasts,
+        intl,
         aggregateReportTypes,
       }}
     />

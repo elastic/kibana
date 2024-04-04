@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -28,19 +28,24 @@ import { i18n } from '@kbn/i18n';
 // import useMountedState from 'react-use/lib/useMountedState';
 import { type IShareContext } from '../../context';
 
-type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
+type ExportProps = Pick<
+  IShareContext,
+  'isDirty' | 'objectId' | 'objectType' | 'onClose' | 'intl' | 'toasts'
+> & {
   layoutOption?: 'print';
   aggregateReportTypes: any[];
 };
 
 type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'csv';
 
-export const ExportContent = ({
+const ExportContentUi = ({
   isDirty,
   objectId,
   objectType,
   aggregateReportTypes,
   layoutOption,
+  intl,
+  toasts,
 }: ExportProps) => {
   const isSaved = Boolean(objectId) || !isDirty;
   // needed for CSV in Discover
@@ -181,8 +186,12 @@ export const ExportContent = ({
     if (objectType === 'lens' && selectedRadio === 'csv') {
       return downloadCSVLens();
     }
-    return usePrintLayout ? generateReportForPrinting() : generateReport();
+    return usePrintLayout
+      ? generateReportForPrinting({ intl, toasts })
+      : generateReport({ intl, toasts });
   }, [
+    intl,
+    toasts,
     downloadCSVLens,
     generateReport,
     generateReportForPrinting,
@@ -265,3 +274,5 @@ export const ExportContent = ({
     </>
   );
 };
+
+export const ExportContent = injectI18n(ExportContentUi);

@@ -18,7 +18,6 @@ import type { ReportingAPIClient } from '../../reporting_api_client';
 
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
   uiSettings: IUiSettingsClient;
   usesUiCapabilities: boolean;
   license: ILicense;

@@ -24,7 +24,6 @@ export const reportingCsvShareProvider = ({
   application,
   license,
   usesUiCapabilities,
-  toasts,
   theme,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
@@ -33,6 +32,7 @@ export const reportingCsvShareProvider = ({
     sharingData,
     onClose,
     intl,
+    toasts,
   }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
@@ -89,13 +89,13 @@ export const reportingCsvShareProvider = ({
       capabilityHasCsvReporting = true; // deprecated
     }
 
-    const generateReportingJobCSV = () => {
+    const generateReportingJobCSV = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
       return apiClient
         .createReportingJob(reportType, decoratedJobParams)
         .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
+          toastsReport.addSuccess({
+            title: intlReport.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -126,8 +126,8 @@ export const reportingCsvShareProvider = ({
           }
         })
         .catch((error) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
+          toastsReport.addError(error, {
+            title: intlReport.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),

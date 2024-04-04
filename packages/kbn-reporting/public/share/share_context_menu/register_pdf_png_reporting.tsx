@@ -231,7 +231,6 @@ export const reportingExportModalProvider = ({
   license,
   application,
   usesUiCapabilities,
-  toasts,
   theme,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
@@ -298,15 +297,16 @@ export const reportingExportModalProvider = ({
 
     type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 
-    const generateReportPDF = () => {
+    const generateReportPDF = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(
-        getJobParams(apiClient, jobProviderOptions, 'printablePdfV2') as unknown as AppParams
+        getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')() as unknown as AppParams
       );
+
       return apiClient
         .createReportingJob('printablePdfV2', decoratedJobParams)
         .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
+          toastsReport.addSuccess({
+            title: intlReport.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -337,8 +337,8 @@ export const reportingExportModalProvider = ({
           }
         })
         .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
+          toastsReport.addError(error, {
+            title: intlReport.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
@@ -350,22 +350,25 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateReportPDFForPrinting = () => {
+    const generateReportPDFForPrinting = ({
+      intl: intlReport,
+      toasts: toastsReport,
+    }: ShareContext) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2'),
+        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')(),
         layout: { id: 'print', dimensions },
         objectType,
         title: sharingData.title,
       });
       return apiClient
-        .createReportingJob('pngV2', decoratedJobParams)
+        .createReportingJob('printablePdfV2', decoratedJobParams)
         .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
+          toastsReport.addSuccess({
+            title: intlReport.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -396,8 +399,8 @@ export const reportingExportModalProvider = ({
           }
         })
         .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
+          toastsReport.addError(error, {
+            title: intlReport.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
@@ -409,13 +412,13 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateReportPNG = () => {
+    const generateReportPNG = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'pngV2'),
+        ...getJobParams(apiClient, jobProviderOptions, 'pngV2')(),
         layout: { id: 'preserve_layout', dimensions },
         objectType,
         title: sharingData.title,
@@ -423,8 +426,8 @@ export const reportingExportModalProvider = ({
       return apiClient
         .createReportingJob('pngV2', decoratedJobParams)
         .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
+          toastsReport.addSuccess({
+            title: intlReport.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -455,8 +458,8 @@ export const reportingExportModalProvider = ({
           }
         })
         .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
+          toastsReport.addError(error, {
+            title: intlReport.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
@@ -478,7 +481,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      showRadios: true,
+      showRadios: objectType === 'dashboard',
       generateReport: generateReportPDF,
       generateReportForPrinting: generateReportPDFForPrinting,
       reportType: 'printablePdfV2',
@@ -511,7 +514,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      showRadios: true,
+      showRadios: objectType === 'dashboard',
       generateReport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,

@@ -7,7 +7,8 @@
  */
 
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import { I18nStart, ToastsSetup } from '@kbn/core/public';
+import { I18nStart, ToastsStart } from '@kbn/core/public';
+import { InjectedIntl } from '@kbn/i18n-react';
 import { createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
@@ -30,7 +31,8 @@ export interface IShareContext extends ShareContext {
   isEmbedded: boolean;
   theme: ThemeServiceSetup;
   i18n: I18nStart;
-  toasts: ToastsSetup;
+  intl: InjectedIntl;
+  toasts: ToastsStart;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);
