@@ -35,8 +35,8 @@ export const parseProps = (props) => {
     total_time_in_millis: totalTimeInMillis,
     start_time: mbStartTime,
     total_time: mbTotalTime,
-    source = {},
-    target = {},
+    source = {}, // This property is potentially undefined due to a legacy search where `source` is optionally existing
+    target = {}, // This property is potentially undefined due to a legacy search where `target` is optionally existing
     translog,
     type,
     timezone,
