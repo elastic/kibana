@@ -12,7 +12,7 @@ The PagerDuty connector enables you to trigger, acknowledge, and resolve PagerDu
 In particular, it uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API].
 
 To create this connector, you must have a valid PagerDuty integration key.
-For configuration tips, refer to <<configuring-opsgenie>>
+For configuration tips, refer to <<configuring-pagerduty>>
 
 [float]
 [[define-pagerduty-ui]]
@@ -129,7 +129,7 @@ For more details on these properties, see https://v2.developer.pagerduty.com/v2/
 Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 [float]
-[[pagerduty-benefits]]
+[[configuring-pagerduty]]
 === Configure PagerDuty
 
 By integrating PagerDuty with rules, you can:

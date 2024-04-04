@@ -11,6 +11,7 @@ import type {
   CalculateAndPersistScoresResponse,
   CalculateScoresParams,
   CalculateScoresResponse,
+  EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
 import { calculateRiskScores } from './calculate_risk_scores';
@@ -21,12 +22,17 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 import { scheduleLatestTransformNow } from '../utils/transforms';
 
+type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
+  alertSampleSizePerShard: number;
+};
 export interface RiskScoreService {
   calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
   ) => Promise<CalculateAndPersistScoresResponse>;
-  getConfiguration: () => Promise<RiskEngineConfiguration | null>;
+  getConfigurationWithDefaults: (
+    entityAnalyticsConfig: EntityAnalyticsConfig
+  ) => Promise<RiskEngineConfigurationWithDefaults | null>;
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
 }
@@ -59,7 +65,22 @@ export const riskScoreServiceFactory = ({
       riskScoreDataClient,
       spaceId,
     }),
-  getConfiguration: async () => riskEngineDataClient.getConfiguration(),
+  getConfigurationWithDefaults: async (entityAnalyticsConfig: EntityAnalyticsConfig) => {
+    const savedObjectConfig = await riskEngineDataClient.getConfiguration();
+
+    if (!savedObjectConfig) {
+      return null;
+    }
+
+    const alertSampleSizePerShard =
+      savedObjectConfig.alertSampleSizePerShard ??
+      entityAnalyticsConfig.riskEngine.alertSampleSizePerShard;
+
+    return {
+      ...savedObjectConfig,
+      alertSampleSizePerShard,
+    };
+  },
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
   scheduleLatestTransformNow: () => scheduleLatestTransformNow({ namespace: spaceId, esClient }),
 });

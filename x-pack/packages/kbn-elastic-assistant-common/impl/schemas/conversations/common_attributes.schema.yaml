@@ -1,0 +1,286 @@
+openapi: 3.0.0
+info:
+  title: Common Conversation Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    NonEmptyString:
+      type: string
+      pattern: ^(?! *$).+$
+      minLength: 1
+      description: A string that is not empty and does not contain only whitespace
+
+    UUID:
+      type: string
+      format: uuid
+      description: A universally unique identifier
+
+    User:
+      type: object
+      description: Could be any string, not necessarily a UUID
+      properties:
+        id:
+          type: string
+          description: User id.
+        name:
+          type: string
+          description: User name.
+
+    TraceData:
+      type: object
+      description: trace Data
+      properties:
+        transactionId:
+          type: string
+          description: Could be any string, not necessarily a UUID
+        traceId:
+          type: string
+          description: Could be any string, not necessarily a UUID
+
+    Replacements:
+      type: object
+      additionalProperties:
+        type: string
+      description: Replacements object used to anonymize/deanomymize messsages
+
+    Reader:
+      type: object
+      additionalProperties: true
+
+    Provider:
+      type: string
+      description: Provider
+      enum:
+        - OpenAI
+        - Azure OpenAI
+
+    MessageRole:
+      type: string
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+
+    ConversationCategory:
+      type: string
+      description: The conversation category.
+      enum:
+        - assistant
+        - insights
+
+    ConversationConfidence:
+      type: string
+      description: The conversation confidence.
+      enum:
+        - low
+        - medium
+        - high
+
+    Message:
+      type: object
+      description: AI assistant conversation message.
+      required:
+        - 'timestamp'
+        - 'content'
+        - 'role'
+      properties:
+        content:
+          type: string
+          description: Message content.
+        reader:
+          $ref: '#/components/schemas/Reader'
+          description: Message content.
+        role:
+          $ref: '#/components/schemas/MessageRole'
+          description: Message role.
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: The timestamp message was sent or received.
+        isError:
+          type: boolean
+          description: Is error message.
+        traceData:
+          $ref: '#/components/schemas/TraceData'
+          description: trace Data
+
+    ApiConfig:
+      type: object
+      required:
+        - connectorId
+      properties:
+        connectorId:
+          type: string
+          description: connector Id
+        defaultSystemPromptId:
+          type: string
+          description: defaultSystemPromptId
+        provider:
+          $ref: '#/components/schemas/Provider'
+          description: Provider
+        model:
+          type: string
+          description: model
+
+    ConversationSummary:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Summary text of the conversation over time.
+        timestamp:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: The timestamp summary was updated.
+        public:
+          type: boolean
+          description: Define if summary is marked as publicly available.
+        confidence:
+          $ref: '#/components/schemas/ConversationConfidence'
+          description: How confident you are about this being a correct and useful learning.
+
+    ErrorSchema:
+      type: object
+      required:
+        - error
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        error:
+          type: object
+          required:
+            - status_code
+            - message
+          properties:
+            status_code:
+              type: integer
+              minimum: 400
+            message:
+              type: string
+
+    ConversationResponse:
+      type: object
+      required:
+        - id
+        - title
+        - createdAt
+        - users
+        - namespace
+        - category
+      properties:
+        id:
+          oneOf:
+            - $ref: '#/components/schemas/UUID'
+            - $ref: '#/components/schemas/NonEmptyString'
+        title:
+          type: string
+          description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
+        'timestamp':
+          $ref: '#/components/schemas/NonEmptyString'
+        updatedAt:
+          description: The last time conversation was updated.
+          type: string
+        createdAt:
+          description: The last time conversation was updated.
+          type: string
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        isDefault:
+          description: Is default conversation.
+          type: boolean
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        namespace:
+          type: string
+          description: Kibana space
+
+    ConversationUpdateProps:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          oneOf:
+            - $ref: '#/components/schemas/UUID'
+            - $ref: '#/components/schemas/NonEmptyString'
+        title:
+          type: string
+          description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+
+    ConversationCreateProps:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        isDefault:
+          description: Is default conversation.
+          type: boolean
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+
+    ConversationMessageCreateProps:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+

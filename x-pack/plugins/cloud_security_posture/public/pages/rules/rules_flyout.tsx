@@ -36,7 +36,7 @@ import {
   TakeAction,
 } from '../../components/take_action';
 import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
-import { createDetectionRuleFromBenchmark } from '../configurations/utils/create_detection_rule_from_benchmark';
+import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -92,7 +92,7 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
   };
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromBenchmark(http, rule.metadata);
+    await createDetectionRuleFromBenchmarkRule(http, rule.metadata);
 
   return (
     <EuiFlyout

@@ -14,6 +14,7 @@ export {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
   logsExplorerUrlSchemaV1,
+  logsExplorerUrlSchemaV2,
   datasetQualityUrlSchemaV1,
 } from './url_schema';
 export { deepCompactObject } from './utils/deep_compact_object';

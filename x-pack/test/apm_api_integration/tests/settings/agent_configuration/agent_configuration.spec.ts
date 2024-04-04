@@ -387,6 +387,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177661
   registry.when('Agent configurations through fleet', { config: 'basic', archives: [] }, () => {
     const name = 'myservice';
     const environment = 'development';

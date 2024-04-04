@@ -36,6 +36,7 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
+  // Fleet Server hosts must have the default host URL in serverless.
   const serverlessDefaultFleetServerHost = await getFleetServerHost(
     soClient,
     SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID

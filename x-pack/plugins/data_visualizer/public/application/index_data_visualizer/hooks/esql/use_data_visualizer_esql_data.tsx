@@ -15,14 +15,14 @@ import { getFieldType } from '@kbn/field-utils';
 import { UI_SETTINGS } from '@kbn/data-service';
 import useObservable from 'react-use/lib/useObservable';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
-import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
-import { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import type {
   MetricFieldsStats,
   TotalFieldsStats,
@@ -31,7 +31,8 @@ import { filterFields } from '../../../common/components/fields_stats_grid/filte
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useESQLFieldStatsData } from './use_esql_field_stats_data';
 import type { NonAggregatableField } from '../../types/overall_stats';
-import { ESQLQuery, isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
 import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_data';
 import { type AggregatableField } from '../../types/esql_data_visualizer';
@@ -42,6 +43,7 @@ import type {
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
+import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -104,7 +106,7 @@ export const useESQLDataVisualizerData = (
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: true,
     autoRefreshSelector: true,
@@ -194,7 +196,7 @@ export const useESQLDataVisualizerData = (
         aggInterval,
         intervalMs: aggInterval?.asMilliseconds(),
         searchQuery: query,
-        limitSize,
+        limit: limitSize !== undefined ? parseInt(limitSize, 10) : DEFAULT_ESQL_LIMIT,
         sessionId: undefined,
         indexPattern,
         timeFieldName: currentDataView?.timeFieldName,
@@ -336,7 +338,7 @@ export const useESQLDataVisualizerData = (
     searchQuery: fieldStatsRequest?.searchQuery,
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
-    limitSize: fieldStatsRequest?.limitSize,
+    limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
   });
 
   useEffect(

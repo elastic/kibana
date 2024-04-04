@@ -63,7 +63,7 @@ export class CoreAppsService {
     // We register app-serving routes only if there are `preboot` plugins that may need them.
     if (uiPlugins.public.size > 0) {
       this.registerPrebootDefaultRoutes(corePreboot, uiPlugins);
-      this.registerStaticDirs(corePreboot);
+      this.registerStaticDirs(corePreboot, uiPlugins);
     }
   }
 
@@ -71,7 +71,7 @@ export class CoreAppsService {
     this.logger.debug('Setting up core app.');
     const config = await firstValueFrom(this.config$);
     this.registerDefaultRoutes(coreSetup, uiPlugins, config);
-    this.registerStaticDirs(coreSetup);
+    this.registerStaticDirs(coreSetup, uiPlugins);
   }
 
   private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -271,7 +271,7 @@ export class CoreAppsService {
 
   // After the package is built and bootstrap extracts files to bazel-bin,
   // assets are exposed at the root of the package and in the package's node_modules dir
-  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
+  private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
     /**
      * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
      * Eventually we only want to serve from the sha scoped path
@@ -282,5 +282,19 @@ export class CoreAppsService {
         fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
       );
     });
+
+    for (const [pluginName, pluginInfo] of uiPlugins.internal) {
+      if (!pluginInfo.publicAssetsDir) continue;
+      /**
+       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+       * Eventually we only want to serve from the sha scoped path
+       */
+      [
+        core.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
+        `/plugins/${pluginName}/assets/{path*}`,
+      ].forEach((path) => {
+        core.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
+      });
+    }
   }
 }

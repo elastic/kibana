@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiButton, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -76,19 +76,17 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           {message}
         </EuiCodeBlock>
         {hasAssistantPrivilege && (
-          <EuiButton color={color} size="s">
-            <NewChat
-              category="detection-rules"
-              color={color}
-              conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-              description={i18n.ASK_ASSISTANT_DESCRIPTION}
-              getPromptContext={getPromptContext}
-              suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-              tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-            >
-              {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-            </NewChat>
-          </EuiButton>
+          <NewChat
+            category="detection-rules"
+            color={color}
+            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            description={i18n.ASK_ASSISTANT_DESCRIPTION}
+            getPromptContext={getPromptContext}
+            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+          >
+            {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+          </NewChat>
         )}
       </EuiCallOut>
     </div>

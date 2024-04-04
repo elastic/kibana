@@ -42,7 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   }
 
   const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
-  const configPath = journey.configPath ?? 'x-pack/performance/journeys/login.ts';
+  const configPath = journey.configPath ?? 'x-pack/performance/journeys_e2e/login.ts';
 
   const baseConfig = (await readConfigFile(path.resolve(REPO_ROOT, configPath))).getAll();
 

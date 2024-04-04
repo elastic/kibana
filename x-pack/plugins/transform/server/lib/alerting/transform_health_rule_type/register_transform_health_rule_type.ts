@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -14,8 +15,12 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { AlertsClientError, IRuleTypeAlerts, RuleType } from '@kbn/alerting-plugin/server';
-import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type {
+  PluginSetupContract as AlertingSetup,
+  IRuleTypeAlerts,
+  RuleType,
+} from '@kbn/alerting-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
@@ -26,7 +31,8 @@ import {
   TRANSFORM_RULE_TYPE,
   TRANSFORM_HEALTH_RESULTS,
 } from '../../../../common/constants';
-import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
+import type { TransformHealthRuleParams } from './schema';
+import { transformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
 
 export interface BaseTransformAlertResponse {

@@ -56,12 +56,6 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
-const requeueInvalidTasksConfig = schema.object({
-  delay: schema.number({ defaultValue: 3000, min: 0 }),
-  enabled: schema.boolean({ defaultValue: false }),
-  max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
-});
-
 const requestTimeoutsConfig = schema.object({
   /* The request timeout config for task manager's updateByQuery default:30s, min:10s, max:10m */
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
@@ -143,7 +137,6 @@ export const configSchema = schema.object(
       defaultValue: 1000,
       min: 1,
     }),
-    requeue_invalid_tasks: requeueInvalidTasksConfig,
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
@@ -181,7 +174,6 @@ export const configSchema = schema.object(
   }
 );
 
-export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>;
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

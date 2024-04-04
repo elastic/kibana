@@ -837,6 +837,11 @@
           "panelsJSON": {
             "index": false,
             "type": "text"
+          },
+          "showApplySelections": {
+            "doc_values": false,
+            "index": false,
+            "type": "boolean"
           }
         }
       },
@@ -1550,6 +1555,20 @@
       },
       "type": {
         "type": "keyword"
+      }
+    }
+  },
+  "infra-custom-dashboards": {
+    "dynamic": false,
+    "properties": {
+      "assetType": {
+        "type": "keyword"
+      },
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       }
     }
   },
@@ -2416,6 +2435,9 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },

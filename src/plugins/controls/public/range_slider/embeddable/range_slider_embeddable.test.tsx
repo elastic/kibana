@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
-import { ControlGroupInput } from '../../../common';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { storybookFlightsDataView } from '@kbn/presentation-util-plugin/public/mocks';
-import { RANGE_SLIDER_CONTROL } from '../../../common';
-import { ControlGroupContainer } from '../../control_group/embeddable/control_group_container';
+import { of } from 'rxjs';
+import { ControlGroupInput, RANGE_SLIDER_CONTROL } from '../../../common';
+import { mockControlGroupContainer } from '../../../common/mocks';
 import { pluginServices } from '../../services';
 import { injectStorybookDataView } from '../../services/data_views/data_views.story';
-import { RangeSliderEmbeddableFactory } from './range_slider_embeddable_factory';
 import { RangeSliderEmbeddable } from './range_slider_embeddable';
+import { RangeSliderEmbeddableFactory } from './range_slider_embeddable_factory';
 
 let totalResults = 20;
 beforeEach(() => {
@@ -51,9 +49,8 @@ beforeEach(() => {
 describe('initialize', () => {
   describe('without selected range', () => {
     test('should notify control group when initialization is finished', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       // data view not required for test case
       // setInitializationFinished is called before fetching slider range when value is not provided
@@ -71,9 +68,8 @@ describe('initialize', () => {
 
   describe('with selected range', () => {
     test('should set error message when data view can not be found', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       injectStorybookDataView(undefined);
 
@@ -94,9 +90,8 @@ describe('initialize', () => {
     });
 
     test('should set error message when field can not be found', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       injectStorybookDataView(storybookFlightsDataView);
 
@@ -115,9 +110,8 @@ describe('initialize', () => {
     });
 
     test('should set invalid state when filter returns zero results', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       injectStorybookDataView(storybookFlightsDataView);
       totalResults = 0;
@@ -132,14 +126,13 @@ describe('initialize', () => {
       await new Promise((resolve) => process.nextTick(resolve));
 
       const reduxState = control.getState();
-      expect(reduxState.output.filters?.length).toBe(0);
+      expect(reduxState.output.filters?.length).toBe(1);
       expect(reduxState.componentState.isInvalid).toBe(true);
     });
 
     test('should set range and filter', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       injectStorybookDataView(storybookFlightsDataView);
 
@@ -168,9 +161,8 @@ describe('initialize', () => {
     });
 
     test('should notify control group when initialization is finished', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       injectStorybookDataView(storybookFlightsDataView);
 
@@ -185,9 +177,8 @@ describe('initialize', () => {
     });
 
     test('should notify control group when initialization throws', async () => {
-      const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
       const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
-      const container = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+      const container = await mockControlGroupContainer(controlGroupInput);
 
       injectStorybookDataView(storybookFlightsDataView);
 

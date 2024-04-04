@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
@@ -69,7 +70,7 @@ const RowActionComponent = ({
   refetch,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-
+  const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
@@ -120,6 +121,10 @@ const RowActionComponent = ({
           },
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        tableId,
+        panel: 'right',
+      });
     }
     // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
     // support of old flyout in cases page
@@ -142,7 +147,7 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout]);
+  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 

@@ -63,6 +63,7 @@ const LensComponentWrapper = styled.div<{
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
   extraActions,
   extraOptions,
   getLensAttributes,
@@ -99,6 +100,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
+    applyPageAndTabsFilters,
     extraOptions,
     getLensAttributes,
     lensAttributes,

@@ -8,7 +8,7 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';

@@ -41,7 +41,7 @@ import {
   ErrorLike,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -885,7 +885,7 @@ export class Embeddable
           navigateToLensEditor={
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
-          displayFlyoutHeader={true}
+          displayFlyoutHeader
           canEditTextBasedQuery={this.isTextBasedLanguage()}
           isNewPanel={isNewPanel}
           deletePanel={deletePanel}
@@ -1489,7 +1489,9 @@ export class Embeddable
     const input = this.getInput();
 
     // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    // this is necessary for the dataview embeddable but not the ES|QL one
     if (
+      !Boolean(this.isTextBasedLanguage()) &&
       input.timeRange == null &&
       indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
     ) {
@@ -1591,8 +1593,19 @@ export class Embeddable
     return this.savedVis?.state.query;
   }
 
-  public getSavedVis(): Readonly<Document | undefined> {
-    return this.savedVis;
+  public getSavedVis(): Readonly<LensSavedObjectAttributes | undefined> {
+    if (!this.savedVis) {
+      return;
+    }
+
+    // Why are 'type' and 'savedObjectId' keys being removed?
+    // Prior to removing them,
+    // this method returned 'Readonly<Document | undefined>' while consumers typed the results as 'LensSavedObjectAttributes'.
+    // Removing 'type' and 'savedObjectId' keys to align method results with consumer typing.
+    const savedVis = { ...this.savedVis };
+    delete savedVis.type;
+    delete savedVis.savedObjectId;
+    return savedVis;
   }
 
   destroy() {

@@ -178,6 +178,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
       // Update custom label, popularity and format
       dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+      dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
 
       editedField.count = updatedField.popularity || 0;
       if (updatedField.format) {

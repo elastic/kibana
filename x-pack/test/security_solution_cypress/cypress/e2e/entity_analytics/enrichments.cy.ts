@@ -36,13 +36,13 @@ const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
 describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverUnload', 'risk_scores_new');
-    cy.task('esArchiverUnload', 'risk_scores_new_updated');
+    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
+    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_updated' });
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
   });
 
   describe('Custom query rule', () => {
@@ -59,8 +59,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       afterEach(() => {
-        cy.task('esArchiverUnload', 'risk_hosts');
-        cy.task('esArchiverUnload', 'risk_hosts_updated');
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts_updated' });
       });
 
       it('Should has enrichment fields from legacy risk', function () {
@@ -78,7 +78,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
         cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL).should('not.exist');
 
         closeAlertFlyout();
-        cy.task('esArchiverUnload', 'risk_hosts');
+        cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
         cy.task('esArchiverLoad', { archiveName: 'risk_hosts_updated' });
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Critical');
@@ -99,8 +99,8 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       afterEach(() => {
-        cy.task('esArchiverUnload', 'risk_scores_new');
-        cy.task('esArchiverUnload', 'risk_scores_new_updated');
+        cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
+        cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_updated' });
       });
 
       it('Should has enrichment fields from legacy risk', function () {
@@ -118,7 +118,7 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
         cy.get(ENRICHED_DATA_ROW).contains(ORIGINAL_HOST_RISK_LEVEL).should('not.exist');
 
         closeAlertFlyout();
-        cy.task('esArchiverUnload', 'risk_scores_new');
+        cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_updated' });
         expandFirstAlert();
         cy.get(ENRICHED_DATA_ROW).contains('Low');

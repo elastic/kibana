@@ -6,4 +6,5 @@
  */
 import type { Rule } from '../../../types';
 
+// @ts-expect-error upgrade typescript v4.9.5
 export type ResolvedRule<Params> = Rule<Params> & { outcome: string; alias_target_id?: string };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddInferencePipelineSteps } from './types';
+import type { AddInferencePipelineSteps } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 
 export function getSteps(

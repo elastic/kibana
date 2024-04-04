@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["public/**/*"],
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/unified-search-plugin",
@@ -11,6 +17,20 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-mount",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/cloud-plugin",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
+    "@kbn/i18n",
+    "@kbn/solution-nav-es",
+    "@kbn/solution-nav-oblt",
+    "@kbn/config",
+    "@kbn/solution-nav-analytics",
+    "@kbn/security-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",

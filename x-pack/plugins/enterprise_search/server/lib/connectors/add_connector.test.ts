@@ -146,7 +146,7 @@ describe('addConnector lib function', () => {
     });
 
     // native connector should generate API key and update secrets storage
-    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true, null);
+    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true);
   });
 
   it('should reject if index already exists', async () => {

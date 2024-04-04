@@ -246,6 +246,7 @@
     "controlGroupInput.controlStyle",
     "controlGroupInput.ignoreParentSettingsJSON",
     "controlGroupInput.panelsJSON",
+    "controlGroupInput.showApplySelections",
     "description",
     "hits",
     "kibanaSavedObjectMeta",
@@ -458,6 +459,11 @@
     "name",
     "title",
     "type"
+  ],
+  "infra-custom-dashboards": [
+    "assetType",
+    "dashboardFilterAssetIdEnabled",
+    "dashboardSavedObjectId"
   ],
   "infrastructure-monitoring-log-view": [
     "name"
@@ -721,6 +727,7 @@
     "titleKeyword"
   ],
   "risk-engine-configuration": [
+    "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
     "filter",

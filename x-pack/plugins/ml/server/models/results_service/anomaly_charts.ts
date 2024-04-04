@@ -46,15 +46,16 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import { CriteriaField } from './results_service';
+import type { CriteriaField } from './results_service';
 import type { CombinedJob, Datafeed } from '../../shared';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
-import { CHART_TYPE, ChartType } from '../../../common/constants/charts';
+import type { ChartType } from '../../../common/constants/charts';
+import { CHART_TYPE } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import { MlJob } from '../..';
+import type { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {

@@ -32,7 +32,6 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/es-ui-shared-plugin",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/ui-theme",
     "@kbn/config-schema",
@@ -68,6 +67,12 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/code-editor",
     "@kbn/console-plugin",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/es-errors",
+    "@kbn/search-connectors-plugin",
+    "@kbn/search-playground",
+    "@kbn/utility-types",
+    "@kbn/index-management-plugin",
+    "@kbn/deeplinks-search"
   ]
 }

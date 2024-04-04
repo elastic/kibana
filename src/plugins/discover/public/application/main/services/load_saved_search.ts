@@ -45,7 +45,7 @@ export const loadSavedSearch = async (
   deps: LoadSavedSearchDeps
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
-  const { savedSearchId } = params ?? {};
+  const { savedSearchId, initialAppState } = params ?? {};
   const {
     appStateContainer,
     internalStateContainer,
@@ -54,7 +54,7 @@ export const loadSavedSearch = async (
     services,
   } = deps;
   const appStateExists = !appStateContainer.isEmptyURL();
-  const appState = appStateExists ? appStateContainer.getState() : undefined;
+  const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 
   // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId

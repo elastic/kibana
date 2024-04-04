@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
-import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 export const useConnectorTypes = () => {
-  const { http } = useKibanaServices();
+  const { searchConnectors } = useKibanaServices();
 
-  return useQuery({
-    queryKey: ['fetchConnectorTypes'],
-    queryFn: () =>
-      http.fetch<{ connectors: ConnectorServerSideDefinition[] }>(
-        '/internal/serverless_search/connector_types'
-      ),
-  });
+  return searchConnectors?.getConnectorTypes() || [];
 };

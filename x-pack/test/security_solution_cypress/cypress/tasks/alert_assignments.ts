@@ -111,7 +111,7 @@ export const cannotAddAssigneesViaDetailsFlyout = () => {
   cy.get(ALERT_DETAILS_ASSIGN_BUTTON).should('be.disabled');
 };
 
-export const alertsTableShowsAssigneesForAlert = (users: SecurityRoleName[], alertIndex = 0) => {
+export const alertsTableShowsAssigneesForAlert = (users: string[], alertIndex = 0) => {
   cy.get(ALERT_ASIGNEES_COLUMN)
     .eq(alertIndex)
     .within(() => {
@@ -119,7 +119,7 @@ export const alertsTableShowsAssigneesForAlert = (users: SecurityRoleName[], ale
     });
 };
 
-export const alertsTableShowsAssigneesForAllAlerts = (users: SecurityRoleName[]) => {
+export const alertsTableShowsAssigneesForAllAlerts = (users: string[]) => {
   cy.get(ALERT_ASIGNEES_COLUMN).each(($column) => {
     cy.wrap($column).within(() => {
       users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
@@ -127,7 +127,7 @@ export const alertsTableShowsAssigneesForAllAlerts = (users: SecurityRoleName[])
   });
 };
 
-export const alertsTableShowsAssigneesBadgeForFirstAlert = (users: SecurityRoleName[]) => {
+export const alertsTableShowsAssigneesBadgeForFirstAlert = (users: string[]) => {
   cy.get(ALERT_ASIGNEES_COLUMN)
     .first()
     .within(() => {
@@ -136,13 +136,13 @@ export const alertsTableShowsAssigneesBadgeForFirstAlert = (users: SecurityRoleN
     });
 };
 
-export const alertDetailsFlyoutShowsAssignees = (users: SecurityRoleName[]) => {
+export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
     users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
   });
 };
 
-export const alertDetailsFlyoutShowsAssigneesBadge = (users: SecurityRoleName[]) => {
+export const alertDetailsFlyoutShowsAssigneesBadge = (users: string[]) => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).within(() => {
     cy.get(ALERT_ASSIGNEES_COUNT_BADGE).contains(users.length);
     users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('not.exist'));
@@ -165,7 +165,7 @@ export const selectAlertAssignee = (assignee: string) => {
  * This will update assignees for selected alert
  * @param users The list of assugnees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
  */
-export const updateAssigneesForFirstAlert = (users: SecurityRoleName[]) => {
+export const updateAssigneesForFirstAlert = (users: string[]) => {
   openFirstAlertAssigningActionMenu();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
@@ -173,7 +173,7 @@ export const updateAssigneesForFirstAlert = (users: SecurityRoleName[]) => {
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const updateAssigneesViaAddButtonInFlyout = (users: SecurityRoleName[]) => {
+export const updateAssigneesViaAddButtonInFlyout = (users: string[]) => {
   cy.get(ALERT_DETAILS_ASSIGN_BUTTON).click();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
@@ -181,7 +181,7 @@ export const updateAssigneesViaAddButtonInFlyout = (users: SecurityRoleName[]) =
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const updateAssigneesViaTakeActionButtonInFlyout = (users: SecurityRoleName[]) => {
+export const updateAssigneesViaTakeActionButtonInFlyout = (users: string[]) => {
   cy.get(ALERT_DETAILS_TAKE_ACTION_BUTTON).click();
   cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).click();
   waitForAssigneesToPopulatePopover();
@@ -190,7 +190,7 @@ export const updateAssigneesViaTakeActionButtonInFlyout = (users: SecurityRoleNa
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const bulkUpdateAssignees = (users: SecurityRoleName[]) => {
+export const bulkUpdateAssignees = (users: string[]) => {
   openAlertAssigningBulkActionMenu();
   waitForAssigneesToPopulatePopover();
   users.forEach((user) => selectAlertAssignee(user));
@@ -216,9 +216,10 @@ export const bulkRemoveAllAssignees = () => {
   cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
 };
 
-export const filterByAssignees = (users: Array<SecurityRoleName | typeof NO_ASSIGNEES>) => {
+export const filterByAssignees = (users: Array<string | typeof NO_ASSIGNEES>) => {
   cy.get(FILTER_BY_ASSIGNEES_BUTTON).scrollIntoView();
   cy.get(FILTER_BY_ASSIGNEES_BUTTON).click();
+  cy.get(FILTER_BY_ASSIGNEES_BUTTON).trigger('mouseleave');
   users.forEach((user) => selectAlertAssignee(user));
   cy.get(FILTER_BY_ASSIGNEES_BUTTON).click();
 };

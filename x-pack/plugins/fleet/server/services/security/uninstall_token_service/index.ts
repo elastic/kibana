@@ -166,7 +166,6 @@ export interface UninstallTokenServiceInterface {
   /**
    * Check whether all policies have a valid uninstall token. Rejects returning promise if not.
    *
-   * @param policyId policy Id to check
    */
   checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null>;
 }
@@ -541,25 +540,11 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     await this.soClient.bulkUpdate(bulkUpdateObjects);
   }
 
-  private async getPolicyIdsBatch(
-    batchSize: number = SO_SEARCH_LIMIT,
-    page: number = 1
-  ): Promise<string[]> {
-    return (
-      await agentPolicyService.list(this.soClient, { page, perPage: batchSize, fields: ['id'] })
-    ).items.map((policy) => policy.id);
-  }
-
   private async getAllPolicyIds(): Promise<string[]> {
-    const batchSize = SO_SEARCH_LIMIT;
-    let policyIdsBatch = await this.getPolicyIdsBatch(batchSize);
-    let policyIds = policyIdsBatch;
-    let page = 2;
-
-    while (policyIdsBatch.length === batchSize) {
-      policyIdsBatch = await this.getPolicyIdsBatch(batchSize, page);
-      policyIds = [...policyIds, ...policyIdsBatch];
-      page++;
+    const agentPolicyIdsFetcher = agentPolicyService.fetchAllAgentPolicyIds(this.soClient);
+    const policyIds: string[] = [];
+    for await (const agentPolicyId of agentPolicyIdsFetcher) {
+      policyIds.push(...agentPolicyId);
     }
 
     return policyIds;

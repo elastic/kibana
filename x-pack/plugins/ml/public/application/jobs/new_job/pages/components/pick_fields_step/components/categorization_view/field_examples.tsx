@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
-import { CategoryFieldExample } from '@kbn/ml-category-validator';
+import type { CategoryFieldExample } from '@kbn/ml-category-validator';
 
 interface Props {
   fieldExamples: CategoryFieldExample[] | null;

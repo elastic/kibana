@@ -6,7 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
@@ -24,7 +25,7 @@ import {
 
 import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import {
   DatePickerWrapper,
@@ -44,16 +45,14 @@ import {
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
-import {
-  DataVisualizerTable,
-  ItemIdToExpandedRowMap,
-} from '../../../common/components/stats_table';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
+import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import {
+import type {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';

@@ -43,16 +43,32 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
     <>
       <RuleDiffHeaderBar />
       {aboutFields.length !== 0 && (
-        <RuleDiffSection title={i18n.ABOUT_SECTION_LABEL} fieldGroups={aboutFields} />
+        <RuleDiffSection
+          title={i18n.ABOUT_SECTION_LABEL}
+          fieldGroups={aboutFields}
+          dataTestSubj="perFieldDiffAboutSection"
+        />
       )}
       {definitionFields.length !== 0 && (
-        <RuleDiffSection title={i18n.DEFINITION_SECTION_LABEL} fieldGroups={definitionFields} />
+        <RuleDiffSection
+          title={i18n.DEFINITION_SECTION_LABEL}
+          fieldGroups={definitionFields}
+          dataTestSubj="perFieldDiffDefinitionSection"
+        />
       )}
       {scheduleFields.length !== 0 && (
-        <RuleDiffSection title={i18n.SCHEDULE_SECTION_LABEL} fieldGroups={scheduleFields} />
+        <RuleDiffSection
+          title={i18n.SCHEDULE_SECTION_LABEL}
+          fieldGroups={scheduleFields}
+          dataTestSubj="perFieldDiffScheduleSection"
+        />
       )}
       {setupFields.length !== 0 && (
-        <RuleDiffSection title={i18n.SETUP_GUIDE_SECTION_LABEL} fieldGroups={setupFields} />
+        <RuleDiffSection
+          title={i18n.SETUP_GUIDE_SECTION_LABEL}
+          fieldGroups={setupFields}
+          dataTestSubj="perFieldDiffSetupSection"
+        />
       )}
     </>
   );

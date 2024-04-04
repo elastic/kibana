@@ -46,9 +46,19 @@ const datasetRT = rt.intersection([
   ),
 ]);
 
+const timeRangeRT = rt.strict({
+  from: rt.string,
+  to: rt.string,
+  refresh: rt.strict({
+    pause: rt.boolean,
+    value: rt.number,
+  }),
+});
+
 export const flyoutRT = rt.exact(
   rt.partial({
     dataset: datasetRT,
+    insightsTimeRange: timeRangeRT,
   })
 );
 
@@ -56,15 +66,9 @@ export const filtersRT = rt.exact(
   rt.partial({
     inactive: rt.boolean,
     fullNames: rt.boolean,
-    timeRange: rt.strict({
-      from: rt.string,
-      to: rt.string,
-      refresh: rt.strict({
-        isPaused: rt.boolean,
-        interval: rt.number,
-      }),
-    }),
+    timeRange: timeRangeRT,
     integrations: rt.array(rt.string),
+    namespaces: rt.array(rt.string),
     query: rt.string,
   })
 );

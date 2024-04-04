@@ -9,25 +9,26 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
-import { Embeddable } from '@kbn/embeddable-plugin/public';
+import { Embeddable, embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
+import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { EmbeddableSingleMetricViewerContainer } from './embeddable_single_metric_viewer_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+import type {
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   SingleMetricViewerServices,
 } from '..';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+import type { MlEntity } from '..';
 
 export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.singleMetricViewerEmbeddable.title', {
@@ -45,12 +46,49 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE;
 
+  // API
+  public readonly functionDescription: BehaviorSubject<string | undefined>;
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
+  public readonly selectedDetectorIndex: BehaviorSubject<number | undefined>;
+  public readonly selectedEntities: BehaviorSubject<MlEntity | undefined>;
+
+  private apiSubscriptions = new Subscription();
+
   constructor(
     initialInput: SingleMetricViewerEmbeddableInput,
     public services: [CoreStart, MlDependencies, SingleMetricViewerServices],
     parent?: IContainer
   ) {
     super(initialInput, {} as AnomalyChartsEmbeddableOutput, parent);
+
+    this.jobIds = embeddableInputToSubject<JobId[], SingleMetricViewerEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'jobIds'
+    );
+
+    this.functionDescription = embeddableInputToSubject<
+      string | undefined,
+      SingleMetricViewerEmbeddableInput
+    >(this.apiSubscriptions, this, 'functionDescription');
+
+    this.selectedDetectorIndex = embeddableInputToSubject<
+      number | undefined,
+      SingleMetricViewerEmbeddableInput
+    >(this.apiSubscriptions, this, 'selectedDetectorIndex');
+
+    this.selectedEntities = embeddableInputToSubject<
+      MlEntity | undefined,
+      SingleMetricViewerEmbeddableInput
+    >(this.apiSubscriptions, this, 'selectedEntities');
+  }
+
+  public updateUserInput(update: SingleMetricViewerEmbeddableInput) {
+    this.updateInput(update);
+  }
+
+  public reportsEmbeddableLoad() {
+    return true;
   }
 
   public onLoading() {
@@ -65,7 +103,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
 
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({ loading: false, rendered: true, error: undefined });
   }
 
   public render(node: HTMLElement) {
@@ -94,6 +132,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
                 ...this.services[2],
               },
               ...this.services[0],
+              ...this.services[1],
             }}
           >
             <DatePickerContextProvider {...datePickerDeps}>
@@ -101,7 +140,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
                 <EmbeddableSingleMetricViewerContainer
                   id={this.input.id}
                   embeddableContext={this}
-                  embeddableInput={this.getInput$()}
+                  embeddableInput$={this.getInput$()}
                   services={this.services}
                   refresh={this.reload$.asObservable()}
                   onInputChange={this.updateInput.bind(this)}
@@ -120,6 +159,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   }
 
   public destroy() {
+    this.apiSubscriptions.unsubscribe();
     super.destroy();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);

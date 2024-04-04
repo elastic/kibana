@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
-import { catchError, distinctUntilChanged, map, pluck, switchMap } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import { catchError, distinctUntilChanged, map, pluck, switchMap } from 'rxjs';
 import { isEqual } from 'lodash';
-import { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from '../types';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { ExplorerJob } from '../../application/explorer/explorer_utils';
+import type { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from '../types';
+import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import type { ExplorerJob } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 export function getJobsObservable(

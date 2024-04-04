@@ -35,7 +35,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
           {
             "pluginId": "@kbn/core-http-common",
             "scope": "common",
@@ -72,7 +72,7 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
               {
                 "pluginId": "@kbn/core-http-common",
                 "scope": "common",
@@ -292,7 +292,7 @@
             "section": "def-common.SessionStorageFactory",
             "text": "SessionStorageFactory"
           },
-          "<unknown>>, [cookieOptions: ",
+          "<object>>, [cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -300,7 +300,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -575,7 +575,7 @@
             "section": "def-common.SessionStorageFactory",
             "text": "SessionStorageFactory"
           },
-          "<unknown>>, [cookieOptions: ",
+          "<object>>, [cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -583,7 +583,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -1783,7 +1783,7 @@
             "label": "createFactory",
             "description": [],
             "signature": [
-              "<T>() => DeepMocked<",
+              "<T extends object>() => DeepMocked<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
