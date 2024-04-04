@@ -90,11 +90,10 @@ export default function ({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168648
-    describe.only('non-default URL params', () => {
+    describe('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
+        const newUrl = [currentUrl].concat([...urlParamExtensions, 'embed=true']).join('&');
         // Embed parameter only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
