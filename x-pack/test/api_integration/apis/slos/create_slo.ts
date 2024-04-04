@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             dest: {
               index: '.slo-observability.sli-v3.1',
-              pipeline: '.slo-observability.sli.pipeline-v3',
+              pipeline: '.slo-observability.sli.pipeline-v3.1',
             },
             frequency: '1m',
             sync: { time: { field: '@timestamp', delay: '1m' } },
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.summary-v3',
+              index: '.slo-observability.summary-v3.1',
               pipeline: `.slo-observability.summary.pipeline-${id}-1`,
             },
             frequency: '1m',
