@@ -111,9 +111,9 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
     responseStream.destroy();
   };
 
-  const onData = (chunk: string) => {
-    // no special encoding, can safely use toString and append to responseBody
-    responseBody += chunk.toString();
+  const onData = (chunk: Buffer) => {
+    // no special encoding, can safely use `${chunk}` and append to responseBody
+    responseBody += `${chunk}`;
   };
 
   responseStream.on('data', onData);
@@ -124,7 +124,7 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
     signal?.addEventListener('abort', destroyStream);
     await finished(responseStream);
   } catch (e) {
-    if ('Premature close' !== e.message)
+    if (!signal?.aborted)
       logger.error('An error occurred while calculating streaming response tokens');
   }
   return parseOpenAIResponse(responseBody);

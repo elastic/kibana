@@ -73,6 +73,7 @@ export const getGenAiTokenTracking = async ({
         'Failed to calculate tokens from Invoke Async Iterator subaction streaming response'
       );
       logger.error(e);
+      // silently fail and null is returned at bottom of fuction
     }
   }
 
@@ -93,6 +94,7 @@ export const getGenAiTokenTracking = async ({
     } catch (e) {
       logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
       logger.error(e);
+      // silently fail and null is returned at bottom of fuction
     }
   }
 
@@ -112,6 +114,7 @@ export const getGenAiTokenTracking = async ({
     } catch (e) {
       logger.error('Failed to calculate tokens from streaming response');
       logger.error(e);
+      // silently fail and null is returned at bottom of fuction
     }
   }
 
@@ -202,6 +205,7 @@ export const getGenAiTokenTracking = async ({
     } catch (e) {
       logger.error('Failed to calculate tokens from Bedrock invoke response');
       logger.error(e);
+      // silently fail and null is returned at bottom of function
     }
   }
   return null;
