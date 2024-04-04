@@ -28,16 +28,16 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/m
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { ExtensionsService } from '../../../public/services/extensions_service';
-import { setExtensionsService } from '../../../public/application/store/selectors';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
 import { notificationService } from '../../../public/application/services/notification';
+import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
+import { setExtensionsService } from '../../../public/application/store/selectors/extension_service';
 import {
   MappingsEditorProvider,
   ComponentTemplatesProvider,

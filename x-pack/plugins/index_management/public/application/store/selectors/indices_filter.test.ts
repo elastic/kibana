@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ExtensionsService } from '../../../services';
 import { getFilteredIndices } from '.';
 // @ts-ignore
 import { defaultTableState } from '../reducers/table_state';
 import { setExtensionsService } from './extension_service';
-import { ExtensionsService } from '../../../services/extensions_service';
 
 describe('getFilteredIndices selector', () => {
   let extensionService: ExtensionsService;

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '../../../services';
+export { ExtensionsService } from './extensions_service';
 
-export declare function setExtensionsService(extensionsService: ExtensionsService): any;
-
-export const getFilteredIndices: (state: any) => any;
+export { PublicApiService } from './public_api_service';
