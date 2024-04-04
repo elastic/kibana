@@ -9,10 +9,10 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { SUB_ACTION } from '../../../common/thehive/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
-const CONNECTOR_TYPE_ID = '.d3security';
+const CONNECTOR_TYPE_ID = '.thehive';
 let connectorTypeModel: ConnectorTypeModel;
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
@@ -30,63 +30,107 @@ describe('actionTypeRegistry.get() works', () => {
   });
 });
 
-describe('d3security action params validation', () => {
-  test('action params validation succeeds when action params is valid', async () => {
+describe('thehive pushToService action params validation', () => {
+  test('pushToService action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      subAction: SUB_ACTION.RUN,
+      subAction: SUB_ACTION.PUSH_TO_SERVICE,
       subActionParams: {
-        body: 'message {test}',
-        severity: 'test severity',
-        eventType: 'test type',
+        incident: {
+          title: 'title {test}',
+          description: 'test description',
+        }
       },
+      comments: []
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [], subAction: [] },
+      errors: {
+        'pushToServiceParam.incident.title': [],
+        'pushToServiceParam.incident.description': [],
+        'createAlertParam.title': [],
+        'createAlertParam.description': [],
+        'createAlertParam.type': [],
+        'createAlertParam.source': [],
+        'createAlertParam.sourceRef': [],
+      },
     });
   });
 
-  test('params validation fails when body is not valid', async () => {
+  test('pushToService action params validation fails when Required fields is not valid', async () => {
     const actionParams = {
-      subAction: SUB_ACTION.RUN,
+      subAction: SUB_ACTION.PUSH_TO_SERVICE,
       subActionParams: {
-        body: '',
-        severity: '',
-        eventType: '',
+        incident: {
+          title: '',
+          description: '',
+        }
       },
+      comments: []
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: ['Body is required.'],
-        subAction: [],
+        'pushToServiceParam.incident.title': ['Title is required.'],
+        'pushToServiceParam.incident.description': ['Description is required.'],
+        'createAlertParam.title': [],
+        'createAlertParam.description': [],
+        'createAlertParam.type': [],
+        'createAlertParam.source': [],
+        'createAlertParam.sourceRef': [],
+      },
+    });
+  });
+});
+
+describe('thehive createAlert action params validation', () => {
+  test('createAlert action params validation succeeds when action params is valid', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.CREATE_ALERT,
+      subActionParams: {
+        title: 'some title {test}',
+        description: 'some description {test}',
+        type: 'type test',
+        source: 'source test',
+        sourceRef: 'source reference test',
+      },
+      comments: []
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'pushToServiceParam.incident.title': [],
+        'pushToServiceParam.incident.description': [],
+        'createAlertParam.title': [],
+        'createAlertParam.description': [],
+        'createAlertParam.type': [],
+        'createAlertParam.source': [],
+        'createAlertParam.sourceRef': [],
       },
     });
   });
 
-  test('params validation fails when subAction is missing', async () => {
+  test('params validation fails when Required fields is not valid', async () => {
     const actionParams = {
-      subActionParams: { body: '{"message": "test"}' },
-    };
-
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        body: [],
-        subAction: ['Action is required.'],
+      subAction: SUB_ACTION.CREATE_ALERT,
+      subActionParams: {
+        title: '',
+        description: '',
+        type: '',
+        source: '',
+        sourceRef: '',
       },
-    });
-  });
-
-  test('params validation fails when subActionParams is missing', async () => {
-    const actionParams = {
-      subAction: SUB_ACTION.RUN,
-      subActionParams: {},
+      comments: []
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: ['Body is required.'],
-        subAction: [],
+        'pushToServiceParam.incident.title': [],
+        'pushToServiceParam.incident.description': [],
+        'createAlertParam.title': ['Title is required.'],
+        'createAlertParam.description': ['Description is required.'],
+        'createAlertParam.type': ['Type is required.'],
+        'createAlertParam.source': ['Source is required.'],
+        'createAlertParam.sourceRef': ['Source Reference is required.'],
       },
     });
   });

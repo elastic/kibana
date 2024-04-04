@@ -6,11 +6,11 @@
  */
 
 import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
-import { schema } from '@kbn/config-schema';
 import type { AxiosError } from 'axios';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
   TheHiveIncidentResponseSchema,
+  TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   ExecutorSubActionCreateAlertParamsSchema,
@@ -64,6 +64,8 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       responseSchema: TheHiveIncidentResponseSchema,
     });
 
+    console.log(incident);
+
     return {
       id: res.data._id,
       title: res.data.title,
@@ -106,7 +108,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       url: `${this.url}/api/${API_VERSION}/case/${incidentId}`,
       data: incident,
       headers: { Authorization: `Bearer ${this.api_key}`, 'X-Organisation': this.organisation },
-      responseSchema: schema.any(),
+      responseSchema: TheHiveUpdateIncidentResponseSchema,
     });
 
     return {

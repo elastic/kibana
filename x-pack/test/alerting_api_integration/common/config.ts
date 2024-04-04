@@ -54,6 +54,7 @@ const enabledActionTypes = [
   SENTINELONE_CONNECTOR_ID,
   '.slack',
   '.slack_api',
+  '.thehive',
   '.tines',
   '.webhook',
   '.xmatters',

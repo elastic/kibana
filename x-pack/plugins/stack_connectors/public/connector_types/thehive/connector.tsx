@@ -24,7 +24,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   { id: 'api_key', label: API_KEY_LABEL, isPasswordField: true },
 ];
 
-const theHiveSecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const TheHiveConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   return (
     <>
       <SimpleConnectorForm
@@ -38,4 +38,4 @@ const theHiveSecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ 
 };
 
 // eslint-disable-next-line import/no-default-export
-export { theHiveSecurityConnectorFields as default };
+export { TheHiveConnectorFields as default };

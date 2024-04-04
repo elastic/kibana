@@ -1,9 +1,9 @@
 import { i18n } from '@kbn/i18n';
-import { TheHiveSeverity, TheHiveTLP } from '../../../common/thehive/constants';
+import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from '../../../common/thehive/constants';
 
 export const eventActionOptions = [
     {
-        value: 'case',
+        value: SUB_ACTION.PUSH_TO_SERVICE,
         text: i18n.translate(
             'xpack.stackConnectors.components.thehive.eventSelectCreateCaseOptionLabel',
             {
@@ -12,7 +12,7 @@ export const eventActionOptions = [
         ),
     },
     {
-        value: 'alert',
+        value: SUB_ACTION.CREATE_ALERT,
         text: i18n.translate(
             'xpack.stackConnectors.components.thehive.eventSelectCreateAlertOptionLabel',
             {

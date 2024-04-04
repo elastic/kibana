@@ -45,6 +45,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.jira',
           '.resilient',
           '.teams',
+          '.thehive',
           '.tines',
           '.torq',
           '.opsgenie',

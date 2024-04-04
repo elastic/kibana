@@ -16,7 +16,6 @@ import {
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { renderParameterTemplates } from './render';
 import { TheHiveConnector } from './thehive';
 import { TheHiveConfigSchema, TheHiveSecretsSchema } from '../../../common/thehive/schema';
 import { THEHIVE_CONNECTOR_ID, THEHIVE_TITLE } from '../../../common/thehive/constants';
@@ -36,6 +35,5 @@ export function getConnectorType(): TheHiveConnectorType {
       secrets: TheHiveSecretsSchema,
     },
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-    renderParameterTemplates,
   };
 }

@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.slack_api',
         'actions:.swimlane',
         'actions:.teams',
+        'actions:.thehive',
         'actions:.tines',
         'actions:.torq',
         'actions:.webhook',
