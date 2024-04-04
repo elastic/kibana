@@ -506,7 +506,7 @@ export const reportingExportModalProvider = ({
 
     shareActions.push({
       shareMenuItem: {
-        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
+        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabelPNG', {
           defaultMessage: 'PNG export',
         }),
         toolTipContent: licenseToolTipContent,

@@ -123,11 +123,6 @@ const ExportContentUi = ({
     getProperties();
   }, [aggregateReportTypes, getProperties, getRadioOptions, renderLayoutOptionsSwitch]);
 
-  // const markAsStale = useCallback(() => {
-  //   if (!isMounted) return;
-  //   setIsStale(true);
-  // }, [isMounted]);
-
   const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
     setPrintLayout(evt.target.checked);
   };
@@ -248,6 +243,11 @@ const ExportContentUi = ({
     }
   };
 
+  const styling =
+    selectedRadio === 'printablePdfV2' && (objectType === 'dashboard' || objectType === 'lens')
+      ? { justifyContent: 'center', alignItems: 'center' }
+      : {};
+
   return (
     <>
       <EuiForm>
@@ -258,12 +258,7 @@ const ExportContentUi = ({
         <EuiSpacer size="xl" />
       </EuiForm>
       <EuiModalFooter // dashboard has three buttons in the footer and needs to have them in the footer
-        css={
-          selectedRadio === 'printablePdfV2' &&
-          (objectType === 'dashboard' || objectType === 'lens')
-            ? { justifyContent: 'center', alignItems: 'center' }
-            : {}
-        }
+        css={{ padding: 0, ...styling }}
       >
         {renderLayoutOptionsSwitch()}
         {showCopyURLButton()}

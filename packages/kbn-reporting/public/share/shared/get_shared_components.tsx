@@ -7,14 +7,11 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import { BaseParams } from '@kbn/reporting-common/types';
-import { CSV_JOB_TYPE, JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { JobAppParamsPDFV2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
 import { ReportingAPIClient } from '../..';
-import { CsvModalContent } from '../share_context_menu/csv_export_modal';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
-import { ReportingModalContent } from '../share_context_menu/reporting_modal_content_lazy';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 /**
  * Properties for displaying a share menu with Reporting features.
@@ -47,20 +44,6 @@ export interface ApplicationProps {
 export interface ReportingPublicComponents {
   /** Needed for Canvas PDF reports */
   ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | undefined;
-  /**
-   * An element to display a form to export the page as PDF
-   */
-  ReportingModalPDFV2(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as PNG
-   */
-  ReportingModalPNGV2(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as CSV
-   */
-  ReportingModalCSV(props: ApplicationProps): JSX.Element;
 }
 
 /**
@@ -90,47 +73,6 @@ export function getSharedComponents(
           />
         );
       }
-    },
-    ReportingModalPDFV2(props: ApplicationProps) {
-      return (
-        <ReportingModalContent
-          requiresSavedState={false}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
-    },
-    ReportingModalPNGV2(props: ApplicationProps) {
-      return (
-        <ReportingModalContent
-          requiresSavedState={false}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
-    },
-    ReportingModalCSV(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as (
-        forShareUrl?: boolean
-      ) => Omit<BaseParams, 'browserTimezone' | 'version'>;
-      return (
-        <CsvModalContent
-          requiresSavedState={false}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          reportType={CSV_JOB_TYPE}
-          theme={core.theme}
-          {...props}
-          getJobParams={getJobParams}
-        />
-      );
     },
   };
 }

@@ -163,7 +163,7 @@ export const reportingCsvShareProvider = ({
         showRadios: false,
         helpText: (
           <FormattedMessage
-            id="share.csv.reporting.helpText"
+            id="reporting.share.csv.reporting.helpTextCSV"
             defaultMessage="Export a CSV of this {objectType}"
             values={{ objectType }}
           />
@@ -177,7 +177,7 @@ export const reportingCsvShareProvider = ({
         },
         generateReportButton: (
           <FormattedMessage
-            id="reporting.share.generateButtonLabel"
+            id="reporting.share.generateButtonLabelCSV"
             data-test-subj="generateReportButton"
             defaultMessage="Generate CSV"
           />

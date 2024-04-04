@@ -145,7 +145,7 @@ export const downloadCsvShareProvider = ({
               />
             ),
             generateReportButton: (
-              <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Generate Export" />
+              <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
             ),
             renderLayoutOptionSwitch: false,
             getJobParams: undefined,
