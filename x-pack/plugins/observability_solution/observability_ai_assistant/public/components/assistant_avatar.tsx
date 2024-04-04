@@ -9,6 +9,7 @@ import React, { ReactNode } from 'react';
 export interface AssistantAvatarProps {
   size?: keyof typeof sizeMap;
   children?: ReactNode;
+  css?: React.SVGProps<SVGElement>['css'];
 }
 
 export const sizeMap = {
@@ -19,14 +20,16 @@ export const sizeMap = {
   xs: 16,
 };
 
-export function AssistantAvatar({ size = 's' }: AssistantAvatarProps) {
+export function AssistantAvatar({ size = 's', css }: AssistantAvatarProps) {
+  const sizePx = sizeMap[size];
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={sizeMap[size]}
-      height={sizeMap[size]}
+      width={sizePx}
+      height={sizePx}
       viewBox="0 0 64 64"
       fill="none"
+      css={css}
     >
       <path fill="#F04E98" d="M36 28h24v36H36V28Z" />
       <path fill="#00BFB3" d="M4 46c0-9.941 8.059-18 18-18h6v36h-6c-9.941 0-18-8.059-18-18Z" />

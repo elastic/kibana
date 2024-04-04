@@ -421,6 +421,7 @@ export type AggregateOf<
           {
             doc_count: number;
             key: string[];
+            key_as_string: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
@@ -563,6 +564,16 @@ export type AggregateOf<
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
+      categorize_text: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: string | number;
+            regex?: string;
+            max_matching_length: number;
+          } & SubAggregateOf<TAggregationContainer, TDocument>
+        >;
+      };
       top_hits: {
         hits: {
           total: {
@@ -645,15 +656,6 @@ export type InferSearchResponseOf<
         >;
       };
   };
-
-export interface ClusterDetails {
-  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
-  indices: string;
-  took?: number;
-  timed_out: boolean;
-  _shards?: estypes.ShardStatistics;
-  failures?: estypes.ShardFailure[];
-}
 
 export interface ESQLColumn {
   name: string;

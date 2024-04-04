@@ -10,7 +10,6 @@
     "server/**/*",
     "typings/**/*",
     "../../../../typings/**/*",
-    "../../observability/public/embeddable/slo/common"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -47,13 +46,10 @@
     "@kbn/server-route-repository",
     "@kbn/ui-theme",
     "@kbn/test-jest-helpers",
-    "@kbn/core-http-browser",
     "@kbn/config-schema",
     "@kbn/features-plugin",
-    "@kbn/core-saved-objects-server",
     "@kbn/logging-mocks",
     "@kbn/logging",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
@@ -93,28 +89,17 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/core-chrome-browser",
     "@kbn/lens-embeddable-utils",
     "@kbn/serverless",
-    "@kbn/dashboard-plugin",
-    "@kbn/calculate-auto",
     "@kbn/presentation-util-plugin",
-    "@kbn/task-manager-plugin",
-    "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/es-types",
-    "@kbn/ingest-pipelines-plugin",
-    "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/field-formats-plugin",
-    "@kbn/aiops-utils",
     "@kbn/event-annotation-common",
-    "@kbn/controls-plugin",
-    "@kbn/core-lifecycle-browser",
-    "@kbn/unified-data-table",
-    "@kbn/cell-actions",
-    "@kbn/discover-utils",
-    "@kbn/unified-field-list",
-    "@kbn/data-view-field-editor-plugin"
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/aiops-log-rate-analysis",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

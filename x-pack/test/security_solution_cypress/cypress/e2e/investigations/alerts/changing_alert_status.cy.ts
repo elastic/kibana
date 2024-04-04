@@ -46,7 +46,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   context('Opening alerts', () => {

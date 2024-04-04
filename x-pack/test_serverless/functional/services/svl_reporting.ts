@@ -18,8 +18,6 @@ const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'K
 // const REPORTING_ROLE = 'reporting_user_role';
 // const REPORTING_USER_PASSWORD = 'reporting_user-password';
 // const REPORTING_USER_USERNAME = 'reporting_user';
-const REPORTING_USER_USERNAME = 'elastic_serverless';
-const REPORTING_USER_PASSWORD = 'changeme';
 
 /**
  * Services to create roles and users for security testing
@@ -29,6 +27,9 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
+
+  const REPORTING_USER_USERNAME = config.get('servers.kibana.username');
+  const REPORTING_USER_PASSWORD = config.get('servers.kibana.password');
 
   return {
     /**

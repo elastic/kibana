@@ -14,7 +14,7 @@ import {
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { CertResult, GetCertsParams } from '../../../common/runtime_types';
-import { AlertConfigKey } from '../../../common/constants/monitor_management';
+import { ConfigKey } from '../../../common/constants/monitor_management';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 
 export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
@@ -45,7 +45,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
 
     const monitors = await getAllMonitors({
       soClient: savedObjectsClient,
-      filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
+      filter: `${monitorAttributes}.${ConfigKey.ENABLED}: true`,
     });
 
     if (monitors.length === 0) {

@@ -12,7 +12,12 @@ import {
   RecoveredActionGroup,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { Alert } from '@kbn/alerting-plugin/server';
+import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+} from '@kbn/rule-data-utils';
 import {
   CustomMetricExpressionParams,
   Group,
@@ -20,7 +25,6 @@ import {
 } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { MissingGroupsRecord } from './lib/check_missing_group';
-import { AdditionalContext } from './utils';
 
 export enum AlertStates {
   OK,
@@ -42,7 +46,7 @@ export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
 
 export type CustomThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
-  missingGroups?: Array<string | MissingGroupsRecord>;
+  missingGroups?: MissingGroupsRecord[];
   groupBy?: string | string[];
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
 };
@@ -63,23 +67,17 @@ export type CustomThresholdActionGroup =
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
 
-export type CustomThresholdAlertFactory = (
-  id: string,
-  reason: string,
-  actionGroup: CustomThresholdActionGroup,
-  additionalContext?: AdditionalContext | null,
-  evaluationValues?: Array<number | null>,
-  threshold?: Array<number | null>,
-  group?: Group[]
-) => CustomThresholdAlert;
-
-type CustomThresholdAlert = Alert<
-  CustomThresholdAlertState,
-  CustomThresholdAlertContext,
-  CustomThresholdSpecificActionGroups
->;
-
 export interface AlertExecutionDetails {
   alertId: string;
   executionId: string;
 }
+
+export type CustomThresholdAlert = Omit<
+  ObservabilityMetricsAlert,
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
+> & {
+  // Defining a custom type for this because the schema generation script doesn't allow explicit null values
+  [ALERT_EVALUATION_VALUES]?: Array<number | null>;
+  [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
+};

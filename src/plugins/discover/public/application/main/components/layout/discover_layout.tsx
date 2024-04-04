@@ -83,8 +83,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.columns,
     state.sort,
   ]);
+  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
+    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isPlainRecord)
+      return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
@@ -112,7 +114,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]

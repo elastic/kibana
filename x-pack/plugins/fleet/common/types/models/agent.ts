@@ -107,6 +107,13 @@ interface AgentBase {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   agent?: FleetServerAgentMetadata;
+  unhealthy_reason?: UnhealthyReason[];
+}
+
+export enum UnhealthyReason {
+  INPUT = 'input',
+  OUTPUT = 'output',
+  OTHER = 'other',
 }
 
 export interface AgentMetrics {
@@ -336,6 +343,11 @@ export interface FleetServerAgent {
    * Outputs map
    */
   outputs?: OutputMap;
+
+  /**
+   * Unhealthy reason: input, output, other
+   */
+  unhealthy_reason?: UnhealthyReason[];
 }
 
 /**

@@ -2,7 +2,11 @@
   "prefix": "xpack",
   "paths": {
     "xpack.actions": "plugins/actions",
-    "xpack.aiops": ["packages/ml/aiops_components", "plugins/aiops"],
+    "xpack.aiops": [
+      "packages/ml/aiops_components",
+      "packages/ml/aiops_log_pattern_analysis",
+      "plugins/aiops"
+    ],
     "xpack.alerting": "plugins/alerting",
     "xpack.eventLog": "plugins/event_log",
     "xpack.stackAlerts": "plugins/stack_alerts",
@@ -33,9 +37,15 @@
     "xpack.dataVisualizer": "plugins/data_visualizer",
     "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
-    "xpack.globalSearch": ["plugins/global_search"],
-    "xpack.globalSearchBar": ["plugins/global_search_bar"],
-    "xpack.graph": ["plugins/graph"],
+    "xpack.globalSearch": [
+      "plugins/global_search"
+    ],
+    "xpack.globalSearchBar": [
+      "plugins/global_search_bar"
+    ],
+    "xpack.graph": [
+      "plugins/graph"
+    ],
     "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
@@ -50,9 +60,13 @@
     "xpack.licenseMgmt": "plugins/license_management",
     "xpack.licensing": "plugins/licensing",
     "xpack.lists": "plugins/lists",
-    "xpack.logstash": ["plugins/logstash"],
+    "xpack.logstash": [
+      "plugins/logstash"
+    ],
     "xpack.main": "legacy/plugins/xpack_main",
-    "xpack.maps": ["plugins/maps"],
+    "xpack.maps": [
+      "plugins/maps"
+    ],
     "xpack.metricsData": "plugins/metrics_data_access",
     "xpack.ml": [
       "packages/ml/anomaly_utils",
@@ -65,20 +79,35 @@
       "packages/ml/ui_actions",
       "plugins/ml"
     ],
-    "xpack.monitoring": ["plugins/monitoring"],
+    "xpack.monitoring": [
+      "plugins/monitoring"
+    ],
     "xpack.observability": "plugins/observability_solution/observability",
-    "xpack.observabilityAiAssistant": "plugins/observability_solution/observability_ai_assistant",
+    "xpack.observabilityAiAssistant": [
+      "plugins/observability_solution/observability_ai_assistant",
+      "plugins/observability_solution/observability_ai_assistant_app"
+    ],
+    "xpack.observabilityAiAssistantManagement": "plugins/observability_solution/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
-    "xpack.osquery": ["plugins/osquery"],
+    "xpack.osquery": [
+      "plugins/osquery"
+    ],
     "xpack.painlessLab": "plugins/painless_lab",
-    "xpack.profiling": ["plugins/observability_solution/profiling"],
+    "xpack.profiling": [
+      "plugins/observability_solution/profiling"
+    ],
     "xpack.remoteClusters": "plugins/remote_clusters",
-    "xpack.reporting": ["plugins/reporting"],
-    "xpack.rollupJobs": ["plugins/rollup"],
+    "xpack.reporting": [
+      "plugins/reporting"
+    ],
+    "xpack.rollupJobs": [
+      "plugins/rollup"
+    ],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
@@ -89,22 +118,33 @@
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
+    "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
-    "xpack.savedObjectsTagging": ["plugins/saved_objects_tagging"],
+    "xpack.savedObjectsTagging": [
+      "plugins/saved_objects_tagging"
+    ],
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.threatIntelligence": "plugins/threat_intelligence",
     "xpack.timelines": "plugins/timelines",
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
-    "xpack.uptime": ["plugins/observability_solution/uptime"],
-    "xpack.synthetics": ["plugins/observability_solution/synthetics"],
-    "xpack.ux": ["plugins/observability_solution/ux"],
+    "xpack.uptime": [
+      "plugins/observability_solution/uptime"
+    ],
+    "xpack.synthetics": [
+      "plugins/observability_solution/synthetics"
+    ],
+    "xpack.ux": [
+      "plugins/observability_solution/ux"
+    ],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
     "xpack.watcher": "plugins/watcher"
   },
-  "exclude": ["examples"],
+  "exclude": [
+    "examples"
+  ],
   "translations": [
     "@kbn/translations-plugin/translations/zh-CN.json",
     "@kbn/translations-plugin/translations/ja-JP.json",

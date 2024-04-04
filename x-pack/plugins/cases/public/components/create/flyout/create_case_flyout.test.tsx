@@ -39,8 +39,7 @@ const defaultProps = {
   owner: 'securitySolution',
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/174525
-describe.skip('CreateCaseFlyout', () => {
+describe('CreateCaseFlyout', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {

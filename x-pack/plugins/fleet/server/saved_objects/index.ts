@@ -73,6 +73,7 @@ import {
 } from './migrations/to_v8_6_0';
 import {
   migratePackagePolicyToV8100,
+  migratePackagePolicyToV8140,
   migratePackagePolicyToV870,
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
@@ -473,6 +474,14 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         ],
       },
+      '6': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8140,
+          },
+        ],
+      },
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
@@ -714,41 +723,13 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
 }
 
-export const OUTPUT_EXLCUDE_AAD_FIELDS = new Set([
-  'output_id',
-  'name',
-  'type',
-  'is_default',
-  'is_default_monitoring',
-  'hosts',
-  'ca_sha256',
-  'ca_trusted_fingerprint',
-  'config',
-  'config_yaml',
-  'is_internal',
-  'is_preconfigured',
-  'proxy_id',
-  'version',
-  'key',
-  'compression',
-  'compression_level',
-  'client_id',
-  'auth_type',
-  'connection_type',
-  'username',
-  'sasl',
-  'partition',
-  'random',
-  'round_robin',
-  'hash',
-  'topic',
-  'topics',
-  'headers',
-  'timeout',
-  'broker_timeout',
-  'required_acks',
-  'preset',
-  'secrets',
+export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
+  'service_token',
+  'shipper',
+  'allow_edit',
+  'broker_ack_reliability',
+  'broker_buffer_size',
+  'channel_buffer_size',
 ]);
 
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
@@ -762,15 +743,17 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
-    attributesToExcludeFromAAD: OUTPUT_EXLCUDE_AAD_FIELDS,
+    attributesToIncludeInAAD: OUTPUT_INCLUDE_AAD_FIELDS,
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['passphrase']),
+    attributesToIncludeInAAD: new Set(['private_key', 'public_key', 'passphrase_plain']),
   });
   encryptedSavedObjects.registerType({
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
   });
 }

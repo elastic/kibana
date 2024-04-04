@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
+import { compose, lifecycle, withHandlers, withProps, withState } from 'react-recompose';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
