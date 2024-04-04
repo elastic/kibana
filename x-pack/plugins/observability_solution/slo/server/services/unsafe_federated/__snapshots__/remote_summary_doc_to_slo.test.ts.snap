@@ -7,7 +7,6 @@ Object {
   "description": "irrelevant",
   "enabled": true,
   "groupBy": "*",
-  "groupings": Object {},
   "id": "irrelevant",
   "indicator": Object {
     "params": Object {
@@ -18,8 +17,6 @@ Object {
     },
     "type": "sli.kql.custom",
   },
-  "instanceId": "*",
-  "kibanaUrl": undefined,
   "name": "irrelevant",
   "objective": Object {
     "target": 0.9999,
@@ -62,7 +59,6 @@ Object {
   "description": "irrelevant",
   "enabled": true,
   "groupBy": "*",
-  "groupings": Object {},
   "id": "irrelevant",
   "indicator": Object {
     "params": Object {
@@ -73,8 +69,6 @@ Object {
     },
     "type": "sli.kql.custom",
   },
-  "instanceId": "*",
-  "kibanaUrl": undefined,
   "name": "irrelevant",
   "objective": Object {
     "target": 0.9999,
