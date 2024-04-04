@@ -102,7 +102,11 @@ class AppContextService {
    * @param pluginName
    */
   public getRegisteredFeatures(pluginName: string): AssistantFeatures {
+    console.log('this.registeredFeatures', this.registeredFeatures);
+    console.log('pluginName', pluginName);
+
     const features = this.registeredFeatures?.get(pluginName) ?? defaultAssistantFeatures;
+    console.log('featuresfeatures', features);
 
     this.logger?.debug('AppContextService:getRegisteredFeatures');
     this.logger?.debug(`pluginName: ${pluginName}`);

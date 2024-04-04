@@ -33,6 +33,7 @@ import {
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_TITLE_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
+  STREAMING_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
@@ -138,6 +139,7 @@ export interface UseAssistantContext {
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
@@ -203,6 +205,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   );
 
   /**
+   * Local storage for streaming configuration, prefixed by assistant nameSpace
+   */
+  // can be undefined from localStorage, if not defined, default to true
+  const [localStorageStreaming, setLocalStorageStreaming] = useLocalStorage<boolean>(
+    `${nameSpace}.${STREAMING_LOCAL_STORAGE_KEY}`,
+    true
+  );
+
+  /**
    * Prompt contexts are used to provide components a way to register and make their data available to the assistant.
    */
   const [promptContexts, setPromptContexts] = useState<Record<string, PromptContext>>({});
@@ -258,7 +269,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   // Fetch assistant capabilities
   const { data: capabilities } = useCapabilities({ http, toasts });
-  const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } =
+  const { assistantModelEvaluation: modelEvaluatorEnabled } =
     capabilities ?? defaultAssistantFeatures;
 
   const value = useMemo(
@@ -266,7 +277,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       actionTypeRegistry,
       alertsIndexPattern,
       assistantAvailability,
-      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -288,6 +298,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
+      // can be undefined from localStorage, if not defined, default to true
+      assistantStreamingEnabled: localStorageStreaming ?? true,
+      setAssistantStreamingEnabled: setLocalStorageStreaming,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
       setDefaultAllow,
@@ -307,7 +320,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       actionTypeRegistry,
       alertsIndexPattern,
       assistantAvailability,
-      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       localStorageQuickPrompts,
@@ -329,6 +341,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
+      localStorageStreaming,
+      setLocalStorageStreaming,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
       setDefaultAllow,
