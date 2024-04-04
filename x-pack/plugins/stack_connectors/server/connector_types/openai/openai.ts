@@ -131,6 +131,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
+    // handle known Azure error from early release, we can probably get rid of this eventually
     if (error.message === '404 Unrecognized request argument supplied: functions') {
       // add information for known Azure error
       return `API Error: ${error.message}
