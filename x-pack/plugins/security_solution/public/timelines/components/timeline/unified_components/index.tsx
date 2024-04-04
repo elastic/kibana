@@ -232,7 +232,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     [dispatch, onSort, timelineId]
   );
 
-  const { onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
+  const {
+    columns: currentColumns,
+    onAddColumn,
+    onRemoveColumn,
+    onSetColumns,
+  } = useColumns({
     capabilities,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     dataView: dataView!,
@@ -242,6 +247,13 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     columns: columnIds,
     sort: sortingColumns,
   });
+
+  const onSetColumnsTimeline = useCallback(
+    (nextColumns: string[]) => {
+      onSetColumns(nextColumns, true);
+    },
+    [onSetColumns]
+  );
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -374,13 +386,14 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   <EventDetailsWidthProvider>
                     <DataGridMemoized
                       columns={columns}
+                      columnIds={currentColumns}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
                       sort={sortingColumns}
                       onSort={onSort}
-                      onSetColumns={onSetColumns}
+                      onSetColumns={onSetColumnsTimeline}
                       events={events}
                       refetch={refetch}
                       onFieldEdited={onFieldEdited}
