@@ -417,6 +417,55 @@ describe('OpenAIConnector', () => {
     });
   });
 
+  describe('OpenAI without headers', () => {
+    const connector = new OpenAIConnector({
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      config: {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+      },
+      secrets: { apiKey: '123' },
+      logger: loggingSystemMock.createLogger(),
+      services: actionsMock.createServices(),
+    });
+
+    const sampleOpenAiBody = {
+      messages: [
+        {
+          role: 'user',
+          content: 'Hello world',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      // @ts-ignore
+      connector.request = mockRequest;
+      jest.clearAllMocks();
+    });
+
+    describe('runApi', () => {
+      it('uses the default model if none is supplied', async () => {
+        const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+        expect(response).toEqual(mockResponse.data);
+      });
+    });
+  });
+
   describe('AzureAI', () => {
     const connector = new OpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
