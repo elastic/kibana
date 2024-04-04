@@ -85,7 +85,7 @@ export function AddLayerButton({
     toolTipContent,
   }: typeof supportedLayers[0]) => {
     return {
-      panel: AddLayerPanelType.layerVisualizationType,
+      panel: AddLayerPanelType.selectVisualizationType,
       toolTipContent,
       disabled,
       name: <span className="lnsLayerAddButtonLabel">{label}</span>,
@@ -193,7 +193,7 @@ export function AddLayerButton({
               ],
             },
             {
-              id: AddLayerPanelType.layerVisualizationType,
+              id: AddLayerPanelType.selectVisualizationType,
               initialFocusedItemIndex: currentLayerVisType,
               title: i18n.translate('xpack.lens.layerPanel.selectVisualizationType', {
                 defaultMessage: 'Select visualization type',
