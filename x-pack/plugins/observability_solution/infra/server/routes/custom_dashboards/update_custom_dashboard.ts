@@ -26,7 +26,7 @@ export function initUpdateCustomDashboardRoute(framework: KibanaFramework) {
   framework.registerRoute(
     {
       method: 'put',
-      path: '/api/infra/{assetType}/custom-dashboards/{savedObjectId}',
+      path: '/api/infra/{assetType}/custom-dashboards/{id}',
       validate: {
         body: validatePayload,
         params: validateParams,
@@ -40,15 +40,14 @@ export function initUpdateCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const { savedObjectId, assetType } = request.params;
-      const { ...payload } = request.body;
+      const { id, assetType } = request.params;
 
       const savedCustomDashboard = await savedObjectsClient.update<InfraCustomDashboard>(
         INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        savedObjectId,
+        id,
         {
           assetType,
-          ...payload,
+          ...request.body,
         }
       );
 
@@ -56,7 +55,7 @@ export function initUpdateCustomDashboardRoute(framework: KibanaFramework) {
         body: InfraSaveCustomDashboardsResponseBodyRT.encode({
           id: savedCustomDashboard.id,
           assetType,
-          ...payload,
+          ...request.body,
           ...savedCustomDashboard.attributes,
         }),
       });

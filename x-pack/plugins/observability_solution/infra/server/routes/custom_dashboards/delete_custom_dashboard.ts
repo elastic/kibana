@@ -18,7 +18,7 @@ export function initDeleteCustomDashboardRoute(framework: KibanaFramework) {
   framework.registerRoute(
     {
       method: 'delete',
-      path: '/api/infra/{assetType}/custom-dashboards/{savedObjectId}',
+      path: '/api/infra/{assetType}/custom-dashboards/{id}',
       validate: {
         params: validateParams,
       },
@@ -31,15 +31,15 @@ export function initDeleteCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const params = request.params;
+      const { id } = request.params;
 
       await deleteCustomDashboard({
         savedObjectsClient,
-        savedObjectId: params.savedObjectId,
+        savedObjectId: id,
       });
 
       return response.ok({
-        body: params.savedObjectId,
+        body: id,
       });
     })
   );

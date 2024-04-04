@@ -17,15 +17,11 @@ const PayloadRT = rt.type({
   dashboardFilterAssetIdEnabled: rt.boolean,
 });
 
-const ExistingIdRT = rt.type({
+const SavedObjectIdRT = rt.type({
   id: rt.string,
 });
 
-const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT, ExistingIdRT]);
-
-const SavedObjectIdRT = rt.type({
-  savedObjectId: rt.string,
-});
+const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT, SavedObjectIdRT]);
 
 /**
  GET endpoint

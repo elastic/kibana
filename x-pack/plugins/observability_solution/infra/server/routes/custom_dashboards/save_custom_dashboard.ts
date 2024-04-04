@@ -54,7 +54,7 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       if (dashboardExist) {
         return response.badRequest({
-          body: `Custom dashboard for ${assetType} with id ${payload.dashboardSavedObjectId} already exist`,
+          body: `Dashboard with id ${payload.dashboardSavedObjectId} has already been linked to ${assetType}`,
         });
       }
 

@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body.error).to.be.eql('Bad Request');
         expect(response.body.message).to.be.eql(
-          'Custom dashboard for host with id 123 already exist'
+          'Dashboard with id 123 has already been linked to host'
         );
       });
     });
