@@ -312,7 +312,7 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
 
 #### Internal rule schema
 
-**The internal rule schema** needs to represent that the new `ruleSource` field may not always exist, so it must be optional.
+**The internal rule schema** needs to represent that the `immutable` and the new `ruleSource` field may not always exist, so they must be optional.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts)_
 
@@ -321,7 +321,7 @@ export type BaseRuleParams = z.infer<typeof BaseRuleParams>;
 export const BaseRuleParams = z.object({
   // [...]
 
-  immutable: IsRuleImmutable,
+  immutable: IsRuleImmutable.optional(),
   ruleSource: RuleSource.transform(camelize).optional(),
   // [...]
 });
@@ -1058,14 +1058,13 @@ The logic to importing a rule is as follows:
 
 **If a matching `rule_id` is found, but the `version` is not found**, it means there are some versions of this prebuilt rule known to Kibana, which means we should identify the rule being imported as prebuilt. The prebuilt rules package has a limit on the number of historical rule versions, and we can't assume that for a given rule_id we will always have ALL historical versions available as security-rule assets.
 
-In this case, we will the rule's params to be:
+In this case, we will set the rule's params to be:
 ```
 { 
-  rule_source: {
+  ruleSource: {
     type: 'external',
-    is_customized: false
-  },
-  immutable: true
+    isCustomized: false
+  }
 }
 ```
 
@@ -1168,7 +1167,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My edited rule",
-  rule_source: {
+  ruleSource: {
     type: "internal"
   }
 } 
@@ -1199,9 +1198,9 @@ Given the requirements described above, the following table shows the behaviour 
     <td><pre>
 {
   name: "My prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: false,
+    isCustomized: false,
   }
 } 
 </pre>
@@ -1231,9 +1230,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: false,
+    isCustomized: false,
   }
 } 
 </pre>
@@ -1263,9 +1262,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: true,
+    isCustomized: true,
   }
 } 
 </pre>
@@ -1276,9 +1275,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: false,
+    isCustomized: false,
   }
 } 
 </pre>
@@ -1308,9 +1307,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: false,
+    isCustomized: false,
   }
 } 
 </pre>
@@ -1335,9 +1334,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: true,
+    isCustomized: true,
   }
 } 
 </pre>
@@ -1348,9 +1347,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: true,
+    isCustomized: true,
   }
 } 
 </pre>
@@ -1375,9 +1374,9 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-  rule_source: {
+  ruleSource: {
     type: "external",
-    is_customized: false,
+    isCustomized: false,
   }
 } 
 </pre>
