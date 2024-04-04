@@ -165,6 +165,7 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
 
 export const CrowdstrikeHostActionsParamsSchema = schema.object({
   command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),
+  actionParameters: schema.maybe(schema.object()),
   ids: schema.arrayOf(schema.string()),
   alertIds: schema.maybe(schema.arrayOf(schema.string())),
 });

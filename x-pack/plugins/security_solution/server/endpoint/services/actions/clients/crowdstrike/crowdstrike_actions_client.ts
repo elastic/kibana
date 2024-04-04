@@ -121,9 +121,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     let crowdstrikeApiResponse: CrowdstrikeGetAgentsResponse | undefined;
 
     try {
-      const response = (await this.connectorActionsClient.execute(
-        executeOptions
-      )) as ActionTypeExecutorResult<CrowdstrikeGetAgentsResponse>;
+      const response = await this.connectorActionsClient.execute(executeOptions);
 
       this.log.debug(`Response for Crowdstrike agent id [${id}] returned:\n${stringify(response)}`);
 
@@ -178,6 +176,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
           await this.sendAction(SUB_ACTION.HOST_ACTIONS, {
             ids: actionRequest.endpoint_ids,
             command: 'contain',
+            ...(reqIndexOptions.comment
+              ? {
+                  actionParameters: {
+                    comment: reqIndexOptions.comment,
+                  },
+                }
+              : {}),
           });
         } catch (err) {
           error = err;

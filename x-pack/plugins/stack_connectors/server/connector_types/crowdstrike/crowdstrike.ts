@@ -87,6 +87,14 @@ export class CrowdstrikeConnector extends SubActionConnector<
       },
       data: {
         ids: payload.ids,
+        ...(actionParameters
+          ? {
+              action_parameters: Object.entries(payload.actionParameters).map(([name, value]) => ({
+                name,
+                value,
+              })),
+            }
+          : {}),
       },
       paramsSerializer,
       responseSchema: CrowdstrikeHostActionsResponseSchema,
