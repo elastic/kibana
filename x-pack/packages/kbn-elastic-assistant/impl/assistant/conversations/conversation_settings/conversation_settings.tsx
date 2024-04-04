@@ -426,7 +426,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               />
             </EuiFormRow>
           )}
-        <EuiSpacer size="s" />
+        <EuiSpacer size="l" />
         <EuiTitle size={'s'}>
           <h2>{i18n.SETTINGS_ALL_TITLE}</h2>
         </EuiTitle>
