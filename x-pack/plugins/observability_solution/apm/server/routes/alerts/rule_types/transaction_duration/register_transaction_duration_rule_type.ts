@@ -73,7 +73,7 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import {
-  getServiceGroupFields,
+  getApmAlertSourceFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
 import {
@@ -276,7 +276,7 @@ export function registerTransactionDurationRuleType({
           transactionDuration > thresholdMicroseconds
         ) {
           triggeredBuckets.push({
-            sourceFields: getServiceGroupFields(bucket),
+            sourceFields: getApmAlertSourceFields(bucket),
             transactionDuration,
             groupByFields,
             bucketKey,

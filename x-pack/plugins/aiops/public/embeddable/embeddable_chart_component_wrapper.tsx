@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';

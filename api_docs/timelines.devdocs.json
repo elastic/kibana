@@ -4355,6 +4355,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_tab_content/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_tab_content/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
