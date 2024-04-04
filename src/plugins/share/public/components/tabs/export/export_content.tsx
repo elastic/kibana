@@ -92,7 +92,7 @@ const ExportContentUi = ({
             label={
               <EuiText size="s" css={{ textWrap: 'nowrap' }}>
                 <FormattedMessage
-                  id="reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                  id="share.screenCapturePanelContent.optimizeForPrintingLabel"
                   defaultMessage="For printing"
                 />
               </EuiText>
@@ -105,7 +105,7 @@ const ExportContentUi = ({
           <EuiToolTip
             content={
               <FormattedMessage
-                id="reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
+                id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
                 defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
               />
             }
@@ -140,12 +140,12 @@ const ExportContentUi = ({
             content={
               isDirty ? (
                 <FormattedMessage
-                  id="reporting.share.modalContent.unsavedStateErrorText"
+                  id="share.modalContent.unsavedStateErrorText"
                   defaultMessage="Save your work before copying this URL."
                 />
               ) : (
                 <FormattedMessage
-                  id="reporting.share.modalContent.savedStateErrorText"
+                  id="share.modalContent.savedStateErrorText"
                   defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
                 />
               )
@@ -161,7 +161,7 @@ const ExportContentUi = ({
                   data-test-subj="shareReportingCopyURL"
                 >
                   <FormattedMessage
-                    id="reporting.share.modalContent.copyUrlButtonLabel"
+                    id="share.modalContent.copyUrlButtonLabel"
                     defaultMessage="Post URL"
                   />
                 </EuiButtonEmpty>
@@ -171,7 +171,7 @@ const ExportContentUi = ({
           <EuiToolTip
             content={
               <FormattedMessage
-                id="reporting.share.postURLWatcherMessage"
+                id="share.postURLWatcherMessage"
                 defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher. Unsaved changes: URL may change if you upgrade Kibana"
               />
             }
@@ -203,7 +203,7 @@ const ExportContentUi = ({
   const renderGenerateReportButton = useCallback(() => {
     return !isSaved ? (
       <EuiToolTip
-        content={i18n.translate('reporting.share.panelContent.unsavedStateErrorTitle', {
+        content={i18n.translate('share.panelContent.unsavedStateErrorTitle', {
           defaultMessage: 'Unsaved work',
         })}
       >
@@ -240,9 +240,7 @@ const ExportContentUi = ({
             name="image reporting radio group"
             idSelected={selectedRadio}
             legend={{
-              children: (
-                <FormattedMessage id="reporting.share.fileType" defaultMessage="File type" />
-              ),
+              children: <FormattedMessage id="share.fileType" defaultMessage="File type" />,
             }}
           />
         </EuiFlexGroup>
