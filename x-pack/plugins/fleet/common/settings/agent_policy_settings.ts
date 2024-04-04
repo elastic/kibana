@@ -20,7 +20,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         index: false,
       },
     },
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.goMaxProcsDescription', {
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.goMaxProcsTitle', {
       defaultMessage: 'GO_MAX_PROCS',
     }),
     description: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.goMaxProcsDescription', {
