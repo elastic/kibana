@@ -97,10 +97,13 @@ export function InnerFieldItem(props: FieldItemProps) {
         aggregatable: true,
       });
     }
+    const getContext = indexPattern?.getFieldByName
+      ? {
+          ecs: Boolean(indexPattern?.getFieldByName('ecs.version')),
+        }
+      : undefined;
     // IndexPatternField type
-    return new DataViewField(field, () => ({
-      ecs: Boolean(indexPattern?.getFieldByName('ecs.version')),
-    }));
+    return new DataViewField(field, getContext);
   }, [field, indexPattern]);
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;
