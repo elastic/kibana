@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
 import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';
-import { decode, encode } from '../../../../common/lib/embeddable_dataurl';
+import { decode } from '../../../../common/lib/embeddable_dataurl';
 import { CanvasElement, CanvasPage } from '../../../../types';
 import { useEmbeddablesService, useLabsService, useNotifyService } from '../../../services';
 // @ts-expect-error unconverted file
@@ -23,6 +23,7 @@ import {
   fetchEmbeddableRenderable,
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
+import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 
 const { actionsElements: strings } = ErrorStrings;
 
@@ -83,9 +84,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           updatedInput = { ...originalInput, ...incomingInput };
         }
 
-        const expression = `embeddable config="${encode(updatedInput)}"
-  type="${type}"
-| render`;
+        const expression = embeddableInputToExpression(updatedInput, type, undefined, true);
 
         dispatch(
           updateEmbeddableExpression({
@@ -100,9 +99,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         // select new embeddable element
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
-        const expression = `embeddable config="${encode(incomingInput)}"
-  type="${type}"
-| render`;
+        const expression = embeddableInputToExpression(incomingInput, type, undefined, true);
         dispatch(addElement(selectedPage.id, { expression }));
       }
     }
