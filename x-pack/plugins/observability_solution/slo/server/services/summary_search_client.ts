@@ -20,7 +20,7 @@ import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from './utils';
 
-export type SummaryResult = {
+export interface SummaryResult {
   sloId: SLOId;
   instanceId: string;
   summary: Summary;
@@ -30,7 +30,7 @@ export type SummaryResult = {
     remoteName: string;
     slo: SLODefinition;
   };
-};
+}
 
 type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sli_value' | 'status';
 
@@ -144,7 +144,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               !!remoteSloDefinition && {
                 remote: {
                   kibanaUrl: summaryDoc.kibanaUrl!,
-                  remoteName: remoteName,
+                  remoteName,
                   slo: remoteSloDefinition,
                 },
               }),

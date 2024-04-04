@@ -12,13 +12,13 @@ import { SLORepository } from './slo_repository';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 
-type SLODefinitionResult = {
+interface SLODefinitionResult {
   slo: SLODefinition;
   remote?: {
     kibanaUrl: string;
     remoteName: string;
   };
-};
+}
 
 export class SloDefinitionClient {
   constructor(
