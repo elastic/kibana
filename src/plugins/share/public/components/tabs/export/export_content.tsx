@@ -47,12 +47,11 @@ const ExportContentUi = ({
   intl,
   toasts,
 }: ExportProps) => {
-  const isSaved = Boolean(objectId) || !isDirty;
   // needed for CSV in Discover
   const firstRadio =
     (aggregateReportTypes[0].reportType as AllowedExports) ?? ('printablePdfV2' as const);
   const [, setIsStale] = useState(false);
-  const [isCreatingReport] = useState(false);
+  const [isCreatingReport, setIsCreatingReport] = useState<boolean>(false);
   const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(firstRadio);
   const [usePrintLayout, setPrintLayout] = useState(false);
   const isMounted = useMountedState();
@@ -215,14 +214,14 @@ const ExportContentUi = ({
   ]);
 
   const renderGenerateReportButton = useCallback(() => {
-    return !isSaved ? (
+    return isDirty ? (
       <EuiToolTip
         content={i18n.translate('share.panelContent.unsavedStateErrorTitle', {
           defaultMessage: 'Unsaved work',
         })}
       >
         <EuiButton
-          disabled={!isSaved}
+          disabled={isDirty}
           data-test-subj="generateReportButton"
           isLoading={Boolean(isCreatingReport)}
         >
@@ -231,16 +230,20 @@ const ExportContentUi = ({
       </EuiToolTip>
     ) : (
       <EuiButton
-        disabled={!isSaved}
+        disabled={isDirty}
         fill
-        onClick={() => getReport()}
+        onClick={() => {
+          setIsCreatingReport(true);
+          getReport();
+          setIsCreatingReport(false);
+        }}
         data-test-subj="generateReportButton"
         isLoading={Boolean(isCreatingReport)}
       >
         {generateReportButton}
       </EuiButton>
     );
-  }, [isSaved, generateReportButton, getReport, isCreatingReport]);
+  }, [isDirty, generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
     if (showRadios && getRadioOptions() !== undefined) {
