@@ -33,6 +33,7 @@ spec:
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
+        trigger_mode: none
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
