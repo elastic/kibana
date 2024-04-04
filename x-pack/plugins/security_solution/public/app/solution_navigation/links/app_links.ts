@@ -7,40 +7,41 @@
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { cloneDeep, find, remove } from 'lodash';
-import type { AppLinksSwitcher, LinkItem } from '../../../common/links/types';
+import type { AppLinkItems, LinkItem } from '../../../common/links/types';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
 import { createSettingsLinksFromManage } from './sections/settings_links';
 
 // This function is called by the security_solution plugin to alter the app links
-// that will be registered to the Security Solution application on Serverless projects.
+// that will be registered to the Security Solution application using the new "solution-centric" IA.
 // The capabilities filtering is done after this function is called by the security_solution plugin.
-export const solutionAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
-  const projectAppLinks = cloneDeep(appLinks) as LinkItem[];
+// TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
+export const solutionAppLinksSwitcher = (appLinks: AppLinkItems): AppLinkItems => {
+  const solutionAppLinks = cloneDeep(appLinks) as LinkItem[];
 
   // Remove timeline link
-  const [timelineLinkItem] = remove(projectAppLinks, { id: SecurityPageName.timelines });
+  const [timelineLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.timelines });
   if (timelineLinkItem) {
-    projectAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
+    solutionAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
   }
 
   // Remove data quality dashboard link
-  const dashboardLinkItem = find(projectAppLinks, { id: SecurityPageName.dashboards });
+  const dashboardLinkItem = find(solutionAppLinks, { id: SecurityPageName.dashboards });
   if (dashboardLinkItem && dashboardLinkItem.links) {
     remove(dashboardLinkItem.links, { id: SecurityPageName.dataQuality });
   }
 
   // Remove manage link
-  const [manageLinkItem] = remove(projectAppLinks, { id: SecurityPageName.administration });
+  const [manageLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.administration });
 
   if (manageLinkItem) {
-    projectAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
-    projectAppLinks.push(...createSettingsLinksFromManage(manageLinkItem));
+    solutionAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
+    solutionAppLinks.push(...createSettingsLinksFromManage(manageLinkItem));
   }
 
   // Add ML link
-  projectAppLinks.push(mlAppLink);
+  solutionAppLinks.push(mlAppLink);
 
-  return projectAppLinks;
+  return Object.freeze(solutionAppLinks);
 };

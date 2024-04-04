@@ -11,7 +11,7 @@ import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/pu
 import { appLinks$ } from './links';
 import type { AppLinkItems } from './types';
 
-export type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
+type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 const classicFormatter: DeepLinksFormatter = (appLinks) =>

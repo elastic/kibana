@@ -9,8 +9,6 @@ import { BehaviorSubject } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { CoreStart } from '@kbn/core/public';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
-import type { AppLinksSwitcher } from './common/links';
-import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
@@ -22,15 +20,12 @@ export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
   public onboardingPageService: OnboardingPageService;
-  public appLinksSwitcher: AppLinksSwitcher;
-  public deepLinksFormatter?: DeepLinksFormatter;
   public isSolutionNavigationEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.onboardingPageService = new OnboardingPageService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
-    this.appLinksSwitcher = (appLinks) => appLinks;
     this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false);
   }
 
@@ -38,12 +33,6 @@ export class PluginContract {
     return {
       resolver: lazyResolver,
       experimentalFeatures: { ...this.experimentalFeatures },
-      setAppLinksSwitcher: (appLinksSwitcher) => {
-        this.appLinksSwitcher = appLinksSwitcher;
-      },
-      setDeepLinksFormatter: (deepLinksFormatter) => {
-        this.deepLinksFormatter = deepLinksFormatter;
-      },
     };
   }
 

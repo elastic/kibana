@@ -72,7 +72,7 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { AppLinksSwitcher, NavigationLink } from './common/links';
+import type { NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
 import type { Assets } from './assets';
 import type { Investigations } from './investigations';
@@ -83,7 +83,6 @@ import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
@@ -187,8 +186,6 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;
-  setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
-  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {
