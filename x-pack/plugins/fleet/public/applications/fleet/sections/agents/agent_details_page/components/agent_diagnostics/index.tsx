@@ -228,7 +228,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       size="m"
       onClick={onSubmit}
       disabled={
-        isSubmitting || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.allAgents
+        isSubmitting || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents
       }
     >
       <FormattedMessage

@@ -60,9 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
         operation: 'max',
         field: 'bytes',
-        keepOpen: true,
       });
-      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('applyFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
       const data = await PageObjects.lens.getMetricVisualizationData();
@@ -123,11 +121,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
         operation: 'max',
         field: 'bytes',
-        keepOpen: true,
       });
 
       log.debug('Cancels the changes');
-      await PageObjects.lens.closeDimensionEditor();
       await testSubjects.click('cancelFlyoutButton');
       await PageObjects.dashboard.waitForRenderComplete();
 

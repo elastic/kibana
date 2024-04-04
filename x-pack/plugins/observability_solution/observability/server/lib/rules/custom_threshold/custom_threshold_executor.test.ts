@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import { AlertInstanceState as AlertState } from '@kbn/alerting-plugin/server';
-import {
-  AlertInstanceMock,
-  RuleExecutorServicesMock,
-  alertsMock,
-} from '@kbn/alerting-plugin/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -33,14 +25,6 @@ jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
   getViewInAppUrl: jest.fn().mockReturnValue('mockedViewInApp'),
 }));
-
-interface AlertTestInstance {
-  instance: AlertInstanceMock;
-  actionQueue: any[];
-  state: any;
-}
-
-const persistAlertInstances = false;
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
@@ -141,7 +125,110 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
+const mockLibs: any = {
+  basePath: {
+    publicBaseUrl: 'http://localhost:5601',
+    prepend: (path: string) => path,
+  },
+  logger,
+  config: {
+    customThresholdRule: {
+      groupByPageSize: 10_000,
+    },
+  },
+  locators: {},
+};
+
+const executor = createCustomThresholdExecutor(mockLibs);
+
+const mockedIndex = {
+  id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+  title: 'metrics-fake_hosts',
+  name: 'mockedDataViewName',
+  fieldFormatMap: {},
+  typeMeta: {},
+  timeFieldName: '@timestamp',
+};
+const mockedDataView = {
+  getIndexPattern: () => 'mockedIndexPattern',
+  getName: () => 'mockedDataViewName',
+  ...mockedIndex,
+};
+const mockedSearchSource = {
+  getField: jest.fn(() => mockedDataView),
+} as any as ISearchSource;
+let services: RuleExecutorServicesMock;
+
+interface ReportedAlert {
+  id: string;
+  actionGroup: string;
+  payload: object;
+  context?: {
+    group: string;
+    reason: string;
+    tags: string[];
+  };
+}
+
+const alerts = new Map<string, ReportedAlert[]>();
+
+const setup = () => {
+  const alertsServices = alertsMock.createRuleExecutorServices();
+
+  services = {
+    ...alertsServices,
+    searchSourceClient: {
+      ...searchSourceCommonMock,
+      create: jest.fn(() => Promise.resolve(mockedSearchSource)),
+    },
+  };
+
+  services.alertsClient.report.mockImplementation((params: any) => {
+    alerts.set(params.id, [
+      {
+        id: params.id,
+        actionGroup: params.actionGroup,
+        payload: params.payload,
+      },
+    ]);
+
+    return {
+      uuid: `uuid-${params.id}`,
+      start: new Date().toISOString(),
+      alertDoc: {},
+    };
+  });
+
+  services.alertsClient.setAlertData.mockImplementation((params: any) => {
+    const alertsList = alerts.get(params.id);
+    if (alertsList && alertsList.length > 0) {
+      const lastAlert = alertsList[alertsList.length - 1];
+      lastAlert.context = params.context;
+    }
+  });
+
+  services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
+    if (sourceId === 'alternate')
+      return {
+        id: 'alternate',
+        attributes: { metricAlias: 'alternatebeat-*' },
+        type,
+        references: [],
+      };
+    if (sourceId === 'empty-response')
+      return {
+        id: 'empty',
+        attributes: { metricAlias: 'empty-response' },
+        type,
+        references: [],
+      };
+    return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
+  });
+};
+
 describe('The custom threshold alert type', () => {
+  setup();
+
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -184,63 +271,63 @@ describe('The custom threshold alert type', () => {
     test('alerts as expected with the > comparator', async () => {
       setResults(Comparator.GT, [0.75], true);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.GT, [1.5], false);
       await execute(Comparator.GT, [1.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the < comparator', async () => {
       setResults(Comparator.LT, [1.5], true);
       await execute(Comparator.LT, [1.5]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.LT, [0.75], false);
       await execute(Comparator.LT, [0.75]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the >= comparator', async () => {
       setResults(Comparator.GT_OR_EQ, [0.75], true);
       await execute(Comparator.GT_OR_EQ, [0.75]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.GT_OR_EQ, [1.0], true);
       await execute(Comparator.GT_OR_EQ, [1.0]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.GT_OR_EQ, [1.5], false);
       await execute(Comparator.GT_OR_EQ, [1.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the <= comparator', async () => {
       setResults(Comparator.LT_OR_EQ, [1.5], true);
       await execute(Comparator.LT_OR_EQ, [1.5]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.LT_OR_EQ, [1.0], true);
       await execute(Comparator.LT_OR_EQ, [1.0]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.LT_OR_EQ, [0.75], false);
       await execute(Comparator.LT_OR_EQ, [0.75]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the between comparator', async () => {
       setResults(Comparator.BETWEEN, [0, 1.5], true);
       await execute(Comparator.BETWEEN, [0, 1.5]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.BETWEEN, [0, 0.75], false);
       await execute(Comparator.BETWEEN, [0, 0.75]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the outside range comparator', async () => {
       setResults(Comparator.OUTSIDE_RANGE, [0, 0.75], true);
       await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setResults(Comparator.OUTSIDE_RANGE, [0, 1.5], false);
       await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('reports expected values to the action context', async () => {
       setResults(Comparator.GT, [0.75], true);
       await execute(Comparator.GT, [0.75]);
-      const { action } = mostRecentAction(instanceID);
-      expect(action.group).toBeUndefined();
-      expect(action.reason).toBe(
+      const reportedAlert = getLastReportedAlert(instanceID);
+      expect(reportedAlert?.context?.group).toBeUndefined();
+      expect(reportedAlert?.context?.reason).toBe(
         'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
@@ -300,8 +387,8 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
     });
     test('sends an alert when only some groups pass the threshold', async () => {
       setEvaluationResults([
@@ -329,8 +416,8 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.LT, [1.5]);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('sends no alert when no groups pass the threshold', async () => {
       setEvaluationResults([
@@ -358,8 +445,8 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [5]);
-      expect(mostRecentAction(instanceIdA)).toBe(undefined);
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('reports group values to the action context', async () => {
       setEvaluationResults([
@@ -387,10 +474,10 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.group).toEqual([
+      expect(getLastReportedAlert(instanceIdA)?.context?.group).toEqual([
         { field: 'groupByField', value: 'a' },
       ]);
-      expect(mostRecentAction(instanceIdB).action.group).toEqual([
+      expect(getLastReportedAlert(instanceIdB)?.context?.group).toEqual([
         { field: 'groupByField', value: 'b' },
       ]);
     });
@@ -728,7 +815,7 @@ describe('The custom threshold alert type', () => {
         ],
         stateResult2
       );
-      expect(stateResult3.groups).toEqual(expect.arrayContaining([]));
+      expect(stateResult3.missingGroups).toEqual(expect.arrayContaining([]));
     });
   });
 
@@ -797,13 +884,13 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual([
+      expect(getLastReportedAlert(instanceIdA)?.context?.tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
         'ruleTag1',
         'ruleTag2',
       ]);
-      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual([
+      expect(getLastReportedAlert(instanceIdB)?.context?.tags).toStrictEqual([
         'host-02_tag1',
         'host-02_tag2',
         'ruleTag1',
@@ -861,7 +948,10 @@ describe('The custom threshold alert type', () => {
 
       const instanceID = '*';
       await execute(Comparator.GT, [0.75]);
-      expect(mostRecentAction(instanceID).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
+      expect(getLastReportedAlert(instanceID)?.context?.tags).toStrictEqual([
+        'ruleTag1',
+        'ruleTag2',
+      ]);
     });
   });
 
@@ -931,7 +1021,7 @@ describe('The custom threshold alert type', () => {
       ]);
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       setEvaluationResults([
@@ -951,7 +1041,7 @@ describe('The custom threshold alert type', () => {
       ]);
       const instanceID = '*';
       await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
       setEvaluationResults([
@@ -1017,8 +1107,8 @@ describe('The custom threshold alert type', () => {
       const instanceIdA = 'a';
       const instanceIdB = 'b';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'groupByField');
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
     test('sends all criteria to the action context', async () => {
       setEvaluationResults([
@@ -1056,8 +1146,8 @@ describe('The custom threshold alert type', () => {
       ]);
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
-      const { action } = mostRecentAction(instanceID);
-      const reasons = action.reason;
+      const reportedAlert = getLastReportedAlert(instanceID);
+      const reasons = reportedAlert?.context?.reason;
       expect(reasons).toBe(
         'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
       );
@@ -1099,7 +1189,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.GT, [0.9]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setEvaluationResults([
         {
           '*': {
@@ -1115,7 +1205,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(Comparator.LT, [0.5]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     describe('with a groupBy parameter', () => {
       const executeGroupBy = (
@@ -1170,8 +1260,8 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
-        expect(mostRecentAction(instanceIdA)).toBe(undefined);
-        expect(mostRecentAction(instanceIdB)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
         setEvaluationResults([
           {
             a: {
@@ -1197,8 +1287,8 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
-        expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-        expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+        expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       });
     });
   });
@@ -1315,11 +1405,11 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(true);
-      const recentAction = mostRecentAction(instanceID);
-      expect(recentAction.action.reason).toEqual(
+      const reportedAlert = getLastReportedAlert(instanceID);
+      expect(reportedAlert?.context?.reason).toEqual(
         'Average test.metric.3 reported no data in the last 1m'
       );
-      expect(recentAction).toBeNoDataAction();
+      expect(reportedAlert).toHaveNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
@@ -1344,7 +1434,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute(false);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
   });
 
@@ -1404,16 +1494,16 @@ describe('The custom threshold alert type', () => {
         {},
       ]);
       await execute(true);
-      const recentAction = mostRecentAction(instanceID);
-      expect(recentAction.action).toEqual({
-        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+      const recentAlert = getLastReportedAlert(instanceID);
+      expect(recentAlert?.context).toEqual({
+        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/uuid-*',
         reason: 'Average test.metric.3 reported no data in the last 1m',
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
         value: ['[NO DATA]', null],
         tags: [],
         viewInAppUrl: 'mockedViewInApp',
       });
-      expect(recentAction).toBeNoDataAction();
+      expect(recentAlert).toHaveNoDataAction();
     });
   });
 
@@ -1477,7 +1567,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       let resultState = await executeEmptyResponse();
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toHaveNoDataAction();
       setEvaluationResults([
         {
           '*': {
@@ -1500,7 +1590,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       resultState = await executeEmptyResponse(true, resultState);
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toHaveNoDataAction();
       setEvaluationResults([
         {
           a: {
@@ -1526,9 +1616,9 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       resultState = await execute2GroupsABResponse(true, resultState);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       interTestStateStorage.push(resultState); // Hand off resultState to the next test
     });
     test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
@@ -1574,9 +1664,9 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await executeEmptyResponse(true, resultState);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeNoDataAction();
-      expect(mostRecentAction(instanceIdB)).toBeNoDataAction();
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
     });
     test('does not send individual No Data alerts when groups disappear if alertOnGroupDisappear is disabled', async () => {
       setEvaluationResults([
@@ -1635,10 +1725,10 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const resultState = await execute3GroupsABCResponse(false);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdC)).toBeAlertAction();
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdC)).toHaveAlertAction();
       setEvaluationResults([
         {
           a: {
@@ -1664,10 +1754,10 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       await execute2GroupsABResponse(false, resultState);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdB)).toBeAlertAction();
-      expect(mostRecentAction(instanceIdC)).toBe(undefined);
+      expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
+      expect(getLastReportedAlert(instanceIdC)).toBe(undefined);
     });
 
     describe('if alertOnNoData is disabled but alertOnGroupDisappear is enabled', () => {
@@ -1721,7 +1811,7 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         let resultState = await executeWeirdEmptyResponse();
-        expect(mostRecentAction(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
         setEvaluationResults([
           {
             '*': {
@@ -1744,7 +1834,7 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         resultState = await executeWeirdEmptyResponse(resultState);
-        expect(mostRecentAction(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
         setEvaluationResults([
           {
             a: {
@@ -1770,9 +1860,9 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         resultState = await executeWeird2GroupsABResponse(resultState);
-        expect(mostRecentAction(instanceID)).toBe(undefined);
-        expect(mostRecentAction(instanceIdA)).toBeAlertAction();
-        expect(mostRecentAction(instanceIdB)).toBeAlertAction();
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
         interTestStateStorage.push(resultState); // Hand off resultState to the next test
       });
       test('sends No Data alerts for the previously detected groups when they stop reporting data, but not the * group', async () => {
@@ -1816,128 +1906,46 @@ describe('The custom threshold alert type', () => {
           },
         ]);
         await executeWeirdEmptyResponse(resultState);
-        expect(mostRecentAction(instanceID)).toBe(undefined);
-        expect(mostRecentAction(instanceIdA)).toBeNoDataAction();
-        expect(mostRecentAction(instanceIdB)).toBeNoDataAction();
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+        expect(getLastReportedAlert(instanceIdA)).toHaveNoDataAction();
+        expect(getLastReportedAlert(instanceIdB)).toHaveNoDataAction();
       });
     });
   });
 });
 
-const mockLibs: any = {
-  threshold_rule: {
-    group_by_page_size: 10000,
-  },
-  basePath: {
-    publicBaseUrl: 'http://localhost:5601',
-    prepend: (path: string) => path,
-  },
-  logger,
-  config: {
-    customThresholdRule: {
-      groupByPageSize: 10_000,
-    },
-  },
-  locators: {},
-};
-
-const executor = createCustomThresholdExecutor(mockLibs);
-
-const alertsServices = alertsMock.createRuleExecutorServices();
-const mockedIndex = {
-  id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
-  title: 'metrics-fake_hosts',
-  name: 'mockedDataViewName',
-  fieldFormatMap: {},
-  typeMeta: {},
-  timeFieldName: '@timestamp',
-};
-const mockedDataView = {
-  getIndexPattern: () => 'mockedIndexPattern',
-  getName: () => 'mockedDataViewName',
-  ...mockedIndex,
-};
-const mockedSearchSource = {
-  getField: jest.fn(() => mockedDataView),
-} as any as ISearchSource;
-const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, CustomThresholdAlertContext, string> = {
-  ...alertsServices,
-  ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
-  searchSourceClient: {
-    ...searchSourceCommonMock,
-    create: jest.fn(() => Promise.resolve(mockedSearchSource)),
-  },
-};
-services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-  if (sourceId === 'alternate')
-    return {
-      id: 'alternate',
-      attributes: { metricAlias: 'alternatebeat-*' },
-      type,
-      references: [],
-    };
-  if (sourceId === 'empty-response')
-    return {
-      id: 'empty',
-      attributes: { metricAlias: 'empty-response' },
-      type,
-      references: [],
-    };
-  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-});
-
-const alertInstances = new Map<string, AlertTestInstance>();
-services.alertFactory.create.mockImplementation((instanceID: string) => {
-  const newAlertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertFactory.create(),
-    actionQueue: [],
-    state: {},
-  };
-  const alertInstance: AlertTestInstance = persistAlertInstances
-    ? alertInstances.get(instanceID) || newAlertInstance
-    : newAlertInstance;
-  alertInstances.set(instanceID, alertInstance);
-
-  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
-    alertInstance.state = newState;
-    return alertInstance.instance;
-  });
-  (alertInstance.instance.scheduleActions as jest.Mock).mockImplementation(
-    (id: string, action: any) => {
-      alertInstance.actionQueue.push({ id, action });
-      return alertInstance.instance;
-    }
-  );
-  return alertInstance.instance;
-});
-
-function mostRecentAction(id: string) {
-  const instance = alertInstances.get(id);
-  if (!instance) return undefined;
-  return instance.actionQueue.pop();
+function getLastReportedAlert(id: string): ReportedAlert | undefined {
+  const alert = alerts.get(id);
+  if (!alert) return undefined;
+  return alert.pop();
 }
 
 function clearInstances() {
-  alertInstances.clear();
+  alerts.clear();
 }
 
 interface Action {
-  id: string;
-  action: { reason: string };
+  actionGroup: string;
+  context: {
+    alertDetailsUrl: string;
+    reason: string;
+    timestamp: string;
+  };
 }
 
 expect.extend({
-  toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTION.id && !action?.action.reason.includes('no data');
+  toHaveAlertAction(action?: Action) {
+    const pass =
+      action?.actionGroup === FIRED_ACTION.id && !action?.context?.reason?.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
       pass,
     };
   },
-  toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTION.id && action?.action.reason.includes('no data');
+  toHaveNoDataAction(action?: Action) {
+    const pass =
+      action?.actionGroup === NO_DATA_ACTION.id && action?.context?.reason?.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,
@@ -1950,8 +1958,8 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
-      toBeAlertAction(action?: Action): R;
-      toBeNoDataAction(action?: Action): R;
+      toHaveAlertAction(action?: Action): R;
+      toHaveNoDataAction(action?: Action): R;
     }
   }
 }
