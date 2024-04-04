@@ -23,7 +23,6 @@ export type LogDocument = Fields &
     'event.dataset': string;
     'log.level'?: string;
     'host.name'?: string;
-    'container.id'?: string;
     'trace.id'?: string;
     'agent.id'?: string;
     'agent.name'?: string;
@@ -45,16 +44,6 @@ export type LogDocument = Fields &
 class Log extends Serializable<LogDocument> {
   service(name: string) {
     this.fields['service.name'] = name;
-    return this;
-  }
-
-  hostName(name: string) {
-    this.fields['host.name'] = name;
-    return this;
-  }
-
-  containerId(id: string) {
-    this.fields['container.id'] = id;
     return this;
   }
 

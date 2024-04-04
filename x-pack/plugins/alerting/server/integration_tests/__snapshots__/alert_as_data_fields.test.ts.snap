@@ -88,19 +88,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "container.id": Object {
-      "required": false,
-      "type": "keyword",
-    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
-      "required": false,
-      "type": "keyword",
-    },
-    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -180,19 +172,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "container.id": Object {
-      "required": false,
-      "type": "keyword",
-    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
-      "required": false,
-      "type": "keyword",
-    },
-    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -272,19 +256,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "container.id": Object {
-      "required": false,
-      "type": "keyword",
-    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
-      "required": false,
-      "type": "keyword",
-    },
-    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -364,19 +340,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "container.id": Object {
-      "required": false,
-      "type": "keyword",
-    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
-      "required": false,
-      "type": "keyword",
-    },
-    "host.name": Object {
       "required": false,
       "type": "keyword",
     },

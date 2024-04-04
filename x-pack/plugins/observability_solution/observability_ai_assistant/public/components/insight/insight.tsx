@@ -13,11 +13,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, isArray, last, once } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneDeep, last } from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -193,75 +192,20 @@ function PromptEdit({
 }
 
 export interface InsightProps {
-  messages: Message[] | (() => Promise<Message[] | undefined>);
+  messages: Message[];
   title: string;
   dataTestSubj?: string;
 }
 
-enum FETCH_STATUS {
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  NOT_INITIATED = 'not_initiated',
-}
-
-export function Insight({
-  messages: initialMessagesOrCallback,
-  title,
-  dataTestSubj,
-}: InsightProps) {
-  const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
-    messages: [],
-    status: FETCH_STATUS.NOT_INITIATED,
-  });
+export function Insight({ messages, title, dataTestSubj }: InsightProps) {
+  const [initialMessages, setInitialMessages] = useState(messages);
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
 
-  const updateInitialMessages = useCallback(async () => {
-    if (isArray(initialMessagesOrCallback)) {
-      setMessages({
-        messages: initialMessagesOrCallback,
-        status: FETCH_STATUS.SUCCESS,
-      });
-      return;
-    }
-
-    setMessages({
-      messages: [],
-      status: FETCH_STATUS.LOADING,
-    });
-
-    try {
-      const data = await initialMessagesOrCallback();
-      setMessages({
-        messages: data ?? [],
-        status: FETCH_STATUS.SUCCESS,
-      });
-    } catch (e) {
-      setMessages({
-        messages: [],
-        status: FETCH_STATUS.FAILURE,
-      });
-
-      // eslint-disable-next-line no-console
-      console.log('could not load insight messages', e);
-    }
-  }, [initialMessagesOrCallback]);
-
-  const updateInitialMessagesOnce = useMemo(
-    () => once(updateInitialMessages),
-    [updateInitialMessages]
-  );
-
-  useEffect(() => {
-    if (isInsightOpen) {
-      updateInitialMessagesOnce();
-    }
-  }, [updateInitialMessagesOnce, isInsightOpen]);
-
   const connectors = useGenAIConnectors();
+
   const service = useObservabilityAIAssistant();
 
   const chatService = useAbortableAsync(
@@ -271,14 +215,14 @@ export function Insight({
     [service]
   );
 
-  const onEditPrompt = (newPrompt: string) => {
-    const clonedMessages = cloneDeep(messages.messages);
+  const handleSend = (newPrompt: string) => {
+    const clonedMessages = cloneDeep(messages);
     const userMessage = getLastMessageOfType(clonedMessages, MessageRole.User);
     if (!userMessage) return false;
 
     userMessage.message.content = newPrompt;
     setIsPromptUpdated(true);
-    setMessages({ messages: clonedMessages, status: FETCH_STATUS.SUCCESS });
+    setInitialMessages(clonedMessages);
     setEditingPrompt(false);
     return true;
   };
@@ -297,8 +241,7 @@ export function Insight({
 
   if (
     connectors.selectedConnector &&
-    ((!isInsightOpen && hasOpened) ||
-      (isInsightOpen && !isEditingPrompt && messages.status === FETCH_STATUS.SUCCESS))
+    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt))
   ) {
     children = (
       <>
@@ -319,7 +262,7 @@ export function Insight({
                     setIsPromptUpdated(false);
                     setHasOpened(false);
                     setInsightOpen(false);
-                    updateInitialMessages();
+                    setInitialMessages(messages);
                   }}
                 >
                   <EuiText size="xs">
@@ -338,7 +281,7 @@ export function Insight({
 
         <ChatContent
           title={title}
-          initialMessages={messages.messages}
+          initialMessages={initialMessages}
           connectorId={connectors.selectedConnector}
         />
       </>
@@ -347,29 +290,15 @@ export function Insight({
     children = (
       <PromptEdit
         initialPrompt={
-          getLastMessageOfType(messages.messages, MessageRole.User)?.message.content || ''
+          getLastMessageOfType(initialMessages, MessageRole.User)?.message.content || ''
         }
-        onSend={onEditPrompt}
+        onSend={handleSend}
         onCancel={handleCancel}
       />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
-    );
-  } else if (messages.status === FETCH_STATUS.FAILURE) {
-    children = (
-      <EuiCallOut
-        size="s"
-        title={i18n.translate(
-          'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',
-          {
-            defaultMessage: 'Could not fetch prompt messages',
-          }
-        )}
-        color="danger"
-        iconType="error"
-      />
     );
   }
 

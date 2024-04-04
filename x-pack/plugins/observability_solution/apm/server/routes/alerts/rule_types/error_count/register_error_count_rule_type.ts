@@ -62,7 +62,7 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import {
-  getApmAlertSourceFields,
+  getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
@@ -225,7 +225,7 @@ export function registerErrorCountRuleType({
 
           return {
             errorCount: bucket.doc_count,
-            sourceFields: getApmAlertSourceFields(bucket),
+            sourceFields: getServiceGroupFields(bucket),
             groupByFields,
             bucketKey,
           };

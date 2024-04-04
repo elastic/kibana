@@ -58,7 +58,7 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import {
-  getApmAlertSourceFields,
+  getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
@@ -253,7 +253,7 @@ export function registerTransactionErrorRateRuleType({
           if (errorRate >= ruleParams.threshold) {
             results.push({
               errorRate,
-              sourceFields: getApmAlertSourceFields(failedOutcomeBucket),
+              sourceFields: getServiceGroupFields(failedOutcomeBucket),
               groupByFields,
               bucketKey,
             });

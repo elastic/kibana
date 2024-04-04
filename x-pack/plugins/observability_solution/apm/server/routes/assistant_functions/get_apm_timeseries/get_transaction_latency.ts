@@ -7,7 +7,6 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { TRANSACTION_NAME } from '@kbn/observability-shared-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   TRANSACTION_DURATION_HISTOGRAM,
@@ -26,7 +25,6 @@ export async function getTransactionLatency({
   intervalString,
   filter,
   transactionType,
-  transactionName,
   latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
@@ -36,7 +34,6 @@ export async function getTransactionLatency({
   bucketSize: number;
   filter: QueryDslQueryContainer[];
   transactionType?: string;
-  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
   return (
@@ -49,11 +46,8 @@ export async function getTransactionLatency({
       documentType: ApmDocumentType.TransactionMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
-      filter: filter.concat(
-        ...termQuery(TRANSACTION_TYPE, transactionType),
-        ...termQuery(TRANSACTION_NAME, transactionName)
-      ),
-      groupByFields: [TRANSACTION_TYPE, TRANSACTION_NAME],
+      filter: filter.concat(...termQuery(TRANSACTION_TYPE, transactionType)),
+      groupBy: 'transaction.type',
       aggs: {
         ...getLatencyAggregation(
           latencyAggregationType,

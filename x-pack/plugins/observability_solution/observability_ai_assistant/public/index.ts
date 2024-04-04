@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -66,9 +65,6 @@ export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetr
 
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';
-
-export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
-export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
 
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,

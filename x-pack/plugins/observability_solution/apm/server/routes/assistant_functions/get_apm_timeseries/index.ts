@@ -48,7 +48,6 @@ export const getApmTimeseriesRt = t.type({
             }),
             t.partial({
               'transaction.type': t.string,
-              'transaction.name': t.string,
             }),
           ]),
           t.intersection([
@@ -74,7 +73,6 @@ export const getApmTimeseriesRt = t.type({
             }),
             t.partial({
               'transaction.type': t.string,
-              'transaction.name': t.string,
             }),
           ]),
           t.type({
@@ -95,15 +93,6 @@ export const getApmTimeseriesRt = t.type({
 
 type ApmTimeseriesArgs = t.TypeOf<typeof getApmTimeseriesRt>;
 
-export interface TimeseriesChangePoint {
-  change_point?: number | undefined;
-  r_value?: number | undefined;
-  trend?: string | undefined;
-  p_value: number;
-  date: string | undefined;
-  type: string;
-}
-
 export interface ApmTimeseries {
   stat: ApmTimeseriesArgs['stats'][number];
   group: string;
@@ -113,7 +102,14 @@ export interface ApmTimeseries {
   start: number;
   end: number;
   unit: string;
-  changes: TimeseriesChangePoint[];
+  changes: Array<{
+    change_point?: number | undefined;
+    r_value?: number | undefined;
+    trend?: string | undefined;
+    p_value: number;
+    date: string | undefined;
+    type: string;
+  }>;
 }
 
 export async function getApmTimeseries({
@@ -132,15 +128,19 @@ export async function getApmTimeseries({
     numBuckets: 100,
   });
 
+  const sharedParameters = {
+    apmEventClient,
+    start,
+    end,
+    bucketSize,
+    intervalString,
+  };
+
   return (
     await Promise.all(
       args.stats.map(async (stat) => {
         const parameters = {
-          apmEventClient,
-          start,
-          end,
-          bucketSize,
-          intervalString,
+          ...sharedParameters,
           filter: [
             ...rangeQuery(start, end),
             ...termQuery(SERVICE_NAME, stat['service.name']),
@@ -156,21 +156,18 @@ export async function getApmTimeseries({
               return await getTransactionThroughput({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
-                transactionName: stat.timeseries['transaction.name'],
               });
 
             case ApmTimeseriesType.transactionFailureRate:
               return await getTransactionFailureRate({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
-                transactionName: stat.timeseries['transaction.name'],
               });
 
             case ApmTimeseriesType.transactionLatency:
               return await getTransactionLatency({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
-                transactionName: stat.timeseries['transaction.name'],
                 latencyAggregationType: stat.timeseries.function,
               });
 

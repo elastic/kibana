@@ -49,7 +49,7 @@ export async function getExitSpanLatency({
           spanDestinationServiceResource
         )
       ),
-      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
+      groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
       aggs: {
         count: {
           sum: {

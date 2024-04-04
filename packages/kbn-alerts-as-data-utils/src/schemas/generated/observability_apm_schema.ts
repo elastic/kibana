@@ -72,10 +72,8 @@ const ObservabilityApmAlertRequired = rt.type({
 // prettier-ignore
 const ObservabilityApmAlertOptional = rt.partial({
   'agent.name': schemaString,
-  'container.id': schemaString,
   'error.grouping_key': schemaString,
   'error.grouping_name': schemaString,
-  'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
