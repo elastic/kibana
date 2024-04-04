@@ -6,13 +6,14 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiDatePicker } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiDatePicker } from '@elastic/eui';
 import React, { forwardRef } from 'react';
 import moment from 'moment';
 
 interface Props {
   selectedDate: moment.Moment | null;
   onChangeSelectedDate: (date: moment.Moment | null) => void;
+  filledStyle: boolean;
   onClick?: () => void;
   value?: string;
 }
@@ -24,7 +25,9 @@ export const GoToDate: React.FunctionComponent<Props> = (props) => {
       selected={props.selectedDate}
       onChange={props.onChangeSelectedDate}
       maxDate={moment()}
-      customInput={<GoToDateButton {...props} />}
+      customInput={
+        props.filledStyle ? <GoToDateButton {...props} /> : <EmptyGoToDateButton {...props} />
+      }
     />
   );
 };
@@ -35,6 +38,17 @@ interface CustomInputProps {
 }
 
 const GoToDateButton = forwardRef(({ onClick, value }: CustomInputProps, ref) => {
+  return (
+    <EuiButton fill onClick={onClick}>
+      <FormattedMessage
+        id="xpack.fleet.agentActivityFlyout.emptyState.goToDateButton"
+        defaultMessage="Go to date"
+      />
+    </EuiButton>
+  );
+});
+
+const EmptyGoToDateButton = forwardRef(({ onClick, value }: CustomInputProps, ref) => {
   return (
     <EuiButtonEmpty size="m" flush="left" onClick={onClick}>
       <FormattedMessage
