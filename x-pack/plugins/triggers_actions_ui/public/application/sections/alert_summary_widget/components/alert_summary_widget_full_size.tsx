@@ -21,8 +21,7 @@ import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
-import { Alert, ChartProps } from '../types';
-import { useChartThemes } from '../../../hooks/use_chart_themes';
+import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;
@@ -31,6 +30,7 @@ export interface AlertSummaryWidgetFullSizeProps {
   recoveredAlertCount: number;
   dateFormat?: string;
   hideChart?: boolean;
+  dependencyProps: DependencyProps;
 }
 
 export const AlertSummaryWidgetFullSize = ({
@@ -40,8 +40,8 @@ export const AlertSummaryWidgetFullSize = ({
   dateFormat,
   recoveredAlertCount,
   hideChart,
+  dependencyProps: { baseTheme },
 }: AlertSummaryWidgetFullSizeProps) => {
-  const { baseTheme } = useChartThemes();
   const chartData = activeAlerts.map((alert) => alert.doc_count);
   const domain = {
     max: Math.max(...chartData) * 1.1, // add 10% headroom

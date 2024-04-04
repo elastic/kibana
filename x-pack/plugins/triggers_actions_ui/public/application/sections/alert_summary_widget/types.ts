@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { BrushEndListener, SettingsProps } from '@elastic/charts';
+import type { BrushEndListener, PartialTheme, SettingsProps, Theme } from '@elastic/charts';
 import { estypes } from '@elastic/elasticsearch';
 import { AlertStatus, ValidFeatureId } from '@kbn/rule-data-utils';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 export interface Alert {
   key: number;
@@ -31,6 +32,17 @@ export interface ChartProps {
 interface AlertsCount {
   activeAlertCount: number;
   recoveredAlertCount: number;
+}
+
+export interface AlertSummaryWidgetDependencies {
+  dependencies: {
+    charts: ChartsPluginStart;
+  };
+}
+
+export interface DependencyProps {
+  baseTheme: Theme;
+  sparklineTheme: PartialTheme;
 }
 
 export interface AlertSummaryWidgetProps {

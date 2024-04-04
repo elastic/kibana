@@ -22,8 +22,7 @@ import { AlertStatus } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, WIDGET_TITLE } from './constants';
-import { Alert, ChartProps } from '../types';
-import { useChartThemes } from '../../../hooks/use_chart_themes';
+import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetCompactProps {
   activeAlertCount: number;
@@ -32,6 +31,7 @@ export interface AlertSummaryWidgetCompactProps {
   recoveredAlertCount: number;
   timeRangeTitle?: JSX.Element | string;
   onClick: (status?: AlertStatus) => void;
+  dependencyProps: DependencyProps;
 }
 
 export const AlertSummaryWidgetCompact = ({
@@ -41,9 +41,8 @@ export const AlertSummaryWidgetCompact = ({
   recoveredAlertCount,
   timeRangeTitle,
   onClick,
+  dependencyProps: { baseTheme, sparklineTheme },
 }: AlertSummaryWidgetCompactProps) => {
-  const { baseTheme, sparklineTheme } = useChartThemes();
-
   const handleClick = (
     event: MouseEvent<HTMLAnchorElement | HTMLDivElement>,
     status?: AlertStatus
