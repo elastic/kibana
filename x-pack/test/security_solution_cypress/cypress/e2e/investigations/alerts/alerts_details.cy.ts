@@ -196,8 +196,6 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
     });
 
-    const alertTableKey = 'alerts-page';
-
     /**
      * Localstorage is updated after a delay here x-pack/plugins/security_solution/public/common/store/data_table/epic_local_storage.ts
      * We create this config to re-check localStorage 3 times, every 500ms to avoid any potential flakyness from that delay
