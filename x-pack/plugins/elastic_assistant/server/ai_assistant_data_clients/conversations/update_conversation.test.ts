@@ -151,6 +151,10 @@ describe('transformToUpdateScheme', () => {
           content: 'Message 3',
           role: 'user',
           timestamp: '2011-10-05T14:48:00.000Z',
+          traceData: {
+            traceId: 'something',
+            transactionId: 'something',
+          },
         },
         {
           content: 'Message 4',
@@ -180,8 +184,8 @@ describe('transformToUpdateScheme', () => {
           reader: undefined,
           role: 'user',
           trace_data: {
-            trace_id: undefined,
-            transaction_id: undefined,
+            trace_id: 'something',
+            transaction_id: 'something',
           },
         },
         {
@@ -190,10 +194,6 @@ describe('transformToUpdateScheme', () => {
           is_error: undefined,
           reader: undefined,
           role: 'user',
-          trace_data: {
-            trace_id: undefined,
-            transaction_id: undefined,
-          },
         },
       ],
     };

@@ -154,7 +154,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       }
       streamEnd();
       didEnd = true;
-      if (!streamingSpan?.outcome || streamingSpan?.outcome === 'unknown') {
+      if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
         streamingSpan.outcome = 'success';
       }
       streamingSpan?.end();
