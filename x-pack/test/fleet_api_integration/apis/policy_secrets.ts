@@ -191,7 +191,7 @@ export default function (providerContext: FtrProviderContext) {
       policyId: string,
       hostname: string,
       agentVersion: string,
-      isActive = true
+      status = 'active'
     ) => {
       const agentResponse = await es.index({
         index: '.fleet-agents',
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           enrolled_at: '2022-06-21T12:14:25Z',
           last_checkin: '2022-06-27T12:28:29Z',
           tags: ['tag1'],
-          status: isActive ? 'online' : 'offline',
+          status,
         },
       });
 
@@ -951,9 +951,9 @@ export default function (providerContext: FtrProviderContext) {
         ).to.eql(true);
       });
 
-      it('should store secrets if fleet server does not meet minimum version, but is inactive + managed', async () => {
+      it('should store secrets if fleet server does not meet minimum version, but is offline + managed', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy({ isManaged: true });
-        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0', false);
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0', 'offline');
 
         const agentPolicy = await createAgentPolicy();
         const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
@@ -965,6 +965,68 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
         ).to.eql(true);
+      });
+
+      it('should store secrets if fleet server does not meet minimum version, but is unenrolled', async () => {
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0', 'unenrolled');
+
+        const agentPolicy = await createAgentPolicy();
+        const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
+
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
+        expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(
+          true
+        );
+        expect(
+          packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
+        ).to.eql(true);
+      });
+
+      it('should not store secrets if fleet server does not meet minimum version, but is inactive + managed', async () => {
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy({ isManaged: true });
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0', 'inactive');
+
+        const agentPolicy = await createAgentPolicy();
+        const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
+
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
+        expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(
+          true
+        );
+        expect(
+          packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
+        ).to.eql(true);
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value).eql('package_secret_val');
+        expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value).eql(
+          'input_secret_val'
+        );
+        expect(packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value).eql(
+          'stream_secret_val'
+        );
+      });
+
+      it('should not store secrets if fleet server does not meet minimum version, but is inactive', async () => {
+        const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
+        await createFleetServerAgent(fleetServerAgentPolicy.id, 'server_1', '7.0.0', 'inactive');
+
+        const agentPolicy = await createAgentPolicy();
+        const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
+
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
+        expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(
+          true
+        );
+        expect(
+          packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
+        ).to.eql(true);
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value).eql('package_secret_val');
+        expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value).eql(
+          'input_secret_val'
+        );
+        expect(packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value).eql(
+          'stream_secret_val'
+        );
       });
     });
 

@@ -101,11 +101,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
     const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
-    const useSecretsUI = secretsStorageEnabled && varDef.secret;
+    const useSecretsUi = secretsStorageEnabled && varDef.secret;
 
     let field: JSX.Element;
 
-    if (useSecretsUI) {
+    if (useSecretsUi) {
       field = (
         <SecretInputField
           varDef={varDef}
@@ -145,7 +145,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       <FormRow
         isInvalid={isInvalid}
         error={errors}
-        label={varDef.secret ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
+        label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
           isOptional ? (
             <EuiText size="xs" color="subdued">
@@ -163,7 +163,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       </FormRow>
     );
 
-    return useSecretsUI ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
+    return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
   }
 );
 

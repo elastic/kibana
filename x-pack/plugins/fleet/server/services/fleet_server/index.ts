@@ -79,6 +79,16 @@ export async function allFleetServerVersionsAreAtLeast(
     const isNewerVersion = semverGte(semverCoerce(agentVersion)!, version);
 
     if (!isNewerVersion) {
+      const agentStatus = await getAgentStatusById(esClient, soClient, fleetServerAgent.id);
+
+      // Any unenrolled Fleet Server agents can be ignored
+      if (agentStatus === 'unenrolled') {
+        logger.debug(
+          `Found outdated Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
+        );
+        continue;
+      }
+
       const isManagedAgentPolicy = managedAgentPolicies.some(
         (managedPolicy) => managedPolicy.id === fleetServerAgent.policy_id
       );
@@ -86,15 +96,11 @@ export async function allFleetServerVersionsAreAtLeast(
       // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's
       // running on an outdated version. This prevents users with offline Elastic Agent on Cloud policies from
       // being stuck when it comes to enabling secrets, as agents can't be unenrolled from managed policies via Fleet UI.
-      if (isManagedAgentPolicy) {
-        const agentStatus = await getAgentStatusById(esClient, soClient, fleetServerAgent.id);
-
-        if (agentStatus === 'offline' || agentStatus === 'unenrolled') {
-          logger.debug(
-            `Found outdated managed Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
-          );
-          continue;
-        }
+      if (isManagedAgentPolicy && agentStatus === 'offline') {
+        logger.debug(
+          `Found outdated managed Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
+        );
+        continue;
       }
 
       logger.debug(
