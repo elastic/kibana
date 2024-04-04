@@ -12,31 +12,27 @@ import React from 'react';
 import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
 
 import { getHeaderActions } from './header_actions';
-import { SearchEnginesPopover } from './search_engines_popover';
+import { SearchEnginesPlayground } from './search_engines_playground';
 import { SyncsContextMenu } from './syncs_context_menu';
 
 describe('Header Actions', () => {
   it('renders api index', () => {
     expect(getHeaderActions(apiIndex, true)).toEqual([
-      <SearchEnginesPopover indexName="api" ingestionMethod="api" isHiddenIndex={false} />,
+      <SearchEnginesPlayground indexName="api" ingestionMethod="api" />,
     ]);
     expect(getHeaderActions(apiIndex, false)).toEqual([]);
   });
   it('renders connector index', () => {
     expect(getHeaderActions(connectorIndex, true)).toEqual([
       <SyncsContextMenu />,
-      <SearchEnginesPopover
-        indexName="connector"
-        ingestionMethod="connector"
-        isHiddenIndex={false}
-      />,
+      <SearchEnginesPlayground indexName="connector" ingestionMethod="connector" />,
     ]);
     expect(getHeaderActions(connectorIndex, false)).toEqual([<SyncsContextMenu />]);
   });
   it('renders crawler index', () => {
     expect(getHeaderActions(crawlerIndex, true)).toEqual([
       <CrawlerStatusIndicator />,
-      <SearchEnginesPopover indexName="crawler" ingestionMethod="crawler" isHiddenIndex={false} />,
+      <SearchEnginesPlayground indexName="crawler" ingestionMethod="crawler" />,
     ]);
     expect(getHeaderActions(crawlerIndex, false)).toEqual([<CrawlerStatusIndicator />]);
   });
