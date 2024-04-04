@@ -794,12 +794,14 @@ packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
+packages/shared-ux/modal/tabbed @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/es @elastic/appex-sharedux
-packages/solution-nav/oblt @elastic/appex-sharedux
+packages/solution-nav/analytics @elastic/appex-sharedux @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+packages/solution-nav/es @elastic/appex-sharedux @elastic/enterprise-search-frontend
+packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
@@ -1107,6 +1109,7 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-infra_services-team
 /x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
+/x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-infra_services-team
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
@@ -1252,6 +1255,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_functional/ @elastic/kibana-security
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
+/packages/core/http/core-http-server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team
@@ -1426,6 +1430,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management

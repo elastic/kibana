@@ -42,9 +42,7 @@ export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
+    observabilityAIAssistant,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { search } = useLocation();
@@ -81,11 +79,11 @@ export function SloDetailsPage() {
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   useEffect(() => {
-    if (!slo) {
+    if (!slo || !observabilityAIAssistant) {
       return;
     }
 
-    return setScreenContext({
+    return observabilityAIAssistant.service.setScreenContext({
       screenDescription: dedent(`
         The user is looking at the detail page for the following SLO
 
@@ -104,7 +102,7 @@ export function SloDetailsPage() {
         },
       ],
     });
-  }, [setScreenContext, slo]);
+  }, [observabilityAIAssistant, slo]);
 
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {

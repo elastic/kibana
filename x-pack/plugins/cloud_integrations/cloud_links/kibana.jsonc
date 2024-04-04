@@ -12,9 +12,7 @@
       "security",
       "guidedOnboarding"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "requiredBundles": [],
     "requiredPlugins": [
       "share"
     ]
