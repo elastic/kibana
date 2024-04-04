@@ -28,6 +28,7 @@ import type {
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { definition as esDefinition } from '@kbn/solution-nav-es';
 import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
+import { definition as analyticsDefinition } from '@kbn/solution-nav-analytics';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { UserProfileData } from '@kbn/user-profile-components';
 import {
@@ -262,11 +263,15 @@ export class NavigationPublicPlugin
     const solutionNavs: SolutionNavigationDefinitions = {
       es: {
         ...esDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlSearchSideNav' }),
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'searchSideNav' }),
       },
       oblt: {
         ...obltDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlObservabilitySideNav' }),
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'observabilitySideNav' }),
+      },
+      analytics: {
+        ...analyticsDefinition,
+        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'analyticsSideNav' }),
       },
     };
 

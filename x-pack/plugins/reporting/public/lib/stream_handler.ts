@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs';
 
 import { DocLinksStart, NotificationsSetup, ThemeServiceStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
