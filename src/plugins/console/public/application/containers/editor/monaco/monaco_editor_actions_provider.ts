@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { CSSProperties, Dispatch } from 'react';
+import { debounce } from 'lodash';
 import {
   ConsoleParsedRequestsProvider,
   getParsedRequestsProvider,
@@ -14,13 +16,12 @@ import {
 } from '@kbn/monaco';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { CSSProperties, Dispatch } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
+import { getStorage, StorageKeys } from '../../../../services';
+import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
 import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
-import { getStorage, StorageKeys } from '../../../../services';
 import {
   stringifyRequest,
   replaceRequestVariables,
@@ -44,32 +45,47 @@ export class MonacoEditorActionsProvider {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.decorations = this.editor.createDecorationsCollection();
     this.editor.focus();
-    this.highlightCurrentRequests();
+    const debouncedHighlight = debounce(() => this.highlightCurrentRequests(), 200, {
+      leading: true,
+    });
+    debouncedHighlight();
     editor.onDidChangeCursorPosition(async (event) => {
-      await this.highlightCurrentRequests();
+      await debouncedHighlight();
     });
-    // update actions bar on scroll change and size of the editor change
+    editor.onDidScrollChange(async (event) => {
+      await debouncedHighlight();
+    });
+    editor.onDidChangeCursorSelection(async (event) => {
+      await debouncedHighlight();
+    });
+    editor.onDidContentSizeChange(async (event) => {
+      await debouncedHighlight();
+    });
   }
 
-  private hideEditorActions() {
-    this.setEditorActionsCss({
-      visibility: 'hidden',
-    });
-  }
-
-  private updateEditorActions(topOffset: number) {
-    this.setEditorActionsCss({
-      visibility: 'visible',
-      top: topOffset,
-    });
+  private updateEditorActionsPosition(lineNumber?: number) {
+    // if no request is currently selected, hide the actions buttons
+    if (!lineNumber) {
+      this.setEditorActionsCss({
+        visibility: 'hidden',
+      });
+    } else {
+      // if a request is selected, the actions buttons are placed at lineNumberOffset - scrollOffset
+      const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
+      this.setEditorActionsCss({
+        visibility: 'visible',
+        top: offset,
+      });
+    }
   }
 
   private async highlightCurrentRequests(): Promise<void> {
+    // get the requests in the selected range
     const { range: selectedRange, parsedRequests } = await this.getSelectedParsedRequestsAndRange();
+    // if any requests are selected, highlight the lines and update the position of actions buttons
     if (parsedRequests.length > 0) {
-      const topLine = selectedRange.startLineNumber;
-      const topOffset = this.editor.getTopForLineNumber(topLine);
-      this.updateEditorActions(topOffset);
+      const selectedRequestStartLine = selectedRange.startLineNumber;
+      this.updateEditorActionsPosition(selectedRequestStartLine);
       this.decorations.set([
         {
           range: selectedRange,
@@ -80,7 +96,8 @@ export class MonacoEditorActionsProvider {
         },
       ]);
     } else {
-      this.hideEditorActions();
+      // if no requests are selected, hide actions buttons and remove highlighted lines
+      this.updateEditorActionsPosition();
       this.decorations.clear();
     }
   }
