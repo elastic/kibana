@@ -504,7 +504,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
-        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -736,7 +735,6 @@ describe('update()', () => {
             uuid: '105',
           },
         ],
-        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -974,13 +972,6 @@ describe('update()', () => {
             uuid: '107',
           },
         ],
-        systemActions: [
-          {
-            id: 'system_action-id',
-            params: {},
-            uuid: '107',
-          },
-        ],
         muteAll: false,
         legacyId: null,
         snoozeSchedule: [],
@@ -1201,7 +1192,6 @@ describe('update()', () => {
             uuid: '108',
           },
         ],
-        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -1426,7 +1416,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
-        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1599,7 +1588,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
-        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -2661,7 +2649,6 @@ describe('update()', () => {
             uuid: '145',
           },
         ],
-        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -3251,7 +3238,6 @@ describe('update()', () => {
             uuid: '152',
           },
         ],
-        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -3498,7 +3484,6 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
-        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -3726,13 +3711,6 @@ describe('update()', () => {
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
           snoozeSchedule: [],
-          systemActions: [
-            {
-              id: 'system_action-id',
-              params: {},
-              uuid: '156',
-            },
-          ],
           muteAll: false,
           mutedInstanceIds: [],
           alertTypeId: 'myType',

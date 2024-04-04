@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import { SanitizedRule, RawRule } from '../../../../types';
 import {
@@ -319,7 +319,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
     ...updatedRule,
-    ...updateRuleData,
+    ...omit(updateRuleData, 'actions', 'systemActions'),
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
