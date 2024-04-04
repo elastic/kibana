@@ -248,7 +248,7 @@ export function VisualizeESQL({
                 defaultMessage: 'There were some errors in the generated query',
               })}
             </EuiText>
-            <EuiDescriptionList>
+            <EuiDescriptionList data-test-subj="observabilityAiAssistantErrorsList">
               {errorMessages?.map((error, index) => {
                 return (
                   <EuiDescriptionListDescription key={index}>
