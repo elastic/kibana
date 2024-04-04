@@ -45,11 +45,17 @@ export const useSetInitialValue = async (params: SetInitialValueParams) => {
   const { initialTextValue, setValue, toasts } = params;
 
   const loadBufferFromRemote = async (url: string) => {
-    // Normalize and encode the URL to avoid issues with spaces and other special characters.
-    const encodedUrl = new URL(url);
-    if (encodedUrl.protocol === 'https:') {
-      if (encodedUrl.hostname === 'www.elastic.co') {
-        const resp = await fetch(url);
+    if (/^https?:\/\//.test(url)) {
+      // Check if this is a valid URL
+      try {
+        new URL(url);
+      } catch (e) {
+        return;
+      }
+      // Parse the URL to avoid issues with spaces and other special characters.
+      const parsedURL = new URL(url);
+      if (parsedURL.origin === 'https://www.elastic.co') {
+        const resp = await fetch(parsedURL);
         const data = await resp.text();
         setValue(`${initialTextValue}\n\n${data}`);
       } else {
