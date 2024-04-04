@@ -1,0 +1,22 @@
+name: Validate RRE Entities
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Script in Docker Image
+        run: |
+          # Pull the Docker image
+          docker pull docker.elastic.co/ci-agent-images/pipelib:0.1.0
+
+          # Run the script within the Docker image
+          docker run docker.elastic.co/ci-agent-images/pipelib:0.1.0 /agent/check-catalog-info.sh
