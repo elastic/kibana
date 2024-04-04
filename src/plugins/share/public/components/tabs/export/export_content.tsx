@@ -68,6 +68,7 @@ export const ExportContent = ({
     downloadCSVLens,
     absoluteUrl,
     renderLayoutOptionSwitch,
+    showRadios,
   } = getProperties();
 
   const getRadioOptions = useCallback(
@@ -219,7 +220,7 @@ export const ExportContent = ({
   }, [isSaved, generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
-    if (objectType === 'dashboard' || objectType === 'lens') {
+    if (showRadios) {
       return (
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup

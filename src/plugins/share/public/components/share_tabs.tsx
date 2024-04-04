@@ -33,7 +33,7 @@ export const ShareMenuTabs = () => {
 
   tabs.push(linkTab);
 
-  if (shareMenuItems) {
+  if (shareMenuItems.length > 0) {
     tabs.push(exportTab);
   }
 

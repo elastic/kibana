@@ -91,6 +91,7 @@ export interface ShareMenuItem {
   absoluteUrl?: string;
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
+  showRadios?: boolean;
 }
 
 /**

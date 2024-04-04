@@ -13,7 +13,6 @@ import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormatFactory } from '../../../common/types';
-import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 declare global {
@@ -137,7 +136,7 @@ export const downloadCsvShareProvider = ({
               });
               onClose?.();
             },
-            label: 'CSV',
+            label: 'CSV' as const,
             reportType: 'csv',
             helpText: (
               <FormattedMessage
@@ -150,6 +149,7 @@ export const downloadCsvShareProvider = ({
             ),
             renderLayoutOptionSwitch: false,
             getJobParams: undefined,
+            showRadios: true,
           },
         ]
       : [
@@ -160,22 +160,30 @@ export const downloadCsvShareProvider = ({
               disabled: !csvEnabled,
               sortOrder: 1,
             },
-            content: (
-              <DownloadPanelContent
-                isDisabled={!csvEnabled}
-                warnings={getWarnings(activeData)}
-                onClick={async () => {
-                  await downloadCSVs({
-                    title,
-                    formatFactory: formatFactoryFn(),
-                    activeData,
-                    uiSettings,
-                    columnsSorting,
-                  });
-                  onClose?.();
-                }}
+            showRadios: false,
+            helpText: (
+              <FormattedMessage
+                id="xpack.lens.application.csvPanelContent.generationDescription"
+                defaultMessage="Download the data displayed in the visualization."
               />
             ),
+            isDisabled: !csvEnabled,
+            warnings: getWarnings(activeData),
+            generateReportButton: (
+              <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
+            ),
+            downloadCSVLens: async () => {
+              await downloadCSVs({
+                title,
+                formatFactory: formatFactoryFn(),
+                activeData,
+                uiSettings,
+                columnsSorting,
+              });
+              onClose?.();
+            },
+            label: 'CSV' as const,
+            reportType: 'csv',
           },
         ];
   };

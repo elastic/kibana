@@ -398,15 +398,13 @@ export class LensPlugin {
       startServices$.subscribe(([, { licensing }]) => {
         licensing?.license$.subscribe((license) => {
           const atLeastGold = license.hasAtLeast('gold');
-          if (atLeastGold) {
-            return share.register(
-              downloadCsvShareProvider({
-                uiSettings: core.uiSettings,
-                formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-                atLeastGold,
-              })
-            );
-          }
+          return share.register(
+            downloadCsvShareProvider({
+              uiSettings: core.uiSettings,
+              formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+              atLeastGold,
+            })
+          );
         });
       });
     }
