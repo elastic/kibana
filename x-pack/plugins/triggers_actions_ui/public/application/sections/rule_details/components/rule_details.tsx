@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -58,7 +58,7 @@ import {
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ruleReducer } from '../../rule_form/rule_reducer';
+import { getRuleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
@@ -109,6 +109,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
   const [{}, dispatch] = useReducer(ruleReducer, { rule });
   const setInitialRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -141,7 +142,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     (async () => {
       let loadedConnectors: ActionConnector[] = [];
       try {
-        loadedConnectors = await loadConnectors({ http });
+        loadedConnectors = await loadConnectors({ http, includeSystemActions: true });
       } catch (err) {
         loadedConnectors = [];
       }

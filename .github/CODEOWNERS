@@ -12,10 +12,13 @@ x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/
 packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
+x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
+x-pack/packages/ml/aiops_common @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
+x-pack/packages/ml/aiops_log_pattern_analysis @elastic/ml-ui
+x-pack/packages/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/packages/ml/aiops_test_utils @elastic/ml-ui
-x-pack/packages/ml/aiops_utils @elastic/ml-ui
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
@@ -41,6 +44,7 @@ packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team

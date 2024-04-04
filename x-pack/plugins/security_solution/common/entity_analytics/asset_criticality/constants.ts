@@ -22,6 +22,8 @@ export enum CriticalityLevels {
   LOW_IMPACT = 'low_impact',
 }
 
+export const ValidCriticalityLevels = Object.values(CriticalityLevels);
+
 /**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
  */

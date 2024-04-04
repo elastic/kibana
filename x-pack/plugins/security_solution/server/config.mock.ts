@@ -38,6 +38,12 @@ export const createMockConfig = (): ConfigType => {
       riskEngine: {
         alertSampleSizePerShard: 10_000,
       },
+      assetCriticality: {
+        csvUpload: {
+          sizeLimitMb: 10,
+          batchSize: 1000,
+        },
+      },
     },
   };
 };
