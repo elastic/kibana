@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
+
 import {
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+
+import { addCanvasElementTrigger } from '../../../state/triggers/add_canvas_element_trigger';
+import { useCanvasApi } from '../../hooks/use_canvas_api';
 
 const strings = {
   getEditorMenuButtonLabel: () =>
@@ -33,21 +38,30 @@ interface FactoryGroup {
 
 interface Props {
   factories: EmbeddableFactoryDefinition[];
+  addPanelActions: Action[];
   promotedVisTypes: BaseVisType[];
   visTypeAliases: VisTypeAlias[];
   createNewVisType: (visType?: BaseVisType | VisTypeAlias) => () => void;
-  createNewEmbeddable: (factory: EmbeddableFactoryDefinition) => () => void;
+  createNewEmbeddableFromFactory: (factory: EmbeddableFactoryDefinition) => () => void;
+  createNewEmbeddableFromAction: (
+    action: Action,
+    context: ActionExecutionContext<object>,
+    closePopover: () => void
+  ) => (event: React.MouseEvent) => void;
 }
 
 export const EditorMenu: FC<Props> = ({
   factories,
+  addPanelActions,
   promotedVisTypes,
   visTypeAliases,
   createNewVisType,
-  createNewEmbeddable,
+  createNewEmbeddableFromAction,
+  createNewEmbeddableFromFactory,
 }: Props) => {
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
+  const canvasApi = useCanvasApi();
 
   let panelCount = 1;
 
@@ -113,16 +127,37 @@ export const EditorMenu: FC<Props> = ({
       name: factory.getDisplayName(),
       icon,
       toolTipContent,
-      onClick: createNewEmbeddable(factory),
+      onClick: createNewEmbeddableFromFactory(factory),
       'data-test-subj': `createNew-${factory.type}`,
     };
   };
 
-  const editorMenuPanels = [
+  const getAddPanelActionMenuItems = useCallback(
+    (closePopover: () => void) => {
+      return addPanelActions.map((item) => {
+        const context = {
+          embeddable: canvasApi,
+          trigger: addCanvasElementTrigger,
+        };
+        const actionName = item.getDisplayName(context);
+        return {
+          name: actionName,
+          icon: item.getIconType(context),
+          onClick: createNewEmbeddableFromAction(item, context, closePopover),
+          'data-test-subj': `create-action-${actionName}`,
+          toolTipContent: item?.getDisplayNameTooltip?.(context),
+        };
+      });
+    },
+    [addPanelActions, createNewEmbeddableFromAction, canvasApi]
+  );
+
+  const getEditorMenuPanels = (closePopover: () => void) => [
     {
       id: 0,
       items: [
         ...visTypeAliases.map(getVisTypeAliasMenuItem),
+        ...getAddPanelActionMenuItems(closePopover),
         ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
           name: appName,
           icon,
@@ -149,10 +184,10 @@ export const EditorMenu: FC<Props> = ({
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
-      {() => (
+      {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenu
           initialPanelId={0}
-          panels={editorMenuPanels}
+          panels={getEditorMenuPanels(closePopover)}
           data-test-subj="canvasEditorContextMenu"
         />
       )}
