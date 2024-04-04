@@ -132,6 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
             name: 'host-a',
           },
         };
+
         // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
         // trigger an update to the existing alert without changing the timestamp
         await indexListOfSourceDocuments([secondDocument, secondDocument]);
@@ -169,6 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeLessThan(new Date().getTime());
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
+
       it('should NOT suppress and update an alert if the alert is closed', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date().toISOString();
@@ -247,6 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
       });
+
       it('should NOT suppress alerts when suppression period is less than rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -322,6 +325,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
       });
+
       it('should suppress alerts in the time window that covers 3 rule executions', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -393,6 +397,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
         });
       });
+
       it('should correctly suppress when using a timestamp override', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -459,6 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
+
       it('should deduplicate multiple alerts while suppressing new ones', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -519,6 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
         });
       });
+
       it('should suppress alerts with missing fields', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -609,6 +616,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
       });
+
       it('should NOT suppress alerts with missing fields if configured so', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -695,6 +703,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
         });
       });
+
       describe('rule execution only', () => {
         it('should suppress alerts during rule execution only', async () => {
           const id = uuidv4();
