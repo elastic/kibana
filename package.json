@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.11.1",
+    "node": "20.12.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -796,6 +796,7 @@
     "@kbn/shared-ux-router-types": "link:packages/shared-ux/router/types",
     "@kbn/shared-ux-storybook-config": "link:packages/shared-ux/storybook/config",
     "@kbn/shared-ux-storybook-mock": "link:packages/shared-ux/storybook/mock",
+    "@kbn/shared-ux-tabbed-modal": "link:packages/shared-ux/modal/tabbed",
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
     "@kbn/slo-plugin": "link:x-pack/plugins/observability_solution/slo",
     "@kbn/slo-schema": "link:x-pack/packages/kbn-slo-schema",
