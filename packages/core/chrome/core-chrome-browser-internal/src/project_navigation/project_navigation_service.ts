@@ -80,6 +80,10 @@ export class ProjectNavigationService {
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions$ = new BehaviorSubject<SolutionNavigationDefinitions>({});
+  // As the active definition **id** and the definitions are set independently, one before the other without
+  // any guarantee of order, we need to store the next active definition id in a separate BehaviorSubject
+  private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
+  // The active solution navigation definition id that has been initiated and is currently active
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<string | null>(null);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
@@ -100,6 +104,7 @@ export class ProjectNavigationService {
 
     this.handleActiveNodesChange();
     this.handleEmptyActiveNodes();
+    this.handleSolutionNavDefinitionChange();
 
     this.deepLinksMap$ = navLinksService.getNavLinks$().pipe(
       map((navLinks) => {
@@ -178,7 +183,10 @@ export class ProjectNavigationService {
                   ? {
                       definitions: solutionNavDefinitions,
                       activeId: activeSolutionNavDefinitionId,
-                      onChange: this.changeActiveSolutionNavigation.bind(this),
+                      onChange: (id: string) => {
+                        this.changeActiveSolutionNavigation(id);
+                        this.goToSolutionHome(id);
+                      },
                     }
                   : undefined;
 
@@ -391,52 +399,47 @@ export class ProjectNavigationService {
     this.customProjectSideNavComponent$.next({ current: component });
   }
 
-  private changeActiveSolutionNavigation(
-    id: string | null,
-    { onlyIfNotSet = false, redirect = false } = {}
-  ) {
-    if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
-    if (onlyIfNotSet && this.activeSolutionNavDefinitionId$.getValue() !== null) {
-      return;
-    }
+  private handleSolutionNavDefinitionChange() {
+    combineLatest([
+      this.solutionNavDefinitions$,
+      this.nextSolutionNavDefinitionId$.pipe(distinctUntilChanged()),
+    ]).subscribe(([definitions, nextId]) => {
+      const definition = typeof nextId === 'string' ? definitions[nextId] : undefined;
+      const noActiveDefinition =
+        Object.keys(definitions).length === 0 || !definition || nextId === null;
 
-    const definitions = this.solutionNavDefinitions$.getValue();
-    this.activeSolutionNavDefinitionId$.next(null);
-    // We don't want to change to "classic" if `id` is `null` when we haven't received
-    // any definitions yet. Serverless Kibana could be impacted by this.
-    // When we **do** have definitions, then passing `null` does mean we should change to "classic".
-    if (Object.keys(definitions).length > 0) {
-      if (id === null) {
+      if (noActiveDefinition) {
         this.navigationTree$.next(undefined);
-        this.activeSolutionNavDefinitionId$.next(null);
-      } else {
-        const definition = definitions[id];
-        if (!definition) {
-          throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
-        }
-
-        const { sideNavComponent } = definition;
-        if (sideNavComponent) {
-          this.setSideNavComponent(sideNavComponent);
-        }
-
-        let location: Location | undefined;
-        if (redirect) {
-          // Navigate to the new home page if it's defined, otherwise navigate to the default home page
-          const link = this.navLinksService?.get(definition.homePage ?? 'home');
-          if (link) {
-            const linkUrl = this.http?.basePath.remove(link.url) ?? link.url;
-            location = createLocation(linkUrl);
-            this.location$.next(location);
-            this.application?.navigateToUrl(link.href);
-          }
-        }
-
-        this.initNavigation(id, definition.navigationTree$);
+        return;
       }
-    } else if (id !== null) {
-      this.activeSolutionNavDefinitionId$.next(id);
+
+      const { sideNavComponent } = definition;
+      if (sideNavComponent) {
+        this.setSideNavComponent(sideNavComponent);
+      }
+
+      this.initNavigation(nextId, definition.navigationTree$);
+    });
+  }
+
+  private goToSolutionHome(id: string) {
+    const definitions = this.solutionNavDefinitions$.getValue();
+    const definition = definitions[id];
+    if (!definition) return;
+
+    // Navigate to the new home page if it's defined
+    const link = this.navLinksService?.get(definition.homePage ?? 'undefined');
+    if (link) {
+      const linkUrl = this.http?.basePath.remove(link.url) ?? link.url;
+      const location = createLocation(linkUrl);
+      this.location$.next(location);
+      this.application?.navigateToUrl(link.href);
     }
+  }
+
+  private changeActiveSolutionNavigation(id: string | null, { onlyIfNotSet = false } = {}) {
+    if (onlyIfNotSet && this.nextSolutionNavDefinitionId$.getValue() !== null) return;
+    this.nextSolutionNavDefinitionId$.next(id);
   }
 
   private getSolutionsNavDefinitions$() {
@@ -449,9 +452,8 @@ export class ProjectNavigationService {
       map(([definitions, id]) => {
         if (id === null) return null;
         if (Object.keys(definitions).length === 0) return null;
-        if (!definitions[id]) {
-          throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
-        }
+        if (!definitions[id]) return null;
+
         // We strip out the sideNavComponent from the definition as it should only be used internally
         const { sideNavComponent, ...definition } = definitions[id];
         return definition;

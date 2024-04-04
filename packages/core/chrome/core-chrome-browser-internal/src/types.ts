@@ -118,8 +118,6 @@ export interface InternalChromeStart extends ChromeStart {
       options?: {
         /** only change if there isn't any active solution yet */
         onlyIfNotSet?: boolean;
-        /** redirect to the new navigation home page */
-        redirect?: boolean;
       }
     ): void;
   };

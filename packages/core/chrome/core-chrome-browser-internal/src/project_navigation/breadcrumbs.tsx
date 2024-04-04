@@ -41,7 +41,7 @@ export function buildBreadcrumbs({
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
     activeId: string;
-    onChange: (id: string, options?: { redirect?: boolean }) => void;
+    onChange: (id: string) => void;
   };
 }): ChromeProjectBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
@@ -107,7 +107,7 @@ function buildRootCrumb({
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
     activeId: string;
-    onChange: (id: string, options?: { redirect?: boolean }) => void;
+    onChange: (id: string) => void;
   };
 }): ChromeProjectBreadcrumb {
   if (solutionNavigations) {
