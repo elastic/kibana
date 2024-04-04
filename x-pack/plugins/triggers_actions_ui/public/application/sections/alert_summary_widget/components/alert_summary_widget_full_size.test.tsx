@@ -14,16 +14,13 @@ import {
   AlertSummaryWidgetFullSizeProps,
 } from './alert_summary_widget_full_size';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
-import { useChartThemes } from '../../../hooks/use_chart_themes';
+import { DependencyProps } from '../types';
 import { LIGHT_THEME } from '@elastic/charts';
 
-jest.mock('../../../hooks/use_chart_themes', () => ({
-  useChartThemes: jest.fn(),
-}));
-(useChartThemes as jest.Mock).mockReturnValue({
+const dependencyProps: DependencyProps = {
   baseTheme: LIGHT_THEME,
   sparklineTheme: {},
-});
+};
 
 describe('AlertSummaryWidgetFullSize', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetFullSizeProps> = {}) =>
@@ -31,6 +28,7 @@ describe('AlertSummaryWidgetFullSize', () => {
       <IntlProvider locale="en">
         <AlertSummaryWidgetFullSize
           chartProps={mockedChartProps}
+          dependencyProps={dependencyProps}
           {...mockedAlertSummaryResponse}
           {...props}
         />

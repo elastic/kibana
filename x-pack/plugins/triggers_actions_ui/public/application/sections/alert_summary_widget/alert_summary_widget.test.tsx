@@ -9,21 +9,18 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
-import { AlertSummaryWidgetProps } from './types';
+import { AlertSummaryWidgetDependencies, AlertSummaryWidgetProps } from './types';
 import { mockedAlertSummaryTimeRange, mockedChartProps } from '../../mock/alert_summary_widget';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './components/constants';
-import { useChartThemes } from '../../hooks/use_chart_themes';
-import { LIGHT_THEME } from '@elastic/charts';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),
 }));
-
-const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
 
 jest.mock('../../hooks/use_load_alert_summary', () => ({
   useLoadAlertSummary: jest.fn().mockReturnValue({
@@ -38,15 +35,13 @@ jest.mock('../../hooks/use_load_alert_summary', () => ({
   }),
 }));
 
-jest.mock('../../hooks/use_chart_themes', () => ({
-  useChartThemes: jest.fn(),
-}));
-(useChartThemes as jest.Mock).mockReturnValue({
-  baseTheme: LIGHT_THEME,
-  sparklineTheme: {},
-});
+const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
 
 const useLoadAlertSummaryMock = useLoadAlertSummary as jest.Mock;
+
+const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
+  charts: chartPluginMock.createStartContract(),
+};
 
 describe('AlertSummaryWidget', () => {
   const mockedTimeRange = {
@@ -62,6 +57,7 @@ describe('AlertSummaryWidget', () => {
           featureIds={['apm', 'uptime', 'logs']}
           onClick={jest.fn}
           timeRange={mockedTimeRange}
+          dependencies={dependencies}
           {...props}
         />
       </IntlProvider>
