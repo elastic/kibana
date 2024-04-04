@@ -98,9 +98,9 @@ export function InnerFieldItem(props: FieldItemProps) {
       });
     }
     const getContext = indexPattern?.getFieldByName
-      ? {
+      ? () => ({
           ecs: Boolean(indexPattern?.getFieldByName('ecs.version')),
-        }
+        })
       : undefined;
     // IndexPatternField type
     return new DataViewField(field, getContext);
