@@ -24,6 +24,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../apps/discover/group2_data_grid3'),
       require.resolve('../apps/discover/group3'),
       require.resolve('../apps/discover/group4'),
+      require.resolve('../apps/discover/group5'),
+      require.resolve('../apps/discover/group6'),
+      require.resolve('../apps/discover/group7'),
+      require.resolve('../apps/discover/group8'),
     ],
 
     junit: {
