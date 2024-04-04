@@ -10,11 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { SettingsConfig } from '../../../common/settings/types';
 
-import {
-  _getSettingsAPISchema,
-  _getSettingsSavedObjectMappings,
-  _getSettingsValuesForAgentPolicy,
-} from './form_settings';
+import { _getSettingsAPISchema, _getSettingsValuesForAgentPolicy } from './form_settings';
 
 const TEST_SETTINGS: SettingsConfig[] = [
   {
@@ -25,12 +21,6 @@ const TEST_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'test_foo',
     },
-    saved_object_field: {
-      name: 'test_foo',
-      mapping: {
-        type: 'boolean',
-      },
-    },
   },
   {
     name: 'test.foo.default_value',
@@ -40,26 +30,10 @@ const TEST_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'test_foo_default_value',
     },
-    saved_object_field: {
-      name: 'test_foo_default_value',
-      mapping: {
-        type: 'keyword',
-      },
-    },
   },
 ];
 
 describe('form_settings', () => {
-  describe('_getSettingsSavedObjectMappings', () => {
-    it('return saved object mappings from settings', () => {
-      const mappings = _getSettingsSavedObjectMappings(TEST_SETTINGS);
-      expect(mappings).toEqual({
-        test_foo: { type: 'boolean' },
-        test_foo_default_value: { type: 'keyword' },
-      });
-    });
-  });
-
   describe('_getSettingsAPISchema', () => {
     it('generate a valid API schema for api_field', () => {
       const apiSchema = schema.object(_getSettingsAPISchema(TEST_SETTINGS));

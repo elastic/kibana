@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 import type { z } from 'zod';
 
 export type SettingsSection = 'AGENT_POLICY_ADVANCED_SETTINGS';
@@ -16,10 +15,6 @@ export interface SettingsConfig {
   description: string;
   learnMoreLink?: string;
   schema: z.ZodTypeAny;
-  saved_object_field?: {
-    name: string;
-    mapping: SavedObjectsFieldMapping;
-  };
   api_field: {
     name: string;
   };

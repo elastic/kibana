@@ -13,13 +13,6 @@ import type { SettingsConfig } from './types';
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.limits.go_max_procs',
-    saved_object_field: {
-      name: 'agent_limits_go_max_procs',
-      mapping: {
-        type: 'integer',
-        index: false,
-      },
-    },
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.goMaxProcsTitle', {
       defaultMessage: 'GO_MAX_PROCS',
     }),
@@ -44,13 +37,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       }
     ),
     learnMoreLink: 'https://docs.elastic.co/...',
-    saved_object_field: {
-      name: 'agent_download_timeout',
-      mapping: {
-        type: 'integer',
-        index: false,
-      },
-    },
     api_field: {
       name: 'agent_download_timeout',
     },

@@ -7,31 +7,10 @@
 
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 
 import type { SettingsConfig, SettingsSection } from '../../../common/settings/types';
 import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../common/settings';
 import type { AgentPolicy } from '../../types';
-
-export function getSettingsSavedObjectMappings(settingSection: SettingsSection) {
-  const settings = getSettings(settingSection);
-
-  return _getSettingsSavedObjectMappings(settings);
-}
-
-export function _getSettingsSavedObjectMappings(settings: SettingsConfig[]): {
-  [k: string]: SavedObjectsFieldMapping;
-} {
-  const mappings: { [k: string]: SavedObjectsFieldMapping } = {};
-  settings.forEach((setting) => {
-    if (!setting.saved_object_field) {
-      return;
-    }
-    mappings[setting.saved_object_field.name] = setting.saved_object_field.mapping;
-  });
-
-  return mappings;
-}
 
 export function getSettingsAPISchema(settingSection: SettingsSection) {
   const settings = getSettings(settingSection);
@@ -105,11 +84,11 @@ export function _getSettingsValuesForAgentPolicy(
 ) {
   const settingsValues: { [k: string]: any } = {};
   settings.forEach((setting) => {
-    if (!setting.saved_object_field) {
+    if (!setting.api_field) {
       return;
     }
 
-    const val = agentPolicy.advanced_settings?.[setting.saved_object_field.name];
+    const val = agentPolicy.advanced_settings?.[setting.api_field.name];
     if (val) {
       settingsValues[setting.name] = val;
     }
