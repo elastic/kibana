@@ -6143,7 +6143,7 @@
                     "type": "object",
                     "additionalProperties": true,
                     "maxProperties": 20,
-                    "description": "Custom field names and values for Jira connectors.\n"
+                    "description": "Custom field identifiers and their values for Jira connectors.\n"
                   },
                   "parent": {
                     "type": "string",
