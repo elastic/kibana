@@ -8,9 +8,13 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { TestProvider } from '../../../test/test_provider';
-import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
-import { FieldsSelectorTable, FieldsSelectorTableProps } from './fields_selector_table';
+import {
+  FieldsSelectorTable,
+  FieldsSelectorTableProps,
+  filterFieldsBySearch,
+} from './fields_selector_table';
 
 const VIEW_MENU_ALL_TEXT = 'View: all';
 const VIEW_MENU_SELECTED_TEXT = 'View: selected';
@@ -21,9 +25,14 @@ const mockDataView = {
       { id: 'field1', name: 'field1', customLabel: 'Label 1', visualizable: true },
       { id: 'field2', name: 'field2', customLabel: 'Label 2', visualizable: true },
       { id: 'field3', name: 'field3', customLabel: 'Label 3', visualizable: true },
+      { id: 'field4', name: 'field4', customLabel: 'Label 3.A', visualizable: true },
+      { id: 'not-visible', name: 'not-visible', customLabel: 'Label 3.A', visualizable: false },
+      { id: '_index', name: '_index', customLabel: 'should not be shown', visualizable: true },
     ],
   },
 } as any;
+
+jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
 
 const renderFieldsTable = (props: Partial<FieldsSelectorTableProps> = {}) => {
   const defaultProps: FieldsSelectorTableProps = {
@@ -42,6 +51,10 @@ const renderFieldsTable = (props: Partial<FieldsSelectorTableProps> = {}) => {
 };
 
 describe('FieldsSelectorTable', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the table with data correctly', () => {
     const { getByText } = renderFieldsTable();
 
@@ -75,34 +88,22 @@ describe('FieldsSelectorTable', () => {
   });
 
   describe('View selected', () => {
-    afterEach(() => {
-      sessionStorage.removeItem(SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED);
-    });
-
-    it('should render "view all" option by default', () => {
-      // Just for the sake of readability, cleaning up the session storage
-      sessionStorage.removeItem(SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED);
+    it('should show "view all" option by default', () => {
       const { getByTestId } = renderFieldsTable();
-
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_ALL_TEXT);
     });
 
-    it('should render "view all" option after the local storage showSelected is false', () => {
-      const { getByTestId } = renderFieldsTable();
-
-      expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_ALL_TEXT);
-    });
-
-    it('should render "view selected" option after the local storage showSelected is true', () => {
-      sessionStorage.setItem(SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED, 'true');
+    it('should render "view selected" option when previous selection was "view selected"', () => {
+      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
       const { getByTestId } = renderFieldsTable();
 
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
     });
 
-    it('should show the "view all" option after the "view all" option is selected', async () => {
+    it('should show "view all" option after the "view all" is selected', async () => {
       // Forcing the view to be the selected state
-      sessionStorage.setItem(SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED, 'true');
+      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
+
       const { getByTestId } = renderFieldsTable();
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
 
@@ -114,16 +115,10 @@ describe('FieldsSelectorTable', () => {
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_ALL_TEXT);
     });
 
-    it('should show the only selected columns after the "view selected" option is selected', async () => {
+    it('should show only selected columns after the "view selected" option is selected', async () => {
+      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
       // Render the table with field3 selected
       const { getAllByRole, getByTestId } = renderFieldsTable({ columns: ['field3'] });
-      expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_ALL_TEXT);
-
-      getByTestId('viewSelectorButton').click();
-      await waitForEuiPopoverOpen();
-
-      getByTestId('viewSelectorOption-selected').click();
-
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
       // Only field3 should be visible
       expect(getByTestId('cloud-security-fields-selector-item-field3')).toBeInTheDocument();
@@ -132,7 +127,7 @@ describe('FieldsSelectorTable', () => {
 
     it('should show all columns available after the "view all" option is selected', async () => {
       // Forcing the view to be the selected state
-      sessionStorage.setItem(SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED, 'true');
+      (useSessionStorage as jest.Mock).mockReturnValueOnce([true, jest.fn()]);
 
       // Render the table with field3 selected
       const { getAllByRole, getByTestId } = renderFieldsTable({ columns: ['field3'] });
@@ -146,7 +141,7 @@ describe('FieldsSelectorTable', () => {
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_ALL_TEXT);
       // Only field3 should be visible
       expect(getByTestId('cloud-security-fields-selector-item-field3')).toBeInTheDocument();
-      expect(getAllByRole('checkbox').length).toBe(3);
+      expect(getAllByRole('checkbox').length).toBe(4);
     });
 
     it('should open the view selector with button click', async () => {
@@ -162,6 +157,73 @@ describe('FieldsSelectorTable', () => {
       expect(getByTestId('viewSelectorMenu')).toBeInTheDocument();
       expect(getByTestId('viewSelectorOption-all')).toBeInTheDocument();
       expect(getByTestId('viewSelectorOption-selected')).toBeInTheDocument();
+    });
+  });
+
+  describe('Searching columns', () => {
+    it('should find all columns match the search term', async () => {
+      // No columns are selected and no search term
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), undefined, undefined, false).length
+      ).toEqual(4);
+
+      // Columns selected and no search term
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], undefined, false)
+          .length
+      ).toEqual(4);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label', false)
+          .length
+      ).toEqual(4);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3', false)
+          .length
+      ).toEqual(2);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3.A', false)
+          .length
+      ).toEqual(1);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'foo', false)
+          .length
+      ).toEqual(0);
+    });
+
+    it('should find all columns match the search term and are selected', async () => {
+      // No columns are selected and no search term
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), undefined, undefined, true).length
+      ).toEqual(0);
+
+      // Columns selected and no search term
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], undefined, true)
+          .length
+      ).toEqual(2);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label', true)
+          .length
+      ).toEqual(2);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3', true)
+          .length
+      ).toEqual(2);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'Label 3.A', true)
+          .length
+      ).toEqual(1);
+
+      expect(
+        filterFieldsBySearch(mockDataView.fields.getAll(), ['field3', 'field4'], 'foo', true).length
+      ).toEqual(0);
     });
   });
 });

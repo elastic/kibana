@@ -20,7 +20,7 @@ import {
   EuiSearchBarProps,
   EuiText,
 } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
@@ -58,14 +58,13 @@ export interface FieldsSelectorTableProps {
   title: string;
 }
 
-function filterFieldsBySearch(
-  dataView: DataView,
-  columns: string[] = [],
+export const filterFieldsBySearch = (
+  fields: DataViewField[],
+  visibleColumns: string[] = [],
   searchQuery?: string,
   isFilterSelectedEnabled: boolean = false
-) {
-  const dataViewFields = dataView.fields
-    .getAll()
+) => {
+  const allowedFields = fields
     .filter((field) => field.name !== '_index' && field.visualizable)
     .map((field) => ({
       id: field.name,
@@ -74,8 +73,8 @@ function filterFieldsBySearch(
     }));
 
   const visibleFields = !isFilterSelectedEnabled
-    ? dataViewFields
-    : dataViewFields.filter((field) => columns.includes(field.id));
+    ? allowedFields
+    : allowedFields.filter((field) => visibleColumns.includes(field.id));
 
   return !searchQuery
     ? visibleFields
@@ -84,7 +83,7 @@ function filterFieldsBySearch(
         const normalizedQuery = searchQuery.toLowerCase() || '';
         return normalizedName.indexOf(normalizedQuery) !== -1;
       });
-}
+};
 
 export const FieldsSelectorTable = ({
   title,
@@ -100,7 +99,8 @@ export const FieldsSelectorTable = ({
     false
   );
   const fields = useMemo<Field[]>(
-    () => filterFieldsBySearch(dataView, columns, searchQuery, isFilterSelectedEnabled),
+    () =>
+      filterFieldsBySearch(dataView.fields.getAll(), columns, searchQuery, isFilterSelectedEnabled),
     [dataView, columns, searchQuery, isFilterSelectedEnabled]
   );
 
