@@ -29,7 +29,7 @@ import {
   take,
   takeUntil,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';

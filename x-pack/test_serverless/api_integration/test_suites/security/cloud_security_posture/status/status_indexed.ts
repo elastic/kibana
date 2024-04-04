@@ -47,7 +47,8 @@ export default function (providerContext: FtrProviderContext) {
 
     let agentPolicyId: string;
 
-    describe('STATUS = INDEXED TEST', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/178027
+    describe.skip('STATUS = INDEXED TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
