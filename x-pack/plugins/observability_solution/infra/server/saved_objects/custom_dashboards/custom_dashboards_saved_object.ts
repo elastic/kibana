@@ -20,7 +20,7 @@ const properties: Record<keyof InfraCustomDashboard, SavedObjectsFieldMapping> =
     type: 'keyword',
   },
   dashboardFilterAssetIdEnabled: {
-    type: 'keyword',
+    type: 'boolean',
   },
 };
 
@@ -60,7 +60,7 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
               type: 'keyword',
             },
             dashboardFilterAssetIdEnabled: {
-              type: 'keyword',
+              type: 'boolean',
             },
           },
         },
