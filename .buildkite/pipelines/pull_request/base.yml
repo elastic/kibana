@@ -101,3 +101,10 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - label: "Check Catalog Info RREs"
+    command: "/agent/check-catalog-info.sh"
+    agents:
+      image: docker.elastic.co/ci-agent-images/pipelib:0.1.0
+    env:
+      CATALOG_INFO_PATH: .buildkite/pipeline-resource-definitions/**/*.yml
