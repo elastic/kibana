@@ -7,6 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { isEmpty } from 'lodash';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
   CrowdstrikeConfig,
@@ -87,7 +88,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       },
       data: {
         ids: payload.ids,
-        ...(actionParameters
+        ...(payload.actionParameters
           ? {
               action_parameters: Object.entries(payload.actionParameters).map(([name, value]) => ({
                 name,
