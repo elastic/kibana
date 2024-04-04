@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { APP_ID } from './constants';
+import { APP_ID, RULE_MANAGEMENT_API_READ, RULE_MANAGEMENT_API_WRITE } from './constants';
+import { SECURITY_RULE_TYPES } from './security/kibana_features';
 
 export enum ProductFeaturesPrivilegeId {
   endpointExceptions = 'endpoint_exceptions',
+  ruleManagement = 'rule_management',
 }
 
 /**
@@ -25,6 +27,30 @@ export const ProductFeaturesPrivileges = {
     read: {
       ui: ['showEndpointExceptions'],
       api: [`${APP_ID}-showEndpointExceptions`],
+    },
+  },
+  [ProductFeaturesPrivilegeId.ruleManagement]: {
+    all: {
+      api: [RULE_MANAGEMENT_API_READ, RULE_MANAGEMENT_API_WRITE],
+      alerting: {
+        rule: {
+          all: SECURITY_RULE_TYPES,
+        },
+        alert: {
+          all: SECURITY_RULE_TYPES,
+        },
+      },
+    },
+    read: {
+      api: [RULE_MANAGEMENT_API_READ],
+      alerting: {
+        rule: {
+          read: SECURITY_RULE_TYPES,
+        },
+        alert: {
+          all: SECURITY_RULE_TYPES,
+        },
+      },
     },
   },
 };

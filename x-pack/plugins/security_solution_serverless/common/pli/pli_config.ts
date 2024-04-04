@@ -18,6 +18,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     essentials: [
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.ruleManagement,
     ],
     complete: [
       ProductFeatureKey.advancedInsights,
@@ -33,6 +34,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointPolicyProtections,
       ProductFeatureKey.endpointArtifactManagement,
       ProductFeatureKey.endpointExceptions,
+      ProductFeatureKey.ruleManagement,
     ],
     complete: [
       ProductFeatureKey.endpointResponseActions,

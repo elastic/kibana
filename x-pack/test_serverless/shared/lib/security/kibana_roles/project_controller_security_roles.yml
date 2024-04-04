@@ -6,19 +6,19 @@ viewer:
   cluster: []
   indices:
     - names:
-        - ".siem-signals*"
-        - ".lists-*"
-        - ".items-*"
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
-        - ".alerts*"
-        - ".preview.alerts*"
+        - '.alerts*'
+        - '.preview.alerts*'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -30,19 +30,20 @@ viewer:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
-        - ".fleet-agents*"
-        - ".fleet-actions*"
-        - "risk-score.risk-score-*"
-        - ".asset-criticality.asset-criticality-*"
+        - '.fleet-agents*'
+        - '.fleet-actions*'
+        - 'risk-score.risk-score-*'
+        - '.asset-criticality.asset-criticality-*'
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -54,7 +55,7 @@ viewer:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
   run_as: []
 
 # modeled after t3_analyst
@@ -62,14 +63,14 @@ editor:
   cluster: []
   indices:
     - names:
-        - ".siem-signals*"
-        - ".lists-*"
-        - ".items-*"
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
-        - "maintenance"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -84,24 +85,24 @@ editor:
         - read
         - write
     - names:
-        - ".internal.alerts*"
-        - ".alerts*"
-        - ".internal.preview.alerts*"
-        - ".preview.alerts*"
-        - "risk-score.risk-score-*"
+        - '.internal.alerts*'
+        - '.alerts*'
+        - '.internal.preview.alerts*'
+        - '.preview.alerts*'
+        - 'risk-score.risk-score-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
-        - "maintenance"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
     - names:
-        - ".asset-criticality.asset-criticality-*"
+        - '.asset-criticality.asset-criticality-*'
       privileges:
-        - "read"
-        - "write"
+        - 'read'
+        - 'write'
       allow_restricted_indices: false
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -117,6 +118,7 @@ editor:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -128,15 +130,15 @@ editor:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
   run_as: []
 
 t1_analyst:
   cluster:
   indices:
     - names:
-        - ".alerts-security*"
-        - ".siem-signals-*"
+        - '.alerts-security*'
+        - '.siem-signals-*'
       privileges:
         - read
         - write
@@ -151,19 +153,20 @@ t1_analyst:
         - packetbeat-*
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
-        - ".fleet-agents*"
-        - ".fleet-actions*"
+        - '.fleet-agents*'
+        - '.fleet-actions*'
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -176,7 +179,7 @@ t1_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 t2_analyst:
   cluster:
@@ -211,12 +214,13 @@ t2_analyst:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -229,7 +233,7 @@ t2_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 t3_analyst:
   cluster:
@@ -268,7 +272,7 @@ t3_analyst:
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -284,6 +288,7 @@ t3_analyst:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -295,7 +300,7 @@ t3_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 threat_intelligence_analyst:
   cluster:
@@ -333,12 +338,13 @@ threat_intelligence_analyst:
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -350,7 +356,7 @@ threat_intelligence_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 rule_author:
   cluster:
@@ -392,7 +398,7 @@ rule_author:
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -405,6 +411,7 @@ rule_author:
         - feature_siem.host_isolation_exceptions_read
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -416,7 +423,7 @@ rule_author:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 soc_manager:
   cluster:
@@ -457,7 +464,7 @@ soc_manager:
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -474,6 +481,7 @@ soc_manager:
         - feature_siem.actions_log_management_all
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -486,10 +494,10 @@ soc_manager:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 detections_admin:
-  cluster: ["manage_index_templates", "manage_transform"]
+  cluster: ['manage_index_templates', 'manage_transform']
   indices:
     - names:
         - apm-*-transaction*
@@ -526,12 +534,13 @@ detections_admin:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
         - feature_siem.all
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -543,7 +552,7 @@ detections_admin:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 platform_engineer:
   cluster:
@@ -573,7 +582,7 @@ platform_engineer:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -586,6 +595,7 @@ platform_engineer:
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -600,7 +610,7 @@ platform_engineer:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 endpoint_operations_analyst:
   cluster:
@@ -640,7 +650,7 @@ endpoint_operations_analyst:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siem.all
@@ -656,6 +666,7 @@ endpoint_operations_analyst:
         - feature_siem.actions_log_management_all # Response History
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all # Execute
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -669,7 +680,7 @@ endpoint_operations_analyst:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'
 
 endpoint_policy_manager:
   cluster:
@@ -709,7 +720,7 @@ endpoint_policy_manager:
         - write
         - manage
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
         - feature_siem.all
@@ -721,6 +732,7 @@ endpoint_policy_manager:
         - feature_siem.event_filters_all
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -734,4 +746,4 @@ endpoint_policy_manager:
         - feature_graph.all
         - feature_maps.all
         - feature_visualize.all
-      resources: "*"
+      resources: '*'

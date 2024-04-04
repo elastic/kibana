@@ -63,6 +63,11 @@ export enum ProductFeatureSecurityKey {
    * enables all rule actions
    */
   externalRuleActions = 'external_rule_actions',
+
+  /**
+   * Enables management of detection rules
+   */
+  ruleManagement = 'rule_management',
 }
 
 export enum ProductFeatureCasesKey {
@@ -107,6 +112,7 @@ export enum SecuritySubFeatureId {
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
+  ruleManagement = 'ruleManagementSubFeature',
 }
 
 /** Sub-features IDs for Cases */

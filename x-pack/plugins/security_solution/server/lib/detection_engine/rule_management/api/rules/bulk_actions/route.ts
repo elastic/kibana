@@ -12,6 +12,7 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { RULE_MANAGEMENT_API_WRITE } from '@kbn/security-solution-features/src/constants';
 import type { RuleAlertType } from '../../../../rule_schema';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import {
@@ -240,7 +241,10 @@ export const performBulkActionRoute = (
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        tags: [
+          `access:${RULE_MANAGEMENT_API_WRITE}`,
+          routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY),
+        ],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },

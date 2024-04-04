@@ -44,6 +44,7 @@ viewer:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -117,6 +118,7 @@ editor:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -163,6 +165,7 @@ t1_analyst:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -215,6 +218,7 @@ t2_analyst:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -281,6 +285,7 @@ t3_analyst:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -335,6 +340,7 @@ threat_intelligence_analyst:
         - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -400,6 +406,7 @@ rule_author:
         - feature_siem.host_isolation_exceptions_read
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -468,6 +475,7 @@ soc_manager:
         - feature_siem.actions_log_management_all
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -525,6 +533,7 @@ detections_admin:
         - feature_siem.all
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -578,6 +587,7 @@ platform_engineer:
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -647,6 +657,7 @@ endpoint_operations_analyst:
         - feature_siem.actions_log_management_all # Response History
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all # Execute
+        - feature_siem.rule_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -711,6 +722,7 @@ endpoint_policy_manager:
         - feature_siem.event_filters_all
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
+        - feature_siem.rule_management_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all

@@ -28,6 +28,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import { RULE_MANAGEMENT_API_WRITE } from '@kbn/security-solution-features/src/constants';
 import type {
   CreateRuleExceptionsRequestBodyDecoded,
   CreateRuleExceptionsRequestParamsDecoded,
@@ -52,7 +53,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
       path: CREATE_RULE_EXCEPTIONS_URL,
       access: 'public',
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_WRITE}`],
       },
     })
     .addVersion(

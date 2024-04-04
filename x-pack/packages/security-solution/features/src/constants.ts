@@ -23,3 +23,6 @@ export const CLOUD_DEFEND_APP_ID = 'cloudDefend' as const;
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
+
+export const RULE_MANAGEMENT_API_READ = `${APP_ID}-ruleRead`;
+export const RULE_MANAGEMENT_API_WRITE = `${APP_ID}-ruleWrite`;

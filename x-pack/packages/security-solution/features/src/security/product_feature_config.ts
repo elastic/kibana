@@ -105,6 +105,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     ],
   },
 
+  [ProductFeatureSecurityKey.ruleManagement]: {
+    subFeatureIds: [SecuritySubFeatureId.ruleManagement],
+  },
+
   // Product features without RBAC
   [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},

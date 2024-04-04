@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleInstallationResponseBody,
@@ -27,7 +28,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
       access: 'internal',
       path: REVIEW_RULE_INSTALLATION_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

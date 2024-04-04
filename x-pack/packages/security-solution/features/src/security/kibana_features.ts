@@ -28,7 +28,7 @@ import {
 } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
-const SECURITY_RULE_TYPES = [
+export const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
   ESQL_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
@@ -77,14 +77,6 @@ export const getSecurityBaseKibanaFeature = ({
         all: ['alert', ...savedObjects],
         read: [],
       },
-      alerting: {
-        rule: {
-          all: SECURITY_RULE_TYPES,
-        },
-        alert: {
-          all: SECURITY_RULE_TYPES,
-        },
-      },
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
@@ -97,14 +89,6 @@ export const getSecurityBaseKibanaFeature = ({
       savedObject: {
         all: [],
         read: [...savedObjects],
-      },
-      alerting: {
-        rule: {
-          read: SECURITY_RULE_TYPES,
-        },
-        alert: {
-          all: SECURITY_RULE_TYPES,
-        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],

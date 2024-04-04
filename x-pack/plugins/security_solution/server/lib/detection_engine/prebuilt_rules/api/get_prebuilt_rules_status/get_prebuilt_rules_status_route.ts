@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -21,7 +22,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
       access: 'internal',
       path: GET_PREBUILT_RULES_STATUS_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
       },
     })
     .addVersion(
