@@ -71,7 +71,6 @@ const renderCompareDocuments = ({
       getDocById={getDocById}
       setSelectedDocs={setSelectedDocs}
       setIsCompareActive={jest.fn()}
-      renderCustomToolbar={jest.fn()}
     />
   );
   return { setSelectedDocs };

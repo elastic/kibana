@@ -7,8 +7,11 @@
  */
 
 import React from 'react';
-import { UnifiedDataTable, type UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { renderCustomToolbar } from './render_custom_toolbar';
+import {
+  renderCustomToolbar,
+  UnifiedDataTable,
+  type UnifiedDataTableProps,
+} from '@kbn/unified-data-table';
 
 /**
  * Customized version of the UnifiedDataTable
@@ -21,7 +24,6 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
       showColumnTokens
       enableComparisonMode
       renderCustomToolbar={renderCustomToolbar}
-      renderCustomComparisonToolbar={renderCustomToolbar}
       {...props}
     />
   );

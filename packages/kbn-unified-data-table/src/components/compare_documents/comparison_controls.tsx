@@ -98,18 +98,20 @@ export const ComparisonControls = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiDataGridToolbarControl
-          iconType="exit"
-          onClick={() => {
-            setIsCompareActive(false);
-          }}
-          data-test-subj="unifiedDataTableExitDocumentComparison"
-        >
-          <FormattedMessage
-            id="unifiedDataTable.exitDocumentComparison"
-            defaultMessage="Exit comparison mode"
-          />
-        </EuiDataGridToolbarControl>
+        <div className="unifiedDataTableToolbarControlButton">
+          <EuiDataGridToolbarControl
+            iconType="exit"
+            onClick={() => {
+              setIsCompareActive(false);
+            }}
+            data-test-subj="unifiedDataTableExitDocumentComparison"
+          >
+            <FormattedMessage
+              id="unifiedDataTable.exitDocumentComparison"
+              defaultMessage="Exit comparison mode"
+            />
+          </EuiDataGridToolbarControl>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -142,18 +144,20 @@ const ComparisonSettings = ({
   return (
     <EuiPopover
       button={
-        <EuiDataGridToolbarControl
-          iconType="gear"
-          onClick={() => {
-            setIsSettingsMenuOpen(!isSettingsMenuOpen);
-          }}
-          data-test-subj="unifiedDataTableComparisonSettings"
-        >
-          <FormattedMessage
-            id="unifiedDataTable.comparisonSettings"
-            defaultMessage="Comparison settings"
-          />
-        </EuiDataGridToolbarControl>
+        <div className="unifiedDataTableToolbarControlButton">
+          <EuiDataGridToolbarControl
+            iconType="gear"
+            onClick={() => {
+              setIsSettingsMenuOpen(!isSettingsMenuOpen);
+            }}
+            data-test-subj="unifiedDataTableComparisonSettings"
+          >
+            <FormattedMessage
+              id="unifiedDataTable.comparisonSettings"
+              defaultMessage="Comparison settings"
+            />
+          </EuiDataGridToolbarControl>
+        </div>
       }
       isOpen={isSettingsMenuOpen}
       closePopover={() => {

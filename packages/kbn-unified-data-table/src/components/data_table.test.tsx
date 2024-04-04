@@ -840,21 +840,6 @@ describe('UnifiedDataTable', () => {
       expect(getFullScreenButton()).not.toBeInTheDocument();
     });
 
-    it('should render custom comparison toolbar', async () => {
-      const customToolbar = 'Custom toolbar';
-      renderDataTable({
-        enableComparisonMode: true,
-        renderCustomComparisonToolbar: ({ gridProps: { additionalControls } }) => (
-          <>
-            {additionalControls}
-            <div>{customToolbar}</div>
-          </>
-        ),
-      });
-      await goToComparisonMode();
-      expect(screen.getByText(customToolbar)).toBeInTheDocument();
-    });
-
     it('should render selected fields', async () => {
       const columns = ['bytes', 'message'];
       renderDataTable({ enableComparisonMode: true, columns });

@@ -14,15 +14,12 @@ import {
   type UnifiedDataTableProps,
   type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
+  getRenderCustomToolbarWithElements,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../components/discover_grid';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
-import {
-  getRenderCustomToolbarWithElements,
-  renderCustomToolbar,
-} from '../components/discover_grid/render_custom_toolbar';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
 export interface DiscoverGridEmbeddableProps
@@ -108,7 +105,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
         renderCustomToolbar={renderCustomToolbarWithElements}
-        renderCustomComparisonToolbar={renderCustomToolbar}
         enableComparisonMode
         showColumnTokens
         configHeaderRowHeight={3}

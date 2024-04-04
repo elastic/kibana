@@ -23,7 +23,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
-import type { UnifiedDataTableRenderCustomToolbar } from '../data_table';
 import { ComparisonControls } from './comparison_controls';
 import { renderComparisonToolbar } from './comparison_toolbar';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
@@ -49,7 +48,6 @@ export interface CompareDocumentsProps {
   getDocById: (id: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
-  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
 }
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
@@ -75,7 +73,6 @@ const CompareDocuments = ({
   getDocById,
   setSelectedDocs,
   setIsCompareActive,
-  renderCustomToolbar,
 }: CompareDocumentsProps) => {
   const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
     getStorageKey(consumer, 'DiffMode'),
@@ -164,12 +161,11 @@ const CompareDocuments = ({
   const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar'] | undefined>(
     () =>
       renderComparisonToolbar({
-        renderCustomToolbar,
         additionalControls,
         comparisonFields,
         totalFields,
       }),
-    [renderCustomToolbar, additionalControls, comparisonFields, totalFields]
+    [additionalControls, comparisonFields, totalFields]
   );
   const renderCellValue = useComparisonCellValue({
     dataView,

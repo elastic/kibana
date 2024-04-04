@@ -26,8 +26,6 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
-  EuiDataGridCustomToolbarProps,
-  EuiDataGridToolBarVisibilityOptions,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
@@ -80,17 +78,7 @@ import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_addition
 import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
-
-export interface UnifiedDataTableRenderCustomToolbarProps {
-  toolbarProps: EuiDataGridCustomToolbarProps;
-  gridProps: {
-    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
-  };
-}
-
-export type UnifiedDataTableRenderCustomToolbar = (
-  props: UnifiedDataTableRenderCustomToolbarProps
-) => React.ReactElement;
+import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 
 export type SortOrder = [string, string];
 
@@ -333,12 +321,6 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
-   * Optional render for the grid toolbar when in comparison mode
-   * @param toolbarProps
-   * @param gridProps
-   */
-  renderCustomComparisonToolbar?: UnifiedDataTableRenderCustomToolbar;
-  /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
@@ -429,7 +411,6 @@ export const UnifiedDataTable = ({
   services,
   renderCustomGridBody,
   renderCustomToolbar,
-  renderCustomComparisonToolbar,
   trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
@@ -1038,7 +1019,6 @@ export const UnifiedDataTable = ({
               getDocById={getDocById}
               setSelectedDocs={setSelectedDocs}
               setIsCompareActive={setIsCompareActive}
-              renderCustomToolbar={renderCustomComparisonToolbar}
             />
           ) : (
             <EuiDataGridMemoized

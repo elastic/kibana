@@ -26,6 +26,7 @@ import {
   useColumns,
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
+  getRenderCustomToolbarWithElements,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -61,10 +62,6 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import {
-  getRenderCustomToolbarWithElements,
-  renderCustomToolbar,
-} from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
@@ -438,7 +435,6 @@ function DiscoverDocumentsComponent({
                   maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                   renderDocumentView={renderDocumentView}
                   renderCustomToolbar={renderCustomToolbarWithElements}
-                  renderCustomComparisonToolbar={renderCustomToolbar}
                   services={services}
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
