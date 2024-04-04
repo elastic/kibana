@@ -151,7 +151,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const securityCommon = MachineLearningSecurityCommonProvider(context);
   const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
-
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
