@@ -119,4 +119,6 @@ describe('Summary Search Client', () => {
     expect(results).toMatchSnapshot();
     expect(results.total).toBe(5);
   });
+
+  // TODO Kevin: Add test with remote SLOs
 });
