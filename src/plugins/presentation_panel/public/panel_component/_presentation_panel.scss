@@ -147,16 +147,6 @@
 
 .embPanel--editing {
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-  outline-width: $euiBorderWidthThin;
-
-  &:hover,
-  &:focus {
-    @include euiSlightShadowHover;
-
-    .embPanel__emptyTitleDragHandle {
-      display: block;
-    }
-  }
 
   .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
