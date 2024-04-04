@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { filter, lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type {
@@ -15,6 +16,13 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
+import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
+import {
+  ChatCompletionChunkEvent,
+  MessageRole,
+  StreamingChatResponseEventType,
+} from '../../common';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 const ParamsSchema = schema.object({
   connector: schema.string(),
@@ -31,7 +39,9 @@ export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOp
   ActionParamsType
 >;
 
-export function getObsAIAssistantConnectorType(): ObsAIAssistantConnectorType {
+export function getObsAIAssistantConnectorType(
+  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
+): ObsAIAssistantConnectorType {
   return {
     id: '.observability-ai-assistant',
     isSystemActionType: true,
@@ -55,7 +65,7 @@ export function getObsAIAssistantConnectorType(): ObsAIAssistantConnectorType {
     },
     renderParameterTemplates,
     executor(options) {
-      return executor(options);
+      return executor(options, initResources);
     },
   };
 }
@@ -72,7 +82,78 @@ function renderParameterTemplates(
 }
 
 async function executor(
-  execOptions: ObsAIAssistantConnectorTypeExecutorOptions
+  execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
+  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
+  const request = execOptions.request!;
+  const resources = await initResources(request);
+  const client = await resources.service.getClient({ request });
+  const functionClient = await resources.service.getFunctionClient({
+    signal: new AbortController().signal,
+    resources,
+    client,
+    screenContexts: [],
+  });
+  const actionsClient = await (
+    await resources.plugins.actions.start()
+  ).getActionsClientWithRequest(request);
+
+  await lastValueFrom(
+    client
+      .complete({
+        functionClient,
+        persist: true,
+        connectorId: 'azure-open-ai',
+        signal: new AbortController().signal,
+        messages: [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.System,
+              content: `You are a helpful assistant for Elastic Observability.
+                     An alert about a specific metric just fired. Your task is to
+                     execute the workflow asked by the user. You can use the function
+                     execute_connector if a webhook needs to be called. When a
+                     webhook is called, include what url was called in your response.`,
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: execOptions.params.message,
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'get_connectors',
+                arguments: JSON.stringify({}),
+                trigger: MessageRole.Assistant as const,
+              },
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: 'get_connectors',
+              content: JSON.stringify({ connectors: await actionsClient.getAll() }),
+            },
+          },
+        ],
+      })
+      .pipe(
+        filter(
+          (event): event is ChatCompletionChunkEvent =>
+            event.type === StreamingChatResponseEventType.ChatCompletionChunk
+        )
+      )
+      .pipe(concatenateChatCompletionChunks())
+  );
+
   return { actionId: execOptions.actionId, status: 'ok' };
 }

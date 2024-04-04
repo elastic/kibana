@@ -8,6 +8,7 @@
 import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -23,7 +24,10 @@ import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
-import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
+import {
+  ObservabilityAIAssistantRequestHandlerContext,
+  ObservabilityAIAssistantRouteHandlerResources,
+} from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
 import {
   ObservabilityAIAssistantServerSetup,
@@ -155,7 +159,40 @@ export class ObservabilityAIAssistantPlugin
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
-    plugins.actions.registerType(getObsAIAssistantConnectorType());
+    const initResources = async (
+      request: KibanaRequest
+    ): Promise<ObservabilityAIAssistantRouteHandlerResources> => {
+      const [coreStart] = await core.getStartServices();
+      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+      return {
+        request,
+        service,
+        context: {
+          rac: routeHandlerPlugins.ruleRegistry.start().then((startContract) => {
+            return {
+              getAlertsClient() {
+                return startContract.getRacClientWithRequest(request);
+              },
+            };
+          }),
+          core: {
+            elasticsearch: {
+              client: coreStart.elasticsearch.client.asScoped(request),
+            },
+            uiSettings: {
+              client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
+            },
+            savedObjects: {
+              client: savedObjectsClient,
+            },
+          },
+        } as unknown as ObservabilityAIAssistantRequestHandlerContext,
+        logger: this.logger.get('connector'),
+        plugins: routeHandlerPlugins,
+      };
+    };
+
+    plugins.actions.registerType(getObsAIAssistantConnectorType(initResources));
 
     registerServerRoutes({
       core,
