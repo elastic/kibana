@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { CanAddNewPanel, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
@@ -15,20 +15,27 @@ import {
 } from '../image_embeddable/constants';
 import { uiActionsService } from '../services/kibana_services';
 
+const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {
+  const { apiCanAddNewPanel } = await import('@kbn/presentation-publishing');
+  // we cannot have an async type check, so return the casted parentApi rather than a boolean
+  return apiCanAddNewPanel(parentApi) ? (parentApi as CanAddNewPanel) : undefined;
+};
+
 export const registerCreateImageAction = () => {
   uiActionsService.registerAction<EmbeddableApiContext>({
     id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
     getIconType: () => 'image',
     isCompatible: async ({ embeddable: parentApi }) => {
-      return apiCanAddNewPanel(parentApi);
+      return Boolean(await parentApiIsCompatible(parentApi));
     },
     execute: async ({ embeddable: parentApi }) => {
-      if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
+      const canAddNewPanelParent = await parentApiIsCompatible(parentApi);
+      if (!canAddNewPanelParent) throw new IncompatibleActionError();
       const { openImageEditor } = await import('../components/image_editor/open_image_editor');
       try {
-        const imageConfig = await openImageEditor({ parentApi });
+        const imageConfig = await openImageEditor({ parentApi: canAddNewPanelParent });
 
-        parentApi.addNewPanel({
+        canAddNewPanelParent.addNewPanel({
           panelType: IMAGE_EMBEDDABLE_TYPE,
           initialState: { imageConfig },
         });
