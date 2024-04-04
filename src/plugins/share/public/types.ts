@@ -90,6 +90,7 @@ export interface ShareMenuItem {
   layoutOption?: 'print';
   absoluteUrl?: string;
   generateCopyUrl?: URL;
+  renderCopyURLButton?: boolean;
 }
 
 /**

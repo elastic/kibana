@@ -184,6 +184,7 @@ export const reportingCsvShareProvider = ({
         generateReport: generateReportingJobCSV,
         generateCopyUrl: reportingUrl,
         absoluteUrl,
+        renderCopyURLButton: true,
       });
     }
 

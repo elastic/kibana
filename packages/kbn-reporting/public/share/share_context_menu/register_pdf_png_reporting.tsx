@@ -497,6 +497,7 @@ export const reportingExportModalProvider = ({
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       theme,
       renderLayoutOptionSwitch: true,
+      renderCopyURLButton: true,
     });
 
     shareActions.push({
@@ -525,6 +526,7 @@ export const reportingExportModalProvider = ({
         />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
+      renderCopyURLButton: true,
     });
 
     return shareActions;
