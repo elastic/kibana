@@ -235,11 +235,6 @@ export const DocViewerTable = ({
     [storage]
   );
 
-  const handleKeyDown = useCallback((event) => {
-    // prevents the flyout keydown handler from being triggered in order to switch between data grid rows
-    event.stopPropagation();
-  }, []);
-
   const { pinnedItems, restItems } = Object.keys(flattened)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
@@ -421,7 +416,6 @@ export const DocViewerTable = ({
         <EuiFieldSearch
           aria-label={searchPlaceholder}
           fullWidth
-          onKeyDown={handleKeyDown}
           onChange={handleOnChange}
           placeholder={searchPlaceholder}
           value={searchText}
