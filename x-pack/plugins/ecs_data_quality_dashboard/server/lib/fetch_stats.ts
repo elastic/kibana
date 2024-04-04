@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesStatsIndicesStats,
+  IndicesStatsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { MeteringIndicesStatsResponse } from '../../common/types';
+import type { MeteringIndicesStatsResponse, MeteringStatsIndex } from '../../common/types';
 
 export const fetchStats = (
   client: IScopedClusterClient,
@@ -18,39 +21,22 @@ export const fetchStats = (
     index: indexPattern,
   });
 
-/**
- * {
- *    "_shards": {
- *        "total": 4,
- *        "successful": 2,
- *        "failed": 0
- *    },
- *    "indices": [
- *      {
- *          "name": ".ds-my-datastream-03-02-2024-00001",
- *          "num_docs": 3,
- *          "size_in_bytes": 15785,
- *          "datastream": "my-datastream" // ---> ds name
- *      },
- *      {
- *        "name": "my-index-000001",
- *        "num_docs": 2,
- *        "size_in_bytes": 11462
- *      },
- *    ],
- *    "datastreams": [
- *      {
- *        "name": "my-datastream",
- *        "num_docs": 6,
- *        "size_in_bytes": 31752
- *      }
- *    ],
- *    "total": {
- *        "num_docs": 8,
- *        "size_in_bytes": 47214
- *    }
- * }
- */
+export const parseIndicesStats = (
+  statsIndices: Record<string, IndicesStatsIndicesStats> | undefined
+) =>
+  Object.entries(statsIndices ?? {}).reduce<Record<string, MeteringStatsIndex>>(
+    (acc, [key, value]) => {
+      acc[key] = {
+        uuid: value.uuid,
+        name: key,
+        num_docs: value?.primaries?.docs?.count ?? null,
+        size_in_bytes: value?.primaries?.store?.size_in_bytes ?? null,
+      };
+      return acc;
+    },
+    {}
+  );
+
 export const fetchMeteringStats = (
   client: IScopedClusterClient,
   indexPattern: string,
@@ -63,3 +49,25 @@ export const fetchMeteringStats = (
     },
     { headers: { 'es-secondary-authorization': secondaryAuthorization } }
   );
+
+export const parseMeteringStats = (meteringStatsIndices: MeteringStatsIndex[] | undefined) =>
+  meteringStatsIndices?.reduce<Record<string, MeteringStatsIndex>>((acc, curr) => {
+    acc[curr.name] = curr;
+    return acc;
+  }, {});
+
+export const pickAvailableMeteringStats = (
+  indicesBuckets: Array<{ key: string }> | undefined,
+  meteringStatsIndices: Record<string, MeteringStatsIndex> | undefined
+) =>
+  indicesBuckets?.reduce((acc: Record<string, MeteringStatsIndex>, { key }: { key: string }) => {
+    if (meteringStatsIndices?.[key]) {
+      acc[key] = {
+        name: meteringStatsIndices?.[key].name,
+        num_docs: meteringStatsIndices?.[key].num_docs,
+        size_in_bytes: null, // We don't have size_in_bytes intentionally when ILM is not available
+        data_stream: meteringStatsIndices?.[key].data_stream,
+      };
+    }
+    return acc;
+  }, {});

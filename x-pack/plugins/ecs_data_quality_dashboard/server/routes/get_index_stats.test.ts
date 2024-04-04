@@ -18,11 +18,15 @@ import { mockStatsGreenIndex } from '../__mocks__/mock_stats_green_index';
 import { mockStatsYellowIndex } from '../__mocks__/mock_stats_yellow_index';
 import { mockMeteringStatsIndex } from '../__mocks__/mock_metering_stats_index';
 
-jest.mock('../lib', () => ({
-  fetchStats: jest.fn(),
-  fetchMeteringStats: jest.fn(),
-  fetchAvailableIndices: jest.fn(),
-}));
+jest.mock('../lib', () => {
+  const originalModule = jest.requireActual('../lib');
+  return {
+    ...originalModule,
+    fetchStats: jest.fn(),
+    fetchMeteringStats: jest.fn(),
+    fetchAvailableIndices: jest.fn(),
+  };
+});
 
 describe('getIndexStatsRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
