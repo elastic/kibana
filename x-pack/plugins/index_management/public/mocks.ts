@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { extensionsServiceMock } from '@kbn/index-management/src/services/extensions_service.mock';
+import { extensionsServiceMock } from './services/extensions_service.mock';
 import { publicApiServiceMock } from './services/public_api_service.mock';
 
-export { extensionsServiceMock } from '@kbn/index-management/src/services/extensions_service.mock';
+export { extensionsServiceMock } from './services/extensions_service.mock';
 export { publicApiServiceMock } from './services/public_api_service.mock';
 
 function createIdxManagementSetupMock() {

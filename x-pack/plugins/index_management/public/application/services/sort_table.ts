@@ -6,7 +6,7 @@
  */
 
 import { sortBy, get } from 'lodash';
-import type { ExtensionsService } from '@kbn/index-management';
+import type { ExtensionsService } from '../../services/extensions_service';
 import { Index } from '../../../common';
 
 type SortField =

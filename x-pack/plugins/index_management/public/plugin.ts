@@ -16,13 +16,13 @@ import {
   ScopedHistory,
 } from '@kbn/core/public';
 import {
-  ExtensionsService,
   IndexManagementPluginSetup,
   SetupDependencies,
   StartDependencies,
   IndexManagementPluginStart,
 } from '@kbn/index-management';
 import { setExtensionsService } from './application/store/selectors/extension_service';
+import { ExtensionsService } from './services/extensions_service';
 
 import { ClientConfigType } from './types';
 

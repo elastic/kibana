@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '@kbn/index-management';
+import { ExtensionsService } from '../../../services/extensions_service';
 
 // Temporary hack to provide the extensionsService instance to this file.
 // TODO: Refactor and export all the app selectors through the app dependencies context

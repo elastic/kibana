@@ -28,7 +28,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/m
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { ExtensionsService } from '@kbn/index-management';
+import { ExtensionsService } from '../../../public/services/extensions_service';
 import { setExtensionsService } from '../../../public/application/store/selectors';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
