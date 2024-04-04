@@ -8,23 +8,32 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import url from 'url';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
-import { generateReportingJobCSV } from '../shared/get_report_generate';
 
 export const reportingCsvShareProvider = ({
   apiClient,
   application,
   license,
   usesUiCapabilities,
+  toasts,
+  theme,
 }: ExportModalShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({
+    objectType,
+    objectId,
+    sharingData,
+    onClose,
+    intl,
+  }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -80,10 +89,69 @@ export const reportingCsvShareProvider = ({
       capabilityHasCsvReporting = true; // deprecated
     }
 
+    const generateReportingJobCSV = () => {
+      const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
+      return apiClient
+        .createReportingJob(reportType, decoratedJobParams)
+        .then(() => {
+          toasts.addSuccess({
+            title: intl.formatMessage(
+              {
+                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                defaultMessage: 'Queued report for {objectType}',
+              },
+              { objectType }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                defaultMessage="Track its progress in {path}."
+                values={{
+                  path: (
+                    <a href={apiClient.getManagementLink()}>
+                      <FormattedMessage
+                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                        defaultMessage="Stack Management &gt; Reporting"
+                      />
+                    </a>
+                  ),
+                }}
+              />,
+              { theme$: theme.theme$ }
+            ),
+            'data-test-subj': 'queueReportSuccess',
+          });
+          if (onClose) {
+            onClose();
+          }
+        })
+        .catch((error) => {
+          toasts.addError(error, {
+            title: intl.formatMessage({
+              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+              defaultMessage: 'Unable to create report',
+            }),
+            toastMessage: (
+              // eslint-disable-next-line react/no-danger
+              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+            ) as unknown as string,
+          });
+        });
+    };
+
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('reporting.share.contextMenu.csvReportsButtonLabel', {
         defaultMessage: 'Export',
       });
+
+      const reportingUrl = new URL(window.location.origin);
+
+      const relativePath = apiClient.getReportingPublicJobPath(
+        reportType,
+        apiClient.getDecoratedJobParams(getJobParams())
+      );
+
+      const absoluteUrl = url.resolve(window.location.href, relativePath);
 
       shareActions.push({
         shareMenuItem: {
@@ -92,7 +160,6 @@ export const reportingCsvShareProvider = ({
           disabled: licenseDisabled,
           ['data-test-subj']: 'Export',
         },
-        tabType: 'Export',
         helpText: (
           <FormattedMessage
             id="share.csv.reporting.helpText"
@@ -100,7 +167,8 @@ export const reportingCsvShareProvider = ({
             values={{ objectType }}
           />
         ),
-        reportType: [reportType],
+        reportType,
+        label: 'CSV' as const,
         copyURLButton: {
           id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
           dataTestSubj: 'shareReportingCopyURL',
@@ -113,9 +181,9 @@ export const reportingCsvShareProvider = ({
             defaultMessage="Generate CSV"
           />
         ),
-        getJobParams: [{ id: reportType, handler: getJobParams }],
-        createReportingJob: generateReportingJobCSV,
-        reportingAPIClient: apiClient,
+        generateReport: generateReportingJobCSV,
+        generateCopyUrl: reportingUrl,
+        absoluteUrl,
       });
     }
 

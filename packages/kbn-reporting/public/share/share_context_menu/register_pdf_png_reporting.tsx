@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { BaseParams } from '@kbn/reporting-common/types';
 import { checkLicense } from '../../license_check';
 import {
   ExportModalShareOpts,
@@ -19,7 +21,6 @@ import {
 } from '.';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 import { ReportingAPIClient } from '../../reporting_api_client';
-import { generateReportingJobPNGPDF } from '../shared/get_report_generate';
 
 const getJobParams =
   (
@@ -240,6 +241,7 @@ export const reportingExportModalProvider = ({
     onClose,
     shareableUrl,
     shareableUrlForSavedObject,
+    intl,
     ...shareOpts
   }: ShareContext) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
@@ -294,43 +296,235 @@ export const reportingExportModalProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
+    type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
+
+    const generateReportPDF = () => {
+      const decoratedJobParams = apiClient.getDecoratedJobParams(
+        getJobParams(apiClient, jobProviderOptions, 'printablePdfV2') as unknown as AppParams
+      );
+      return apiClient
+        .createReportingJob('printablePdfV2', decoratedJobParams)
+        .then(() => {
+          toasts.addSuccess({
+            title: intl.formatMessage(
+              {
+                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                defaultMessage: 'Queued report for {objectType}',
+              },
+              { objectType }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                defaultMessage="Track its progress in {path}."
+                values={{
+                  path: (
+                    <a href={apiClient.getManagementLink()}>
+                      <FormattedMessage
+                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                        defaultMessage="Stack Management &gt; Reporting"
+                      />
+                    </a>
+                  ),
+                }}
+              />,
+              { theme$: theme.theme$ }
+            ),
+            'data-test-subj': 'queueReportSuccess',
+          });
+          if (onClose) {
+            onClose();
+          }
+        })
+        .catch((error: any) => {
+          toasts.addError(error, {
+            title: intl.formatMessage({
+              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+              defaultMessage: 'Unable to create report',
+            }),
+            toastMessage: (
+              // eslint-disable-next-line react/no-danger
+              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+            ) as unknown as string,
+          });
+        });
+    };
+
+    const generateReportPDFForPrinting = () => {
+      const el = document.querySelector('[data-shared-items-container]');
+      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+      const dimensions = { height, width };
+
+      const decoratedJobParams = apiClient.getDecoratedJobParams({
+        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2'),
+        layout: { id: 'print', dimensions },
+        objectType,
+        title: sharingData.title,
+      });
+      return apiClient
+        .createReportingJob('pngV2', decoratedJobParams)
+        .then(() => {
+          toasts.addSuccess({
+            title: intl.formatMessage(
+              {
+                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                defaultMessage: 'Queued report for {objectType}',
+              },
+              { objectType }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                defaultMessage="Track its progress in {path}."
+                values={{
+                  path: (
+                    <a href={apiClient.getManagementLink()}>
+                      <FormattedMessage
+                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                        defaultMessage="Stack Management &gt; Reporting"
+                      />
+                    </a>
+                  ),
+                }}
+              />,
+              { theme$: theme.theme$ }
+            ),
+            'data-test-subj': 'queueReportSuccess',
+          });
+          if (onClose) {
+            onClose();
+          }
+        })
+        .catch((error: any) => {
+          toasts.addError(error, {
+            title: intl.formatMessage({
+              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+              defaultMessage: 'Unable to create report',
+            }),
+            toastMessage: (
+              // eslint-disable-next-line react/no-danger
+              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+            ) as unknown as string,
+          });
+        });
+    };
+
+    const generateReportPNG = () => {
+      const el = document.querySelector('[data-shared-items-container]');
+      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+      const dimensions = { height, width };
+
+      const decoratedJobParams = apiClient.getDecoratedJobParams({
+        ...getJobParams(apiClient, jobProviderOptions, 'pngV2'),
+        layout: { id: 'preserve_layout', dimensions },
+        objectType,
+        title: sharingData.title,
+      });
+      return apiClient
+        .createReportingJob('pngV2', decoratedJobParams)
+        .then(() => {
+          toasts.addSuccess({
+            title: intl.formatMessage(
+              {
+                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                defaultMessage: 'Queued report for {objectType}',
+              },
+              { objectType }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                defaultMessage="Track its progress in {path}."
+                values={{
+                  path: (
+                    <a href={apiClient.getManagementLink()}>
+                      <FormattedMessage
+                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                        defaultMessage="Stack Management &gt; Reporting"
+                      />
+                    </a>
+                  ),
+                }}
+              />,
+              { theme$: theme.theme$ }
+            ),
+            'data-test-subj': 'queueReportSuccess',
+          });
+          if (onClose) {
+            onClose();
+          }
+        })
+        .catch((error: any) => {
+          toasts.addError(error, {
+            title: intl.formatMessage({
+              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+              defaultMessage: 'Unable to create report',
+            }),
+            toastMessage: (
+              // eslint-disable-next-line react/no-danger
+              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
+            ) as unknown as string,
+          });
+        });
+    };
+
     shareActions.push({
       shareMenuItem: {
         name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
-          defaultMessage: 'Export',
+          defaultMessage: 'PDF',
         }),
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled || sharingData.reportingDisabled,
         ['data-test-subj']: 'imageExports',
       },
-      tabType: 'Export',
-      jobProviderOptions,
-      reportingAPIClient: apiClient,
-      reportType: ['printablePdfV2', 'pngV2'],
+      label: 'PDF' as const,
+      generateReport: generateReportPDF,
+      generateReportForPrinting: generateReportPDFForPrinting,
+      reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
         <FormattedMessage
-          id="reporting.modalContent.helpText"
+          id="reporting.printablePdfV2.helpText"
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
       generateReportButton: (
         <FormattedMessage
-          id="reporting.modalContent.generateButtonLabel"
+          id="reporting.printablePdfV2.generateButtonLabel"
           defaultMessage="Generate export"
         />
       ),
-      createReportingJob: generateReportingJobPNGPDF,
-      getJobParams: [
-        { id: 'pngV2', handler: getJobParams(apiClient, jobProviderOptions, 'pngV2') },
-        {
-          id: 'printablePdfV2',
-          handler: getJobParams(apiClient, jobProviderOptions, 'printablePdfV2'),
-        },
-      ],
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
-      toasts,
       theme,
+      renderLayoutOptionSwitch: true,
+    });
+
+    shareActions.push({
+      shareMenuItem: {
+        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
+          defaultMessage: 'PNG export',
+        }),
+        toolTipContent: licenseToolTipContent,
+        disabled: licenseDisabled || sharingData.reportingDisabled,
+        ['data-test-subj']: 'imageExports',
+      },
+      label: 'PNG' as const,
+      generateReport: generateReportPNG,
+      reportType: 'pngV2',
+      requiresSavedState,
+      helpText: (
+        <FormattedMessage
+          id="reporting.pngV2.helpText"
+          defaultMessage="Exports can take a few minutes to generate."
+        />
+      ),
+      generateReportButton: (
+        <FormattedMessage
+          id="reporting.pngV2.generateButtonLabel"
+          defaultMessage="Generate export"
+        />
+      ),
+      layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
     });
 
     return shareActions;

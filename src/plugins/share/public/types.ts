@@ -9,9 +9,8 @@
 import { ComponentType, ReactElement } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities, IToasts, ThemeServiceSetup } from '@kbn/core/public';
-import type { JobParamsProviderOptions } from '@kbn/reporting-public/share/share_context_menu';
-import { ReportingAPIClient } from '@kbn/reporting-public';
+import type { Capabilities, ThemeServiceSetup } from '@kbn/core/public';
+import { InjectedIntl } from '@kbn/i18n-react';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -53,6 +52,7 @@ export interface ShareContext {
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
+  intl: InjectedIntl;
 }
 
 /**
@@ -76,20 +76,20 @@ export interface ShareMenuItem {
   shareMenuItem?: ShareContextMenuPanelItem;
   // needed for Canvas
   panel?: EuiContextMenuPanelDescriptor;
-  reportType?: Array<string | JobParamsProviderOptions>;
-  tabType?: string;
+  label?: 'PDF' | 'CSV' | 'PNG';
+  reportType?: string;
   requresSavedState?: boolean;
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
   generateReportButton?: ReactElement;
-  getJobParams?: Array<{ id: string; handler: Function }>;
-  reportingAPIClient?: ReportingAPIClient;
-  jobProviderOptions?: JobParamsProviderOptions;
-  layoutOption?: 'print';
-  toasts?: IToasts;
+  generateReport?: Function;
+  generateReportForPrinting?: Function;
   theme?: ThemeServiceSetup;
   downloadCSVLens?: Function;
-  content?: ReactElement;
+  renderLayoutOptionSwitch?: boolean;
+  layoutOption?: 'print';
+  absoluteUrl?: string;
+  generateCopyUrl?: URL;
 }
 
 /**

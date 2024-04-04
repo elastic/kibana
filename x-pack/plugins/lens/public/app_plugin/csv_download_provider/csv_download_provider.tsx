@@ -11,6 +11,7 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FormatFactory } from '../../../common/types';
 import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -136,7 +137,19 @@ export const downloadCsvShareProvider = ({
               });
               onClose?.();
             },
-            reportType: ['csv'],
+            label: 'CSV',
+            reportType: 'csv',
+            helpText: (
+              <FormattedMessage
+                id="xpack.lens.share.helpText"
+                defaultMessage="Export a PDF, PNG, or CSV of this visualization."
+              />
+            ),
+            generateReportButton: (
+              <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Generate Export" />
+            ),
+            renderLayoutOptionSwitch: false,
+            getJobParams: undefined,
           },
         ]
       : [

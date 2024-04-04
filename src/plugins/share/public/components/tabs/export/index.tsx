@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
+import { ShareMenuItem } from '../../../types';
 import { ExportContent } from './export_content';
 import { useShareTabsContext } from '../../context';
 
@@ -21,58 +22,52 @@ const exportTabReducer: IExportTab['reducer'] = (state, action) => {
   }
 };
 
-function ExportTabContent() {
-  const {
-    shareMenuItems,
-    objectType,
-    isDirty,
-    objectId,
-    onClose,
-    i18n: i18nStart,
-    toasts,
-  } = useShareTabsContext()!;
+const ExportTabContent = () => {
+  const { shareMenuItems, objectType, isDirty, onClose, toasts } = useShareTabsContext()!;
+  const aggregateReportTypes: ShareMenuItem[] = [];
 
-  return shareMenuItems.map((shareMenuItem, index) => {
-    if (objectType === 'lens' && shareMenuItem.content) {
-      return shareMenuItem.content;
-    }
-
+  shareMenuItems.map((shareMenuItem) => {
     const {
-      getJobParams,
-      jobProviderOptions,
       helpText,
-      layoutOption,
-      reportingAPIClient,
       generateReportButton,
-      theme,
       downloadCSVLens,
       reportType,
+      renderLayoutOptionSwitch,
+      label,
+      generateReport,
+      generateReportForPrinting,
+      layoutOption,
+      absoluteUrl,
+      generateCopyUrl,
     } = shareMenuItem;
-    return (
-      // @ts-ignore props show undefined because of v1 share design modal needed the props to be optional for congruency with Canvas
-      <ExportContent
-        {...{
-          getJobParams,
-          helpText,
-          isDirty,
-          objectType,
-          objectId,
-          theme,
-          onClose,
-          reportingAPIClient,
-          generateReportButton,
-          jobProviderOptions,
-          layoutOption,
-          toasts,
-          downloadCSVLens,
-          i18nStart,
-          reportType,
-        }}
-        key={index}
-      />
-    );
+
+    aggregateReportTypes.push({
+      reportType,
+      label,
+      generateReport,
+      generateReportButton,
+      helpText,
+      downloadCSVLens,
+      renderLayoutOptionSwitch,
+      layoutOption,
+      generateReportForPrinting,
+      absoluteUrl,
+      generateCopyUrl,
+    });
   });
-}
+
+  return (
+    <ExportContent
+      {...{
+        objectType,
+        isDirty,
+        onClose,
+        toasts,
+        aggregateReportTypes,
+      }}
+    />
+  );
+};
 
 export const exportTab: IExportTab = {
   id: 'export',
