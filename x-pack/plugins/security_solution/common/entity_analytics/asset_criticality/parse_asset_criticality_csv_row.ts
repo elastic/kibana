@@ -8,6 +8,8 @@ import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
 import type { AssetCriticalityUpsert, CriticalityLevel } from './types';
 
+const MAX_COLUMN_CHARS = 1000;
+
 interface ValidRecord {
   valid: true;
   record: AssetCriticalityUpsert;
@@ -23,9 +25,13 @@ export const isErrorResult = (result: ReturnType): result is InvalidRecord => {
   return !result.valid;
 };
 
+const trimColumn = (column: string): string => {
+  return column.length > MAX_COLUMN_CHARS ? `${column.substring(0, MAX_COLUMN_CHARS)}...` : column;
+};
+
 export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   if (row.length !== 3) {
-    return { valid: false, error: `Missing row data, expected 3 columns got ${row.length}` };
+    return { valid: false, error: `Expected 3 columns got ${row.length}` };
   }
 
   const [entityType, idValue, criticalityLevel] = row;
@@ -38,16 +44,23 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return { valid: false, error: 'Missing ID' };
   }
 
+  if (idValue.length > MAX_COLUMN_CHARS) {
+    return {
+      valid: false,
+      error: `ID is too long, expected less than ${MAX_COLUMN_CHARS} characters got ${idValue.length}`,
+    };
+  }
+
   if (!criticalityLevel) {
     return { valid: false, error: 'Missing criticality level' };
   }
 
   if (!isValidCriticalityLevel(criticalityLevel)) {
-    return { valid: false, error: `Invalid criticality level ${criticalityLevel}` };
+    return { valid: false, error: `Invalid criticality level ${trimColumn(criticalityLevel)}` };
   }
 
   if (entityType !== 'host' && entityType !== 'user') {
-    return { valid: false, error: `Invalid entity type ${entityType}` };
+    return { valid: false, error: `Invalid entity type ${trimColumn(entityType)}` };
   }
 
   const idField = entityType === 'host' ? 'host.name' : 'user.name';
