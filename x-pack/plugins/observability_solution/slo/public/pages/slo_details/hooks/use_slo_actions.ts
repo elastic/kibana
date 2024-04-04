@@ -57,11 +57,12 @@ export const useSloActions = ({
     ? paths.sloDetails(
         slo.id,
         ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-        slo.remoteName
+        slo.remote?.remoteName
       )
     : '';
 
-  const remoteDeleteUrl = formatRemoteKibanaUrl(slo?.kibanaUrl ?? '', detailsUrl) + `&delete=true`;
+  const remoteDeleteUrl =
+    formatRemoteKibanaUrl(slo?.remote?.kibanaUrl ?? '', detailsUrl) + `&delete=true`;
 
   const editSloHref = () => {
     if (slo) {

@@ -31,6 +31,7 @@ export interface Props {
   isLoading: boolean;
 }
 
+// TODO Kevin: Refactor the need to check slo undefined. We can probably simplify everything here.
 export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl, capabilities },

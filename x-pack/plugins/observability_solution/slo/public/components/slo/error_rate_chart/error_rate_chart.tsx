@@ -6,7 +6,7 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { SLOResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
@@ -14,7 +14,7 @@ import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_second
 import { AlertAnnotation, TimeRange, useLensDefinition } from './use_lens_definition';
 
 interface Props {
-  slo: SLOResponse;
+  slo: SLOWithSummaryResponse;
   dataTimeRange: TimeRange;
   threshold: number;
   alertTimeRange?: TimeRange;

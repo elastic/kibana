@@ -9,14 +9,16 @@ import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '../../../common/locators/paths';
 
 export function createRemoteSloDetailsUrl(slo: SLOWithSummaryResponse, spaceId?: string) {
-  return slo.kibanaUrl
-    ? (
-        slo.kibanaUrl +
-        (spaceId ? `/s/${spaceId}` : '') +
-        paths.sloDetails(
-          slo.id,
-          ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-        )
-      ).replace(/\/\//g, '/')
-    : undefined;
+  if (!slo.remote) {
+    return undefined;
+  }
+
+  return (
+    slo.remote.kibanaUrl +
+    (spaceId ? `/s/${spaceId}` : '') +
+    paths.sloDetails(
+      slo.id,
+      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
+    )
+  ).replace(/\/\//g, '/');
 }

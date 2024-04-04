@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  SLOResponse,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -24,7 +23,7 @@ import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
   color?: EuiBadgeProps['color'];
-  slo: SLOWithSummaryResponse | SLOResponse;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloIndicatorTypeBadge({ slo, color }: Props) {

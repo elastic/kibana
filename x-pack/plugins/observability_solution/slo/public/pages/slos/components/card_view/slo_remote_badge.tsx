@@ -14,11 +14,14 @@ import { createRemoteSloDetailsUrl } from '../../../../utils/slo/create_remote_s
 
 export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
   const spaceId = useSpace();
+  if (!slo.remote) {
+    return null;
+  }
 
   const sloDetailsUrl = createRemoteSloDetailsUrl(slo, spaceId);
-  return slo.remoteName ? (
+  return (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={slo.kibanaUrl} title={slo.remoteName}>
+      <EuiToolTip content={slo.remote.kibanaUrl} title={slo.remote.remoteName}>
         <EuiBadge
           color="default"
           href={sloDetailsUrl!}
@@ -33,5 +36,5 @@ export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
         </EuiBadge>
       </EuiToolTip>
     </EuiFlexItem>
-  ) : null;
+  );
 }

@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTextColor } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 
 export interface BurnRateParams {
-  slo: SLOResponse;
+  slo: SLODefinitionResponse;
   threshold: number;
   burnRate?: number;
   isLoading?: boolean;
@@ -40,7 +40,7 @@ function getTitleFromStatus(status: Status): string {
 function getSubtitleFromStatus(
   status: Status,
   burnRate: number | undefined = 1,
-  slo: SLOResponse
+  slo: SLODefinitionResponse
 ): string {
   if (status === 'NO_DATA')
     return i18n.translate('xpack.slo.burnRate.noDataStatusSubtitle', {

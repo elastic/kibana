@@ -7,11 +7,11 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
 export interface SloResetConfirmationModalProps {
-  slo: SLOWithSummaryResponse | SLOResponse;
+  slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
   onConfirm: () => void;
 }

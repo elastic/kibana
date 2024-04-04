@@ -21,6 +21,7 @@ export function SloRulesBadge({ rules, onClick, isRemote }: Props) {
   if (isRemote) {
     return null;
   }
+
   return rules === undefined || rules.length > 0 ? null : (
     <EuiToolTip
       position="top"
