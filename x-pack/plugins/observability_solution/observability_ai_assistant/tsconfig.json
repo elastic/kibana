@@ -47,7 +47,8 @@
     "@kbn/apm-synthtrace",
     "@kbn/safer-lodash-set",
     "@kbn/cloud-plugin",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/triggers-actions-ui-plugin"
   ],
   "exclude": ["target/**/*"]
 }
