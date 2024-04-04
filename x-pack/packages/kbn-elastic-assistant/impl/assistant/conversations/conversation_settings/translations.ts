@@ -31,7 +31,7 @@ export const SETTINGS_ALL_TITLE = i18n.translate(
 export const SETTINGS_ALL_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.settingsAllDescription',
   {
-    defaultMessage: 'These settings apply to all conversations',
+    defaultMessage: 'These settings apply to all conversations.',
   }
 );
 

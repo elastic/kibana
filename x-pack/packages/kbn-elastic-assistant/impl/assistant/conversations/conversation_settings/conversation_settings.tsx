@@ -433,7 +433,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         <EuiSpacer size="xs" />
         <EuiText size={'s'}>{i18n.SETTINGS_ALL_DESCRIPTION}</EuiText>
         <EuiHorizontalRule margin={'s'} />
-        <EuiFormRow display="rowCompressed" label={i18n.STREAMING_TITLE}>
+        <EuiFormRow fullWidth display="rowCompressed" label={i18n.STREAMING_TITLE}>
           <EuiSwitch
             label={<EuiText size="xs">{i18n.STREAMING_HELP_TEXT_TITLE}</EuiText>}
             checked={assistantStreamingEnabled}
