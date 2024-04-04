@@ -15,7 +15,8 @@ import {
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+
+import { i18n } from '@kbn/i18n';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
@@ -62,22 +63,20 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
       fullWidth
       title={
         <h4>
-          <FormattedMessage
-            id={`xpack.fleet.settings.agentPolicyAdvanced.${nameToStartCase(
-              settingsConfig.name
-            )}Title`}
-            defaultMessage={settingsConfig.title}
-          />
+          {i18n.translate(
+            `xpack.fleet.settings.agentPolicyAdvanced.${nameToStartCase(settingsConfig.name)}Title`,
+            { defaultMessage: settingsConfig.title }
+          )}
         </h4>
       }
       description={
         <>
-          <FormattedMessage
-            id={`xpack.fleet.settings.agentPolicyAdvanced.${nameToStartCase(
+          {i18n.translate(
+            `xpack.fleet.settings.agentPolicyAdvanced.${nameToStartCase(
               settingsConfig.name
-            )}Description`}
-            defaultMessage={settingsConfig.description}
-          />
+            )}Description`,
+            { defaultMessage: settingsConfig.description }
+          )}
           .{' '}
           <EuiLink href={settingsConfig.learnMoreLink} external>
             Learn more.
