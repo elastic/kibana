@@ -7,9 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DEV_TOOLS_TITLE = i18n.translate(
-  'xpack.securitySolution.navLinks.devTools.title',
-  {
-    defaultMessage: 'Developer tools',
-  }
-);
+export const DEV_TOOLS_TITLE = i18n.translate('xpack.securitySolution.navLinks.devTools.title', {
+  defaultMessage: 'Developer tools',
+});

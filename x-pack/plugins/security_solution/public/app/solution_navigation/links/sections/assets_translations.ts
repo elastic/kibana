@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ASSETS_TITLE = i18n.translate(
-  'xpack.securitySolution.navLinks.assets.title',
-  {
-    defaultMessage: 'Assets',
-  }
-);
+export const ASSETS_TITLE = i18n.translate('xpack.securitySolution.navLinks.assets.title', {
+  defaultMessage: 'Assets',
+});
 
 export const CLOUD_DEFEND_TITLE = i18n.translate(
   'xpack.securitySolution.navLinks.assets.cloud_defend.title',
@@ -27,12 +24,9 @@ export const CLOUD_DEFEND_DESCRIPTION = i18n.translate(
   }
 );
 
-export const FLEET_TITLE = i18n.translate(
-  'xpack.securitySolution.navLinks.assets.fleet.title',
-  {
-    defaultMessage: 'Fleet',
-  }
-);
+export const FLEET_TITLE = i18n.translate('xpack.securitySolution.navLinks.assets.fleet.title', {
+  defaultMessage: 'Fleet',
+});
 export const FLEET_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.navLinks.assets.fleet.description',
   {

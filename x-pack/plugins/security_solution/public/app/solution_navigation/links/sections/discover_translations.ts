@@ -7,9 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DISCOVER_TITLE = i18n.translate(
-  'xpack.securitySolution.navLinks.discover.title',
-  {
-    defaultMessage: 'Discover',
-  }
-);
+export const DISCOVER_TITLE = i18n.translate('xpack.securitySolution.navLinks.discover.title', {
+  defaultMessage: 'Discover',
+});
