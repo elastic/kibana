@@ -32,6 +32,7 @@ import type {
   EmbeddableLogCategorizationInput,
   EmbeddableLogCategorizationOutput,
 } from '@kbn/aiops-log-pattern-analysis/embeddable';
+import useObservable from 'react-use/lib/useObservable';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { LogCategorizationEmbeddable } from '../../components/log_categorization/log_categorization_for_embeddable';
@@ -53,6 +54,25 @@ export interface EmbeddableLogCategorizationDeps {
 }
 
 export type IEmbeddableLogCategorization = typeof EmbeddableLogCategorization;
+
+const LogCategorizationEmbeddableWrapper = (props: {
+  embeddableContext: InstanceType<IEmbeddableLogCategorization>;
+}) => {
+  const { embeddableContext } = props;
+  const input$ = embeddableContext.getInput$();
+  const input = useObservable(input$);
+  if (input === undefined) {
+    return null;
+  }
+
+  return (
+    <LogCategorizationEmbeddable
+      onClose={() => embeddableContext.destroy()}
+      embeddingOrigin={'discover-embedded'}
+      input={input}
+    />
+  );
+};
 
 export class EmbeddableLogCategorization extends AbstractEmbeddable<
   EmbeddableLogCategorizationInput,
@@ -137,11 +157,7 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
             <DatePickerContextProvider {...datePickerDeps}>
               <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                 <Suspense fallback={null}>
-                  <LogCategorizationEmbeddable
-                    onClose={() => this.destroy()}
-                    embeddingOrigin={'discover-change-me'} // !!!!!!!!!!!!!!
-                    input={input}
-                  />
+                  <LogCategorizationEmbeddableWrapper embeddableContext={this} />
                 </Suspense>
               </StorageContextProvider>
             </DatePickerContextProvider>

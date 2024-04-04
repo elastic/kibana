@@ -8,11 +8,16 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { ErrorEmbeddable, IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import type {
-  EmbeddableLogCategorizationInput,
-  EmbeddableLogCategorizationOutput,
-  EmbeddableLogCategorizationProps,
+import {
+  ErrorEmbeddable,
+  type IEmbeddable,
+  isErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import {
+  type EmbeddableLogCategorizationInput,
+  type EmbeddableLogCategorizationOutput,
+  type EmbeddableLogCategorizationProps,
+  EMBEDDABLE_LOG_CATEGORIZATION_TYPE,
 } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -99,11 +104,11 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
         const factory = services.embeddable.getEmbeddableFactory<
           EmbeddableLogCategorizationInput,
           EmbeddableLogCategorizationOutput
-        >('aiopsLogCategorization');
+        >(EMBEDDABLE_LOG_CATEGORIZATION_TYPE);
         if (factory) {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
-            id: 'aiopsLogCategorization',
+            id: EMBEDDABLE_LOG_CATEGORIZATION_TYPE,
             dataView,
             savedSearch,
             query,
