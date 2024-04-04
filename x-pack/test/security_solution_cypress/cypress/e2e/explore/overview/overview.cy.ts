@@ -16,6 +16,8 @@ import { OVERVIEW_URL } from '../../../urls/navigation';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
+const mockTimeline = getTimeline();
+
 describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'overview' });
@@ -49,14 +51,14 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   // https://github.com/elastic/kibana/issues/173168
   describe('Favorite Timelines', { tags: ['@brokenInServerless'] }, () => {
     it('should appear on overview page', () => {
-      createTimeline(getTimeline())
+      createTimeline()
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
             visitWithTimeRange(OVERVIEW_URL);
             cy.get('[data-test-subj="overview-recent-timelines"]').should(
               'contain',
-              getTimeline().title
+              mockTimeline.title
             );
           });
         });

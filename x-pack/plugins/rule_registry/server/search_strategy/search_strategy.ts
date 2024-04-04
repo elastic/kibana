@@ -121,6 +121,7 @@ export const ruleRegistrySearchStrategyProvider = (
               ? { ids: request.query?.ids }
               : {
                   bool: {
+                    ...request.query?.bool,
                     filter,
                   },
                 }),
