@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-const { writeFile, readFile } = require('fs/promises');
+const { readdirSync, readFileSync } = require('fs');
+const { writeFile } = require('fs/promises');
 const join = require('path').join;
 
 const aliasTable = {
@@ -19,62 +20,6 @@ const aliasTable = {
   to_integer: ['to_int'],
 };
 const aliases = new Set(Object.values(aliasTable).flat());
-
-/**
- * Report the possible combinations of parameter types for a function
- *
- * For example, given
- *
- * [
- *  { name: 'a', type: ['number', 'string'], optional: true },
- *  { name: 'b', type: ['number', 'boolean'] }
- * ]
- *
- * this function will return
- * [
- *   [
- *    { name: 'a', type: 'number', optional: true },
- *    { name: 'b', type: 'number' }
- *  ],
- *  [
- *    { name: 'a', type: 'number', optional: true },
- *    { name: 'b', type: 'boolean' }
- *  ],
- *  [
- *    { name: 'a', type: 'string', optional: true },
- *    { name: 'b', type: 'number' }
- *  ],
- *  [
- *    { name: 'a', type: 'string', optional: true },
- *    { name: 'b', type: 'boolean' }
- *  ]
- * ]
- */
-function expandParams(params) {
-  let result = [[]];
-
-  params.forEach((param) => {
-    const temp = [];
-    result.forEach((res) => {
-      param.type.forEach((type) => {
-        temp.push([...res, { ...param, type }]);
-      });
-    });
-    result = temp;
-  });
-
-  return result;
-}
-
-const ensureArray = (value) => {
-  if (Array.isArray(value)) {
-    return value;
-  } else {
-    return value === null ? [] : [value];
-  }
-};
-
-const dedupe = (arr) => Array.from(new Set(arr));
 
 const elasticsearchToKibanaType = (elasticsearchType) => {
   const numberType = ['double', 'unsigned_long', 'long', 'integer'];
@@ -97,45 +42,23 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
  * @param {*} columnIndices — the indices of the columns in the "meta functions" table
  * @returns
  */
-function getFunctionDefinition(value, columnIndices) {
-  const kbnArgTypes = ensureArray(value[columnIndices.argTypes]).map((argType) =>
-    dedupe(argType.split('|').map(elasticsearchToKibanaType))
-  );
-
-  const getMinParams = () =>
-    value[columnIndices.variadic]
-      ? ensureArray(value[columnIndices.optionalArgs]).length
-      : undefined;
-
-  const getReturnType = () => {
-    const allReturnTypes = dedupe(
-      value[columnIndices.returnType].split('|').map(elasticsearchToKibanaType)
-    );
-
-    // our client-side parser doesn't currently support multiple return types
-    return allReturnTypes.length === 1 ? allReturnTypes[0] : 'any';
-  };
-
-  const unexpandedParams = ensureArray(value[columnIndices.argNames]).map((argName, i) => ({
-    name: argName,
-    type: kbnArgTypes[i],
-    optional: ensureArray(value[columnIndices.optionalArgs])[i],
-  }));
-
-  const expandedParams = expandParams(unexpandedParams);
-
-  const signatures = expandedParams.map((params) => ({
-    params,
-    returnType: getReturnType(),
-    minParams: getMinParams(),
-  }));
-
+function getFunctionDefinition(ESFunctionDefinition) {
   return {
-    type: value[columnIndices.isAggregation] ? 'agg' : 'eval',
-    name: value[columnIndices.name],
-    description: value[columnIndices.description],
-    alias: aliasTable[value[columnIndices.name]],
-    signatures,
+    type: ESFunctionDefinition.type,
+    name: ESFunctionDefinition.name,
+    description: ESFunctionDefinition.description,
+    alias: aliasTable[ESFunctionDefinition.name],
+    signatures: ESFunctionDefinition.signatures.map((signature) => ({
+      ...signature,
+      params: signature.params.map((param) => ({
+        ...param,
+        type: elasticsearchToKibanaType(param.type),
+        description: undefined,
+      })),
+      returnType: elasticsearchToKibanaType(signature.returnType),
+      // TODO compute minParams
+      variadic: undefined,
+    })),
   };
 }
 
@@ -170,27 +93,26 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [\n${functionDe
 }
 
 (async function main() {
-  const showFunctionsOutput = JSON.parse(
-    await readFile(join(__dirname, 'meta_functions_output.json'), 'utf8')
+  const ESFunctionDefinitionsDirectory = join(
+    __dirname,
+    '../../../../elasticsearch/docs/reference/esql/functions/kibana/definition'
   );
 
-  const columnIndices = showFunctionsOutput.columns.reduce((acc, curr, index) => {
-    acc[curr.name] = index;
-    return acc;
-  }, {});
+  // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
+  const ESFunctionDefinitions = readdirSync(ESFunctionDefinitionsDirectory).map((file) =>
+    JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
+  );
 
   const evalFunctionDefinitions = [];
-  const aggFunctionDefinitions = [];
-  for (const value of showFunctionsOutput.values) {
-    if (aliases.has(value[columnIndices.name])) {
+  // const aggFunctionDefinitions = [];
+  for (const ESDefinition of ESFunctionDefinitions) {
+    if (aliases.has(ESDefinition.name)) {
       continue;
     }
 
-    const functionDefinition = getFunctionDefinition(value, columnIndices);
+    const functionDefinition = getFunctionDefinition(ESDefinition);
 
-    functionDefinition.type === 'agg'
-      ? aggFunctionDefinitions.push(functionDefinition)
-      : evalFunctionDefinitions.push(functionDefinition);
+    evalFunctionDefinitions.push(functionDefinition);
   }
 
   await writeFile(
@@ -198,8 +120,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [\n${functionDe
     printGeneratedFunctionsFile(evalFunctionDefinitions)
   );
 
-  await writeFile(
-    join(__dirname, 'agg_functions_generated.ts'),
-    printGeneratedFunctionsFile(aggFunctionDefinitions)
-  );
+  // await writeFile(
+  //   join(__dirname, 'agg_functions_generated.ts'),
+  //   printGeneratedFunctionsFile(aggFunctionDefinitions)
+  // );
 })();

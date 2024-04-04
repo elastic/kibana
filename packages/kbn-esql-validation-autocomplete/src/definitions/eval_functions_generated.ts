@@ -28,6 +28,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
     ],
   },
   {
@@ -48,6 +78,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
     ],
   },
   {
@@ -55,10 +115,40 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'asin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asin', {
       defaultMessage:
-        'Returns the arcsine of the input numeric expression as an angle, expressed in radians.',
+        'Returns the arcsine of the input\nnumeric expression as an angle, expressed in radians.',
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -76,10 +166,40 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'atan',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.atan', {
       defaultMessage:
-        'Returns the arctangent of the input numeric expression as an angle, expressed in radians.',
+        'Returns the arctangent of the input\nnumeric expression as an angle, expressed in radians.',
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -97,10 +217,235 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'atan2',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.atan2', {
       defaultMessage:
-        'The angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane, expressed in radians.',
+        'The angle between the positive x-axis and the ray from the\norigin to the point (x , y) in the Cartesian plane, expressed in radians.',
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'y_coordinate',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'x_coordinate',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -123,7 +468,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'auto_bucket',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.auto_bucket', {
       defaultMessage:
-        'Creates human-friendly buckets and returns a datetime value for each row that corresponds to the resulting bucket the row falls into.',
+        'Creates human-friendly buckets and returns a datetime value\nfor each row that corresponds to the resulting bucket the row falls into.',
     }),
     alias: undefined,
     signatures: [
@@ -131,26 +476,11 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'number',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -159,23 +489,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'number',
             optional: false,
           },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'date',
-            optional: false,
-          },
         ],
-        returnType: 'any',
+        returnType: 'number',
       },
       {
         params: [
@@ -184,23 +499,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'number',
             optional: false,
           },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'string',
-            optional: false,
-          },
         ],
-        returnType: 'any',
+        returnType: 'number',
       },
       {
         params: [
@@ -209,373 +509,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'number',
             optional: false,
           },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'number',
-            optional: false,
-          },
         ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'date',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'date',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'date',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'date',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'date',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'date',
-            optional: false,
-          },
-          {
-            name: 'buckets',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'from',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'to',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
+        returnType: 'number',
       },
     ],
   },
@@ -584,139 +519,10 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     name: 'case',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.case', {
       defaultMessage:
-        'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to true.',
+        'Accepts pairs of conditions and values.\nThe function returns the value that belongs to the first condition that evaluates to true.',
     }),
     alias: undefined,
-    signatures: [
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'boolean',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'cartesian_point',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'date',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'geo_point',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'ip',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-      {
-        params: [
-          {
-            name: 'condition',
-            type: 'boolean',
-            optional: false,
-          },
-          {
-            name: 'trueValue',
-            type: 'version',
-            optional: false,
-          },
-        ],
-        returnType: 'any',
-        minParams: 2,
-      },
-    ],
+    signatures: [],
   },
   {
     type: 'eval',
@@ -736,32 +542,35 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-    ],
-  },
-  {
-    type: 'eval',
-    name: 'cidr_match',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cidr_match', {
-      defaultMessage:
-        'Returns true if the provided IP is contained in one of the provided CIDR blocks.',
-    }),
-    alias: undefined,
-    signatures: [
       {
         params: [
           {
-            name: 'ip',
-            type: 'ip',
-            optional: false,
-          },
-          {
-            name: 'blockX',
-            type: 'string',
+            name: 'number',
+            type: 'number',
             optional: false,
           },
         ],
-        returnType: 'boolean',
-        minParams: 2,
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
     ],
   },
@@ -782,19 +591,22 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'boolean',
       },
       {
         params: [
           {
             name: 'first',
-            type: 'string',
+            type: 'boolean',
             optional: false,
           },
+          {
+            name: 'rest',
+            type: 'boolean',
+            optional: true,
+          },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'boolean',
       },
       {
         params: [
@@ -804,8 +616,97 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
       },
     ],
   },
@@ -831,7 +732,21 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           },
         ],
         returnType: 'string',
-        minParams: 2,
+      },
+      {
+        params: [
+          {
+            name: 'string1',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'string2',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
       },
     ],
   },
@@ -839,14 +754,44 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     type: 'eval',
     name: 'cos',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cos', {
-      defaultMessage: 'Returns the trigonometric cosine of an angle',
+      defaultMessage: 'Returns the cosine of an angle.',
     }),
     alias: undefined,
     signatures: [
       {
         params: [
           {
-            name: 'number',
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
             type: 'number',
             optional: false,
           },
@@ -859,14 +804,44 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     type: 'eval',
     name: 'cosh',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cosh', {
-      defaultMessage: 'Returns the hyperbolic cosine of a number',
+      defaultMessage: 'Returns the hyperbolic cosine of an angle.',
     }),
     alias: undefined,
     signatures: [
       {
         params: [
           {
-            name: 'number',
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
             type: 'number',
             optional: false,
           },
@@ -893,12 +868,32 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           },
           {
             name: 'startTimestamp',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
           {
             name: 'endTimestamp',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'unit',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'startTimestamp',
+            type: 'datetime',
+            optional: false,
+          },
+          {
+            name: 'endTimestamp',
+            type: 'datetime',
             optional: false,
           },
         ],
@@ -923,7 +918,22 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           },
           {
             name: 'date',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'datePart',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
@@ -948,7 +958,22 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           },
           {
             name: 'date',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'dateFormat',
+            type: 'string',
+            optional: true,
+          },
+          {
+            name: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
@@ -977,32 +1002,37 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'date',
+        returnType: 'datetime',
       },
-    ],
-  },
-  {
-    type: 'eval',
-    name: 'date_trunc',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_trunc', {
-      defaultMessage: 'Rounds down a date to the closest interval.',
-    }),
-    alias: undefined,
-    signatures: [
       {
         params: [
           {
-            name: 'interval',
+            name: 'datePattern',
+            type: 'string',
+            optional: true,
+          },
+          {
+            name: 'dateString',
             type: 'string',
             optional: false,
           },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
           {
-            name: 'date',
-            type: 'date',
+            name: 'datePattern',
+            type: 'string',
+            optional: true,
+          },
+          {
+            name: 'dateString',
+            type: 'string',
             optional: false,
           },
         ],
-        returnType: 'date',
+        returnType: 'datetime',
       },
     ],
   },
@@ -1044,6 +1074,21 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'boolean',
       },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'suffix',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
     ],
   },
   {
@@ -1054,6 +1099,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -1078,12 +1153,11 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'first',
-            type: 'number',
+            type: 'boolean',
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'boolean',
       },
       {
         params: [
@@ -1092,9 +1166,68 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'boolean',
             optional: false,
           },
+          {
+            name: 'rest',
+            type: 'boolean',
+            optional: true,
+          },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'ip',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'ip',
+            optional: true,
+          },
+        ],
+        returnType: 'ip',
       },
       {
         params: [
@@ -1104,19 +1237,72 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'string',
       },
       {
         params: [
           {
             name: 'first',
-            type: 'ip',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
       },
       {
         params: [
@@ -1125,9 +1311,13 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'version',
             optional: false,
           },
+          {
+            name: 'rest',
+            type: 'version',
+            optional: true,
+          },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'version',
       },
     ],
   },
@@ -1143,12 +1333,11 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'first',
-            type: 'number',
+            type: 'boolean',
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'boolean',
       },
       {
         params: [
@@ -1157,9 +1346,68 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'boolean',
             optional: false,
           },
+          {
+            name: 'rest',
+            type: 'boolean',
+            optional: true,
+          },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'ip',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'ip',
+            optional: true,
+          },
+        ],
+        returnType: 'ip',
       },
       {
         params: [
@@ -1169,19 +1417,72 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'string',
       },
       {
         params: [
           {
             name: 'first',
-            type: 'ip',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
             optional: false,
           },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'first',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'rest',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
       },
       {
         params: [
@@ -1190,9 +1491,13 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             type: 'version',
             optional: false,
           },
+          {
+            name: 'rest',
+            type: 'version',
+            optional: true,
+          },
         ],
-        returnType: 'any',
-        minParams: 1,
+        returnType: 'version',
       },
     ],
   },
@@ -1205,6 +1510,21 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'length',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
       {
         params: [
           {
@@ -1240,6 +1560,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
     ],
   },
   {
@@ -1250,6 +1580,271 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: true,
+          },
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -1285,6 +1880,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
     ],
   },
   {
@@ -1295,6 +1920,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
       {
         params: [
           {
@@ -1326,6 +1961,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
     ],
   },
   {
@@ -1337,6 +2002,51 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'delim',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'delim',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'delim',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
       {
         params: [
           {
@@ -1397,7 +2107,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
@@ -1437,6 +2147,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -1448,6 +2168,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           {
             name: 'field',
             type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -1481,17 +2231,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -1501,7 +2251,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1511,7 +2271,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -1521,7 +2281,27 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
       },
       {
         params: [
@@ -1531,7 +2311,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -1552,7 +2332,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
@@ -1562,7 +2342,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'cartesian_point',
       },
       {
         params: [
@@ -1572,17 +2352,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'cartesian_shape',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -1592,7 +2372,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
       },
       {
         params: [
@@ -1602,7 +2382,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'geo_point',
       },
       {
         params: [
@@ -1612,7 +2392,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'geo_shape',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1622,7 +2412,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -1632,7 +2422,37 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1642,7 +2462,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -1663,7 +2483,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
@@ -1673,7 +2493,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'cartesian_point',
       },
       {
         params: [
@@ -1683,17 +2503,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'cartesian_shape',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -1703,7 +2523,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
       },
       {
         params: [
@@ -1713,7 +2533,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'geo_point',
       },
       {
         params: [
@@ -1723,7 +2543,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'geo_shape',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1733,7 +2563,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -1743,7 +2573,37 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1753,7 +2613,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -1774,17 +2634,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -1794,7 +2654,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1804,7 +2674,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -1814,7 +2684,37 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1824,7 +2724,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -1837,6 +2737,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -1866,17 +2796,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -1886,7 +2816,17 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1896,7 +2836,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -1906,7 +2846,37 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -1916,7 +2886,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -1947,7 +2917,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
@@ -1967,7 +2937,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'cartesian_point',
       },
       {
         params: [
@@ -1987,13 +2957,13 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'cartesian_shape',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
           {
@@ -2007,7 +2977,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -2027,7 +2997,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
       },
       {
         params: [
@@ -2047,7 +3017,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'geo_point',
       },
       {
         params: [
@@ -2067,7 +3037,27 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'geo_shape',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'start',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'end',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -2087,7 +3077,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -2107,7 +3097,47 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'start',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'end',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'start',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'end',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
       },
       {
         params: [
@@ -2127,7 +3157,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -2152,13 +3182,13 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'boolean',
       },
       {
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
           {
@@ -2167,7 +3197,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -2182,7 +3212,22 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
       },
       {
         params: [
@@ -2197,7 +3242,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'ip',
       },
       {
         params: [
@@ -2212,7 +3257,37 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
       },
       {
         params: [
@@ -2227,7 +3302,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: true,
           },
         ],
-        returnType: 'any',
+        returnType: 'version',
       },
     ],
   },
@@ -2240,6 +3315,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -2281,19 +3386,25 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-    ],
-  },
-  {
-    type: 'eval',
-    name: 'now',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.now', {
-      defaultMessage: 'Returns current date and time.',
-    }),
-    alias: undefined,
-    signatures: [
       {
-        params: [],
-        returnType: 'date',
+        params: [
+          {
+            name: 'string1',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'string2',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'delim',
+            type: 'string',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
       },
     ],
   },
@@ -2319,6 +3430,231 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'base',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'exponent',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -2365,6 +3701,146 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'string',
       },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'regex',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'newString',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
     ],
   },
   {
@@ -2376,6 +3852,21 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'length',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
       {
         params: [
           {
@@ -2436,20 +3927,60 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'string',
       },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
     ],
   },
   {
     type: 'eval',
     name: 'sin',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sin', {
-      defaultMessage: 'Returns the trigonometric sine of an angle',
+      defaultMessage: 'Returns ths Sine trigonometric function of an angle.',
     }),
     alias: undefined,
     signatures: [
       {
         params: [
           {
-            name: 'number',
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
             type: 'number',
             optional: false,
           },
@@ -2462,14 +3993,44 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     type: 'eval',
     name: 'sinh',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sinh', {
-      defaultMessage: 'Returns the hyperbolic sine of a number',
+      defaultMessage: 'Returns the hyperbolic sine of an angle.',
     }),
     alias: undefined,
     signatures: [
       {
         params: [
           {
-            name: 'number',
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
             type: 'number',
             optional: false,
           },
@@ -2486,6 +4047,21 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'delim',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
       {
         params: [
           {
@@ -2521,6 +4097,166 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'number',
       },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+    ],
+  },
+  {
+    type: 'eval',
+    name: 'st_contains',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_contains', {
+      defaultMessage: 'Returns whether the first geometry contains the second geometry.',
+    }),
+    alias: undefined,
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
     ],
   },
   {
@@ -2535,102 +4271,12 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'geomA',
-            type: 'geo_point',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_point',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_point',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'cartesian_point',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_point',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_shape',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_point',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'cartesian_shape',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'cartesian_point',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_point',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
             type: 'cartesian_point',
             optional: false,
           },
           {
             name: 'geomB',
             type: 'cartesian_point',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'cartesian_point',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_shape',
             optional: false,
           },
         ],
@@ -2646,81 +4292,6 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           {
             name: 'geomB',
             type: 'cartesian_shape',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_shape',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_point',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_shape',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'cartesian_point',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_shape',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_shape',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'geo_shape',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'cartesian_shape',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'geomA',
-            type: 'cartesian_shape',
-            optional: false,
-          },
-          {
-            name: 'geomB',
-            type: 'geo_point',
             optional: false,
           },
         ],
@@ -2750,7 +4321,122 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           },
           {
             name: 'geomB',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
             type: 'geo_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+    ],
+  },
+  {
+    type: 'eval',
+    name: 'st_within',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_within', {
+      defaultMessage: 'Returns whether the first geometry is within the second geometry.',
+    }),
+    alias: undefined,
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
             optional: false,
           },
         ],
@@ -2766,6 +4452,66 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           {
             name: 'geomB',
             type: 'cartesian_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+            optional: false,
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
             optional: false,
           },
         ],
@@ -2785,7 +4531,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'point',
-            type: 'geo_point',
+            type: 'cartesian_point',
             optional: false,
           },
         ],
@@ -2795,7 +4541,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'point',
-            type: 'cartesian_point',
+            type: 'geo_point',
             optional: false,
           },
         ],
@@ -2815,7 +4561,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'point',
-            type: 'geo_point',
+            type: 'cartesian_point',
             optional: false,
           },
         ],
@@ -2825,7 +4571,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'point',
-            type: 'cartesian_point',
+            type: 'geo_point',
             optional: false,
           },
         ],
@@ -2842,6 +4588,21 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'prefix',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
       {
         params: [
           {
@@ -2888,20 +4649,70 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'string',
       },
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+          {
+            name: 'start',
+            type: 'number',
+            optional: false,
+          },
+          {
+            name: 'length',
+            type: 'number',
+            optional: true,
+          },
+        ],
+        returnType: 'string',
+      },
     ],
   },
   {
     type: 'eval',
     name: 'tan',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tan', {
-      defaultMessage: 'Returns the trigonometric tangent of an angle',
+      defaultMessage: 'Returns the Tangent trigonometric function of an angle.',
     }),
     alias: undefined,
     signatures: [
       {
         params: [
           {
-            name: 'number',
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
             type: 'number',
             optional: false,
           },
@@ -2914,14 +4725,44 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     type: 'eval',
     name: 'tanh',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tanh', {
-      defaultMessage: 'Returns the hyperbolic tangent of a number',
+      defaultMessage: 'Returns the Tangent hyperbolic function of an angle.',
     }),
     alias: undefined,
     signatures: [
       {
         params: [
           {
-            name: 'number',
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'angle',
             type: 'number',
             optional: false,
           },
@@ -2957,6 +4798,46 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           {
             name: 'field',
             type: 'boolean',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -3013,6 +4894,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'cartesian_point',
       },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'cartesian_point',
+      },
     ],
   },
   {
@@ -3054,6 +4945,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'cartesian_shape',
       },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'cartesian_shape',
+      },
     ],
   },
   {
@@ -3068,21 +4969,11 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
-        returnType: 'date',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'date',
+        returnType: 'datetime',
       },
       {
         params: [
@@ -3092,7 +4983,57 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
             optional: false,
           },
         ],
-        returnType: 'date',
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'datetime',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'datetime',
       },
     ],
   },
@@ -3104,6 +5045,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -3138,7 +5109,47 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -3194,6 +5205,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'geo_point',
       },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'geo_point',
+      },
     ],
   },
   {
@@ -3234,6 +5255,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'geo_shape',
       },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'geo_shape',
+      },
     ],
   },
   {
@@ -3258,7 +5289,47 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -3314,6 +5385,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'ip',
       },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'ip',
+      },
     ],
   },
   {
@@ -3338,7 +5419,47 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -3384,6 +5505,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'string',
       },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
     ],
   },
   {
@@ -3394,6 +5525,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'number',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
       {
         params: [
           {
@@ -3448,7 +5609,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
             optional: false,
           },
         ],
@@ -3488,6 +5649,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -3499,6 +5670,36 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
           {
             name: 'field',
             type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -3539,7 +5740,47 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'date',
+            type: 'datetime',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'number',
+      },
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'number',
             optional: false,
           },
         ],
@@ -3585,6 +5826,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         ],
         returnType: 'string',
       },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
     ],
   },
   {
@@ -3595,6 +5846,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: ['to_ver'],
     signatures: [
+      {
+        params: [
+          {
+            name: 'field',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'version',
+      },
       {
         params: [
           {
@@ -3625,6 +5886,16 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
+      {
+        params: [
+          {
+            name: 'string',
+            type: 'string',
+            optional: false,
+          },
+        ],
+        returnType: 'string',
+      },
       {
         params: [
           {
