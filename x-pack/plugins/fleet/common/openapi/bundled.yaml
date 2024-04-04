@@ -4712,6 +4712,12 @@ components:
             settings cannot be overridden. The override option should be used
             only in unusual circumstances and not as a routine procedure.
           nullable: true
+        advanced_settings:
+          type: object
+          description: >-
+            Advanced settings stored in the agent policy, e.g.
+            agent_limits_go_max_procs
+          nullable: true
       required:
         - id
         - status
