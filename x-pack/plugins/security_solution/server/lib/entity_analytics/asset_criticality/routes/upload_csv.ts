@@ -8,19 +8,19 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
+import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../types';
 import { ASSET_CRITICALITY_CSV_UPLOAD_URL, APP_ID } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { transformCSVToUpsertRecords } from '../csv';
+import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 
 export const assetCriticalityCSVUploadRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   config: ConfigType
 ) => {
-  const { sizeLimitMb, batchSize } = config.entityAnalytics.assetCriticality.csvUpload;
-  const maxBytes = sizeLimitMb * 1024 * 1024;
+  const { batchSize } = config.entityAnalytics.assetCriticality.csvUpload;
   router.versioned
     .post({
       access: 'internal',
@@ -30,7 +30,7 @@ export const assetCriticalityCSVUploadRoute = (
         body: {
           output: 'stream',
           accepts: 'multipart/form-data',
-          maxBytes,
+          maxBytes: CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE,
         },
       },
     })
@@ -72,7 +72,6 @@ export const assetCriticalityCSVUploadRoute = (
           logger.debug(
             `Asset criticality CSV upload completed in ${end - start}ms ${JSON.stringify(stats)}`
           );
-
           return response.ok({ body: { errors, stats } });
         } catch (error) {
           logger.error(`Error during asset criticality csv upload: ${error}`);

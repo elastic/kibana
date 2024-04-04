@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import type { AssetCriticalityUpsert } from '../../../../../common/entity_analytics/asset_criticality/types';
+import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   parseAssetCriticalityCsvRow,
   isErrorResult,
-} from '../../../../../common/entity_analytics/asset_criticality';
+} from '../../../../common/entity_analytics/asset_criticality';
 
 class TransformCSVToUpsertRecords extends Transform {
   constructor() {

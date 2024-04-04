@@ -40,7 +40,6 @@ export const createMockConfig = (): ConfigType => {
       },
       assetCriticality: {
         csvUpload: {
-          sizeLimitMb: 10,
           batchSize: 1000,
         },
       },

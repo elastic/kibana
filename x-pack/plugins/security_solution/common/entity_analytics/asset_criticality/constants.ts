@@ -33,3 +33,8 @@ export const CriticalityModifiers: Record<CriticalityLevels, number> = {
   [CriticalityLevels.MEDIUM_IMPACT]: 1,
   [CriticalityLevels.LOW_IMPACT]: 0.5,
 };
+
+export const CRITICALITY_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
+export const CRITICALITY_CSV_SIZE_TOLERANCE_BYTES = 1024 * 50; // ~= 50kb
+export const CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE =
+  CRITICALITY_CSV_MAX_SIZE_BYTES + CRITICALITY_CSV_SIZE_TOLERANCE_BYTES;

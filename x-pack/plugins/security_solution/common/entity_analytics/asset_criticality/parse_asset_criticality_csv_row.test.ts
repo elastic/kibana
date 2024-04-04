@@ -98,4 +98,15 @@ describe('parseAssetCriticalityCsvRow', () => {
       },
     });
   });
+
+  it('should return the parsed row if criticality level is the wrong case', () => {
+    expect(parseAssetCriticalityCsvRow(['host', 'host-1', 'LOW_IMPACT'])).toEqual({
+      valid: true,
+      record: {
+        idField: 'host.name',
+        idValue: 'host-1',
+        criticalityLevel: 'low_impact',
+      },
+    });
+  });
 });

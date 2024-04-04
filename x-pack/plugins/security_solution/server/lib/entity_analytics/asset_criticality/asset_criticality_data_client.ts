@@ -8,7 +8,10 @@ import type { ESFilter } from '@kbn/es-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
+import type {
+  AssetCriticalityCsvUploadResponse,
+  AssetCriticalityUpsert,
+} from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
@@ -194,20 +197,17 @@ export class AssetCriticalityDataClient {
   }: {
     recordsStream: NodeJS.ReadableStream;
     batchSize: number;
-  }): Promise<{
-    errors: Array<{ message: string; index: number }>;
-    stats: {
-      updated: number;
-      created: number;
-      errors: number;
-      total: number;
-    };
-  }> => {
+  }): Promise<AssetCriticalityCsvUploadResponse> => {
     return new Promise((resolve, reject) => {
       let index = 0;
       let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
-      const errors: Array<{ index: number; message: string }> = [];
-      const stats = { updated: 0, created: 0, errors: 0, total: 0 };
+      const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
+      const stats: AssetCriticalityCsvUploadResponse['stats'] = {
+        updated: 0,
+        created: 0,
+        errors: 0,
+        total: 0,
+      };
       const batchPromises: Array<Promise<void>> = [];
 
       const flushBatch = async (
