@@ -42,3 +42,8 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: BUILD_AND_READ
+      schedules:
+        Daily 6 am UTC:
+          cronline: 0 5 * * *
+          message: Daily 6 am UTC
+          branch: main
