@@ -7,7 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form';
+import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT, SetupFormat } from './azure_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getArmTemplateUrlFromCspmPackage,
@@ -21,21 +21,19 @@ import {
 import { CLOUDBEAT_AZURE } from '../../../../common/constants';
 import { AzureCredentialsType } from '../../../../common/types_old';
 
-export type SetupFormat = 'arm_template' | 'manual';
-
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
   hasArmTemplateUrl: boolean
 ): SetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
   if (!credentialsType && hasArmTemplateUrl) {
-    return 'arm_template';
+    return AZURE_SETUP_FORMAT.ARM_TEMPLATE;
   }
-  if (credentialsType !== 'arm_template') {
-    return 'manual';
+  if (credentialsType !== AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE) {
+    return AZURE_SETUP_FORMAT.MANUAL;
   }
 
-  return 'arm_template';
+  return AZURE_SETUP_FORMAT.ARM_TEMPLATE;
 };
 
 const getAzureCredentialsType = (
@@ -82,7 +80,7 @@ const useUpdateAzureArmTemplate = ({
   useEffect(() => {
     const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
 
-    if (setupFormat === 'manual') {
+    if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
       if (!!azureArmTemplateUrl) {
         updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined);
       }
@@ -115,7 +113,7 @@ export const useAzureCredentialsForm = ({
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
-    getAzureCredentialsType(input) || AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE;
+    getAzureCredentialsType(input) || AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
 
   const options = getAzureCredentialsFormOptions();
 
@@ -129,7 +127,7 @@ export const useAzureCredentialsForm = ({
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    const isInvalid = setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && !hasArmTemplateUrl;
+    const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
     setIsValid(!isInvalid);
 
     onChange({
@@ -148,10 +146,10 @@ export const useAzureCredentialsForm = ({
     setupFormat,
   });
 
-  const defaultAzureManualCredentialType = 'managed_identity';
+  const defaultAzureManualCredentialType = AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
 
   const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
-    if (newSetupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE) {
+    if (newSetupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE) {
       fieldsSnapshot.current = Object.fromEntries(
         fields?.map((field) => [field.id, { value: field.value }])
       );
@@ -161,7 +159,7 @@ export const useAzureCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'azure.credentials.type': {
-            value: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+            value: AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
             type: 'text',
           },
           ...Object.fromEntries(fields?.map((field) => [field.id, { value: undefined }])),

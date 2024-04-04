@@ -1718,12 +1718,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.12.2":
-  version "8.12.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.12.2.tgz#7a241f739a509cc59faee85f79a4c9e9e5ba9128"
-  integrity sha512-04NvH3LIgcv1Uwguorfw2WwzC9Lhfsqs9f0L6uq6MrCw0lqe/HOQ6E8vJ6EkHAA15iEfbhtxOtenbZVVcE+mAQ==
+"@elastic/elasticsearch@^8.13.0":
+  version "8.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.13.0.tgz#625c6fba3caf944370c6859482fbd5cf3543aea8"
+  integrity sha512-OAYgzqArPqgDaIJ1yT0RX31YCgr1lleo53zL+36i23PFjHu08CA6Uq+BmBzEV05yEidl+ILPdeSfF3G8hPG/JQ==
   dependencies:
-    "@elastic/transport" "^8.4.1"
+    "@elastic/transport" "^8.4.0"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.5.1":
@@ -1898,7 +1898,7 @@
     undici "^5.21.2"
     yaml "^2.2.2"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.4.1":
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.4.0":
   version "8.4.1"
   resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.4.1.tgz#f98c5a5e2156bcb3f01170b4aca7e7de4d8b61b8"
   integrity sha512-/SXVuVnuU5b4dq8OFY4izG+dmGla185PcoqgK6+AJMpmOeY1QYVNbWtCwvSvoAANN5D/wV+EBU8+x7Vf9EphbA==
@@ -5802,6 +5802,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-notebooks@link:x-pack/plugins/search_notebooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-playground@link:x-pack/plugins/search_playground":
   version "0.0.0"
   uid ""
@@ -6210,6 +6214,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-tabbed-modal@link:packages/shared-ux/modal/tabbed":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
@@ -6223,6 +6231,10 @@
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
+  version "0.0.0"
+  uid ""
+
+"@kbn/solution-nav-analytics@link:packages/solution-nav/analytics":
   version "0.0.0"
   uid ""
 
@@ -31180,9 +31192,9 @@ webpack-dev-middleware@^3.7.3:
     webpack-log "^2.0.0"
 
 webpack-dev-middleware@^5.3.1:
-  version "5.3.3"
-  resolved "https://registry.yarnpkg.com/webpack-dev-middleware/-/webpack-dev-middleware-5.3.3.tgz#efae67c2793908e7311f1d9b06f2a08dcc97e51f"
-  integrity sha512-hj5CYrY0bZLB+eTO+x/j67Pkrquiy7kWepMHmUMoPsmcUaeEnQJqFzHJOyxgWlq746/wUuA64p9ta34Kyb01pA==
+  version "5.3.4"
+  resolved "https://registry.yarnpkg.com/webpack-dev-middleware/-/webpack-dev-middleware-5.3.4.tgz#eb7b39281cbce10e104eb2b8bf2b63fce49a3517"
+  integrity sha512-BVdTqhhs+0IfoeAf7EoH5WE+exCmqGerHfDM0IL096Px60Tq2Mn9MAbnaGUe6HiMa41KMCYF19gyzZmBcq/o4Q==
   dependencies:
     colorette "^2.0.10"
     memfs "^3.4.3"
