@@ -222,16 +222,12 @@ export function MachineLearningJobTableProvider(
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
-    public async withDetailsOpen<T>(
-      jobId: string,
-      block: () => Promise<T>,
-      ensureClosed: boolean = true
-    ): Promise<T> {
+    public async withDetailsOpen<T>(jobId: string, block: () => Promise<T>): Promise<T> {
       await this.ensureDetailsOpen(jobId);
       try {
         return await block();
       } finally {
-        if (ensureClosed) await this.ensureDetailsClosed(jobId);
+        await this.ensureDetailsClosed(jobId);
       }
     }
 
