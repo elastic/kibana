@@ -30,7 +30,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -141,7 +141,6 @@ export class DashboardContainer
 
   // performance monitoring
   private dashboardCreationStartTime?: number;
-  private savedObjectLoadTime?: number;
 
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
@@ -268,8 +267,6 @@ export class DashboardContainer
         value2: panelCount,
         key3: 'total_load_time',
         value3: totalDuration,
-        key4: 'saved_object_load_time',
-        value4: this.savedObjectLoadTime,
       });
     }
   }
