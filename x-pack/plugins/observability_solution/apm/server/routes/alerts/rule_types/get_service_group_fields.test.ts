@@ -6,7 +6,7 @@
  */
 
 import {
-  getServiceGroupFields,
+  getApmAlertSourceFields,
   getServiceGroupFieldsAgg,
   flattenSourceDoc,
 } from './get_service_group_fields';
@@ -18,6 +18,12 @@ const mockSourceObj = {
     language: {
       name: 'typescript',
     },
+  },
+  container: {
+    id: 'my-container',
+  },
+  host: {
+    name: 'my-host',
   },
   labels: {
     team: 'test',
@@ -38,10 +44,12 @@ const mockBucket = {
 
 describe('getSourceFields', () => {
   it('should return a flattened record of fields and values for a given bucket except for labels', () => {
-    const result = getServiceGroupFields(mockBucket);
+    const result = getApmAlertSourceFields(mockBucket);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
+        "container.id": "my-container",
+        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",
@@ -71,6 +79,8 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
+                "host.name",
+                "container.id",
               ],
             },
             "size": 1,
@@ -95,6 +105,8 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
+                "host.name",
+                "container.id",
               ],
             },
             "size": 1,
@@ -118,6 +130,8 @@ describe('flattenSourceDoc', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
+        "container.id": "my-container",
+        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",

@@ -45,6 +45,7 @@ interface IModalTabActionBtn<S> extends CommonProps {
   label: string;
   handler: (args: { state: S }) => void;
   isCopy?: boolean;
+  style?: (args: { state: S }) => boolean;
 }
 
 export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclaration<S> {
@@ -71,7 +72,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
 
   const {
     content: SelectedTabContent,
-    modalActionBtn: { handler, dataTestSubj, label },
+    modalActionBtn: { handler, dataTestSubj, label, style },
   } = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
@@ -119,6 +120,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton
+          isDisabled={style ? style({ state: selectedTabState }) : false}
           fill
           data-test-subj={dataTestSubj}
           data-share-url={state.url}

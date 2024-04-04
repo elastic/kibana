@@ -35,7 +35,7 @@ describe('TabbedModal', () => {
         }
       },
       content: ({ state, dispatch }) => {
-        const onChange = (e) => {
+        const onChange = (e: { target: { value: any } }) => {
           dispatch({ type: 'UPDATE_TEXT_VALUE', payload: e.target.value });
         };
 

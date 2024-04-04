@@ -13,7 +13,7 @@ import { useModalContext, ModalContextProvider } from '.';
 type ModalContextProviderProps = ComponentProps<typeof ModalContextProvider>;
 
 function createModalContextWrapper<T extends ComponentType>(props: ModalContextProviderProps) {
-  return function CreatedWrapper({ children }) {
+  return function CreatedWrapper({ children }: any) {
     return <ModalContextProvider {...props}>{children}</ModalContextProvider>;
   };
 }
@@ -36,7 +36,7 @@ describe('tabbed modal provider', () => {
 
     expect(result.current).toHaveProperty(
       'tabs',
-      ([] as ModalContextProviderProps['tabs']).concat(props.tabs).map((tab) => {
+      ([] as ModalContextProviderProps['tabs'])?.concat(props.tabs).map((tab) => {
         if (tab.initialState) {
           delete tab.initialState;
         }

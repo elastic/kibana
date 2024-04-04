@@ -34,6 +34,18 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: [],
     },
+    defaultSelectedTabId: {
+      control: {
+        type: 'array',
+      },
+      defaultValue: [],
+    },
+    onClose: {
+      control: {
+        type: 'array',
+      },
+      defaultValue: [],
+    },
   };
 
   serviceArguments = {};
