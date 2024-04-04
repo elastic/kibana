@@ -47,9 +47,7 @@ Note that we use tags in order to select which tests we want to execute:
 - `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless. 
 - `@serverlessQA` includes a test in the Serverless test suite for the Kibana release process of serverless. You need to explicitly add this tag to any test you want yo run in CI for the second quality gate.
 - `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
-- `@brokenInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that a test should run in Serverless, but currently is broken.
-- `@brokenInServerlessQA` excludes a test form the Serverless QA environment for both periodic pipeline and second quality gate. Indicates that a test should run on it, but currently is broken.
-- `@skipInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environemnt", "the test has been temporarily excluded, see the comment above why".
+- `@skipInServerless` excludes a test from the Serverless test suite and Serverless QA environment for both, periodic pipeline and second quality gate (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environment", "the test has been temporarily excluded, see the comment above why".
 
 Please, before opening a PR with a new test, make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 

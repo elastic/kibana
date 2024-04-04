@@ -30,7 +30,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();
 
-describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
+describe('timeline overview search', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     createTimeline(mockFavoritedTimeline)
