@@ -84,7 +84,13 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           }).map((command) => {
             if (command.name !== 'status') {
               // POC code
-              if (command.name === 'run') {
+              if (['run', 'get-file'].includes(command.name)) {
+                if (command.name === 'get-file') {
+                  command.helpHidden = false;
+                  command.helpDisabled = false;
+                  command.validate = undefined;
+                }
+
                 return command;
               }
 

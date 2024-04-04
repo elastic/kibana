@@ -52,6 +52,7 @@ const getResponseActionsSupportMap = ({
               })
             : actionName === 'isolate' ||
               actionName === 'unisolate' ||
+              actionName === 'get-file' ||
               actionName === 'kill-process',
       },
     },
@@ -119,7 +120,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
     },
     manual: {
       endpoint: true,
-      sentinel_one: false,
+      sentinel_one: true,
     },
   },
   'kill-process': {

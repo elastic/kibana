@@ -26,6 +26,24 @@ export const getSentinelOneListScriptsHandler = (
   const logger = endpointContext.logFactory.get('sentineloneListScripts');
 
   return async (context, request, response) => {
+    // QUICK TEST:
+    // Is ES updated to include correct privileges for kibana_system
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    logger.info(
+      JSON.stringify(
+        await esClient
+          .search({
+            index: 'logs-sentinel_one.activity-default',
+          })
+          .catch((e) => {
+            return {
+              error: `error while searching logs sentinelone activity index:\n ${e.message}`,
+            };
+          })
+      )
+    );
+    // END: QUICK TEST
+
     const actionsPluginClient = (await context.actions).getActionsClient();
     const connectorClient = new NormalizedExternalConnectorClient(
       SENTINELONE_CONNECTOR_ID,
