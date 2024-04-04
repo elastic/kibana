@@ -46,17 +46,17 @@ export const useSetInitialValue = async (params: SetInitialValueParams) => {
 
   const loadBufferFromRemote = async (url: string) => {
     // Normalize and encode the URL to avoid issues with spaces and other special characters.
-    const encodedUrl = new URL(url).toString();
-    if (/^https?:\/\//.test(encodedUrl)) {
-      if (/^https?:\/\/www.elastic.co\//.test(encodedUrl)) {
+    const encodedUrl = new URL(url);
+    if (encodedUrl.protocol === 'https:') {
+      if (encodedUrl.hostname === 'www.elastic.co') {
         const resp = await fetch(url);
         const data = await resp.text();
-        setValue(`${initialTextValue}\n${data}`);
+        setValue(`${initialTextValue}\n\n${data}`);
       } else {
         toasts.addWarning(
           i18n.translate('console.loadFromDataUnrecognizedUrlErrorMessage', {
             defaultMessage:
-              'Only URLs with the Elastic domain (elastic.co) can be loaded in Console.',
+              'Only URLs with the Elastic domain (www.elastic.co) can be loaded in Console.',
           })
         );
       }
