@@ -15,6 +15,7 @@ import {
 } from '../../api/conversations/use_bulk_actions_conversations';
 
 interface UseSettingsUpdater {
+  assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultAllow: string[];
@@ -32,6 +33,7 @@ interface UseSettingsUpdater {
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   saveSettings: () => Promise<boolean>;
 }
 
@@ -50,6 +52,8 @@ export const useSettingsUpdater = (
     setAllSystemPrompts,
     setDefaultAllow,
     setDefaultAllowReplacement,
+    assistantStreamingEnabled,
+    setAssistantStreamingEnabled,
     setKnowledgeBase,
     http,
     toasts,
@@ -73,6 +77,8 @@ export const useSettingsUpdater = (
   const [updatedDefaultAllow, setUpdatedDefaultAllow] = useState<string[]>(defaultAllow);
   const [updatedDefaultAllowReplacement, setUpdatedDefaultAllowReplacement] =
     useState<string[]>(defaultAllowReplacement);
+  const [updatedAssistantStreamingEnabled, setUpdatedAssistantStreamingEnabled] =
+    useState<boolean>(assistantStreamingEnabled);
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
@@ -85,12 +91,14 @@ export const useSettingsUpdater = (
     setConversationsSettingsBulkActions({});
     setUpdatedQuickPromptSettings(allQuickPrompts);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
+    setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
     setUpdatedSystemPromptSettings(allSystemPrompts);
     setUpdatedDefaultAllow(defaultAllow);
     setUpdatedDefaultAllowReplacement(defaultAllowReplacement);
   }, [
     allQuickPrompts,
     allSystemPrompts,
+    assistantStreamingEnabled,
     conversations,
     defaultAllow,
     defaultAllowReplacement,
@@ -126,6 +134,7 @@ export const useSettingsUpdater = (
           : {}),
       });
     }
+    setAssistantStreamingEnabled(updatedAssistantStreamingEnabled);
     setKnowledgeBase(updatedKnowledgeBaseSettings);
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
@@ -141,7 +150,9 @@ export const useSettingsUpdater = (
     toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
+    updatedAssistantStreamingEnabled,
     updatedKnowledgeBaseSettings,
+    setAssistantStreamingEnabled,
     setKnowledgeBase,
     setDefaultAllow,
     updatedDefaultAllow,
@@ -156,6 +167,7 @@ export const useSettingsUpdater = (
     defaultAllow: updatedDefaultAllow,
     defaultAllowReplacement: updatedDefaultAllowReplacement,
     knowledgeBase: updatedKnowledgeBaseSettings,
+    assistantStreamingEnabled: updatedAssistantStreamingEnabled,
     quickPromptSettings: updatedQuickPromptSettings,
     resetSettings,
     systemPromptSettings: updatedSystemPromptSettings,
@@ -163,6 +175,7 @@ export const useSettingsUpdater = (
     setUpdatedDefaultAllow,
     setUpdatedDefaultAllowReplacement,
     setUpdatedKnowledgeBaseSettings,
+    setUpdatedAssistantStreamingEnabled,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,
     setConversationSettings,

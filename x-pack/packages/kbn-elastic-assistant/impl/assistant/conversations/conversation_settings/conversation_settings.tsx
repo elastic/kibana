@@ -44,7 +44,7 @@ export interface ConversationSettingsProps {
   http: HttpSetup;
   onSelectedConversationChange: (conversation?: Conversation) => void;
   selectedConversation?: Conversation;
-  setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
+  setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
@@ -351,7 +351,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         setConversationsSettingsBulkActions,
       ]
     );
-    console.log('conversationSettings', { assistantStreamingEnabled });
     return (
       <>
         <EuiTitle size={'s'}>
@@ -427,16 +426,16 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               />
             </EuiFormRow>
           )}
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="s" />
         <EuiTitle size={'s'}>
           <h2>{i18n.SETTINGS_ALL_TITLE}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size={'s'}>{i18n.SETTINGS_ALL_DESCRIPTION}</EuiText>
         <EuiHorizontalRule margin={'s'} />
-        <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+        <EuiFormRow display="rowCompressed" label={i18n.STREAMING_TITLE}>
           <EuiSwitch
-            label={<EuiText size="xs">{i18n.STREAMING_TITLE}</EuiText>}
+            label={<EuiText size="xs">{i18n.STREAMING_HELP_TEXT_TITLE}</EuiText>}
             checked={assistantStreamingEnabled}
             onChange={(e) => setAssistantStreamingEnabled(e.target.checked)}
             compressed
