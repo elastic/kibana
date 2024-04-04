@@ -75,7 +75,13 @@ export interface InstallContext extends StateContext<StateNames> {
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
 }
-
+/*
+ * _stateMachineInstallPackage installs packages using the generic state machine in ./state_machine
+ * installStates is the data structure providing the state machine definition
+ * Usually the install process starts with `create_restart_installation` and continues based on nextState parameter in the definition
+ * The `onTransition` functions are the steps executed to go from one state to another, and all accept an `InstallContext` object as input parameter
+ * After each transition `updateLatestExecutedState` is executed, it updates the executed state in the SO
+ */
 export async function _stateMachineInstallPackage(
   context: InstallContext
 ): Promise<AssetReference[]> {
