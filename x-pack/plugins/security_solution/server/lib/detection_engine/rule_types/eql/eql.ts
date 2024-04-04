@@ -127,7 +127,7 @@ export const eqlExecutor = async ({
 
     if (events) {
       if (isAlertSuppressionActive) {
-        const createResult = await bulkCreateSuppressedAlertsInMemory({
+        await bulkCreateSuppressedAlertsInMemory({
           enrichedEvents: events,
           toReturn: result,
           wrapHits,
@@ -141,8 +141,6 @@ export const eqlExecutor = async ({
           alertTimestampOverride,
           alertWithSuppression,
         });
-        // TODO wafaa didn't have this; should we?
-        addToSearchAfterReturn({ current: result, next: createResult });
       } else {
         newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
       }

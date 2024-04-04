@@ -25,6 +25,7 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
+  waitForRuleSuccess,
 } from '../../../../../../../common/utils/security_solution';
 import {
   getEqlRuleForAlertTesting,
@@ -34,6 +35,7 @@ import {
   dataGeneratorFactory,
   patchRule,
   setAlertStatus,
+  fetchRule,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
@@ -1469,6 +1471,37 @@ export default ({ getService }: FtrProviderContext) => {
           });
           expect(previewAlerts.length).toEqual(100);
         });
+      });
+
+      it('adds to rule execution state', async () => {
+        const eventId = uuidv4();
+        await indexGeneratedSourceDocuments({
+          docsCount: 10,
+          seed: () => ({ id: eventId }),
+        });
+
+        const ruleParams: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getQuery(eventId),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { id } = await createRule(supertest, log, ruleParams);
+        await waitForRuleSuccess({ supertest, log, id });
+        const rule = await fetchRule(supertest, { id });
+
+        expect(
+          rule?.execution_summary?.last_execution?.metrics?.total_search_duration_ms
+        ).toBeGreaterThan(0);
       });
     });
 
