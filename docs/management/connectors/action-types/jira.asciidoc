@@ -59,6 +59,9 @@ Title:: A title for the issue, used for searching the contents of the knowledge 
 Description:: The details about the incident.
 Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
+Additional fields::
+An object that contains custom field names and values. These custom fields must comply with your Jira policies; they are not validated by the connector. For example, if a rule action does not include custom fields that are mandatory, the action might fail.
+
 
 [float]
 [[jira-connector-networking-configuration]]
