@@ -1477,7 +1477,11 @@ export default ({ getService }: FtrProviderContext) => {
         const eventId = uuidv4();
         await indexGeneratedSourceDocuments({
           docsCount: 10,
-          seed: () => ({ id: eventId }),
+          seed: (index, id, timestamp) => ({
+            id: eventId,
+            '@timestamp': timestamp,
+            agent: { name: 'group_me' },
+          }),
         });
 
         const ruleParams: EqlRuleCreateProps = {
@@ -1492,16 +1496,16 @@ export default ({ getService }: FtrProviderContext) => {
             missing_fields_strategy: 'suppress',
           },
           from: 'now-35m',
-          interval: '30m',
         };
 
         const { id } = await createRule(supertest, log, ruleParams);
         await waitForRuleSuccess({ supertest, log, id });
         const rule = await fetchRule(supertest, { id });
 
-        expect(
-          rule?.execution_summary?.last_execution?.metrics?.total_search_duration_ms
-        ).toBeGreaterThan(0);
+        const lastExecution = rule?.execution_summary?.last_execution!;
+        expect(lastExecution.status).toEqual('succeeded');
+        expect(lastExecution.metrics?.total_search_duration_ms).toBeGreaterThan(0);
+        // TODO suppressedAlertsCount is present on the rule result, but doesn't make it to the execution status
       });
     });
 
