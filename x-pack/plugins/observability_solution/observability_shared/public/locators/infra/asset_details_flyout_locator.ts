@@ -32,7 +32,7 @@ export interface AssetDetailsFlyoutLocatorParams extends SerializableRecord {
   };
 }
 
-export const ASSET_DETAILS_FLYOUT_LOCATOR_ID = 'ASSET_DETAILS_FLYOUT_LOCATOR';
+const ASSET_DETAILS_FLYOUT_LOCATOR_ID = 'ASSET_DETAILS_FLYOUT_LOCATOR';
 
 export class AssetDetailsFlyoutLocatorDefinition
   implements LocatorDefinition<AssetDetailsFlyoutLocatorParams>

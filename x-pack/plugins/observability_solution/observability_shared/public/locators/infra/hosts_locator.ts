@@ -36,7 +36,7 @@ export interface HostsLocatorParams extends SerializableRecord {
   };
 }
 
-export const HOSTS_LOCATOR_ID = 'HOSTS_LOCATOR';
+const HOSTS_LOCATOR_ID = 'HOSTS_LOCATOR';
 const DEFAULT_HOST_LIMIT = 100;
 
 export class HostsLocatorDefinition implements LocatorDefinition<HostsLocatorParams> {

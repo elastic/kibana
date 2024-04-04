@@ -30,7 +30,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
   };
 }
 
-export const ASSET_DETAILS_LOCATOR_ID = 'ASSET_DETAILS_LOCATOR';
+const ASSET_DETAILS_LOCATOR_ID = 'ASSET_DETAILS_LOCATOR';
 
 export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDetailsLocatorParams> {
   public readonly id = ASSET_DETAILS_LOCATOR_ID;
