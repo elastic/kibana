@@ -50,18 +50,17 @@ export const getHistoryItems = (sortDirection: 'desc' | 'asc'): QueryHistoryItem
 };
 
 const cachedQueries = new Map<string, QueryHistoryItem>();
-const localStorageQueries = getHistoryItems('desc');
-
-localStorageQueries.forEach((queryItem) => {
-  const trimmedQueryString = getKey(queryItem.queryString);
-  cachedQueries.set(trimmedQueryString, queryItem);
-});
 
 export const getCachedQueries = (): QueryHistoryItem[] => {
   return Array.from(cachedQueries, ([name, value]) => ({ ...value }));
 };
 
 export const addQueriesToCache = (item: QueryHistoryItem) => {
+  const queries = getHistoryItems('desc');
+  queries.forEach((queryItem) => {
+    const trimmedQueryString = getKey(queryItem.queryString);
+    cachedQueries.set(trimmedQueryString, queryItem);
+  });
   const trimmedQueryString = getKey(item.queryString);
 
   if (item.queryString) {
@@ -91,14 +90,26 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
     });
   }
   const queriesToStore = getCachedQueries();
-  if (queriesToStore.length === MAX_QUERIES_NUMBER) {
-    const sortedByDate = queriesToStore.sort((a, b) =>
+  const localStorageQueries = getHistoryItems('desc');
+  // if the user is working on multiple tabs
+  // the cachedQueries Map might not contain all
+  // the localStorage queries
+  const newQueries = localStorageQueries.filter(
+    (ls) => !queriesToStore.find((cachedQuery) => cachedQuery.queryString === ls.queryString)
+  );
+  let allQueries = [...queriesToStore, ...newQueries];
+
+  if (allQueries.length === MAX_QUERIES_NUMBER + 1) {
+    const sortedByDate = allQueries.sort((a, b) =>
       sortDates(b?.startDateMilliseconds, a?.startDateMilliseconds)
     );
 
     // delete the last element
-    const toBeDeletedQuery = sortedByDate[MAX_QUERIES_NUMBER - 1];
+    const toBeDeletedQuery = sortedByDate[MAX_QUERIES_NUMBER];
     cachedQueries.delete(toBeDeletedQuery.queryString);
+    allQueries = allQueries.filter((q) => {
+      return q.queryString !== toBeDeletedQuery.queryString;
+    });
   }
-  localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(queriesToStore));
+  localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(allQueries));
 };
