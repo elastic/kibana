@@ -33,7 +33,7 @@ export class NavigationServerPlugin
     core: CoreSetup<NavigationServerStartDependencies>,
     plugins: NavigationServerSetupDependencies
   ) {
-    if (!this.isServerless()) {
+    if (plugins.cloud?.isCloudEnabled && !this.isServerless()) {
       const config = this.initializerContext.config.get<NavigationConfig>();
 
       core.getStartServices().then(([coreStart, deps]) => {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NavigationServerSetup {}
@@ -13,9 +14,11 @@ export interface NavigationServerSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NavigationServerStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface NavigationServerSetupDependencies {}
+export interface NavigationServerSetupDependencies {
+  cloud?: CloudSetup;
+}
 
 export interface NavigationServerStartDependencies {
   cloudExperiments?: CloudExperimentsPluginStart;
+  cloud?: CloudStart;
 }
