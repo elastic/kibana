@@ -12,6 +12,7 @@ import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
+import { registerExecuteConnectorFunction } from './execute_connector';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],
@@ -116,6 +117,8 @@ export const registerFunctions: RegistrationCallback = async ({
       });
     }
     registerGetDatasetInfoFunction(registrationParameters);
+
+    registerExecuteConnectorFunction(registrationParameters);
 
     functions.registerContext({
       name: 'core',
