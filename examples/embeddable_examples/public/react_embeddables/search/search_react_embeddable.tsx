@@ -13,7 +13,7 @@ import {
   FetchContext,
   initializeTimeRange,
   onFetchContextChanged,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -103,8 +103,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       return {
         api,
         Component: () => {
-          const count = useStateFromPublishingSubject(count$);
-          const error = useStateFromPublishingSubject(error$);
+          const [count, error] = useBatchedPublishingSubjects(count$, error$);
 
           useEffect(() => {
             return () => {
