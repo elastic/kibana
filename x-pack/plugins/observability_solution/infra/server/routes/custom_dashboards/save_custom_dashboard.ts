@@ -39,22 +39,19 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const payload = {
-        ...request.body,
-      };
+      const { dashboardSavedObjectId } = request.body;
 
       const { assetType } = request.params;
 
       const customDashboards = await findCustomDashboard(assetType, savedObjectsClient);
 
       const dashboardExist = customDashboards.find(
-        (customDashboard) =>
-          customDashboard.dashboardSavedObjectId === payload.dashboardSavedObjectId
+        (customDashboard) => customDashboard.dashboardSavedObjectId === dashboardSavedObjectId
       );
 
       if (dashboardExist) {
         return response.badRequest({
-          body: `Dashboard with id ${payload.dashboardSavedObjectId} has already been linked to ${assetType}`,
+          body: `Dashboard with id ${dashboardSavedObjectId} has already been linked to ${assetType}`,
         });
       }
 
@@ -62,7 +59,7 @@ export function initSaveCustomDashboardRoute(framework: KibanaFramework) {
         INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
         {
           assetType,
-          ...payload,
+          ...request.body,
         }
       );
 
