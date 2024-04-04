@@ -13,14 +13,14 @@ import type { PluginName } from '@kbn/core-base-common';
 import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
-import type { StatusResponse } from '@kbn/core-status-common-internal';
-import {
-  type ServiceStatus,
-  type ServiceStatusLevel,
-  type CoreStatus,
-  ServiceStatusLevels,
-} from '@kbn/core-status-common';
+import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { StatusResponse } from '@kbn/core-status-common-internal';
 import { calculateLegacyStatus, type LegacyStatusInfo } from '../legacy_status';
+import {
+  statusResponse,
+  redactedStatusResponse,
+  type RedactedStatusHttpBody,
+} from './status_response_schemas';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
@@ -53,18 +53,12 @@ interface StatusHttpBody extends Omit<StatusResponse, 'status'> {
   status: StatusInfo | LegacyStatusInfo;
 }
 
-export interface RedactedStatusHttpBody {
-  status: {
-    overall: {
-      level: ServiceStatusLevel;
-    };
-  };
-}
-
 const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
   level: ServiceStatusLevels.unavailable,
   summary: 'Status not yet reported',
 };
+
+const responseSchema = schema.oneOf([redactedStatusResponse, statusResponse]);
 
 export const registerStatusRoute = ({
   router,
@@ -102,19 +96,29 @@ export const registerStatusRoute = ({
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
       },
       validate: {
-        query: schema.object(
-          {
-            v7format: schema.maybe(schema.boolean()),
-            v8format: schema.maybe(schema.boolean()),
-          },
-          {
-            validate: ({ v7format, v8format }) => {
-              if (typeof v7format === 'boolean' && typeof v8format === 'boolean') {
-                return `provide only one format option: v7format or v8format`;
-              }
+        request: {
+          query: schema.object(
+            {
+              v7format: schema.maybe(schema.boolean()),
+              v8format: schema.maybe(schema.boolean()),
             },
-          }
-        ),
+            {
+              validate: ({ v7format, v8format }) => {
+                if (typeof v7format === 'boolean' && typeof v8format === 'boolean') {
+                  return `provide only one format option: v7format or v8format`;
+                }
+              },
+            }
+          ),
+        },
+        response: {
+          200: {
+            body: responseSchema,
+          },
+          503: {
+            body: responseSchema,
+          },
+        },
       },
     },
     async (context, req, res) => {
@@ -217,7 +221,7 @@ const getRedactedStatusResponse = ({
   const body: RedactedStatusHttpBody = {
     status: {
       overall: {
-        level: coreOverall.level,
+        level: coreOverall.level.toString(),
       },
     },
   };
