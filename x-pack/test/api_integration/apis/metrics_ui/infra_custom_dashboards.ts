@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST endpoint for saving (creating or updating) custom dashboard', () => {
+    describe('POST endpoint for saving custom dashboard', () => {
       it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
           dashboardSavedObjectId: '123',
@@ -133,7 +133,79 @@ export default function ({ getService }: FtrProviderContext) {
           .send(payload)
           .expect(200);
 
-        expect(response.body).to.be.eql({ ...payload, assetType: 'host' });
+        expect(response.body).to.have.property('id');
+        expect(response.body).to.have.property('dashboardFilterAssetIdEnabled', true);
+        expect(response.body).to.have.property('assetType', 'host');
+        expect(response.body).to.have.property('dashboardSavedObjectId', '123');
+      });
+
+      it('returns 400 when the dashboard already exist and tries to create it again', async () => {
+        const payload: InfraSaveCustomDashboardsRequestPayload = {
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
+        };
+
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: true,
+        });
+        await kibanaServer.savedObjects.clean({
+          types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
+        });
+        await kibanaServer.savedObjects.create({
+          type: INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+          attributes: {
+            assetType: 'host',
+            dashboardSavedObjectId: '123',
+            dashboardFilterAssetIdEnabled: true,
+          },
+          overwrite: true,
+        });
+
+        const response = await supertest
+          .post(getCustomDashboardsUrl('host'))
+          .set('kbn-xsrf', 'xxx')
+          .send(payload)
+          .expect(400);
+
+        expect(response.body.error).to.be.eql('Bad Request');
+        expect(response.body.message).to.be.eql(
+          'Custom dashboard for host with id 123 already exist'
+        );
+      });
+    });
+
+    describe('PUT endpoint for updating custom dashboard', () => {
+      it('responds with an error if Custom Dashboards UI setting is not enabled', async () => {
+        const payload: InfraSaveCustomDashboardsRequestPayload = {
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
+        };
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: false,
+        });
+
+        await supertest
+          .put(getCustomDashboardsUrl('host', '123'))
+          .set('kbn-xsrf', 'xxx')
+          .send(payload)
+          .expect(403);
+      });
+
+      it('responds with an error when trying to update not existing dashboard', async () => {
+        const payload: InfraSaveCustomDashboardsRequestPayload = {
+          dashboardSavedObjectId: '123',
+          dashboardFilterAssetIdEnabled: true,
+        };
+
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: true,
+        });
+
+        await supertest
+          .put(getCustomDashboardsUrl('host', '000'))
+          .set('kbn-xsrf', 'xxx')
+          .send(payload)
+          .expect(404);
       });
 
       it('updates existing dashboard configuration for a given asset type', async () => {
@@ -165,16 +237,19 @@ export default function ({ getService }: FtrProviderContext) {
         const payload: InfraSaveCustomDashboardsRequestPayload = {
           dashboardSavedObjectId: '123',
           dashboardFilterAssetIdEnabled: false,
-          id: existingDashboardSavedObject.id,
         };
         const updateResponse = await supertest
-          .post(getCustomDashboardsUrl('host'))
+          .put(getCustomDashboardsUrl('host', existingDashboardSavedObject.id))
           .set('kbn-xsrf', 'xxx')
           .send(payload)
           .expect(200);
         const getResponse = await supertest.get(getCustomDashboardsUrl('host')).expect(200);
 
-        expect(updateResponse.body).to.be.eql({ ...payload, assetType: 'host' });
+        expect(updateResponse.body).to.be.eql({
+          ...payload,
+          assetType: 'host',
+          id: updateResponse.body.id,
+        });
 
         expect(getResponse.body).to.have.length(2);
         expect(getResponse.body[0]).to.have.property('dashboardSavedObjectId', '123');
