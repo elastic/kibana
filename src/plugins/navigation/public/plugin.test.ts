@@ -39,7 +39,12 @@ const setup = (
   {
     buildFlavor = 'traditional',
     userSettings = {},
-  }: { buildFlavor?: BuildFlavor; userSettings?: UserSettingsData } = {}
+    uiSettingsValues,
+  }: {
+    buildFlavor?: BuildFlavor;
+    userSettings?: UserSettingsData;
+    uiSettingsValues?: Record<string, any>;
+  } = {}
 ) => {
   const config = {
     solutionNavigation: {
@@ -51,6 +56,7 @@ const setup = (
   const initializerContext = coreMock.createPluginInitializerContext(config, { buildFlavor });
   const plugin = new NavigationPublicPlugin(initializerContext);
 
+  const setChromeStyle = jest.fn();
   const coreStart = coreMock.createStart();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cloud = cloudMock.createStart();
@@ -67,11 +73,17 @@ const setup = (
   security.userProfiles.userProfile$ = of({ userSettings });
 
   const getGlobalSetting$ = jest.fn();
+  if (uiSettingsValues) {
+    getGlobalSetting$.mockImplementation((settingId: string) =>
+      of(uiSettingsValues[settingId] ?? 'unknown')
+    );
+  }
   const settingsGlobalClient = {
     ...coreStart.settings.globalClient,
     get$: getGlobalSetting$,
   };
   coreStart.settings.globalClient = settingsGlobalClient;
+  coreStart.chrome.setChromeStyle = setChromeStyle;
 
   return {
     plugin,
@@ -80,8 +92,8 @@ const setup = (
     cloud,
     security,
     cloudExperiments,
-    getGlobalSetting$,
     config,
+    setChromeStyle,
   };
 };
 
@@ -109,19 +121,16 @@ describe('Navigation Plugin', () => {
     const featureOn = true;
 
     it('should add the default solution navs but **not** set the active nav', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, getGlobalSetting$ } =
-        setup({
-          featureOn,
-        });
-
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: false, // NOT enabled, so we should not set the active nav
       };
 
-      getGlobalSetting$.mockImplementation((settingId: string) => {
-        const value = uiSettingsValues[settingId];
-        return of(value);
-      });
+      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+        {
+          featureOn,
+        },
+        { uiSettingsValues }
+      );
 
       plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
 
@@ -136,17 +145,14 @@ describe('Navigation Plugin', () => {
     });
 
     it('should add the default solution navs **and** set the active nav', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, getGlobalSetting$ } =
-        setup({ featureOn, defaultSolution: 'security' });
-
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
       };
 
-      getGlobalSetting$.mockImplementation((settingId: string) => {
-        const value = uiSettingsValues[settingId] ?? 'unknown';
-        return of(value);
-      });
+      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+        { featureOn, defaultSolution: 'security' },
+        { uiSettingsValues }
+      );
 
       plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
       await new Promise((resolve) => setTimeout(resolve));
@@ -160,26 +166,16 @@ describe('Navigation Plugin', () => {
     });
 
     it('should add the opt in/out toggle in the user menu', async () => {
-      const {
-        plugin,
-        coreStart,
-        unifiedSearch,
-        cloud,
-        security,
-        cloudExperiments,
-        getGlobalSetting$,
-      } = setup({
-        featureOn,
-      });
-
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
       };
 
-      getGlobalSetting$.mockImplementation((settingId: string) => {
-        const value = uiSettingsValues[settingId] ?? 'unknown';
-        return of(value);
-      });
+      const { plugin, coreStart, unifiedSearch, cloud, security, cloudExperiments } = setup(
+        {
+          featureOn,
+        },
+        { uiSettingsValues }
+      );
 
       plugin.start(coreStart, { unifiedSearch, cloud, security, cloudExperiments });
       await new Promise((resolve) => setTimeout(resolve));
@@ -187,6 +183,68 @@ describe('Navigation Plugin', () => {
       expect(security.navControlService.addUserMenuLinks).toHaveBeenCalled();
       const [menuLink] = security.navControlService.addUserMenuLinks.mock.calls[0][0];
       expect((menuLink.content as any)?.type).toBe(SolutionNavUserProfileToggle);
+    });
+
+    describe('set Chrome style', () => {
+      it('should set the Chrome style to "classic" when the feature is not enabled', async () => {
+        const uiSettingsValues: Record<string, any> = {
+          [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
+        };
+
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+          { featureOn: false }, // feature not enabled
+          { uiSettingsValues }
+        );
+
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
+      });
+
+      it('should set the Chrome style to "classic" when the feature is enabled BUT globalSettings is disabled', async () => {
+        const uiSettingsValues: Record<string, any> = {
+          [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: false, // Global setting disabled
+        };
+
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+          { featureOn: true }, // feature enabled
+          { uiSettingsValues }
+        );
+
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
+      });
+
+      it('should NOT set the Chrome style when the feature is enabled, globalSettings is enabled BUT on serverless', async () => {
+        const uiSettingsValues: Record<string, any> = {
+          [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true, // Global setting enabled
+        };
+
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+          { featureOn: true }, // feature enabled
+          { uiSettingsValues, buildFlavor: 'serverless' }
+        );
+
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).not.toHaveBeenCalled();
+      });
+
+      it('should set the Chrome style to "project" when the feature is enabled', async () => {
+        const uiSettingsValues: Record<string, any> = {
+          [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
+        };
+
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+          { featureOn: true },
+          { uiSettingsValues }
+        );
+
+        plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('project');
+      });
     });
 
     describe('isSolutionNavEnabled$', () => {
@@ -210,18 +268,18 @@ describe('Navigation Plugin', () => {
 
         testCases.forEach(([uiSettingsValues, description, expected]) => {
           it(description, async () => {
-            const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, getGlobalSetting$ } =
-              setup(
-                {
-                  featureOn,
+            const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+              {
+                featureOn,
+              },
+              {
+                userSettings: {
+                  // user has not opted in or out
+                  solutionNavOptOut: undefined,
                 },
-                { userSettings: { solutionNavOptOut: undefined } } // user has not opted in or out
-              );
-
-            getGlobalSetting$.mockImplementation((settingId: string) => {
-              const value = uiSettingsValues[settingId] ?? 'unknown';
-              return of(value);
-            });
+                uiSettingsValues,
+              }
+            );
 
             const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
               unifiedSearch,
@@ -255,25 +313,18 @@ describe('Navigation Plugin', () => {
 
         testCases.forEach(([uiSettingsValues, description, expected]) => {
           it(description, async () => {
-            const {
-              plugin,
-              coreStart,
-              unifiedSearch,
-              cloud,
-              security,
-              cloudExperiments,
-              getGlobalSetting$,
-            } = setup(
+            const { plugin, coreStart, unifiedSearch, cloud, security, cloudExperiments } = setup(
               {
                 featureOn,
               },
-              { userSettings: { solutionNavOptOut: false } } // user has opted in
+              {
+                userSettings: {
+                  // user has opted in
+                  solutionNavOptOut: false,
+                },
+                uiSettingsValues,
+              }
             );
-
-            getGlobalSetting$.mockImplementation((settingId: string) => {
-              const value = uiSettingsValues[settingId] ?? 'unknown';
-              return of(value);
-            });
 
             const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
               security,
@@ -308,25 +359,12 @@ describe('Navigation Plugin', () => {
 
         testCases.forEach(([uiSettingsValues, description, expected]) => {
           it(description, async () => {
-            const {
-              plugin,
-              coreStart,
-              unifiedSearch,
-              cloud,
-              security,
-              cloudExperiments,
-              getGlobalSetting$,
-            } = setup(
+            const { plugin, coreStart, unifiedSearch, cloud, security, cloudExperiments } = setup(
               {
                 featureOn,
               },
-              { userSettings: { solutionNavOptOut: true } } // user has opted out
+              { userSettings: { solutionNavOptOut: true }, uiSettingsValues } // user has opted out
             );
-
-            getGlobalSetting$.mockImplementation((settingId: string) => {
-              const value = uiSettingsValues[settingId] ?? 'unknown';
-              return of(value);
-            });
 
             const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
               security,
@@ -342,16 +380,14 @@ describe('Navigation Plugin', () => {
       });
 
       it('on serverless should flag must be disabled', async () => {
-        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments, getGlobalSetting$ } =
-          setup({ featureOn }, { buildFlavor: 'serverless' });
         const uiSettingsValues: Record<string, any> = {
           [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true, // enabled, but we are on serverless
         };
 
-        getGlobalSetting$.mockImplementation((settingId: string) => {
-          const value = uiSettingsValues[settingId] ?? 'unknown';
-          return of(value);
-        });
+        const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+          { featureOn },
+          { buildFlavor: 'serverless', uiSettingsValues }
+        );
 
         const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
           unifiedSearch,

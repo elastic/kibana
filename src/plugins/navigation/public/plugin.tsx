@@ -163,14 +163,17 @@ export class NavigationPublicPlugin
       );
     }
 
+    this.isSolutionNavEnabled$
+      .pipe(takeUntil(this.stop$), distinctUntilChanged())
+      .subscribe((isSolutionNavEnabled) => {
+        if (isServerless) return; // Serverless already controls the chrome style
+
+        chrome.setChromeStyle(isSolutionNavEnabled ? 'project' : 'classic');
+      });
+
     // Initialize the solution navigation if it is enabled
     isFeatureEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
-      if (!isFeatureEnabled) {
-        if (!isServerless) {
-          chrome.setChromeStyle('classic');
-        }
-        return;
-      }
+      if (!isFeatureEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
       this.addDefaultSolutionNavigation({ chrome });
