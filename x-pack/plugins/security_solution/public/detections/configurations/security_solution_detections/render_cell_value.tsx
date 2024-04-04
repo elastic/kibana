@@ -50,7 +50,6 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
       linkValues,
       rowRenderers,
       isDetails,
-      isDraggable,
       isExpandable,
       isExpanded,
       colIndex,
@@ -135,7 +134,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
             eventId={eventId}
             header={myHeader}
             isDetails={isDetails}
-            isDraggable={isDraggable}
+            isDraggable={false}
             isExpandable={isExpandable}
             isExpanded={isExpanded}
             linkValues={linkValues ?? localLinkValues}
@@ -160,7 +159,6 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
       linkValues,
       rowRenderers,
       isDetails,
-      isDraggable,
       isExpandable,
       isExpanded,
       colIndex,

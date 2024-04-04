@@ -258,7 +258,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 
   const cellContext = useMemo(() => {
     return {
-      isDraggable: false,
       rowRenderers: defaultRowRenderers,
       isDetails: false,
       truncate: true,
