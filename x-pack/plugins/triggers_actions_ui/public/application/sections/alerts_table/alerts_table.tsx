@@ -136,21 +136,19 @@ const CustomGridBody = memo(
   }
 );
 
+// Here we force the error callout to be the same height as the cell content
+// so that the error detail gets hidden in the overflow area and only shown in
+// the cell popover
+const errorCalloutStyles = css`
+  height: 1lh;
+`;
+
 /**
  * An error callout that displays the error stack in a code block
  */
 const ViewError = ({ error }: { error: Error }) => (
   <>
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      // Here we force the error callout to be the same height as the cell content
-      // so that the error detail gets hidden in the overflow area and only shown in
-      // the cell popover
-      css={css`
-        height: 1lh;
-      `}
-    >
+    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
       <EuiFlexItem grow={false}>
         <EuiIcon type="error" color="danger" />
       </EuiFlexItem>
@@ -423,12 +421,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const renderCellValue = useCallback(
     () =>
-      props.alertsTableConfiguration?.getRenderCellValue
-        ? props.alertsTableConfiguration?.getRenderCellValue({
-            setFlyoutAlert: handleFlyoutAlert,
-            context: renderCellContext,
-          })
-        : basicRenderCellValue,
+      props.alertsTableConfiguration?.getRenderCellValue?.({
+        setFlyoutAlert: handleFlyoutAlert,
+        context: renderCellContext,
+      }) ?? basicRenderCellValue,
     [handleFlyoutAlert, props.alertsTableConfiguration, renderCellContext]
   )();
 
@@ -490,11 +486,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const renderCellPopover = useMemo(
     () =>
-      props.alertsTableConfiguration?.getRenderCellPopover
-        ? props.alertsTableConfiguration?.getRenderCellPopover({
-            context: renderCellContext,
-          })
-        : props.renderCellPopover,
+      props.alertsTableConfiguration?.getRenderCellPopover?.({
+        context: renderCellContext,
+      }) ?? props.renderCellPopover,
     [props.alertsTableConfiguration, props.renderCellPopover, renderCellContext]
   );
 

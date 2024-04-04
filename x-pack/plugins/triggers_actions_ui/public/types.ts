@@ -607,7 +607,7 @@ export type GetRenderCellValue<T = unknown> = ({
   context?: T;
 }) => (
   props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
-) => React.ReactNode | JSX.Element | null | string;
+) => React.ReactNode | JSX.Element;
 
 export type GetRenderCellPopover<T = unknown> = ({
   context,
@@ -615,7 +615,7 @@ export type GetRenderCellPopover<T = unknown> = ({
   context?: T;
 }) => (
   props: EuiDataGridCellPopoverElementProps & { alert: Alert }
-) => React.ReactNode | JSX.Element | null | string;
+) => React.ReactNode | JSX.Element;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
