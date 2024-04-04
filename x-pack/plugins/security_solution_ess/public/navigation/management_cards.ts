@@ -10,6 +10,7 @@ import {
   SecurityPageName,
   ExternalPageName,
 } from '@kbn/security-solution-navigation';
+import { combineLatestWith } from 'rxjs';
 import type { Services } from '../common/services';
 
 const SecurityManagementCards = new Map<string, CardNavExtensionDefinition['category']>([
@@ -18,31 +19,33 @@ const SecurityManagementCards = new Map<string, CardNavExtensionDefinition['cate
   [SecurityPageName.entityAnalyticsManagement, 'alerts'],
 ]);
 export const enableManagementCardsLanding = (services: Services) => {
-  const { securitySolution, management, application } = services;
+  const { securitySolution, management, application, navigation } = services;
 
-  securitySolution.getNavLinks$().subscribe((navLinks) => {
-    const cardNavDefinitions = navLinks.reduce<Record<string, CardNavExtensionDefinition>>(
-      (acc, navLink) => {
-        if (SecurityManagementCards.has(navLink.id)) {
-          const { appId, deepLinkId, path } = getNavigationPropsFromId(navLink.id);
+  securitySolution
+    .getNavLinks$()
+    .pipe(combineLatestWith(navigation.isSolutionNavEnabled$))
+    .subscribe(([navLinks, isSolutionNavEnabled]) => {
+      const cardNavDefinitions = navLinks.reduce<Record<string, CardNavExtensionDefinition>>(
+        (acc, navLink) => {
+          if (SecurityManagementCards.has(navLink.id)) {
+            const { appId, deepLinkId, path } = getNavigationPropsFromId(navLink.id);
+            acc[navLink.id] = {
+              category: SecurityManagementCards.get(navLink.id) ?? 'other',
+              title: navLink.title,
+              description: navLink.description ?? '',
+              icon: navLink.landingIcon ?? '',
+              href: application.getUrlForApp(appId, { deepLinkId, path }),
+              skipValidation: true,
+            };
+          }
+          return acc;
+        },
+        {}
+      );
 
-          acc[navLink.id] = {
-            category: SecurityManagementCards.get(navLink.id) ?? 'other',
-            title: navLink.title,
-            description: navLink.description ?? '',
-            icon: navLink.landingIcon ?? '',
-            href: application.getUrlForApp(appId, { deepLinkId, path }),
-            skipValidation: true,
-          };
-        }
-        return acc;
-      },
-      {}
-    );
-
-    management.setupCardsNavigation({
-      enabled: true,
-      extendCardNavDefinitions: cardNavDefinitions,
+      management.setupCardsNavigation({
+        enabled: isSolutionNavEnabled,
+        extendCardNavDefinitions: cardNavDefinitions,
+      });
     });
-  });
 };
