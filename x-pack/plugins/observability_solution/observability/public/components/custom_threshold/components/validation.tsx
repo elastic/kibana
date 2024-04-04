@@ -6,7 +6,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { getEsQueryConfig, Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
@@ -14,6 +14,7 @@ import { isEmpty } from 'lodash';
 import {
   Comparator,
   CustomMetricExpressionParams,
+  CustomThresholdSearchSourceFields,
 } from '../../../../common/custom_threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
@@ -24,7 +25,7 @@ export function validateCustomThreshold({
   uiSettings,
 }: {
   criteria: CustomMetricExpressionParams[];
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: CustomThresholdSearchSourceFields;
   uiSettings: IUiSettingsClient;
 }): ValidationResult {
   const validationResult = { errors: {} };
@@ -58,7 +59,7 @@ export function validateCustomThreshold({
     try {
       buildEsQuery(
         undefined,
-        [{ query: (searchConfiguration.query as Query).query, language: 'kuery' }],
+        [{ query: searchConfiguration.query.query, language: 'kuery' }],
         [],
         getEsQueryConfig(uiSettings)
       );

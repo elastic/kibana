@@ -72,6 +72,7 @@
     "@kbn/index-management-plugin",
     "@kbn/rison",
     "@kbn/core-application-browser",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

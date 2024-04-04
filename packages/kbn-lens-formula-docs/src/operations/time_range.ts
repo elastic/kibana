@@ -21,8 +21,11 @@ export const timeRange = buildContextVariableDocumentationDefinition({
     defaultMessage: `
 The specified time range, in milliseconds (ms).
 
-Example: How long is the current time range?
+Example: How long is the current time range in (ms)?
 \`time_range()\`
+
+Example: A static average per minute computed with the current time range:
+\`(sum(bytes) / time_range()) * 1000 * 60\`
 `,
   }),
 });

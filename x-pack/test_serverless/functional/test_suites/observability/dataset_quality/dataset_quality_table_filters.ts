@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const to = '2024-01-01T12:00:00.000Z';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178652
-  describe.skip('Dataset quality table filters', () => {
+  describe('Dataset quality table filters', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');

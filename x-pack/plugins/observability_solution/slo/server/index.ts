@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { configSchema } from '../common/config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
@@ -18,12 +18,10 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { PluginSetup, PluginStart } from './plugin';
 
-const configSchema = schema.object({
-  sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
-  enabled: schema.boolean({ defaultValue: true }),
-});
-
 export const config = {
   schema: configSchema,
+  exposeToBrowser: {
+    experimental: true,
+  },
 };
-export type SloConfig = TypeOf<typeof configSchema>;
+export type { SloConfig } from '../common/config';

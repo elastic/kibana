@@ -10,10 +10,11 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public';
 import moment, { type Moment } from 'moment';
-import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { IMPORT_STATUS, type Statuses } from '../import_progress';
 import { EventRateChart, type LineChartPoint } from './event_rate_chart';
 import { runDocCountSearch } from './doc_count_search';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
@@ -26,7 +27,9 @@ export const DocCountChart: FC<{
   dataStart: DataPublicPluginStart;
   importer: IImporter;
 }> = ({ statuses, dataStart, importer }) => {
-  const timeBuckets = useTimeBuckets();
+  const { services } = useDataVisualizerKibana();
+  const { uiSettings } = services;
+  const timeBuckets = useTimeBuckets(uiSettings);
   const index = useMemo(() => importer.getIndex(), [importer]);
   const timeField = useMemo(() => importer.getTimeField(), [importer]);
 

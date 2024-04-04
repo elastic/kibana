@@ -18,7 +18,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
-  getServiceGroupFields,
+  getApmAlertSourceFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
 
@@ -78,5 +78,5 @@ export async function getServiceGroupFieldsForAnomaly({
   if (!response.aggregations) {
     return {};
   }
-  return getServiceGroupFields(response.aggregations);
+  return getApmAlertSourceFields(response.aggregations);
 }

@@ -137,6 +137,10 @@ export class LegacyAlertsClient<
     return this.alertFactory?.get(id);
   }
 
+  public isTrackedAlert(id: string) {
+    return !!this.trackedAlerts.active[id];
+  }
+
   public processAlerts({
     notifyOnActionGroupChange,
     flappingSettings,

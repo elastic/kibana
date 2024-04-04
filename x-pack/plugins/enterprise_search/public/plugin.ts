@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -16,16 +18,22 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
+  AppDeepLink,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
@@ -40,7 +48,20 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
+import {
+  CreatIndexLocatorDefinition,
+  CreatIndexLocatorParams,
+} from '../common/locators/create_index_locator';
 import { ClientConfigType, InitialAppData } from '../common/types';
+
+import { ENGINES_PATH } from './applications/app_search/routes';
+import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+import {
+  CONNECTORS_PATH,
+  SEARCH_INDICES_PATH,
+  CRAWLERS_PATH,
+  PLAYGROUND_PATH,
+} from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
 
@@ -56,6 +77,7 @@ interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface PluginsStart {
@@ -64,9 +86,12 @@ export interface PluginsStart {
   console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  indexManagement: IndexManagementPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   ml: MlPluginStart;
+  searchConnectors: SearchConnectorsPluginStart;
+  searchPlayground: SearchPlaygroundPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
 }
@@ -74,6 +99,60 @@ export interface PluginsStart {
 export interface ESConfig {
   elasticsearch_host: string;
 }
+
+const contentLinks: AppDeepLink[] = [
+  {
+    id: 'connectors',
+    path: `/${CONNECTORS_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
+      defaultMessage: 'Connectors',
+    }),
+  },
+  {
+    id: 'searchIndices',
+    path: `/${SEARCH_INDICES_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
+      defaultMessage: 'Indices',
+    }),
+  },
+  {
+    id: 'webCrawlers',
+    path: `/${CRAWLERS_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
+      defaultMessage: 'Web crawlers',
+    }),
+  },
+  {
+    id: 'playground',
+    path: `/${PLAYGROUND_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
+      defaultMessage: 'Playground',
+    }),
+  },
+];
+
+const applicationsLinks: AppDeepLink[] = [
+  {
+    id: 'searchApplications',
+    path: `/${SEARCH_APPLICATIONS_PATH}`,
+    title: i18n.translate(
+      'xpack.enterpriseSearch.navigation.applicationsSearchApplicationsLinkLabel',
+      {
+        defaultMessage: 'Search Applications',
+      }
+    ),
+  },
+];
+
+const appSearchLinks: AppDeepLink[] = [
+  {
+    id: 'engines',
+    path: `/${ENGINES_PATH}`,
+    title: i18n.translate('xpack.enterpriseSearch.navigation.appSearchEnginesLinkLabel', {
+      defaultMessage: 'Engines',
+    }),
+  },
+];
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
@@ -118,9 +197,12 @@ export class EnterpriseSearchPlugin implements Plugin {
         : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
-    coreStart.chrome
-      .getChromeStyle$()
-      .subscribe((style) => (this.isSidebarEnabled = style === 'classic'));
+    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
+    this.isSidebarEnabled = chromeStyle === 'classic';
+
+    coreStart.chrome.getChromeStyle$().subscribe((style) => {
+      this.isSidebarEnabled = style === 'classic';
+    });
 
     return { core: coreStart, isSidebarEnabled: this.isSidebarEnabled, params, plugins };
   }
@@ -143,7 +225,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!config.ui?.enabled) {
       return;
     }
-    const { cloud } = plugins;
+    const { cloud, share } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -172,6 +254,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      deepLinks: contentLinks,
       euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
@@ -259,6 +342,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: APPLICATIONS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      deepLinks: applicationsLinks,
       euiIconType: APPLICATIONS_PLUGIN.LOGO,
       id: APPLICATIONS_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
@@ -320,10 +404,13 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
+    share.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+
     if (config.canDeployEntSearch) {
       core.application.register({
         appRoute: APP_SEARCH_PLUGIN.URL,
         category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        deepLinks: appSearchLinks,
         euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
         id: APP_SEARCH_PLUGIN.ID,
         mount: async (params: AppMountParameters) => {

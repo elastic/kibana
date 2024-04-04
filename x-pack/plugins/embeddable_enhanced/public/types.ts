@@ -6,16 +6,9 @@
  */
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
+import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
 
-export type EnhancedEmbeddable<E extends IEmbeddable = IEmbeddable> = E & {
-  enhancements: {
-    /**
-     * Default implementation of dynamic action manager for embeddables.
-     */
-    dynamicActions: DynamicActionManager;
-  };
-};
+export type EnhancedEmbeddable<E extends IEmbeddable = IEmbeddable> = E & HasDynamicActions;
 
 /**
  * @deprecated use `EmbeddableApiContext` from `@kbn/presentation-publishing`

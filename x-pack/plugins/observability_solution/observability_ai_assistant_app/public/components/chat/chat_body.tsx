@@ -90,6 +90,11 @@ const animClassName = css`
     ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
+const containerClassName = css`
+  min-width: 0;
+  max-height: 100%;
+`;
+
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
@@ -153,12 +158,6 @@ export function ChatBody({
       title = EMPTY_CONVERSATION_TITLE;
     }
   }
-
-  const containerClassName = css`
-    background: white;
-    min-width: 0;
-    max-height: 100%;
-  `;
 
   const headerContainerClassName = css`
     padding-right: ${showLinkToConversationsApp ? '32px' : '0'};

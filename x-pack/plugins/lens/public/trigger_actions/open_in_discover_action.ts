@@ -7,15 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
-
-interface Context {
-  embeddable: IEmbeddable;
-}
 
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
 
@@ -24,7 +20,7 @@ export const createOpenInDiscoverAction = (
   dataViews: Pick<DataViewsService, 'get'>,
   hasDiscoverAccess: boolean
 ) =>
-  createAction<Context>({
+  createAction<EmbeddableApiContext>({
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
     order: 19, // right after Inspect which is 20
@@ -33,7 +29,7 @@ export const createOpenInDiscoverAction = (
       i18n.translate('xpack.lens.app.exploreDataInDiscover', {
         defaultMessage: 'Explore data in Discover',
       }),
-    getHref: async (context: Context) => {
+    getHref: async (context: EmbeddableApiContext) => {
       const { getHref } = await getDiscoverHelpersAsync();
       return getHref({
         locator,
@@ -42,7 +38,7 @@ export const createOpenInDiscoverAction = (
         ...context,
       });
     },
-    isCompatible: async (context: Context) => {
+    isCompatible: async (context: EmbeddableApiContext) => {
       const { isCompatible } = await getDiscoverHelpersAsync();
       return isCompatible({
         hasDiscoverAccess,
@@ -51,7 +47,7 @@ export const createOpenInDiscoverAction = (
         embeddable: context.embeddable,
       });
     },
-    execute: async (context: Context) => {
+    execute: async (context: EmbeddableApiContext) => {
       const { execute } = await getDiscoverHelpersAsync();
       return execute({ ...context, locator, dataViews, hasDiscoverAccess });
     },

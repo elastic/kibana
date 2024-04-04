@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-code-coverage-main
+  description: 'Collects code coverage for unit and e2e tests, publishes results on Kibana stats cluster'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-code-coverage-main'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:appex-qa'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / code-coverage / main
+      description: 'Collects code coverage for unit and e2e tests, publishes results on Kibana stats cluster'
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#appex-qa-bots'
+        GITHUB_COMMIT_STATUS_CONTEXT: kibana-code-coverage-main
+        CODE_COVERAGE: '1'
+        FTR_CONFIGS_RETRY_COUNT: '0'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: false
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/code_coverage/daily.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
