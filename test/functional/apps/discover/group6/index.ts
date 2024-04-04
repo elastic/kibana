@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group1', function () {
+  describe('discover/group6', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -20,13 +20,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./_discover'));
-    loadTestFile(require.resolve('./_discover_accessibility'));
-    loadTestFile(require.resolve('./_discover_histogram_breakdown'));
-    loadTestFile(require.resolve('./_discover_histogram'));
-    loadTestFile(require.resolve('./_doc_accessibility'));
-    loadTestFile(require.resolve('./_errors'));
-    loadTestFile(require.resolve('./_date_nanos'));
-    loadTestFile(require.resolve('./_date_nanos_mixed'));
+    loadTestFile(require.resolve('./_sidebar'));
+    loadTestFile(require.resolve('./_sidebar_field_stats'));
+    loadTestFile(require.resolve('./_time_field_column'));
+    loadTestFile(require.resolve('./_unsaved_changes_badge'));
+    loadTestFile(require.resolve('./_view_mode_toggle'));
   });
 }

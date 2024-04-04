@@ -11,22 +11,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group1', function () {
+  describe('discover/group2/data_grid1', function () {
     before(async function () {
-      await browser.setWindowSize(1300, 800);
+      await browser.setWindowSize(1600, 1200);
     });
 
     after(async function unloadMakelogs() {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    loadTestFile(require.resolve('./_discover'));
-    loadTestFile(require.resolve('./_discover_accessibility'));
-    loadTestFile(require.resolve('./_discover_histogram_breakdown'));
-    loadTestFile(require.resolve('./_discover_histogram'));
-    loadTestFile(require.resolve('./_doc_accessibility'));
-    loadTestFile(require.resolve('./_errors'));
-    loadTestFile(require.resolve('./_date_nanos'));
-    loadTestFile(require.resolve('./_date_nanos_mixed'));
+    loadTestFile(require.resolve('./_data_grid'));
+    loadTestFile(require.resolve('./_data_grid_context'));
+    loadTestFile(require.resolve('./_data_grid_doc_navigation'));
+    loadTestFile(require.resolve('./_data_grid_doc_table'));
+    loadTestFile(require.resolve('./_data_grid_copy_to_clipboard'));
   });
 }
