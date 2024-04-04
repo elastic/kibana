@@ -9,42 +9,92 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
   EuiPageHeader,
   EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 
 export const AssetCriticalityUploadPage = () => {
   return (
     <>
       <EuiPageHeader
-        pageTitle={'Asset classification'} // TODO i18n
+        pageTitle={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.title"
+            defaultMessage="Asset classification"
+          />
+        }
       />
       <EuiHorizontalRule />
-
       <EuiSpacer size="l" />
-
       <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem grow={2}>
-          {'Quickly Assign Asset Criticality with CSV Upload'}
-          {
-            'Effortlessly import asset criticality from your asset management tools via CSV. This simple upload ensures data accuracy and reduces manual input errors.'
-          }
+        <EuiFlexItem grow={3}>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.subTitle"
+                defaultMessage="Quickly Assign Asset Criticality with CSV Upload"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.description"
+              defaultMessage="Effortlessly import asset criticality from your asset management tools via CSV. This simple upload ensures data accuracy and reduces manual input errors."
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
           <AssetCriticalityFileUploader />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={1}>
-          <EuiPanel hasBorder={true}>
-            {'icon'}
-            {'What is assets criticality?'}
-            {
-              'Categorizes assets based on their value and impact on business operations, guiding prioritization for protection and resource allocation.'
-            }
+        <EuiFlexItem grow={2}>
+          <EuiPanel hasBorder={true} paddingSize="l" grow={false}>
+            <EuiIcon type={'questionInCircle'} size={'xl'} />
+            <EuiSpacer size="m" />
+            <EuiTitle size="xxs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.title"
+                  defaultMessage="What is assets criticality?"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.description"
+                defaultMessage="Categorizes assets based on their value and impact on business operations, guiding prioritization for protection and resource allocation."
+              />
+            </EuiText>
             <EuiHorizontalRule />
-            {'Useful links'}
-            {'Asset classification documentation'}
+            <EuiTitle size="xxs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.usefulLinks"
+                  defaultMessage="Useful links"
+                />
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+
+            <EuiLink>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.documentationLink"
+                defaultMessage="Asset classification documentation"
+              />
+            </EuiLink>
+            <EuiText size="xs" color={'danger'}>
+              {/* // TODO fix link */}
+              {'broken link'}
+            </EuiText>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

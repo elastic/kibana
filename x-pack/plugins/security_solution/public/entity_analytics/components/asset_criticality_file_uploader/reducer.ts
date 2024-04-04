@@ -17,6 +17,7 @@ interface ReducerState {
 }
 
 type ReducerAction =
+  | { type: 'goToStep'; payload: { step: number } }
   | { type: 'loadingFile'; payload: File }
   | {
       type: 'fileValidated';
@@ -28,18 +29,41 @@ type ReducerAction =
 
 export const reducer = (state: ReducerState, action: ReducerAction): ReducerState => {
   switch (action.type) {
+    case 'goToStep':
+      if (action.payload.step > state.step) {
+        return state;
+      }
+
+      if (action.payload.step === 1) {
+        return {
+          ...action.payload,
+          isLoading: false,
+          step: 1,
+        };
+      }
+
+      if (action.payload.step === 2) {
+        return {
+          isLoading: false,
+          step: 2,
+        };
+      }
+
+      return state;
     case 'loadingFile':
       return {
         isLoading: true,
         file: action.payload,
         step: 1,
       };
+
     case 'fileValidated':
       return {
         isLoading: false,
         step: 2,
         ...action.payload,
       };
+
     case 'parserError':
       return {
         isLoading: false,

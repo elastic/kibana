@@ -5,8 +5,24 @@
  * 2.0.
  */
 
-import { EuiFilePicker, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFilePicker,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  SUPPORTED_FILE_EXTENSIONS,
+  SUPPORTED_FILE_TYPES,
+  VALID_CRITICALITY_LEVELS,
+} from '../constants';
 
 interface AssetCriticalityFilePickerStepProps {
   onFileChange: (fileList: FileList | null) => void;
@@ -14,27 +30,125 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
+const sampleCSVContent = `host-001,low_impact\nhost-029,medium_impact\nhost-002,extreme_impact`;
+
+const listStyle = css`
+  list-style-type: disc;
+  margin-bottom: ${euiThemeVars.euiSizeL};
+  margin-left: ${euiThemeVars.euiSizeL};
+  line-height: ${euiThemeVars.euiLineHeight};
+`;
+
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> = ({
   onFileChange,
   errorMessage,
   isLoading,
-}) => (
-  <>
-    {'Select a text file:'}
-    <EuiSpacer size="l" />
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiPanel color={'subdued'} paddingSize="l" grow={false} hasShadow={false}>
+        <EuiTitle size="xxs">
+          <h3>
+            <FormattedMessage
+              defaultMessage={'CSV File Format Requirements'}
+              id={
+                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.csvFileFormatRequirements'
+              }
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
 
-    <EuiFilePicker
-      fullWidth
-      // multiple
-      initialPromptText="content that appears in the dropzone if no file is attached"
-      onChange={onFileChange}
-      isInvalid={!!errorMessage}
-      isLoading={isLoading}
-    />
-    <br />
-    {errorMessage && <div>{errorMessage}</div>}
-    {/* {state.parserError && <div>{state.parserError.message}</div>}
-    {state.unsupportedFileTypeError && <div>{state.unsupportedFileTypeError}</div>}
-    {state.fileValidationError && <div>{state.fileValidationError}</div>} */}
-  </>
-);
+        <ul className={listStyle}>
+          <li>
+            <FormattedMessage
+              defaultMessage="Supported file formats: {formats}"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.acceptedFileFormats"
+              values={{
+                formats: SUPPORTED_FILE_EXTENSIONS.join(', '),
+              }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              defaultMessage={'You can upload file up tp 100MB'}
+              id={
+                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit'
+              }
+            />
+          </li>
+        </ul>
+
+        <EuiTitle size="xxs">
+          <h3>
+            <FormattedMessage
+              defaultMessage={'Required CSV Structure'}
+              id={
+                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.CSVStructureTitle'
+              }
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <ul className={listStyle}>
+          <li>
+            {
+              <FormattedMessage
+                defaultMessage={
+                  'Asset Identifier: Host.name or User.name. These ECS fields identify the host or user from ingested datasources'
+                }
+                id={
+                  'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription'
+                }
+              />
+            }
+          </li>
+          <li>
+            <FormattedMessage
+              defaultMessage="Asset Criticality label: Any of the following labels: {labels}"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
+              values={{
+                labels: <b>{VALID_CRITICALITY_LEVELS.join(', ')}</b>,
+              }}
+            />
+          </li>
+        </ul>
+
+        <EuiTitle size="xxs">
+          <h3>
+            <FormattedMessage
+              defaultMessage={'Example'}
+              id={'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.exampleTitle'}
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiCodeBlock
+          language="csv"
+          css={css`
+            background-color: ${euiTheme.colors.ghost};
+          `}
+          paddingSize="s"
+          lineNumbers
+          isCopyable
+        >
+          {sampleCSVContent}
+        </EuiCodeBlock>
+      </EuiPanel>
+
+      <EuiSpacer size="l" />
+      <EuiFilePicker
+        accept={SUPPORTED_FILE_TYPES.join(',')}
+        fullWidth
+        onChange={onFileChange}
+        isInvalid={!!errorMessage}
+        isLoading={isLoading}
+      />
+      <br />
+      {errorMessage && <div>{errorMessage}</div>}
+    </>
+  );
+};
