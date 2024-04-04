@@ -69,7 +69,6 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-execution-context-server-mocks",
-    "@kbn/content-management-utils"
   ],
   "exclude": [
     "target/**/*"
