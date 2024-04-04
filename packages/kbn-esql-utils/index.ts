@@ -14,5 +14,6 @@ export {
   removeDropCommandsFromESQLQuery,
   getIndexForESQLQuery,
   getInitialESQLQuery,
+  getESQLWithSafeLimit,
   TextBasedLanguages,
 } from './src';

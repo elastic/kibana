@@ -129,7 +129,9 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
+    aria-modal="true"
     class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
+    role="alertdialog"
     tabindex="0"
   >
     <button
@@ -388,7 +390,9 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
+    aria-modal="true"
     class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
+    role="alertdialog"
     tabindex="0"
   >
     <button
@@ -1470,7 +1474,9 @@ exports[`ModalService openModal() renders a modal to the DOM 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
+    aria-modal="true"
     class="euiModal emotion-euiModal-defaultMaxWidth"
+    role="dialog"
     tabindex="0"
   >
     <button

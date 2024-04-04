@@ -11,15 +11,18 @@
 
 import { find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
-import { Subject, Subscription, forkJoin } from 'rxjs';
-import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-
+import {
+  Subject,
+  Subscription,
+  forkJoin,
+  map,
+  debounceTime,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
-
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { context } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiCallOut,
@@ -34,6 +37,11 @@ import {
   EuiBadge,
   EuiTextColor,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
+import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
@@ -61,8 +69,6 @@ import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
-
-import { getBoundsRoundedToInterval } from '../util/time_buckets';
 
 import {
   APP_STATE_ACTION,

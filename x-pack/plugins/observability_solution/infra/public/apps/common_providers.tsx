@@ -9,7 +9,6 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -28,18 +27,9 @@ export const CommonInfraProviders: React.FC<{
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
-}> = ({
-  children,
-  triggersActionsUI,
-  observabilityAIAssistant: { service: observabilityAIAssistantService },
-  setHeaderActionMenu,
-  appName,
-  storage,
-  theme$,
-}) => {
+}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const darkMode = useIsDarkMode();
 
   return (

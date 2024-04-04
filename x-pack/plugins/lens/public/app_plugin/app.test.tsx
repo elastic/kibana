@@ -332,12 +332,11 @@ describe('Lens App', () => {
         props,
         services,
         preloadedState: {
-          isLinkedToOriginatingApp: true,
+          isLinkedToOriginatingApp: false,
         },
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
         {
           text: 'Visualize Library',
           href: '/testbasepath/app/visualize#/',
@@ -347,7 +346,12 @@ describe('Lens App', () => {
       ]);
 
       await act(async () => {
-        instance.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        instance.setProps({
+          initialInput: { savedObjectId: breadcrumbDocSavedObjectId },
+          preloadedState: {
+            isLinkedToOriginatingApp: true,
+          },
+        });
 
         lensStore.dispatch(
           setState({
@@ -357,7 +361,6 @@ describe('Lens App', () => {
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
         {
           text: 'Visualize Library',
           href: '/testbasepath/app/visualize#/',
@@ -562,6 +565,10 @@ describe('Lens App', () => {
             : undefined,
         };
 
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
+
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
@@ -589,6 +596,7 @@ describe('Lens App', () => {
           props,
           preloadedState: {
             isSaveable: true,
+            isLinkedToOriginatingApp: true,
             ...preloadedState,
           },
         });
@@ -653,7 +661,6 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServicesForApp();
-        services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
         props.incomingState = {
           originatingApp: 'ultraDashboard',
           valueInput: {
@@ -817,14 +824,22 @@ describe('Lens App', () => {
         const mockedConsoleDir = jest.spyOn(console, 'dir'); // mocked console.dir to avoid messages in the console when running tests
         mockedConsoleDir.mockImplementation(() => {});
 
+        const props = makeDefaultProps();
+
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
+
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
-        const { instance, props } = await mountWith({
+        const { instance } = await mountWith({
+          props,
           services,
           preloadedState: {
             isSaveable: true,
+            isLinkedToOriginatingApp: true,
           },
         });
 
@@ -892,15 +907,19 @@ describe('Lens App', () => {
       });
 
       it('checks for duplicate title before saving', async () => {
+        const props = makeDefaultProps();
+        props.incomingState = { originatingApp: 'coolContainer' };
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
         const { instance } = await mountWith({
+          props,
           services,
           preloadedState: {
             isSaveable: true,
             persistedDoc: { savedObjectId: '123' } as unknown as Document,
+            isLinkedToOriginatingApp: true,
           },
         });
         await act(async () => {
@@ -926,7 +945,12 @@ describe('Lens App', () => {
       });
 
       it('does not show the copy button on first save', async () => {
-        const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
+        const props = makeDefaultProps();
+        props.incomingState = { originatingApp: 'coolContainer' };
+        const { instance } = await mountWith({
+          props,
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+        });
         await act(async () => getButton(instance).run(instance.getDOMNode()));
         instance.update();
         expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
