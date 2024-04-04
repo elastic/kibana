@@ -128,6 +128,7 @@ function getFunctionDefinition(ESFunctionDefinition) {
       // TODO compute minParams
       variadic: undefined,
     })),
+    examples: ESFunctionDefinition.examples,
   };
 
   if (functionEnrichments[ret.name]) {
@@ -157,6 +158,7 @@ function printGeneratedFunctionsFile(functionDefinitions) {
     supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
     supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
     validate: ${functionDefinition.validate || 'undefined'},
+    // examples: ${JSON.stringify(functionDefinition.examples || [])},
 }`;
   };
 

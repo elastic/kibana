@@ -67,6 +67,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW number = -1.0 \n| EVAL abs_number = ABS(number)","FROM employees\n| KEEP first_name, last_name, height\n| EVAL abs_height = ABS(0.0 - height)"],
   },
   {
     type: 'eval',
@@ -120,6 +121,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=.9\n| EVAL acos=ACOS(a)"],
   },
   {
     type: 'eval',
@@ -174,6 +176,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=.9\n| EVAL asin=ASIN(a)"],
   },
   {
     type: 'eval',
@@ -228,6 +231,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=12.9\n| EVAL atan=ATAN(a)"],
   },
   {
     type: 'eval',
@@ -482,6 +486,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)"],
   },
   {
     type: 'eval',
@@ -536,6 +541,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -549,6 +555,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -602,6 +609,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8\n| EVAL a=CEIL(a)"],
   },
   {
     type: 'eval',
@@ -741,6 +749,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=null, b=\"b\"\n| EVAL COALESCE(a, b)"],
   },
   {
     type: 'eval',
@@ -784,6 +793,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -837,6 +847,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8 \n| EVAL cos=COS(a)"],
   },
   {
     type: 'eval',
@@ -890,6 +901,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8 \n| EVAL cosh=COSH(a)"],
   },
   {
     type: 'eval',
@@ -944,6 +956,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -987,6 +1000,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1030,6 +1044,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1088,6 +1103,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1105,6 +1121,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1149,6 +1166,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1202,6 +1220,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1385,6 +1404,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1568,6 +1588,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1612,6 +1633,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["FROM employees\n| KEEP last_name\n| EVAL left = LEFT(last_name, 3)\n| SORT last_name ASC\n| LIMIT 5"],
   },
   {
     type: 'eval',
@@ -1645,6 +1667,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -1961,6 +1984,7 @@ export const functionDefinitions: FunctionDefinition[] = [
       }
       return messages;
     },
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2037,6 +2061,7 @@ export const functionDefinitions: FunctionDefinition[] = [
       }
       return messages;
     },
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2070,6 +2095,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2124,6 +2150,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2198,6 +2225,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2352,6 +2380,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2455,6 +2484,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2609,6 +2639,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2763,6 +2794,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2877,6 +2909,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -2931,6 +2964,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3045,6 +3079,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3319,6 +3354,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3467,6 +3503,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3521,6 +3558,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3575,6 +3613,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3592,6 +3631,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -3845,6 +3885,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4019,6 +4060,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4063,6 +4105,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4091,6 +4134,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4124,6 +4168,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4177,6 +4222,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8 \n| EVAL sin=SIN(a)"],
   },
   {
     type: 'eval',
@@ -4230,6 +4276,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8 \n| EVAL sinh=SINH(a)"],
   },
   {
     type: 'eval',
@@ -4273,6 +4320,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4326,6 +4374,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4459,6 +4508,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["FROM airport_city_boundaries\n| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE(\"POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))\"))\n| KEEP abbrev, airport, region, city, city_location"],
   },
   {
     type: 'eval',
@@ -4592,6 +4642,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["FROM airports\n| WHERE ST_INTERSECTS(location, TO_GEOSHAPE(\"POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))\"))"],
   },
   {
     type: 'eval',
@@ -4725,6 +4776,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["FROM airport_city_boundaries\n| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE(\"POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))\"))\n| KEEP abbrev, airport, region, city, city_location"],
   },
   {
     type: 'eval',
@@ -4758,6 +4810,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4791,6 +4844,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4835,6 +4889,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4889,6 +4944,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -4942,6 +4998,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8 \n| EVAL tan=TAN(a)"],
   },
   {
     type: 'eval',
@@ -4995,6 +5052,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: ["ROW a=1.8 \n| EVAL tanh=TANH(a)"],
   },
   {
     type: 'eval',
@@ -5012,6 +5070,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5095,6 +5154,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5139,6 +5199,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5193,6 +5254,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5276,6 +5338,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5329,6 +5392,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5422,6 +5486,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5465,6 +5530,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5518,6 +5584,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5611,6 +5678,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5654,6 +5722,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5747,6 +5816,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5780,6 +5850,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5833,6 +5904,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -5986,6 +6058,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -6080,6 +6153,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -6113,6 +6187,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -6156,6 +6231,7 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
   {
     type: 'eval',
@@ -6189,5 +6265,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,
+    // examples: [],
   },
 ];
