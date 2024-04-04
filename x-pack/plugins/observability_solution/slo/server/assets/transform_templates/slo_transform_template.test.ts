@@ -14,7 +14,7 @@ describe('slo transform template', () => {
   const description = 'irrelevant';
   const destination = {
     pipeline: '.slo-observability.sli.pipeline-v3',
-    index: '.slo-observability.sli-v3',
+    index: '.slo-observability.sli-v3.1',
   };
   const source = {
     index: ['my-index*', 'my-other-index*'],
@@ -143,7 +143,7 @@ describe('slo transform template', () => {
       },
       defer_validation: true,
       _meta: {
-        version: 3,
+        version: 3.1,
         managed: true,
         managed_by: 'observability',
       },
@@ -247,7 +247,7 @@ describe('slo transform template', () => {
       },
       defer_validation: true,
       _meta: {
-        version: 3,
+        version: 3.1,
         managed: true,
         managed_by: 'observability',
       },

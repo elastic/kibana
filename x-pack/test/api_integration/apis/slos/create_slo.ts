@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.sli-v3',
+              index: '.slo-observability.sli-v3.1',
               pipeline: '.slo-observability.sli.pipeline-v3',
             },
             frequency: '1m',
@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Rolled-up SLI data for SLO: Test SLO for api integration [id: ${id}, revision: 1]`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.1, managed: true, managed_by: 'observability' },
           },
         ],
       });
@@ -275,7 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Summarise the rollup data of SLO: Test SLO for api integration [id: ${id}, revision: 1].`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.1, managed: true, managed_by: 'observability' },
           },
         ],
       });
