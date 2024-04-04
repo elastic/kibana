@@ -125,7 +125,7 @@ export const NonTrivialExample = (params: TabbedModalStorybookParams) => {
     content: ({ state, dispatch }) => {
       const { checkboxIdToSelectedMap } = state;
 
-      const onChange = (optionId) => {
+      const onChange = (optionId: string) => {
         const newCheckboxIdToSelectedMap = {
           ...checkboxIdToSelectedMap,
           ...{

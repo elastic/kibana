@@ -13,7 +13,7 @@ import { useModalContext, ModalContextProvider } from '.';
 type ModalContextProviderProps = ComponentProps<typeof ModalContextProvider>;
 
 function createModalContextWrapper<T extends ComponentType>(props: ModalContextProviderProps) {
-  return function CreatedWrapper({ children }) {
+  return function CreatedWrapper({ children }: any) {
     return <ModalContextProvider {...props}>{children}</ModalContextProvider>;
   };
 }
