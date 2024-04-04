@@ -20,7 +20,8 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
           !doc["rule.benchmark.posture_type"].empty;
         def orchestratorIdAvailable = doc.containsKey("orchestrator.cluster.id") &&
           !doc["orchestrator.cluster.id"].empty;
-        def cloudAccountIdAvailable = doc.containsKey("cloud.account.id") && !doc["cloud.account.id"].empty;
+        def cloudAccountIdAvailable = doc.containsKey("cloud.account.id") && !doc["cloud.account.id"].empty &&
+          doc["cloud.account.id"].value != "";
         if (!postureTypeAvailable) {
           def identifier = orchestratorIdAvailable ?
             doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
@@ -29,7 +30,9 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
           def policy_template_type = doc["rule.benchmark.posture_type"].value;
 
           if (policy_template_type == "cspm") {
-            if (cloudAccountIdAvailable && doc["cloud.account.id"].value != "") {
+            // Checking for emptiness due to backwards compatibility with 8.13
+            // where cloud.account.id was not available and no field was eligible for asset identifier
+            if (cloudAccountIdAvailable) {
               emit(doc["cloud.account.id"].value);
             } else {
               return;
