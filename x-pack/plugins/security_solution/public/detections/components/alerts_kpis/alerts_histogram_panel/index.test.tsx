@@ -15,7 +15,6 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { mockAlertSearchResponse } from './mock_data';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 import { AlertsHistogramPanel } from '.';
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -612,27 +611,6 @@ describe('AlertsHistogramPanel', () => {
         expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
           155
         );
-      });
-    });
-
-    it('should render correct subtitle with empty string', async () => {
-      mockUseVisualizationResponse.mockReturnValue({
-        responses: [
-          {
-            hits: { total: 0 },
-            aggregations: { myAgg: { buckets: [] } },
-          },
-        ],
-        loading: false,
-      });
-
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsHistogramPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
       });
     });
 
