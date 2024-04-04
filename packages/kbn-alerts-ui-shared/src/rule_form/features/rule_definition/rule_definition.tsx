@@ -31,7 +31,7 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { useRuleFormSelector, useRuleFormDispatch } from '../../hooks';
+import { useRuleFormSelector, useRuleFormDispatch, useValidationContext } from '../../hooks';
 import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../../types';
 import { setParam, replaceParams, useSelectAreAdvancedOptionsSet } from './slice';
 import { RuleScheduleField } from './rule_schedule_field';
@@ -61,6 +61,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
 }) => {
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
+  const ruleParamsErrors = useValidationContext().ruleDefinition.errors.params;
   const dispatch = useRuleFormDispatch();
 
   const { euiTheme } = useEuiTheme();
@@ -78,7 +79,6 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
 
   const RuleParamsExpressionComponent = ruleTypeModel.ruleParamsExpression ?? null;
 
-  const { errors } = ruleTypeModel.validate(ruleParams);
   const docsUrl = useMemo(
     () =>
       typeof ruleTypeModel.documentationUrl === 'function'
@@ -134,7 +134,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
             ruleInterval={'1m'}
             ruleThrottle={''}
             alertNotifyWhen={'onActionGroupChange'}
-            errors={errors}
+            errors={ruleParamsErrors}
             setRuleParams={(key, value) => dispatch(setParam([key, value]))}
             setRuleProperty={(_, value) => {
               /* setRuleProperty is only ever used to replace all params */
@@ -179,7 +179,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
           }
         >
           <EuiFormRow fullWidth>
-            <RuleScheduleField errors={{}} />
+            <RuleScheduleField />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         {shouldShowConsumerSelect && (

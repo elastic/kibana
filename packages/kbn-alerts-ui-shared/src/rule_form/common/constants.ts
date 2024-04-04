@@ -22,3 +22,9 @@ export const DEFAULT_VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 ];
 
 export const INTEGER_REGEX = /^[1-9][0-9]*$/;
+
+export enum ValidationStatus {
+  COMPLETE,
+  INCOMPLETE,
+  INVALID,
+}

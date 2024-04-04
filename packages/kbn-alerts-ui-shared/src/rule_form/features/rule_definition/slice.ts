@@ -23,7 +23,9 @@ import { DEFAULT_VALID_CONSUMERS } from '../../common/constants';
 const initialState: {
   id: string;
   params: Record<string, unknown>;
-  interval: string;
+  schedule: {
+    interval: string;
+  };
   consumer: RuleCreationValidConsumer | null;
   alertDelay?: {
     active: number;
@@ -31,7 +33,7 @@ const initialState: {
 } = {
   id: '',
   params: {},
-  interval: '1m',
+  schedule: { interval: '1m' },
   consumer: 'alerts',
   alertDelay: undefined,
 };
@@ -46,11 +48,11 @@ export const ruleDefinitionSlice = createSlice({
     replaceParams(state, { payload }: PayloadAction<Record<string, unknown>>) {
       state.params = payload;
     },
-    setIntervalNumber(state, { payload }: PayloadAction<number | ''>) {
-      state.interval = `${payload}${getDurationUnitValue(state.interval)}`;
+    setIntervalNumber(state, { payload }: PayloadAction<number | string>) {
+      state.schedule.interval = `${payload}${getDurationUnitValue(state.schedule.interval)}`;
     },
     setIntervalUnit(state, { payload }: PayloadAction<string>) {
-      state.interval = `${getDurationNumberInItsUnit(state.interval)}${payload}`;
+      state.schedule.interval = `${getDurationNumberInItsUnit(state.schedule.interval)}${payload}`;
     },
     setAlertDelay(state, { payload }: PayloadAction<number | undefined>) {
       if (payload) {
@@ -104,9 +106,11 @@ export const {
 } = ruleDefinitionSlice.actions;
 
 export const useSelectIntervalNumber = () =>
-  useRuleFormSelector((state) => getDurationNumberInItsUnit(state.ruleDefinition.interval));
+  useRuleFormSelector((state) =>
+    getDurationNumberInItsUnit(state.ruleDefinition.schedule.interval)
+  );
 export const useSelectIntervalUnit = () =>
-  useRuleFormSelector((state) => getDurationUnitValue(state.ruleDefinition.interval));
+  useRuleFormSelector((state) => getDurationUnitValue(state.ruleDefinition.schedule.interval));
 export const useSelectAlertDelay = () =>
   useRuleFormSelector((state) => state.ruleDefinition.alertDelay?.active);
 

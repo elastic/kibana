@@ -9,15 +9,17 @@
 import { useRef } from 'react';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { ruleDetailsReducer } from './features/rule_details/slice';
 import {
+  ruleDetailsReducer,
   ruleDefinitionReducer,
   initializeAndValidateConsumer,
-} from './features/rule_definition/slice';
+} from './features';
+import { metaReducer } from './metaSlice';
 
 const rootReducer = combineReducers({
   ruleDefinition: ruleDefinitionReducer,
   ruleDetails: ruleDetailsReducer,
+  meta: metaReducer,
 });
 
 const initializeStore = (

@@ -17,13 +17,13 @@ import {
   setIntervalNumber,
   setIntervalUnit,
 } from './slice';
-import { useConfigContext, useRuleFormDispatch, useRuleFormSelector } from '../../hooks';
+import {
+  useConfigContext,
+  useRuleFormDispatch,
+  useRuleFormSelector,
+  useValidationContext,
+} from '../../hooks';
 import { RuleFormConfig } from '../../types';
-import { INTEGER_REGEX } from '../../common/constants';
-
-interface RuleScheduleFieldProps {
-  errors: Record<string, string[]>;
-}
 
 const getHelpTextForInterval = (
   currentInterval: string,
@@ -35,7 +35,7 @@ const getHelpTextForInterval = (
 
   if (minimumScheduleInterval.enforce) {
     // Always show help text if minimum is enforced
-    return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
+    return i18n.translate('alertsUIShared.ruleForm.ruleDefinition.checkEveryHelpText', {
       defaultMessage: 'Interval must be at least {minimum}.',
       values: {
         minimum: formatDuration(minimumScheduleInterval.value, true),
@@ -46,16 +46,13 @@ const getHelpTextForInterval = (
     parseDuration(currentInterval) < parseDuration(minimumScheduleInterval.value)
   ) {
     // Only show help text if current interval is less than suggested
-    return i18n.translate(
-      'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpSuggestionText',
-      {
-        defaultMessage:
-          'Intervals less than {minimum} are not recommended due to performance considerations.',
-        values: {
-          minimum: formatDuration(minimumScheduleInterval.value, true),
-        },
-      }
-    );
+    return i18n.translate('alertsUIShared.ruleForm.ruleDefinition.checkEveryHelpSuggestionText', {
+      defaultMessage:
+        'Intervals less than {minimum} are not recommended due to performance considerations.',
+      values: {
+        minimum: formatDuration(minimumScheduleInterval.value, true),
+      },
+    });
   } else {
     return '';
   }
@@ -67,15 +64,22 @@ const labelForRuleChecked = [
   }),
 ];
 
-export const RuleScheduleField: React.FC<RuleScheduleFieldProps> = ({ errors }) => {
+export const RuleScheduleField: React.FC = () => {
   const ruleIntervalNumber = useSelectIntervalNumber();
   const ruleIntervalUnit = useSelectIntervalUnit();
-  const currentInterval = useRuleFormSelector((state) => state.ruleDefinition.interval);
+  const currentInterval = useRuleFormSelector((state) => state.ruleDefinition.schedule.interval);
   const dispatch = useRuleFormDispatch();
   const { minimumScheduleInterval } = useConfigContext();
 
-  const intervalError = errors['schedule.interval'] ?? '';
+  const intervalError = useValidationContext().ruleDefinition.errors.schedule.interval;
   const hasIntervalError = useMemo(() => intervalError.length > 0, [intervalError]);
+  const displayedIntervalError = useMemo(
+    () =>
+      hasIntervalError
+        ? intervalError.map((error, i) => <span key={`intervalError-${i}`}>{error.text}</span>)
+        : undefined,
+    [intervalError, hasIntervalError]
+  );
 
   const helpText = useMemo(
     () =>
@@ -93,7 +97,7 @@ export const RuleScheduleField: React.FC<RuleScheduleFieldProps> = ({ errors }) 
         display="rowCompressed"
         helpText={helpText}
         isInvalid={hasIntervalError}
-        error={intervalError}
+        error={displayedIntervalError}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={2}>
@@ -107,10 +111,8 @@ export const RuleScheduleField: React.FC<RuleScheduleFieldProps> = ({ errors }) 
               data-test-subj="intervalInput"
               onChange={(e) => {
                 const value = e.target.value;
-                if (value === '' || INTEGER_REGEX.test(value)) {
-                  const parsedValue = value === '' ? '' : parseInt(value, 10);
-                  dispatch(setIntervalNumber(parsedValue));
-                }
+                const parsedValue = value === '' ? '' : parseInt(value, 10);
+                dispatch(setIntervalNumber(parsedValue));
               }}
             />
           </EuiFlexItem>

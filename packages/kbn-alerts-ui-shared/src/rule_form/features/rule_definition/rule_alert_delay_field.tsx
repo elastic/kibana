@@ -10,7 +10,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber } from '@elastic/eui';
 import { useRuleFormDispatch } from '../../hooks';
-import { INTEGER_REGEX } from '../../common/constants';
 import { setAlertDelay, useSelectAlertDelay } from './slice';
 
 export const RuleAlertDelayField: React.FC = () => {
@@ -36,10 +35,7 @@ export const RuleAlertDelayField: React.FC = () => {
       )}
       onChange={(e) => {
         const value = e.target.value;
-        if (value === '' || INTEGER_REGEX.test(value)) {
-          const parsedValue = value === '' ? '' : parseInt(value, 10);
-          dispatch(setAlertDelay(parsedValue || undefined));
-        }
+        dispatch(setAlertDelay(parseInt(value, 10)));
       }}
     />
   );

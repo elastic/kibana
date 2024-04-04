@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EuiPageTemplate, EuiSteps } from '@elastic/eui';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useRuleFormSelector, useRuleFormDispatch } from '../hooks';
 import { setRuleName } from '../features/rule_details/slice';
 import { RuleFormPageHeader } from './header';
-import { RuleDetails } from '../features/rule_details/rule_details';
+import { RuleDetails, RuleDefinition } from '../features';
 import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../types';
-import { RuleDefinition } from '../features/rule_definition/rule_definition';
+import { useValidationContext } from '../hooks/validation_context';
+import { ValidationStatus } from '../common/constants';
 
 export interface RuleFormPageProps {
   ruleTypeModel: RuleTypeModel;
@@ -26,6 +27,17 @@ export interface RuleFormPageProps {
   canShowConsumerSelection?: boolean;
   authorizedConsumers?: RuleCreationValidConsumer[];
 }
+
+const validationStatusToStepStatus: (
+  status: ValidationStatus
+) => 'incomplete' | 'danger' | undefined = (status) => {
+  switch (status) {
+    case ValidationStatus.INCOMPLETE:
+      return 'incomplete';
+    case ValidationStatus.INVALID:
+      return 'danger';
+  }
+};
 
 export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   onClickReturn,
@@ -38,6 +50,14 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
 }) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
+  const validation = useValidationContext();
+  const stepStatuses = useMemo(
+    () => ({
+      ruleDefinition: validationStatusToStepStatus(validation.ruleDefinition.status),
+      ruleDetails: validationStatusToStepStatus(validation.ruleDetails.status),
+    }),
+    [validation]
+  );
 
   return (
     <>
@@ -52,6 +72,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
           steps={[
             {
               title: 'Rule definition',
+              status: stepStatuses.ruleDefinition,
               children: (
                 <RuleDefinition
                   ruleTypeModel={ruleTypeModel}
@@ -75,6 +96,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
             {
               title: 'Rule details',
               children: <RuleDetails />,
+              status: stepStatuses.ruleDetails,
             },
           ]}
         />

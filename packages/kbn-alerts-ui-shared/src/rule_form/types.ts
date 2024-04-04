@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { ComponentType } from 'react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { ComponentType } from 'react';
-
-export interface ValidationResult {
-  errors: Record<string, any>;
-}
-export interface IErrorObject {
-  [key: string]: string | string[] | IErrorObject;
-}
+import { ValidationStatus } from './common/constants';
+import type { RuleFormRootState } from './store';
+import { RuleDefinitionValidation, RuleDetailsValidation } from './features';
 
 type RuleTypeParams = Record<string, unknown>;
 
@@ -39,15 +35,15 @@ export interface RuleTypeParamsExpressionProps<
   ruleThrottle: string;
   alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
-  /*
-   * @deprecated
+  /**
+   * @deprecated Use setRuleParams instead
    */
   setRuleProperty: <Prop extends keyof Rule>(
     key: 'params',
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;
-  errors: IErrorObject;
+  errors: RuleFormValidationErrorObject | RuleFormValidationErrorList | IErrorObject;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;
@@ -60,7 +56,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (ruleParams: Params) => ValidationResult;
+  validate: (ruleParams: Params) => RuleFormValidationResult | V1ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
@@ -80,4 +76,33 @@ export interface RuleFormAppContext {
   consumer: RuleCreationValidConsumer;
   validConsumers?: RuleCreationValidConsumer[];
   canShowConsumerSelection?: boolean;
+}
+
+export interface RuleFormValidationError {
+  text: string;
+  status: ValidationStatus;
+}
+
+export type RuleFormValidationErrorList = RuleFormValidationError[];
+export interface RuleFormValidationErrorObject {
+  [key: string]: RuleFormValidationErrorList | RuleFormValidationErrorObject;
+}
+export interface RuleFormValidationResult {
+  errors: RuleFormValidationErrorObject | RuleFormValidationErrorList;
+}
+/** @deprecated Use RuleFormValidationResult instead */
+export interface V1ValidationResult {
+  errors: IErrorObject | string | string[];
+}
+
+/**
+ * @deprecated Use RuleFormValidationErrorObject instead
+ */
+export interface IErrorObject {
+  [key: string]: string | string[] | IErrorObject;
+}
+
+export interface RuleFormStateValidation {
+  ruleDefinition: RuleDefinitionValidation;
+  ruleDetails: RuleDetailsValidation;
 }

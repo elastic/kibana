@@ -11,7 +11,12 @@ import { Provider } from 'react-redux';
 import { RuleFormPage } from './rule_form_page';
 import { useStore } from '../store';
 import type { RuleFormPageProps } from './rule_form_page';
-import { ConfigProvider, useAuthorizedConsumers, DEFAULT_CONFIG } from '../hooks';
+import {
+  ConfigProvider,
+  ValidationProvider,
+  useAuthorizedConsumers,
+  DEFAULT_CONFIG,
+} from '../hooks';
 import { RuleFormAppContext, RuleFormConfig } from '../types';
 
 interface RuleFormPageComponentProps extends RuleFormPageProps {
@@ -40,12 +45,14 @@ export const RuleFormPageComponent: React.FC<RuleFormPageComponentProps> = ({
   return (
     <Provider store={store}>
       <ConfigProvider value={config}>
-        <RuleFormPage
-          ruleTypeModel={ruleTypeModel}
-          canShowConsumerSelection={canShowConsumerSelection}
-          authorizedConsumers={authorizedConsumers}
-          {...rest}
-        />
+        <ValidationProvider ruleTypeModel={ruleTypeModel}>
+          <RuleFormPage
+            ruleTypeModel={ruleTypeModel}
+            canShowConsumerSelection={canShowConsumerSelection}
+            authorizedConsumers={authorizedConsumers}
+            {...rest}
+          />
+        </ValidationProvider>
       </ConfigProvider>
     </Provider>
   );
