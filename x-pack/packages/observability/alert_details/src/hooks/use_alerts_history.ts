@@ -30,6 +30,11 @@ export interface Props {
   queries?: QueryDslQueryContainer[];
 }
 
+export interface Group {
+  field: string;
+  value: string;
+}
+
 interface FetchAlertsHistory {
   totalTriggeredAlerts: number;
   histogramTriggeredAlerts: AggregationsDateHistogramBucketKeys[];
@@ -47,6 +52,19 @@ export const EMPTY_ALERTS_HISTORY = {
   histogramTriggeredAlerts: [] as AggregationsDateHistogramBucketKeys[],
   avgTimeToRecoverUS: 0,
 };
+
+export const getGroupQueries = (groups?: Group[]): QueryDslQueryContainer[] | undefined => {
+  return (
+    (groups &&
+      groups.map((group) => ({
+        match_phrase: {
+          [group.field]: group.value,
+        },
+      }))) ||
+    undefined
+  );
+};
+
 export function useAlertsHistory({
   featureIds,
   ruleId,

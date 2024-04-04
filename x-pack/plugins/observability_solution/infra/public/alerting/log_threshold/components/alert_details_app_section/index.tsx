@@ -18,6 +18,7 @@ import moment from 'moment';
 import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Group } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
@@ -63,6 +64,16 @@ const AlertDetailsAppSection = ({
         .filter(identity)
         .join(' AND ')
     : '';
+  const groups: Group[] | undefined = rule.params.groupBy
+    ? rule.params.groupBy.flatMap((field) => {
+        const value: string = get(
+          alert.fields[ALERT_CONTEXT],
+          ['groupByKeys', ...field.split('.')],
+          null
+        );
+        return value ? { field, value } : [];
+      })
+    : undefined;
 
   const { derivedDataView } = useLogView({
     initialLogViewReference: rule.params.logView,
@@ -230,7 +241,11 @@ const AlertDetailsAppSection = ({
       rule.params.criteria.length === 1 && (
         <EuiFlexItem>
           <LogsHistoryChart
-            rule={{ ...rule, params: { ...rule.params, timeSize: 12, timeUnit: 'h' } }}
+            rule={{
+              ...rule,
+              params: { ...rule.params, timeSize: 12, timeUnit: 'h' },
+            }}
+            groups={groups}
           />
         </EuiFlexItem>
       )
