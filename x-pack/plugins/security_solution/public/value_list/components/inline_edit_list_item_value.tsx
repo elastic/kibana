@@ -54,6 +54,7 @@ export const InlineEditListItemValue = ({ listItem }: { listItem: ListItemSchema
 
   return (
     <EuiInlineEditText
+      data-test-subj={`value-list-item-update-${listItem.value}`}
       size={'s'}
       inputAriaLabel={EDIT_TEXT_INLINE_LABEL}
       value={value}

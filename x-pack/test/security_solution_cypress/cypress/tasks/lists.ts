@@ -13,7 +13,15 @@ import {
   VALUE_LIST_FILE_PICKER,
   VALUE_LIST_FILE_UPLOAD_BUTTON,
   VALUE_LIST_TYPE_SELECTOR,
+  VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT,
+  VALUE_LIST_ITEMS_MODAL_TABLE,
+  VALUE_LIST_ITEMS_MODAL_INFO,
+  VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER,
+  VALUE_LIST_ITEMS_ADD_INPUT,
+  VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT
 } from '../screens/lists';
+import { EUI_INLINE_SAVE_BUTTON } from '../screens/common/controls';
+import { rootRequest } from './api_calls/common';
 
 export const KNOWN_VALUE_LIST_FILES = {
   TEXT: 'value_list.txt',
@@ -22,7 +30,7 @@ export const KNOWN_VALUE_LIST_FILES = {
 };
 
 export const createListsIndex = () => {
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: '/api/lists/index',
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
@@ -31,7 +39,7 @@ export const createListsIndex = () => {
 };
 
 export const waitForListsIndex = () => {
-  cy.request({
+  rootRequest({
     url: '/api/lists/index',
     headers: { 'x-elastic-internal-origin': 'security-solution' },
     retryOnStatusCodeFailure: true,
@@ -94,7 +102,7 @@ export const deleteValueLists = (
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
 const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unknown>> => {
-  return cy.request({
+  return rootRequest({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
     headers: { 'kbn-xsrf': 'delete-lists', 'x-elastic-internal-origin': 'security-solution' },
@@ -123,9 +131,9 @@ const uploadListItemData = (
     .filter((line) => line.trim() !== '')
     .join('\n');
 
-  return cy.request({
+  return rootRequest({
     method: 'POST',
-    url: `api/lists/items/_import?type=${type}`,
+    url: `api/lists/items/_import?type=${type}&refresh=true`,
     encoding: 'binary',
     headers: {
       'kbn-xsrf': 'upload-value-lists',
@@ -159,4 +167,48 @@ export const importValueList = (
   testSuggestions: string[] | undefined = undefined
 ) => {
   return cy.fixture<string>(file).then((data) => uploadListItemData(file, type, data));
+};
+
+export const openValueListItemsModal = (listId: string) => {
+  return cy.get(`[data-test-subj="show-value-list-modal-${listId}"]`).click();
+};
+
+export const searchValueListItemsModal = (search: string) => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).clear();
+  cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).type(search);
+  return cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).trigger('search');
+};
+
+export const clearSearchValueListItemsModal = (search: string) => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).clear();
+  return cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).trigger('search');
+};
+
+export const getValueListItemsTableRow = () =>
+  cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).find('tbody tr');
+
+export const checkTotalItems = (totalItems: number) => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains(`Total items: ${totalItems}`);
+};
+
+export const deleteListItem = (value: string) => {
+  return cy.get(`[data-test-subj="delete-list-item-${value}"]`).click();
+};
+
+export const sortByValue = () => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).find('thead tr th').eq(0).click();
+};
+
+export const updateListItem = (oldValue: string, newValue: string) => {
+  const inlineEdit = `[data-test-subj="value-list-item-update-${oldValue}"]`;
+  cy.get(inlineEdit).click();
+  cy.get(inlineEdit).find('input').clear();
+  cy.get(inlineEdit).find('input').type(newValue);
+  return cy.get(inlineEdit).find(EUI_INLINE_SAVE_BUTTON).click();
+};
+
+export const addListItem = (value: string) => {
+  cy.get(VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER).click();
+  cy.get(VALUE_LIST_ITEMS_ADD_INPUT).type(value);
+  return cy.get(VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT).click();
 };

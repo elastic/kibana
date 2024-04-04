@@ -67,6 +67,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
           iconSide="right"
           fill
           iconType="arrowDown"
+          data-test-subj="value-list-item-add-button-show-popover"
           onClick={() => setIsPopoverOpen(true)}
         >
           {ADD_LIST_ITEM}
@@ -91,6 +92,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
                   value={formik.values.value}
                   name="value"
                   icon="listAdd"
+                  data-test-subj="value-list-item-add-input"
                   placeholder={ADD_VALUE_LIST_PLACEHOLDER}
                   isInvalid={!!formik.errors.value}
                 />
@@ -98,7 +100,11 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
-                <EuiButton isLoading={createListItemMutation.isLoading} type="submit">
+                <EuiButton
+                  data-test-subj="value-list-item-add-button-submit"
+                  isLoading={createListItemMutation.isLoading}
+                  type="submit"
+                >
                   {createListItemMutation.isLoading
                     ? ADDING_LIST_ITEM_BUTTON
                     : ADD_LIST_ITEM_BUTTON}

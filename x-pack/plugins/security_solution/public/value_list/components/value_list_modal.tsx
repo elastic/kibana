@@ -6,7 +6,6 @@
  */
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/css';
-import type { Query } from '@kbn/es-query';
 import {
   EuiModal,
   EuiModalHeader,
@@ -17,6 +16,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSearchBar,
 } from '@elastic/eui';
 import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
 import { FormattedDate } from '../../common/components/formatted_date';
@@ -85,12 +85,6 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
     padding: ${useEuiPaddingSize('m')};
   `;
 
-  const {
-    unifiedSearch: {
-      ui: { SearchBar },
-    },
-  } = useKibana().services;
-
   const sorting: Sorting = {
     sort: {
       field: sortField,
@@ -106,9 +100,8 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
     pageSizeOptions: [5, 10, 25],
   };
 
-  const onQuerySubmit = useCallback((payload: { query?: Query }) => {
-    if (payload.query === undefined) return;
-    setFilter(payload.query.query.toString());
+  const onQueryChange = useCallback((params) => {
+    setFilter(params.queryText);
   }, []);
 
   const isListExist = !(isListLoading || !list);
@@ -120,7 +113,9 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
           {isListExist && (
             <EuiFlexGroup justifyContent="spaceBetween" wrap>
               <EuiFlexItem grow={false}>
-                <EuiModalHeaderTitle>{list.id}</EuiModalHeaderTitle>
+                <EuiModalHeaderTitle data-test-subj="value-list-items-modal-title">
+                  {list.id}
+                </EuiModalHeaderTitle>
                 <EuiSpacer size="s" />
                 {list.description && (
                   <>
@@ -128,7 +123,10 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
                     <EuiSpacer size="xs" />
                   </>
                 )}
-                <EuiFlexGroup justifyContent="flexStart">
+                <EuiFlexGroup
+                  data-test-subj="value-list-items-modal-info"
+                  justifyContent="flexStart"
+                >
                   <Info label={INFO_TYPE} value={list.type} />
                   <Info
                     label={INFO_UPDATED_AT}
@@ -151,15 +149,13 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
         </EuiModalHeader>
         <EuiFlexGroup className={modalBodyStyle} direction="column">
           <EuiFlexItem grow={false}>
-            <SearchBar
-              appName="siem"
-              isLoading={isListItemsLoading}
-              onQuerySubmit={onQuerySubmit}
-              showFilterBar={false}
-              showDatePicker={false}
-              displayStyle={'inPage'}
-              submitButtonStyle={'iconOnly'}
-              placeholder={getInfoTotalItems(list?.type ?? '')}
+            <EuiSearchBar
+              onChange={onQueryChange}
+              data-test-subj="value-list-items-modal-search-bar"
+              box={{
+                [`data-test-subj`]: 'value-list-items-modal-search-bar-input',
+                placeholder: getInfoTotalItems(list?.type ?? ''),
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true} className={tableStyle}>

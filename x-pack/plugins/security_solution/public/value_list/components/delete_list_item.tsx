@@ -16,7 +16,7 @@ const toastOptions = {
   toastLifeTimeMs: 5000,
 };
 
-export const DeleteListItem = ({ id }: { id: string }) => {
+export const DeleteListItem = ({ id, value }: { id: string; value: string }) => {
   const { addSuccess, addError } = useAppToasts();
   const http = useKibana().services.http;
   const deleteListItemMutation = useDeleteListItemMutation({
@@ -37,6 +37,7 @@ export const DeleteListItem = ({ id }: { id: string }) => {
       onClick={() => deleteListItemMutation.mutate({ id, http })}
       iconType="trash"
       isLoading={deleteListItemMutation.isLoading}
+      data-test-subj={`delete-list-item-${value}`}
     />
   );
 };

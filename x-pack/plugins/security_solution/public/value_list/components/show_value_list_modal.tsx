@@ -34,7 +34,12 @@ export const ShowValueListModal = ({
 
   return (
     <>
-      <EuiLink onClick={() => setShowModal(true)}>{children}</EuiLink>
+      <EuiLink
+        data-test-subj={`show-value-list-modal-${listId}`}
+        onClick={() => setShowModal(true)}
+      >
+        {children}
+      </EuiLink>
       {showModal && (
         <ValueListModal
           canWriteIndex={canWriteIndex ?? false}

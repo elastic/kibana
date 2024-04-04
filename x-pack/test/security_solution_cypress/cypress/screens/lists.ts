@@ -16,3 +16,17 @@ export const VALUE_LIST_DELETE_BUTTON = (name: string) =>
 export const VALUE_LIST_FILES = '[data-test-subj*="action-delete-value-list-"]';
 export const VALUE_LIST_CLOSE_BUTTON = '[data-test-subj="value-lists-flyout-close-action"]';
 export const VALUE_LIST_EXPORT_BUTTON = '[data-test-subj="action-export-value-list"]';
+
+export const VALUE_LIST_ITEMS_MODAL_TITLE = '[data-test-subj="value-list-items-modal-title"]';
+export const VALUE_LIST_ITEMS_MODAL_INFO = '[data-test-subj="value-list-items-modal-info"]';
+export const VALUE_LIST_ITEMS_MODAL_TABLE = '[data-test-subj="value-list-items-modal-table"]';
+export const VALUE_LIST_ITEMS_MODAL_SEARCH_BAR =
+  '[data-test-subj="value-list-items-modal-search-bar"]';
+export const VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT =
+  '[data-test-subj="value-list-items-modal-search-bar-input"]';
+
+export const VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER =
+  '[data-test-subj="value-list-item-add-button-show-popover"]';
+export const VALUE_LIST_ITEMS_ADD_INPUT = '[data-test-subj="value-list-item-add-input"]';
+export const VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT =
+  '[data-test-subj="value-list-item-add-button-submit"]';

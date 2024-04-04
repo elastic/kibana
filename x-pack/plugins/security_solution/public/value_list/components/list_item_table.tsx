@@ -62,7 +62,7 @@ export const ListItemTable = ({
           name: DELETE_LIST_ITEM,
           description: DELETE_LIST_ITEM_DESCRIPTION,
           isPrimary: true,
-          render: (item: ListItemSchema) => <DeleteListItem id={item.id} />,
+          render: (item: ListItemSchema) => <DeleteListItem id={item.id} value={item.value} />,
         },
       ],
       width: '10%',
@@ -71,6 +71,7 @@ export const ListItemTable = ({
 
   return (
     <EuiBasicTable
+      data-test-subj="value-list-items-modal-table"
       items={items}
       columns={columns}
       pagination={pagination}
