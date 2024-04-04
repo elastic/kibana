@@ -33,36 +33,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -77,36 +47,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -142,36 +82,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -197,36 +107,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -242,231 +122,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'y_coordinate',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'x_coordinate',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -517,26 +172,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -565,36 +200,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -695,56 +300,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -759,21 +314,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string1',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'string2',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {
@@ -813,36 +353,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -857,36 +367,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -912,26 +392,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'unit',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'startTimestamp',
-            type: 'datetime',
-            optional: false,
-          },
-          {
-            name: 'endTimestamp',
-            type: 'datetime',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -981,21 +441,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'datePart',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'date',
-            type: 'datetime',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -1025,21 +470,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'dateFormat',
-            type: 'string',
-            optional: true,
-          },
-          {
-            name: 'date',
-            type: 'datetime',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -1054,36 +484,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'datePattern',
-            type: 'string',
-            optional: true,
-          },
-          {
-            name: 'dateString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          {
-            name: 'datePattern',
-            type: 'string',
-            optional: true,
-          },
-          {
-            name: 'dateString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'datetime',
-      },
       {
         params: [
           {
@@ -1147,21 +547,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'boolean',
       },
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'suffix',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -1176,36 +561,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -1284,21 +639,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'first',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'first',
             type: 'ip',
             optional: false,
           },
@@ -1309,56 +649,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'ip',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -1468,21 +758,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'first',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'first',
             type: 'ip',
             optional: false,
           },
@@ -1493,56 +768,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'ip',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'first',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'rest',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -1614,21 +839,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'length',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -1643,16 +853,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -1683,261 +883,6 @@ export const functionDefinitions: FunctionDefinition[] = [
             name: 'base',
             type: 'number',
             optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: true,
-          },
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
           },
         ],
         returnType: 'number',
@@ -2004,36 +949,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -2081,16 +996,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -2116,36 +1021,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -2161,51 +1036,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'delim',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'delim',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'delim',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {
@@ -2310,16 +1140,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -2331,36 +1151,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           {
             name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -2424,41 +1214,11 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
         ],
         returnType: 'ip',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -2569,16 +1329,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -2594,36 +1344,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -2724,16 +1444,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -2749,36 +1459,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -2839,16 +1519,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -2864,36 +1534,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -2920,36 +1560,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -3009,16 +1619,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -3034,36 +1634,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -3234,26 +1804,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'start',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'end',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -3269,46 +1819,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'ip',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'start',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'end',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'start',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'end',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -3413,21 +1923,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'order',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -3438,36 +1933,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'ip',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'order',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'order',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'number',
       },
       {
         params: [
@@ -3524,36 +1989,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -3569,26 +2004,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string1',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'string2',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'delim',
-            type: 'string',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {
@@ -3656,231 +2071,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'base',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'exponent',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -3916,146 +2106,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'regex',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'newString',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -4071,21 +2121,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'length',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {
@@ -4154,16 +2189,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -4188,36 +2213,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -4232,36 +2227,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -4301,21 +2266,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'delim',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -4330,36 +2280,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -4870,21 +2790,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'boolean',
       },
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'prefix',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -4900,26 +2805,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-          {
-            name: 'start',
-            type: 'number',
-            optional: false,
-          },
-          {
-            name: 'length',
-            type: 'number',
-            optional: true,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {
@@ -4964,36 +2849,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
       },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -5008,36 +2863,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'angle',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -5104,47 +2929,7 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -5170,16 +2955,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           {
             name: 'field',
             type: 'cartesian_point',
-            optional: false,
-          },
-        ],
-        returnType: 'cartesian_point',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
             optional: false,
           },
         ],
@@ -5240,16 +3015,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'cartesian_shape',
       },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'cartesian_shape',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -5288,47 +3053,7 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'datetime',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -5348,36 +3073,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -5436,47 +3131,7 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -5501,16 +3156,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           {
             name: 'field',
             type: 'geo_point',
-            optional: false,
-          },
-        ],
-        returnType: 'geo_point',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
             optional: false,
           },
         ],
@@ -5555,16 +3200,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           {
             name: 'field',
             type: 'geo_shape',
-            optional: false,
-          },
-        ],
-        returnType: 'geo_shape',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
             optional: false,
           },
         ],
@@ -5628,47 +3263,7 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -5693,16 +3288,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           {
             name: 'field',
             type: 'ip',
-            optional: false,
-          },
-        ],
-        returnType: 'ip',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
             optional: false,
           },
         ],
@@ -5766,47 +3351,7 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -5836,16 +3381,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'string',
       },
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
     ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
@@ -5860,36 +3395,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'number',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
       {
         params: [
           {
@@ -5988,16 +3493,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'ip',
             optional: false,
           },
@@ -6009,36 +3504,6 @@ export const functionDefinitions: FunctionDefinition[] = [
           {
             name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -6103,47 +3568,7 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'number',
-      },
-      {
-        params: [
-          {
-            name: 'field',
-            type: 'number',
             optional: false,
           },
         ],
@@ -6163,16 +3588,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'str',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {
@@ -6211,16 +3626,6 @@ export const functionDefinitions: FunctionDefinition[] = [
         params: [
           {
             name: 'field',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'version',
-      },
-      {
-        params: [
-          {
-            name: 'field',
             type: 'version',
             optional: false,
           },
@@ -6241,16 +3646,6 @@ export const functionDefinitions: FunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [
-      {
-        params: [
-          {
-            name: 'string',
-            type: 'string',
-            optional: false,
-          },
-        ],
-        returnType: 'string',
-      },
       {
         params: [
           {

@@ -117,17 +117,20 @@ function getFunctionDefinition(ESFunctionDefinition) {
       : { supportedCommands: ['stats'] }),
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
-    signatures: ESFunctionDefinition.signatures.map((signature) => ({
-      ...signature,
-      params: signature.params.map((param) => ({
-        ...param,
-        type: elasticsearchToKibanaType(param.type),
-        description: undefined,
+    signatures: _.uniqBy(
+      ESFunctionDefinition.signatures.map((signature) => ({
+        ...signature,
+        params: signature.params.map((param) => ({
+          ...param,
+          type: elasticsearchToKibanaType(param.type),
+          description: undefined,
+        })),
+        returnType: elasticsearchToKibanaType(signature.returnType),
+        // TODO compute minParams
+        variadic: undefined,
       })),
-      returnType: elasticsearchToKibanaType(signature.returnType),
-      // TODO compute minParams
-      variadic: undefined,
-    })),
+      (el) => JSON.stringify(el)
+    ),
     examples: ESFunctionDefinition.examples,
   };
 
