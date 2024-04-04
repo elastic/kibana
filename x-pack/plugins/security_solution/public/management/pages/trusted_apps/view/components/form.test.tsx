@@ -533,11 +533,25 @@ describe('Trusted apps form', () => {
 
   describe('and a wildcard value is used with the IS operator', () => {
     beforeEach(() => render());
-    it('shows callout warning and help text warning', () => {
+    it('shows warning callout and help text warning if the field is PATH', async () => {
+      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        entries: [createEntry(ConditionEntryField.PATH, 'match', '')],
+      };
+      latestUpdatedItem = { ...formProps.item, ...propsItem };
+      rerenderWithLatestProps();
+
+      act(() => {
+        setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+      });
+
+      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
+    });
+
+    it('shows a warning if field is HASH or SIGNATURE', () => {
       setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
       rerenderWithLatestProps();
-      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeTruthy();
-      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0)));
+      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
     });
   });
 

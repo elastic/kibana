@@ -45,6 +45,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/apm-data-view",
     "@kbn/spaces-plugin",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }
