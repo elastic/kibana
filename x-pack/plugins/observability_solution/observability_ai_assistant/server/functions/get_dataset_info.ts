@@ -30,7 +30,6 @@ export function registerGetDatasetInfoFunction({
         'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           index: {
             type: 'string',
@@ -146,14 +145,11 @@ export function registerGetDatasetInfoFunction({
                   description: 'The fields you consider relevant to the conversation',
                   parameters: {
                     type: 'object',
-                    additionalProperties: false,
                     properties: {
                       fields: {
                         type: 'array',
-                        additionalProperties: false,
                         items: {
                           type: 'string',
-                          additionalProperties: false,
                         },
                       },
                     },

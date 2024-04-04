@@ -53,8 +53,6 @@ export class ChatFunctionClient {
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
-            additionalProperties: false,
-            additionalItems: false,
             properties: {
               data: {
                 type: 'array',
@@ -64,8 +62,6 @@ export class ChatFunctionClient {
                   type: 'string',
                   enum: allData.map((data) => data.name),
                 },
-                additionalItems: false,
-                additionalProperties: false,
               },
             },
             required: ['data' as const],
