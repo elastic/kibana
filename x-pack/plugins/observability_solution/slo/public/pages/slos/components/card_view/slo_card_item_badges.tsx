@@ -44,6 +44,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
     },
     [onStateChange]
   );
+
   return (
     <Container
       onClick={(evt) => {
@@ -57,11 +58,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
             <SLOCardItemInstanceBadge slo={slo} />
-            <SloRulesBadge
-              rules={rules}
-              onClick={handleCreateRule}
-              isRemote={slo.remoteName != null}
-            />
+            <SloRulesBadge rules={rules} onClick={handleCreateRule} isRemote={!!slo.remote} />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRemoteBadge slo={slo} />
             <SloTagsList

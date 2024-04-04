@@ -75,7 +75,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, editSloHref } = useSloActions({
+  const { handleNavigateToRules, sloEditUrl } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -93,7 +93,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
-  const navigateToClone = useCloneSlo(slo?.kibanaUrl);
+  const navigateToClone = useCloneSlo();
 
   const handleClone = async () => {
     if (slo) {
@@ -123,9 +123,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
     (url: string) => setTimeout(() => navigateToUrl(url)),
     [navigateToUrl]
   );
-  const isRemote = !!slo?.remoteName;
 
-  const canEditRemote = Boolean(isRemote && slo.kibanaUrl);
+  // TODO Kevin: Should we centralize this business logic to avoid scattering the same logic everywhere?
+  const isRemote = !!slo?.remote;
+  const canEditRemote = Boolean(isRemote && slo?.remote?.kibanaUrl);
 
   return (
     <>
@@ -157,7 +158,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               key="edit"
               disabled={!hasWriteCapabilities || !canEditRemote}
               icon="pencil"
-              href={editSloHref()}
+              href={sloEditUrl}
               target={isRemote ? '_blank' : undefined}
               data-test-subj="sloDetailsHeaderControlPopoverEdit"
             >
@@ -211,6 +212,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
+                // TODO Kevin: Tecnically this should not be empty since we fallback to a dummy indicator params in case the summary document does not have the stringified params
                 disabled={!hasWriteCapabilities || (isRemote && isEmpty(slo.indicator.params))}
                 icon="copy"
                 onClick={handleClone}

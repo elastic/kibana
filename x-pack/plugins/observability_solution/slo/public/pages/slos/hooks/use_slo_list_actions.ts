@@ -47,7 +47,7 @@ export function useSloListActions({
         description: newDescription,
         sloId: slo.id,
         sloInstanceId: slo.instanceId,
-        remoteName: slo.remoteName,
+        remoteName: slo.remote?.remoteName,
       };
 
       const state = {
@@ -62,7 +62,7 @@ export function useSloListActions({
         path,
       });
     },
-    [embeddable, slo.id, slo.instanceId, slo.remoteName]
+    [embeddable, slo.id, slo.instanceId, slo.remote?.remoteName]
   );
 
   return {

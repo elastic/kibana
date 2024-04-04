@@ -118,7 +118,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
               ? slo.instanceId
               : undefined,
-            slo.remoteName
+            slo.remote?.remoteName
           )
         );
         navigateToUrl(sloDetailsUrl);
@@ -229,7 +229,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           <SloRulesBadge
             rules={rulesBySlo?.[slo.id]}
             onClick={() => setSloToAddRule(slo)}
-            isRemote={slo.remoteName != null}
+            isRemote={!!slo.remote}
           />
           <SloActiveAlertsBadge
             slo={slo}
@@ -252,7 +252,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
               ? slo.instanceId
               : undefined,
-            slo.remoteName
+            slo.remote?.remoteName
           )
         );
         return (

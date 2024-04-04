@@ -17,7 +17,11 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const spaceId = useSpace();
   const sloDetailsUrl = createRemoteSloDetailsUrl(slo, spaceId);
 
-  return slo.remoteName ? (
+  if (!slo.remote) {
+    return null;
+  }
+
+  return (
     <EuiCallOut
       title={i18n.translate('xpack.slo.sloDetails.headerTitle.calloutMessage', {
         defaultMessage: 'Remote SLO',
@@ -28,14 +32,14 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           id="xpack.slo.sloDetails.headerTitle.calloutDescription"
           defaultMessage="This is a remote SLO which belongs to another Kibana instance. it is fetched from the remote cluster: {remoteName} with kibana url {kibanaUrl}."
           values={{
-            remoteName: <strong>{slo.remoteName}</strong>,
+            remoteName: <strong>{slo.remote.remoteName}</strong>,
             kibanaUrl: (
               <EuiLink
                 data-test-subj="sloSloRemoteCalloutLink"
-                href={slo.kibanaUrl}
+                href={slo.remote.kibanaUrl}
                 target="_blank"
               >
-                {slo.kibanaUrl}
+                {slo.remote.kibanaUrl}
               </EuiLink>
             ),
           }}
@@ -54,5 +58,5 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         })}
       </EuiButton>
     </EuiCallOut>
-  ) : null;
+  );
 }

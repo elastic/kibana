@@ -28,6 +28,8 @@ export const useSloDetailsTabs = ({
     shouldRefetch: isAutoRefreshing,
   });
 
+  const isRemote = !!slo?.remote;
+
   const tabs = [
     {
       id: OVERVIEW_TAB_ID,
@@ -40,7 +42,7 @@ export const useSloDetailsTabs = ({
     },
     {
       id: ALERTS_TAB_ID,
-      label: slo?.remoteName ? (
+      label: isRemote ? (
         <EuiToolTip
           content={i18n.translate('xpack.slo.sloDetails.tab.alertsDisabledTooltip', {
             defaultMessage: 'Alerts are not available for remote SLOs',
@@ -53,7 +55,7 @@ export const useSloDetailsTabs = ({
         ALERTS_LABEL
       ),
       'data-test-subj': 'alertsTab',
-      disabled: Boolean(slo?.remoteName),
+      disabled: Boolean(isRemote),
       isSelected: selectedTabId === ALERTS_TAB_ID,
       append: slo ? (
         <EuiNotificationBadge className="eui-alignCenter" size="m">

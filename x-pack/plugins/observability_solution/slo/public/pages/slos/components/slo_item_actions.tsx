@@ -74,7 +74,8 @@ export function SloItemActions({
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
 
-  const { handleNavigateToRules, editSloHref, remoteDeleteUrl, sloDetailsUrl } = useSloActions({
+  // TODO Kevin: Should we make useSloActions consistent? Either return an URL for all actions, or return directly the handlers.
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, sloDetailsUrl } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -89,14 +90,14 @@ export function SloItemActions({
     navigateToUrl(sloDetailsUrl);
   };
 
-  const navigateToClone = useCloneSlo(slo.kibanaUrl);
+  const navigateToClone = useCloneSlo();
 
   const handleClone = () => {
     navigateToClone(slo);
   };
 
   const handleDelete = () => {
-    if (slo.kibanaUrl) {
+    if (slo.remote) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
       setDeleteConfirmationModalOpen(true);
@@ -131,9 +132,9 @@ export function SloItemActions({
       {...btnProps}
     />
   );
-  const isRemote = !!slo.remoteName;
 
-  const showPopUpIcon = slo.kibanaUrl ? (
+  const isRemote = !!slo.remote;
+  const showPopUpIcon = isRemote ? (
     <EuiIcon
       type="popout"
       size="s"
@@ -167,9 +168,9 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities || (isRemote && !slo.kibanaUrl)}
-            href={editSloHref()}
-            target={slo.kibanaUrl ? '_blank' : undefined}
+            disabled={!hasWriteCapabilities}
+            href={sloEditUrl}
+            target={isRemote ? '_blank' : undefined}
             data-test-subj="sloActionsEdit"
           >
             {i18n.translate('xpack.slo.item.actions.edit', {
@@ -209,7 +210,7 @@ export function SloItemActions({
             onClick={handleClone}
             data-test-subj="sloActionsClone"
             toolTipContent={
-              isRemote && isEmpty(slo.indicator.params) ? NOT_AVAILABLE_FOR_REMOTE : ''
+              isRemote && isEmpty(slo.indicator.params) ? NOT_AVAILABLE_FOR_REMOTE : '' // TODO Kevin: params are always defined at least with fallback on dummy params
             }
           >
             {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}

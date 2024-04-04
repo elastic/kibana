@@ -49,7 +49,7 @@ export const getSloFormattedSummary = (
     paths.sloDetails(
       slo.id,
       ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-      slo.remoteName
+      slo.remote?.remoteName
     )
   );
 

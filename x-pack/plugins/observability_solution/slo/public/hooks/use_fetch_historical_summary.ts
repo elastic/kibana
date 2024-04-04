@@ -31,10 +31,11 @@ export function useFetchHistoricalSummary({
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
+  // TODO Kevin: Check if we want to have an API using partial SLO model
   const list = sloList.map((slo) => ({
     sloId: slo.id,
     instanceId: slo.instanceId ?? ALL_VALUE,
-    remoteName: slo.remoteName,
+    remoteName: slo.remote?.remoteName,
     timeWindow: slo.timeWindow,
     groupBy: slo.groupBy,
     revision: slo.revision,

@@ -13,6 +13,8 @@ import { paths } from '../../../../common/locators/paths';
 import { formatRemoteKibanaUrl, openRemoteKibana } from '../../../utils/slo/utils';
 import { useKibana } from '../../../utils/kibana_react';
 
+// TODO Kevin: Refactor: can we remove the undefined check somehow?
+// TODO Kevin: Refactor remote url generation
 export const useSloActions = ({
   slo,
   rules,
@@ -31,6 +33,15 @@ export const useSloActions = ({
     http,
   } = useKibana().services;
 
+  if (!slo) {
+    return {
+      sloEditUrl: '',
+      handleNavigateToRules: () => {},
+      remoteDeleteUrl: undefined,
+      sloDetailsUrl: '',
+    };
+  }
+
   const handleNavigateToRules = async () => {
     if (rules?.length === 1) {
       // if there is only one rule we can edit inline in flyout
@@ -39,43 +50,36 @@ export const useSloActions = ({
     } else {
       const locator = locators.get<RulesParams>(rulesLocatorID);
 
-      if (slo?.kibanaUrl) {
+      if (slo.remote) {
         const basePath = http.basePath.get();
         const url = await locator?.getUrl({ params: { sloId: slo.id } });
         // since basePath is already included in the kibanaUrl, we need to remove it from the start of url
         const urlWithoutBasePath = url?.replace(basePath, '');
-        openRemoteKibana(slo.kibanaUrl, urlWithoutBasePath);
+        openRemoteKibana(slo.remote.kibanaUrl, urlWithoutBasePath);
       } else {
-        if (slo?.id && locator) {
+        if (slo.id && locator) {
           locator.navigate({ params: { sloId: slo.id } }, { replace: false });
         }
       }
     }
   };
 
-  const detailsUrl = slo
-    ? paths.sloDetails(
-        slo.id,
-        ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-        slo.remote?.remoteName
-      )
-    : '';
+  const detailsUrl = paths.sloDetails(
+    slo.id,
+    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
+    slo.remote?.remoteName
+  );
 
+  // TODO Kevin: Issue with spaceId not taken into account.
   const remoteDeleteUrl =
     formatRemoteKibanaUrl(slo?.remote?.kibanaUrl ?? '', detailsUrl) + `&delete=true`;
 
-  const editSloHref = () => {
-    if (slo) {
-      if (slo.kibanaUrl) {
-        return formatRemoteKibanaUrl(slo.kibanaUrl, paths.sloEdit(slo.id));
-      } else {
-        return http.basePath.prepend(paths.sloEdit(slo.id));
-      }
-    }
-  };
+  const sloEditUrl = slo.remote
+    ? formatRemoteKibanaUrl(slo.remote.kibanaUrl, paths.sloEdit(slo.id))
+    : http.basePath.prepend(paths.sloEdit(slo.id));
 
   return {
-    editSloHref,
+    sloEditUrl,
     handleNavigateToRules,
     remoteDeleteUrl,
     sloDetailsUrl: http.basePath.prepend(detailsUrl),
