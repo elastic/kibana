@@ -69,6 +69,14 @@ const ExportContentUi = ({
     }
   }, [selectedRadio, aggregateReportTypes, objectType]);
 
+  const handlePrintLayoutChange = useCallback(
+    (evt: EuiSwitchEvent) => {
+      setPrintLayout(evt.target.checked);
+      getProperties();
+    },
+    [setPrintLayout, getProperties]
+  );
+
   const {
     generateReportButton,
     helpText,
@@ -121,7 +129,7 @@ const ExportContentUi = ({
         </>
       );
     }
-  }, [usePrintLayout, renderLayoutOptionSwitch]);
+  }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   useEffect(() => {
     isMounted();
@@ -137,10 +145,6 @@ const ExportContentUi = ({
     markAsStale,
     isMounted,
   ]);
-
-  const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
-    setPrintLayout(evt.target.checked);
-  };
 
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
@@ -254,6 +258,7 @@ const ExportContentUi = ({
             options={getRadioOptions()}
             onChange={(id) => {
               setSelectedRadio(id as AllowedExports);
+              getProperties();
             }}
             name="image reporting radio group"
             idSelected={selectedRadio}
