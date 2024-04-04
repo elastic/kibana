@@ -9,17 +9,13 @@ import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mo
 import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
-import { refreshTimelines } from './helpers';
-import { TimelineStatus } from '../../../../common/api/timeline';
-import { UNTITLED_TIMELINE } from '../../components/open_timeline/translations';
+import { refreshTimelines, ensureTimelineIsSaved } from './helpers';
 import {
   startTimelineSaving,
   endTimelineSaving,
   pinEvent,
   unPinEvent,
   showCallOutUnauthorizedMsg,
-  updateTimeline,
-  saveTimeline,
 } from '../actions';
 
 jest.mock('../actions', () => {
@@ -28,8 +24,6 @@ jest.mock('../actions', () => {
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
     ...actual,
-    updateTimeline: jest.fn().mockImplementation((...args) => actual.updateTimeline(...args)),
-    saveTimeline: jest.fn().mockImplementation((...args) => actual.saveTimeline(...args)),
     showCallOutUnauthorizedMsg: jest
       .fn()
       .mockImplementation((...args) => actual.showCallOutUnauthorizedMsg(...args)),
@@ -40,13 +34,23 @@ jest.mock('../actions', () => {
   };
 });
 jest.mock('../../containers/pinned_event/api');
-jest.mock('./helpers');
+const mockTimelineSavedObjectId = 'mockTimelineSavedObjectId';
+jest.mock('./helpers', () => {
+  const actual = jest.requireActual('./helpers');
+  return {
+    ...actual,
+    ensureTimelineIsSaved: jest.fn().mockImplementation(() => ({
+      ...mockGlobalState.timeline.timelineById['timeline-test'],
+      savedObjectId: mockTimelineSavedObjectId,
+    })),
+    refreshTimelines: jest.fn(),
+  };
+});
 
 const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
 const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as jest.Mock;
-const updateTimelineMock = updateTimeline as unknown as jest.Mock;
-const saveTimelineMock = saveTimeline as unknown as jest.Mock;
+const ensureTimelineIsSavedMock = ensureTimelineIsSaved as unknown as jest.Mock;
 
 describe('Timeline pinned event middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
@@ -111,15 +115,11 @@ describe('Timeline pinned event middleware', () => {
     expect(selectTimelineById(store.getState(), TimelineId.test).pinnedEventIds).toEqual({});
   });
 
-  it('should persist the timeline when a pinned event was created on an unsaved timeline', async () => {
-    const testTimelineId = 'testTimelineId';
-    const testTimelineVersion = 'testVersion';
+  it('should ensure the timeline is saved or in draft mode before pinning an event', async () => {
     (persistPinnedEvent as jest.Mock).mockResolvedValue({
       data: {
         persistPinnedEventOnTimeline: {
           code: 200,
-          timelineId: testTimelineId,
-          timelineVersion: testTimelineVersion,
         },
       },
     });
@@ -128,24 +128,13 @@ describe('Timeline pinned event middleware', () => {
 
     expect(persistPinnedEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        timelineId: null,
+        timelineId: mockTimelineSavedObjectId,
         eventId: testEventId,
         pinnedEventId: null,
       })
     );
 
-    expect(updateTimelineMock).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        timeline: expect.objectContaining({
-          savedObjectId: testTimelineId,
-          version: testTimelineVersion,
-          status: TimelineStatus.active,
-          title: UNTITLED_TIMELINE,
-        }),
-      })
-    );
-    expect(saveTimelineMock).toHaveBeenCalled();
+    expect(ensureTimelineIsSavedMock).toHaveBeenCalled();
   });
 
   it('should show an error message when the call is unauthorized', async () => {

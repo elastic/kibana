@@ -19,17 +19,13 @@ import {
   endTimelineSaving,
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
-  updateTimeline,
-  saveTimeline,
   pinEvent,
 } from '../actions';
 import { persistNote } from '../../containers/notes/api';
 import type { ResponseNote } from '../../../../common/api/timeline';
-import { TimelineStatus } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import { refreshTimelines } from './helpers';
-import { UNTITLED_TIMELINE } from '../../components/open_timeline/translations';
+import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
 
 type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
 
@@ -50,12 +46,24 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
 
     if (isNoteAction(action)) {
       const { id: localTimelineId, noteId: localNoteId } = action.payload;
-      const timeline = selectTimelineById(store.getState(), localTimelineId);
       const notes = appSelectors.selectNotesByIdSelector(store.getState());
 
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
+        // In case a note is being added to an unsaved timeline, we need to make sure
+        // the timeline has been saved or is in draft state. Otherwise, `timelineId` will be `null`
+        // and we're creating orphaned notes.
+        const timeline = await ensureTimelineIsSaved({
+          localTimelineId,
+          timeline: selectTimelineById(store.getState(), localTimelineId),
+          store,
+        });
+
+        if (!timeline.savedObjectId) {
+          throw new Error('Cannot create note without a timelineId');
+        }
+
         const result = await persistNote({
           noteId: null,
           version: null,
@@ -90,25 +98,6 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
         );
 
         const currentTimeline = selectTimelineById(store.getState(), localTimelineId);
-
-        // In case a note was added to an unsaved timeline, we need to make sure to update the timeline
-        // locally and then remotely again in order not to lose the SO associations.
-        // This also involves setting the status and the default title.
-        if (!timeline.savedObjectId && response.note.timelineId && response.note.timelineVersion) {
-          await store.dispatch(
-            updateTimeline({
-              id: localTimelineId,
-              timeline: {
-                ...currentTimeline,
-                savedObjectId: response.note.timelineId,
-                version: response.note.timelineVersion || currentTimeline.version,
-                status: TimelineStatus.active,
-                title: currentTimeline.title || UNTITLED_TIMELINE,
-              },
-            })
-          );
-          await store.dispatch(saveTimeline({ id: localTimelineId, saveAsNew: false }));
-        }
 
         // Automatically pin an associated event if it's not pinned yet
         if (isAddNoteToEventAction(action)) {
