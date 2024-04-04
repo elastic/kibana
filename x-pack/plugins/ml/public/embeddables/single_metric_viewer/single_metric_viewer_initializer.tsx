@@ -29,7 +29,7 @@ import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import type { SingleMetricViewerEmbeddableCustomInput } from '../types';
+import type { SingleMetricViewerEmbeddableCustomInput, MlEntity } from '..';
 
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
@@ -58,7 +58,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
     !isNewJob && initialInput?.selectedDetectorIndex ? initialInput.selectedDetectorIndex : 0
   );
-  const [selectedEntities, setSelectedEntities] = useState<Record<string, any> | undefined>(
+  const [selectedEntities, setSelectedEntities] = useState<MlEntity | undefined>(
     !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
   );
 
@@ -66,11 +66,11 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
 
   const handleStateUpdate = (
     action: TimeseriesexplorerActionType,
-    payload: string | number | Record<string, any>
+    payload: string | number | MlEntity
   ) => {
     switch (action) {
       case APP_STATE_ACTION.SET_ENTITIES:
-        setSelectedEntities(payload as Record<string, any>);
+        setSelectedEntities(payload as MlEntity);
         break;
       case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
         setFunctionDescription(payload as string);

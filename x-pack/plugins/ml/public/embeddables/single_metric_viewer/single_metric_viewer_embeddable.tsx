@@ -28,6 +28,7 @@ import type {
 } from '..';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+import type { MlEntity } from '..';
 
 export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.singleMetricViewerEmbeddable.title', {
@@ -49,7 +50,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
   public readonly functionDescription: BehaviorSubject<string | undefined>;
   public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
   public readonly selectedDetectorIndex: BehaviorSubject<number | undefined>;
-  public readonly selectedEntities: BehaviorSubject<Record<string, any> | undefined>;
+  public readonly selectedEntities: BehaviorSubject<MlEntity | undefined>;
 
   private apiSubscriptions = new Subscription();
 
@@ -77,7 +78,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
     >(this.apiSubscriptions, this, 'selectedDetectorIndex');
 
     this.selectedEntities = embeddableInputToSubject<
-      Record<string, any> | undefined,
+      MlEntity | undefined,
       SingleMetricViewerEmbeddableInput
     >(this.apiSubscriptions, this, 'selectedEntities');
   }

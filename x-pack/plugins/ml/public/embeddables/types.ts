@@ -44,6 +44,8 @@ export type MlEmbeddableBaseApi = Partial<
   HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
 >;
 
+export type MlEntity = Record<string, MlEntityField['fieldValue']>;
+
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {
   jobIds: JobId[];
@@ -125,7 +127,7 @@ export interface SingleMetricViewerEmbeddableCustomInput {
   functionDescription?: string;
   panelTitle: string;
   selectedDetectorIndex: number;
-  selectedEntities?: Record<string, any>;
+  selectedEntities?: MlEntity;
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;
@@ -140,7 +142,7 @@ export interface SingleMetricViewerComponentApi {
   functionDescription?: PublishingSubject<string>;
   jobIds: PublishingSubject<JobId[]>;
   selectedDetectorIndex: PublishingSubject<number>;
-  selectedEntities?: PublishingSubject<Record<string, any>>;
+  selectedEntities?: PublishingSubject<MlEntity>;
 
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }
