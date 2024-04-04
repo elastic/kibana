@@ -23,5 +23,7 @@
     "@kbn/security-solution-navigation",
     "@kbn/licensing-plugin",
     "@kbn/security-solution-upselling",
+    "@kbn/i18n",
+    "@kbn/navigation-plugin",
   ]
 }
