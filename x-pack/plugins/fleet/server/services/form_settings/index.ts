@@ -8,6 +8,5 @@
 export {
   getSettings,
   getSettingsAPISchema,
-  getSettingsSavedObjectMappings,
   getSettingsValuesForAgentPolicy,
 } from './form_settings';
