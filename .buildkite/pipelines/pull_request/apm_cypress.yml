@@ -7,7 +7,7 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 120
-    parallelism: 1
+    parallelism: 1 # TODO: Set parallelism when apm_cypress handles it
     retry:
       automatic:
         - exit_status: '-1'
