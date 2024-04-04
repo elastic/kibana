@@ -989,7 +989,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async createLayer(
       layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
-      annotationFromLibraryTitle?: string
+      annotationFromLibraryTitle?: string,
+      seriesType = 'bar_stacked'
     ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
@@ -1004,6 +1005,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'data') {
+          await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
+        }
         if (layerType === 'annotations') {
           if (!annotationFromLibraryTitle) {
             await testSubjects.click('lnsAnnotationLayer_new');

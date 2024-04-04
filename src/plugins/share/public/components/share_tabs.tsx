@@ -6,115 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from '@kbn/core-capabilities-common';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { ShareModal } from '@kbn/share-modal';
-import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
-import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
-import { LinkModal } from './link_modal';
-import { EmbedModal } from './embed_modal';
+import React, { type FC } from 'react';
+import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 
-export interface ModalTabActionHandler {
-  id: string;
-  dataTestSubj: string;
-  formattedMessageId: string;
-  defaultMessage: string;
-}
+import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
+import { linkTab, embedTab } from './tabs';
 
-export interface ModalTabActionHandler {
-  id: string;
-  dataTestSubj: string;
-  formattedMessageId: string;
-  defaultMessage: string;
-}
+export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
+  return (
+    <ShareTabsContext.Provider value={shareContext}>
+      <ShareMenuTabs />
+    </ShareTabsContext.Provider>
+  );
+};
 
-export interface ShareContextTabProps {
-  allowEmbed: boolean;
-  allowShortUrl: boolean;
-  objectId?: string;
-  objectType: string;
-  shareableUrl?: string;
-  shareableUrlForSavedObject?: string;
-  shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
-  };
-  shareMenuItems: ShareMenuItem[];
-  sharingData: any;
-  onClose: () => void;
-  embedUrlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: AnonymousAccessServiceContract;
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
-  urlService: BrowserUrlService;
-  snapshotShareWarning?: string;
-  objectTypeTitle?: string;
-  disabledShareUrl?: boolean;
-  isDirty: boolean;
-  isEmbedded: boolean;
-}
+// this file is intended to replace share_context_menu
+export const ShareMenuTabs = () => {
+  const shareContext = useShareTabsContext();
 
-export const ShareMenuTabs = ({
-  allowEmbed,
-  shareMenuItems,
-  urlService,
-  onClose,
-  objectType,
-  embedUrlParamExtensions,
-  objectId,
-  isDirty,
-  isEmbedded,
-}: ShareContextTabProps) => {
-  const getTabs = () => {
-    const tabs: any[] = [];
+  if (!shareContext) {
+    return null;
+  }
 
-    tabs.push({
-      id: 'link',
-      name: i18n.translate('share.contextMenu.permalinksTab', {
-        defaultMessage: 'Links',
-      }),
-      // do not break functional tests
-      dataTestSubj: 'Permalinks',
-      content: (
-        <LinkModal
-          objectType={objectType}
-          objectId={objectId}
-          isDirty={isDirty}
-          isEmbedded={isEmbedded}
-          onClose={onClose}
-          urlService={urlService}
-        />
-      ),
-    });
+  const { allowEmbed, objectType, onClose } = shareContext;
+  const tabs = [];
+  tabs.push(linkTab);
 
-    shareMenuItems.map(({ shareMenuItem, panel }) => {
-      tabs.push({
-        ...shareMenuItem,
-        dataTestSubj: 'export',
-        id: panel.id,
-        content: panel.content,
-      });
-    });
+  if (allowEmbed) {
+    tabs.push(embedTab);
+  }
 
-    if (allowEmbed) {
-      tabs.push({
-        id: 'embed',
-        name: i18n.translate('share.contextMenu.embedCodeTab', {
-          defaultMessage: 'Embed',
-        }),
-        dataTestSubj: 'Embed',
-        content: (
-          <EmbedModal
-            objectType={objectType}
-            urlParamExtensions={embedUrlParamExtensions}
-            urlService={urlService}
-            isEmbedded={allowEmbed}
-          />
-        ),
-      });
-    }
-    return tabs;
-  };
-
-  return <ShareModal objectType={objectType} onClose={onClose} tabs={getTabs()} />;
+  return (
+    <TabbedModal
+      tabs={tabs}
+      modalWidth={483}
+      onClose={onClose}
+      modalTitle={`Share this ${objectType}`}
+      defaultSelectedTabId="link"
+    />
+  );
 };

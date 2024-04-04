@@ -47,7 +47,6 @@ export const fetchIndexInfo = async (
     {
       index,
       fields: '*',
-      // @ts-expect-error include_empty_fields missing from FieldCapsRequest
       include_empty_fields: false,
     },
     { signal: abortSignal, maxRetries: 0 }
@@ -101,10 +100,13 @@ export const fetchIndexInfo = async (
   const fieldCandidates: string[] = [...acceptableFields].filter(
     (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
   );
-  const textFieldCandidates: string[] = [...acceptableTextFields].filter(
-    (field) =>
-      !allFieldNames.includes(`${field}.keyword`) || textFieldCandidatesOverrides.includes(field)
-  );
+  const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
+    const fieldName = field.replace(new RegExp(/\.text$/), '');
+    return (
+      (!fieldCandidates.includes(fieldName) && !fieldCandidates.includes(`${fieldName}.keyword`)) ||
+      textFieldCandidatesOverrides.includes(field)
+    );
+  });
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
@@ -112,8 +114,8 @@ export const fetchIndexInfo = async (
     .value;
 
   return {
-    fieldCandidates,
-    textFieldCandidates,
+    fieldCandidates: fieldCandidates.sort(),
+    textFieldCandidates: textFieldCandidates.sort(),
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,
