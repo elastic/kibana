@@ -13,7 +13,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-// import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -64,11 +63,10 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
-  // const services = useDiscoverServices();
   const [patternCount, setPatternCount] = React.useState<number | undefined>(undefined);
+
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
-      // @ts-expect-error why is this wrong????
       stateContainer.appState.update({ viewMode: mode });
 
       if (trackUiMetric) {
@@ -108,26 +106,6 @@ export const DiscoverMainContent = ({
     isChartAvailable,
     patternCount,
   ]);
-
-  // const viewModeToggle2 = useCallback(
-  //   (patternCount: number) => {
-  //     return (
-  //       <DocumentViewModeToggle
-  //         viewMode={viewMode}
-  //         isTextBasedQuery={isPlainRecord}
-  //         stateContainer={stateContainer}
-  //         setDiscoverViewMode={setDiscoverViewMode}
-  //         patternCount={patternCount}
-  //         // prepend={
-  //         //   React.isValidElement(panelsToggle)
-  //         //     ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-  //         //     : undefined
-  //         // }
-  //       />
-  //     );
-  //   },
-  //   [viewMode, setDiscoverViewMode, isPlainRecord, stateContainer]
-  // );
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -170,25 +148,13 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
             <>
-              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <LogCategorizationTab
                 dataView={dataView}
-                columns={columns}
                 stateContainer={stateContainer}
                 onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
                 trackUiMetric={trackUiMetric}
                 setPatternCount={setPatternCount}
-                // getViewModeToggle={(patternCount: number) => {
-                //   try {
-                //     return (
-                //       <KibanaContextProvider services={services}>
-                //         <EuiFlexItem grow={false}>{viewModeToggle2(patternCount)}</EuiFlexItem>
-                //       </KibanaContextProvider>
-                //     );
-                //   } catch (error) {
-                //     // console.log(error);
-                //   }
-                // }}
+                viewModeToggle={viewModeToggle}
               />
             </>
           ) : null}

@@ -84,7 +84,8 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/aiops-log-pattern-analysis",
   ],
   "exclude": ["target/**/*"]
 }

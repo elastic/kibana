@@ -92,7 +92,7 @@ export const DocumentViewModeToggle = ({
               <FormattedMessage
                 id="discover.viewModes.patternAnalysis.label"
                 defaultMessage="Patterns {patternCount}"
-                values={{ patternCount: patternCount ? ` (${patternCount})` : '' }}
+                values={{ patternCount: patternCount !== undefined ? ` (${patternCount})` : '' }}
               />
             </EuiTab>
 

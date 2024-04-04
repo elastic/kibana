@@ -7,7 +7,7 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import type { EmbeddableInput, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { Embeddable as AbstractEmbeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -20,46 +20,23 @@ import { pick } from 'lodash';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-// import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { Query, AggregateQuery } from '@kbn/es-query';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-// import useObservable from 'react-use/lib/useObservable';
 
 import type { EmbeddableLogCategorizationType } from '@kbn/aiops-log-pattern-analysis/constants';
 
 import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import type {
+  EmbeddableLogCategorizationInput,
+  EmbeddableLogCategorizationOutput,
+} from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { LogCategorizationEmbeddable } from '../../components/log_categorization/log_categorization_for_embeddable';
 
-// import type { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
-
-interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
-  dataView: DataView;
-  savedSearch?: SavedSearch | null;
-  query?: T;
-  filters?: Filter[];
-  id?: string;
-  embeddingOrigin?: string;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: () => void;
-  getViewModeToggle: () => React.ReactElement | undefined;
-  setPatternCount: (patternCount: number | undefined) => void;
-}
-
 const localStorage = new Storage(window.localStorage);
-
-export type EmbeddableLogCategorizationInput = EmbeddableInput & EmbeddableLogCategorizationProps;
-
-export type EmbeddableLogCategorizationOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
 export interface EmbeddableLogCategorizationDeps {
   theme: ThemeServiceStart;
@@ -104,14 +81,7 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
   }
 
   private async initOutput() {
-    // const {
-    //   data: { dataViews: dataViewsService },
-    // } = this.deps;
-
     const { dataView } = this.getInput();
-
-    // const dataView = await dataViewsService.get(dataViewId);
-
     this.updateOutput({
       indexPatterns: [dataView],
     });
@@ -144,7 +114,7 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
     this.node.setAttribute('data-shared-item', '');
 
     // test subject selector for functional tests
-    this.node.setAttribute('data-test-subj', 'aiopsEmbeddableChangePointChart');
+    this.node.setAttribute('data-test-subj', 'aiopsEmbeddableLogCategorization');
 
     const I18nContext = this.deps.i18n.Context;
 
@@ -154,8 +124,6 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
     };
 
     const input = this.getInput();
-    // const input$ = this.getInput$();
-    // const input = useObservable(input$);
 
     const aiopsAppContextValue = {
       embeddingOrigin: this.parent?.type ?? input.embeddingOrigin ?? EMBEDDABLE_ORIGIN,
@@ -171,18 +139,9 @@ export class EmbeddableLogCategorization extends AbstractEmbeddable<
                 <Suspense fallback={null}>
                   <LogCategorizationEmbeddable
                     onClose={() => this.destroy()}
-                    embeddingOrigin={'discover-change-me'}
+                    embeddingOrigin={'discover-change-me'} // !!!!!!!!!!!!!!
                     input={input}
                   />
-                  {/* <EmbeddableInputTracker
-                  input$={input$}
-                  initialInput={input}
-                  reload$={this.reload$}
-                  onOutputChange={this.updateOutput.bind(this)}
-                  onRenderComplete={this.onRenderComplete.bind(this)}
-                  onLoading={this.onLoading.bind(this)}
-                  onError={this.onError.bind(this)}
-                /> */}
                 </Suspense>
               </StorageContextProvider>
             </DatePickerContextProvider>

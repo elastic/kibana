@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  LogCategorizationTable,
-  type EmbeddableLogCategorizationInput,
-} from './log_categorization_table';
+export { LogCategorizationTable } from './log_categorization_table';
 export { LogCategorizationTab } from './log_categorization_tab';

@@ -7,17 +7,13 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-  IEmbeddable,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { ErrorEmbeddable, IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableLogCategorizationInput,
+  EmbeddableLogCategorizationOutput,
+  EmbeddableLogCategorizationProps,
+} from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -25,128 +21,30 @@ import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
-export interface RandomSamplingOption {
-  mode: 'random_sampling';
-  seed: string;
-  probability: number;
-}
 
-export interface NormalSamplingOption {
-  mode: 'normal_sampling';
-  seed: string;
-  shardSize: number;
-}
-
-export interface NoSamplingOption {
-  mode: 'no_sampling';
-  seed: string;
-}
-
-export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
-
-interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
-  dataView: DataView;
-  savedSearch?: SavedSearch | null;
-  query?: T;
-  filters?: Filter[];
-  id?: string;
-  embeddingOrigin?: string;
-  onAddFilter?: () => void;
-  getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
-  setPatternCount: (patternCount: number | undefined) => void;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  // onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-}
-
-export type EmbeddableLogCategorizationInput = EmbeddableInput & EmbeddableLogCategorizationProps;
-
-export type EmbeddableLogCategorizationOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
-
-// export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-//   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!rename
-//   dataView: DataView;
-//   savedSearch?: SavedSearch;
-//   query?: Query | AggregateQuery;
-//   visibleFieldNames?: string[];
-//   filters?: Filter[];
-//   showPreviewByDefault?: boolean;
-//   /**
-//    * Callback to add a filter to filter bar
-//    */
-//   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-//   sessionId?: string;
-//   fieldsToFetch?: string[];
-//   totalDocuments?: number;
-//   samplingOption?: SamplingOption;
-//   getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
-// }
-// export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
-//   showDistributions?: boolean;
-// }
-
-export interface LogCategorizationTableProps {
-  /**
-   * Determines which columns are displayed
-   */
-  columns: string[];
-  /**
-   * The used data view
-   */
-  dataView: DataView;
-  /**
-   * Saved search description
-   */
+export type LogCategorizationTableProps = EmbeddableLogCategorizationProps & {
   searchDescription?: string;
-  /**
-   * Saved search title
-   */
-  searchTitle?: string;
-  /**
-   * Optional saved search
-   */
-  savedSearch?: SavedSearch;
-  /**
-   * Optional query to update the table content
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * Filters query to update the table content
-   */
-  filters?: Filter[];
+
   /**
    * State container with persisted settings
    */
   stateContainer?: DiscoverStateContainer;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  // onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  onAddFilter?: () => void;
-  /**
-   * Metric tracking function
-   * @param metricType
-   * @param eventName
-   */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   searchSessionId?: string;
-  getViewModeToggle?: (patternCount: number) => React.ReactElement | undefined;
-  setPatternCount: (patternCount: number | undefined) => void;
-}
+  viewModeToggle: React.ReactElement;
+  setOptionsMenu: (optionsMenu: React.ReactElement | undefined) => void;
+};
 
 export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   const {
     dataView,
     savedSearch,
     query,
-    columns,
     filters,
     stateContainer,
     onAddFilter,
     trackUiMetric,
     searchSessionId,
-    getViewModeToggle,
   } = props;
 
   const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
@@ -166,29 +64,14 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   );
 
   useEffect(() => {
-    // const availableFields$ = stateContainer?.dataState.data$.availableFields$;
-    // const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
-    //   if (output.showDistributions !== undefined && stateContainer) {
-    //     stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
-    //   }
-    // });
-
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }
     });
 
-    // const fields = availableFields$?.subscribe(() => {
-    //   if (embeddable && !isErrorEmbeddable(embeddable) && !availableFields$?.getValue().error) {
-    //     embeddable.updateInput({ fieldsToFetch: availableFields$?.getValue().fields });
-    //   }
-    // });
-
     return () => {
-      // sub?.unsubscribe();
       refetch?.unsubscribe();
-      // fields?.unsubscribe();
     };
   }, [embeddable, stateContainer]);
 
@@ -200,8 +83,6 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
         savedSearch,
         query,
         filters,
-        // visibleFieldNames: columns,
-        // onAddFilter,
       });
       embeddable.reload();
     }
@@ -210,9 +91,7 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
     dataView,
     savedSearch,
     query,
-    columns,
     filters,
-    onAddFilter,
     searchSessionId,
     totalDocuments,
     stateContainer,
@@ -220,11 +99,6 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
-      // Update embeddable whenever one of the important input changes
-      // embeddable.updateInput({
-      //   showPreviewByDefault,
-      // });
-
       embeddable.reload();
     }
   }, [showPreviewByDefault, embeddable]);
@@ -245,8 +119,8 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
             savedSearch,
             query,
             onAddFilter,
-            getViewModeToggle: getViewModeToggle ?? ((p: number) => <></>),
             setPatternCount: props.setPatternCount,
+            setOptionsMenu: props.setOptionsMenu,
           });
           if (!unmounted) {
             setEmbeddable(initializedEmbeddable);

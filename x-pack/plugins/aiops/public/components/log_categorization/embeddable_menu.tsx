@@ -116,7 +116,7 @@ export const EmbeddableMenu: FC<Props> = ({
           )}
           helpText={
             <>
-              {categoryCount !== undefined ? (
+              {categoryCount !== undefined && widenessOption !== 'No minimum' ? (
                 <>
                   Total patterns in {widenessOption}: {categoryCount}
                 </>

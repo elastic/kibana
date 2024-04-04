@@ -27,7 +27,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { stringHash } from '@kbn/ml-string-hash';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
@@ -51,7 +50,7 @@ import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
-import type { DocumentStats } from '../../hooks/use_document_count_stats';
+import { createDocumentStatsHash } from './utils';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -255,8 +254,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           docCount,
         }))
       );
-      // setData(null);
-      // setFieldValidationResult(null);
       setTotalCount(documentStats.totalCount);
       if (fieldValidationResult !== null) {
         loadCategories();
@@ -411,15 +408,3 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     </EuiPageBody>
   );
 };
-
-/**
- * Creates a hash from the document stats to determine if the document stats have changed.
- */
-function createDocumentStatsHash(documentStats: DocumentStats) {
-  const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
-  const totalCount = documentStats.documentCountStats?.totalCount;
-  const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
-  const firstBucketTimeStamp = times.length ? times[0] : undefined;
-  const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
-  return stringHash(`${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}`);
-}

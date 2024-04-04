@@ -15,7 +15,6 @@ import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { stringHash } from '@kbn/ml-string-hash';
 import useMount from 'react-use/lib/useMount';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { unitOfTime } from 'moment';
@@ -26,6 +25,7 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import type { EmbeddableLogCategorizationInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -39,17 +39,14 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { InformationText } from './information_text';
-// import { SamplingMenu } from './sampling_menu';
-// import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
-import type { DocumentStats } from '../../hooks/use_document_count_stats';
 import { EmbeddableMenu } from './embeddable_menu';
 import { useWiderTimeRange } from './use_wider_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../types/storage';
 import { AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE } from '../../types/storage';
-import type { EmbeddableLogCategorizationInput } from '../../embeddables/log_categorization/log_categorization_embeddable';
+import { createDocumentStatsHash } from './utils';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -74,7 +71,6 @@ export interface LogCategorizationPageProps {
   embeddingOrigin: string;
   additionalFilter?: CategorizationAdditionalFilter;
   input: Readonly<EmbeddableLogCategorizationInput>;
-  // embeddableInput: Readonly<Observable<EmbeddableLogCategorizationInput>>;
 }
 
 const BAR_TARGET = 20;
@@ -92,11 +88,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     },
     uiSettings,
   } = useAiopsAppContext();
-  // console.log(lastReloadRequestTime);
-  // const input = useObservable(embeddableInput)!;
-  const { dataView, savedSearch, setPatternCount } = input;
-  const getViewModeToggle: (patternCount: number) => React.ReactElement | undefined =
-    input.getViewModeToggle;
+  const { dataView, savedSearch, setPatternCount, setOptionsMenu } = input;
+  // const getViewModeToggle: (patternCount: number) => React.ReactElement | undefined =
+  //   input.getViewModeToggle;
 
   const [widenessOption, setWidenessOption] = useStorage<
     AiOpsKey,
@@ -122,9 +116,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
-  // const [wideness, setWideness] = useState<WidenessOption>('1 week');
   const [fields, setFields] = useState<DataViewField[]>([]);
-  const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch ?? null);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
@@ -176,7 +168,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
-    { dataView, savedSearch: selectedSavedSearch },
+    { dataView, savedSearch: savedSearch ?? null },
     stateFromUrl,
     true
   );
@@ -202,7 +194,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       selectedField === null ||
       timeField === undefined ||
       earliest === undefined ||
-      latest === undefined
+      latest === undefined ||
+      widenessOption === undefined
     ) {
       return;
     }
@@ -284,9 +277,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
 
         // eslint-disable-next-line no-console
         console.log('categories', categories);
-
-        // console.log('categoriesInBucket', categoriesInBucket);
-
         setSelectedTab(SELECTED_TAB.BUCKET);
       }
     } catch (error) {
@@ -317,8 +307,37 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   ]);
 
   useEffect(() => {
-    setPatternCount(data?.categories.length ?? 0);
-  }, [data, setPatternCount]);
+    setPatternCount(data?.categories.length);
+    setOptionsMenu(
+      <>
+        {randomSampler !== undefined ? (
+          <EmbeddableMenu
+            randomSampler={randomSampler}
+            reload={() => loadCategories()}
+            fields={fields}
+            setSelectedField={setSelectedField}
+            selectedField={selectedField}
+            widenessOption={widenessOption}
+            setWidenessOption={setWidenessOption}
+            categoryCount={data?.totalCategories}
+          />
+        ) : null}
+      </>
+    );
+    return () => {
+      setOptionsMenu(undefined);
+    };
+  }, [
+    data,
+    fields,
+    loadCategories,
+    randomSampler,
+    selectedField,
+    setOptionsMenu,
+    setPatternCount,
+    setWidenessOption,
+    widenessOption,
+  ]);
 
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
@@ -345,7 +364,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       return;
     }
 
-    const hash = createDocumentStatsHash(documentStats, selectedField.name, widenessOption);
+    const hash = createDocumentStatsHash(documentStats, [selectedField.name, widenessOption]);
     if (hash !== previousDocumentStatsHash) {
       randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
@@ -354,10 +373,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
           docCount,
         }))
       );
-      // setData(null);
-      // if (fieldValidationResult !== null) {
       loadCategories();
-      // }
       setPreviousDocumentStatsHash(hash);
     }
   }, [
@@ -392,9 +408,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         direction="column"
         gutterSize="none"
         responsive={false}
-        // data-test-subj="dscMainContent"
       >
-        <EuiFlexItem grow={false}>
+        {/* <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
             <>{getViewModeToggle(data?.categories?.length ?? 0)}</>
             <EuiFlexItem />
@@ -413,53 +428,13 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
               ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        {/* <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
-                <FormattedMessage
-                  id="xpack.aiops.categorizeFlyout.title"
-                  defaultMessage="Pattern analysis of {name}"
-                  values={{ name: selectedField.name }}
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-            <TechnicalPreviewBadge />
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader> */}
-        {/* <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody"> */}
+        </EuiFlexItem> */}
+
         <EuiFlexItem
-          // className="dscTable"
           aria-labelledby="documentsAriaLabel"
           css={{ position: 'relative', overflowY: 'auto' }}
         >
           <>
-            {/* {showTabs === false && loading === false ? (
-              <CreateCategorizationJobButton
-                dataView={dataView}
-                field={selectedField}
-                query={searchQuery}
-                earliest={earliest}
-                latest={latest}
-              />
-            ) : null} */}
-
-            {/* <EuiFlexGroup>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
-          </EuiFlexItem>
-        </EuiFlexGroup> */}
-
             <FieldValidationCallout validationResults={fieldValidationResult} />
             {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
             <InformationText
@@ -472,31 +447,29 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
             data !== null &&
             data.categories.length > 0 &&
             selectedField !== null ? (
-              <>
-                <CategoryTable
-                  categories={data.categories}
-                  aiopsListState={stateFromUrl}
-                  dataViewId={dataView.id!}
-                  eventRate={eventRate}
-                  selectedField={selectedField}
-                  pinnedCategory={pinnedCategory}
-                  setPinnedCategory={setPinnedCategory}
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                  timefilter={timefilter}
-                  onAddFilter={onAddFilter}
-                  onClose={onClose}
-                  enableRowActions={false}
-                  additionalFilter={
-                    selectedTab === SELECTED_TAB.BUCKET && additionalFilter !== undefined
-                      ? additionalFilter
-                      : undefined
-                  }
-                  navigateToDiscover={additionalFilter !== undefined}
-                  displayExamples={data.displayExamples}
-                  displayHeader={false}
-                />
-              </>
+              <CategoryTable
+                categories={data.categories}
+                aiopsListState={stateFromUrl}
+                dataViewId={dataView.id!}
+                eventRate={eventRate}
+                selectedField={selectedField}
+                pinnedCategory={pinnedCategory}
+                setPinnedCategory={setPinnedCategory}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                timefilter={timefilter}
+                onAddFilter={onAddFilter}
+                onClose={onClose}
+                enableRowActions={false}
+                additionalFilter={
+                  selectedTab === SELECTED_TAB.BUCKET && additionalFilter !== undefined
+                    ? additionalFilter
+                    : undefined
+                }
+                navigateToDiscover={additionalFilter !== undefined}
+                displayExamples={data.displayExamples}
+                displayHeader={false}
+              />
             ) : null}
           </>
         </EuiFlexItem>
@@ -504,21 +477,3 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     </>
   );
 };
-
-/**
- * Creates a hash from the document stats to determine if the document stats have changed.
- */
-function createDocumentStatsHash(
-  documentStats: DocumentStats,
-  selectedFieldName: string,
-  wideness: WidenessOption
-) {
-  const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
-  const totalCount = documentStats.documentCountStats?.totalCount;
-  const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
-  const firstBucketTimeStamp = times.length ? times[0] : undefined;
-  const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
-  return stringHash(
-    `${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}${selectedFieldName}${wideness}`
-  );
-}

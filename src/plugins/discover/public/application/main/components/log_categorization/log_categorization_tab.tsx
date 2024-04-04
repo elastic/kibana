@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSavedSearch } from '../../services/discover_state_provider';
 import {
   LogCategorizationTable,
@@ -16,20 +17,31 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const LogCategorizationTab: React.FC<
-  Omit<LogCategorizationTableProps, 'query' | 'filters'>
+  Omit<LogCategorizationTableProps, 'query' | 'filters' | 'setOptionsMenu'>
 > = React.memo((props) => {
   const services = useDiscoverServices();
   const querySubscriberResult = useQuerySubscriber({
     data: services.data,
   });
   const savedSearch = useSavedSearch();
+  const [optionsMenu, setOptionsMenu] = React.useState<React.ReactElement | undefined>(undefined);
 
   return (
-    <LogCategorizationTable
-      {...props}
-      savedSearch={savedSearch}
-      query={querySubscriberResult.query}
-      filters={querySubscriberResult.filters}
-    />
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>{props.viewModeToggle}</EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>{optionsMenu}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <LogCategorizationTable
+        {...props}
+        savedSearch={savedSearch}
+        query={querySubscriberResult.query}
+        filters={querySubscriberResult.filters}
+        setOptionsMenu={setOptionsMenu}
+      />
+    </>
   );
 });

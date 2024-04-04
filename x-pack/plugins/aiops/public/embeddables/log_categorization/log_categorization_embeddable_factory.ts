@@ -8,17 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-// import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
-// import type { DataVisualizerGridEmbeddableServices } from './grid_embeddable';
-// import type { DataVisualizerGridEmbeddableInput } from './types';
-// import type { EmbeddableLogCategorizationType } from '../../../common/constants';
 
 import { EMBEDDABLE_LOG_CATEGORIZATION_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
+import type { EmbeddableLogCategorizationInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import type {
-  EmbeddableLogCategorizationDeps,
-  EmbeddableLogCategorizationInput,
-} from './log_categorization_embeddable';
+import type { EmbeddableLogCategorizationDeps } from './log_categorization_embeddable';
 
 export class EmbeddableLogCategorizationFactory
   implements EmbeddableFactoryDefinition<EmbeddableLogCategorizationInput>
@@ -36,6 +30,10 @@ export class EmbeddableLogCategorizationFactory
     private readonly name: string,
     private readonly getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
   ) {}
+
+  public getName() {
+    return this.name;
+  }
 
   public async isEditable() {
     return false;
@@ -79,8 +77,10 @@ export class EmbeddableLogCategorizationFactory
   }
 
   public async create(input: EmbeddableLogCategorizationInput, parent?: IContainer) {
-    const deps = await this.getServices();
-    const { EmbeddableLogCategorization } = await import('./log_categorization_embeddable');
+    const [deps, { EmbeddableLogCategorization }] = await Promise.all([
+      this.getServices(),
+      import('./log_categorization_embeddable'),
+    ]);
     return new EmbeddableLogCategorization(this.type, deps, input, parent);
   }
 }
