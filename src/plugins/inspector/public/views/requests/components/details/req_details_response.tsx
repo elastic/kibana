@@ -24,6 +24,11 @@ export class RequestDetailsResponse extends Component<DetailViewProps> {
       return null;
     }
 
-    return <RequestCodeViewer json={JSON.stringify(responseJSON, null, 2)} />;
+    return (
+      <RequestCodeViewer
+        json={JSON.stringify(responseJSON, null, 2)}
+        includeOpenInAppLinks={false}
+      />
+    );
   }
 }
