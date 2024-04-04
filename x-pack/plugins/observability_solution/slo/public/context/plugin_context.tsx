@@ -15,8 +15,14 @@ export interface PluginContextValue {
   isDev?: boolean;
   appMountParameters?: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  ObservabilityPageTemplate?: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   experimentalFeatures?: ExperimentalFeatures;
 }
 
-export const PluginContext = createContext({} as PluginContextValue);
+export interface OverviewEmbeddableContextValue {
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+}
+
+export const PluginContext = createContext(
+  {} as PluginContextValue | OverviewEmbeddableContextValue
+);
