@@ -10,20 +10,21 @@ import { i18n } from '@kbn/i18n';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  SLODefinitionResponse,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import React, { MouseEvent } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { SLOS_PATH } from '../../../../../common/locators/paths';
-import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export interface Props {
   color?: EuiBadgeProps['color'];
-  slo: SLOWithSummaryResponse;
+  slo: SLOWithSummaryResponse | SLODefinitionResponse;
 }
 
 export function SloIndicatorTypeBadge({ slo, color }: Props) {

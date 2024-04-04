@@ -10,11 +10,12 @@ import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlQuerySchema,
+  SLODefinitionResponse,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
-  slo: SLOWithSummaryResponse
+  slo: SLOWithSummaryResponse | SLODefinitionResponse
 ): string | undefined {
   if (
     !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
@@ -29,7 +30,6 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     },
     timeWindow: { duration },
     groupBy,
-    instanceId,
   } = slo;
 
   const qs = new URLSearchParams('comparisonEnabled=true');
@@ -54,8 +54,9 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
   if (filter && kqlQuerySchema.is(filter) && filter.length > 0) {
     kueryParams.push(filter);
   }
-  if (groupBy !== ALL_VALUE && instanceId !== ALL_VALUE) {
-    kueryParams.push(`${groupBy} : "${instanceId}"`);
+
+  if (groupBy !== ALL_VALUE && 'instanceId' in slo && slo.instanceId !== ALL_VALUE) {
+    kueryParams.push(`${groupBy} : "${slo.instanceId}"`);
   }
 
   if (kueryParams.length > 0) {
