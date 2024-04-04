@@ -11,7 +11,6 @@ import React from 'react';
 import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { BaseParams } from '@kbn/reporting-common/types';
 import { checkLicense } from '../../license_check';
 import {
   ExportModalShareOpts,
@@ -295,12 +294,17 @@ export const reportingExportModalProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
-    type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
-
     const generateReportPDF = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
-      const decoratedJobParams = apiClient.getDecoratedJobParams(
-        getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')() as unknown as AppParams
-      );
+      const el = document.querySelector('[data-shared-items-container]');
+      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+      const dimensions = { height, width };
+
+      const decoratedJobParams = apiClient.getDecoratedJobParams({
+        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')(),
+        layout: { id: 'preserve_layout', dimensions },
+        objectType,
+        title: sharingData.title,
+      });
 
       return apiClient
         .createReportingJob('printablePdfV2', decoratedJobParams)
