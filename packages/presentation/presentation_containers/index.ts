@@ -15,7 +15,6 @@ export {
 export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
-  type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
