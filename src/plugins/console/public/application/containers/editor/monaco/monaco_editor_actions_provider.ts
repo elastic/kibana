@@ -29,41 +29,46 @@ import {
   trackSentRequests,
 } from './utils';
 
+const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
+
 export interface EditorRequest {
   method: string;
   url: string;
   data: string[];
 }
-const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
+
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
-  private decorations: monaco.editor.IEditorDecorationsCollection;
+  private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void
   ) {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
-    this.decorations = this.editor.createDecorationsCollection();
+    this.highlightedLines = this.editor.createDecorationsCollection();
     this.editor.focus();
-    const debouncedHighlight = debounce(() => this.highlightCurrentRequests(), 200, {
+
+    const debouncedHighlightRequests = debounce(() => this.highlightRequests(), 200, {
       leading: true,
     });
-    debouncedHighlight();
+    debouncedHighlightRequests();
+
+    // init all listeners
     editor.onDidChangeCursorPosition(async (event) => {
-      await debouncedHighlight();
+      await debouncedHighlightRequests();
     });
     editor.onDidScrollChange(async (event) => {
-      await debouncedHighlight();
+      await debouncedHighlightRequests();
     });
     editor.onDidChangeCursorSelection(async (event) => {
-      await debouncedHighlight();
+      await debouncedHighlightRequests();
     });
     editor.onDidContentSizeChange(async (event) => {
-      await debouncedHighlight();
+      await debouncedHighlightRequests();
     });
   }
 
-  private updateEditorActionsPosition(lineNumber?: number) {
+  private updateEditorActions(lineNumber?: number) {
     // if no request is currently selected, hide the actions buttons
     if (!lineNumber) {
       this.setEditorActionsCss({
@@ -79,14 +84,15 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  private async highlightCurrentRequests(): Promise<void> {
+  private async highlightRequests(): Promise<void> {
     // get the requests in the selected range
     const { range: selectedRange, parsedRequests } = await this.getSelectedParsedRequestsAndRange();
     // if any requests are selected, highlight the lines and update the position of actions buttons
     if (parsedRequests.length > 0) {
       const selectedRequestStartLine = selectedRange.startLineNumber;
-      this.updateEditorActionsPosition(selectedRequestStartLine);
-      this.decorations.set([
+      // display the actions buttons on the 1st line of the 1st selected request
+      this.updateEditorActions(selectedRequestStartLine);
+      this.highlightedLines.set([
         {
           range: selectedRange,
           options: {
@@ -97,8 +103,8 @@ export class MonacoEditorActionsProvider {
       ]);
     } else {
       // if no requests are selected, hide actions buttons and remove highlighted lines
-      this.updateEditorActionsPosition();
-      this.decorations.clear();
+      this.updateEditorActions();
+      this.highlightedLines.clear();
     }
   }
 
@@ -125,6 +131,7 @@ export class MonacoEditorActionsProvider {
       let { lineNumber: requestEndLine } = model.getPositionAt(requestEnd);
       const requestEndLineContent = model.getLineContent(requestEndLine);
 
+      // sometimes the parser includes a trailing empty line into the request
       if (requestEndLineContent.trim().length < 1) {
         requestEndLine = requestEndLine - 1;
       }
@@ -149,6 +156,8 @@ export class MonacoEditorActionsProvider {
     }
     return {
       parsedRequests: selectedRequests,
+      // the expanded selected range goes from the 1st char of the start line of the 1st request
+      // to the last char of the last line of the last request
       range: new monaco.Range(
         selectionStartLine,
         1,
