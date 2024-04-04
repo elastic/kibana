@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
@@ -24,7 +24,6 @@ import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
-import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
@@ -35,7 +34,10 @@ import { MlPageHeader } from '../../../../components/page_header';
 
 export const Page: FC = () => {
   const {
-    services: { share },
+    services: {
+      share,
+      notifications: { toasts },
+    },
   } = useMlKibana();
 
   const dataSourceContext = useDataSource();
@@ -48,7 +50,22 @@ export const Page: FC = () => {
 
   const { selectedDataView, selectedSavedSearch } = dataSourceContext;
 
-  const isTimeBasedIndex = timeBasedIndexCheck(selectedDataView);
+  const isTimeBasedIndex: boolean = selectedDataView.isTimeBased();
+
+  useEffect(() => {
+    if (!isTimeBasedIndex) {
+      toasts.addWarning({
+        title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view {dataViewIndexPattern} is not based on a time series',
+          values: { dataViewIndexPattern: selectedDataView.getIndexPattern() },
+        }),
+        text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
+          defaultMessage: 'Anomaly detection only runs over time-based indices',
+        }),
+      });
+    }
+  }, [isTimeBasedIndex, selectedDataView, toasts]);
+
   const hasGeoFields = useMemo(
     () =>
       [

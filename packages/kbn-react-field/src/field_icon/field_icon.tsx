@@ -33,6 +33,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'point'
     | 'shape'
     | 'sparse_vector'
+    | 'semantic_text'
     | 'string'
     | string
     | 'nested'
