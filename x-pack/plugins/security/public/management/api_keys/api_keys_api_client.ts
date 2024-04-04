@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
+
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 
@@ -22,12 +24,37 @@ export interface InvalidateApiKeysResponse {
   errors: any[];
 }
 
+export interface QueryApiKeySortOptions {
+  field:
+    | 'id'
+    | 'type'
+    | 'name'
+    | 'username'
+    | 'realm'
+    | 'creation'
+    | 'metadata'
+    | 'role_descriptors'
+    | 'expiration'
+    | 'invalidated'
+    | 'limited_by'
+    | '_sort'
+    | 'expired';
+  direction: 'asc' | 'desc';
+}
+
+export interface QueryApiKeyParams {
+  query: QueryContainer;
+  from: number;
+  size: number;
+  sort: QueryApiKeySortOptions;
+}
+
 const apiKeysUrl = '/internal/security/api_key';
 
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  public async queryApiKeys(params?: any) {
+  public async queryApiKeys(params?: QueryApiKeyParams) {
     return await this.http.post<QueryApiKeyResult>(`${apiKeysUrl}/_query`, {
       body: JSON.stringify(params || {}),
     });

@@ -30,25 +30,8 @@ import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import type { AuthenticatedUser } from '../../../../common';
 import type { ApiKey, ApiKeyAggregations, RestApiKey } from '../../../../common/model';
-import type { CreateAPIKeyResult } from '../api_keys_api_client';
+import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
 
-export interface TableSortingOptions {
-  field:
-    | 'id'
-    | 'type'
-    | 'name'
-    | 'username'
-    | 'realm'
-    | 'creation'
-    | 'metadata'
-    | 'role_descriptors'
-    | 'expiration'
-    | 'invalidated'
-    | 'limited_by'
-    | '_sort'
-    | 'expired';
-  direction: 'asc' | 'desc';
-}
 export interface ApiKeysTableProps {
   apiKeys: CategorizedApiKey[];
   currentUser: AuthenticatedUser;
@@ -65,7 +48,7 @@ export interface ApiKeysTableProps {
   pagination: any;
   onSearchChange: any;
   aggregations?: ApiKeyAggregations;
-  sortingOptions: TableSortingOptions;
+  sortingOptions: QueryApiKeySortOptions;
 }
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({

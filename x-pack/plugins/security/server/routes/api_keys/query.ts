@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SecurityQueryApiKeysAPIKeyAggregate } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
-import type { ApiKey, ApiKeyAggregations, ApiKeyAggregationsResponse } from '../../../common/model';
+import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -23,7 +25,7 @@ export interface QueryApiKeyResult {
   count: number;
   total: number;
   aggregationTotal: number;
-  aggregations: ApiKeyAggregations;
+  aggregations: Record<string, SecurityQueryApiKeysAPIKeyAggregate> | undefined;
 }
 
 export function defineQueryApiKeysAndAggregationsRoute({
@@ -83,56 +85,49 @@ export function defineQueryApiKeysAndAggregationsRoute({
           sort: transformedSort,
         });
 
-        const transportResponse =
-          await esClient.asCurrentUser.transport.request<ApiKeyAggregationsResponse>({
-            method: 'POST',
-            path: '/_security/_query/api_key',
-            querystring: {
-              filter_path: [
-                'total',
-                'aggregations.usernames.buckets.key',
-                'aggregations.types.buckets.key',
-                'aggregations.invalidated.doc_count',
-                'aggregations.expired.doc_count',
-                'aggregations.managed.buckets.metadataBased.doc_count',
-                'aggregations.managed.buckets.namePrefixBased.doc_count',
-              ],
+        const aggregationResponse = await esClient.asCurrentUser.security.queryApiKeys({
+          filter_path: [
+            'total',
+            'aggregations.usernames.buckets.key',
+            'aggregations.types.buckets.key',
+            'aggregations.invalidated.doc_count',
+            'aggregations.expired.doc_count',
+            'aggregations.managed.buckets.metadataBased.doc_count',
+            'aggregations.managed.buckets.namePrefixBased.doc_count',
+          ],
+          size: 0,
+          query: { match: { invalidated: false } },
+          aggs: {
+            usernames: {
+              terms: {
+                field: 'username',
+              },
             },
-            body: {
-              size: 0,
-              query: { match: { invalidated: false } },
-              aggs: {
-                usernames: {
-                  terms: {
-                    field: 'username',
-                  },
-                },
-                types: {
-                  terms: {
-                    field: 'type',
-                  },
-                },
-                invalidated: {
-                  terms: {
-                    field: 'invalidated',
-                  },
-                },
-                expired: {
-                  filter: {
-                    range: { expiration: { lte: 'now/m' } },
-                  },
-                },
-                managed: {
-                  filters: {
-                    filters: {
-                      metadataBased: { term: { 'metadata.managed': true } },
-                      namePrefixBased: { prefix: { name: { value: 'Alerting: ' } } },
-                    },
-                  },
+            types: {
+              terms: {
+                field: 'type',
+              },
+            },
+            invalidated: {
+              terms: {
+                field: 'invalidated',
+              },
+            },
+            expired: {
+              filter: {
+                range: { expiration: { lte: 'now/m' } },
+              },
+            },
+            managed: {
+              filters: {
+                filters: {
+                  metadataBased: { term: { 'metadata.managed': true } },
+                  namePrefixBased: { prefix: { name: { value: 'Alerting: ' } } },
                 },
               },
             },
-          });
+          },
+        });
 
         return response.ok<QueryApiKeyResult>({
           body: {
@@ -144,8 +139,8 @@ export function defineQueryApiKeysAndAggregationsRoute({
               clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
             canManageApiKeys: clusterPrivileges.manage_api_key,
             canManageOwnApiKeys: clusterPrivileges.manage_own_api_key,
-            aggregationTotal: transportResponse.total,
-            aggregations: transportResponse.aggregations,
+            aggregationTotal: aggregationResponse.total,
+            aggregations: aggregationResponse.aggregations,
           },
         });
       } catch (error) {

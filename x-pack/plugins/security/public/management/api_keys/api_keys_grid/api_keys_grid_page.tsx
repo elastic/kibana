@@ -26,14 +26,14 @@ import { Route } from '@kbn/shared-ux-router';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable } from './api_keys_table';
-import type { CategorizedApiKey, TableSortingOptions } from './api_keys_table';
+import type { CategorizedApiKey } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import type { ApiKey } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
-import type { CreateAPIKeyResult } from '../api_keys_api_client';
+import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
 
 const parseSearchBarQuery = (query: Query): QueryContainer => {
@@ -74,7 +74,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const [query, setQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
   const [from, setFrom] = useState<number>(0);
   const [pageSize, setPageSize] = useState(25);
-  const [tableSort, setTableSort] = useState<TableSortingOptions>({
+  const [tableSort, setTableSort] = useState<QueryApiKeySortOptions>({
     field: 'creation',
     direction: 'desc',
   });
