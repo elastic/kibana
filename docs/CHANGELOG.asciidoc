@@ -111,6 +111,33 @@ For information about the {kib} 8.13.0 release, review the following information
 In Canvas, an empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
 ====
 
+[discrete]
+[[known-179611]]
+In Dashboard, base font size changes are not applied
+[%collapsible]
+====
+*Details* +
+In Dashboard, base font size changes to a text panel are not applied to the content. For more information, refer to ({kibana-issue}179611[#179611]).
+====
+
+[discrete]
+[[known-179498]]
+Custom CSS in markdown for TSVB panels is broken
+[%collapsible]
+====
+*Details* +
+In Dashboard, custom CSS in markdown for TSVB panels is no longer applied. For more information, refer to ({kibana-issue}179498[#179498]).
+====
+
+[discrete]
+[[known-179940]]
+In Canvas, markdown text settings are not applied
+[%collapsible]
+====
+*Details* +
+In Canvas, markdown text settings are no longer applied. For more information, refer to ({kibana-issue}179940[#179940]).
+====
+
 [float]
 [[breaking-changes-8.13.0]]
 === Breaking changes
