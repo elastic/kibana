@@ -26,14 +26,13 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { PageTitle, pageTitleContent } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
 import { AlertSummary, AlertSummaryField } from './components/alert_summary';
@@ -66,9 +65,7 @@ export function AlertDetails() {
     },
     http,
     triggersActionsUi: { ruleTypeRegistry },
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
+    observabilityAIAssistant,
     uiSettings,
   } = useKibana().services;
 
@@ -86,27 +83,13 @@ export function AlertDetails() {
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
-    if (!alertDetail) {
+    if (!alertDetail || !observabilityAIAssistant) {
       return;
     }
 
-    const screenDescription = dedent(`The user is looking at an ${
-      alertDetail.formatted.active ? 'active' : 'recovered'
-    } alert.
-    It started at ${new Date(
-      alertDetail.formatted.start
-    ).toISOString()}, and was last updated at ${new Date(
-      alertDetail.formatted.lastUpdated
-    ).toISOString()}.
+    const screenDescription = getScreenDescription(alertDetail);
 
-    ${
-      alertDetail.formatted.reason
-        ? `The reason given for the alert is ${alertDetail.formatted.reason}.`
-        : ''
-    }
-    `);
-
-    return setScreenContext({
+    return observabilityAIAssistant.service.setScreenContext({
       screenDescription,
       data: [
         {
@@ -116,7 +99,7 @@ export function AlertDetails() {
         },
       ],
     });
-  }, [setScreenContext, alertDetail]);
+  }, [observabilityAIAssistant, alertDetail]);
 
   useEffect(() => {
     if (alertDetail) {
@@ -124,6 +107,7 @@ export function AlertDetails() {
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
     }
   }, [alertDetail, ruleTypeRegistry]);
+
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -259,4 +243,29 @@ export function AlertDetails() {
       <EuiTabbedContent data-test-subj="alertDetailsTabbedContent" tabs={tabs} />
     </ObservabilityPageTemplate>
   );
+}
+
+export function getScreenDescription(alertDetail: AlertData) {
+  const alertState = alertDetail.formatted.active ? 'active' : 'recovered';
+  const alertStarted = new Date(alertDetail.formatted.start).toISOString();
+  const alertUpdated = new Date(alertDetail.formatted.lastUpdated).toISOString();
+
+  return dedent(`The user is looking at an ${alertState} alert. It started at ${alertStarted}, and was last updated at ${alertUpdated}.
+
+  ${
+    alertDetail.formatted.reason
+      ? `The reason given for the alert is ${alertDetail.formatted.reason}.`
+      : ''
+  }
+
+  The alert details are:
+  ${Object.entries(alertDetail.formatted.fields)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n')}  
+
+  Do not repeat this information to the user, unless it is relevant for them to know. 
+  Please suggestion root causes if possilbe.
+  Suggest next steps for the user to take.
+
+  `);
 }

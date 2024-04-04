@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.11.1",
+    "node": "20.12.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -104,7 +104,7 @@
     "@elastic/charts": "64.0.2",
     "@elastic/datemath": "5.0.3",
     "@elastic/ecs": "^8.11.1",
-    "@elastic/elasticsearch": "^8.12.2",
+    "@elastic/elasticsearch": "^8.13.0",
     "@elastic/ems-client": "8.5.1",
     "@elastic/eui": "93.5.2",
     "@elastic/filesaver": "1.1.2",
@@ -696,6 +696,7 @@
     "@kbn/search-errors": "link:packages/kbn-search-errors",
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-index-documents": "link:packages/kbn-search-index-documents",
+    "@kbn/search-notebooks": "link:x-pack/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/plugins/search_playground",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
@@ -796,10 +797,12 @@
     "@kbn/shared-ux-router-types": "link:packages/shared-ux/router/types",
     "@kbn/shared-ux-storybook-config": "link:packages/shared-ux/storybook/config",
     "@kbn/shared-ux-storybook-mock": "link:packages/shared-ux/storybook/mock",
+    "@kbn/shared-ux-tabbed-modal": "link:packages/shared-ux/modal/tabbed",
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
     "@kbn/slo-plugin": "link:x-pack/plugins/observability_solution/slo",
     "@kbn/slo-schema": "link:x-pack/packages/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/plugins/snapshot_restore",
+    "@kbn/solution-nav-analytics": "link:packages/solution-nav/analytics",
     "@kbn/solution-nav-es": "link:packages/solution-nav/es",
     "@kbn/solution-nav-oblt": "link:packages/solution-nav/oblt",
     "@kbn/sort-predicates": "link:packages/kbn-sort-predicates",

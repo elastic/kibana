@@ -310,7 +310,7 @@ export class ConfigService {
       {
         dev: this.env.mode.dev,
         prod: this.env.mode.prod,
-        serverless: this.env.cliArgs.serverless === true,
+        serverless: this.env.packageInfo.buildFlavor === 'serverless',
         ...this.env.packageInfo,
       },
       `config validation of [${namespace}]`
