@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
@@ -20,8 +20,7 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
-  const inputs = useMemo(() => [input], [input]);
-  const panels = useRiskInputActionsPanels(inputs, closePopover);
+  const panels = useRiskInputActionsPanels([input], closePopover);
 
   return (
     <EuiPopover
