@@ -11,7 +11,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../plugins/index_management/public/services/extensions_service.mock.ts",
   ],
   "exclude": [
     "target/**/*"
