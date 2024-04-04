@@ -76,7 +76,7 @@ export const getAgentStatusRouteHandler = (
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
     );
 
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const agentStatusClient = getAgentStatusClient(agentType, {
       esClient,
       endpointService: endpointContext.service,
