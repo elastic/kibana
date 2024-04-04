@@ -50,9 +50,9 @@ import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineButtonOverview } from './pipeline_button_overview';
+import { SelectClientCallouts } from './select_client_callouts';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -100,7 +100,7 @@ export const ElasticsearchOverview = () => {
       >
         <SelectClientPanel
           docLinks={docLinks}
-          callout={<ConnectorsCallout />}
+          callout={<SelectClientCallouts />}
           application={application}
           consolePlugin={consolePlugin}
           sharePlugin={share}

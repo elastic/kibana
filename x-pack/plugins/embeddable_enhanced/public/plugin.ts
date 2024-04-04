@@ -18,8 +18,7 @@ import {
   IEmbeddable,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { EmbeddableStateComparators } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
-import { apiHasUniqueId } from '@kbn/presentation-publishing';
+import { apiHasUniqueId, StateComparators } from '@kbn/presentation-publishing';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   AdvancedUiActionsSetup,
@@ -57,7 +56,7 @@ export interface StartContract {
     state: DynamicActionsSerializedState
   ) => {
     dynamicActionsApi: HasDynamicActions;
-    dynamicActionsComparator: EmbeddableStateComparators<DynamicActionsSerializedState>;
+    dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
   };
 }
@@ -137,7 +136,7 @@ export class EmbeddableEnhancedPlugin
     state: DynamicActionsSerializedState
   ): {
     dynamicActionsApi: HasDynamicActions;
-    dynamicActionsComparator: EmbeddableStateComparators<DynamicActionsSerializedState>;
+    dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
   } {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(

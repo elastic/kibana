@@ -18,7 +18,6 @@ const conversations = {
     isDefault: true,
     apiConfig: {
       connectorId: 'my-bedrock',
-      connectorTypeTitle: 'Amazon Bedrock',
       defaultSystemPromptId: 'default-system-prompt',
     },
     replacements: {
@@ -49,7 +48,6 @@ const conversations = {
     isDefault: true,
     apiConfig: {
       connectorId: 'my-gen-ai',
-      connectorTypeTitle: 'OpenAI',
       defaultSystemPromptId: 'default-system-prompt',
     },
     messages: [
@@ -105,7 +103,6 @@ const conversations = {
     },
     apiConfig: {
       connectorId: 'my-gen-ai',
-      connectorTypeTitle: 'OpenAI',
       defaultSystemPromptId: 'default-system-prompt',
     },
     messages: [],

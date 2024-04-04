@@ -27,11 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { GcpCredentialsType } from '../../../../common/types_old';
-import {
-  CLOUDBEAT_GCP,
-  SETUP_ACCESS_CLOUD_SHELL,
-  SETUP_ACCESS_MANUAL,
-} from '../../../../common/constants';
+import { CLOUDBEAT_GCP } from '../../../../common/constants';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
   getCspmCloudShellDefaultValue,
@@ -47,7 +43,18 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from '../../test_subjects';
 
-type SetupFormatGCP = 'google_cloud_shell' | 'manual';
+export const GCP_SETUP_ACCESS = {
+  CLOUD_SHELL: 'google_cloud_shell',
+  MANUAL: 'manual',
+};
+
+export const GCP_CREDENTIALS_TYPE = {
+  CREDENTIALS_FILE: 'credentials-file',
+  CREDENTIALS_JSON: 'credentials-json',
+  CREDENTIALS_NONE: 'credentials-none',
+};
+
+type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
 export const GCPSetupInfoContent = () => (
   <>
     <EuiHorizontalRule margin="xl" />
@@ -173,14 +180,14 @@ const credentialOptionsList = [
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
       defaultMessage: 'Credentials File',
     }),
-    value: 'credentials-file',
+    value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
     'data-test-subj': 'credentials_file_option_test_id',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
-    value: 'credentials-json',
+    value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
     'data-test-subj': 'credentials_json_option_test_id',
   },
 ];
@@ -230,7 +237,7 @@ export const gcpField: GcpInputFields = {
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: SETUP_ACCESS_CLOUD_SHELL,
+    id: GCP_SETUP_ACCESS.CLOUD_SHELL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
       defaultMessage: 'Google Cloud Shell',
     }),
@@ -238,7 +245,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
     testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
   },
   {
-    id: SETUP_ACCESS_MANUAL,
+    id: GCP_SETUP_ACCESS.MANUAL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -279,13 +286,13 @@ const getSetupFormatFromInput = (
   const credentialsType = input.streams[0].vars?.setup_access?.value;
   // Google Cloud shell is the default value
   if (!credentialsType) {
-    return SETUP_ACCESS_CLOUD_SHELL;
+    return GCP_SETUP_ACCESS.CLOUD_SHELL;
   }
-  if (credentialsType !== SETUP_ACCESS_CLOUD_SHELL) {
-    return SETUP_ACCESS_MANUAL;
+  if (credentialsType !== GCP_SETUP_ACCESS.CLOUD_SHELL) {
+    return GCP_SETUP_ACCESS.MANUAL;
   }
 
-  return SETUP_ACCESS_CLOUD_SHELL;
+  return GCP_SETUP_ACCESS.CLOUD_SHELL;
 };
 
 const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
@@ -328,7 +335,7 @@ const useCloudShellUrl = ({
   useEffect(() => {
     const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
 
-    if (setupFormat === SETUP_ACCESS_MANUAL) {
+    if (setupFormat === GCP_SETUP_ACCESS.MANUAL) {
       if (!!policyInputCloudShellUrl) {
         updateCloudShellUrl(newPolicy, updatePolicy, undefined);
       }
@@ -349,7 +356,7 @@ const useCloudShellUrl = ({
 
 export const getGcpCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpCredentialsType | undefined => input.streams[0].vars?.setup_access.value;
+): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const GcpCredentialsForm = ({
   input,
@@ -371,7 +378,7 @@ export const GcpCredentialsForm = ({
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   const fieldsSnapshot = useRef({});
-  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const lastCredentialsType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
@@ -395,18 +402,22 @@ export const GcpCredentialsForm = ({
     setupFormat,
   });
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
-    if (newSetupFormat === 'google_cloud_shell') {
+    if (newSetupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
         fieldsToHide.map((field) => [field.id, { value: field.value }])
       );
       // We need to store the last manual credentials type to restore it later
-      lastSetupAccessType.current = getGcpCredentialsType(input);
+      lastCredentialsType.current = getGcpCredentialsType(input);
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            value: 'google_cloud_shell',
+            value: GCP_SETUP_ACCESS.CLOUD_SHELL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
+            value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -418,8 +429,12 @@ export const GcpCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
+            value: GCP_SETUP_ACCESS.MANUAL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
             // Restoring last manual credentials type
-            value: lastSetupAccessType.current || SETUP_ACCESS_MANUAL,
+            value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
             type: 'text',
           },
           // Restoring fields from manual setup format if any
@@ -456,7 +471,7 @@ export const GcpCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === SETUP_ACCESS_CLOUD_SHELL ? (
+      {setupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL ? (
         <GoogleCloudShellSetup
           disabled={disabled}
           fields={fields}

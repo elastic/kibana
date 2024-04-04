@@ -6,6 +6,7 @@ xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
+xpack.observabilityAIAssistant.enabled: false
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security

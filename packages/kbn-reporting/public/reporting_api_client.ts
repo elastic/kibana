@@ -41,7 +41,7 @@ interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
   getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
+  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job | undefined>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
@@ -177,17 +177,29 @@ export class ReportingAPIClient implements IReportingAPI {
    */
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
-    const resp: { job: ReportApiJSON } = await this.http.post(
-      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ jobParams: jobParamsRison }),
+    try {
+      const resp: { job?: ReportApiJSON } | undefined = await this.http.post(
+        `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ jobParams: jobParamsRison }),
+        }
+      );
+      if (resp?.job) {
+        this.addPendingJobId(resp.job.id);
+        return new Job(resp.job);
       }
-    );
-    this.addPendingJobId(resp.job.id);
-    return new Job(resp.job);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      throw new Error('invalid response!');
+    }
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
     return this.http.post(INTERNAL_ROUTES.DOWNLOAD_CSV, {

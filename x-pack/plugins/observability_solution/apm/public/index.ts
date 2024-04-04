@@ -25,6 +25,7 @@ export interface ConfigSchema {
     sourcemapApiAvailable: boolean;
     storageExplorerAvailable: boolean;
     profilingIntegrationAvailable: boolean;
+    ruleFormV2Enabled: boolean;
   };
   serverless: {
     enabled: boolean;
