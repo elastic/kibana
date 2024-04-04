@@ -14,8 +14,7 @@ import {
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { combineLatest } from 'rxjs';
-import { debounceTime, skip } from 'rxjs/operators';
+import { combineLatest, debounceTime, skip } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
