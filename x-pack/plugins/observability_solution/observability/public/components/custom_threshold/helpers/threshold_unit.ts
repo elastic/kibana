@@ -8,13 +8,14 @@
 import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { decimalToPct, pctToDecimal } from './corrected_percent_convert';
 
-export const adjustThresholdBasedOnFormat = (
+export const convertToApiThreshold = (
   previous: CustomThresholdExpressionMetric[],
   next: CustomThresholdExpressionMetric[],
   threshold: number[]
 ) => {
-  const isPreviousPercent = Boolean(previous.length === 1 && previous[0].field?.endsWith('.pct'));
-  const isPercent = Boolean(next.length === 1 && next[0].field?.endsWith('.pct'));
+  const isPreviousPercent = Boolean(previous.every((metric) => metric.field?.endsWith('.pct')));
+  const isPercent = Boolean(next.every((metric) => metric.field?.endsWith('.pct')));
+
   return isPercent === isPreviousPercent
     ? threshold
     : isPercent
@@ -23,3 +24,6 @@ export const adjustThresholdBasedOnFormat = (
     ? threshold.map((v: number) => decimalToPct(v))
     : threshold;
 };
+
+export const isPercent = (metrics: CustomThresholdExpressionMetric[]) =>
+  Boolean(metrics.every((metric) => metric.field?.endsWith('.pct')));
