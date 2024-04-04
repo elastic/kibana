@@ -5,24 +5,37 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
-import React, { Suspense, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import {
+  initializeTimeRange,
+  initializeTitles,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
+import {
+  isViewBySwimLaneData,
+  SwimlaneContainer,
+} from '../../application/explorer/swimlane_container';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddable';
-import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
-import EmbeddableSwimLaneContainer from './embeddable_swim_lane_container';
 import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -72,6 +85,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const services = await getServices(getStartServices);
+
+      const [coreStartServices, pluginsStartServices, anomalySwimLaneServices] = services;
+
       const subscriptions = new Subscription();
 
       const interval = new BehaviorSubject<number | undefined>(undefined);
@@ -108,7 +124,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         query$,
         filters$,
         refresh$,
-        services[2]
+        anomalySwimLaneServices
       );
 
       const api = buildApi(
@@ -152,8 +168,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       return {
         api,
         Component: () => {
-          const I18nContext = services[0].i18n.Context;
-          const theme = services[0].theme;
+          const { theme, i18n, uiSettings } = coreStartServices;
+          const { uiActions } = pluginsStartServices;
+
+          const I18nContext = i18n.Context;
+          const timeBuckets = useTimeBuckets(uiSettings);
 
           useEffect(function onUnmount() {
             return () => {
@@ -162,21 +181,84 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             };
           }, []);
 
+          const [fromPage, perPage, swimlaneType, swimlaneData] = useBatchedPublishingSubjects(
+            api.fromPage,
+            api.perPage,
+            api.swimlaneType,
+            swimLaneData$
+          );
+
+          const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
+
+          const onCellsSelection = useCallback(
+            (update?: AppStateSelectedCells) => {
+              setSelectedCells(update);
+
+              if (update) {
+                uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
+                  embeddable: api,
+                  data: update,
+                  updateCallback: setSelectedCells.bind(null, undefined),
+                });
+              }
+            },
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            [swimlaneData, perPage, setSelectedCells]
+          );
+
           return (
             <I18nContext>
               <KibanaThemeProvider theme={theme}>
-                <KibanaContextProvider services={{ ...services[0] }}>
-                  <Suspense fallback={<EmbeddableLoading />}>
-                    <EmbeddableSwimLaneContainer
-                      api={api}
-                      id={api.uuid}
-                      services={services}
-                      refresh={refresh$}
+                <KibanaContextProvider services={{ ...coreStartServices }}>
+                  <div
+                    css={css`
+                      width: 100%;
+                      padding: 8px;
+                    `}
+                    data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
+                  >
+                    <SwimlaneContainer
+                      id={'id'}
+                      data-test-subj={`mlSwimLaneEmbeddable_${'id'}`}
+                      timeBuckets={timeBuckets}
+                      swimlaneData={swimlaneData!}
+                      swimlaneType={swimlaneType}
+                      fromPage={fromPage}
+                      perPage={perPage}
+                      swimlaneLimit={
+                        isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined
+                      }
+                      onResize={(size) => chartWidth$.next(size)}
+                      selection={selectedCells}
+                      onCellsSelection={onCellsSelection}
+                      onPaginationChange={(update) => {
+                        if (update.fromPage) {
+                          api.updatePagination({ fromPage: update.fromPage });
+                        }
+                        if (update.perPage) {
+                          api.updatePagination({ perPage: update.perPage, fromPage: 1 });
+                        }
+                      }}
+                      isLoading={dataLoading.value!}
+                      yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
+                      noDataWarning={
+                        <EuiEmptyPrompt
+                          titleSize="xxs"
+                          css={{ padding: 0 }}
+                          title={
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ml.swimlaneEmbeddable.noDataFound"
+                                defaultMessage="No anomalies found"
+                              />
+                            </h2>
+                          }
+                        />
+                      }
+                      chartsService={pluginsStartServices.charts}
                       onRenderComplete={onRenderComplete}
-                      onLoading={onLoading}
-                      onError={onError}
                     />
-                  </Suspense>
+                  </div>
                 </KibanaContextProvider>
               </KibanaThemeProvider>
             </I18nContext>
