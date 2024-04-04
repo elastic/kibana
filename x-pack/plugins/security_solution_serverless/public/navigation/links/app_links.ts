@@ -10,7 +10,7 @@ import type {
   LinkItem,
 } from '@kbn/security-solution-plugin/public/common/links/types';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { cloneDeep, find, remove } from 'lodash';
+import { cloneDeep, remove } from 'lodash';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
@@ -27,12 +27,6 @@ export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
   if (timelineLinkItem) {
     // Add investigations link
     projectAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
-  }
-
-  // Remove data quality dashboard link
-  const dashboardLinkItem = find(projectAppLinks, { id: SecurityPageName.dashboards });
-  if (dashboardLinkItem && dashboardLinkItem.links) {
-    remove(dashboardLinkItem.links, { id: SecurityPageName.dataQuality });
   }
 
   // Remove manage link
