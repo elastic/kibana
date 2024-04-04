@@ -35,6 +35,8 @@ export * from './src/types';
 export {
   CONSOLE_LANG_ID,
   CONSOLE_THEME_ID,
+  CONSOLE_OUTPUT_LANG_ID,
+  CONSOLE_OUTPUT_THEME_ID,
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
 } from './src/console';

@@ -12,17 +12,33 @@
 import './language';
 
 import type { LangModuleType } from '../types';
-import { CONSOLE_LANG_ID } from './constants';
-import { lexerRules, languageConfiguration } from './lexer_rules';
+import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
+import {
+  lexerRules,
+  languageConfiguration,
+  consoleOutputLexerRules,
+  consoleOutputLanguageConfiguration,
+} from './lexer_rules';
 
-export { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from './constants';
+export {
+  CONSOLE_LANG_ID,
+  CONSOLE_OUTPUT_LANG_ID,
+  CONSOLE_THEME_ID,
+  CONSOLE_OUTPUT_THEME_ID,
+} from './constants';
 
-export { buildConsoleTheme } from './theme';
+export { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
 
 export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,
   lexerRules,
   languageConfiguration,
+};
+
+export const ConsoleOutputLang: LangModuleType = {
+  ID: CONSOLE_OUTPUT_LANG_ID,
+  lexerRules: consoleOutputLexerRules,
+  languageConfiguration: consoleOutputLanguageConfiguration,
 };
 
 export type { ParsedRequest } from './types';
