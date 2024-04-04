@@ -346,7 +346,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     alertsTableConfiguration.useFieldBrowserOptions ?? fieldBrowserStub,
     onToggleColumn
   );
-
   const toolbarVisibilityArgs = useMemo(() => {
     return {
       bulkActions,
@@ -459,7 +458,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       refresh,
       clearSelection,
       renderCustomActionsRow,
-      'test-test-custom-attribute': 'ello cool api',
     };
   }, [
     passedCellContext,

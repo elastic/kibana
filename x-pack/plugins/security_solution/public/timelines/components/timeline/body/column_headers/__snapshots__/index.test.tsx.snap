@@ -782,7 +782,11 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
         "headerCellRender": Object {
           "$$typeof": Symbol(react.memo),
           "compare": null,
-          "type": [Function],
+          "type": Object {
+            "$$typeof": Symbol(react.memo),
+            "compare": null,
+            "type": [Function],
+          },
         },
         "id": "default-timeline-control-column",
         "rowCellRender": Object {

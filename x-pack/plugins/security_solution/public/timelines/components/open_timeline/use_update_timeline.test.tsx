@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mockTimelineModel } from '../../../common/mock';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
@@ -81,149 +82,196 @@ describe('dispatchUpdateTimeline', () => {
     jest.clearAllMocks();
 
     clock = sinon.useFakeTimers(unix);
-    timelineDispatch = useUpdateTimeline();
   });
 
   afterEach(function () {
     clock.restore();
   });
 
-  test('it invokes date range picker dispatch', () => {
-    timelineDispatch(defaultArgs);
+  it('it invokes date range picker dispatch', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      result.current(defaultArgs);
 
-    expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
-      from: '2020-03-26T14:35:56.356Z',
-      to: '2020-03-26T14:41:56.356Z',
+      expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
+      });
     });
   });
 
-  test('it invokes add timeline dispatch', () => {
-    timelineDispatch(defaultArgs);
+  it('it invokes add timeline dispatch', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      result.current(defaultArgs);
 
-    expect(dispatchAddTimeline).toHaveBeenCalledWith({
-      id: TimelineId.active,
-      savedTimeline: true,
-      timeline: {
+      expect(dispatchAddTimeline).toHaveBeenCalledWith({
+        id: TimelineId.active,
+        savedTimeline: true,
+        timeline: {
+          ...mockTimelineModel,
+          version: null,
+          updated: undefined,
+          changed: undefined,
+        },
+      });
+    });
+  });
+
+  it('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      result.current(defaultArgs);
+
+      expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  it('it does not invoke notes dispatch if duplicate is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      result.current(defaultArgs);
+
+      expect(dispatchAddNotes).not.toHaveBeenCalled();
+    });
+  });
+
+  it('it does not invoke kql filter query dispatches if timeline.kqlQuery.kuery is null', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      const mockTimeline = {
         ...mockTimelineModel,
+        kqlQuery: {
+          filterQuery: {
+            kuery: null,
+            serializedQuery: 'some-serialized-query',
+          },
+        },
+      };
+      result.current({
+        ...defaultArgs,
+        timeline: mockTimeline,
+      });
+
+      expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  it('it invokes kql filter query dispatches if timeline.kqlQuery.filterQuery.kuery is not null', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      const mockTimeline = {
+        ...mockTimelineModel,
+        kqlQuery: {
+          filterQuery: {
+            kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
+            serializedQuery: 'some-serialized-query',
+          },
+        },
+      };
+      result.current({
+        ...defaultArgs,
+        timeline: mockTimeline,
+      });
+
+      expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
+        id: TimelineId.active,
+        filterQuery: {
+          kuery: {
+            kind: 'kuery',
+            expression: 'expression',
+          },
+          serializedQuery: 'some-serialized-query',
+        },
+      });
+    });
+  });
+
+  it('it invokes dispatchAddNotes if duplicate is false', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      result.current({
+        ...defaultArgs,
+        duplicate: false,
+        notes: [
+          {
+            created: 1585233356356,
+            updated: 1585233356356,
+            noteId: 'note-id',
+            note: 'I am a note',
+            timelineId: null,
+            version: 'testVersion',
+          },
+        ],
+      });
+
+      expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
+      expect(dispatchUpdateNote).not.toHaveBeenCalled();
+      expect(dispatchAddNotes).toHaveBeenCalledWith({
+        notes: [
+          {
+            created: new Date('2020-03-26T14:35:56.356Z'),
+            eventId: null,
+            id: 'note-id',
+            lastEdit: new Date('2020-03-26T14:35:56.356Z'),
+            note: 'I am a note',
+            user: 'unknown',
+            saveObjectId: 'note-id',
+            timelineId: null,
+            version: 'testVersion',
+          },
+        ],
+      });
+    });
+  });
+
+  it('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useUpdateTimeline(), {
+        wrapper: TestProviders,
+      });
+      await waitForNextUpdate();
+      result.current({
+        ...defaultArgs,
+        ruleNote: '# this would be some markdown',
+      });
+      const expectedNote: Note = {
+        created: new Date(anchor),
+        id: 'uuidv4()',
+        lastEdit: null,
+        note: '# this would be some markdown',
+        saveObjectId: null,
+        user: 'elastic',
         version: null,
-        updated: undefined,
-        changed: undefined,
-      },
-    });
-  });
+      };
 
-  test('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', () => {
-    timelineDispatch(defaultArgs);
-
-    expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
-  });
-
-  test('it does not invoke notes dispatch if duplicate is true', () => {
-    timelineDispatch(defaultArgs);
-
-    expect(dispatchAddNotes).not.toHaveBeenCalled();
-  });
-
-  test('it does not invoke kql filter query dispatches if timeline.kqlQuery.kuery is null', () => {
-    const mockTimeline = {
-      ...mockTimelineModel,
-      kqlQuery: {
-        filterQuery: {
-          kuery: null,
-          serializedQuery: 'some-serialized-query',
-        },
-      },
-    };
-    timelineDispatch({
-      ...defaultArgs,
-      timeline: mockTimeline,
-    });
-
-    expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
-  });
-
-  test('it invokes kql filter query dispatches if timeline.kqlQuery.filterQuery.kuery is not null', () => {
-    const mockTimeline = {
-      ...mockTimelineModel,
-      kqlQuery: {
-        filterQuery: {
-          kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
-          serializedQuery: 'some-serialized-query',
-        },
-      },
-    };
-    timelineDispatch({
-      ...defaultArgs,
-      timeline: mockTimeline,
-    });
-
-    expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
-      id: TimelineId.active,
-      filterQuery: {
-        kuery: {
-          kind: 'kuery',
-          expression: 'expression',
-        },
-        serializedQuery: 'some-serialized-query',
-      },
-    });
-  });
-
-  test('it invokes dispatchAddNotes if duplicate is false', () => {
-    timelineDispatch({
-      ...defaultArgs,
-      duplicate: false,
-      notes: [
-        {
-          created: 1585233356356,
-          updated: 1585233356356,
-          noteId: 'note-id',
-          note: 'I am a note',
-          timelineId: null,
-          version: 'testVersion',
-        },
-      ],
-    });
-
-    expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
-    expect(dispatchUpdateNote).not.toHaveBeenCalled();
-    expect(dispatchAddNotes).toHaveBeenCalledWith({
-      notes: [
-        {
-          created: new Date('2020-03-26T14:35:56.356Z'),
-          eventId: null,
-          id: 'note-id',
-          lastEdit: new Date('2020-03-26T14:35:56.356Z'),
-          note: 'I am a note',
-          user: 'unknown',
-          saveObjectId: 'note-id',
-          timelineId: null,
-          version: 'testVersion',
-        },
-      ],
-    });
-  });
-
-  test('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', () => {
-    timelineDispatch({
-      ...defaultArgs,
-      ruleNote: '# this would be some markdown',
-    });
-    const expectedNote: Note = {
-      created: new Date(anchor),
-      id: 'uuidv4()',
-      lastEdit: null,
-      note: '# this would be some markdown',
-      saveObjectId: null,
-      user: 'elastic',
-      version: null,
-    };
-
-    expect(dispatchAddNotes).not.toHaveBeenCalled();
-    expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
-    expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
-      id: TimelineId.active,
-      noteId: 'uuidv4()',
+      expect(dispatchAddNotes).not.toHaveBeenCalled();
+      expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
+      expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
+        id: TimelineId.active,
+        noteId: 'uuidv4()',
+      });
     });
   });
 });

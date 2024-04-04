@@ -98,6 +98,7 @@ const useGetDefaultVisibility = ({
   fieldBrowserOptions,
   getInspectQuery,
   showInspectButton,
+  toolbarVisibilityProp,
 }: {
   alertsCount: number;
   columnIds: string[];
@@ -108,6 +109,7 @@ const useGetDefaultVisibility = ({
   fieldBrowserOptions?: FieldBrowserOptions;
   getInspectQuery: GetInspectQuery;
   showInspectButton: boolean;
+  toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const defaultVisibility = useMemo(() => {
     const hasBrowserFields = Object.keys(browserFields).length > 0;
@@ -170,7 +172,7 @@ export const useGetToolbarVisibility = ({
   fieldBrowserOptions,
   getInspectQuery,
   showInspectButton,
-  toolbarVisiblityProp,
+  toolbarVisibilityProp,
 }: {
   bulkActions: BulkActionsPanelConfig[];
   alertsCount: number;
@@ -188,10 +190,9 @@ export const useGetToolbarVisibility = ({
   fieldBrowserOptions?: FieldBrowserOptions;
   getInspectQuery: GetInspectQuery;
   showInspectButton: boolean;
-  toolbarVisiblityProp?: EuiDataGridToolBarVisibilityOptions;
+  toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-
   const defaultVisibilityProps = useMemo(() => {
     return {
       alertsCount,
@@ -220,48 +221,50 @@ export const useGetToolbarVisibility = ({
     const isBulkActionsActive =
       selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
 
-    if (isBulkActionsActive)
+    if (isBulkActionsActive) {
       return {
         ...defaultVisibility,
-        ...(toolbarVisiblityProp ?? {}),
+        ...(toolbarVisibilityProp ?? {}),
       };
-    return {
-      showColumnSelector: false,
-      showSortSelector: false,
-      additionalControls: {
-        right: (
-          <RightControl
-            controls={controls}
-            getInspectQuery={getInspectQuery}
-            showInspectButton={showInspectButton}
-          />
-        ),
-        left: {
-          append: (
-            <>
-              <AlertsCount count={alertsCount} />
-              <Suspense fallback={null}>
-                <BulkActionsToolbar
-                  totalItems={alertsCount}
-                  panels={bulkActions}
-                  alerts={alerts}
-                  setIsBulkActionsLoading={setIsBulkActionsLoading}
-                  clearSelection={clearSelection}
-                  refresh={refresh}
-                />
-              </Suspense>
-            </>
+    } else {
+      return {
+        showColumnSelector: false,
+        showSortSelector: false,
+        additionalControls: {
+          right: (
+            <RightControl
+              controls={controls}
+              getInspectQuery={getInspectQuery}
+              showInspectButton={showInspectButton}
+            />
           ),
+          left: {
+            append: (
+              <>
+                <AlertsCount count={alertsCount} />
+                <Suspense fallback={null}>
+                  <BulkActionsToolbar
+                    totalItems={alertsCount}
+                    panels={bulkActions}
+                    alerts={alerts}
+                    setIsBulkActionsLoading={setIsBulkActionsLoading}
+                    clearSelection={clearSelection}
+                    refresh={refresh}
+                  />
+                </Suspense>
+              </>
+            ),
+          },
         },
-      },
-      ...(toolbarVisiblityProp ?? {}),
-    };
+        ...(toolbarVisibilityProp ?? {}),
+      };
+    }
   }, [
     alertsCount,
     bulkActions,
     defaultVisibility,
     selectedRowsCount,
-    toolbarVisiblityProp,
+    toolbarVisibilityProp,
     alerts,
     clearSelection,
     refresh,

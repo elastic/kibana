@@ -226,7 +226,8 @@ export default ({ getService }: FtrProviderContext) => {
         it('Opens rule details page when click on "View Rule Details"', async () => {
           const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
           await actionsButton.click();
-          await observability.alerts.common.viewRuleDetailsButtonClick();
+          await observability.alerts.common.openAlertsFlyout();
+          await observability.alerts.common.viewRuleDetailsLinkClick();
           expect(
             await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
           ).to.eql('Observability');
