@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SloErrorBudgetEmbeddableFactoryDefinition } from './slo_error_budget_embeddable_factory';
+export const SLO_ERROR_BUDGET_ID = 'SLO_ERROR_BUDGET_EMBEDDABLE';
+export const ADD_SLO_ERROR_BUDGET_ACTION_ID = 'CREATE_SLO_ERROR_BUDGET_EMBEDDABLE';

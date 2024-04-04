@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SloSelector } from '../alerts/slo_selector';
 import type { EmbeddableSloProps } from './types';
+import { SloSelector } from '../alerts/slo_selector';
 
 interface SloConfigurationProps {
   onCreate: (props: EmbeddableSloProps) => void;
@@ -29,14 +29,13 @@ interface SloConfigurationProps {
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
+  const [hasError, setHasError] = useState(false);
 
   const onConfirmClick = () =>
     onCreate({
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
     });
-  const [hasError, setHasError] = useState(false);
-
   return (
     <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
       <EuiModalHeader>

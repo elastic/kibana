@@ -39,6 +39,7 @@ export {
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
+export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
