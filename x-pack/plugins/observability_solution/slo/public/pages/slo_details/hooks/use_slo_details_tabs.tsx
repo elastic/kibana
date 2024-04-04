@@ -18,11 +18,12 @@ export const useSloDetailsTabs = ({
   selectedTabId,
   setSelectedTabId,
 }: {
-  isAutoRefreshing: boolean;
   slo?: SLOWithSummaryResponse | null;
+  isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
   setSelectedTabId: (val: SloTabId) => void;
 }) => {
+  // TODO Kevin: slo.instanceId should always be set at this point
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE]] : [],
     shouldRefetch: isAutoRefreshing,

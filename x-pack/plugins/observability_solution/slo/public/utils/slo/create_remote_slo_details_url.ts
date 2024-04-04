@@ -8,6 +8,7 @@
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '../../../common/locators/paths';
 
+// TODO Kevin: we should use a similar function for remote delete URls and co.
 export function createRemoteSloDetailsUrl(slo: SLOWithSummaryResponse, spaceId?: string) {
   if (!slo.remote) {
     return undefined;

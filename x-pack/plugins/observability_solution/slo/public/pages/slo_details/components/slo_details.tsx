@@ -9,9 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
-import { SloRemoteCallout } from './slo_remote_callout';
 import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
-
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
@@ -20,6 +18,7 @@ import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
+import { SloRemoteCallout } from './slo_remote_callout';
 
 export const TAB_ID_URL_PARAM = 'tabId';
 export const OVERVIEW_TAB_ID = 'overview';
