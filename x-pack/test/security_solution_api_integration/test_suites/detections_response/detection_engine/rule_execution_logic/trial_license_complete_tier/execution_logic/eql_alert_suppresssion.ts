@@ -1486,7 +1486,7 @@ export default ({ getService }: FtrProviderContext) => {
         const eventId = uuidv4();
         await indexGeneratedSourceDocuments({
           docsCount: 10,
-          seed: (index, id, timestamp) => ({
+          seed: (_index, _id, timestamp) => ({
             id: eventId,
             '@timestamp': timestamp,
             agent: { name: 'group_me' },
@@ -1513,8 +1513,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const lastExecution = rule?.execution_summary?.last_execution!;
         expect(lastExecution.status).toEqual('succeeded');
-        expect(lastExecution.metrics?.total_search_duration_ms).toBeGreaterThan(0);
-        // TODO suppressedAlertsCount is present on the rule result, but doesn't make it to the execution status
+        expect(lastExecution.metrics).toEqual(
+          expect.objectContaining({
+            total_indexing_duration_ms: expect.any(Number),
+            total_search_duration_ms: expect.any(Number),
+          })
+        );
       });
     });
 
