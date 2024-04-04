@@ -65,7 +65,6 @@ const getPanelContentProvider = (
 export interface GetSolutionNavigation {
   navigationTree$: Observable<NavigationTreeDefinition>;
   panelContentProvider: PanelContentProvider;
-  dataTestSubj: string;
 }
 
 export const getSolutionNavigation = (core: CoreStart): GetSolutionNavigation => {
@@ -77,9 +76,5 @@ export const getSolutionNavigation = (core: CoreStart): GetSolutionNavigation =>
     map((solutionNavLinks) => formatNavigationTree(solutionNavLinks, CATEGORIES, FOOTER_CATEGORIES))
   );
 
-  return {
-    navigationTree$,
-    panelContentProvider,
-    dataTestSubj: 'securitySolutionSideNav',
-  };
+  return { navigationTree$, panelContentProvider };
 };
