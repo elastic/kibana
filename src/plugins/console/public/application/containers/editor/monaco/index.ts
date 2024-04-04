@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { lexerRules, languageConfiguration } from './console_editor';
-export { consoleOutputLexerRules, consoleOutputLanguageConfiguration } from './console_output';
+export { MonacoEditor } from './monaco_editor';
+export { MonacoEditorOutput } from './monaco_editor_output';
