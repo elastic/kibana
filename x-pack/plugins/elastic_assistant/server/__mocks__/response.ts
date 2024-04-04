@@ -73,7 +73,7 @@ export const getConversationResponseMock = (
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   createdAt: timestamp,
   namespace: 'default',
   isDefault: false,

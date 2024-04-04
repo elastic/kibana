@@ -18,6 +18,7 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -32,6 +33,8 @@ import { getField } from '../../../../helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { defaultUdtHeaders } from '../../../../timelines/components/timeline/unified_components/default_headers';
+import { defaultHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -141,6 +144,9 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
   const updateTimeline = useUpdateTimeline();
 
   const createTimeline = useCallback(
@@ -154,6 +160,7 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           indexNames: timeline.indexNames ?? [],
           show: true,
         },
@@ -161,7 +168,12 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       });
     },
-    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline]
+    [
+      updateTimeline,
+      updateTimelineIsLoading,
+      clearActiveTimeline,
+      unifiedComponentsInTimelineEnabled,
+    ]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {

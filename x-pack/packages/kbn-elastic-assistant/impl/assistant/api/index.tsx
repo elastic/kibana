@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { ApiConfig, Replacement } from '@kbn/elastic-assistant-common';
+import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
 export * from './conversations';
@@ -23,7 +23,7 @@ export interface FetchConnectorExecuteAction {
   apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
-  replacements: Replacement[];
+  replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
 }
@@ -114,7 +114,7 @@ export const fetchConnectorExecuteAction = async ({
       connector_id: string;
       status: string;
       data: string;
-      replacements?: Replacement[];
+      replacements?: Replacements;
       service_message?: string;
       trace_data?: {
         transaction_id: string;

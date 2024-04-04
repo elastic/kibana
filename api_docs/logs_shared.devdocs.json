@@ -3019,7 +3019,8 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-public.ObservabilityAIAssistantPublicStart",
                 "text": "ObservabilityAIAssistantPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
             "deprecated": false,
@@ -3041,7 +3042,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -3497,7 +3498,7 @@
           "label": "LogAIAssistant",
           "description": [],
           "signature": [
-            "(props: Omit<",
+            "((props: Omit<",
             {
               "pluginId": "logsShared",
               "scope": "public",
@@ -3505,7 +3506,7 @@
               "section": "def-public.LogAIAssistantProps",
               "text": "LogAIAssistantProps"
             },
-            ", \"observabilityAIAssistant\">) => JSX.Element"
+            ", \"observabilityAIAssistant\">) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
           "deprecated": false,
