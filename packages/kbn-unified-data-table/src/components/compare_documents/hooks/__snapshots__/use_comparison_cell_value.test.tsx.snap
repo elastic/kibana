@@ -358,9 +358,9 @@ exports[`useComparisonCellValue should render field cells 1`] = `
       >
         <span
           data-euiicon-type="tokenString"
-          title="String"
+          title="string"
         >
-          String
+          string
         </span>
       </span>
     </div>
@@ -393,9 +393,9 @@ exports[`useComparisonCellValue should render field cells 2`] = `
       >
         <span
           data-euiicon-type="tokenString"
-          title="String"
+          title="string"
         >
-          String
+          string
         </span>
       </span>
     </div>
@@ -428,9 +428,9 @@ exports[`useComparisonCellValue should render field cells 3`] = `
       >
         <span
           data-euiicon-type="tokenNumber"
-          title="Number"
+          title="number"
         >
-          Number
+          number
         </span>
       </span>
     </div>

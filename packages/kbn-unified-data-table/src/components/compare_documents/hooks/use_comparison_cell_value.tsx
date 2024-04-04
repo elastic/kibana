@@ -11,7 +11,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getFieldTypeName } from '@kbn/field-utils';
+import { getFieldIconProps } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
@@ -117,13 +117,11 @@ interface FieldCellValueProps {
 const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <FieldIcon
-          type={field?.type ?? 'unknown'}
-          label={getFieldTypeName(field?.type)}
-          scripted={field?.scripted}
-        />
-      </EuiFlexItem>
+      {field && (
+        <EuiFlexItem grow={false}>
+          <FieldIcon {...getFieldIconProps(field)} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiText
           size="relative"

@@ -98,6 +98,7 @@ export function DataTableDocumentToolbarBtn({
   setSelectedDocs: (value: string[]) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const { isDarkMode } = useContext(UnifiedDataTableContext);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const getMenuItems = useCallback(() => {
@@ -249,7 +250,10 @@ export function DataTableDocumentToolbarBtn({
           badgeContent={selectedDocs.length}
           css={{
             '.euiDataGridToolbarControl__badge': {
-              backgroundColor: tint(euiTheme.colors.success, 0.3),
+              backgroundColor: isDarkMode
+                ? euiTheme.colors.success
+                : tint(euiTheme.colors.success, 0.3),
+              color: euiTheme.colors.ink,
             },
           }}
         >

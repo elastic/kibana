@@ -133,10 +133,10 @@ describe('CompareDocuments', () => {
   it('should get values from local storage', () => {
     renderCompareDocuments();
     expect(mockLocalStorage).toEqual({
-      'test:dataGridDiffMode': '"basic"',
-      'test:dataGridShowAllFields': 'false',
-      'test:dataGridShowDiffDecorations': 'true',
-      'test:dataGridShowMatchingValues': 'true',
+      'test:dataGridComparisonDiffMode': '"basic"',
+      'test:dataGridComparisonShowAllFields': 'false',
+      'test:dataGridComparisonShowDiffDecorations': 'true',
+      'test:dataGridComparisonShowMatchingValues': 'true',
     });
   });
 

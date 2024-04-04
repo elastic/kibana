@@ -52,7 +52,11 @@ export interface CompareDocumentsProps {
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
 }
 
-const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGrid${key}`;
+const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
+const COMPARISON_IN_MEMORY: EuiDataGridInMemory = { level: 'sorting' };
+const COMPARISON_GRID_STYLE: EuiDataGridStyle = { ...GRID_STYLE, stripes: undefined };
+
+const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGridComparison${key}`;
 
 const CompareDocuments = ({
   id,
@@ -117,13 +121,6 @@ const CompareDocuments = ({
     }),
     [comparisonColumns, setSelectedDocs]
   );
-  const comparisonRowCount = useMemo(() => comparisonFields.length, [comparisonFields.length]);
-  const comparisonRowHeight = useMemo<EuiDataGridRowHeightsOptions>(
-    () => ({ defaultHeight: 'auto' }),
-    []
-  );
-  const comparisonInMemory = useMemo<EuiDataGridInMemory>(() => ({ level: 'sorting' }), []);
-  const gridStyle = useMemo<EuiDataGridStyle>(() => ({ ...GRID_STYLE, stripes: undefined }), []);
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
@@ -190,13 +187,13 @@ const CompareDocuments = ({
       id={id}
       aria-describedby={ariaDescribedBy}
       aria-labelledby={ariaLabelledBy}
-      gridStyle={gridStyle}
+      gridStyle={COMPARISON_GRID_STYLE}
       toolbarVisibility={comparisonToolbarVisibility}
       columns={comparisonColumns}
       columnVisibility={comparisonColumnVisibility}
-      rowCount={comparisonRowCount}
-      rowHeightsOptions={comparisonRowHeight}
-      inMemory={comparisonInMemory}
+      rowCount={comparisonFields.length}
+      rowHeightsOptions={COMPARISON_ROW_HEIGHT}
+      inMemory={COMPARISON_IN_MEMORY}
       schemaDetectors={schemaDetectors}
       renderCellValue={renderCellValue}
       renderCustomToolbar={renderCustomToolbarFn}
