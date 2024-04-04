@@ -32,10 +32,11 @@ export function AlertDetailContextualInsights({
   alert: AlertDetailsAppSectionProps['alert'];
 }) {
   const {
-    services: {
-      observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
-    },
+    services: { observabilityAIAssistant },
   } = useKibana();
+
+  const ObservabilityAIAssistantContextualInsight =
+    observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
 
   const getPromptMessages = useCallback(async () => {
     const {
