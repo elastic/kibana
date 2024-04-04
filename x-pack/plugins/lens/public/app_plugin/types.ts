@@ -25,10 +25,8 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -147,7 +145,6 @@ export interface LensAppServices {
   chrome: ChromeStart;
   overlays: OverlayStart;
   storage: IStorageWrapper;
-  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
@@ -171,8 +168,6 @@ export interface LensAppServices {
   share?: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
-  // Temporarily required until the 'by value' paradigm is default.
-  dashboardFeatureFlag: DashboardFeatureFlagConfig;
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;

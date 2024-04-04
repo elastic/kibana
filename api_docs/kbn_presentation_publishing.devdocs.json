@@ -63,6 +63,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiCanAddNewPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanAddNewPanel",
+        "description": [
+          "\nA type guard which can be used to determine if a given API can add a new panel."
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAddNewPanel",
+            "text": "CanAddNewPanel"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiCanAddNewPanel.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasDisableTriggers",
         "type": "Function",
         "tags": [],
@@ -93,6 +135,107 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasLegacyLibraryTransforms",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "apiHasLegacyLibraryTransforms",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLegacyLibraryTransforms",
+            "text": "HasLegacyLibraryTransforms"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasLegacyLibraryTransforms.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasLibraryTransforms",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasLibraryTransforms",
+        "description": [],
+        "signature": [
+          "<StateT extends object = object>(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<StateT>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasLibraryTransforms.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1556,7 +1699,9 @@
             "type": "Object",
             "tags": [],
             "label": "subjects",
-            "description": [],
+            "description": [
+              "Publishing subjects array.\nWhen 'subjects' is expected to change, 'subjects' must be part of component react state."
+            ],
             "signature": [
               "[...SubjectsType]"
             ],
@@ -1564,269 +1709,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useBlockingError",
-        "type": "Function",
-        "tags": [],
-        "label": "useBlockingError",
-        "description": [
-          "\nGets this API's fatal error as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesBlockingError",
-            "text": "PublishesBlockingError"
-          },
-          "> | undefined) => Error | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useBlockingError.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesBlockingError",
-                "text": "PublishesBlockingError"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDataLoading",
-        "type": "Function",
-        "tags": [],
-        "label": "useDataLoading",
-        "description": [
-          "\nGets this API's data loading state as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDataLoading",
-            "text": "PublishesDataLoading"
-          },
-          "> | undefined) => boolean | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDataLoading.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesDataLoading",
-                "text": "PublishesDataLoading"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_loading.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDataViews",
-        "type": "Function",
-        "tags": [],
-        "label": "useDataViews",
-        "description": [
-          "\nGets this API's data views as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDataViews",
-            "text": "PublishesDataViews"
-          },
-          "> | undefined) => ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "[] | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDataViews.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesDataViews",
-                "text": "PublishesDataViews"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDefaultPanelDescription",
-        "type": "Function",
-        "tags": [],
-        "label": "useDefaultPanelDescription",
-        "description": [
-          "\nA hook that gets this API's default panel description as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelDescription",
-            "text": "PublishesPanelDescription"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDefaultPanelDescription.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelDescription",
-                "text": "PublishesPanelDescription"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useDisabledActionIds",
-        "type": "Function",
-        "tags": [],
-        "label": "useDisabledActionIds",
-        "description": [
-          "\nGets this API's disabled action IDs as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesDisabledActionIds",
-            "text": "PublishesDisabledActionIds"
-          },
-          "> | undefined) => string[] | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useDisabledActionIds.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesDisabledActionIds",
-                "text": "PublishesDisabledActionIds"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_disabled_action_ids.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1893,57 +1775,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.usePanelDescription",
-        "type": "Function",
-        "tags": [],
-        "label": "usePanelDescription",
-        "description": [
-          "\nA hook that gets this API's panel description as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelDescription",
-            "text": "PublishesPanelDescription"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.usePanelDescription.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesPanelDescription",
-                "text": "PublishesPanelDescription"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.usePublishingSubject",
         "type": "Function",
         "tags": [],
@@ -1982,56 +1813,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useSavedObjectId",
-        "type": "Function",
-        "tags": [],
-        "label": "useSavedObjectId",
-        "description": [
-          "\nA hook that gets this API's saved object ID as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesSavedObjectId",
-            "text": "PublishesSavedObjectId"
-          },
-          " | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useSavedObjectId.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesSavedObjectId",
-                "text": "PublishesSavedObjectId"
-              },
-              " | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2078,7 +1859,7 @@
             "tags": [],
             "label": "subject",
             "description": [
-              "Publishing subject."
+              "Publishing subject.\nWhen 'subject' is expected to change, 'subject' must be part of component react state."
             ],
             "signature": [
               "SubjectType"
@@ -2091,118 +1872,86 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
+      }
+    ],
+    "interfaces": [
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useUnsavedChanges",
-        "type": "Function",
+        "id": "def-common.CanAddNewPanel",
+        "type": "Interface",
         "tags": [],
-        "label": "useUnsavedChanges",
+        "label": "CanAddNewPanel",
         "description": [
-          "\nA hook that gets this API's unsaved changes as a reactive variable which will cause re-renders on change."
+          "\nThis API can add a new panel as a child."
         ],
-        "signature": [
-          "(api: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnsavedChanges",
-            "text": "PublishesUnsavedChanges"
-          },
-          " | undefined) => object | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useUnsavedChanges.$1",
-            "type": "Object",
+            "id": "def-common.CanAddNewPanel.addNewPanel",
+            "type": "Function",
             "tags": [],
-            "label": "api",
+            "label": "addNewPanel",
             "description": [],
             "signature": [
+              "<ApiType extends unknown = unknown>(panel: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesUnsavedChanges",
-                "text": "PublishesUnsavedChanges"
+                "section": "def-common.PanelPackage",
+                "text": "PanelPackage"
               },
-              " | undefined"
+              ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.CanAddNewPanel.addNewPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.PanelPackage",
+                    "text": "PanelPackage"
+                  }
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.CanAddNewPanel.addNewPanel.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displaySuccessMessage",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useViewMode",
-        "type": "Function",
-        "tags": [],
-        "label": "useViewMode",
-        "description": [
-          "\nA hook that gets this API's view mode as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "<ApiType extends Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          "> = Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">>(api: ApiType | undefined) => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useViewMode.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "ApiType | undefined"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
-    "interfaces": [
       {
         "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.EmbeddableApiContext",
@@ -2335,6 +2084,224 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasLibraryTransforms",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasLibraryTransforms",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<StateT>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.canLinkToLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "canLinkToLibrary",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True when embeddable is by-value and can be converted to by-reference"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.saveToLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "saveToLibrary",
+            "description": [
+              "\nSave embeddable to library\n"
+            ],
+            "signature": [
+              "(title: string) => Promise<string>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.saveToLibrary.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "id of persisted library item"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.getByReferenceState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByReferenceState",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(libraryId: string) => StateT"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.getByReferenceState.$1",
+                "type": "string",
+                "tags": [],
+                "label": "libraryId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "by-reference embeddable state replacing by-value embeddable state"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "checkForDuplicateTitle",
+            "description": [],
+            "signature": [
+              "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "newTitle",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isTitleDuplicateConfirmed",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "onTitleDuplicate",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.canUnlinkFromLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "canUnlinkFromLibrary",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True when embeddable is by-reference and can be converted to by-value"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.getByValueState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByValueState",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "() => StateT"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "by-value embeddable state replacing by-reference embeddable state"
+            ]
           }
         ],
         "initialIsOpen": false
@@ -2510,6 +2477,45 @@
             "label": "uuid",
             "description": [],
             "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.PanelPackage",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelPackage",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PanelPackage.panelType",
+            "type": "string",
+            "tags": [],
+            "label": "panelType",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PanelPackage.initialState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5788,6 +5794,57 @@
             "path": "packages/presentation/presentation_publishing/comparators/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasLegacyLibraryTransforms",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "HasLegacyLibraryTransforms",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasLibraryTransforms",
+            "text": "HasLibraryTransforms"
+          },
+          "<object>, \"canLinkToLibrary\" | \"canUnlinkFromLibrary\"> & { linkToLibrary: () => Promise<void>; unlinkFromLibrary: () => Promise<void>; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts"
+          },
+          {
+            "plugin": "embeddable",
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_add_to_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_actions/legacy_unlink_from_library_action.tsx"
           }
         ],
         "initialIsOpen": false

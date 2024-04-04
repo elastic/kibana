@@ -12,10 +12,13 @@ x-pack/test/alerting_api_integration/common/plugins/actions_simulators @elastic/
 packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
+x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
+x-pack/packages/ml/aiops_common @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
+x-pack/packages/ml/aiops_log_pattern_analysis @elastic/ml-ui
+x-pack/packages/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/packages/ml/aiops_test_utils @elastic/ml-ui
-x-pack/packages/ml/aiops_utils @elastic/ml-ui
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
@@ -41,6 +44,7 @@ packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
@@ -393,7 +397,10 @@ packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+packages/kbn-esql-ast @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
+packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
+examples/esql_validation_example @elastic/kibana-esql
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
 packages/kbn-event-annotation-components @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
@@ -613,7 +620,6 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 packages/presentation/presentation_containers @elastic/kibana-presentation
-packages/presentation/presentation_library @elastic/kibana-presentation
 src/plugins/presentation_panel @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
@@ -792,8 +798,9 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/es @elastic/appex-sharedux
-packages/solution-nav/oblt @elastic/appex-sharedux
+packages/solution-nav/analytics @elastic/appex-sharedux @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+packages/solution-nav/es @elastic/appex-sharedux @elastic/enterprise-search-frontend
+packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
@@ -1246,6 +1253,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_functional/ @elastic/kibana-security
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
+/packages/core/http/core-http-server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Response Ops team

@@ -1611,12 +1611,12 @@
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Conversation.replacements",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "replacements",
             "description": [],
             "signature": [
-              "{ value: string; uuid: string; }[]"
+              "{} & { [k: string]: string; }"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -1930,12 +1930,12 @@
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.Message.replacements",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "replacements",
             "description": [],
             "signature": [
-              "{ value: string; uuid: string; }[] | undefined"
+              "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,

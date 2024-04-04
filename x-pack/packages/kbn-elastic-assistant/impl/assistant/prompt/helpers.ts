@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Replacement, transformRawData } from '@kbn/elastic-assistant-common';
+import { Replacements, transformRawData } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { Message } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
@@ -40,7 +40,7 @@ export function getCombinedMessage({
   selectedPromptContexts,
   selectedSystemPrompt,
 }: {
-  currentReplacements: Replacement[] | undefined;
+  currentReplacements: Replacements | undefined;
   getAnonymizedValue?: ({
     currentReplacements,
     rawValue,
@@ -53,9 +53,9 @@ export function getCombinedMessage({
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
 }): Message {
-  const replacements: Replacement[] = currentReplacements ?? [];
-  const onNewReplacements = (newReplacements: Replacement[]) => {
-    replacements.push(...newReplacements);
+  let replacements: Replacements = currentReplacements ?? {};
+  const onNewReplacements = (newReplacements: Replacements) => {
+    replacements = { ...replacements, ...newReplacements };
   };
 
   const promptContextsContent = Object.keys(selectedPromptContexts)
