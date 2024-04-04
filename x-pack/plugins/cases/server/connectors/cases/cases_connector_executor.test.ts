@@ -13,6 +13,7 @@ import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
@@ -40,7 +41,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
-import { MAX_OPEN_CASES } from './constants';
+import { INITIAL_ORACLE_RECORD_COUNTER, MAX_OPEN_CASES } from './constants';
 import { CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('./cases_oracle_service');
@@ -636,7 +637,7 @@ describe('CasesConnectorExecutor', () => {
           );
         });
 
-        it('adds the counter correctly if it is bigger than INITIAL_ORACLE_RECORD_COUNTER', async () => {
+        it(`adds the counter correctly if it is bigger than ${INITIAL_ORACLE_RECORD_COUNTER}`, async () => {
           mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
           casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
           casesClientMock.cases.bulkGet.mockResolvedValue({
@@ -655,6 +656,33 @@ describe('CasesConnectorExecutor', () => {
           const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
 
           expect(title).toBe('Test rule (2) (Auto-created)');
+        });
+
+        it(`trims the title correctly if the rule title including the suffix is bigger than ${MAX_TITLE_LENGTH}`, async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            groupingBy: [],
+            rule: { ...params.rule, name: 'a'.repeat(MAX_TITLE_LENGTH) },
+          });
+
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title.length).toBe(MAX_TITLE_LENGTH);
+          expect(title.includes('(2) (Auto-created)')).toBe(true);
         });
 
         it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {

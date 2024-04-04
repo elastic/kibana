@@ -18,6 +18,7 @@ import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
@@ -705,10 +706,6 @@ export class CasesConnectorExecutor {
 
     const groupingDescription = this.getGroupingDescription(grouping);
     const description = `This case is auto-created by ${ruleName}. \n\n Grouping: ${groupingDescription}`;
-    const title =
-      oracleRecord.counter === INITIAL_ORACLE_RECORD_COUNTER
-        ? `${params.rule.name} (Auto-created)`
-        : `${params.rule.name} (${oracleRecord.counter}) (Auto-created)`;
 
     const requiredCustomFields = buildRequiredCustomFieldsForRequest(customFieldsConfigurations);
     this.logger.debug(
@@ -726,7 +723,7 @@ export class CasesConnectorExecutor {
       id: caseId,
       description,
       tags: this.getCaseTags(params, grouping),
-      title,
+      title: this.getCasesTitle(params.rule.name, oracleRecord.counter),
       connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
       /**
        * TODO: Turn on for Security solution
@@ -735,6 +732,17 @@ export class CasesConnectorExecutor {
       owner: params.owner,
       customFields: requiredCustomFields,
     };
+  }
+
+  private getCasesTitle(ruleName: string, oracleCounter: number) {
+    const suffix =
+      oracleCounter === INITIAL_ORACLE_RECORD_COUNTER
+        ? '(Auto-created)'
+        : `(${oracleCounter}) (Auto-created)`;
+
+    const ruleNameTrimmed = ruleName.slice(0, MAX_TITLE_LENGTH - suffix.length - 1);
+
+    return `${ruleNameTrimmed} ${suffix}`;
   }
 
   private getGroupingDescription(grouping: GroupedAlerts['grouping']) {
