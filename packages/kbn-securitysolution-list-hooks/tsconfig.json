@@ -8,7 +8,8 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "kbn_references": [
     "@kbn/securitysolution-hook-utils",
