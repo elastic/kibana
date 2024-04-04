@@ -22,7 +22,7 @@ paths:
                   assistantModelEvaluation:
                     type: boolean
                 required:
-                  - assistantModelEvaluation=
+                  - assistantModelEvaluation
         '400':
           description: Generic Error
           content:
