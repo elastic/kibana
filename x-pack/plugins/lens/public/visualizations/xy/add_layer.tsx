@@ -36,7 +36,7 @@ interface AddLayerButtonProps {
 export enum AddLayerPanelType {
   main = 'main',
   selectAnnotationMethod = 'selectAnnotationMethod',
-  layerVisualizationType = 'layerVisualizationType',
+  selectVisualizationType = 'selectVisualizationType',
 }
 
 export function AddLayerButton({
