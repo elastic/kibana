@@ -100,10 +100,14 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
-      trace_data: {
-        trace_id: message.traceData?.traceId,
-        transaction_id: message.traceData?.transactionId,
-      },
+      ...(message.traceData
+        ? {
+            trace_data: {
+              trace_id: message.traceData.traceId ?? '',
+              transaction_id: message.traceData.transactionId ?? '',
+            },
+          }
+        : {}),
     })),
   };
 };

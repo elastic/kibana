@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import agent, { Span } from 'elastic-apm-node';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
-// import { RetrievalQAChain } from 'langchain/chains';
+
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
@@ -132,6 +133,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   let traceData;
   if (isStream) {
+    let streamingSpan: Span | undefined;
+    if (agent.isStarted()) {
+      streamingSpan = agent.startSpan(`${DEFAULT_AGENT_EXECUTOR_ID} (Streaming)`) ?? undefined;
+    }
     const {
       end: streamEnd,
       push,
@@ -142,10 +147,17 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
     const handleStreamEnd = (finalResponse: string) => {
       if (onLlmResponse) {
-        onLlmResponse(finalResponse);
+        onLlmResponse(finalResponse, {
+          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+          traceId: streamingSpan?.ids?.['trace.id'],
+        });
       }
       streamEnd();
       didEnd = true;
+      if (!streamingSpan?.outcome || streamingSpan?.outcome === 'unknown') {
+        streamingSpan.outcome = 'success';
+      }
+      streamingSpan?.end();
     };
 
     let message = '';
