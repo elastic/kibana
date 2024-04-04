@@ -63,6 +63,48 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiCanAddNewPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanAddNewPanel",
+        "description": [
+          "\nA type guard which can be used to determine if a given API can add a new panel."
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAddNewPanel",
+            "text": "CanAddNewPanel"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiCanAddNewPanel.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasDisableTriggers",
         "type": "Function",
         "tags": [],
@@ -1835,6 +1877,83 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.CanAddNewPanel",
+        "type": "Interface",
+        "tags": [],
+        "label": "CanAddNewPanel",
+        "description": [
+          "\nThis API can add a new panel as a child."
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.CanAddNewPanel.addNewPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "addNewPanel",
+            "description": [],
+            "signature": [
+              "<ApiType extends unknown = unknown>(panel: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PanelPackage",
+                "text": "PanelPackage"
+              },
+              ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.CanAddNewPanel.addNewPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.PanelPackage",
+                    "text": "PanelPackage"
+                  }
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.CanAddNewPanel.addNewPanel.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displaySuccessMessage",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.EmbeddableApiContext",
         "type": "Interface",
         "tags": [],
@@ -2012,15 +2131,15 @@
           },
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.HasLibraryTransforms.saveStateToSavedObject",
+            "id": "def-common.HasLibraryTransforms.saveToLibrary",
             "type": "Function",
             "tags": [],
-            "label": "saveStateToSavedObject",
+            "label": "saveToLibrary",
             "description": [
-              "\nSaves embeddable to library\n"
+              "\nSave embeddable to library\n"
             ],
             "signature": [
-              "(title: string) => Promise<{ state: StateT; savedObjectId: string; }>"
+              "(title: string) => Promise<string>"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "deprecated": false,
@@ -2028,7 +2147,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.HasLibraryTransforms.saveStateToSavedObject.$1",
+                "id": "def-common.HasLibraryTransforms.saveToLibrary.$1",
                 "type": "string",
                 "tags": [],
                 "label": "title",
@@ -2043,7 +2162,43 @@
               }
             ],
             "returnComment": [
-              "state: by-reference embeddable state replacing by-value embeddable state\nsavedObjectId: Saved object id for new saved object added to library"
+              "id of persisted library item"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasLibraryTransforms.getByReferenceState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByReferenceState",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(libraryId: string) => StateT"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.HasLibraryTransforms.getByReferenceState.$1",
+                "type": "string",
+                "tags": [],
+                "label": "libraryId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "by-reference embeddable state replacing by-value embeddable state"
             ]
           },
           {
@@ -2130,10 +2285,10 @@
           },
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.HasLibraryTransforms.savedObjectAttributesToState",
+            "id": "def-common.HasLibraryTransforms.getByValueState",
             "type": "Function",
             "tags": [],
-            "label": "savedObjectAttributesToState",
+            "label": "getByValueState",
             "description": [
               "\n"
             ],
@@ -2322,6 +2477,45 @@
             "label": "uuid",
             "description": [],
             "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.PanelPackage",
+        "type": "Interface",
+        "tags": [],
+        "label": "PanelPackage",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PanelPackage.panelType",
+            "type": "string",
+            "tags": [],
+            "label": "panelType",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PanelPackage.initialState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_add_new_panel.ts",
             "deprecated": false,
             "trackAdoption": false
           }

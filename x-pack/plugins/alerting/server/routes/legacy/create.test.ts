@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Rule } from '../../../common/rule';
+import { Rule, RuleSystemAction } from '../../../common/rule';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
@@ -55,6 +55,15 @@ describe('createAlertRoute', () => {
         },
       },
     ],
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
   };
 
   const createResult: Rule<{ bar: boolean }> = {
@@ -460,8 +469,81 @@ describe('createAlertRoute', () => {
       usageCounter: mockUsageCounter,
     });
     const [, handler] = router.post.mock.calls[0];
+    rulesClient.create.mockResolvedValueOnce(createResult);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('create', mockUsageCounter);
+  });
+
+  it('does not return system actions', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+    });
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
+
+    rulesClient.create.mockResolvedValueOnce({ ...createResult, systemActions: [systemAction] });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: mockedAlert,
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({ body: createResult });
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "2",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "1",
+            "consumer": "bar",
+            "name": "abc",
+            "notifyWhen": "onActionGroupChange",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "tags": Array [
+              "foo",
+            ],
+            "throttle": "30s",
+          },
+          "options": Object {
+            "id": undefined,
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: createResult,
+    });
   });
 });

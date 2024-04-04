@@ -25,7 +25,7 @@ import type {
   RequestHandler,
   VersionedRouter,
 } from '@kbn/core-http-server';
-import { validBodyOutput } from '@kbn/core-http-server';
+import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -67,17 +67,15 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate !== false) {
-    Object.entries(route.validate).forEach(([key, schema]) => {
+    const validation = getRequestValidation(route.validate);
+    Object.entries(validation).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
           `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
-  }
-
-  if (route.validate) {
-    return RouteValidator.from(route.validate);
+    return RouteValidator.from(validation);
   }
 }
 
@@ -93,7 +91,7 @@ function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
+  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {

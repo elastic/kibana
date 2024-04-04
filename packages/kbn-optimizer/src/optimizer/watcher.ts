@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { take, map, share } from 'rxjs/operators';
+import { take, map, share } from 'rxjs';
 import Watchpack from 'watchpack';
 
 import { debounceTimeBuffer, Bundle } from '../common';

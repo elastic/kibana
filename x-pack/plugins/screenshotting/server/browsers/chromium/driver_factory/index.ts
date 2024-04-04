@@ -16,16 +16,7 @@ import path from 'path';
 import puppeteer, { Browser, ConsoleMessage, Page, Viewport, PageEvents } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  ignoreElements,
-  mergeMap,
-  map,
-  reduce,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+import { catchError, concatMap, ignoreElements, mergeMap, map, reduce, takeUntil, tap } from 'rxjs';
 import { PerformanceMetrics } from '../../../../common/types';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
