@@ -50,7 +50,7 @@ export interface FetchSeriesProps<T extends ValueAggregationMap> {
   start: number;
   end: number;
   filter?: QueryDslQueryContainer[];
-  groupBy?: string;
+  groupByFields: string[];
   aggs: T;
   unit: 'ms' | 'rpm' | '%';
 }
@@ -64,7 +64,7 @@ export async function fetchSeries<T extends ValueAggregationMap>({
   start,
   end,
   filter,
-  groupBy,
+  groupByFields,
   aggs,
   unit,
 }: FetchSeriesProps<T>): Promise<Array<ApmFetchedTimeseries<T>>> {
@@ -81,18 +81,18 @@ export async function fetchSeries<T extends ValueAggregationMap>({
         },
       },
       aggs: {
-        groupBy: {
-          ...(groupBy
+        groups: {
+          ...(groupByFields.length === 1
             ? {
                 terms: {
-                  field: groupBy,
                   size: 20,
+                  field: groupByFields[0],
                 },
               }
             : {
-                terms: {
-                  field: 'non_existing_field',
-                  missing: '',
+                multi_terms: {
+                  size: 20,
+                  terms: groupByFields.map((field) => ({ field })),
                 },
               }),
           aggs: {
@@ -117,11 +117,11 @@ export async function fetchSeries<T extends ValueAggregationMap>({
     },
   });
 
-  if (!response.aggregations?.groupBy) {
+  if (!response.aggregations?.groups) {
     return [];
   }
 
-  return response.aggregations.groupBy.buckets.map((bucket) => {
+  return response.aggregations.groups.buckets.map((bucket) => {
     let value =
       bucket.value?.value === undefined || bucket.value?.value === null
         ? null
