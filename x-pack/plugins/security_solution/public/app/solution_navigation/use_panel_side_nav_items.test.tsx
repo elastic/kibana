@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { usePanelSideNavItems } from './use_panel_side_nav_items';
-import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navigation';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 
@@ -89,6 +89,7 @@ describe('usePanelSideNavItems', () => {
           id: SecurityPageName.landing,
           title: 'Get Started',
           sideNavIcon: 'launch',
+          isFooterLink: true,
         },
       ],
     });
@@ -102,32 +103,6 @@ describe('usePanelSideNavItems', () => {
         position: 'bottom',
         onClick: expect.any(Function),
         iconType: 'launch',
-      },
-    ]);
-  });
-
-  it('should openInNewTab for external (cloud) links', async () => {
-    const { result } = renderHook(usePanelSideNavItems, {
-      initialProps: [
-        {
-          id: ExternalPageName.cloudUsersAndRoles,
-          externalUrl: 'https://cloud.elastic.co/users_roles',
-          title: 'Users & Roles',
-          sideNavIcon: 'someicon',
-        },
-      ],
-    });
-
-    const items = result.current;
-
-    expect(items).toEqual([
-      {
-        id: ExternalPageName.cloudUsersAndRoles,
-        href: 'https://cloud.elastic.co/users_roles',
-        label: 'Users & Roles',
-        openInNewTab: true,
-        iconType: 'someicon',
-        position: 'bottom',
       },
     ]);
   });

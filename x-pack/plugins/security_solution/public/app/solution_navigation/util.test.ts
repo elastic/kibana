@@ -5,32 +5,53 @@
  * 2.0.
  */
 
-import { getProjectFeaturesUrl } from './util';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-
-const cloud = {
-  serverless: {
-    projectId: '1234',
-  },
-  projectsUrl: 'https://cloud.elastic.co/projects',
-} as CloudStart;
+import type { SolutionPageName } from './types';
+import { getNavLinkIdFromSolutionPageName, getSolutionPageNameFromNavLinkId } from './util';
 
 describe('util', () => {
-  describe('getProductFeaturesUrl', () => {
-    it('should return undefined if the projectId is not present', () => {
-      expect(getProjectFeaturesUrl({ ...cloud, serverless: { projectId: undefined } })).toBe(
-        undefined
+  describe('getNavLinkIdFromSolutionPageName', () => {
+    it('should return the correct navLink id for security pages', () => {
+      expect(getNavLinkIdFromSolutionPageName('administration' as SolutionPageName)).toEqual(
+        'securitySolutionUI:administration'
       );
     });
 
-    it('should return undefined if the projectsUrl is not present', () => {
-      expect(getProjectFeaturesUrl({ ...cloud, projectsUrl: undefined })).toBe(undefined);
+    it('should return the correct navLink id for app root', () => {
+      expect(getNavLinkIdFromSolutionPageName('discover:' as SolutionPageName)).toEqual('discover');
     });
 
-    it('should return the correct url', () => {
-      expect(getProjectFeaturesUrl(cloud)).toBe(
-        `${cloud.projectsUrl}/security/${cloud.serverless?.projectId}?open=securityProjectFeatures`
+    it('should return the correct navLink id for app nested pages', () => {
+      expect(getNavLinkIdFromSolutionPageName('ml:overview' as SolutionPageName)).toEqual(
+        'ml:overview'
       );
+    });
+
+    it('should return the correct navLink id pages with custom path', () => {
+      expect(
+        getNavLinkIdFromSolutionPageName('integrations:/browse/security' as SolutionPageName)
+      ).toEqual('integrations');
+    });
+
+    it('should return the correct navLink id for nested page custom path', () => {
+      expect(
+        getNavLinkIdFromSolutionPageName('fleet:agents/test/path' as SolutionPageName)
+      ).toEqual('fleet:agents');
+    });
+  });
+
+  describe('getSolutionPageNameFromNavLinkId', () => {
+    it('should return the correct solution page name for security pages', () => {
+      expect(getSolutionPageNameFromNavLinkId('securitySolutionUI:administration')).toEqual(
+        'administration'
+      );
+    });
+
+    it('should return the correct solution page name for app root', () => {
+      expect(getSolutionPageNameFromNavLinkId('discover')).toEqual('discover:');
+    });
+
+    it('should return the correct solution page name for app nested pages', () => {
+      expect(getSolutionPageNameFromNavLinkId('ml:overview')).toEqual('ml:overview');
     });
   });
 });

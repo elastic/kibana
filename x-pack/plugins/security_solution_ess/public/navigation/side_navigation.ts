@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18n } from '@kbn/i18n';
+import { SecurityPageName, SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
 import { type Services } from '../common/services';
+
+export const SOLUTION_NAME = i18n.translate('xpack.securitySolutionEss.nav.solutionName', {
+  defaultMessage: 'Security',
+});
 
 export const initSideNavigation = (services: Services) => {
   const { securitySolution, navigation } = services;
@@ -18,8 +23,8 @@ export const initSideNavigation = (services: Services) => {
   const { navigationTree$, panelContentProvider } = securitySolution.getSolutionNavigation();
   navigation.addSolutionNavigation({
     id: 'security',
-    homePage: `securitySolutionUI:${SecurityPageName.landing}`,
-    title: 'Security',
+    homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
+    title: SOLUTION_NAME,
     icon: 'logoSecurity',
     navigationTree$,
     panelContentProvider,

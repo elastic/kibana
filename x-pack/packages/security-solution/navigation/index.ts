@@ -13,5 +13,10 @@ export {
 } from './src/navigation';
 export type { GetAppUrl, NavigateTo } from './src/navigation';
 export { NavigationProvider } from './src/context';
-export { SecurityPageName, ExternalPageName, LinkCategoryType } from './src/constants';
+export {
+  SecurityPageName,
+  ExternalPageName,
+  LinkCategoryType,
+  SECURITY_UI_APP_ID,
+} from './src/constants';
 export * from './src/types';
