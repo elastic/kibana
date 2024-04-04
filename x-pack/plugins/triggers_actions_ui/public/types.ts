@@ -24,6 +24,7 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
@@ -588,6 +589,7 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
+  renderCellPopover?: ReturnType<GetRenderCellPopover>;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;
@@ -606,7 +608,15 @@ export type GetRenderCellValue<T = unknown> = ({
   context?: T;
 }) => (
   props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
-) => React.ReactNode | JSX.Element | null | string;
+) => React.ReactNode | JSX.Element;
+
+export type GetRenderCellPopover<T = unknown> = ({
+  context,
+}: {
+  context?: T;
+}) => (
+  props: EuiDataGridCellPopoverElementProps & { alert: Alert }
+) => React.ReactNode | JSX.Element;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -740,6 +750,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  getRenderCellPopover?: GetRenderCellPopover;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;
