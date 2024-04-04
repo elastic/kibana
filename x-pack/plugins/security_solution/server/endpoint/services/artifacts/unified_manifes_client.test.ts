@@ -73,8 +73,7 @@ describe('unified_manifest_client', () => {
     test('can get unified manifest by id', async () => {
       await unifiedManifestClient.getUnifiedManifestById('123');
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-        expect.arrayContaining([mockSoClientCallParams({ id: '123' }, false)]),
-        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+        expect.arrayContaining([mockSoClientCallParams({ id: '123' }, false)])
       );
     });
 
@@ -84,8 +83,7 @@ describe('unified_manifest_client', () => {
         expect.arrayContaining([
           mockSoClientCallParams({ id: '123' }, false),
           mockSoClientCallParams({ id: '456' }, false),
-        ]),
-        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+        ])
       );
     });
 
@@ -118,13 +116,9 @@ describe('unified_manifest_client', () => {
         })
       );
 
-      const cbFunc = jest.fn();
-      await unifiedManifestClient.getAllUnifiedManifests(cbFunc);
+      const result = await unifiedManifestClient.getAllUnifiedManifests();
 
-      expect(cbFunc).toHaveBeenCalledTimes(3);
-      expect(cbFunc).toHaveBeenLastCalledWith([
-        expect.objectContaining({ policyId: 'policy-2000', id: 'id-2000' }),
-      ]);
+      expect(result.length).toBe(2001);
     });
   });
 
@@ -140,8 +134,7 @@ describe('unified_manifest_client', () => {
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           mockSoClientCallParams({ id: '1234', version: 'abcd' }, true, false),
-        ]),
-        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+        ])
       );
     });
     test('can update unified manifests', async () => {
@@ -153,8 +146,7 @@ describe('unified_manifest_client', () => {
         expect.arrayContaining([
           mockSoClientCallParams({ id: '1234', version: 'abcd' }, true, false),
           mockSoClientCallParams({ id: '1234', version: 'abcd' }, true, false),
-        ]),
-        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+        ])
       );
     });
   });
@@ -162,8 +154,7 @@ describe('unified_manifest_client', () => {
     test('can delete unified manifest', async () => {
       await unifiedManifestClient.deleteUnifiedManifestById('123');
       expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
-        expect.arrayContaining([{ id: '123', type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }]),
-        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+        expect.arrayContaining([{ id: '123', type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE }])
       );
     });
     test('can delete unified manifests', async () => {
@@ -172,8 +163,7 @@ describe('unified_manifest_client', () => {
         expect.arrayContaining([
           mockSoClientCallParams({ id: '123' }, false),
           mockSoClientCallParams({ id: '456' }, false),
-        ]),
-        { namespace: UNIFIED_MANIFEST_ALL_NAMESPACES }
+        ])
       );
     });
   });

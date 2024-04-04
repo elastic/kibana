@@ -920,13 +920,13 @@
     "dynamic": false,
     "properties": {
       "artifactIds": {
-        "type": "text"
+        "type": "keyword"
       },
       "policyId": {
         "type": "keyword"
       },
       "semanticVersion": {
-        "type": "text"
+        "type": "keyword"
       }
     }
   },
