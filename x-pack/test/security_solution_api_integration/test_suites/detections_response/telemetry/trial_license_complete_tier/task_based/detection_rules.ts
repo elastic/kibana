@@ -16,7 +16,7 @@ import {
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
-  removeTimeFieldsFromTelemetryStats,
+  removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
 import {
   createRule,
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
@@ -211,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
@@ -267,7 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
@@ -323,7 +323,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
@@ -451,7 +451,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -528,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -605,7 +605,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -682,7 +682,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -759,7 +759,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -860,7 +860,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule))
