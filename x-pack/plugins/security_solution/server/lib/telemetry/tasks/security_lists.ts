@@ -13,7 +13,7 @@ import {
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
 } from '../constants';
-import type { ESClusterInfo, ESLicense } from '../types';
+import type { ESClusterInfo, ESLicense, Nullable } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
@@ -69,7 +69,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         const licenseInfo =
           licenseInfoPromise.status === 'fulfilled'
             ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
+            : ({} as Nullable<ESLicense>);
         const FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS = 24;
 
         // Lists Telemetry: Trusted Applications
