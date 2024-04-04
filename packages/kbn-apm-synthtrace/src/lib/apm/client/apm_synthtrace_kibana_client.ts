@@ -20,10 +20,18 @@ export class ApmSynthtraceKibanaClient {
     this.target = options.target;
   }
 
+  getFleetApmPackagePath(packageVersion?: string): string {
+    let path = `${this.target}/api/fleet/epm/packages/apm`;
+    if (packageVersion) {
+      path = `${path}/${packageVersion}`;
+    }
+    return path;
+  }
+
   async fetchLatestApmPackageVersion() {
     this.logger.debug(`Fetching latest APM package version`);
-    const fleetPackageApiUrl = `${this.target}/api/fleet/epm/packages/apm?prerelease=true`;
-    const response = await fetch(fleetPackageApiUrl, {
+    const url = `${this.getFleetApmPackagePath()}?prerelease=true`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: kibanaHeaders(),
     });
@@ -47,7 +55,7 @@ export class ApmSynthtraceKibanaClient {
       packageVersion = await this.fetchLatestApmPackageVersion();
     }
 
-    const url = `${this.target}/api/fleet/epm/packages/apm/${packageVersion}`;
+    const url = this.getFleetApmPackagePath(packageVersion);
     const response = await pRetry(
       async () => {
         const res = await fetch(url, {
@@ -56,10 +64,14 @@ export class ApmSynthtraceKibanaClient {
           body: '{"force":true}',
         });
 
-        if (res.status >= 400) {
+        if (!res.ok) {
           const errorJson = await res.json();
+          const errorMessage =
+            typeof errorJson.message === 'string'
+              ? errorJson.message
+              : 'An error occurred during APM package installation.';
           throw new Error(
-            `APM package installation returned ${res.status} status code\nError: ${errorJson}`
+            `APM package installation returned ${res.status} status code\nError: ${errorMessage}`
           );
         }
         return res;
@@ -78,19 +90,19 @@ export class ApmSynthtraceKibanaClient {
 
     if (!responseJson.items) {
       throw new Error(
-        `Failed to install APM package version ${packageVersion}, received HTTP ${response.status} and message: ${responseJson.message} for url ${url}`
+        `No installed asests received for APM package version ${packageVersion}, received HTTP ${response.status} for url ${url}`
       );
     }
 
     this.logger.info(`Installed APM package ${packageVersion}`);
-    return packageVersion;
+    return { version: packageVersion };
   }
 
   async uninstallApmPackage() {
     this.logger.debug('Uninstalling APM package');
     const latestApmPackageVersion = await this.fetchLatestApmPackageVersion();
 
-    const url = `${this.target}/api/fleet/epm/packages/apm/${latestApmPackageVersion}`;
+    const url = this.getFleetApmPackagePath(latestApmPackageVersion);
     const response = await pRetry(
       async () => {
         const res = await fetch(url, {
@@ -99,12 +111,14 @@ export class ApmSynthtraceKibanaClient {
           body: '{"force":true}',
         });
 
-        if (res.status >= 400) {
+        if (!res.ok) {
           const errorJson = await res.json();
+          const errorMessage =
+            typeof errorJson.message === 'string'
+              ? errorJson.message
+              : 'An error occurred during APM package uninstallation.';
           throw new Error(
-            `APM package ${url} uninstallation returned ${
-              res.status
-            } status code\nError: ${JSON.stringify(errorJson, null, 2)}`
+            `APM package uninstallation returned ${res.status} status code\nError: ${errorMessage}`
           );
         }
         return res;
@@ -125,7 +139,7 @@ export class ApmSynthtraceKibanaClient {
 
     if (!responseJson.items) {
       throw new Error(
-        `Failed to uninstall APM package version ${latestApmPackageVersion}, received HTTP ${response.status} and message: ${responseJson.message} for url ${url}`
+        `No uninstalled assets received for APM package version ${latestApmPackageVersion}, received HTTP ${response.status} for url ${url}`
       );
     }
 

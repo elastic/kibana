@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
         (synthtraceApmClient = new ApmSynthtraceEsClient({
           client: esClient,
           logger: createLogger(LogLevel.info),
-          version: await apmSynthtraceKibanaClient.installApmPackage(),
+          version: (await apmSynthtraceKibanaClient.installApmPackage()).version,
           refreshAfterIndex: true,
         }))
     );
