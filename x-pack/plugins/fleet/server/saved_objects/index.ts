@@ -73,6 +73,7 @@ import {
 } from './migrations/to_v8_6_0';
 import {
   migratePackagePolicyToV8100,
+  migratePackagePolicyToV8140,
   migratePackagePolicyToV870,
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
@@ -470,6 +471,14 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           {
             type: 'data_backfill',
             backfillFn: migrateSyntheticsPackagePolicyToV8120,
+          },
+        ],
+      },
+      '6': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8140,
           },
         ],
       },
