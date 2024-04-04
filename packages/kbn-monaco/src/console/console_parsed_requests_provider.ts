@@ -19,7 +19,7 @@ export class ConsoleParsedRequestsProvider {
     if (!this.model) {
       return [];
     }
-    const parseResult = await this.workerProxyService.getParseResult(this.model.uri);
-    return parseResult?.requests ?? [];
+    const parserResult = await this.workerProxyService.getParserResult(this.model.uri);
+    return parserResult?.requests ?? [];
   }
 }

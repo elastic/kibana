@@ -7,7 +7,7 @@
  */
 
 export interface ErrorAnnotation {
-  at: number;
+  offset: number;
   text: string;
 }
 
@@ -18,12 +18,12 @@ export interface ParsedRequest {
   url: string;
   data?: Array<Record<string, unknown>>;
 }
-export interface ConsoleParseResult {
+export interface ConsoleParserResult {
   errors: ErrorAnnotation[];
   requests: ParsedRequest[];
 }
 
 export interface ConsoleWorkerDefinition {
-  getParseResult: (modelUri: string) => ConsoleParseResult | undefined;
+  getParserResult: (modelUri: string) => ConsoleParserResult | undefined;
 }
-export type ConsoleParser = (source: string) => ConsoleParseResult | undefined;
+export type ConsoleParser = (source: string) => ConsoleParserResult | undefined;

@@ -12,7 +12,6 @@ export const createParser = () => {
 
   let at, // The index of the current character
     ch, // The current character
-    annos, // annotations
     escapee = {
       '"': '"',
       '\\': '\\',
@@ -24,34 +23,30 @@ export const createParser = () => {
       t: '\t',
     },
     text,
-    annotate = function (type, text) {
-      annos.push({ type: type, text: text, at: at });
+    errors,
+    addError = function (text) {
+      errors.push({ text: text, offset: at });
     },
-    requestEvents,
+    requests,
     requestStartOffset,
     requestEndOffset,
     getLastRequest = function() {
-      return requestEvents.length > 0 ? requestEvents.pop() : {};
+      return requests.length > 0 ? requests.pop() : {};
     },
     addRequestStart = function() {
       requestStartOffset = at - 1;
-      requestEvents.push({startOffset: requestStartOffset});
-    },
-    addRequestEnd = function() {
-      const lastRequest = getLastRequest();
-      lastRequest.endOffset = requestEndOffset;
-      requestEvents.push(lastRequest);
+      requests.push({ startOffset: requestStartOffset });
     },
     addRequestMethod = function(method) {
       const lastRequest = getLastRequest();
       lastRequest.method = method;
-      requestEvents.push(lastRequest);
+      requests.push(lastRequest);
       requestEndOffset = at - 1;
     },
     addRequestUrl = function(url) {
       const lastRequest = getLastRequest();
       lastRequest.url = url;
-      requestEvents.push(lastRequest);
+      requests.push(lastRequest);
       requestEndOffset = at - 1;
     },
     addRequestData = function(data) {
@@ -59,8 +54,13 @@ export const createParser = () => {
       const dataArray = lastRequest.data || [];
       dataArray.push(data);
       lastRequest.data = dataArray;
-      requestEvents.push(lastRequest);
+      requests.push(lastRequest);
       requestEndOffset = at - 1;
+    },
+    addRequestEnd = function() {
+      const lastRequest = getLastRequest();
+      lastRequest.endOffset = requestEndOffset;
+      requests.push(lastRequest);
     },
     error = function (m) {
       throw {
@@ -458,7 +458,7 @@ export const createParser = () => {
           request();
           white();
         } catch (e) {
-          annotate('error', e.message);
+          addError(e.message);
           // snap
           const substring = text.substr(at);
           const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE|PATCH/m);
@@ -473,16 +473,16 @@ export const createParser = () => {
 
     text = source;
     at = 0;
-    annos = [];
-    requestEvents = [];
+    errors = [];
+    requests = [];
     next();
     multi_request();
     white();
     if (ch) {
-      annotate('error', 'Syntax error');
+      addError('Syntax error');
     }
 
-    result = { errors: annos, requests: requestEvents };
+    result = { errors, requests };
 
     return typeof reviver === 'function'
       ? (function walk(holder, key) {

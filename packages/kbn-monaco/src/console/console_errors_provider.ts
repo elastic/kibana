@@ -15,17 +15,17 @@ export const setupConsoleErrorsProvider = (workerProxyService: ConsoleWorkerProx
     if (model.isDisposed()) {
       return;
     }
-    const parseResult = await workerProxyService.getParseResult(model.uri);
+    const parserResult = await workerProxyService.getParserResult(model.uri);
 
-    if (!parseResult) {
+    if (!parserResult) {
       return;
     }
-    const { errors } = parseResult;
+    const { errors } = parserResult;
     monaco.editor.setModelMarkers(
       model,
       CONSOLE_LANG_ID,
-      errors.map(({ at, text }) => {
-        const { column, lineNumber } = model.getPositionAt(at);
+      errors.map(({ offset, text }) => {
+        const { column, lineNumber } = model.getPositionAt(offset);
         return {
           startLineNumber: lineNumber,
           startColumn: column,
