@@ -15,6 +15,7 @@ import {
   LOG_THRESHOLD_ALERT_TYPE_ID,
   ALERT_EVALUATION_THRESHOLD,
   ApmRuleType,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
@@ -153,7 +154,6 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const flyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
-        fields: [],
         comparator,
         pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
           alert.fields[ALERT_EVALUATION_THRESHOLD]!,
@@ -202,6 +202,17 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         comparator: thresholdComparator,
       } as unknown as FlyoutThresholdData;
       return [ESQueryFlyoutMap];
+
+    case SLO_BURN_RATE_RULE_TYPE_ID:
+      const SLOBurnRateFlyoutMap = {
+        observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
+        threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
+        comparator: '>',
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
+          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
+        ]),
+      } as unknown as FlyoutThresholdData;
+      return [SLOBurnRateFlyoutMap];
     default:
       return [];
   }
