@@ -19,7 +19,7 @@ export const registerChangePointChartEmbeddable = (
 ) => {
   const changePointChartFactory = new EmbeddableChangePointChartFactory(
     EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    i18n.translate('xpack.aiops.embeddableLogCategorizationDisplayName', {
+    i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
       defaultMessage: 'Change point detection',
     }),
     core.getStartServices
