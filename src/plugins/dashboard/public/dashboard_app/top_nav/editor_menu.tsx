@@ -30,7 +30,7 @@ import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { ADD_PANEL_TRIGGER } from '../../triggers';
 import {
   getAddPanelActionMenuItems,
-  type GroupedAppPanelActions,
+  type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
 
 export interface FactoryGroup {
@@ -70,7 +70,7 @@ export const mergeGroupedItemsProvider =
   (getEmbeddableFactoryMenuItem: GetEmbeddableFactoryMenuItem) =>
   (
     factoryGroupMap: Record<string, FactoryGroup>,
-    groupedAddPanelAction: Record<string, GroupedAppPanelActions>
+    groupedAddPanelAction: Record<string, GroupedAddPanelActions>
   ): [EuiContextMenuPanelItemDescriptor[], EuiContextMenuPanelDescriptor[]] => {
     const initialPanelGroups: EuiContextMenuPanelItemDescriptor[] = [];
     const additionalPanels: EuiContextMenuPanelDescriptor[] = [];

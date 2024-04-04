@@ -8,7 +8,7 @@
 
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import { GroupedAppPanelActions } from './add_panel_action_menu_items';
+import { GroupedAddPanelActions } from './add_panel_action_menu_items';
 import {
   FactoryGroup,
   mergeGroupedItemsProvider,
@@ -52,7 +52,7 @@ describe('mergeGroupedItemsProvider', () => {
         },
       ],
     },
-  } as unknown as Record<string, GroupedAppPanelActions>;
+  } as unknown as Record<string, GroupedAddPanelActions>;
 
   it('should merge factoryGroupMap and groupedAddPanelAction correctly', () => {
     const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(

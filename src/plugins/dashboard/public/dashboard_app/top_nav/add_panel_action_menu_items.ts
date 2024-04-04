@@ -30,7 +30,7 @@ const onAddPanelActionClick =
     } else action.execute(context);
   };
 
-export type GroupedAppPanelActions = EuiContextMenuPanelDescriptor & {
+export type GroupedAddPanelActions = EuiContextMenuPanelDescriptor & {
   icon?: string;
 };
 
@@ -38,9 +38,9 @@ export const getAddPanelActionMenuItems = (
   api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
-): [EuiContextMenuPanelItemDescriptor[], Record<string, GroupedAppPanelActions>] => {
+): [EuiContextMenuPanelItemDescriptor[], Record<string, GroupedAddPanelActions>] => {
   const ungrouped: EuiContextMenuPanelItemDescriptor[] = [];
-  const grouped: Record<string, GroupedAppPanelActions> = {};
+  const grouped: Record<string, GroupedAddPanelActions> = {};
 
   const context = {
     embeddable: api,
