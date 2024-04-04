@@ -210,6 +210,38 @@
           },
           {
             "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.hasTrigger",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTrigger",
+            "description": [],
+            "signature": [
+              "(triggerId: string) => boolean"
+            ],
+            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.hasTrigger.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.getTrigger",
             "type": "Function",
             "tags": [],
@@ -2851,7 +2883,7 @@
           "section": "def-common.Trigger",
           "text": "Trigger"
         },
-        ") => void; readonly getTrigger: (triggerId: string) => ",
+        ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
         "TriggerContract",
         "<object>; readonly registerAction: <Context extends object>(definition: ",
         {

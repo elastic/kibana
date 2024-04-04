@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { ChatForm, ChatFormFields, MessageRole, SummarizationModelName } from '../types';
+import { ChatForm, ChatFormFields, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -40,8 +40,9 @@ const buildFormData = (formData: ChatForm) => ({
   api_key: formData[ChatFormFields.openAIKey],
   citations: formData[ChatFormFields.citations],
   elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-  summarization_model:
-    formData[ChatFormFields.summarizationModel] ?? SummarizationModelName.gpt3_5_turbo_1106,
+  summarization_model: formData[ChatFormFields.summarizationModel],
+  source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
+  docSize: formData[ChatFormFields.docSize],
 });
 
 export const Chat = () => {

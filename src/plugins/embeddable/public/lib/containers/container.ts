@@ -18,14 +18,11 @@ import {
   pairwise,
   switchMap,
   take,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  PresentationContainer,
-  PanelPackage,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-publishing';
+import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
 
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import { EmbeddableStart } from '../../plugin';

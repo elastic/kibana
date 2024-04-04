@@ -6,10 +6,17 @@
  */
 
 import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
 import {
   LABELS,
   SERVICE_GROUP_SUPPORTED_FIELDS,
 } from '../../../../common/service_groups';
+
+const APM_ALERT_SOURCE_FIELDS = [
+  ...SERVICE_GROUP_SUPPORTED_FIELDS,
+  HOST_NAME,
+  CONTAINER_ID,
+];
 
 export interface SourceDoc {
   [key: string]: string | string[] | SourceDoc;
@@ -23,7 +30,7 @@ export function getServiceGroupFieldsAgg(
       top_hits: {
         size: 1,
         _source: {
-          includes: SERVICE_GROUP_SUPPORTED_FIELDS,
+          includes: APM_ALERT_SOURCE_FIELDS,
         },
         ...topHitsOpts,
       },
@@ -39,7 +46,7 @@ interface AggResultBucket {
   };
 }
 
-export function getServiceGroupFields(bucket?: AggResultBucket) {
+export function getApmAlertSourceFields(bucket?: AggResultBucket) {
   if (!bucket) {
     return {};
   }

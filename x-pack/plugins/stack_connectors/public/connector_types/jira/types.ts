@@ -11,7 +11,10 @@ import type { ExecutorSubActionPushParams } from '../../../server/connector_type
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
 export interface JiraActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParams;
+  /* We override "otherFields" to string because when users fill in the form, the structure won't match until done and
+  we need to store the current state. To match with the data structure define in the backend, we make sure users can't
+  send the form while not matching the original object structure. */
+  subActionParams: ExecutorSubActionPushParams & { incident: { otherFields: string | null } };
 }
 
 export interface JiraConfig {
