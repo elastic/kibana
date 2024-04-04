@@ -238,18 +238,15 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
   });
 
   describe('related Integrations Advanced Setting is disabled', () => {
-    before(() => {
-      disableRelatedIntegrations();
-    });
-
-    after(() => {
-      enableRelatedIntegrations();
-    });
-
     describe('rules management table', () => {
       beforeEach(() => {
+        disableRelatedIntegrations();
         visitRulesManagementTable();
         disableAutoRefresh();
+      });
+
+      afterEach(() => {
+        enableRelatedIntegrations();
       });
 
       it('should not display a badge with the installed integrations', () => {

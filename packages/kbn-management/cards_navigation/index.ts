@@ -7,6 +7,5 @@
  */
 
 export type { AppId, CardsNavigationComponentProps } from './src';
-
-export { appIds } from './src';
-export { CardsNavigation } from './src';
+export { appCategories, type CardNavExtensionDefinition } from './src/types';
+export { appIds, CardsNavigation } from './src';

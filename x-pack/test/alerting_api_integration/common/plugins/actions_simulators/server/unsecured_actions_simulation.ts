@@ -94,4 +94,33 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
       }
     }
   );
+
+  router.post(
+    {
+      path: `/api/get_all_unsecured_actions`,
+      validate: {
+        body: schema.object({
+          spaceId: schema.string(),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const [_, { actions }] = await coreSetup.getStartServices();
+      const { body } = req;
+
+      try {
+        const unsecuredActionsClient = actions.getUnsecuredActionsClient();
+        const { spaceId } = body;
+        const result = await unsecuredActionsClient.getAll(spaceId);
+
+        return res.ok({ body: { status: 'success', result } });
+      } catch (err) {
+        return res.ok({ body: { status: 'error', error: `${err}` } });
+      }
+    }
+  );
 }

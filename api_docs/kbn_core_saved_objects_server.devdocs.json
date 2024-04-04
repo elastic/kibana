@@ -5618,7 +5618,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+              " The type of Saved Object. Each plugin can define its own custom Saved Object types."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -10832,6 +10832,26 @@
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository_create_repository.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-base-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-base-server-internal",

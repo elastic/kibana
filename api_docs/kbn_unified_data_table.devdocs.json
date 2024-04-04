@@ -163,12 +163,12 @@
       },
       {
         "parentPluginId": "@kbn/unified-data-table",
-        "id": "def-common.getTextBasedColumnTypes",
+        "id": "def-common.getTextBasedColumnsMeta",
         "type": "Function",
         "tags": [],
-        "label": "getTextBasedColumnTypes",
+        "label": "getTextBasedColumnsMeta",
         "description": [
-          "\nColumn types for text based searches"
+          "\nColumns meta for text based searches"
         ],
         "signature": [
           "(textBasedColumns: ",
@@ -181,13 +181,13 @@
           },
           "[]) => TextBasedColumnTypes"
         ],
-        "path": "packages/kbn-unified-data-table/src/utils/get_column_types.ts",
+        "path": "packages/kbn-unified-data-table/src/utils/get_columns_meta.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/unified-data-table",
-            "id": "def-common.getTextBasedColumnTypes.$1",
+            "id": "def-common.getTextBasedColumnsMeta.$1",
             "type": "Array",
             "tags": [],
             "label": "textBasedColumns",
@@ -202,7 +202,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-unified-data-table/src/utils/get_column_types.ts",
+            "path": "packages/kbn-unified-data-table/src/utils/get_columns_meta.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -418,7 +418,7 @@
         "label": "UnifiedDataTable",
         "description": [],
         "signature": [
-          "({ ariaLabelledBy, columns, columnTypes, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalControlColumns, externalAdditionalControls, rowsPerPageOptions, visibleCellActions, externalCustomRenderers, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, customGridColumnsConfiguration, customControlColumnsConfiguration, }: ",
+          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalControlColumns, externalAdditionalControls, rowsPerPageOptions, visibleCellActions, externalCustomRenderers, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, cellActionsMetadata, customGridColumnsConfiguration, customControlColumnsConfiguration, }: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "common",
@@ -437,7 +437,7 @@
             "id": "def-common.UnifiedDataTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnTypes,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  trailingControlColumns,\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalControlColumns,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  visibleCellActions,\n  externalCustomRenderers,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  customGridColumnsConfiguration,\n  customControlColumnsConfiguration,\n}",
+            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  trailingControlColumns,\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalControlColumns,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  visibleCellActions,\n  externalCustomRenderers,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  cellActionsMetadata,\n  customGridColumnsConfiguration,\n  customControlColumnsConfiguration,\n}",
             "description": [],
             "signature": [
               {
@@ -829,20 +829,20 @@
           },
           {
             "parentPluginId": "@kbn/unified-data-table",
-            "id": "def-common.UnifiedDataTableProps.columnTypes",
+            "id": "def-common.UnifiedDataTableProps.columnsMeta",
             "type": "Object",
             "tags": [],
-            "label": "columnTypes",
+            "label": "columnsMeta",
             "description": [
-              "\nIf not provided, types will be derived by default from the dataView field types.\nFor displaying text-based search results, pass column types (which are available separately in the fetch request) down here.\nCheck available utils in `utils/get_column_types.ts`"
+              "\nIf not provided, types will be derived by default from the dataView field types.\nFor displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.\nCheck available utils in `utils/get_columns_meta.ts`"
             ],
             "signature": [
               {
                 "pluginId": "@kbn/unified-data-table",
                 "scope": "common",
                 "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-common.DataTableColumnTypes",
-                "text": "DataTableColumnTypes"
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
               },
               " | undefined"
             ],
@@ -1726,13 +1726,13 @@
               "DataTableRecord",
               ", displayedRows: ",
               "DataTableRecord",
-              "[], displayedColumns: string[], columnTypes?: ",
+              "[], displayedColumns: string[], columnsMeta?: ",
               {
                 "pluginId": "@kbn/unified-data-table",
                 "scope": "common",
                 "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-common.DataTableColumnTypes",
-                "text": "DataTableColumnTypes"
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
               },
               " | undefined) => JSX.Element | undefined) | undefined"
             ],
@@ -1791,15 +1791,15 @@
                 "id": "def-common.UnifiedDataTableProps.renderDocumentView.$4",
                 "type": "Object",
                 "tags": [],
-                "label": "columnTypes",
+                "label": "columnsMeta",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/unified-data-table",
                     "scope": "common",
                     "docId": "kibKbnUnifiedDataTablePluginApi",
-                    "section": "def-common.DataTableColumnTypes",
-                    "text": "DataTableColumnTypes"
+                    "section": "def-common.DataTableColumnsMeta",
+                    "text": "DataTableColumnsMeta"
                   },
                   " | undefined"
                 ],
@@ -2151,6 +2151,22 @@
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.UnifiedDataTableProps.cellActionsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "cellActionsMetadata",
+            "description": [
+              "\nCustom set of properties used by some actions.\nAn action might require a specific set of metadata properties to render.\nThis data is sent directly to actions."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2415,15 +2431,23 @@
       },
       {
         "parentPluginId": "@kbn/unified-data-table",
-        "id": "def-common.DataTableColumnTypes",
+        "id": "def-common.DataTableColumnsMeta",
         "type": "Type",
         "tags": [],
-        "label": "DataTableColumnTypes",
+        "label": "DataTableColumnsMeta",
         "description": [
           "\nCustom column types per column name"
         ],
         "signature": [
-          "{ [x: string]: string; }"
+          "{ [x: string]: { type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; esType?: string | undefined; }; }"
         ],
         "path": "packages/kbn-unified-data-table/src/types.ts",
         "deprecated": false,

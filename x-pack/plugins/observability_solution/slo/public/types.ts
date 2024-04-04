@@ -67,7 +67,7 @@ export interface SloPublicPluginsSetup {
   uiActions: UiActionsSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -93,7 +93,7 @@ export interface SloPublicPluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   lens: LensPublicStart;
   charts: ChartsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

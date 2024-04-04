@@ -159,6 +159,7 @@ export interface PluginStartContract {
     params: Params,
     variables: Record<string, unknown>
   ): Params;
+  isSystemActionConnector: (connectorId: string) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -486,18 +487,22 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     const getUnsecuredActionsClient = () => {
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_SAVED_OBJECT_TYPE,
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);
 
       return new UnsecuredActionsClient({
         actionExecutor: actionExecutor!,
-        internalSavedObjectsRepository,
+        clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
+        inMemoryConnectors: this.inMemoryConnectors,
+        internalSavedObjectsRepository,
+        kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
       });
     };
@@ -599,6 +604,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
+      isSystemActionConnector: (connectorId: string): boolean => {
+        return this.inMemoryConnectors.some(
+          (inMemoryConnector) =>
+            inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
+        );
+      },
     };
   }
 

@@ -10,12 +10,12 @@ import { RouteDependencies } from '../types';
 import { registerDataStreamRoutes } from './api/data_streams';
 import { registerIndicesRoutes } from './api/indices';
 import { registerTemplateRoutes } from './api/templates';
-import { registerMappingRoute } from './api/mapping';
 import { registerSettingsRoutes } from './api/settings';
 import { registerStatsRoute } from './api/stats';
 import { registerComponentTemplateRoutes } from './api/component_templates';
 import { registerNodesRoute } from './api/nodes';
 import { registerEnrichPoliciesRoute } from './api/enrich_policies';
+import { registerIndexMappingRoutes } from './api/mapping/register_index_mapping_route';
 
 export class ApiRoutes {
   setup(dependencies: RouteDependencies) {
@@ -23,7 +23,7 @@ export class ApiRoutes {
     registerIndicesRoutes(dependencies);
     registerTemplateRoutes(dependencies);
     registerSettingsRoutes(dependencies);
-    registerMappingRoute(dependencies);
+    registerIndexMappingRoutes(dependencies);
     registerComponentTemplateRoutes(dependencies);
     registerNodesRoute(dependencies);
     registerEnrichPoliciesRoute(dependencies);

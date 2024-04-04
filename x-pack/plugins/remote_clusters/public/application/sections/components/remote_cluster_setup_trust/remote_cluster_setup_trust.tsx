@@ -29,10 +29,6 @@ const i18nTexts = {
     'xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.title',
     { defaultMessage: 'API keys' }
   ),
-  apiKeyBadge: i18n.translate(
-    'xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.badge',
-    { defaultMessage: 'BETA' }
-  ),
   apiKeyDescription: i18n.translate(
     'xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.description',
     {
@@ -90,7 +86,6 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
             <EuiCard
               title={i18nTexts.apiKeyTitle}
               paddingSize="l"
-              betaBadgeProps={{ label: i18nTexts.apiKeyBadge, color: 'accent' }}
               data-test-subj="setupTrustApiKeyCard"
             >
               <EuiText size="s">
