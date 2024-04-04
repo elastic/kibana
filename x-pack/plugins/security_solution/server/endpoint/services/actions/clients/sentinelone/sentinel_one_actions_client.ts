@@ -29,9 +29,14 @@ import type {
   KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   LogsEndpointAction,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
   ResponseActionParametersWithPidOrEntityId,
 } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
@@ -290,6 +295,57 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           await this.sendAction(SUB_ACTION.KILL_PROCESS, {
             uuid: actionRequest.endpoint_ids[0],
             processName: actionRequest.parameters.process_name,
+          });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async getFile(
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'get-file',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.GET_AGENT_FILES, {
+            agentUUID: actionRequest.endpoint_ids[0],
+            zipPassCode: 'Elastic@123',
+            files: [actionRequest.parameters.path],
           });
         } catch (err) {
           error = err;
