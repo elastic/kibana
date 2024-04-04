@@ -51,7 +51,7 @@ export const getImageEmbeddableFactory = ({
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       const embeddable = buildApi(
         {
