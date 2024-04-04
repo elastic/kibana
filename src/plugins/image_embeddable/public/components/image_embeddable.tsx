@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
 import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -40,6 +41,10 @@ export const ImageEmbeddable = ({
   const dynamicActionsState = useStateFromPublishingSubject(api.dynamicActionsState$);
 
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
+
+  useMount(() => {
+    api.setDataLoading(true);
+  });
 
   useEffect(() => {
     if (!startDynamicActions) return;
