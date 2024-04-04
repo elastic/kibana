@@ -7,13 +7,14 @@
 
 import React, { useCallback } from 'react';
 import { of } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
@@ -60,6 +61,8 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   onSubmit,
   connectorServices = { validateEmailAddresses: jest.fn() },
 }) => {
+  const core = coreMock.createStart();
+
   const { form } = useForm({ defaultValue });
   const { submit } = form;
 
@@ -71,12 +74,12 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   }, [onSubmit, submit]);
 
   return (
-    <I18nProvider>
+    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <ConnectorProvider value={{ services: connectorServices }}>
         <Form form={form}>{children}</Form>
         <EuiButton data-test-subj="form-test-provide-submit" onClick={onClick} />
       </ConnectorProvider>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
@@ -92,15 +95,16 @@ export interface AppMockRenderer {
 }
 
 export const createAppMockRenderer = (): AppMockRenderer => {
+  const core = coreMock.createStart();
   const services = createStartServicesMock();
-  const theme$ = of({ darkMode: false });
+  const theme = { theme$: of({ darkMode: false }) };
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <I18nProvider>
+    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+        <KibanaThemeProvider theme={theme}>{children}</KibanaThemeProvider>
       </KibanaContextProvider>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
   AppWrapper.displayName = 'AppWrapper';
   const render: UiRender = (ui, options) => {
