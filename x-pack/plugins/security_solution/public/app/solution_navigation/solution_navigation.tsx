@@ -15,7 +15,6 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { CoreStart } from '@kbn/core/public';
-// import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { usePanelSideNavItems } from './use_panel_side_nav_items';
 import { CATEGORIES, FOOTER_CATEGORIES } from './categories';
 import { formatNavigationTree } from './navigation_tree';
@@ -69,17 +68,7 @@ export interface GetSolutionNavigation {
   dataTestSubj: string;
 }
 
-export const getSolutionNavigation = (
-  core: CoreStart
-  // cloud: CloudStart // TODO: remove
-  // solutionNavLinks$: SolutionNavLinks$
-): GetSolutionNavigation => {
-  // const solutionNavLinks$ = createSolutionNavLinks$(
-  //   navLinks$,
-  //   core
-  //   // , cloud
-  // );
-
+export const getSolutionNavigation = (core: CoreStart): GetSolutionNavigation => {
   const panelContentProvider: PanelContentProvider = () => ({
     content: getPanelContentProvider(core, navLinks$),
   });

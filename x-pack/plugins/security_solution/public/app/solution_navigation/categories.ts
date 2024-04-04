@@ -58,8 +58,8 @@ export const FOOTER_CATEGORIES: Array<LinkCategory<SolutionPageName>> = [
   },
   {
     type: LinkCategoryType.accordion,
-    label: i18n.translate('xpack.securitySolution.nav.settings.title', {
-      defaultMessage: 'Settings',
+    label: i18n.translate('xpack.securitySolution.navCategory.management.title', {
+      defaultMessage: 'Management',
     }),
     iconType: 'gear',
     linkIds: [ExternalPageName.management, ExternalPageName.integrationsSecurity],

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const MANAGEMENT_TITLE = i18n.translate('xpack.securitySolution.navLinks.management.title', {
-  defaultMessage: 'Management',
+  defaultMessage: 'Stack Management',
 });
 export const INTEGRATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.navLinks.projectSettings.integrations.title',
