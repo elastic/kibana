@@ -13,7 +13,7 @@ import type { AnomalySwimlaneEmbeddableUserInput } from '..';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalySwimLaneComponentApi, AnomalySwimLaneEmbeddableState } from './types';
 
 export type AnomalySwimLaneControlsState = Pick<
   AnomalySwimLaneEmbeddableState,
@@ -71,7 +71,7 @@ export const initializeSwimLaneControls = (
       perPage,
       updateUserInput,
       updatePagination,
-    },
+    } as unknown as AnomalySwimLaneComponentApi,
     serializeSwimLaneState,
     swimLaneComparators,
   };

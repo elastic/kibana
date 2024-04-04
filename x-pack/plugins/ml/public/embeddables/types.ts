@@ -22,7 +22,6 @@ import type {
   HasType,
   PublishesDataViews,
   PublishesUnifiedSearch,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -49,12 +48,7 @@ import type {
 export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     PublishesDataViews,
-    PublishesUnifiedSearch {
-  /**
-   * Result time range based on the parent and panel time range APIs
-   */
-  appliedTimeRange$: PublishingSubject<TimeRange>;
-}
+    PublishesUnifiedSearch {}
 
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {

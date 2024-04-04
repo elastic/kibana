@@ -22,6 +22,7 @@ import { EmbeddableLoading } from '../common/components/embeddable_loading_fallb
 import EmbeddableSwimLaneContainer from './embeddable_swim_lane_container';
 import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -75,6 +76,19 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
+      const dataLoading = new BehaviorSubject<boolean | undefined>(true);
+      const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+      const query$ =
+        // @ts-ignore
+        (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
+        new BehaviorSubject(undefined);
+      const filters$ =
+        // @ts-ignore
+        (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
+        new BehaviorSubject(undefined);
+
+      const refresh$ = new BehaviorSubject<void>(undefined);
+
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const { appliedTimeRange$, serializeTimeRange, timeRangeComparators, timeRangeApi } =
         initializeTimeRange(state, parentApi);
@@ -82,27 +96,28 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const { swimLaneControlsApi, serializeSwimLaneState, swimLaneComparators } =
         initializeSwimLaneControls(state, titlesApi);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      // Helpers for swim lane data fetching
+      const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
-      const query$ =
-        // @ts-ignore
-        (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
-        new BehaviorSubject(undefined);
-      const filters$ =
-        // @ts-ignore
-
-        (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
-        new BehaviorSubject(undefined);
+      const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
+        swimLaneControlsApi,
+        chartWidth$.asObservable(),
+        dataLoading,
+        blockingError,
+        appliedTimeRange$,
+        query$,
+        filters$,
+        refresh$,
+        services[2]
+      );
 
       const api = buildApi(
         {
           ...titlesApi,
           ...timeRangeApi,
+          ...swimLaneControlsApi,
           query$,
           filters$,
-          // @ts-ignore
-          appliedTimeRange$,
-          ...swimLaneControlsApi,
           interval,
           setInterval: (v) => interval.next(v),
           dataViews: buildDataViewPublishingApi(
@@ -113,7 +128,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             { jobIds: swimLaneControlsApi.jobIds },
             subscriptions
           ),
-          dataLoading: dataLoading$,
+          dataLoading,
           serializeState: () => {
             return {
               rawState: {
@@ -132,16 +147,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         }
       );
 
-      const onError = () => {
-        dataLoading$.next(false);
-      };
-
-      const onLoading = () => {
-        dataLoading$.next(true);
-      };
-
-      const refresh$ = new BehaviorSubject<void>(undefined);
-
       const onRenderComplete = () => {};
 
       return {
@@ -152,6 +157,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
           useEffect(function onUnmount() {
             return () => {
+              onDestroy();
               subscriptions.unsubscribe();
             };
           }, []);
