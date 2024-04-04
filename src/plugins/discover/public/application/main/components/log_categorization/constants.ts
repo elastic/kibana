@@ -7,6 +7,5 @@
  */
 
 /** Telemetry related to field statistics table **/
-export const FIELD_STATISTICS_LOADED = 'field_statistics_loaded';
-export const FIELD_STATISTICS_VIEW_CLICK = 'field_statistics_view_click';
-export const DOCUMENTS_VIEW_CLICK = 'documents_view_click';
+export const PATTERN_ANALYSIS_LOADED = 'pattern_analysis_loaded';
+export const PATTERN_ANALYSIS_VIEW_CLICK = 'pattern_analysis_view_click';

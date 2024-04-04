@@ -89,8 +89,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     uiSettings,
   } = useAiopsAppContext();
   const { dataView, savedSearch, setPatternCount, setOptionsMenu } = input;
-  // const getViewModeToggle: (patternCount: number) => React.ReactElement | undefined =
-  //   input.getViewModeToggle;
 
   const [widenessOption, setWidenessOption] = useStorage<
     AiOpsKey,
@@ -409,31 +407,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         gutterSize="none"
         responsive={false}
       >
-        {/* <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none">
-            <>{getViewModeToggle(data?.categories?.length ?? 0)}</>
-            <EuiFlexItem />
-            <EuiFlexItem grow={false}>
-              {randomSampler !== undefined ? (
-                <EmbeddableMenu
-                  randomSampler={randomSampler}
-                  reload={() => loadCategories()}
-                  fields={fields}
-                  setSelectedField={setSelectedField}
-                  selectedField={selectedField}
-                  widenessOption={widenessOption}
-                  setWidenessOption={setWidenessOption}
-                  categoryCount={data?.totalCategories}
-                />
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem> */}
-
-        <EuiFlexItem
-          aria-labelledby="documentsAriaLabel"
-          css={{ position: 'relative', overflowY: 'auto' }}
-        >
+        <EuiFlexItem css={{ position: 'relative', overflowY: 'auto' }}>
           <>
             <FieldValidationCallout validationResults={fieldValidationResult} />
             {loading === true ? <LoadingCategorization onClose={onClose} /> : null}

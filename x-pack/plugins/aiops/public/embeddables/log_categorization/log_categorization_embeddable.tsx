@@ -25,7 +25,7 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 
-import type { EmbeddableLogCategorizationType } from '@kbn/aiops-log-pattern-analysis/constants';
+import type { EmbeddableLogCategorizationType } from '@kbn/aiops-log-pattern-analysis/embeddable';
 
 import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState, memo, type ReactElement, type FC } from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSavedSearch } from '../../services/discover_state_provider';
@@ -16,15 +16,15 @@ import {
 } from './log_categorization_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
-export const LogCategorizationTab: React.FC<
+export const LogCategorizationTab: FC<
   Omit<LogCategorizationTableProps, 'query' | 'filters' | 'setOptionsMenu'>
-> = React.memo((props) => {
+> = memo((props) => {
   const services = useDiscoverServices();
   const querySubscriberResult = useQuerySubscriber({
     data: services.data,
   });
   const savedSearch = useSavedSearch();
-  const [optionsMenu, setOptionsMenu] = React.useState<React.ReactElement | undefined>(undefined);
+  const [optionsMenu, setOptionsMenu] = useState<ReactElement | undefined>(undefined);
 
   return (
     <>

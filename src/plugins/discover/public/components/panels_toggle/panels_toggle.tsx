@@ -36,11 +36,6 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   renderedFor,
   isChartAvailable,
 }) => {
-  try {
-    useAppStateSelector((state) => Boolean(state.hideChart));
-  } catch (error) {
-    // console.log(error);
-  }
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {

@@ -21,7 +21,6 @@ export interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
    * Callback to add a filter to filter bar
    */
   onAddFilter?: () => void;
-  // getViewModeToggle: (patternCount: number) => React.ReactElement | undefined;
   setPatternCount: (patternCount: number | undefined) => void;
   setOptionsMenu: (optionsMenu: React.ReactElement | undefined) => void;
 }
@@ -29,3 +28,7 @@ export interface EmbeddableLogCategorizationProps<T = Query | AggregateQuery> {
 export type EmbeddableLogCategorizationInput = EmbeddableInput & EmbeddableLogCategorizationProps;
 
 export type EmbeddableLogCategorizationOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
+
+export const EMBEDDABLE_LOG_CATEGORIZATION_TYPE = 'aiopsLogCategorization' as const;
+
+export type EmbeddableLogCategorizationType = typeof EMBEDDABLE_LOG_CATEGORIZATION_TYPE;

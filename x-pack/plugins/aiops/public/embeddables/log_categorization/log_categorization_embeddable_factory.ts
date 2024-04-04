@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
-import { EMBEDDABLE_LOG_CATEGORIZATION_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
+import { EMBEDDABLE_LOG_CATEGORIZATION_TYPE } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import type { EmbeddableLogCategorizationInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import type { EmbeddableLogCategorizationDeps } from './log_categorization_embeddable';
@@ -21,8 +21,8 @@ export class EmbeddableLogCategorizationFactory
 
   public readonly grouping = [
     {
-      id: 'data_visualizer_grid',
-      getDisplayName: () => 'Data Visualizer Grid',
+      id: 'embeddable_log_categorization',
+      getDisplayName: () => 'Pattern Analysis',
     },
   ];
 
@@ -44,14 +44,14 @@ export class EmbeddableLogCategorizationFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.dataVisualizer.index.components.grid.displayName', {
-      defaultMessage: 'Data visualizer grid',
+    return i18n.translate('xpack.aiops.embeddableLogCategorization.displayName', {
+      defaultMessage: 'Pattern analysis',
     });
   }
 
   public getDescription() {
-    return i18n.translate('xpack.dataVisualizer.index.components.grid.description', {
-      defaultMessage: 'Visualize data',
+    return i18n.translate('xpack.aiops.embeddableLogCategorization.description', {
+      defaultMessage: 'Pattern analysis',
     });
   }
 

@@ -20,6 +20,7 @@ import React, { useState, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { RandomSampler } from './sampling_menu';
 import { SamplingPanel } from './sampling_menu/sampling_panel';
 import type { WidenessOption } from './log_categorization_for_embeddable';
@@ -46,8 +47,8 @@ export const EmbeddableMenu: FC<Props> = ({
   categoryCount,
   reload,
 }) => {
-  const [showPopover, setShowPopover] = useState(false);
-  const togglePopover = () => setShowPopover(!showPopover);
+  const [showMenu, setShowMenu] = useState(false);
+  const togglePopover = () => setShowMenu(!showMenu);
 
   const fieldOptions = useMemo(
     () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
@@ -61,7 +62,7 @@ export const EmbeddableMenu: FC<Props> = ({
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="aiopsClickToShowSomeContentButton"
+      data-test-subj="aiopsEmbeddableMenuOptionsButton"
       size="s"
       iconType="arrowDown"
       iconSide="right"
@@ -76,28 +77,32 @@ export const EmbeddableMenu: FC<Props> = ({
     <EuiPopover
       id={'embeddableMenu'}
       button={button}
-      isOpen={showPopover}
+      isOpen={showMenu}
       closePopover={() => togglePopover()}
       panelPaddingSize="s"
       anchorPosition="downLeft"
     >
       <EuiPanel color="transparent" paddingSize="s" css={{ maxWidth: '400px' }}>
         <EuiTitle size="xxxs">
-          <h3>Pattern analysis settings</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.aiops.logCategorization.embeddableMenu.patternAnalysisSettingsTitle"
+              defaultMessage=" Pattern analysis settings"
+            />
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFormRow
-          data-test-subj="aiopsRandomSamplerOptionsFormRow"
+          data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
           label={i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+            'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
             {
               defaultMessage: 'Selected field',
             }
           )}
         >
           <EuiSuperSelect
-            aria-label="Accessible screen reader label"
-            placeholder="Select a single option"
+            aria-label="Select a field"
             options={fieldOptions}
             valueOfSelected={selectedField ?? undefined}
             onChange={setSelectedField}
@@ -109,7 +114,7 @@ export const EmbeddableMenu: FC<Props> = ({
         <EuiFormRow
           data-test-subj="aiopsRandomSamplerOptionsFormRow"
           label={i18n.translate(
-            'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+            'xpack.aiops.logCategorization.embeddableMenu.widenessOptionsRowLabel',
             {
               defaultMessage: 'Minimum time range',
             }
@@ -118,15 +123,18 @@ export const EmbeddableMenu: FC<Props> = ({
             <>
               {categoryCount !== undefined && widenessOption !== 'No minimum' ? (
                 <>
-                  Total patterns in {widenessOption}: {categoryCount}
+                  <FormattedMessage
+                    id="xpack.aiops.logCategorization.embeddableMenu.totalPatternsMessage"
+                    defaultMessage="Total patterns in {widenessOption}: {categoryCount}"
+                    values={{ widenessOption, categoryCount }}
+                  />
                 </>
               ) : null}
             </>
           }
         >
           <EuiSuperSelect
-            aria-label="Accessible screen reader label"
-            placeholder="Select a single option"
+            aria-label="Select a minimum time range"
             options={widenessOptions}
             valueOfSelected={widenessOption}
             onChange={setWidenessOption}

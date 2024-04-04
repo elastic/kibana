@@ -19,7 +19,7 @@ export const registerChangePointChartEmbeddable = (
 ) => {
   const changePointChartFactory = new EmbeddableChangePointChartFactory(
     EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
+    i18n.translate('xpack.aiops.embeddableLogCategorizationDisplayName', {
       defaultMessage: 'Change point detection',
     }),
     core.getStartServices
@@ -31,11 +31,14 @@ export const registerLogCategorizationEmbeddable = (
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
   embeddable: EmbeddableSetup
 ) => {
-  const changePointChartFactory = new EmbeddableLogCategorizationFactory(
-    i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
-      defaultMessage: 'Change point detection',
+  const embeddableLogCategorizationFactory = new EmbeddableLogCategorizationFactory(
+    i18n.translate('xpack.aiops.embeddableLogCategorizationDisplayName', {
+      defaultMessage: 'Pattern analysis',
     }),
     core.getStartServices
   );
-  embeddable.registerEmbeddableFactory(changePointChartFactory.type, changePointChartFactory);
+  embeddable.registerEmbeddableFactory(
+    embeddableLogCategorizationFactory.type,
+    embeddableLogCategorizationFactory
+  );
 };

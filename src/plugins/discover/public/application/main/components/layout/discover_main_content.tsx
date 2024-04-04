@@ -23,6 +23,7 @@ import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stat
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { LogCategorizationTab } from '../log_categorization/log_categorization_tab';
+import { PATTERN_ANALYSIS_LOADED } from '../log_categorization/constants';
 
 const DROP_PROPS = {
   value: {
@@ -72,6 +73,8 @@ export const DiscoverMainContent = ({
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
+        } else if (mode === VIEW_MODE.PATTERN_LEVEL) {
+          trackUiMetric(METRIC_TYPE.CLICK, PATTERN_ANALYSIS_LOADED);
         } else {
           trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
         }

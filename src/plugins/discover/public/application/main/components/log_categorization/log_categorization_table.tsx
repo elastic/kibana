@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { FIELD_STATISTICS_LOADED } from './constants';
+import { PATTERN_ANALYSIS_LOADED } from './constants';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 
 export type LogCategorizationTableProps = EmbeddableLogCategorizationProps & {
@@ -58,11 +58,6 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   >();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
-  const showPreviewByDefault = useMemo(
-    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
-    [stateContainer]
-  );
-
   useEffect(() => {
     const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
@@ -98,12 +93,6 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   ]);
 
   useEffect(() => {
-    if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
-      embeddable.reload();
-    }
-  }, [showPreviewByDefault, embeddable]);
-
-  useEffect(() => {
     let unmounted = false;
     const loadEmbeddable = async () => {
       if (services.embeddable) {
@@ -133,14 +122,14 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [services.embeddable, showPreviewByDefault]);
+  }, [services.embeddable]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
 
-      trackUiMetric?.(METRIC_TYPE.LOADED, FIELD_STATISTICS_LOADED);
+      trackUiMetric?.(METRIC_TYPE.LOADED, PATTERN_ANALYSIS_LOADED);
     }
 
     return () => {
@@ -149,7 +138,7 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
     };
   }, [embeddable, embeddableRoot, trackUiMetric]);
 
-  const statsTableCss = css`
+  const style = css`
     overflow-y: auto;
 
     .kbnDocTableWrapper {
@@ -158,7 +147,7 @@ export const LogCategorizationTable = (props: LogCategorizationTableProps) => {
   `;
 
   return (
-    <EuiFlexItem css={statsTableCss}>
+    <EuiFlexItem css={style}>
       <div
         data-test-subj="dscFieldStatsEmbeddedContent"
         ref={embeddableRoot}
