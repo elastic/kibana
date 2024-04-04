@@ -5806,6 +5806,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-notebooks@link:x-pack/plugins/search_notebooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-playground@link:x-pack/plugins/search_playground":
   version "0.0.0"
   uid ""
