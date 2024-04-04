@@ -71,18 +71,16 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             baseURL: this.config.apiUrl,
             defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
             defaultHeaders: {
-              // TODO, uncomment after Portkey PR merges 179026
-              // ...this.config.headers,
+              ...this.config.headers,
               'api-key': this.secrets.apiKey,
             },
           })
         : new OpenAI({
             baseURL: this.config.apiUrl,
             apiKey: this.secrets.apiKey,
-            // TODO, uncomment after Portkey PR merges 179026
-            //   defaultHeaders: {
-            // ...this.config.headers,
-            // },
+            defaultHeaders: {
+              ...this.config.headers,
+            },
           });
 
     this.registerSubActions();
