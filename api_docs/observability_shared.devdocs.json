@@ -682,7 +682,7 @@
                     "section": "def-common.Trigger",
                     "text": "Trigger"
                   },
-                  ") => void; readonly getTrigger: (triggerId: string) => ",
+                  ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
                   "TriggerContract",
                   "<object>; readonly registerAction: <Context extends object>(definition: ",
                   {
