@@ -73,8 +73,11 @@ export const addQueriesToCache = (item: QueryHistoryItem) => {
     });
   }
 };
-
-export const updateCachedQueries = (item: QueryHistoryItem) => {
+// Adding the maxQueriesAllowed here for testing purposes
+export const updateCachedQueries = (
+  item: QueryHistoryItem,
+  maxQueriesAllowed = MAX_QUERIES_NUMBER
+) => {
   const trimmedQueryString = getKey(item.queryString);
   const query = cachedQueries.get(trimmedQueryString);
 
@@ -99,13 +102,13 @@ export const updateCachedQueries = (item: QueryHistoryItem) => {
   );
   let allQueries = [...queriesToStore, ...newQueries];
 
-  if (allQueries.length === MAX_QUERIES_NUMBER + 1) {
+  if (allQueries.length === maxQueriesAllowed + 1) {
     const sortedByDate = allQueries.sort((a, b) =>
       sortDates(b?.startDateMilliseconds, a?.startDateMilliseconds)
     );
 
     // delete the last element
-    const toBeDeletedQuery = sortedByDate[MAX_QUERIES_NUMBER];
+    const toBeDeletedQuery = sortedByDate[maxQueriesAllowed];
     cachedQueries.delete(toBeDeletedQuery.queryString);
     allQueries = allQueries.filter((q) => {
       return q.queryString !== toBeDeletedQuery.queryString;
