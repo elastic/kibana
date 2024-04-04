@@ -80,7 +80,6 @@ const AssistantComponent: React.FC<Props> = ({
   setConversationTitle,
 }) => {
   const {
-    assistantStreamingEnabled,
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },

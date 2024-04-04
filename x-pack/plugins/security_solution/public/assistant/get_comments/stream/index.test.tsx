@@ -22,15 +22,16 @@ const content = 'Test Content';
 const mockAbortStream = jest.fn();
 const testProps = {
   abortStream: mockAbortStream,
-  refetchCurrentConversation: jest.fn(),
+  actionTypeId: '.gen-ai',
+  connectorId: 'test',
   content,
   index: 1,
-  isEnabledLangChain: true,
-  actionTypeId: '.gen-ai',
   isControlsEnabled: true,
+  isEnabledLangChain: true,
+  refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
+  setIsStreaming: jest.fn(),
   transformMessage: jest.fn(),
-  connectorId: 'test',
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
