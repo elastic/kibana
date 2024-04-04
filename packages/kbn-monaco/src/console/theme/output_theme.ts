@@ -9,9 +9,26 @@
 import { monaco } from '../../monaco_imports';
 import { buildConsoleSharedTheme } from './shared';
 
-export const buildConsoleOutputTheme = (): monaco.editor.IStandaloneThemeData => {
-  const sharedTheme = buildConsoleSharedTheme();
+const sharedTheme = buildConsoleSharedTheme();
+
+export const buildConsoleOutputJsonTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
     ...sharedTheme,
+  };
+};
+
+export const buildConsoleOutputYamlTheme = (): monaco.editor.IStandaloneThemeData => {
+  return {
+    ...sharedTheme,
+    rules: [],
+    colors: sharedTheme.colors,
+  };
+};
+
+export const buildConsoleOutputTextTheme = (): monaco.editor.IStandaloneThemeData => {
+  return {
+    ...sharedTheme,
+    rules: [],
+    colors: sharedTheme.colors,
   };
 };

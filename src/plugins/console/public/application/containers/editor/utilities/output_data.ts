@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { YAML_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
+import {
+  YAML_LANG_ID,
+  CONSOLE_OUTPUT_LANG_ID,
+  CONSOLE_OUTPUT_JSON_THEME_ID,
+  CONSOLE_OUTPUT_YAML_THEME_ID,
+  CONSOLE_OUTPUT_TEXT_THEME_ID,
+} from '@kbn/monaco';
 import { expandLiteralStrings } from '../../../../shared_imports';
 
 export const isJSONContentType = (contentType?: string) =>
@@ -40,3 +46,20 @@ export const languageForContentType = (contentType?: string) => {
   }
   return TEXT_LANGUAGE_ID;
 };
+
+export const getThemeForLanguage = (language: string) => {
+  switch (language) {
+    case CONSOLE_OUTPUT_LANG_ID: {
+      return CONSOLE_OUTPUT_JSON_THEME_ID;
+    }
+    case YAML_LANG_ID: {
+      return CONSOLE_OUTPUT_YAML_THEME_ID;
+    }
+    case TEXT_LANGUAGE_ID: {
+      return CONSOLE_OUTPUT_TEXT_THEME_ID;
+    }
+    default: {
+      return undefined;
+    }
+  }
+}

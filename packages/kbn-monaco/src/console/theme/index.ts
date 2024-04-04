@@ -7,4 +7,8 @@
  */
 
 export { buildConsoleTheme } from './editor_theme';
-export { buildConsoleOutputTheme } from './output_theme';
+export {
+  buildConsoleOutputJsonTheme,
+  buildConsoleOutputYamlTheme,
+  buildConsoleOutputTextTheme,
+} from './output_theme';

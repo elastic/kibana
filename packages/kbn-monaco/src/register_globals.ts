@@ -17,9 +17,13 @@ import {
   ConsoleLang,
   ConsoleOutputLang,
   CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
+  CONSOLE_OUTPUT_JSON_THEME_ID,
+  CONSOLE_OUTPUT_YAML_THEME_ID,
+  CONSOLE_OUTPUT_TEXT_THEME_ID,
   buildConsoleTheme,
-  buildConsoleOutputTheme,
+  buildConsoleOutputJsonTheme,
+  buildConsoleOutputYamlTheme,
+  buildConsoleOutputTextTheme,
 } from './console';
 
 export const DEFAULT_WORKER_ID = 'default';
@@ -48,7 +52,9 @@ registerLanguage(ConsoleOutputLang);
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
 registerTheme(CONSOLE_THEME_ID, buildConsoleTheme());
-registerTheme(CONSOLE_OUTPUT_THEME_ID, buildConsoleOutputTheme());
+registerTheme(CONSOLE_OUTPUT_JSON_THEME_ID, buildConsoleOutputJsonTheme());
+registerTheme(CONSOLE_OUTPUT_YAML_THEME_ID, buildConsoleOutputYamlTheme());
+registerTheme(CONSOLE_OUTPUT_TEXT_THEME_ID, buildConsoleOutputTextTheme());
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 

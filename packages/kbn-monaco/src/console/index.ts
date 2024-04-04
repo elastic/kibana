@@ -24,10 +24,17 @@ export {
   CONSOLE_LANG_ID,
   CONSOLE_OUTPUT_LANG_ID,
   CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
+  CONSOLE_OUTPUT_JSON_THEME_ID,
+  CONSOLE_OUTPUT_YAML_THEME_ID,
+  CONSOLE_OUTPUT_TEXT_THEME_ID,
 } from './constants';
 
-export { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
+export {
+  buildConsoleTheme,
+  buildConsoleOutputJsonTheme,
+  buildConsoleOutputYamlTheme,
+  buildConsoleOutputTextTheme,
+} from './theme';
 
 export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,

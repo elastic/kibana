@@ -9,5 +9,7 @@
 export const CONSOLE_LANG_ID = 'console';
 export const CONSOLE_THEME_ID = 'consoleTheme';
 export const CONSOLE_OUTPUT_LANG_ID = 'consoleOutput';
-export const CONSOLE_OUTPUT_THEME_ID = 'consoleOutputTheme';
+export const CONSOLE_OUTPUT_JSON_THEME_ID = 'consoleOutputJsonTheme';
+export const CONSOLE_OUTPUT_YAML_THEME_ID = 'consoleOutputYamlTheme';
+export const CONSOLE_OUTPUT_TEXT_THEME_ID = 'consoleOutputTextTheme';
 export const CONSOLE_POSTFIX = '.console';
