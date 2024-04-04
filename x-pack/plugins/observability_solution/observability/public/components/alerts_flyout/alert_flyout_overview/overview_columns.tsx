@@ -67,10 +67,12 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           const alertEnd = meta?.alertEnd;
           const timeRange = meta?.timeRange;
           return (
-            <Groups
-              groups={groups}
-              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
-            />
+            <div>
+              <Groups
+                groups={groups}
+                timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+              />
+            </div>
           );
         case ColumnIDs.TRIGGERED:
           const triggeredDate = value as string;
