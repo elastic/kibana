@@ -11,10 +11,13 @@ import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
   EuiThemeProvider,
+  EuiWindowEvent,
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +26,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import {
   EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
+  EmbeddableConsoleView,
 } from '../../../types/embeddable_console';
 
 import * as store from '../../stores/embeddable_console';
@@ -45,6 +49,7 @@ export const EmbeddableConsole = ({
   core,
   usageCollection,
   setDispatch,
+  alternateView,
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
@@ -57,22 +62,39 @@ export const EmbeddableConsole = ({
     return () => setDispatch(null);
   }, [setDispatch, consoleDispatch]);
   useEffect(() => {
-    if (consoleState.isOpen && consoleState.loadFromContent) {
+    if (consoleState.view === EmbeddableConsoleView.Console && consoleState.loadFromContent) {
       setLoadFromParameter(consoleState.loadFromContent);
-    } else if (!consoleState.isOpen) {
+    } else if (consoleState.view === EmbeddableConsoleView.Closed) {
       removeLoadFromParameter();
     }
-  }, [consoleState.isOpen, consoleState.loadFromContent]);
+  }, [consoleState.view, consoleState.loadFromContent]);
   useEffect(() => {
     document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
     return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
   }, []);
 
-  const isConsoleOpen = consoleState.isOpen;
+  const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
+  const showConsole =
+    consoleState.view !== EmbeddableConsoleView.Closed &&
+    (consoleState.view === EmbeddableConsoleView.Console || alternateView === undefined);
+  const showAlternateView =
+    consoleState.view === EmbeddableConsoleView.Alternate && alternateView !== undefined;
   const setIsConsoleOpen = (value: boolean) => {
     consoleDispatch(value ? { type: 'open' } : { type: 'close' });
   };
-  const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
+  const toggleConsole = () => setIsConsoleOpen(!isOpen);
+  const clickAlternateViewActivateButton: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault();
+    switch (consoleState.view) {
+      case EmbeddableConsoleView.Console:
+      case EmbeddableConsoleView.Closed:
+        consoleDispatch({ type: 'open', payload: { alternateView: true } });
+        break;
+      case EmbeddableConsoleView.Alternate:
+        consoleDispatch({ type: 'open', payload: { alternateView: false } });
+        break;
+    }
+  };
 
   const onKeyDown = (event: any) => {
     if (event.key === keys.ESCAPE) {
@@ -83,7 +105,7 @@ export const EmbeddableConsole = ({
   };
 
   const classes = classNames('embeddableConsole', {
-    'embeddableConsole-isOpen': isConsoleOpen,
+    'embeddableConsole-isOpen': isOpen,
     'embeddableConsole--large': size === 'l',
     'embeddableConsole--medium': size === 'm',
     'embeddableConsole--small': size === 's',
@@ -96,7 +118,7 @@ export const EmbeddableConsole = ({
 
   return (
     <EuiPortal>
-      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isConsoleOpen}>
+      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
         <section
           aria-label={landmarkHeading}
           className={classes}
@@ -106,25 +128,44 @@ export const EmbeddableConsole = ({
             <h2>{landmarkHeading}</h2>
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-            <div className="embeddableConsole__controls">
-              <EuiButton
-                color="text"
-                iconType={isConsoleOpen ? 'arrowUp' : 'arrowDown'}
-                onClick={toggleConsole}
-                fullWidth
-                contentProps={{
-                  className: 'embeddableConsole__controls--button',
-                }}
-                data-test-subj="consoleEmbeddedControlBar"
-                data-telemetry-id="console-embedded-controlbar-button"
-              >
-                {i18n.translate('console.embeddableConsole.title', {
-                  defaultMessage: 'Console',
-                })}
-              </EuiButton>
-            </div>
+            <EuiFlexGroup className="embeddableConsole__controls" gutterSize="none">
+              <EuiFlexItem>
+                <EuiButton
+                  color="text"
+                  iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+                  onClick={toggleConsole}
+                  fullWidth
+                  contentProps={{
+                    className: 'embeddableConsole__controls--button',
+                  }}
+                  data-test-subj="consoleEmbeddedControlBar"
+                  data-telemetry-id="console-embedded-controlbar-button"
+                >
+                  {i18n.translate('console.embeddableConsole.title', {
+                    defaultMessage: 'Console',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              {alternateView && (
+                <EuiFlexItem
+                  grow={false}
+                  className="embeddableConsole__controls--altViewButton-container"
+                >
+                  <alternateView.ActivationButton
+                    activeView={showAlternateView}
+                    onClick={clickAlternateViewActivateButton}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiThemeProvider>
-          {isConsoleOpen ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
+          {showConsole ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
+          {showAlternateView ? (
+            <div>
+              <EuiWindowEvent event="keydown" handler={onKeyDown} />
+              <alternateView.ViewContent />
+            </div>
+          ) : null}
         </section>
         <EuiScreenReaderOnly>
           <p aria-live="assertive">

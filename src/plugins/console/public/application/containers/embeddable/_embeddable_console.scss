@@ -70,6 +70,10 @@
   &--button {
     justify-content: flex-start;
   }
+
+  &--altViewButton-container {
+    padding: $euiSizeS;
+  }
 }
 
 .embeddableConsole__content {

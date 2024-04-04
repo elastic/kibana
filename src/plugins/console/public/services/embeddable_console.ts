@@ -7,10 +7,18 @@
  */
 import type { Dispatch } from 'react';
 
-import { EmbeddedConsoleAction as EmbeddableConsoleAction } from '../types/embeddable_console';
+import {
+  EmbeddedConsoleAction as EmbeddableConsoleAction,
+  EmbeddedConsoleView,
+} from '../types/embeddable_console';
 
 export class EmbeddableConsoleInfo {
   private _dispatch: Dispatch<EmbeddableConsoleAction> | null = null;
+  private _alternateView: EmbeddedConsoleView | undefined;
+
+  public get alternateView(): EmbeddedConsoleView | undefined {
+    return this._alternateView;
+  }
 
   public setDispatch(d: Dispatch<EmbeddableConsoleAction> | null) {
     this._dispatch = d;
@@ -25,5 +33,9 @@ export class EmbeddableConsoleInfo {
     if (!this._dispatch) return;
 
     this._dispatch({ type: 'open', payload: content ? { content } : undefined });
+  }
+
+  public registerAlternateView(view: EmbeddedConsoleView | null) {
+    this._alternateView = view ?? undefined;
   }
 }
