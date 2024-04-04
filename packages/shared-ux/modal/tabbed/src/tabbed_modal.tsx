@@ -55,7 +55,7 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   modalActionBtn: IModalTabActionBtn<S>;
 }
 
-interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
 }

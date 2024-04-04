@@ -29,8 +29,12 @@ export const ShareMenuTabs = () => {
   }
 
   const { allowEmbed, objectType, onClose } = shareContext;
+  const tabs = [];
+  tabs.push(linkTab);
 
-  const tabs = [linkTab, allowEmbed ? embedTab : null].filter(Boolean);
+  if (allowEmbed) {
+    tabs.push(embedTab);
+  }
 
   return (
     <TabbedModal

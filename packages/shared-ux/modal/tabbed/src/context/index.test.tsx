@@ -36,7 +36,7 @@ describe('tabbed modal provider', () => {
 
     expect(result.current).toHaveProperty(
       'tabs',
-      ([] as ModalContextProviderProps['tabs']).concat(props.tabs).map((tab) => {
+      ([] as ModalContextProviderProps['tabs'])?.concat(props.tabs).map((tab) => {
         if (tab.initialState) {
           delete tab.initialState;
         }
