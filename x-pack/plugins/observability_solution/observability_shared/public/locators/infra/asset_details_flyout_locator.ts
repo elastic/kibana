@@ -13,11 +13,11 @@ export type AssetDetailsFlyoutLocator = LocatorPublic<AssetDetailsFlyoutLocatorP
 export interface AssetDetailsFlyoutLocatorParams extends SerializableRecord {
   tableProperties: {
     detailsItemId: string;
-    pagination: {
+    pagination?: {
       pageIndex: number;
       pageSize: number;
     };
-    sorting: {
+    sorting?: {
       direction?: string;
       field: string;
     };
