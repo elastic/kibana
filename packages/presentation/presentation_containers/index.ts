@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new_panel';
 export {
   apiPublishesLastSavedState,
   getLastSavedStateSubjectForChild,

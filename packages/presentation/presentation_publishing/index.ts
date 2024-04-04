@@ -30,6 +30,12 @@ export {
 } from './interfaces/can_access_view_mode';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export {
+  apiHasLegacyLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  type HasLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSupportedTriggers,
@@ -62,16 +68,6 @@ export {
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
 export {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
-export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
@@ -100,12 +96,16 @@ export {
   type PublishesWritablePanelTitle,
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
+export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
 export {
-  type HasLibraryTransforms,
-  apiHasLibraryTransforms,
-  type HasLegacyLibraryTransforms,
-  apiHasLegacyLibraryTransforms,
-} from './interfaces/has_library_transforms';
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/unified_search/publishes_unified_search';
 export {
   useBatchedPublishingSubjects,
   usePublishingSubject,

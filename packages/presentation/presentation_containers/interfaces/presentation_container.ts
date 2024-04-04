@@ -12,13 +12,18 @@ import {
   PublishesViewMode,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
+import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
   panelType: string;
   initialState?: object;
 }
 
-export interface PresentationContainer extends Partial<PublishesViewMode> {
+export interface PresentationContainer
+  extends Partial<PublishesViewMode>,
+    CanAddNewPanel,
+    PublishesLastSavedState {
   addNewPanel: <ApiType extends unknown = unknown>(
     panel: PanelPackage,
     displaySuccessMessage?: boolean
@@ -32,7 +37,8 @@ export interface PresentationContainer extends Partial<PublishesViewMode> {
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
-    typeof (api as PresentationContainer)?.removePanel === 'function' &&
+    apiCanAddNewPanel(api) &&
+      typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
       typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
       (api as PresentationContainer)?.children$
