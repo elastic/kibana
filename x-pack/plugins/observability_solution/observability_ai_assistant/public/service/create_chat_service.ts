@@ -46,7 +46,7 @@ import type {
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 import { complete } from './complete';
 
-const MIN_DELAY = 35;
+const MIN_DELAY = 10;
 
 function toObservable(response: HttpResponse<IncomingMessage>) {
   const status = response.response?.status;
