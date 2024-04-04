@@ -53,11 +53,9 @@ export function registerAlertsFunction({
       descriptionForUser: 'Get alerts for Observability',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           featureIds: {
             type: 'array',
-            additionalItems: false,
             items: {
               type: 'string',
               enum: DEFAULT_FEATURE_IDS,

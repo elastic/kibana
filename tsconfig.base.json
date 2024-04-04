@@ -1582,6 +1582,8 @@
       "@kbn/shared-ux-storybook-config/*": ["packages/shared-ux/storybook/config/*"],
       "@kbn/shared-ux-storybook-mock": ["packages/shared-ux/storybook/mock"],
       "@kbn/shared-ux-storybook-mock/*": ["packages/shared-ux/storybook/mock/*"],
+      "@kbn/shared-ux-tabbed-modal": ["packages/shared-ux/modal/tabbed"],
+      "@kbn/shared-ux-tabbed-modal/*": ["packages/shared-ux/modal/tabbed/*"],
       "@kbn/shared-ux-utility": ["packages/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["packages/kbn-shared-ux-utility/*"],
       "@kbn/slo-plugin": ["x-pack/plugins/observability_solution/slo"],

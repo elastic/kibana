@@ -6,7 +6,7 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import { compact, isEmpty, merge, omit } from 'lodash';
+import { compact, isEmpty, merge, omit, pick } from 'lodash';
 import OpenAI from 'openai';
 import { CompatibleJSONSchema } from '../../../../common/functions/types';
 import { Message, MessageRole } from '../../../../common';
@@ -58,6 +58,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
   messages,
   functions,
   functionCall,
+  logger,
 }) => {
   const promptTokens = getOpenAIPromptTokenCount({ messages, functions });
 
@@ -101,9 +102,18 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
       const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
         messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
         stream: true,
-        ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
+        ...(!!functionsForOpenAI?.length
+          ? {
+              tools: functionsForOpenAI.map((fn) => ({
+                function: pick(fn, 'name', 'description', 'parameters'),
+                type: 'function',
+              })),
+            }
+          : {}),
         temperature: 0,
-        function_call: functionCall ? { name: functionCall } : undefined,
+        tool_choice: functionCall
+          ? { function: { name: functionCall }, type: 'function' }
+          : undefined,
       };
 
       return {
@@ -115,7 +125,9 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
       };
     },
     streamIntoObservable: (readable) => {
-      return eventsourceStreamIntoObservable(readable).pipe(processOpenAiStream(promptTokens));
+      return eventsourceStreamIntoObservable(readable).pipe(
+        processOpenAiStream({ promptTokenCount: promptTokens, logger })
+      );
     },
   };
 };
