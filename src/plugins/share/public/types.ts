@@ -78,7 +78,7 @@ export interface ShareMenuItem {
   panel?: EuiContextMenuPanelDescriptor;
   label?: 'PDF' | 'CSV' | 'PNG';
   reportType?: string;
-  requresSavedState?: boolean;
+  requiresSavedState?: boolean;
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
   generateReportButton?: ReactElement;

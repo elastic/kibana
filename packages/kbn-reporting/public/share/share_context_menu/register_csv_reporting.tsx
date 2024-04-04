@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import url from 'url';
 import type { ExportModalShareOpts } from '.';
@@ -75,7 +75,7 @@ export const reportingCsvShareProvider = ({
       };
     };
 
-    const shareActions = [];
+    const shareActions: ShareMenuItem[] = [];
 
     const licenseCheck = checkLicense(license.check('reporting', 'basic'));
     const licenseToolTipContent = licenseCheck.message;

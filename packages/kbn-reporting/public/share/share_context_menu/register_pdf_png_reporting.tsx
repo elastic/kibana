@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { BaseParams } from '@kbn/reporting-common/types';
@@ -125,7 +125,7 @@ export const reportingScreenshotShareProvider = ({
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions = [];
+    const shareActions: ShareMenuItem[] = [];
 
     const pngPanelTitle = i18n.translate('reporting.share.contextMenu.pngReportsButtonLabel', {
       defaultMessage: 'PNG Reports',
@@ -285,7 +285,7 @@ export const reportingExportModalProvider = ({
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions = [];
+    const shareActions: ShareMenuItem[] = [];
 
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,

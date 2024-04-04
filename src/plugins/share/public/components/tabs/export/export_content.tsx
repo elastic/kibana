@@ -25,7 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import useMountedState from 'react-use/lib/useMountedState';
+// import useMountedState from 'react-use/lib/useMountedState';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
@@ -45,17 +45,17 @@ export const ExportContent = ({
   const isSaved = Boolean(objectId) || !isDirty;
   // needed for CSV in Discover
   const firstRadio = aggregateReportTypes[0].reportType;
-  const [, setIsStale] = useState(false);
+  // const [, setIsStale] = useState(false);
   const [isCreatingReport] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(firstRadio);
   const [usePrintLayout, setPrintLayout] = useState(false);
-  const isMounted = useMountedState();
+  // const isMounted = useMountedState();
 
   const getProperties = useCallback(() => {
     if (objectType === 'search') {
       return aggregateReportTypes[0];
     } else {
-      return aggregateReportTypes?.filter(({ reportType }) => reportType === selectedRadio[0]);
+      return aggregateReportTypes?.filter(({ reportType }) => reportType === selectedRadio)[0];
     }
   }, [selectedRadio, aggregateReportTypes, objectType]);
 
@@ -67,6 +67,7 @@ export const ExportContent = ({
     generateReportForPrinting,
     downloadCSVLens,
     absoluteUrl,
+    renderLayoutOptionSwitch,
   } = getProperties();
 
   const getRadioOptions = useCallback(
@@ -78,7 +79,7 @@ export const ExportContent = ({
   );
 
   const renderLayoutOptionsSwitch = useCallback(() => {
-    if (layoutOption === ('print' as const) && selectedRadio !== 'pngV2') {
+    if (renderLayoutOptionSwitch) {
       return (
         <>
           <EuiSwitch
@@ -108,7 +109,7 @@ export const ExportContent = ({
         </>
       );
     }
-  }, [layoutOption, selectedRadio, usePrintLayout]);
+  }, [usePrintLayout, renderLayoutOptionSwitch]);
 
   useEffect(() => {
     getRadioOptions();
@@ -116,10 +117,10 @@ export const ExportContent = ({
     getProperties();
   }, [aggregateReportTypes, getProperties, getRadioOptions, renderLayoutOptionsSwitch]);
 
-  const markAsStale = useCallback(() => {
-    if (!isMounted) return;
-    setIsStale(true);
-  }, [isMounted]);
+  // const markAsStale = useCallback(() => {
+  //   if (!isMounted) return;
+  //   setIsStale(true);
+  // }, [isMounted]);
 
   const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
     setPrintLayout(evt.target.checked);
@@ -175,38 +176,47 @@ export const ExportContent = ({
       );
   }, [absoluteUrl, isDirty, renderCopyURLButton]);
 
-  const getReport = () => {
+  const getReport = useCallback(() => {
     if (objectType === 'lens' && selectedRadio === 'csv') {
       return downloadCSVLens();
     }
     return usePrintLayout ? generateReportForPrinting() : generateReport();
-  };
+  }, [
+    downloadCSVLens,
+    generateReport,
+    generateReportForPrinting,
+    objectType,
+    selectedRadio,
+    usePrintLayout,
+  ]);
 
-  const renderGenerateReportButton = !isSaved ? (
-    <EuiToolTip
-      content={i18n.translate('reporting.share.panelContent.unsavedStateErrorTitle', {
-        defaultMessage: 'Unsaved work',
-      })}
-    >
+  const renderGenerateReportButton = useCallback(() => {
+    return !isSaved ? (
+      <EuiToolTip
+        content={i18n.translate('reporting.share.panelContent.unsavedStateErrorTitle', {
+          defaultMessage: 'Unsaved work',
+        })}
+      >
+        <EuiButton
+          disabled={!isSaved}
+          data-test-subj="generateReportButton"
+          isLoading={Boolean(isCreatingReport)}
+        >
+          {generateReportButton}
+        </EuiButton>
+      </EuiToolTip>
+    ) : (
       <EuiButton
-        disabled={isDirty}
+        disabled={!isSaved}
+        fill
+        onClick={() => getReport()}
         data-test-subj="generateReportButton"
         isLoading={Boolean(isCreatingReport)}
       >
         {generateReportButton}
       </EuiButton>
-    </EuiToolTip>
-  ) : (
-    <EuiButton
-      disabled={isDirty}
-      fill
-      onClick={() => getReport()}
-      data-test-subj="generateReportButton"
-      isLoading={Boolean(isCreatingReport)}
-    >
-      {generateReportButton}
-    </EuiButton>
-  );
+    );
+  }, [isSaved, generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
     if (objectType === 'dashboard' || objectType === 'lens') {
@@ -241,14 +251,15 @@ export const ExportContent = ({
       </EuiForm>
       <EuiModalFooter // dashboard has three buttons in the footer and needs to have them in the footer
         css={
-          selectedRadio === 'printablePdfV2' && objectType === 'dashboard'
+          selectedRadio === 'printablePdfV2' &&
+          (objectType === 'dashboard' || objectType === 'lens')
             ? { justifyContent: 'center', alignItems: 'center' }
             : {}
         }
       >
         {renderLayoutOptionsSwitch()}
         {showCopyURLButton()}
-        {renderGenerateReportButton}
+        {renderGenerateReportButton()}
       </EuiModalFooter>
     </>
   );
