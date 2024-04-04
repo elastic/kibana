@@ -27,6 +27,7 @@
     "@kbn/solution-nav-es",
     "@kbn/solution-nav-oblt",
     "@kbn/config",
+    "@kbn/solution-nav-analytics",
     "@kbn/kibana-react-plugin",
     "@kbn/security-plugin",
     "@kbn/user-profile-components",

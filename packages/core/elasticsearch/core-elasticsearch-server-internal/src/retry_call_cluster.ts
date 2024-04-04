@@ -7,7 +7,7 @@
  */
 
 import { defer, throwError, iif, timer } from 'rxjs';
-import { concatMap, retryWhen } from 'rxjs/operators';
+import { concatMap, retryWhen } from 'rxjs';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable

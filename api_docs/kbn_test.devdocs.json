@@ -3303,7 +3303,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"host\" | \"tag\" | \"image\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
+              ", \"host\" | \"tag\" | \"image\" | \"dataPath\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
