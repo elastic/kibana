@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.11.1",
+    "node": "20.12.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -697,6 +697,7 @@
     "@kbn/search-errors": "link:packages/kbn-search-errors",
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-index-documents": "link:packages/kbn-search-index-documents",
+    "@kbn/search-notebooks": "link:x-pack/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/plugins/search_playground",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
