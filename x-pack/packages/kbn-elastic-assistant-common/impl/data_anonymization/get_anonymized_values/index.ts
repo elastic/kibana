@@ -9,8 +9,7 @@ import { isAllowed, isAnonymized } from '../helpers';
 import { AnonymizedValues, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedValues: GetAnonymizedValues = ({
-  allowSet,
-  allowReplacementSet,
+  anonymizationFields,
   currentReplacements,
   field,
   getAnonymizedValue,
@@ -22,7 +21,10 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
     (acc, rawValue) => {
       const stringValue = `${rawValue}`;
 
-      if (isAllowed({ allowSet, field }) && isAnonymized({ allowReplacementSet, field })) {
+      if (
+        isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field }) &&
+        isAnonymized({ anonymizationFields: anonymizationFields?.data ?? [], field })
+      ) {
         const anonymizedValue = `${getAnonymizedValue({
           currentReplacements,
           rawValue: stringValue,
@@ -35,7 +37,7 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
             [anonymizedValue]: stringValue,
           },
         };
-      } else if (isAllowed({ allowSet, field })) {
+      } else if (isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field })) {
         return {
           anonymizedValues: [...acc.anonymizedValues, stringValue], // no anonymization for this value
           replacements: {

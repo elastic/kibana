@@ -69,8 +69,8 @@ export interface PromptContext {
  * A prompt context that was added from the pills to the current conversation, but not yet sent
  */
 export interface SelectedPromptContext {
-  /** fields allowed to be included in a conversation */
-  anonymizationFields: FindAnonymizationFieldsResponse;
+  /** anonymization fields to be included in a conversation */
+  contextAnonymizationFields?: FindAnonymizationFieldsResponse;
   /** unique id of the selected `PromptContext` */
   promptContextId: string;
   /** this data is not anonymized  */

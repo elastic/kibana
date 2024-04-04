@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
-import { getIsDataAnonymizable } from './helpers';
+import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
 import { Stats } from './stats';
 
@@ -37,8 +37,9 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
     [selectedPromptContext]
   );
 
-  const onListUpdated = useCallback((updates: BatchUpdateListItem[]) => {
-    /* const updatedPromptContext = updates.reduce<SelectedPromptContext>(
+  const onListUpdated = useCallback(
+    (updates: BatchUpdateListItem[]) => {
+      const updatedPromptContext = updates.reduce<SelectedPromptContext>(
         (acc, { field, operation, update }) =>
           updateSelectedPromptContext({
             field,
@@ -53,16 +54,9 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         ...prev,
         [selectedPromptContext.promptContextId]: updatedPromptContext,
       }));
-
-      updateDefaults({
-        defaultAllow,
-        defaultAllowReplacement,
-        setDefaultAllow,
-        setDefaultAllowReplacement,
-        updates,
-      });
-      */
-  }, []);
+    },
+    [selectedPromptContext, setSelectedPromptContexts]
+  );
 
   return (
     <EditorContainer data-test-subj="dataAnonymizationEditor">
@@ -77,7 +71,14 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
       ) : (
         <ContextEditor
-          anonymizationFields={selectedPromptContext.anonymizationFields}
+          anonymizationFields={
+            selectedPromptContext.contextAnonymizationFields ?? {
+              total: 0,
+              page: 1,
+              perPage: 100,
+              data: [],
+            }
+          }
           onListUpdated={onListUpdated}
           rawData={selectedPromptContext.rawData}
         />

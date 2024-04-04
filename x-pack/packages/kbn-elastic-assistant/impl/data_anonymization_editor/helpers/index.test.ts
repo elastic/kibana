@@ -5,17 +5,10 @@
  * 2.0.
  */
 
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
+import { getIsDataAnonymizable } from '.';
 import { SelectedPromptContext } from '../../assistant/prompt_context/types';
-import {
-  isAllowed,
-  isAnonymized,
-  isDenied,
-  getIsDataAnonymizable,
-  updateDefaultList,
-  updateDefaults,
-  updateList,
-  updateSelectedPromptContext,
-} from '.';
+
 import { BatchUpdateListItem } from '../context_editor/types';
 
 describe('helpers', () => {

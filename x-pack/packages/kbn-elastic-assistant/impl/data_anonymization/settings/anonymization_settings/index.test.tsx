@@ -13,11 +13,48 @@ import { AnonymizationSettings } from '.';
 import type { Props } from '.';
 
 const props: Props = {
-  defaultAllow: ['foo', 'bar', 'baz', '@baz'],
-  defaultAllowReplacement: ['bar'],
-  pageSize: 5,
-  setUpdatedDefaultAllow: jest.fn(),
-  setUpdatedDefaultAllowReplacement: jest.fn(),
+  defaultPageSize: 5,
+  anonymizationFields: {
+    total: 4,
+    page: 1,
+    perPage: 100,
+    data: [
+      {
+        field: 'foo',
+        id: 'test',
+        allowed: true,
+        anonymized: false,
+        createdAt: '',
+        timestamp: '',
+      },
+      {
+        field: 'bar',
+        id: 'test1',
+        allowed: true,
+        anonymized: true,
+        createdAt: '',
+        timestamp: '',
+      },
+      {
+        field: 'baz',
+        id: 'test2',
+        allowed: true,
+        anonymized: false,
+        createdAt: '',
+        timestamp: '',
+      },
+      {
+        field: '@baz',
+        id: 'test3',
+        allowed: true,
+        anonymized: false,
+        createdAt: '',
+        timestamp: '',
+      },
+    ],
+  },
+  setAnonymizationFieldsBulkActions: jest.fn(),
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 
 const mockUseAssistantContext = {

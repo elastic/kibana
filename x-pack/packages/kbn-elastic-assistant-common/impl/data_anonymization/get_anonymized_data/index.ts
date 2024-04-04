@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import { FindAnonymizationFieldsResponse } from '../../schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { isAllowed } from '../helpers';
 import type { AnonymizedData, GetAnonymizedValues } from '../types';
 
 export const getAnonymizedData = ({
-  allow,
-  allowReplacement,
+  anonymizationFields,
   currentReplacements,
   getAnonymizedValue,
   getAnonymizedValues,
   rawData,
 }: {
-  allow: string[];
-  allowReplacement: string[];
+  anonymizationFields?: FindAnonymizationFieldsResponse;
   currentReplacements: Record<string, string> | undefined;
   getAnonymizedValue: ({
     currentReplacements,
@@ -31,13 +30,9 @@ export const getAnonymizedData = ({
 }): AnonymizedData =>
   Object.keys(rawData).reduce<AnonymizedData>(
     (acc, field) => {
-      const allowReplacementSet = new Set(allowReplacement);
-      const allowSet = new Set(allow);
-
-      if (isAllowed({ allowSet, field })) {
+      if (isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field })) {
         const { anonymizedValues, replacements } = getAnonymizedValues({
-          allowReplacementSet,
-          allowSet,
+          anonymizationFields,
           currentReplacements,
           field,
           getAnonymizedValue,

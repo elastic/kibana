@@ -10,7 +10,7 @@ import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common
 import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { Stats } from '../helpers';
 
-export const getStats = ({ anonymizationFields, rawData }: SelectedPromptContext): Stats => {
+export const getStats = ({ contextAnonymizationFields, rawData }: SelectedPromptContext): Stats => {
   const ZERO_STATS = {
     allowed: 0,
     anonymized: 0,
@@ -27,15 +27,20 @@ export const getStats = ({ anonymizationFields, rawData }: SelectedPromptContext
       (acc, field) => ({
         allowed:
           acc.allowed +
-          (isAllowed({ anonymizationFields: anonymizationFields.data, field }) ? 1 : 0),
+          (isAllowed({ anonymizationFields: contextAnonymizationFields?.data ?? [], field })
+            ? 1
+            : 0),
         anonymized:
           acc.anonymized +
-          (isAllowed({ anonymizationFields: anonymizationFields.data, field }) &&
-          isAnonymized({ anonymizationFields: anonymizationFields.data, field })
+          (isAllowed({ anonymizationFields: contextAnonymizationFields?.data ?? [], field }) &&
+          isAnonymized({ anonymizationFields: contextAnonymizationFields?.data ?? [], field })
             ? 1
             : 0),
         denied:
-          acc.denied + (isDenied({ anonymizationFields: anonymizationFields.data, field }) ? 1 : 0),
+          acc.denied +
+          (isDenied({ anonymizationFields: contextAnonymizationFields?.data ?? [], field })
+            ? 1
+            : 0),
         total: acc.total + 1,
       }),
       ZERO_STATS

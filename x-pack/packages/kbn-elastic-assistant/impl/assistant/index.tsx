@@ -438,7 +438,6 @@ const AssistantComponent: React.FC<Props> = ({
     selectedConversationTitle,
     selectedPromptContexts,
     autoPopulatedOnce,
-    anonymizationFields,
     isLoadingAnonymizationFields,
     isErrorAnonymizationFields,
     anonymizationData,
@@ -610,10 +609,10 @@ const AssistantComponent: React.FC<Props> = ({
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
         {createCodeBlockPortals()}
 
-        {!isDisabled && (
+        {!isDisabled && !isLoadingAnonymizationFields && !isErrorAnonymizationFields && (
           <>
             <ContextPills
-              anonymizationFields={anonymizationFields}
+              anonymizationFields={anonymizationData}
               promptContexts={promptContexts}
               selectedPromptContexts={selectedPromptContexts}
               setSelectedPromptContexts={setSelectedPromptContexts}

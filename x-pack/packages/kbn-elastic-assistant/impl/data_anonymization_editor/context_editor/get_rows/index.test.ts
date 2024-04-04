@@ -11,12 +11,48 @@ import { getRows } from '.';
 
 describe('getRows', () => {
   const defaultArgs: {
-    allow: SelectedPromptContext['allow'];
-    allowReplacement: SelectedPromptContext['allowReplacement'];
+    anonymizationFields: SelectedPromptContext['anonymizationFields'];
     rawData: Record<string, string[]> | null;
   } = {
-    allow: ['event.action', 'user.name', 'other.field'], // other.field is not in the rawData
-    allowReplacement: ['user.name', 'host.ip'], // host.ip is not in the rawData
+    anonymizationFields: {
+      total: 4,
+      page: 1,
+      perPage: 100,
+      data: [
+        {
+          field: 'event.action',
+          id: 'test',
+          allowed: true,
+          anonymized: false,
+          createdAt: '',
+          timestamp: '',
+        },
+        {
+          field: 'user.name',
+          id: 'test1',
+          allowed: true,
+          anonymized: true,
+          createdAt: '',
+          timestamp: '',
+        },
+        {
+          field: 'other.field',
+          id: 'test2',
+          allowed: true,
+          anonymized: false,
+          createdAt: '',
+          timestamp: '',
+        },
+        {
+          field: 'host.ip',
+          id: 'test3',
+          allowed: false,
+          anonymized: true,
+          createdAt: '',
+          timestamp: '',
+        },
+      ],
+    },
     rawData: {
       'event.category': ['process'], // event.category is not in the allow list, nor is it in the allowReplacement list
       'event.action': ['process_stopped', 'stop'], // event.action is in the allow list, but not the allowReplacement list
@@ -50,8 +86,7 @@ describe('getRows', () => {
     ];
 
     const nullRawData: {
-      allow: SelectedPromptContext['allow'];
-      allowReplacement: SelectedPromptContext['allowReplacement'];
+      anonymizationFields: SelectedPromptContext['anonymizationFields'];
       rawData: Record<string, string[]> | null;
     } = {
       ...defaultArgs,
