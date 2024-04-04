@@ -8,9 +8,7 @@
 
 import { RecursivePartial } from '@kbn/utility-types';
 import type { FunctionDefinition } from './types';
-import { generatedFunctions } from './agg_functions_generated';
-import { enrichGeneratedFunctionDefinitions } from './functions';
-
+const generatedFunctions = [];
 const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> = {
   percentile: {
     signatures: [
@@ -26,8 +24,8 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   },
 };
 
-export const statsAggregationFunctionDefinitions: FunctionDefinition[] =
-  enrichGeneratedFunctionDefinitions(generatedFunctions, functionEnrichments).map((fn) => {
+export const statsAggregationFunctionDefinitions: FunctionDefinition[] = generatedFunctions.map(
+  (fn) => {
     fn.signatures.forEach(
       (signature) => signature.params.forEach((param) => (param.noNestingFunctions = true)) // true for all agg functions
     );
@@ -36,4 +34,5 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] =
       ...fn,
       supportedCommands: ['stats'],
     };
-  });
+  }
+);

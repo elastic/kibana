@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { isLiteralItem } from '../shared/helpers';
 import type { FunctionDefinition } from './types';
 
-export const functionDefinitions: FunctionDefinition[] = [
+export const evalFunctionDefinitions: FunctionDefinition[] = [
   {
     type: 'eval',
     name: 'abs',
@@ -186,7 +186,25 @@ export const functionDefinitions: FunctionDefinition[] = [
         'Accepts pairs of conditions and values.\nThe function returns the value that belongs to the first condition that evaluates to true.',
     }),
     alias: undefined,
-    signatures: [],
+    signatures: [
+      {
+        params: [
+          {
+            name: 'condition',
+            type: 'boolean',
+          },
+          {
+            name: 'value',
+            type: 'any',
+          },
+        ],
+        minParams: 2,
+        returnType: 'any',
+        examples: [
+          'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
+        ],
+      },
+    ],
     supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     validate: undefined,

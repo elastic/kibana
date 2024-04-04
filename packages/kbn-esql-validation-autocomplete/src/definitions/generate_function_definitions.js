@@ -91,6 +91,19 @@ const functionEnrichments = {
       },
     ],
   },
+  // TODO — remove this when the signature is fixed on the ES side
+  case: {
+    signatures: [
+      {
+        params: [
+          { name: 'condition', type: 'boolean' },
+          { name: 'value', type: 'any' },
+        ],
+        minParams: 2,
+        returnType: 'any',
+      },
+    ],
+  },
   // TODO — reenable this when the signature is fixed on the ES side
   // auto_bucket: {
   //   signatures: new Array(4).fill({
@@ -178,7 +191,7 @@ import type { FunctionDefinition } from './types';
 
   const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join(',\n');
 
-  const fileContents = `${fileHeader}export const functionDefinitions: FunctionDefinition[] = [\n${functionDefinitionsString}\n];`;
+  const fileContents = `${fileHeader}export const evalFunctionDefinitions: FunctionDefinition[] = [\n${functionDefinitionsString}\n];`;
 
   return fileContents;
 }
