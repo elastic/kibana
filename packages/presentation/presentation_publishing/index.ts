@@ -28,6 +28,11 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export {
+  apiCanAddNewPanel,
+  type CanAddNewPanel,
+  type PanelPackage,
+} from './interfaces/can_add_new_panel';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
