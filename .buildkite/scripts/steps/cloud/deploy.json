@@ -141,7 +141,7 @@
               ],
               "id": "ml",
               "size": {
-                "value": 1024,
+                "value": 4096,
                 "resource": "memory"
               }
             }
