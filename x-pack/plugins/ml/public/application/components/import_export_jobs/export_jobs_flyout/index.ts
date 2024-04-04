@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { ExportJobsFlyout } from './export_jobs_flyout';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+// export { ExportJobsFlyout } from './export_jobs_flyout';
+
+export const ExportJobsFlyout = dynamic(async () => ({
+  default: (await import('./export_jobs_flyout')).ExportJobsFlyout,
+}));

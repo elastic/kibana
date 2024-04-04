@@ -26,13 +26,11 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
 export type { MlPluginSetup, MlPluginStart };
-export type {
-  DataRecognizerConfigResponse,
-  JobExistResult,
-  JobStat,
-  MlCapabilitiesResponse,
-  MlSummaryJob,
-} from './shared';
+
+export type { MlCapabilitiesResponse } from '../common/types/capabilities';
+export type { MlSummaryJob } from '../common/types/anomaly_detection_jobs';
+export type { JobExistResult, JobStat } from '../common/types/data_recognizer';
+export type { DataRecognizerConfigResponse } from '../common/types/modules';
 
 export type { AnomalySwimlaneEmbeddableInput } from './embeddables';
 
@@ -47,6 +45,7 @@ export { useMlHref, ML_PAGES, MlLocatorDefinition } from './locator';
 export const getMlSharedImports = async () => {
   return await import('./shared');
 };
+
 // Helper to get Type returned by getMlSharedImports.
 type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type GetMlSharedImportsReturnType = AwaitReturnType<ReturnType<typeof getMlSharedImports>>;

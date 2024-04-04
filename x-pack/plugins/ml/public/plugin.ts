@@ -68,9 +68,9 @@ import {
   type ExperimentalFeatures,
   initExperimentalFeatures,
 } from '../common/constants/app';
-import type { MlCapabilities } from './shared';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApiServices } from './application/services/ml_api_service';
+import type { MlCapabilities } from '../common/types/capabilities';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
