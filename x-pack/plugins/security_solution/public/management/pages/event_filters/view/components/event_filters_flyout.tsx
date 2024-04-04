@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo, useEffect, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -19,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
 
@@ -46,6 +46,8 @@ export interface EventFiltersFlyoutProps {
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
   ({ onCancel: onClose, data, ...flyoutProps }) => {
+    const { euiTheme } = useEuiTheme();
+
     const toasts = useToasts();
     const http = useHttp();
 
@@ -173,6 +175,8 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         onClose={handleOnClose}
         data-test-subj="eventFiltersCreateFlyout"
         {...flyoutProps}
+        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+        maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
