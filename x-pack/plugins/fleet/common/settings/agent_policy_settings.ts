@@ -6,19 +6,14 @@
  */
 
 import { z } from 'zod';
-import { i18n } from '@kbn/i18n';
 
 import type { SettingsConfig } from './types';
 
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.limits.go_max_procs',
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.goMaxProcsTitle', {
-      defaultMessage: 'GO_MAX_PROCS',
-    }),
-    description: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.goMaxProcsDescription', {
-      defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously',
-    }),
+    title: 'GO_MAX_PROCS',
+    description: 'Limits the maximum number of CPUs that can be executing simultaneously',
     learnMoreLink: 'https://docs.elastic.co/...',
     api_field: {
       name: 'agent_limits_go_max_procs',
@@ -27,15 +22,8 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.download.timeout',
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvance.downloadTimeoutTitle', {
-      defaultMessage: 'Agent binary download timeout',
-    }),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvance.downloadTimeoutDescription',
-      {
-        defaultMessage: 'Timeout in seconds for downloading the agent binary',
-      }
-    ),
+    title: 'Agent binary download timeout',
+    description: 'Timeout in seconds for downloading the agent binary',
     learnMoreLink: 'https://docs.elastic.co/...',
     api_field: {
       name: 'agent_download_timeout',
