@@ -504,6 +504,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -735,6 +736,7 @@ describe('update()', () => {
             uuid: '105',
           },
         ],
+        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -972,6 +974,13 @@ describe('update()', () => {
             uuid: '107',
           },
         ],
+        systemActions: [
+          {
+            id: 'system_action-id',
+            params: {},
+            uuid: '107',
+          },
+        ],
         muteAll: false,
         legacyId: null,
         snoozeSchedule: [],
@@ -1192,6 +1201,7 @@ describe('update()', () => {
             uuid: '108',
           },
         ],
+        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -1389,6 +1399,7 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
+        "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -1415,6 +1426,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -1587,6 +1599,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -2645,9 +2658,10 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '146',
+            uuid: '145',
           },
         ],
+        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -3234,9 +3248,10 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '153',
+            uuid: '152',
           },
         ],
+        systemActions: [],
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
@@ -3451,7 +3466,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "154",
+            "uuid": "153",
           },
         ],
         "alertTypeId": "myType",
@@ -3483,6 +3498,7 @@ describe('update()', () => {
         },
         "scheduledTaskId": "task-123",
         "snoozeSchedule": Array [],
+        "systemActions": Array [],
         "tags": Array [
           "foo",
         ],
@@ -3579,6 +3595,10 @@ describe('update()', () => {
               params: {},
             },
           ],
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
           notifyWhen: 'onActiveAlert',
           revision: 1,
           scheduledTaskId: 'task-123',
@@ -3689,15 +3709,32 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
-              uuid: '156',
+              uuid: '155',
             },
             {
               actionRef: 'system_action:system_action-id',
               actionTypeId: 'test',
               params: {},
-              uuid: '157',
+              uuid: '156',
             },
           ],
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          legacyId: null,
+          createdAt: '2019-02-12T21:01:22.479Z',
+          createdBy: 'elastic',
+          snoozeSchedule: [],
+          systemActions: [
+            {
+              id: 'system_action-id',
+              params: {},
+              uuid: '156',
+            },
+          ],
+          muteAll: false,
+          mutedInstanceIds: [],
           alertTypeId: 'myType',
           apiKey: null,
           apiKeyOwner: null,
@@ -3725,41 +3762,45 @@ describe('update()', () => {
       );
 
       expect(result).toMatchInlineSnapshot(`
-              Object {
-                "actions": Array [
-                  Object {
-                    "actionTypeId": "test",
-                    "group": "default",
-                    "id": "1",
-                    "params": Object {
-                      "foo": true,
-                    },
-                    "uuid": undefined,
-                  },
-                ],
-                "createdAt": 2019-02-12T21:01:22.479Z,
-                "enabled": true,
-                "id": "1",
-                "notifyWhen": "onActiveAlert",
-                "params": Object {
-                  "bar": true,
-                },
-                "revision": 1,
-                "schedule": Object {
-                  "interval": "1m",
-                },
-                "scheduledTaskId": "task-123",
-                "systemActions": Array [
-                  Object {
-                    "actionTypeId": "test",
-                    "id": "system_action-id",
-                    "params": Object {},
-                    "uuid": undefined,
-                  },
-                ],
-                "updatedAt": 2019-02-12T21:01:22.479Z,
-              }
-          `);
+        Object {
+          "actions": Array [
+            Object {
+              "actionTypeId": "test",
+              "group": "default",
+              "id": "1",
+              "params": Object {
+                "foo": true,
+              },
+              "uuid": undefined,
+            },
+          ],
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+            "status": "pending",
+          },
+          "id": "1",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+          },
+          "revision": 1,
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "scheduledTaskId": "task-123",
+          "systemActions": Array [
+            Object {
+              "actionTypeId": "test",
+              "id": "system_action-id",
+              "params": Object {},
+              "uuid": undefined,
+            },
+          ],
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        }
+      `);
 
       expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
@@ -3813,13 +3854,13 @@ describe('update()', () => {
           params: {
             foo: true,
           },
-          uuid: '158',
+          uuid: '157',
         },
         {
           actionRef: 'system_action:system_action-id',
           actionTypeId: 'test',
           params: {},
-          uuid: '159',
+          uuid: '158',
         },
       ]);
     });
@@ -3930,7 +3971,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating actions - definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.group]: definition for this key is missing]`
       );
     });
 
@@ -3963,7 +4004,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating actions - definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.frequency]: definition for this key is missing]`
       );
     });
 
@@ -3994,7 +4035,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating actions - definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.alertsFilter]: definition for this key is missing]`
       );
     });
 
@@ -4050,7 +4091,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating actions - [actions.0.group]: expected value of type [string] but got [undefined]]`
+        `[Error: Error validating update data - [actions.0.group]: expected value of type [string] but got [undefined]]`
       );
     });
   });

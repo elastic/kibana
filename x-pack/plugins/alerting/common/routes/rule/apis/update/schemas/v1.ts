@@ -45,12 +45,11 @@ export const actionAlertsFilterSchema = schema.object({
 });
 
 export const actionSchema = schema.object({
-  uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
-  actionTypeId: schema.maybe(schema.string()),
-  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   frequency: schema.maybe(actionFrequencySchema),
+  uuid: schema.maybe(schema.string()),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
   use_alert_data_for_template: schema.maybe(schema.boolean()),
 });
@@ -62,7 +61,7 @@ export const updateBodySchema = schema.object({
     interval: schema.string({ validate: validateDurationV1 }),
   }),
   throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDurationV1 }))),
-  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),

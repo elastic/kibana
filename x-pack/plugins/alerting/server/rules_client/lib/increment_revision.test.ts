@@ -69,7 +69,7 @@ describe('incrementRevision', () => {
   it('should return the current revision if no attrs or params are updated', () => {
     expect(
       incrementRevision({
-        originalRuleSavedObject: currentRule,
+        originalRule: currentRule.attributes,
         updateRuleData: {} as UpdateRuleData,
         updatedParams: {},
       })
@@ -79,7 +79,7 @@ describe('incrementRevision', () => {
   it('should increment the revision if a root level attr is updated', () => {
     expect(
       incrementRevision({
-        originalRuleSavedObject: currentRule,
+        originalRule: currentRule.attributes,
         updateRuleData,
         updatedParams: {},
       })
@@ -89,7 +89,7 @@ describe('incrementRevision', () => {
   it('should increment the revision if a rule param is updated', () => {
     expect(
       incrementRevision({
-        originalRuleSavedObject: currentRule,
+        originalRule: currentRule.attributes,
         updateRuleData: {} as UpdateRuleData,
         updatedParams,
       })
@@ -99,7 +99,7 @@ describe('incrementRevision', () => {
   it('should not increment the revision if an excluded attr is updated', () => {
     expect(
       incrementRevision({
-        originalRuleSavedObject: currentRule,
+        originalRule: currentRule.attributes,
         updateRuleData: { activeSnoozes: ['excludedValue'] } as unknown as UpdateRuleData,
         updatedParams: {},
       })
@@ -109,7 +109,7 @@ describe('incrementRevision', () => {
   it('should not increment the revision if an excluded param is updated', () => {
     expect(
       incrementRevision({
-        originalRuleSavedObject: currentRule,
+        originalRule: currentRule.attributes,
         updateRuleData: {} as UpdateRuleData,
         updatedParams: { isSnoozedUntil: '1970-01-02T00:00:00.000Z' },
       })

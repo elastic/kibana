@@ -22,6 +22,7 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../
 import { Rule } from '../../../../application/rule/types';
 import { transformUpdateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -39,17 +40,36 @@ export const updateRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           // Assert versioned inputs
           const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
           const updateRuleParams: UpdateRuleRequestParamsV1 = req.params;
 
           try {
+            /**
+             * Throws an error if the group is not defined in default actions
+             */
+            const { actions: allActions = [] } = updateRuleData;
+            validateRequiredGroupInDefaultActionsV1({
+              actions: allActions,
+              isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+            });
+
+            const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
+            const systemActions = allActions.filter((action) =>
+              actionsClient.isSystemAction(action.id)
+            );
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const updatedRule: Rule<RuleParamsV1> = (await rulesClient.update<RuleParamsV1>({
               id: updateRuleParams.id,
-              data: transformUpdateBodyV1<RuleParamsV1>(updateRuleData),
+              data: transformUpdateBodyV1<RuleParamsV1>({
+                updateBody: updateRuleData,
+                actions,
+                systemActions,
+              }),
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type

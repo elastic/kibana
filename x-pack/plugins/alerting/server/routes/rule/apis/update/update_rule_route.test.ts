@@ -14,7 +14,6 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { RuleNotifyWhen, SanitizedRule } from '../../../../../common';
-import { UpdateRequestBody } from '../../../update_rule';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -27,6 +26,11 @@ beforeEach(() => {
 
 describe('updateRuleRoute', () => {
   const mockedRule = {
+    apiKeyOwner: 'api-key-owner',
+    consumer: 'bar',
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    enabled: true,
     id: '1',
     name: 'abc',
     alertTypeId: '1',
@@ -36,8 +40,12 @@ describe('updateRuleRoute', () => {
     params: {
       otherField: false,
     },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date('2019-02-12T21:01:22.479Z'),
+    updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+      status: 'pending',
+    },
     actions: [
       {
         uuid: '1234-5678',
@@ -68,11 +76,14 @@ describe('updateRuleRoute', () => {
     alertDelay: {
       active: 10,
     },
+    revision: 0,
+    muteAll: false,
+    mutedInstanceIds: [],
   };
 
   const mockedAction0 = mockedRule.actions[0];
 
-  const updateRequest: UpdateRequestBody = {
+  const updateRequest = {
     ...pick(mockedRule, 'name', 'tags', 'schedule', 'params', 'throttle'),
     notify_when: mockedRule.notifyWhen,
     actions: [
@@ -101,14 +112,14 @@ describe('updateRuleRoute', () => {
     revision: 0,
     enabled: true,
     execution_status: {
-      last_execution_date: '2020-08-20T19:23:38.000Z',
-      status: 'unknown',
+      last_execution_date: '2019-02-12T21:01:22.479Z',
+      status: 'pending',
     },
     rule_type_id: mockedRule.alertTypeId,
     updated_by: 'elastic',
     id: mockedRule.id,
-    updated_at: mockedRule.updatedAt,
-    created_at: mockedRule.createdAt,
+    updated_at: mockedRule.updatedAt.toISOString(),
+    created_at: mockedRule.createdAt.toISOString(),
     actions: [
       {
         uuid: '1234-5678',
@@ -168,28 +179,17 @@ describe('updateRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
                     "filters": Array [],
                     "kql": "name:test",
                   },
-                  "timeframe": Object {
-                    "days": Array [
-                      1,
-                    ],
-                    "hours": Object {
-                      "end": "17:00",
-                      "start": "08:00",
-                    },
-                    "timezone": "UTC",
-                  },
                 },
                 "group": "default",
                 "id": "2",
                 "params": Object {
-                  "foo": true,
+                  "baz": true,
                 },
                 "uuid": "1234-5678",
               },
@@ -197,10 +197,10 @@ describe('updateRuleRoute', () => {
             "name": "abc",
             "notifyWhen": "onActionGroupChange",
             "params": Object {
-              "bar": true,
+              "otherField": false,
             },
             "schedule": Object {
-              "interval": "10s",
+              "interval": "12s",
             },
             "systemActions": Array [
               Object {
@@ -212,7 +212,7 @@ describe('updateRuleRoute', () => {
             "tags": Array [
               "foo",
             ],
-            "throttle": "30s",
+            "throttle": "10m",
           },
           "id": "1",
         },
@@ -308,7 +308,7 @@ describe('updateRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}"`);
 
-    rulesClient.update.mockResolvedValueOnce(mockedRule);
+    rulesClient.update.mockResolvedValueOnce(mockedRule as unknown as SanitizedRule);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
 import { get, isEqual } from 'lodash';
 import { RuleTypeParams } from '../../types';
 import { fieldsToExcludeFromRevisionUpdates } from '..';
@@ -13,11 +12,11 @@ import { UpdateRuleData } from '../../application/rule/methods/update';
 import { RuleAttributes } from '../../data/rule/types';
 
 export function incrementRevision<Params extends RuleTypeParams>({
-  originalRuleSavedObject,
+  originalRule,
   updateRuleData,
   updatedParams,
 }: {
-  originalRuleSavedObject: SavedObject<RuleAttributes>;
+  originalRule: RuleAttributes;
   updateRuleData: UpdateRuleData<Params>;
   updatedParams: RuleTypeParams;
 }): number {
@@ -25,9 +24,9 @@ export function incrementRevision<Params extends RuleTypeParams>({
   for (const [field, value] of Object.entries(updateRuleData).filter(([key]) => key !== 'params')) {
     if (
       !fieldsToExcludeFromRevisionUpdates.has(field) &&
-      !isEqual(value, get(originalRuleSavedObject.attributes, field))
+      !isEqual(value, get(originalRule, field))
     ) {
-      return originalRuleSavedObject.attributes.revision + 1;
+      return originalRule.revision + 1;
     }
   }
 
@@ -35,10 +34,10 @@ export function incrementRevision<Params extends RuleTypeParams>({
   for (const [field, value] of Object.entries(updatedParams)) {
     if (
       !fieldsToExcludeFromRevisionUpdates.has(field) &&
-      !isEqual(value, get(originalRuleSavedObject.attributes.params, field))
+      !isEqual(value, get(originalRule.params, field))
     ) {
-      return originalRuleSavedObject.attributes.revision + 1;
+      return originalRule.revision + 1;
     }
   }
-  return originalRuleSavedObject.attributes.revision;
+  return originalRule.revision;
 }

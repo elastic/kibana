@@ -18,6 +18,7 @@ export interface UpdateRuleData<Params extends RuleParams = never> {
   params: Params;
   schedule: UpdateRuleDataType['schedule'];
   actions: UpdateRuleDataType['actions'];
+  systemActions?: UpdateRuleDataType['systemActions'];
   notifyWhen?: UpdateRuleDataType['notifyWhen'];
   alertDelay?: UpdateRuleDataType['alertDelay'];
 }

@@ -7,17 +7,20 @@
 
 import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
-import { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { SavedObjectCreateOptions } from '@kbn/content-management-utils';
+import { SavedObject } from '@kbn/core/server';
 import { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
+import {
+  validateRuleTypeParams,
+  validateSystemActions,
+  getRuleNotifyWhenType,
+} from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
-  NormalizedAlertAction,
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
 } from '../../../../rules_client/types';
@@ -30,7 +33,7 @@ import {
   migrateLegacyActions,
   updateMetaAttributes,
 } from '../../../../rules_client/lib';
-import { RuleDomain, RuleParams } from '../../types';
+import { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
 import { createRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 
@@ -38,11 +41,7 @@ import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_sched
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { RuleAttributes } from '../../../../data/rule/types';
-import {
-  transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRule,
-  transformRuleDomainToRuleAttributes,
-} from '../../transforms';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
@@ -73,21 +72,13 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const {
     data: initialData,
     allowMissingConnectorSecrets,
-    shouldIncrementRevision = () => true,
     id,
+    shouldIncrementRevision = () => true,
   } = updateParams;
-
-  const data = {
-    ...initialData,
-    actions: await addGeneratedActionValues(
-      initialData.actions as NormalizedAlertAction[],
-      context
-    ),
-  };
 
   // Validate update rule data schema
   try {
-    updateRuleDataSchema.validate(data);
+    updateRuleDataSchema.validate(initialData);
   } catch (error) {
     throw Boom.badRequest(`Error validating update data - ${error.message}`);
   }
@@ -113,6 +104,18 @@ async function updateWithOCC<Params extends RuleParams = never>(
       savedObjectsClient: context.unsecuredSavedObjectsClient,
     });
   }
+
+  const { actions: genActions, systemActions: genSystemActions } = await addGeneratedActionValues(
+    initialData.actions,
+    initialData.systemActions,
+    context
+  );
+
+  const data = {
+    ...initialData,
+    actions: genActions,
+    systemActions: genSystemActions,
+  };
 
   const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
     originalRuleSavedObject.attributes;
@@ -164,12 +167,18 @@ async function updateWithOCC<Params extends RuleParams = never>(
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(originalRuleSavedObject.attributes.alertTypeId);
-
   const ruleType = context.ruleTypeRegistry.get(originalRuleSavedObject.attributes.alertTypeId);
 
-  // Validate
+  // Validate Rule types and actions
+  const actionsClient = await context.getActionsClient();
+
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
+  await validateSystemActions({
+    actionsClient,
+    connectorAdapterRegistry: context.connectorAdapterRegistry,
+    systemActions: data.systemActions,
+  });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
@@ -182,60 +191,13 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
-  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: originalRuleSavedObject.id,
-    attributes: originalRuleSavedObject.attributes as RawRule,
-  });
-
-  // Extract saved object references for this rule
-  const {
-    references: extractedReferences,
-    params: updatedParams,
-    actions,
-  } = await extractReferences(
-    context,
-    ruleType,
-    data.actions as NormalizedAlertActionWithGeneratedValues[],
-    validatedRuleTypeParams
-  );
-
-  // Increment revision if applicable field has changed
-  const revision = shouldIncrementRevision(updatedParams)
-    ? incrementRevision<Params>({
-        originalRuleSavedObject,
-        updateRuleData: data,
-        updatedParams,
-      })
-    : originalRuleSavedObject.attributes.revision;
-
-  // Convert rule from rule attributes to rule domain
-  let originalRule = transformRuleAttributesToRuleDomain(originalRuleSavedObject.attributes, {
-    id: originalRuleSavedObject.id,
-    logger: context.logger,
-    ruleType,
-    references: originalRuleSavedObject.references,
-  });
-
-  if (migratedActions.hasLegacyActions) {
-    originalRule = {
-      ...originalRule,
-      notifyWhen: undefined,
-      throttle: undefined,
-    };
-  }
-
   const updateResult = await updateRuleAttributes<Params>({
     context,
     updateRuleData: data as UpdateRuleData<Params>,
-    updatedParams,
-    extractedActions: actions,
-    originalRule,
-    extractedReferences,
-    revision,
-    legacyId: originalRuleSavedObject.attributes.legacyId,
-    id,
-    version: originalRuleSavedObject.version,
+    validatedRuleTypeParams: validatedRuleTypeParams as Params,
+    originalRuleSavedObject,
+    shouldIncrementRevision,
+    isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
   });
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
@@ -286,28 +248,59 @@ async function updateWithOCC<Params extends RuleParams = never>(
 async function updateRuleAttributes<Params extends RuleParams = never>({
   context,
   updateRuleData,
-  updatedParams,
-  extractedActions,
-  extractedReferences,
-  originalRule,
-  revision,
-  legacyId,
-  id,
-  version,
+  validatedRuleTypeParams,
+  originalRuleSavedObject,
+  shouldIncrementRevision,
+  isSystemAction,
 }: {
   context: RulesClientContext;
   updateRuleData: UpdateRuleData<Params>;
-  updatedParams: RuleParams;
-  extractedActions: RuleAttributes['actions'];
-  extractedReferences: SavedObjectReference[];
-  originalRule: RuleDomain;
-  revision: number;
-  legacyId: string | null;
-  id: SavedObjectCreateOptions['id'];
-  version: SavedObjectCreateOptions['version'];
+  originalRuleSavedObject: SavedObject<RuleAttributes>;
+  validatedRuleTypeParams: Params;
+  shouldIncrementRevision: (params?: Params) => boolean;
+  isSystemAction: (connectorId: string) => boolean;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
-  const ruleType = context.ruleTypeRegistry.get(originalRule.alertTypeId);
+  const originalRule = originalRuleSavedObject.attributes;
+  let updatedRule = { ...originalRule };
+
+  const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
+  const ruleType = context.ruleTypeRegistry.get(updatedRule.alertTypeId);
+
+  // Extract saved object references for this rule
+  const {
+    references: extractedReferences,
+    params: updatedParams,
+    actions: actionsWithRefs,
+  } = await extractReferences(
+    context,
+    ruleType,
+    allActions as NormalizedAlertActionWithGeneratedValues[],
+    validatedRuleTypeParams
+  );
+
+  // Increment revision if applicable field has changed
+  const revision = shouldIncrementRevision(updatedParams as Params)
+    ? incrementRevision<Params>({
+        originalRule,
+        updateRuleData,
+        updatedParams,
+      })
+    : originalRule.revision;
+
+  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
+  const migratedActions = await migrateLegacyActions(context, {
+    ruleId: originalRuleSavedObject.id,
+    attributes: originalRule as RawRule,
+  });
+
+  if (migratedActions.hasLegacyActions) {
+    updatedRule = {
+      ...updatedRule,
+      notifyWhen: undefined,
+      throttle: undefined,
+    };
+  }
 
   const username = await context.getUserName();
 
@@ -324,36 +317,35 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updateRuleData.throttle ?? null
   );
 
-  const updatedRuleAttributes = updateMetaAttributes(
-    context,
-    transformRuleDomainToRuleAttributes(
-      {
-        ...originalRule,
-        ...updateRuleData,
-        ...apiKeyAttributes,
-        notifyWhen,
-        revision,
-        updatedBy: username,
-        updatedAt: new Date(),
-      },
-      {
-        legacyId,
-        actionsWithRefs: extractedActions,
-        paramsWithRefs: updatedParams as RuleAttributes['params'],
-      }
-    )
-  );
+  const updatedRuleAttributes = updateMetaAttributes(context, {
+    ...updatedRule,
+    ...updateRuleData,
+    ...apiKeyAttributes,
+    params: updatedParams as RawRule['params'],
+    actions: actionsWithRefs,
+    notifyWhen,
+    revision,
+    updatedBy: username,
+    updatedAt: new Date().toISOString(),
+  });
+
+  const mappedParams = getMappedParams(updatedParams);
+
+  if (Object.keys(mappedParams).length) {
+    updatedRuleAttributes.mapped_params = mappedParams;
+  }
 
   let updatedRuleSavedObject: SavedObject<RuleAttributes>;
 
+  const { id, version } = originalRuleSavedObject;
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       ruleAttributes: updatedRuleAttributes,
       savedObjectsCreateOptions: {
         id,
-        overwrite: true,
         version,
+        overwrite: true,
         references: extractedReferences,
       },
     });
@@ -380,7 +372,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       logger: context.logger,
       ruleType,
       references: updatedRuleSavedObject.references,
-    }
+    },
+    isSystemAction
   );
 
   // Try to validate created rule, but don't throw.

@@ -71,7 +71,7 @@ import {
 } from './types';
 import { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
 import { ruleNotifyWhen } from '../../constants';
-import { ruleDomainSchema } from '../../schemas';
+import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
 import { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';
 import { findRulesSo, bulkCreateRulesSo } from '../../../../data/rule';
 import { RuleAttributes, RuleActionAttributes } from '../../../../data/rule/types';
@@ -81,10 +81,6 @@ import {
   transformRuleDomainToRule,
 } from '../../transforms';
 import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
-import {
-  bulkEditDefaultActionsSchema,
-  bulkEditSystemActionsSchema,
-} from './schemas/bulk_edit_rules_option_schemas';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -656,27 +652,28 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
         const systemActions = operation.value.filter((action): action is RuleSystemAction =>
           actionsClient.isSystemAction(action.id)
         );
-        if (systemActions.length > 0) {
-          try {
-            bulkEditSystemActionsSchema.validate(systemActions);
-          } catch (error) {
-            throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
-          }
-        }
-
-        const defaultActions = operation.value.filter(
+        const actions = operation.value.filter(
           (action): action is RuleAction => !actionsClient.isSystemAction(action.id)
         );
-        if (defaultActions.length > 0) {
+
+        systemActions.forEach((systemAction) => {
           try {
-            bulkEditDefaultActionsSchema.validate(defaultActions);
+            systemActionRequestSchema.validate(systemAction);
           } catch (error) {
             throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
           }
-        }
+        });
+
+        actions.forEach((action) => {
+          try {
+            actionRequestSchema.validate(action);
+          } catch (error) {
+            throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+          }
+        });
 
         const { actions: genActions, systemActions: genSystemActions } =
-          await addGeneratedActionValues(defaultActions, systemActions, context);
+          await addGeneratedActionValues(actions, systemActions, context);
         const updatedOperation = {
           ...operation,
           value: [...genActions, ...genSystemActions],

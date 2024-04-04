@@ -5,33 +5,43 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type {
   UpdateRuleActionV1,
   UpdateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/update';
 import type { UpdateRuleData } from '../../../../../../application/rule/methods/update';
-import type { RuleParams } from '../../../../../../application/rule/types';
+import type {
+  RuleParams,
+  ActionRequest,
+  SystemActionRequest,
+} from '../../../../../../application/rule/types';
 
-const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): UpdateRuleData['actions'] => {
-  if (!actions) return [];
+export const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): ActionRequest[] => {
+  if (!actions) {
+    return [];
+  }
 
   return actions.map(
     ({
+      group,
+      id,
+      params,
       frequency,
+      uuid,
       alerts_filter: alertsFilter,
       use_alert_data_for_template: useAlertDataForTemplate,
-      ...action
     }) => {
       return {
-        group: action.group,
-        id: action.id,
-        params: action.params,
-        actionTypeId: action.actionTypeId,
+        group: group ?? 'default',
+        id,
+        params,
+        ...(uuid ? { uuid } : {}),
         ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-        ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(frequency
           ? {
               frequency: {
+                ...omit(frequency, 'notify_when'),
                 summary: frequency.summary,
                 throttle: frequency.throttle,
                 notifyWhen: frequency.notify_when,
@@ -44,17 +54,40 @@ const transformUpdateBodyActions = (actions: UpdateRuleActionV1[]): UpdateRuleDa
   );
 };
 
-export const transformUpdateBody = <Params extends RuleParams = never>(
-  createBody: UpdateRuleRequestBodyV1<Params>
-): UpdateRuleData<Params> => {
+export const transformUpdateBodySystemActions = (
+  actions: UpdateRuleActionV1[]
+): SystemActionRequest[] => {
+  if (!actions) {
+    return [];
+  }
+
+  return actions.map(({ id, params, uuid }) => {
+    return {
+      id,
+      params,
+      ...(uuid ? { uuid } : {}),
+    };
+  });
+};
+
+export const transformUpdateBody = <Params extends RuleParams = never>({
+  updateBody,
+  actions,
+  systemActions,
+}: {
+  updateBody: UpdateRuleRequestBodyV1<Params>;
+  actions: UpdateRuleRequestBodyV1<Params>['actions'];
+  systemActions: UpdateRuleRequestBodyV1<Params>['actions'];
+}): UpdateRuleData<Params> => {
   return {
-    name: createBody.name,
-    tags: createBody.tags,
-    ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
-    params: createBody.params,
-    schedule: createBody.schedule,
-    actions: transformUpdateBodyActions(createBody.actions),
-    ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
-    ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
+    name: updateBody.name,
+    tags: updateBody.tags,
+    ...(updateBody.throttle ? { throttle: updateBody.throttle } : {}),
+    params: updateBody.params,
+    schedule: updateBody.schedule,
+    actions: transformUpdateBodyActions(actions),
+    systemActions: transformUpdateBodySystemActions(systemActions),
+    ...(updateBody.notify_when ? { notifyWhen: updateBody.notify_when } : {}),
+    ...(updateBody.alert_delay ? { alertDelay: updateBody.alert_delay } : {}),
   };
 };

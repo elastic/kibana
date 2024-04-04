@@ -6,12 +6,10 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { createRuleDataSchema, defaultActionSchema, systemActionSchema } from '../schemas';
+import { createRuleDataSchema } from '../schemas';
 import { RuleParams } from '../../../types';
 
 type CreateRuleDataType = TypeOf<typeof createRuleDataSchema>;
-type CreateRuleActionDataType = TypeOf<typeof defaultActionSchema>;
-type CreateRuleSystemActionDataType = TypeOf<typeof systemActionSchema>;
 
 export interface CreateRuleData<Params extends RuleParams = never> {
   name: CreateRuleDataType['name'];
@@ -22,8 +20,8 @@ export interface CreateRuleData<Params extends RuleParams = never> {
   throttle?: CreateRuleDataType['throttle'];
   params: Params;
   schedule: CreateRuleDataType['schedule'];
-  actions: CreateRuleActionDataType[];
-  systemActions?: CreateRuleSystemActionDataType[];
+  actions: CreateRuleDataType['actions'];
+  systemActions?: CreateRuleDataType['systemActions'];
   notifyWhen?: CreateRuleDataType['notifyWhen'];
   alertDelay?: CreateRuleDataType['alertDelay'];
 }
