@@ -794,6 +794,7 @@ packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
+packages/shared-ux/modal/tabbed @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
@@ -1428,6 +1429,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management
