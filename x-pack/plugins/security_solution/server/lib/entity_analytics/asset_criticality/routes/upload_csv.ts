@@ -12,7 +12,7 @@ import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../types';
 import { ASSET_CRITICALITY_CSV_UPLOAD_URL, APP_ID } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import { transformCSVToUpsertRecords } from '../csv';
+import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 
 export const assetCriticalityCSVUploadRoute = (
   router: SecuritySolutionPluginRouter,
