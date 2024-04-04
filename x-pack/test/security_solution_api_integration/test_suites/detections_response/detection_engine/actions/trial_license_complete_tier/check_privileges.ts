@@ -129,6 +129,43 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('when no specified indices exist', () => {
+      describe('for a query rule', () => {
+        it('sets rule status to partial failure and does not execute', async () => {
+          const rule = getRuleForAlertTesting(['non-existent-index']);
+          await createUserAndRole(getService, ROLES.detections_admin);
+          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+            user: ROLES.detections_admin,
+            pass: 'changeme',
+          });
+
+          await waitForRulePartialFailure({
+            supertest,
+            log,
+            id,
+          });
+          const { body } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .query({ id })
+            .expect(200);
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          const lastExecution = body?.execution_summary?.last_execution;
+
+          expect(lastExecution.message).to.eql(
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["non-existent-index"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+          );
+
+          // no metrics == no work performed, presumably
+          expect(lastExecution.metrics).to.eql({});
+
+          await deleteUserAndRole(getService, ROLES.detections_admin);
+        });
+      });
+    });
+
     context('for threshold rules', () => {
       const thresholdIndexTestCases = [
         ['host_alias', 'auditbeat-8.0.0'],
