@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { TabbedModal } from './src/tabbed_modal';
-export type { IModalTabDeclaration } from './src/tabbed_modal';
+export { TabbedModal, type IModalTabDeclaration } from './src/tabbed_modal';

@@ -12,7 +12,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';

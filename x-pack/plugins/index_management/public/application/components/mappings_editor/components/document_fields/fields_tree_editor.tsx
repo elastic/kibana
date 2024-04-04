@@ -15,9 +15,16 @@ import { FieldsList, CreateField } from './fields';
 interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
+  isSemanticTextEnabled?: boolean;
+  indexName?: string;
 }
 
-export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields, isAddingFields }: Props) => {
+export const DocumentFieldsTreeEditor = ({
+  onCancelAddingNewFields,
+  isAddingFields,
+  isSemanticTextEnabled = false,
+  indexName,
+}: Props) => {
   const dispatch = useDispatch();
   const {
     fields: { byId, rootLevelFields },
@@ -46,6 +53,8 @@ export const DocumentFieldsTreeEditor = ({ onCancelAddingNewFields, isAddingFiel
         isRootLevelField
         onCancelAddingNewFields={onCancelAddingNewFields}
         isAddingFields={isAddingFields}
+        isSemanticTextEnabled={isSemanticTextEnabled}
+        indexName={indexName}
       />
     );
   };

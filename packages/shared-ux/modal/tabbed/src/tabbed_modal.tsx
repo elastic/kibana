@@ -43,18 +43,19 @@ interface IModalTabActionBtn<S> extends CommonProps {
   id: string;
   dataTestSubj: string;
   label: string;
-  handler?: (args: { state: S }) => void;
+  handler: (args: { state: S }) => void;
   isCopy?: boolean;
+  style?: (args: { state: S }) => boolean;
 }
 
 export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclaration<S> {
   description?: string;
   'data-test-subj'?: string;
   content: IModalTabContent<S>;
-  modalActionBtn?: IModalTabActionBtn<S>;
+  modalActionBtn: IModalTabActionBtn<S>;
 }
 
-interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
 }
@@ -118,6 +119,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       {modalActionBtn && (
         <EuiModalFooter>
           <EuiButton
+            isDisabled={
+              modalActionBtn.style ? modalActionBtn.style({ state: selectedTabState }) : false
+            }
             fill
             data-test-subj={modalActionBtn.dataTestSubj}
             data-share-url={state.url}

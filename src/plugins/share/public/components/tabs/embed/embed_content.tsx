@@ -22,6 +22,7 @@ type EmbedProps = Pick<
   | 'shareableUrl'
   | 'isEmbedded'
   | 'embedUrlParamExtensions'
+  | 'objectType'
 > & {
   onChange: (url: string) => void;
 };
@@ -43,6 +44,7 @@ export const EmbedContent = ({
   shareableUrl,
   isEmbedded,
   onChange,
+  objectType,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -52,6 +54,10 @@ export const EmbedContent = ({
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
   const [anonymousAccessParameters] = useState<AnonymousAccessState['accessURLParameters']>(null);
   const [usePublicUrl] = useState<boolean>(false);
+
+  useEffect(() => {
+    onChange(url);
+  }, [url, onChange]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -91,7 +97,7 @@ export const EmbedContent = ({
       }
       return updateUrlParams(tempUrl);
     },
-    [updateUrlParams, shareableUrl, shareableUrlForSavedObject]
+    [shareableUrl, shareableUrlForSavedObject, updateUrlParams]
   );
 
   const getSavedObjectUrl = useCallback(() => {
@@ -173,9 +179,9 @@ export const EmbedContent = ({
     exportUrlAs,
     getSavedObjectUrl,
     getSnapshotUrl,
+    isEmbedded,
     shortUrlCache,
     useShortUrl,
-    isEmbedded,
   ]);
 
   const resetUrl = useCallback(() => {
@@ -216,15 +222,24 @@ export const EmbedContent = ({
     );
   };
 
+  const helpText =
+    objectType === 'dashboard' ? (
+      <FormattedMessage
+        id="share.embed.dashbord.helpText"
+        defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
+      />
+    ) : (
+      <FormattedMessage
+        id="share.embed.helpText"
+        defaultMessage="Embed this {objectType} into another webpage."
+        values={{ objectType }}
+      />
+    );
+
   return (
     <EuiForm>
       <EuiSpacer size="m" />
-      <EuiText size="s">
-        <FormattedMessage
-          id="share.embed.helpText"
-          defaultMessage="Embed this dashboard into another webpage. Select which items to include in the embeddable view."
-        />
-      </EuiText>
+      <EuiText size="s">{helpText}</EuiText>
       <EuiSpacer />
       {renderUrlParamExtensions()}
       <EuiSpacer />

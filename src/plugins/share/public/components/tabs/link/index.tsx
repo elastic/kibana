@@ -15,15 +15,18 @@ import { LinkContent } from './link_content';
 
 type ILinkTab = IModalTabDeclaration<{
   dashboardUrl: string;
+  isNotSaved: boolean;
 }>;
 
 const LINK_TAB_ACTIONS = {
   SET_DASHBOARD_URL: 'SET_DASHBOARD_URL',
+  SET_IS_NOT_SAVED: 'SET_IS_NOT_SAVED',
 };
 
 const linkTabReducer: ILinkTab['reducer'] = (
   state = {
     dashboardUrl: '',
+    isNotSaved: false,
   },
   action
 ) => {
@@ -32,6 +35,11 @@ const linkTabReducer: ILinkTab['reducer'] = (
       return {
         ...state,
         dashboardUrl: action.payload,
+      };
+    case LINK_TAB_ACTIONS.SET_IS_NOT_SAVED:
+      return {
+        ...state,
+        isNotSaved: action.payload,
       };
     default:
       return state;
@@ -57,6 +65,13 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     [dispatch]
   );
 
+  const setIsNotSaved = useCallback(() => {
+    dispatch!({
+      type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
+      payload: objectType === 'lens' ? isDirty : false,
+    });
+  }, [dispatch, objectType, isDirty]);
+
   return (
     <LinkContent
       {...{
@@ -70,6 +85,8 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         shareableUrlLocatorParams,
         dashboardLink: state?.dashboardUrl,
         setDashboardLink,
+        isNotSaved: state?.isNotSaved,
+        setIsNotSaved,
       }}
     />
   );
@@ -80,6 +97,9 @@ export const linkTab: ILinkTab = {
   name: i18n.translate('share.contextMenu.permalinksTab', {
     defaultMessage: 'Links',
   }),
+  description: i18n.translate('share.dashboard.link.description', {
+    defaultMessage: 'Share a direct link to this search.',
+  }),
   content: LinkTabContent,
   reducer: linkTabReducer,
   modalActionBtn: {
@@ -89,5 +109,6 @@ export const linkTab: ILinkTab = {
     handler: ({ state }) => {
       copyToClipboard(state.dashboardUrl);
     },
+    style: ({ state }) => state.isNotSaved,
   },
 };
