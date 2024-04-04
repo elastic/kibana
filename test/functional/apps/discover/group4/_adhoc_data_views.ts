@@ -63,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const first = await PageObjects.discover.getCurrentDataViewId();
 
       await PageObjects.discover.addRuntimeField(
@@ -146,7 +145,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // trigger data view id update
@@ -245,8 +243,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       await filterBar.addFilter({
         field: 'nestedField.child',
         operation: 'is',

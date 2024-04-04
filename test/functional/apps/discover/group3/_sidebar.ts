@@ -645,8 +645,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
           hasTimeField: true,
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
         );

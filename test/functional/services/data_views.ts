@@ -19,6 +19,7 @@ export class DataViewsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly header = this.ctx.getPageObjects(['header']).header;
 
   private async create({ name, adHoc = false, hasTimeField = false }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
@@ -33,6 +34,7 @@ export class DataViewsService extends FtrService {
       });
     }
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**

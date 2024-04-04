@@ -54,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creating a new data view', async function () {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
       await dataViews.createFromSearchBar({ name: dataViewToCreate });
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
     });
   });

@@ -469,7 +469,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);

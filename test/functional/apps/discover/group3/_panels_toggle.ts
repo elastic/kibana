@@ -259,7 +259,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
           hasTimeField: false,
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });

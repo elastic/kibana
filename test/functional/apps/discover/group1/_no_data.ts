@@ -48,7 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
     });
 

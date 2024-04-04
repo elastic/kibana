@@ -264,7 +264,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 hasTimeField: false,
               });
               await PageObjects.discover.waitUntilSearchingHasFinished();
-              await PageObjects.header.waitUntilLoadingHasFinished();
             });
 
             it('should render initial columns correctly', async () => {

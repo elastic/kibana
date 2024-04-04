@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitForWithTimeout(
         'data view selector to include a newly created dataview',

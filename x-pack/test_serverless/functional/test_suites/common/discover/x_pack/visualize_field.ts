@@ -125,7 +125,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();

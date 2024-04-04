@@ -50,7 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'filter manager to be able to create a filter with the new data view',
         5000,
