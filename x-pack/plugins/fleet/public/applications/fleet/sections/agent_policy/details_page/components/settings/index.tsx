@@ -52,6 +52,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'fleet_server_host_id',
     'agent_features',
     'is_protected',
+    'advanced_settings',
   ]);
 
 const FormWrapper = styled.div`

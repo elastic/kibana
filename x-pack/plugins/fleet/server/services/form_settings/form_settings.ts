@@ -80,7 +80,14 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
     }
   });
 
-  return validations;
+  const advancedSettingsValidations: Props = {
+    advanced_settings: schema.maybe(
+      schema.object({
+        ...validations,
+      })
+    ),
+  };
+  return advancedSettingsValidations;
 }
 
 export function getSettingsValuesForAgentPolicy(
@@ -102,8 +109,7 @@ export function _getSettingsValuesForAgentPolicy(
       return;
     }
 
-    // @ts-expect-error
-    const val = agentPolicy[setting.saved_object_field.name];
+    const val = agentPolicy.advanced_settings?.[setting.saved_object_field.name];
     if (val) {
       settingsValues[setting.name] = val;
     }

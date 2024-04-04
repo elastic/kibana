@@ -24,7 +24,6 @@ import {
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { getSettingsSavedObjectMappings } from '../services/form_settings';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -157,7 +156,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
         keep_monitoring_alive: { type: 'boolean' },
-        ...getSettingsSavedObjectMappings('AGENT_POLICY_ADVANCED_SETTINGS'),
+        advanced_settings: { type: 'flattened', index: false },
       },
     },
     migrations: {
@@ -166,6 +165,18 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
       '8.9.0': migrateAgentPolicyToV890,
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              advanced_settings: { type: 'flattened', index: false },
+            },
+          },
+        ],
+      },
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {

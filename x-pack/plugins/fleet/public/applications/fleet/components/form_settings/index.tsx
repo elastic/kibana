@@ -42,8 +42,12 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
       setError(validationResults.error.issues[0].message);
       return;
     }
+    const newAdvancedSettings = {
+      ...(agentPolicyFormContext?.agentPolicy.advanced_settings ?? {}),
+      [settingsConfig.api_field.name]: parseInt(e.target.value, 10), // TODO support float?
+    };
 
-    agentPolicyFormContext?.updateAgentPolicy({ [settingsConfig.api_field.name]: e.target.value });
+    agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
     setError('');
   };
 
@@ -64,7 +68,9 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
         <EuiFieldNumber
           fullWidth
           data-test-subj={fieldKey}
-          value={agentPolicyFormContext?.agentPolicy[settingsConfig.api_field.name]}
+          value={
+            agentPolicyFormContext?.agentPolicy.advanced_settings?.[settingsConfig.api_field.name]
+          }
           min={coercedSchema.minValue ?? undefined}
           max={coercedSchema.maxValue ?? undefined}
           defaultValue={defaultValue}
@@ -95,7 +101,13 @@ settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
       return;
     }
 
-    agentPolicyFormContext?.updateAgentPolicy({ [settingsConfig.api_field.name]: e.target.value });
+    const newAdvancedSettings = {
+      ...(agentPolicyFormContext?.agentPolicy.advanced_settings ?? {}),
+      [settingsConfig.api_field.name]: e.target.value,
+    };
+
+    agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
+
     setError('');
   };
 
@@ -116,7 +128,9 @@ settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
         <EuiFieldText
           fullWidth
           data-test-subj={fieldKey}
-          value={agentPolicyFormContext?.agentPolicy[settingsConfig.api_field.name]}
+          value={
+            agentPolicyFormContext?.agentPolicy.advanced_settings?.[settingsConfig.api_field.name]
+          }
           defaultValue={defaultValue}
           onChange={handleChange}
           isInvalid={!!error}
