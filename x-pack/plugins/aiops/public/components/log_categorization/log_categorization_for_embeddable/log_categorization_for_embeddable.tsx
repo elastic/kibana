@@ -16,10 +16,6 @@ import { buildEmptyFilter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import useMount from 'react-use/lib/useMount';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { unitOfTime } from 'moment';
-import moment from 'moment';
-import { useStorage } from '@kbn/ml-local-storage';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
@@ -29,45 +25,26 @@ import type { EmbeddableLogCategorizationInput } from '@kbn/aiops-log-pattern-an
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
-} from '../../application/url_state/log_pattern_analysis';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
-import { useData } from '../../hooks/use_data';
-import { useSearch } from '../../hooks/use_search';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+} from '../../../application/url_state/log_pattern_analysis';
+import { createMergedEsQuery } from '../../../application/utils/search_utils';
+import { useData } from '../../../hooks/use_data';
+import { useSearch } from '../../../hooks/use_search';
+import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
-import { useCategorizeRequest } from './use_categorize_request';
-import type { EventRate } from './use_categorize_request';
-import { CategoryTable } from './category_table';
-import { InformationText } from './information_text';
-import { LoadingCategorization } from './loading_categorization';
-import { useValidateFieldRequest } from './use_validate_category_field';
-import { FieldValidationCallout } from './category_validation_callout';
+import { useCategorizeRequest } from '../use_categorize_request';
+import type { EventRate } from '../use_categorize_request';
+import { CategoryTable } from '../category_table';
+import { InformationText } from '../information_text';
+import { LoadingCategorization } from '../loading_categorization';
+import { useValidateFieldRequest } from '../use_validate_category_field';
+import { FieldValidationCallout } from '../category_validation_callout';
 import { EmbeddableMenu } from './embeddable_menu';
-import { useWiderTimeRange } from './use_wider_time_range';
-import type { AiOpsKey, AiOpsStorageMapped } from '../../types/storage';
-import { AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE } from '../../types/storage';
-import { createDocumentStatsHash } from './utils';
+import { useMinimumTimeRange } from './use_minimum_time_range';
 
-enum SELECTED_TAB {
-  BUCKET,
-  FULL_TIME_RANGE,
-}
-
-export type WidenessOption = 'No minimum' | '1 week' | '1 month' | '3 months' | '6 months';
-
-type Wideness = Record<WidenessOption, { factor: number; unit: unitOfTime.Base }>;
-
-export const WIDENESS: Wideness = {
-  'No minimum': { factor: 0, unit: 'w' },
-  '1 week': { factor: 1, unit: 'w' },
-  '1 month': { factor: 1, unit: 'M' },
-  '3 months': { factor: 3, unit: 'M' },
-  '6 months': { factor: 6, unit: 'M' },
-};
+import { createDocumentStatsHash, getMessageField } from '../utils';
 
 export interface LogCategorizationPageProps {
   onClose: () => void;
-  /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
   additionalFilter?: CategorizationAdditionalFilter;
   input: Readonly<EmbeddableLogCategorizationInput>;
@@ -90,14 +67,14 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   } = useAiopsAppContext();
   const { dataView, savedSearch, setPatternCount, setOptionsMenu } = input;
 
-  const [widenessOption, setWidenessOption] = useStorage<
-    AiOpsKey,
-    AiOpsStorageMapped<typeof AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE>
-  >(AIOPS_PATTERN_ANALYSIS_WIDENESS_PREFERENCE, '1 week');
-
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
-  const { getWiderTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useWiderTimeRange();
+  const {
+    getMinimumTimeRange,
+    cancelRequest: cancelWiderTimeRangeRequest,
+    minimumTimeRangeOption,
+    setMinimumTimeRangeOption,
+  } = useMinimumTimeRange();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
@@ -127,31 +104,20 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
-  const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
+
+  useMount(function loadFields() {
+    const { dataViewFields, messageField } = getMessageField(dataView);
+    setFields(dataViewFields);
+    if (messageField !== undefined) {
+      setSelectedField(messageField);
+    }
+  });
 
   const cancelRequest = useCallback(() => {
     cancelWiderTimeRangeRequest();
     cancelValidationRequest();
     cancelCategorizationRequest();
   }, [cancelCategorizationRequest, cancelValidationRequest, cancelWiderTimeRangeRequest]);
-
-  useMount(function loadFields() {
-    const dataViewFields = dataView.fields.filter((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
-    setFields(dataViewFields);
-    let messageField = dataViewFields.find((f) => f.name === 'message');
-    if (messageField === undefined) {
-      messageField = dataViewFields.find((f) => f.name === 'error.message');
-    }
-    if (messageField === undefined) {
-      messageField = dataViewFields.find((f) => f.name === 'event.original ');
-    }
-    if (messageField === undefined) {
-      messageField = dataViewFields[0];
-    }
-    if (messageField !== undefined) {
-      setSelectedField(messageField);
-    }
-  });
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -182,9 +148,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   );
 
   const loadCategories = useCallback(async () => {
-    // eslint-disable-next-line no-console
-    console.log('loadCategories');
-
     const { getIndexPattern, timeFieldName: timeField } = dataView;
     const index = getIndexPattern();
 
@@ -193,7 +156,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       timeField === undefined ||
       earliest === undefined ||
       latest === undefined ||
-      widenessOption === undefined
+      minimumTimeRangeOption === undefined
     ) {
       return;
     }
@@ -209,25 +172,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       to: latest,
     };
 
-    const timeRange = await getWiderTimeRange(
+    const timeRange = await getMinimumTimeRange(
       index,
       timeField,
       tempAdditionalFilter,
-      widenessOption,
+      minimumTimeRangeOption,
       searchQuery
-    );
-    // eslint-disable-next-line no-console
-    console.log(
-      'sub agg  s',
-      moment(tempAdditionalFilter.from).toISOString(),
-      moment(tempAdditionalFilter.to).toISOString()
-    );
-
-    // eslint-disable-next-line no-console
-    console.log(
-      'full range',
-      moment(timeRange.from).toISOString(),
-      moment(timeRange.to).toISOString()
     );
 
     try {
@@ -272,10 +222,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
             totalCategories: categories.length,
           });
         }
-
-        // eslint-disable-next-line no-console
-        console.log('categories', categories);
-        setSelectedTab(SELECTED_TAB.BUCKET);
       }
     } catch (error) {
       toasts.addError(error, {
@@ -294,8 +240,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     earliest,
     latest,
     cancelRequest,
-    getWiderTimeRange,
-    widenessOption,
+    getMinimumTimeRange,
+    minimumTimeRangeOption,
     searchQuery,
     runValidateFieldRequest,
     embeddingOrigin,
@@ -304,38 +250,41 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     toasts,
   ]);
 
-  useEffect(() => {
-    setPatternCount(data?.categories.length);
-    setOptionsMenu(
-      <>
-        {randomSampler !== undefined ? (
-          <EmbeddableMenu
-            randomSampler={randomSampler}
-            reload={() => loadCategories()}
-            fields={fields}
-            setSelectedField={setSelectedField}
-            selectedField={selectedField}
-            widenessOption={widenessOption}
-            setWidenessOption={setWidenessOption}
-            categoryCount={data?.totalCategories}
-          />
-        ) : null}
-      </>
-    );
-    return () => {
-      setOptionsMenu(undefined);
-    };
-  }, [
-    data,
-    fields,
-    loadCategories,
-    randomSampler,
-    selectedField,
-    setOptionsMenu,
-    setPatternCount,
-    setWidenessOption,
-    widenessOption,
-  ]);
+  useEffect(
+    function initOptionsMenu() {
+      setPatternCount(data?.categories.length);
+      setOptionsMenu(
+        <>
+          {randomSampler !== undefined ? (
+            <EmbeddableMenu
+              randomSampler={randomSampler}
+              reload={() => loadCategories()}
+              fields={fields}
+              setSelectedField={setSelectedField}
+              selectedField={selectedField}
+              minimumTimeRangeOption={minimumTimeRangeOption}
+              setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+              categoryCount={data?.totalCategories}
+            />
+          ) : null}
+        </>
+      );
+      return () => {
+        setOptionsMenu(undefined);
+      };
+    },
+    [
+      data,
+      fields,
+      loadCategories,
+      randomSampler,
+      selectedField,
+      setOptionsMenu,
+      setPatternCount,
+      setMinimumTimeRangeOption,
+      minimumTimeRangeOption,
+    ]
+  );
 
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
@@ -362,7 +311,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       return;
     }
 
-    const hash = createDocumentStatsHash(documentStats, [selectedField.name, widenessOption]);
+    const hash = createDocumentStatsHash(documentStats, [
+      selectedField.name,
+      minimumTimeRangeOption,
+    ]);
     if (hash !== previousDocumentStatsHash) {
       randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
@@ -386,7 +338,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     previousDocumentStatsHash,
     fieldValidationResult,
     selectedField,
-    widenessOption,
+    minimumTimeRangeOption,
   ]);
 
   useEffect(
@@ -435,11 +387,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
                 onAddFilter={onAddFilter}
                 onClose={onClose}
                 enableRowActions={false}
-                additionalFilter={
-                  selectedTab === SELECTED_TAB.BUCKET && additionalFilter !== undefined
-                    ? additionalFilter
-                    : undefined
-                }
+                additionalFilter={additionalFilter}
                 navigateToDiscover={additionalFilter !== undefined}
                 displayExamples={data.displayExamples}
                 displayHeader={false}

@@ -21,18 +21,18 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RandomSampler } from './sampling_menu';
-import { SamplingPanel } from './sampling_menu/sampling_panel';
-import type { WidenessOption } from './log_categorization_for_embeddable';
-import { WIDENESS } from './log_categorization_for_embeddable';
+import type { RandomSampler } from '../sampling_menu';
+import { SamplingPanel } from '../sampling_menu/sampling_panel';
+import type { MinimumTimeRangeOption } from './minimum_time_range';
+import { MINIMUM_TIME_RANGE } from './minimum_time_range';
 
 interface Props {
   randomSampler: RandomSampler;
   fields: DataViewField[];
   selectedField: DataViewField | null;
   setSelectedField: (field: DataViewField) => void;
-  widenessOption: WidenessOption;
-  setWidenessOption: (w: WidenessOption) => void;
+  minimumTimeRangeOption: MinimumTimeRangeOption;
+  setMinimumTimeRangeOption: (w: MinimumTimeRangeOption) => void;
   categoryCount: number | undefined;
   reload: () => void;
 }
@@ -42,8 +42,8 @@ export const EmbeddableMenu: FC<Props> = ({
   fields,
   selectedField,
   setSelectedField,
-  widenessOption,
-  setWidenessOption,
+  minimumTimeRangeOption,
+  setMinimumTimeRangeOption,
   categoryCount,
   reload,
 }) => {
@@ -55,9 +55,9 @@ export const EmbeddableMenu: FC<Props> = ({
     [fields]
   );
 
-  const widenessOptions = Object.keys(WIDENESS).map((value) => ({
+  const minimumTimeRangeOptions = Object.keys(MINIMUM_TIME_RANGE).map((value) => ({
     inputDisplay: value,
-    value: value as WidenessOption,
+    value: value as MinimumTimeRangeOption,
   }));
 
   const button = (
@@ -114,19 +114,19 @@ export const EmbeddableMenu: FC<Props> = ({
         <EuiFormRow
           data-test-subj="aiopsRandomSamplerOptionsFormRow"
           label={i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.widenessOptionsRowLabel',
+            'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRangeOptionsRowLabel',
             {
               defaultMessage: 'Minimum time range',
             }
           )}
           helpText={
             <>
-              {categoryCount !== undefined && widenessOption !== 'No minimum' ? (
+              {categoryCount !== undefined && minimumTimeRangeOption !== 'No minimum' ? (
                 <>
                   <FormattedMessage
                     id="xpack.aiops.logCategorization.embeddableMenu.totalPatternsMessage"
-                    defaultMessage="Total patterns in {widenessOption}: {categoryCount}"
-                    values={{ widenessOption, categoryCount }}
+                    defaultMessage="Total patterns in {minimumTimeRangeOption}: {categoryCount}"
+                    values={{ minimumTimeRangeOption, categoryCount }}
                   />
                 </>
               ) : null}
@@ -135,9 +135,9 @@ export const EmbeddableMenu: FC<Props> = ({
         >
           <EuiSuperSelect
             aria-label="Select a minimum time range"
-            options={widenessOptions}
-            valueOfSelected={widenessOption}
-            onChange={setWidenessOption}
+            options={minimumTimeRangeOptions}
+            valueOfSelected={minimumTimeRangeOption}
+            onChange={setMinimumTimeRangeOption}
           />
         </EuiFormRow>
 

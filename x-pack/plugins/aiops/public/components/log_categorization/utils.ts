@@ -6,6 +6,8 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DocumentStats } from '../../hooks/use_document_count_stats';
 
 /**
@@ -25,4 +27,27 @@ export function createDocumentStatsHash(
       ''
     )}`
   );
+}
+
+/**
+ * Retrieves the message field from a DataView object.
+ * If the message field is not found, it falls back to error.message or event.original or the first field in the DataView.
+ *
+ * @param dataView - The DataView object containing the fields.
+ * @returns An object containing the message field and all the fields in the DataView.
+ */
+export function getMessageField(dataView: DataView) {
+  const dataViewFields = dataView.fields.filter((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
+  // setFields(dataViewFields);
+  let messageField = dataViewFields.find((f) => f.name === 'message');
+  if (messageField === undefined) {
+    messageField = dataViewFields.find((f) => f.name === 'error.message');
+  }
+  if (messageField === undefined) {
+    messageField = dataViewFields.find((f) => f.name === 'event.original ');
+  }
+  if (messageField === undefined) {
+    messageField = dataViewFields[0];
+  }
+  return { messageField, dataViewFields };
 }
