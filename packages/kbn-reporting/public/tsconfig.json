@@ -30,7 +30,5 @@
     "@kbn/screenshotting-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
-    "@kbn/lens-plugin",
-    "@kbn/field-formats-plugin",
   ]
 }
