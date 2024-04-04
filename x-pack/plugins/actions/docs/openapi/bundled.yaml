@@ -1724,7 +1724,7 @@ components:
           type: boolean
         host:
           description: |
-            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
+            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
           type: string
         oauthTokenUrl:
           type:
@@ -1732,7 +1732,7 @@ components:
             - 'null'
         port:
           description: |
-            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
+            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
           type: integer
         secure:
           description: |
@@ -3270,7 +3270,7 @@ components:
     is_preconfigured:
       type: boolean
       description: |
-        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
+        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
       examples:
         - false
     is_system_action:
@@ -3724,7 +3724,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
@@ -4301,6 +4301,12 @@ components:
                     - type: array
                       items:
                         type: string
+                otherFields:
+                  type: object
+                  additionalProperties: true
+                  maxProperties: 20
+                  description: |
+                    Custom field names and values for Jira connectors.
                 parent:
                   type: string
                   description: The ID or key of the parent issue for Jira connectors. Applies only to `Sub-task` types of issues.
