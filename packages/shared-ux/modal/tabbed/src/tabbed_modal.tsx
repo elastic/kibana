@@ -35,8 +35,8 @@ import {
 } from './context';
 
 export type IModalTabContent<S> = (props: {
-  state?: S;
-  dispatch?: IDispatchFunction;
+  state: S;
+  dispatch: IDispatchFunction;
 }) => ReactElement;
 
 interface IModalTabActionBtn<S> extends CommonProps {
@@ -52,7 +52,7 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   description?: string;
   'data-test-subj'?: string;
   content: IModalTabContent<S>;
-  modalActionBtn: IModalTabActionBtn<S>;
+  modalActionBtn?: IModalTabActionBtn<S>;
 }
 
 export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
@@ -76,7 +76,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
 
   const onSelectedTabChanged = useCallback(
     (id: string) => {
-      dispatch!({ type: 'META_selectedTabId', payload: id });
+      dispatch({ type: 'META_selectedTabId', payload: id });
     },
     [dispatch]
   );
