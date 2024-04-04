@@ -27,13 +27,6 @@ import {
   UPDATE_FIELDS,
 } from '../../lib/rule_api/update';
 
-export interface ShowRequestModalProps {
-  onClose: () => void;
-  rule: RuleUpdates;
-  ruleId?: string;
-  edit?: boolean;
-}
-
 const stringify = (rule: RuleUpdates, edit: boolean): string => {
   try {
     const request = edit
@@ -49,6 +42,38 @@ const stringify = (rule: RuleUpdates, edit: boolean): string => {
     );
   }
 };
+
+const EDIT = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitleEdit',
+  {
+    defaultMessage: 'edit',
+  }
+);
+const CREATE = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitleCreate',
+  {
+    defaultMessage: 'create',
+  }
+);
+const HEADER_EDIT = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.headerTitleEdit',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+const HEADER_CREATE = i18n.translate(
+  'xpack.triggersActionsUI.sections.showRequestModal.headerTitleCreate',
+  {
+    defaultMessage: 'Create',
+  }
+);
+
+export interface ShowRequestModalProps {
+  onClose: () => void;
+  rule: RuleUpdates;
+  ruleId?: string;
+  edit?: boolean;
+}
 
 export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
   onClose,
@@ -66,7 +91,7 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
             <EuiModalHeaderTitle id="showRequestModal" data-test-subj="modalHeaderTitle">
               {i18n.translate('xpack.triggersActionsUI.sections.showRequestModal.headerTitle', {
                 defaultMessage: '{requestType} alerting rule request',
-                values: { requestType: edit ? 'Edit' : 'Create' },
+                values: { requestType: edit ? HEADER_EDIT : HEADER_CREATE },
               })}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
@@ -78,7 +103,7 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
                     'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitle',
                     {
                       defaultMessage: 'This elasticsearch request will {requestType} this rule.',
-                      values: { requestType: edit ? 'edit' : 'create' },
+                      values: { requestType: edit ? EDIT : CREATE },
                     }
                   )}
                 </EuiTextColor>
