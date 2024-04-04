@@ -345,23 +345,9 @@ describe('handleState', () => {
       mockOnTransitionState3,
       contextData
     );
-    try {
-      const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
-      expect(updatedContext).toEqual(
-        expect.objectContaining({
-          fixedVal: 'something',
-          latestExecutedState: {
-            name: 'state3',
-            started_at: expect.anything(),
-            error: `Error during execution of state "state1" with status "failed": Installation failed`,
-          },
-        })
-      );
-    } catch (err) {
-      expect(err).toEqual(
-        `Error during execution of state "state1" with status "failed": Installation failed`
-      );
-    }
+    const promise = handleState('state1', testDefinition, testDefinition.context);
+    await expect(promise).rejects.toThrowError('Installation failed');
+
     expect(mockOnTransitionState1).toHaveBeenCalledTimes(1);
     expect(mockOnTransitionState2).toHaveBeenCalledTimes(0);
     expect(mockOnTransitionState3).toHaveBeenCalledTimes(0);
@@ -447,25 +433,9 @@ describe('handleState', () => {
       contextData,
       mockPostTransition
     );
-    try {
-      const updatedContext = await handleState('state1', testDefinition, testDefinition.context);
-      expect(updatedContext).toEqual(
-        expect.objectContaining({
-          testData: 'test',
-          result1: 'test',
-          latestExecutedState: {
-            name: 'state1',
-            started_at: expect.anything(),
-            error:
-              'Error during execution of state "state2" with status "failed": Installation failed',
-          },
-        })
-      );
-    } catch (err) {
-      expect(err).toEqual(
-        `Error during execution of state \"state2\" with status \"failed\": Installation failed`
-      );
-    }
+    const promise = handleState('state1', testDefinition, testDefinition.context);
+    await expect(promise).rejects.toThrowError('Installation failed');
+
     expect(mockOnTransitionState1).toHaveBeenCalledTimes(1);
     expect(mockPostTransition).toHaveBeenCalledWith(
       expect.objectContaining({
