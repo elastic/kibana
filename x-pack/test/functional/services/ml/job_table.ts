@@ -66,7 +66,7 @@ export function MachineLearningJobTableProvider(
       const calendarTitleVisibleText = await testSubjects.getVisibleText('mlCalendarTitle');
       expect(calendarTitleVisibleText).to.contain(
         calendarId,
-        `Expect [${calendarTitleVisibleText}] to contain [${calendarId}]`
+        `Calendar page title should contain [${calendarId}], got [${calendarTitleVisibleText}]`
       );
     }
 
