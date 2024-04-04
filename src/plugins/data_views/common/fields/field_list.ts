@@ -101,7 +101,8 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec): DataViewField => {
-      const newField = new DataViewField({ ...field, shortDotsEnable }, this.getFieldsContext);
+      const spec = { ...field, shortDotsEnable };
+      const newField = new DataViewField(spec, this.getFieldsContext.bind(this));
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
@@ -117,7 +118,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new DataViewField(field, this.getFieldsContext);
+      const newField = new DataViewField(field, this.getFieldsContext.bind(this));
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);
