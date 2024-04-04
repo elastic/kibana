@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,9 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const panels = useRiskInputActionsPanels(riskInputs, closePopover);
 
+  if (riskInputs.length === 0) {
+    return null;
+  }
   return (
     <>
       <EuiFlexGroup
@@ -47,34 +51,33 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
           `}
         />
         <EuiFlexItem grow={false}>
-          {riskInputs.length > 0 && (
-            <EuiPopover
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              button={
-                <EuiButtonEmpty
-                  onClick={togglePopover}
-                  size="xs"
-                  iconSide="right"
-                  iconType="arrowDown"
-                  flush="left"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
-                    defaultMessage="{totalSelectedContributions} selected risk contribution"
-                    values={{
-                      totalSelectedContributions: riskInputs.length,
-                    }}
-                  />
-                </EuiButtonEmpty>
-              }
-            >
-              <EuiContextMenu panels={panels} initialPanelId={0} />
-            </EuiPopover>
-          )}
+          <EuiPopover
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            button={
+              <EuiButtonEmpty
+                onClick={togglePopover}
+                size="xs"
+                iconSide="right"
+                iconType="arrowDown"
+                flush="left"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
+                  defaultMessage="{totalSelectedContributions} selected risk contribution"
+                  values={{
+                    totalSelectedContributions: riskInputs.length,
+                  }}
+                />
+              </EuiButtonEmpty>
+            }
+          >
+            <EuiContextMenu panels={panels} initialPanelId={0} />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
     </>
   );
 });

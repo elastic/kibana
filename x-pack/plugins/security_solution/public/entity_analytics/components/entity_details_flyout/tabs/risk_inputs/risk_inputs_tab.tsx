@@ -6,7 +6,8 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
+import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
@@ -128,6 +129,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         truncateText: false,
         mobileOptions: { show: true },
         sortable: true,
+        align: 'right',
         render: (contribution: number) => contribution.toFixed(2),
       },
     ],
@@ -158,6 +160,16 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     );
   }
 
+  const totals = !riskScore
+    ? { count: 0, score: 0 }
+    : isUserRiskScore(riskScore)
+    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
+    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+
+  const displayed = {
+    count: alerts.data?.length || 0,
+    score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
+  };
   const riskInputsAlertSection = (
     <>
       <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
@@ -170,7 +182,6 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       </EuiTitle>
       <EuiSpacer size="xs" />
       <RiskInputsUtilityBar riskInputs={selectedItems} />
-      <EuiSpacer size="xs" />
       <EuiInMemoryTable
         compressed={true}
         loading={loadingRiskScore || alerts.loading}
@@ -181,79 +192,129 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         isSelectable
         itemId="_id"
       />
-    </>
-  );
-
-  const totals = !riskScore
-    ? { count: 0, score: 0 }
-    : isUserRiskScore(riskScore)
-    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
-    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
-
-  const displayed = {
-    count: alerts.data?.length || 0,
-    score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
-  };
-  return (
-    <>
-      {isAssetCriticalityEnabled && (
-        <RiskInputsAssetCriticalitySection loading={loadingRiskScore} riskScore={riskScore} />
-      )}
-      {riskInputsAlertSection}
+      <EuiSpacer size="s" />
       <AlertInputMessage totals={totals} inputs={displayed} />
     </>
   );
-};
-
-const RiskInputsAssetCriticalitySection: React.FC<{
-  riskScore?: UserRiskScore | HostRiskScore;
-  loading: boolean;
-}> = ({ riskScore, loading }) => {
-  const criticalityLevel = useMemo(() => {
-    if (!riskScore) {
-      return undefined;
-    }
-
-    if (isUserRiskScore(riskScore)) {
-      return riskScore.user.risk.criticality_level;
-    }
-
-    return riskScore.host.risk.criticality_level;
-  }, [riskScore]);
-
-  if (loading || criticalityLevel === undefined) {
-    return null;
-  }
 
   return (
     <>
-      <EuiTitle size="xs" data-test-subj="risk-input-asset-criticality-title">
-        <h3>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityTitle"
-            defaultMessage="Asset Criticality"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityDescription"
-          defaultMessage="The criticality assigned at the time of the risk score calculation."
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      <AssetCriticalityBadgeAllowMissing
-        criticalityLevel={criticalityLevel}
-        dataTestSubj="risk-inputs-asset-criticality-badge"
-      />
-
+      {isAssetCriticalityEnabled && (
+        <ContextsSection loading={loadingRiskScore} riskScore={riskScore} />
+      )}
       <EuiSpacer size="m" />
+      {riskInputsAlertSection}
     </>
   );
 };
 
 RiskInputsTab.displayName = 'RiskInputsTab';
+
+const ContextsSection: React.FC<{
+  riskScore?: UserRiskScore | HostRiskScore;
+  loading: boolean;
+}> = ({ riskScore, loading }) => {
+  const criticality = useMemo(() => {
+    if (!riskScore) {
+      return undefined;
+    }
+
+    if (isUserRiskScore(riskScore)) {
+      return {
+        level: riskScore.user.risk.criticality_level,
+        contribution: riskScore.user.risk.category_2_score,
+      };
+    }
+
+    return {
+      level: riskScore.host.risk.criticality_level,
+      contribution: riskScore.host.risk.category_2_score,
+    };
+  }, [riskScore]);
+
+  if (loading || criticality === undefined) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiTitle size="xs" data-test-subj="risk-input-contexts-title">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTitle"
+            defaultMessage="Contexts"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiInMemoryTable
+        compressed={true}
+        loading={loading}
+        columns={contextColumns}
+        items={[
+          {
+            field: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityField"
+                defaultMessage="Asset Criticality Level"
+              />
+            ),
+            value: (
+              <AssetCriticalityBadgeAllowMissing
+                criticalityLevel={criticality.level}
+                dataTestSubj="risk-inputs-asset-criticality-badge"
+              />
+            ),
+            contribution: (criticality.contribution || 0).toFixed(2),
+          },
+        ]}
+      />
+    </>
+  );
+};
+
+interface ContextRow {
+  field: ReactNode;
+  value: ReactNode;
+  contribution: string;
+}
+
+const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
+  {
+    field: 'field',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
+        defaultMessage="Field"
+      />
+    ),
+    width: '30%',
+    render: (field: ContextRow['field']) => field,
+  },
+  {
+    field: 'value',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
+        defaultMessage="Value"
+      />
+    ),
+    width: '30%',
+    render: (val: ContextRow['value']) => val,
+  },
+  {
+    field: 'contribution',
+    width: '30%',
+    align: 'right',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
+        defaultMessage="Contribution"
+      />
+    ),
+    render: (score: ContextRow['contribution']) => score,
+  },
+];
 
 interface AlertInputMessageProps {
   totals: {
@@ -268,19 +329,23 @@ interface AlertInputMessageProps {
 const AlertInputMessage: React.FC<AlertInputMessageProps> = ({ totals, inputs }) => {
   const leftover = {
     count: totals.count - inputs.count,
-    score: totals.score - inputs.score,
+    score: (totals.score - inputs.score).toFixed(2),
   };
 
   if (inputs.count >= totals.count) {
     return null;
   }
-
-  // <EuiText size="xs">{`${leftover.count} more alerts contributed ${leftover.score} to the calculated risk score`}</EuiText>
   return (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.entityDetails.riskInputs.extraAlertsMessage"
-      defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
-      values={leftover}
+    <EuiCallOut
+      size="s"
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.extraAlertsMessage"
+          defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
+          values={leftover}
+        />
+      }
+      iconType="annotation"
     />
   );
 };

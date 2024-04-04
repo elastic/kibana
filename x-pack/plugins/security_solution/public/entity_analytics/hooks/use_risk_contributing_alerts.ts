@@ -40,7 +40,7 @@ export interface InputAlert {
   _id: string;
 }
 
-interface UseRiskContributingAlertsResult {
+export interface UseRiskContributingAlertsResult {
   loading: boolean;
   error: boolean;
   data?: InputAlert[];
