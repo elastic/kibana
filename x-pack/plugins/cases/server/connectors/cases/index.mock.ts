@@ -48,6 +48,41 @@ export const alerts = [
   { _id: 'alert-id-4', _index: 'alert-index-4', 'host.name': 'A', 'source.ip': '0.0.0.5' },
 ];
 
+export const alertsNested = [
+  {
+    _id: 'alert-id-0',
+    _index: 'alert-index-0',
+    host: { name: 'A' },
+    dest: { ip: '0.0.0.1' },
+    source: { ip: '0.0.0.2' },
+  },
+  {
+    _id: 'alert-id-1',
+    _index: 'alert-index-1',
+    host: { name: 'B' },
+    dest: { ip: '0.0.0.1' },
+    file: { hash: '12345' },
+  },
+  {
+    _id: 'alert-id-2',
+    _index: 'alert-index-2',
+    host: { name: 'A' },
+    dest: { ip: '0.0.0.1' },
+  },
+  {
+    _id: 'alert-id-3',
+    _index: 'alert-index-3',
+    host: { name: 'B' },
+    dest: { ip: '0.0.0.3' },
+  },
+  {
+    _id: 'alert-id-4',
+    _index: 'alert-index-4',
+    host: { name: 'A' },
+    source: { ip: '0.0.0.5' },
+  },
+];
+
 export const groupingBy = ['host.name', 'dest.ip'];
 export const rule = {
   id: 'rule-test-id',

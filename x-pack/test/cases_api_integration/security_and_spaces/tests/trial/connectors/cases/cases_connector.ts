@@ -39,7 +39,7 @@ import {
 } from '../../../../../common/lib/authentication/users';
 import {
   deleteAllCaseItems,
-  executeConnector,
+  executeSystemConnector,
   findCases,
   getAllComments,
   updateCase,
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('validation', () => {
       it('returns 400 if the alerts do not contain _id and _index', async () => {
-        const res = await executeConnector({
+        const res = await executeSystemConnector({
           supertest,
           connectorId,
           // @ts-expect-error: need to test schema validation
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 when groupingBy has more than one value', async () => {
-        const res = await executeConnector({
+        const res = await executeSystemConnector({
           supertest,
           connectorId,
           req: getRequest({ groupingBy: ['host.name', 'source.ip'] }),
@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 when timeWindow is invalid', async () => {
-        const res = await executeConnector({
+        const res = await executeSystemConnector({
           supertest,
           connectorId,
           req: getRequest({ timeWindow: 'not-valid' }),
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 for valid date math but not valid time window', async () => {
-        const res = await executeConnector({
+        const res = await executeSystemConnector({
           supertest,
           connectorId,
           req: getRequest({ timeWindow: '10d+3d' }),
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns 400 for unsupported time units', async () => {
         for (const unit of ['s', 'm', 'H', 'h']) {
-          const res = await executeConnector({
+          const res = await executeSystemConnector({
             supertest,
             connectorId,
             req: getRequest({ timeWindow: `5${unit}` }),
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 when maximumCasesToOpen > 10', async () => {
-        const res = await executeConnector({
+        const res = await executeSystemConnector({
           supertest,
           connectorId,
           req: getRequest({ maximumCasesToOpen: 11 }),
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 when maximumCasesToOpen < 1', async () => {
-        const res = await executeConnector({
+        const res = await executeSystemConnector({
           supertest,
           connectorId,
           req: getRequest({ maximumCasesToOpen: 0 }),
@@ -968,7 +968,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should not execute without permission to cases for all owners', async () => {
         for (const owner of ['cases', 'securitySolution', 'observability']) {
           const req = getRequest({ owner });
-          await executeConnector({
+          await executeSystemConnector({
             supertest: supertestWithoutAuth,
             connectorId,
             req,
@@ -980,7 +980,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should not execute in a space with no permissions', async () => {
         const req = getRequest({ owner: 'securitySolution' });
-        await executeConnector({
+        await executeSystemConnector({
           supertest: supertestWithoutAuth,
           connectorId,
           req,
@@ -998,7 +998,7 @@ export default ({ getService }: FtrProviderContext): void => {
           noKibanaPrivileges,
         ]) {
           const req = getRequest({ owner: 'securitySolution' });
-          await executeConnector({
+          await executeSystemConnector({
             supertest: supertestWithoutAuth,
             connectorId,
             req,
@@ -1019,7 +1019,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         for (const [user, owner] of usersToTest) {
           const req = getRequest({ owner });
-          const res = await executeConnector({
+          const res = await executeSystemConnector({
             supertest: supertestWithoutAuth,
             connectorId,
             req,
@@ -1042,7 +1042,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         for (const [user, owner] of usersToTest) {
           const req = getRequest({ owner });
-          await executeConnector({
+          await executeSystemConnector({
             supertest: supertestWithoutAuth,
             connectorId,
             req,
@@ -1279,7 +1279,7 @@ const executeConnectorAndVerifyCorrectness = async ({
   connectorId: string;
   req: Record<string, unknown>;
 }) => {
-  const res = await executeConnector({ supertest, connectorId, req });
+  const res = await executeSystemConnector({ supertest, connectorId, req });
 
   expect(res.status).to.be('ok');
 

@@ -31,6 +31,7 @@ import {
   timeWindow,
   reopenClosedCases,
   updatedCounterOracleRecord,
+  alertsNested,
 } from './index.mock';
 import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
@@ -631,7 +632,7 @@ describe('CasesConnectorExecutor', () => {
             casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
 
           expect(description).toBe(
-            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar` equals `{"foo":"test"}` and `baz` equals `my value`'
+            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar.foo` equals `test` and `baz` equals `my value`'
           );
         });
 
@@ -759,7 +760,7 @@ describe('CasesConnectorExecutor', () => {
             'auto-generated',
             'rule:rule-test-id',
             'foo:["bar",1,true,{}]',
-            'bar:{"foo":"test"}',
+            'bar.foo:test',
             'baz:my value',
             'rule',
             'test',
@@ -1006,6 +1007,12 @@ describe('CasesConnectorExecutor', () => {
       describe('Alerts', () => {
         it('attach the alerts to the correct cases correctly', async () => {
           await connectorExecutor.execute(params);
+
+          expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
+        });
+
+        it('attach alerts with nested grouping', async () => {
+          await connectorExecutor.execute({ ...params, alerts: alertsNested });
 
           expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
         });
@@ -1376,6 +1383,25 @@ describe('CasesConnectorExecutor', () => {
           await expect(() =>
             connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"get configuration error"`);
+        });
+      });
+
+      describe('Skipping execution', () => {
+        it('skips execution if alerts cannot be grouped', async () => {
+          await connectorExecutor.execute({
+            ...params,
+            groupingBy: ['does.not.exists'],
+          });
+
+          expect(mockGetRecordId).not.toHaveBeenCalled();
+          expect(mockBulkGetRecords).not.toHaveBeenCalled();
+          expect(mockBulkCreateRecords).not.toHaveBeenCalled();
+          expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
+          expect(mockGetCaseId).not.toHaveBeenCalled();
+          expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
+          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
+          expect(casesClientMock.cases.bulkUpdate).not.toHaveBeenCalled();
+          expect(casesClientMock.configure.get).not.toHaveBeenCalled();
         });
       });
     });

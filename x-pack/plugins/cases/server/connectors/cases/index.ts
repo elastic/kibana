@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { Owner } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from '../../../common/constants';
-import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
-import { CasesConnectorConfigSchema, CasesConnectorSecretsSchema } from './schema';
+import { DEFAULT_MAX_OPEN_CASES } from './constants';
+import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
+import type {
+  CasesConnectorConfig,
+  CasesConnectorParams,
+  CasesConnectorRuleActionParams,
+  CasesConnectorSecrets,
+} from './types';
+import {
+  CasesConnectorConfigSchema,
+  CasesConnectorRuleActionParamsSchema,
+  CasesConnectorSecretsSchema,
+} from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
 
@@ -52,11 +60,7 @@ export const getCasesConnectorType = ({
    * TODO: Limit only to rule types that support
    * alerts-as-data
    */
-  supportedFeatureIds: [
-    SecurityConnectorFeatureId,
-    UptimeConnectorFeatureId,
-    AlertingConnectorFeatureId,
-  ],
+  supportedFeatureIds: [UptimeConnectorFeatureId, AlertingConnectorFeatureId],
   /**
    * TODO: Verify license
    */
@@ -72,3 +76,44 @@ export const getCasesConnectorType = ({
     return constructRequiredKibanaPrivileges(owner);
   },
 });
+
+export const getCasesConnectorAdapter = (): ConnectorAdapter<
+  CasesConnectorRuleActionParams,
+  CasesConnectorParams
+> => {
+  return {
+    connectorTypeId: CASES_CONNECTOR_ID,
+    ruleActionParamsSchema: CasesConnectorRuleActionParamsSchema,
+    buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
+      const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
+
+      const owner = getOwnerFromRuleConsumer(rule.consumer);
+
+      const subActionParams = {
+        alerts: caseAlerts,
+        rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
+        groupingBy: params.subActionParams.groupingBy,
+        owner,
+        reopenClosedCases: params.subActionParams.reopenClosedCases,
+        timeWindow: params.subActionParams.timeWindow,
+        maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+      };
+
+      return { subAction: 'run', subActionParams };
+    },
+  };
+};
+
+const getOwnerFromRuleConsumer = (consumer: string): Owner => {
+  for (const value of Object.values(OWNER_INFO)) {
+    const foundedConsumer = value.validRuleConsumers?.find(
+      (validConsumer) => validConsumer === consumer
+    );
+
+    if (foundedConsumer) {
+      return value.id;
+    }
+  }
+
+  return OWNER_INFO.cases.id;
+};

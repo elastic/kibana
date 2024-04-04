@@ -14,6 +14,7 @@ import type {
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
 import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -135,6 +136,45 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
           headers: boom.output.headers as { [key: string]: string },
           statusCode: boom.output.statusCode,
         });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/{id}/connectors:execute',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const [_, { actions }] = await core.getStartServices();
+
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.execute({
+            actionId: req.params.id,
+            params: req.body.params,
+            source: {
+              type: ActionExecutionSourceType.HTTP_REQUEST,
+              source: req,
+            },
+            relatedSavedObjects: [],
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
       }
     }
   );

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import type {
+  Logger,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { CASE_ORACLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { isSODecoratedError, isSOError } from '../../common/error';
 import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
@@ -97,7 +103,7 @@ export class CasesOracleService {
     const oracleRecord = await this.savedObjectsClient.create<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       this.getCreateRecordAttributes(payload),
-      { id: recordId }
+      { id: recordId, references: this.getCreateRecordReferences(payload) }
     );
 
     return this.getRecordResponse(oracleRecord);
@@ -120,6 +126,7 @@ export class CasesOracleService {
       id: record.recordId,
       type: CASE_ORACLE_SAVED_OBJECT,
       attributes: this.getCreateRecordAttributes(record.payload),
+      references: this.getCreateRecordReferences(record.payload),
     }));
 
     const oracleRecords = (await this.savedObjectsClient.bulkCreate<OracleRecordAttributes>(
@@ -233,5 +240,31 @@ export class CasesOracleService {
       createdAt: new Date().toISOString(),
       updatedAt: null,
     };
+  }
+
+  private getCreateRecordReferences({
+    cases,
+    rules,
+    grouping,
+  }: OracleRecordCreateRequest): SavedObjectReference[] {
+    const references = [];
+
+    for (const rule of rules) {
+      references.push({
+        id: rule.id,
+        type: RULE_SAVED_OBJECT_TYPE,
+        name: `associated-${RULE_SAVED_OBJECT_TYPE}`,
+      });
+    }
+
+    for (const theCase of cases) {
+      references.push({
+        id: theCase.id,
+        type: CASE_SAVED_OBJECT,
+        name: `associated-${CASE_SAVED_OBJECT}`,
+      });
+    }
+
+    return references;
   }
 }

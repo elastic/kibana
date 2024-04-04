@@ -13,6 +13,8 @@ import type {
   CasesConnectorConfigSchema,
   CasesConnectorSecretsSchema,
   CasesConnectorRunParamsSchema,
+  CasesConnectorRuleActionParamsSchema,
+  CasesConnectorParamsSchema,
 } from './schema';
 
 export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
@@ -86,3 +88,6 @@ export interface BackoffStrategy {
 export interface BackoffFactory {
   create: () => BackoffStrategy;
 }
+
+export type CasesConnectorRuleActionParams = TypeOf<typeof CasesConnectorRuleActionParamsSchema>;
+export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;

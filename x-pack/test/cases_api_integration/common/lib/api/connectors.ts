@@ -344,3 +344,26 @@ export const executeConnector = async ({
 
   return mapKeys(res, (_v, k) => camelCase(k)) as ActionTypeExecutorResult<unknown>;
 };
+
+export const executeSystemConnector = async ({
+  supertest,
+  connectorId,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  connectorId: string;
+  req: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<ActionTypeExecutorResult<unknown>> => {
+  const { body: res } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}/api/cases_fixture/${connectorId}/connectors:execute`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return mapKeys(res, (_v, k) => camelCase(k)) as ActionTypeExecutorResult<unknown>;
+};

@@ -20,9 +20,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { useApplication } from '../../../common/lib/kibana/use_application';
-import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
-import { CASES_CONNECTOR_SUB_ACTION, OWNER_INFO } from '../../../../common/constants';
+import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
@@ -32,9 +30,6 @@ import { useAlertDataViews } from '../hooks/use_alert_data_view';
 export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
 > = ({ actionParams, editAction, errors, index, producerId }) => {
-  const { appId } = useApplication();
-  const owner = getCaseOwnerByAppId(appId);
-
   const { dataViews, loading: loadingAlertDataViews } = useAlertDataViews(
     producerId ? [producerId as ValidFeatureId] : []
   );
@@ -70,25 +65,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           timeWindow: `${DEFAULT_TIME_WINDOW}`,
           reopenClosedCases: false,
           groupingBy: [],
-          owner: OWNER_INFO.cases.id,
-        },
-        index
-      );
-    }
-
-    if (actionParams.subActionParams && actionParams.subActionParams?.owner !== owner) {
-      editAction(
-        'subActionParams',
-        {
-          ...actionParams.subActionParams,
-          owner,
         },
         index
       );
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams, owner, appId]);
+  }, [actionParams]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: unknown) => {

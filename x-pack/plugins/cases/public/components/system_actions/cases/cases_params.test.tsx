@@ -24,7 +24,6 @@ const useApplicationMock = useApplication as jest.Mock;
 const actionParams = {
   subAction: 'run',
   subActionParams: {
-    owner: 'cases',
     timeWindow: '6w',
     reopenClosedCases: false,
     groupingBy: [],
@@ -120,22 +119,7 @@ describe('CasesParamsFields renders', () => {
       timeWindow: '7d',
       reopenClosedCases: false,
       groupingBy: [],
-      owner: 'cases',
     });
-  });
-
-  it('sets owner to default if appId not matched', async () => {
-    useApplicationMock.mockReturnValue({ appId: 'testAppId' });
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: {
-        subAction: 'run',
-      },
-    };
-    render(<CasesParamsFields {...newProps} />);
-
-    expect(editAction.mock.calls[0][1].owner).toEqual('cases');
   });
 
   it('If timeWindow has errors, form row is invalid', async () => {
@@ -147,25 +131,6 @@ describe('CasesParamsFields renders', () => {
     render(<CasesParamsFields {...newProps} />);
 
     expect(await screen.findByText('error')).toBeInTheDocument();
-  });
-
-  it('updates owner correctly', async () => {
-    useApplicationMock.mockReturnValueOnce({ appId: 'securitySolutionUI' });
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: {
-        subAction: 'run',
-      },
-    };
-
-    const { rerender } = render(<CasesParamsFields {...newProps} />);
-
-    expect(editAction.mock.calls[0][1].owner).toEqual('cases');
-
-    rerender(<CasesParamsFields {...defaultProps} />);
-
-    expect(editAction.mock.calls[1][1].owner).toEqual('securitySolution');
   });
 
   describe('UI updates', () => {

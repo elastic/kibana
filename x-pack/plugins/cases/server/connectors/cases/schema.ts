@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
-import { MAX_OPEN_CASES } from './constants';
+import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
 import { CASES_CONNECTOR_TIME_WINDOW_REGEX } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -30,6 +30,33 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
+const ReopenClosedCasesSchema = schema.boolean({ defaultValue: false });
+const TimeWindowSchema = schema.string({
+  defaultValue: '7d',
+  validate: (value) => {
+    /**
+     * Validates the time window.
+     * Acceptable format:
+     * - First character should be a digit from 1 to 9
+     * - All next characters should be a digit from 0 to 9
+     * - The last character should be d (day) or w (week) or M (month) or Y (year)
+     *
+     * Example: 20d, 2w, 1M, etc
+     */
+    const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
+
+    if (!timeWindowRegex.test(value)) {
+      return 'Not a valid time window';
+    }
+
+    const date = dateMath.parse(`now-${value}`);
+
+    if (!date || !date.isValid()) {
+      return 'Not a valid time window';
+    }
+  },
+});
+
 /**
  * The case connector does not have any configuration
  * or secrets.
@@ -42,31 +69,25 @@ export const CasesConnectorRunParamsSchema = schema.object({
   groupingBy: GroupingSchema,
   owner: schema.string(),
   rule: RuleSchema,
-  timeWindow: schema.string({
-    defaultValue: '7d',
-    validate: (value) => {
-      /**
-       * Validates the time window.
-       * Acceptable format:
-       * - First character should be a digit from 1 to 9
-       * - All next characters should be a digit from 0 to 9
-       * - The last character should be d (day) or w (week) or M (month) or Y (year)
-       *
-       * Example: 20d, 2w, 1M, etc
-       */
-      const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
-
-      if (!timeWindowRegex.test(value)) {
-        return 'Not a valid time window';
-      }
-
-      const date = dateMath.parse(`now-${value}`);
-
-      if (!date || !date.isValid()) {
-        return 'Not a valid time window';
-      }
-    },
+  timeWindow: TimeWindowSchema,
+  reopenClosedCases: ReopenClosedCasesSchema,
+  maximumCasesToOpen: schema.number({
+    defaultValue: DEFAULT_MAX_OPEN_CASES,
+    min: 1,
+    max: MAX_OPEN_CASES,
   }),
-  reopenClosedCases: schema.boolean({ defaultValue: false }),
-  maximumCasesToOpen: schema.number({ defaultValue: 5, min: 1, max: MAX_OPEN_CASES }),
+});
+
+export const CasesConnectorRuleActionParamsSchema = schema.object({
+  subAction: schema.literal('run'),
+  subActionParams: schema.object({
+    groupingBy: GroupingSchema,
+    reopenClosedCases: ReopenClosedCasesSchema,
+    timeWindow: TimeWindowSchema,
+  }),
+});
+
+export const CasesConnectorParamsSchema = schema.object({
+  subAction: schema.literal('run'),
+  subActionParams: CasesConnectorRunParamsSchema,
 });
