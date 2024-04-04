@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 3 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
@@ -542,7 +543,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should work with ad-hoc data views and runtime fields', async () => {
-        await PageObjects.discover.createAdHocDataView('logstash', true);
+        await dataViews.createFromSearchBar({
+          name: 'logstash',
+          adHoc: true,
+          hasTimeField: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(

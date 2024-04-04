@@ -17,15 +17,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
-    'error',
     'discover',
     'timePicker',
     'unifiedSearch',
     'lens',
-    'security',
-    'spaceSelector',
     'header',
     'unifiedFieldList',
   ]);
@@ -131,16 +129,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly using adhoc data view', async () => {
-      await PageObjects.discover.createAdHocDataView('logst', true);
+      await dataViews.createFromSearchBar({
+        name: 'logst',
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-        expect(selectedPattern).to.eql('logst*');
-      });
+      await dataViews.waitForSwitcherToBe('logst*');
     });
 
     it('should visualize correctly text based language queries in Discover', async () => {

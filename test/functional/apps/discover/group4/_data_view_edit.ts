@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const es = getService('es');
   const retry = getService('retry');
+  const dataViews = getService('dataViews');
+
   const PageObjects = getPageObjects([
     'common',
     'unifiedSearch',
@@ -72,7 +74,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
 
-      await PageObjects.discover.createAdHocDataView(initialPattern, true);
+      await dataViews.createFromSearchBar({
+        name: initialPattern,
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await retry.waitFor('current data view to get updated', async () => {
         return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
@@ -85,8 +91,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('create saved data view', async function () {
       const updatedPattern = 'my-index-000001';
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.createNewDataView(updatedPattern, false, true);
+      await dataViews.createFromSearchBar({
+        name: updatedPattern,
+        adHoc: false,
+        hasTimeField: true,
+      });
 
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(1);
@@ -118,8 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         });
       }
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView(updatedPattern, 'timestamp');
+      await dataViews.editFromSearchBar({ newName: updatedPattern, newTimeField: 'timestamp' });
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(3);
       });
@@ -130,11 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('update data view with no time field', async function () {
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView(
-        undefined,
-        "--- I don't want to use the time filter ---"
-      );
+      await dataViews.editFromSearchBar({
+        newTimeField: "--- I don't want to use the time filter ---",
+      });
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(4);
       });

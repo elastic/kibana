@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
 
   describe('Field list new fields in background handling', function () {
@@ -52,7 +53,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
 
-      await PageObjects.discover.createAdHocDataView(initialPattern, true);
+      await dataViews.createFromSearchBar({
+        name: initialPattern,
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await retry.waitFor('current data view to get updated', async () => {
         return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
@@ -98,7 +103,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
 
-      await PageObjects.discover.createAdHocDataView(initialPattern, true);
+      await dataViews.createFromSearchBar({
+        name: initialPattern,
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await retry.waitFor('current data view to get updated', async () => {
         return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;

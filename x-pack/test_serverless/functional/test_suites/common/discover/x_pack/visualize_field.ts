@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -119,7 +120,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly using adhoc data view', async () => {
-      await PageObjects.discover.createAdHocDataView('logst', true);
+      await dataViews.createFromSearchBar({
+        name: 'logst',
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('unifiedHistogramEditVisualization');

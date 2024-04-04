@@ -1483,17 +1483,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async clickAddField() {
-      await testSubjects.click('lns-dataView-switch-link');
-      await testSubjects.existOrFail('indexPattern-add-field');
-      await testSubjects.click('indexPattern-add-field');
-    },
-
-    async createAdHocDataView(name: string, hasTimeField?: boolean) {
-      await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
-    },
-
     async switchToTextBasedLanguage(language: string) {
       await testSubjects.click('lns-dataView-switch-link');
       await PageObjects.unifiedSearch.selectTextBasedLanguage(language);

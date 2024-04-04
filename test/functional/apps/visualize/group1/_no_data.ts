@@ -13,16 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'header', 'common']);
   const esArchiver = getService('esArchiver');
-  const find = getService('find');
+  const dataViews = getService('dataViews');
   const kibanaServer = getService('kibanaServer');
-
-  const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await testSubjects.click('saveIndexPatternButton');
-  };
 
   describe('no data in visualize', function () {
     it('should show the integrations component if there is no data', async () => {
@@ -43,14 +35,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('createDataViewButton');
-      button.click();
-      await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
-        return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
-      });
 
       const dataViewToCreate = 'logstash';
-      await createDataView(dataViewToCreate);
+      await dataViews.createFromPrompt({ name: dataViewToCreate });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitForWithTimeout(

@@ -18,6 +18,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
   const find = getService('find');
   // const ml = getService('ml');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['discover']);
 
   return {
@@ -141,9 +142,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
     async selectDiscoverIndexPattern(indexPattern: string) {
       await retry.tryForTime(2 * 1000, async () => {
         await PageObjects.discover.selectIndexPattern(indexPattern);
-        const indexPatternTitle = await testSubjects.getVisibleText(
-          'discover-dataView-switch-link'
-        );
+        const indexPatternTitle = await dataViews.getSelectedName();
         expect(indexPatternTitle).to.be(indexPattern);
       });
     },

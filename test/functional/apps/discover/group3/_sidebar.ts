@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
+  const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 3 meta fields.';
@@ -639,7 +640,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should work with ad-hoc data views and runtime fields', async () => {
-        await PageObjects.discover.createAdHocDataView('logstash', true);
+        await dataViews.createFromSearchBar({
+          name: 'logstash',
+          adHoc: true,
+          hasTimeField: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(

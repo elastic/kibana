@@ -11,20 +11,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const find = getService('find');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
-
-  const createDataView = async (dataViewName: string) => {
-    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await testSubjects.click('saveIndexPatternButton');
-  };
 
   describe('dashboard empty state', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
@@ -56,14 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create the new data view from the dashboards/create route in order to test that the dashboard is loaded properly as soon as the data view is created...
       await PageObjects.common.navigateToApp('dashboards', { hash: '/create' });
 
-      const button = await testSubjects.find('createDataViewButton');
-      button.click();
-      await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
-        return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
-      });
-
       const dataViewToCreate = 'logstash';
-      await createDataView(dataViewToCreate);
+      await dataViews.createFromPrompt({ name: dataViewToCreate });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
         'filter manager to be able to create a filter with the new data view',

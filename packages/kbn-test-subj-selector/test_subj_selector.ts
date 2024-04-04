@@ -8,6 +8,7 @@
 
 function selectorToTerms(selector: string) {
   return selector
+    .replace(/\s*~\s*/g, '*') // css locator with '*' operator cannot contain spaces
     .replace(/\s*~\s*/g, '~') // css locator with '~' operator cannot contain spaces
     .replace(/\s*>\s*/g, '>') // remove all whitespace around joins >
     .replace(/\s*&\s*/g, '&') // remove all whitespace around joins &
@@ -16,9 +17,13 @@ function selectorToTerms(selector: string) {
 
 function termToCssSelector(term: string) {
   if (term) {
-    return term.startsWith('~')
-      ? '[data-test-subj~="' + term.substring(1).replace(/\s/g, '') + '"]'
-      : '[data-test-subj="' + term + '"]';
+    if (term.startsWith('~')) {
+      return '[data-test-subj~="' + term.substring(1).replace(/\s/g, '') + '"]';
+    } else if (term.startsWith('*')) {
+      return '[data-test-subj*="' + term.substring(1).replace(/\s/g, '') + '"]';
+    } else {
+      return '[data-test-subj="' + term + '"]';
+    }
   } else {
     return '';
   }

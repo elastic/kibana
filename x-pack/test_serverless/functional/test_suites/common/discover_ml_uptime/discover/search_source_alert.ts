@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
   const comboBox = getService('comboBox');
+  const dataViews = getService('dataViews');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -520,7 +521,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.createAdHocDataView('search-source-', true);
+      await dataViews.createFromSearchBar({
+        name: 'search-source-',
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');

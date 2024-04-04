@@ -13,14 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects([
-    'settings',
-    'common',
-    'header',
-    'discover',
-    'timePicker',
-    'dashboard',
-  ]);
+  const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover', 'timePicker']);
   const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
@@ -33,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -470,7 +464,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.createAdHocDataView('search-source-', true);
+      await dataViews.createFromSearchBar({
+        name: 'search-source-',
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');

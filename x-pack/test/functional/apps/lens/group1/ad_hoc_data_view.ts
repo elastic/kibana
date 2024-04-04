@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const dataViews = getService('dataViews');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -48,11 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.visualize.navigateToNewVisualization();
     await PageObjects.visualize.clickVisType('lens');
     await elasticChart.setNewChartUiDebugFlag(true);
-    await PageObjects.lens.createAdHocDataView('*stash*');
-    retry.try(async () => {
-      const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-      expect(selectedPattern).to.eql('*stash*');
-    });
+    await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
+    await dataViews.waitForSwitcherToBe('*stash*');
   }
 
   const checkDiscoverNavigationResult = async () => {
@@ -71,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
     expect(actualDiscoverQueryHits).to.be('14,005');
-    expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+    expect(await dataViews.isAdHoc()).to.be(true);
   };
 
   describe('lens ad hoc data view tests', () => {
@@ -96,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow adding and using a field', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
-        await PageObjects.lens.clickAddField();
+        await dataViews.clickAddFieldFromSearchBar();
         await fieldEditor.setName('runtimefield');
         await fieldEditor.enableValue();
         await fieldEditor.typeScript("emit('abc')");
@@ -115,9 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow switching to another data view and back', async () => {
-      await PageObjects.lens.switchDataPanelIndexPattern('logstash-*');
+      await dataViews.switchTo('logstash-*');
+      await dataViews.waitForSwitcherToBe('logstash-*');
       await PageObjects.lens.waitForFieldMissing('runtimefield');
-      await PageObjects.lens.switchDataPanelIndexPattern('*stash*');
+      await dataViews.switchTo('*stash*');
+      await dataViews.waitForSwitcherToBe('*stash*');
       await PageObjects.lens.waitForField('runtimefield');
     });
 
@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
-      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+      expect(await dataViews.isAdHoc()).to.be(true);
 
       await browser.closeCurrentWindow();
     });

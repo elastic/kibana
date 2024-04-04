@@ -16,7 +16,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
+  private readonly dataViews = this.ctx.getService('dataViews');
   private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
@@ -476,42 +476,6 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async clickAddNewField() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('indexPattern-add-field');
-      await this.find.byClassName('indexPatternFieldEditor__form');
-    });
-  }
-
-  public async clickCreateNewDataView() {
-    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
-      return await this.testSubjects.isDisplayed('dataview-create-new');
-    });
-    await this.testSubjects.click('dataview-create-new');
-    await this.retry.waitForWithTimeout(
-      'index pattern editor form to be visible',
-      15000,
-      async () => {
-        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
-      }
-    );
-    await (await this.find.byClassName('indexPatternEditor__form')).click();
-  }
-
-  async createAdHocDataView(name: string, hasTimeField = false) {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
-    await this.retry.waitFor('flyout to get closed', async () => {
-      return !(await this.testSubjects.exists('indexPatternEditor__form'));
-    });
-  }
-
-  async clickAddField() {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.testSubjects.existOrFail('indexPattern-add-field');
-    await this.testSubjects.click('indexPattern-add-field');
-  }
-
   public async hasNoResults() {
     return await this.testSubjects.exists('discoverNoResults');
   }
@@ -764,7 +728,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async addRuntimeField(name: string, script: string, type?: string) {
-    await this.clickAddField();
+    await this.dataViews.clickAddFieldFromSearchBar();
     await this.fieldEditor.setName(name);
     if (type) {
       await this.fieldEditor.setFieldType(type);
