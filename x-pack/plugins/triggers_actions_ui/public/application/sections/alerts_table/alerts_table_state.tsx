@@ -89,7 +89,8 @@ export type AlertsTableStateProps = {
    */
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
-} & Partial<EuiDataGridProps>;
+  renderCellPopover?: AlertsTableProps['renderCellPopover'];
+} & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -198,6 +199,7 @@ const AlertsTableStateWithQueryProvider = memo(
     trailingControlColumns,
     rowHeightsOptions,
     cellContext,
+    renderCellPopover,
     columns: propColumns,
     gridStyle,
     browserFields: propBrowserFields,
@@ -454,6 +456,7 @@ const AlertsTableStateWithQueryProvider = memo(
         featureIds,
         isInitializing,
         pagination,
+        renderCellPopover,
         sort,
         isLoading,
         alerts,
@@ -490,6 +493,7 @@ const AlertsTableStateWithQueryProvider = memo(
         dynamicRowHeight,
         featureIds,
         cellContext,
+        renderCellPopover,
         isInitializing,
         pagination,
         sort,
