@@ -68,6 +68,7 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
     })();
     const nextId = apiHasUniqueId(compatibleApi) ? compatibleApi.uuid : null;
     if (nextId === lastCompatibleUuid) return;
+    lastCompatibleUuid = nextId;
     lastCleanupFunction = apiFound(compatibleApi) ?? undefined;
   });
   return () => {

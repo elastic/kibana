@@ -8,6 +8,7 @@
 
 import {
   isReferenceOrValueEmbeddable,
+  PanelIncompatibleError,
   PanelNotFoundError,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
@@ -58,7 +59,7 @@ const duplicateReactEmbeddableInput = async (
   idToDuplicate: string
 ) => {
   const child = dashboard.children$.value[idToDuplicate];
-  if (!child || !apiHasSerializableState(child)) throw new PanelNotFoundError();
+  if (!child || !apiHasSerializableState(child)) throw new PanelIncompatibleError();
 
   const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
