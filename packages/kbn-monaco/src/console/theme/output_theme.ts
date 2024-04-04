@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { lexerRules, languageConfiguration } from './console_editor';
-export { consoleOutputLexerRules, consoleOutputLanguageConfiguration } from './console_output';
+import { monaco } from '../../monaco_imports';
+import { buildConsoleSharedTheme } from './shared';
+
+export const buildConsoleOutputTheme = (): monaco.editor.IStandaloneThemeData => {
+  const sharedTheme = buildConsoleSharedTheme();
+  return {
+    ...sharedTheme,
+  };
+};
