@@ -22,7 +22,7 @@ export function defineGetAllRolesRoutes({
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const hideReservedRoles = buildFlavor === 'serverless' || config.roleManagementEnabled;
+        const hideReservedRoles = buildFlavor === 'serverless';
         const esClient = (await context.core).elasticsearch.client;
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),

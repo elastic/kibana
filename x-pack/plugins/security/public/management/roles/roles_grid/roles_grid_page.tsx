@@ -128,7 +128,7 @@ export class RolesGridPage extends Component<Props, State> {
     const emptyResultsMessage = customRolesEnabled ? (
       <FormattedMessage
         id="xpack.security.management.roles.noCustomRolesFound"
-        defaultMessage="No custom roles found"
+        defaultMessage="No custom roles to show"
       />
     ) : (
       <FormattedMessage
