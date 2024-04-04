@@ -27,7 +27,7 @@ import {
   UPDATE_FIELDS,
 } from '../../lib/rule_api/update';
 
-interface ShowRequestModalProps {
+export interface ShowRequestModalProps {
   onClose: () => void;
   rule: RuleUpdates;
   ruleId?: string;
@@ -63,7 +63,7 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
       <EuiModalHeader>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiModalHeaderTitle id="showRequestModal">
+            <EuiModalHeaderTitle id="showRequestModal" data-test-subj="modalHeaderTitle">
               {i18n.translate('xpack.triggersActionsUI.sections.showRequestModal.headerTitle', {
                 defaultMessage: '{requestType} alerting rule request',
                 values: { requestType: edit ? 'Edit' : 'Create' },
@@ -71,7 +71,7 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText>
+            <EuiText data-test-subj="modalSubheadingTitle">
               <p>
                 <EuiTextColor color="subdued">
                   {i18n.translate(
@@ -88,7 +88,7 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCodeBlock language="json" isCopyable>
+        <EuiCodeBlock language="json" isCopyable data-test-subj="modalRequestCodeBlock">
           {`${edit ? 'PUT' : 'POST'} kbn:${BASE_ALERTING_API_PATH}/rule${
             edit ? ruleId : ''
           }\n${formattedRequest}`}
