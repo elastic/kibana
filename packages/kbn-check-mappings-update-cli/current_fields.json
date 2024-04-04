@@ -462,8 +462,8 @@
   ],
   "infra-custom-dashboards": [
     "assetType",
-    "dashboardSavedObjectId",
-    "dashboardFilterAssetIdEnabled"
+    "dashboardFilterAssetIdEnabled",
+    "dashboardSavedObjectId"
   ],
   "infrastructure-monitoring-log-view": [
     "name"
