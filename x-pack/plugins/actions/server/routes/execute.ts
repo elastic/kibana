@@ -49,12 +49,18 @@ export const executeActionRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const { params } = req.body;
         const { id } = req.params;
+
+        if (actionsClient.isSystemAction(id)) {
+          return res.badRequest({ body: 'Execution of system action is not allowed' });
+        }
+
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,
           actionId: id,
           source: asHttpRequestExecutionSource(req),
           relatedSavedObjects: [],
         });
+
         return body
           ? res.ok({
               body: rewriteBodyRes(body),
