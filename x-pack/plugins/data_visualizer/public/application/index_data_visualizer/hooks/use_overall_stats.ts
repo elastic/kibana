@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import type { Subscription, Observable } from 'rxjs';
 import { from } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import { mergeMap, last, map, toArray } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
