@@ -130,6 +130,9 @@ export class NavigationPublicPlugin
       solutionNavigation: { defaultSolution },
     } = config;
 
+    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+
     let isFeatureEnabled$ = of(false);
     this.isSolutionNavEnabled$ = of(false);
 
@@ -138,11 +141,7 @@ export class NavigationPublicPlugin
         cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
       ).pipe(
         shareReplay(1),
-        map((isFeatureFlagEnabled) => {
-          const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
-          const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-          return isFeatureFlagEnabled && onCloud && !isServerless;
-        })
+        map((isFeatureFlagEnabled) => isFeatureFlagEnabled && onCloud && !isServerless)
       );
 
       this.isSolutionNavEnabled$ = isFeatureEnabled$.pipe(
@@ -167,7 +166,9 @@ export class NavigationPublicPlugin
     // Initialize the solution navigation if it is enabled
     isFeatureEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
       if (!isFeatureEnabled) {
-        chrome.setChromeStyle('classic');
+        if (!isServerless) {
+          chrome.setChromeStyle('classic');
+        }
         return;
       }
 
