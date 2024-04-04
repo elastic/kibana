@@ -27,8 +27,9 @@ export const createFilter = (
   negate: boolean = false,
   index?: string
 ): Filter => {
-  const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;
-  return queryValue != null
+  const queryValue = value !== null ? (Array.isArray(value) ? value[0] : value) : null;
+
+  return queryValue !== null
     ? {
         meta: {
           alias: null,
@@ -59,7 +60,7 @@ export const createFilter = (
           alias: null,
           disabled: false,
           key,
-          negate: value === undefined,
+          negate,
           type: 'exists',
           value: 'exists',
           index,

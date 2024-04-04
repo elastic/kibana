@@ -19,6 +19,7 @@ import { threatMatchRowRenderer } from './cti/threat_match_row_renderer';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { eventSummaryColumnRenderer } from './event_summary_column_renderer';
 import { userProfileColumnRenderer } from './user_profile_renderer';
+import { emptyStringColumnRenderer } from './empty_string_column_renderer';
 
 // The row renderers are order dependent and will return the first renderer
 // which returns true from its isInstance call. The bottom renderers which
@@ -37,6 +38,7 @@ export const defaultRowRenderers: RowRenderer[] = [
 ];
 
 export const columnRenderers: ColumnRenderer[] = [
+  emptyStringColumnRenderer,
   reasonColumnRenderer,
   eventSummaryColumnRenderer,
   userProfileColumnRenderer,

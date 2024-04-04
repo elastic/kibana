@@ -1114,4 +1114,31 @@ export const demoTimelineData: TimelineItem[] = [
       },
     },
   },
+  {
+    _id: '33',
+    data: [
+      { field: '@timestamp', value: ['2018-11-10T19:03:25.937Z'] },
+      { field: 'event.severity', value: ['3'] },
+      { field: 'event.category', value: ['Access'] },
+      { field: 'host.name', value: [''] },
+      { field: 'source.ip', value: ['192.168.0.6'] },
+      { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
+    ],
+    ecs: {
+      _id: '6',
+      timestamp: '2018-11-10T19:03:25.937Z',
+      host: { name: ['braden.davis'], ip: ['192.168.0.1'] },
+      event: {
+        id: ['6'],
+        category: ['Access'],
+        type: ['HTTP Request'],
+        module: ['nginx'],
+        severity: [3],
+      },
+      source: { ip: ['192.168.0.6'], port: [80] },
+      destination: { ip: ['192.168.0.3'], port: [6343] },
+      geo: { region_name: ['xx'], country_iso_code: ['xx'] },
+    },
+  },
 ];

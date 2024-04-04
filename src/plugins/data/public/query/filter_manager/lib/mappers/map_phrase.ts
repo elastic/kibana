@@ -16,6 +16,7 @@ import {
   isPhraseFilter,
 } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
@@ -26,6 +27,11 @@ export function getPhraseDisplayValue(
   fieldType?: string
 ): string {
   const value = filter.meta.value ?? filter.meta.params?.query;
+
+  if (typeof value === 'string' && value.length === 0) {
+    return i18n.translate('data.filter.filterBar.emptyString', { defaultMessage: 'Empty string' });
+  }
+
   const updatedValue = fieldType === 'number' && !value ? 0 : value;
   if (formatter?.convert) {
     return formatter.convert(updatedValue);

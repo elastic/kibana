@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`empty_column_renderer renders correctly against snapshot 1`] = `
+exports[`empty_string_column_renderer renders correctly against snapshot 1`] = `
 <span>
   <DraggableWrapper
     dataProvider={
@@ -8,21 +8,22 @@ exports[`empty_column_renderer renders correctly against snapshot 1`] = `
         "and": Array [],
         "enabled": true,
         "excluded": true,
-        "id": "empty-column-renderer-draggable-wrapper-test-source_ip-1-source_ip",
+        "id": "empty-string-column-renderer-draggable-wrapper-test-host_name-1-host_name",
         "kqlQuery": "",
-        "name": "source.ip: null",
+        "name": "host.name: null",
         "queryMatch": Object {
-          "displayValue": "—",
-          "field": "source.ip",
+          "displayValue": "(Empty string)",
+          "field": "host.name",
           "operator": ":*",
           "value": "",
         },
       }
     }
     isDraggable={true}
-    key="empty-column-renderer-draggable-wrapper-test-source.ip-1-source.ip"
+    key="empty-string-column-renderer-draggable-wrapper-test-host.name-1-host.name"
     render={[Function]}
     scopeId="test"
+    truncate={false}
   />
 </span>
 `;

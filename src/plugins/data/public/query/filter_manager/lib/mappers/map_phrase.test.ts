@@ -47,7 +47,7 @@ describe('filter manager utilities', () => {
     test('without formatter empty value', () => {
       const filter = { meta: { value: '' } } as PhraseFilter;
       const result = getPhraseDisplayValue(filter);
-      expect(result).toMatchInlineSnapshot(`""`);
+      expect(result).toMatchInlineSnapshot(`"Empty string"`);
     });
 
     test('without formatter with undefined value', () => {

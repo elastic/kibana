@@ -10,12 +10,12 @@ import { isObject, isNumber } from 'lodash/fp';
 export const parseQueryValue = (
   value: string | number | object | undefined | null
 ): string | number => {
-  if (value == null) {
+  if (value === '') {
     return '';
   } else if (isObject(value)) {
     return JSON.stringify(value);
   } else if (isNumber(value)) {
     return value;
   }
-  return value.toString();
+  return `${value}`;
 };

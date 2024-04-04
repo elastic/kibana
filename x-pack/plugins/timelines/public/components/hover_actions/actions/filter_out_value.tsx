@@ -37,9 +37,8 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
   }) => {
     const filterOutValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
-        currentVal == null || currentVal?.length === 0
-          ? createFilter(field, null, false, dataViewId)
-          : createFilter(field, currentVal, true, dataViewId);
+        createFilter(field, currentVal, true, dataViewId);
+
       const filters = Array.isArray(value)
         ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
         : makeFilter(value);

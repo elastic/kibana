@@ -52,8 +52,12 @@ export const convertKueryToElasticSearchQuery = (
 export const isNumber = (value: PrimitiveOrArrayOfPrimitives): value is number =>
   !isNaN(Number(value));
 
-export const convertDateFieldToQuery = (field: string, value: PrimitiveOrArrayOfPrimitives) =>
-  `${field}: ${isNumber(value) ? value : new Date(value.toString()).valueOf()}`;
+export const convertDateFieldToQuery = (field: string, value: PrimitiveOrArrayOfPrimitives) => {
+  if (!(isNumber(value) || typeof value === 'string')) {
+    throw new Error(`invalid value used to construct Date object, value type: ${typeof value}`);
+  }
+  return `${field}: ${isNumber(value) ? value : new Date(value.toString()).valueOf()}`;
+};
 
 export const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
   const baseFields = get('base', browserFields);
