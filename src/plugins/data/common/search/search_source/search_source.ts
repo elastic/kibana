@@ -689,7 +689,10 @@ export class SearchSource {
    * flat representation (taking into account merging rules)
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
+  private mergeProps(
+    root = this,
+    searchRequest: SearchRequest = { body: {} }
+  ): SearchSourceFields & SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
@@ -774,7 +777,10 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
+    // body and filters still untyped
     const { body, index, query, filters, highlightAll, pit } = searchRequest;
+
+    // indexType is untyped too, its string | undefined
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
