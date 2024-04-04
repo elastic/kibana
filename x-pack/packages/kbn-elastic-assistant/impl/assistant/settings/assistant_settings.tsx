@@ -23,6 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
@@ -37,6 +38,7 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
+import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -66,6 +68,7 @@ interface Props {
   selectedConversation: Conversation;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 /**
@@ -80,6 +83,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     onConversationSelected,
     conversations,
+    refetchAnonymizationFieldsResults,
   }) => {
     const {
       actionTypeRegistry,
@@ -89,23 +93,31 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
     } = useAssistantContext();
 
+    const [anonymizationFields, setAnonymizationFields] = useState<FindAnonymizationFieldsResponse>(
+      { data: [], page: 1, perPage: 5, total: 0 }
+    );
+    const { data: anonymizationData, isLoading, isError } = useFetchAnonymizationFields({ http });
+
+    useEffect(() => {
+      if (!isLoading && !isError) {
+        setAnonymizationFields(anonymizationData ?? {});
+      }
+    }, [anonymizationData, isError, isLoading]);
+
     const {
       conversationSettings,
       setConversationSettings,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
-      setUpdatedDefaultAllow,
-      setUpdatedDefaultAllowReplacement,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
       conversationsSettingsBulkActions,
       setConversationsSettingsBulkActions,
-    } = useSettingsUpdater(conversations);
+      setAnonymizationFieldsBulkActions,
+    } = useSettingsUpdater(conversations, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -326,11 +338,10 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
-                    defaultAllow={defaultAllow}
-                    defaultAllowReplacement={defaultAllowReplacement}
-                    pageSize={5}
-                    setUpdatedDefaultAllow={setUpdatedDefaultAllow}
-                    setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
+                    defaultPageSize={5}
+                    anonymizationFields={anonymizationFields}
+                    setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
+                    refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
                   />
                 )}
                 {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (

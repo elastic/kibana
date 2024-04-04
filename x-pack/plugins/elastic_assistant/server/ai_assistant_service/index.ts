@@ -11,8 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
-import { Script } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from '../../common/anonymization';
+import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
@@ -318,44 +317,43 @@ export class AIAssistantService {
         await this.anonymizationFieldsDataStream.getInstalledSpaceName(spaceId);
 
       if (!anonymizationFieldsIndexName) {
-      console.log('hkhkjhjkhjkhkjh             ' + anonymizationFieldsIndexName)
-
         anonymizationFieldsIndexName = await this.anonymizationFieldsDataStream.installSpace(
           spaceId
         );
-
-        const dataClient = await this.createAIAssistantAnonymizationFieldsDataClient({
-          spaceId,
-          logger: this.options.logger,
-          currentUser: null,
-        });
-        const writer = await dataClient?.getWriter();
-        console.log('hhhhh             ' + anonymizationFieldsIndexName)
-
-        const changedAt = new Date().toISOString();
-        const res = await writer?.bulk({
-          documentsToCreate: DEFAULT_ALLOW.map((field) => ({
-            '@timestamp': changedAt,
-            created_at: changedAt,
-            created_by: '',
-            field,
-            anonymized: DEFAULT_ALLOW_REPLACEMENT.includes(field),
-            allowed: true,
-            namespace: spaceId,
-          })),
-          getUpdateScript(document: { id: string }, updatedAt: string): Script {
-            throw new Error('Function not implemented.');
-          },
-        });
-        this.options.logger.info(
-          `Created default anonymization fields: ${res?.docs_created.length}`
-        );
+        this.createDefaultAnonymizationFields(spaceId);
       }
     } catch (error) {
       this.options.logger.error(
         `Error initializing AI assistant namespace level resources: ${error.message}`
       );
       throw error;
+    }
+  }
+
+  private async createDefaultAnonymizationFields(spaceId: string) {
+    const dataClient = new AIAssistantDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResorceName: this.resourceNames.aliases.anonymizationFields,
+      currentUser: null,
+    });
+
+    const existingAnonymizationFields = await (
+      await dataClient?.getReader()
+    ).search({
+      body: {
+        size: 1,
+      },
+      allow_no_indices: true,
+    });
+    if (existingAnonymizationFields.hits.total.value === 0) {
+      const writer = await dataClient?.getWriter();
+      const res = await writer?.bulk({
+        documentsToCreate: getDefaultAnonymizationFields(spaceId),
+      });
+      this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
     }
   }
 }

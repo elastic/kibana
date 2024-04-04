@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -14,39 +15,36 @@ import {
 
 export interface UseFetchAnonymizationFieldsParams {
   http: HttpSetup;
-  onFetch: (result: FindAnonymizationFieldsResponse) => Record<string, Anonymization>;
   signal?: AbortSignal | undefined;
 }
 
 /**
- * API call for fetching assistant conversations for the current user
+ * API call for fetching anonymization fields for current spaceId
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {Function} [options.onFetch] - transformation function for conversations fetch result
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {useQuery} hook for getting the status of the conversations
+ * @returns {useQuery} hook for getting the status of the anonymization fields
  */
-export const useFetchCurrentUserConversations = ({
+export const useFetchAnonymizationFields = ({
   http,
-  onFetch,
   signal,
 }: UseFetchAnonymizationFieldsParams) => {
   const query = {
     page: 1,
-    perPage: 100,
+    per_page: 100,
   };
 
   const cachingKeys = [
     ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
     query.page,
-    query.perPage,
+    query.per_page,
     ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ];
 
   return useQuery([cachingKeys, query], async () => {
-    const res = await http.fetch<FetchConversationsResponse>(
+    const res = await http.fetch<FindAnonymizationFieldsResponse>(
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
       {
         method: 'GET',
@@ -55,6 +53,6 @@ export const useFetchCurrentUserConversations = ({
         signal,
       }
     );
-    return onFetch(res);
+    return res;
   });
 };

@@ -26,7 +26,6 @@ import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { useBaseConversations } from './use_conversation_store';
-import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';

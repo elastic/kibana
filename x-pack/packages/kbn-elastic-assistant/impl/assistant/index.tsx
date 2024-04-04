@@ -29,6 +29,7 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -57,6 +58,7 @@ import {
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 import { clearPresentationData } from '../connectorland/connector_setup/helpers';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 
 export interface Props {
   conversationTitle?: string;
@@ -117,7 +119,32 @@ const AssistantComponent: React.FC<Props> = ({
     refetch,
   } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
 
-  
+  const [anonymizationFields, setAnonymizationFields] = useState<FindAnonymizationFieldsResponse>({
+    data: [],
+    page: 1,
+    perPage: 5,
+    total: 0,
+  });
+  const {
+    data: anonymizationData,
+    isLoading: isLoadingAnonymizationFields,
+    isError: isErrorAnonymizationFields,
+    refetch: refetchAnonymizationFields,
+  } = useFetchAnonymizationFields({ http });
+
+  const refetchAnonymizationFieldsResults = useCallback(async () => {
+    const updatedAnonymizationFields = await refetchAnonymizationFields();
+    if (!updatedAnonymizationFields.isLoading && !updatedAnonymizationFields.isError) {
+      setAnonymizationFields(updatedAnonymizationFields.data);
+      return updatedAnonymizationFields.data as FindAnonymizationFieldsResponse;
+    }
+  }, [refetchAnonymizationFields]);
+
+  useEffect(() => {
+    if (!isLoadingAnonymizationFields && !isErrorAnonymizationFields) {
+      setAnonymizationFields(anonymizationData);
+    }
+  }, [anonymizationData, isErrorAnonymizationFields, isLoadingAnonymizationFields]);
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -381,8 +408,7 @@ const AssistantComponent: React.FC<Props> = ({
       if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
         const addNewSelectedPromptContext = async () => {
           const newSelectedPromptContext = await getNewSelectedPromptContext({
-            defaultAllow,
-            defaultAllowReplacement,
+            anonymizationFields,
             promptContext,
           });
 
@@ -407,8 +433,7 @@ const AssistantComponent: React.FC<Props> = ({
     selectedConversationTitle,
     selectedPromptContexts,
     autoPopulatedOnce,
-    defaultAllow,
-    defaultAllowReplacement,
+    anonymizationFields,
   ]);
 
   // Show missing connector callout if no connectors are configured
@@ -569,6 +594,7 @@ const AssistantComponent: React.FC<Props> = ({
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
+            refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}
 
@@ -578,8 +604,7 @@ const AssistantComponent: React.FC<Props> = ({
         {!isDisabled && (
           <>
             <ContextPills
-              defaultAllow={defaultAllow}
-              defaultAllowReplacement={defaultAllowReplacement}
+              anonymizationFields={anonymizationFields}
               promptContexts={promptContexts}
               selectedPromptContexts={selectedPromptContexts}
               setSelectedPromptContexts={setSelectedPromptContexts}

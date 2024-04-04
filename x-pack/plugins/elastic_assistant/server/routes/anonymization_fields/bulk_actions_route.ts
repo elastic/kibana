@@ -29,6 +29,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
+  transformESSearchToAnonymizationFields,
   transformESToAnonymizationFields,
   transformToCreateScheme,
   transformToUpdateScheme,
@@ -204,14 +205,20 @@ export const bulkActionAnonymizationFieldsRoute = (
               getUpdateScript({ anonymizationField: document, isPatch: true }),
             authenticatedUser,
           });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
             updated: docsUpdated
               ? transformESToAnonymizationFields(docsUpdated as EsAnonymizationFieldsSchema[])
               : [],
-            created: docsCreated
-              ? transformESToAnonymizationFields(docsCreated as EsAnonymizationFieldsSchema[])
-              : [],
+            created: created?.data ? transformESSearchToAnonymizationFields(created?.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

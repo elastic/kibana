@@ -36,7 +36,7 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
   documentsToCreate?: TCreateParams[];
   documentsToUpdate?: TUpdateParams[];
   documentsToDelete?: string[];
-  getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script;
+  getUpdateScript?: (document: TUpdateParams, updatedAt: string) => Script;
   authenticatedUser?: AuthenticatedUser;
 }
 
@@ -246,13 +246,12 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
   private buildBulkOperations = async <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
   ): Promise<BulkOperationContainer[]> => {
-    const documentCreateBody =
-      params.authenticatedUser && params.documentsToCreate
-        ? params.documentsToCreate.flatMap((document) => [
-            { create: { _index: this.options.index, _id: uuidV4() } },
-            document,
-          ])
-        : [];
+    const documentCreateBody = params.documentsToCreate
+      ? params.documentsToCreate.flatMap((document) => [
+          { create: { _index: this.options.index, _id: uuidV4() } },
+          document,
+        ])
+      : [];
 
     const documentDeletedBody =
       params.documentsToDelete && params.documentsToDelete.length > 0
@@ -260,7 +259,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         : [];
 
     const documentUpdatedBody =
-      params.documentsToUpdate && params.documentsToUpdate.length > 0
+      params.documentsToUpdate && params.documentsToUpdate.length > 0 && params.getUpdateScript
         ? await this.getUpdateDocumentsQuery(
             params.documentsToUpdate,
             params.getUpdateScript,

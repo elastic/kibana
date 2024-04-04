@@ -5,30 +5,27 @@
  * 2.0.
  */
 
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import type { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 export async function getNewSelectedPromptContext({
-  defaultAllow,
-  defaultAllowReplacement,
+  anonymizationFields,
   promptContext,
 }: {
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
+  anonymizationFields: FindAnonymizationFieldsResponse;
   promptContext: PromptContext;
 }): Promise<SelectedPromptContext> {
   const rawData = await promptContext.getPromptContext();
 
   if (typeof rawData === 'string') {
     return {
-      allow: [],
-      allowReplacement: [],
+      anonymizationFields: undefined,
       promptContextId: promptContext.id,
       rawData,
     };
   } else {
     return {
-      allow: [...defaultAllow],
-      allowReplacement: [...defaultAllowReplacement],
+      anonymizationFields,
       promptContextId: promptContext.id,
       rawData,
     };

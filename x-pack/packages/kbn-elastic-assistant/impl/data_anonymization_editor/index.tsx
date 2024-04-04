@@ -10,11 +10,11 @@ import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { useAssistantContext } from '../assistant_context';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
-import { getIsDataAnonymizable, updateDefaults, updateSelectedPromptContext } from './helpers';
+import { getIsDataAnonymizable } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
 import { Stats } from './stats';
 
@@ -33,16 +33,13 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
   selectedPromptContext,
   setSelectedPromptContexts,
 }) => {
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAssistantContext();
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
     [selectedPromptContext]
   );
 
-  const onListUpdated = useCallback(
-    (updates: BatchUpdateListItem[]) => {
-      const updatedPromptContext = updates.reduce<SelectedPromptContext>(
+  const onListUpdated = useCallback((updates: BatchUpdateListItem[]) => {
+    /* const updatedPromptContext = updates.reduce<SelectedPromptContext>(
         (acc, { field, operation, update }) =>
           updateSelectedPromptContext({
             field,
@@ -65,16 +62,8 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         setDefaultAllowReplacement,
         updates,
       });
-    },
-    [
-      defaultAllow,
-      defaultAllowReplacement,
-      selectedPromptContext,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
-      setSelectedPromptContexts,
-    ]
-  );
+      */
+  }, []);
 
   return (
     <EditorContainer data-test-subj="dataAnonymizationEditor">
@@ -89,8 +78,9 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
       ) : (
         <ContextEditor
-          allow={selectedPromptContext.allow}
-          allowReplacement={selectedPromptContext.allowReplacement}
+          anonymizationFields={
+            selectedPromptContext.anonymizationFields as FindAnonymizationFieldsResponse
+          }
           onListUpdated={onListUpdated}
           rawData={selectedPromptContext.rawData}
         />

@@ -92,8 +92,6 @@ describe('useSettingsUpdater', () => {
         setConversationsSettingsBulkActions,
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
-        setUpdatedDefaultAllow,
-        setUpdatedDefaultAllowReplacement,
         setUpdatedKnowledgeBaseSettings,
         resetSettings,
       } = result.current;

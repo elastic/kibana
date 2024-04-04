@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Conversation, Prompt, QuickPrompt } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
@@ -13,21 +15,25 @@ import {
   ConversationsBulkActions,
   bulkChangeConversations,
 } from '../../api/conversations/use_bulk_actions_conversations';
+import { bulkChangeAnonymizationFields } from '../../api/anonymization_fields/use_bulk_anonymization_fields';
 
 interface UseSettingsUpdater {
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
+  updatedAnonymizationData: FindAnonymizationFieldsResponse;
   knowledgeBase: KnowledgeBaseConfig;
   quickPromptSettings: QuickPrompt[];
   resetSettings: () => void;
   systemPromptSettings: Prompt[];
-  setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  setUpdatedAnonymizationData: React.Dispatch<
+    React.SetStateAction<FindAnonymizationFieldsResponse>
+  >;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
+  >;
+  setAnonymizationFieldsBulkActions: React.Dispatch<
+    React.SetStateAction<PerformBulkActionRequestBody>
   >;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
@@ -36,20 +42,17 @@ interface UseSettingsUpdater {
 }
 
 export const useSettingsUpdater = (
-  conversations: Record<string, Conversation>
+  conversations: Record<string, Conversation>,
+  anonymizationFields: FindAnonymizationFieldsResponse
 ): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
     allQuickPrompts,
     allSystemPrompts,
     assistantTelemetry,
-    defaultAllow,
-    defaultAllowReplacement,
     knowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
-    setDefaultAllow,
-    setDefaultAllowReplacement,
     setKnowledgeBase,
     http,
     toasts,
@@ -70,9 +73,10 @@ export const useSettingsUpdater = (
   const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
     useState<Prompt[]>(allSystemPrompts);
   // Anonymization
-  const [updatedDefaultAllow, setUpdatedDefaultAllow] = useState<string[]>(defaultAllow);
-  const [updatedDefaultAllowReplacement, setUpdatedDefaultAllowReplacement] =
-    useState<string[]>(defaultAllowReplacement);
+  const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
+    useState<PerformBulkActionRequestBody>({});
+  const [updatedAnonymizationData, setUpdatedAnonymizationData] =
+    useState<FindAnonymizationFieldsResponse>(anonymizationFields);
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
@@ -86,16 +90,8 @@ export const useSettingsUpdater = (
     setUpdatedQuickPromptSettings(allQuickPrompts);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedSystemPromptSettings(allSystemPrompts);
-    setUpdatedDefaultAllow(defaultAllow);
-    setUpdatedDefaultAllowReplacement(defaultAllowReplacement);
-  }, [
-    allQuickPrompts,
-    allSystemPrompts,
-    conversations,
-    defaultAllow,
-    defaultAllowReplacement,
-    knowledgeBase,
-  ]);
+    setUpdatedAnonymizationData(anonymizationFields);
+  }, [allQuickPrompts, allSystemPrompts, anonymizationFields, conversations, knowledgeBase]);
 
   /**
    * Save all pending settings
@@ -127,41 +123,42 @@ export const useSettingsUpdater = (
       });
     }
     setKnowledgeBase(updatedKnowledgeBaseSettings);
-    setDefaultAllow(updatedDefaultAllow);
-    setDefaultAllowReplacement(updatedDefaultAllowReplacement);
+    const hasBulkAnonymizationFields =
+      anonymizationFieldsBulkActions.create ||
+      anonymizationFieldsBulkActions.update ||
+      anonymizationFieldsBulkActions.delete;
+    const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
+      ? await bulkChangeAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
+      : undefined;
 
-    return bulkResult?.success ?? true;
+    return (bulkResult?.success ?? true) && (bulkAnonymizationFieldsResult?.success ?? true);
   }, [
     setAllQuickPrompts,
     updatedQuickPromptSettings,
     setAllSystemPrompts,
     updatedSystemPromptSettings,
-    http,
     conversationsSettingsBulkActions,
+    http,
     toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
     updatedKnowledgeBaseSettings,
     setKnowledgeBase,
-    setDefaultAllow,
-    updatedDefaultAllow,
-    setDefaultAllowReplacement,
-    updatedDefaultAllowReplacement,
+    anonymizationFieldsBulkActions,
     assistantTelemetry,
   ]);
 
   return {
     conversationSettings,
     conversationsSettingsBulkActions,
-    defaultAllow: updatedDefaultAllow,
-    defaultAllowReplacement: updatedDefaultAllowReplacement,
     knowledgeBase: updatedKnowledgeBaseSettings,
     quickPromptSettings: updatedQuickPromptSettings,
     resetSettings,
     systemPromptSettings: updatedSystemPromptSettings,
     saveSettings,
-    setUpdatedDefaultAllow,
-    setUpdatedDefaultAllowReplacement,
+    updatedAnonymizationData,
+    setUpdatedAnonymizationData,
+    setAnonymizationFieldsBulkActions,
     setUpdatedKnowledgeBaseSettings,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,

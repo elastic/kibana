@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import type { ReactNode } from 'react';
 
 /**
@@ -69,9 +70,7 @@ export interface PromptContext {
  */
 export interface SelectedPromptContext {
   /** fields allowed to be included in a conversation */
-  allow: string[];
-  /** fields that will be anonymized */
-  allowReplacement: string[];
+  anonymizationFields?: FindAnonymizationFieldsResponse;
   /** unique id of the selected `PromptContext` */
   promptContextId: string;
   /** this data is not anonymized  */

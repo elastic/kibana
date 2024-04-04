@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
@@ -23,6 +24,7 @@ interface Props {
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 /**
@@ -38,6 +40,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     refetchConversationsState,
+    refetchAnonymizationFieldsResults,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -90,6 +93,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             onClose={handleCloseModal}
             onSave={handleSave}
             conversations={conversations}
+            refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}
       </>
