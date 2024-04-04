@@ -9,16 +9,9 @@ import {
   ChatCompletionContentPart,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
+import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
 
-export interface ResponseBody {
-  data: string;
-  connector_id: string;
-  status: string;
-  trace_data?: {
-    transaction_id: string;
-    trace_id: string;
-  };
-}
+export type ResponseBody = ExecuteConnectorResponse;
 
 export interface InvokeAIActionParamsSchema {
   messages: Array<{

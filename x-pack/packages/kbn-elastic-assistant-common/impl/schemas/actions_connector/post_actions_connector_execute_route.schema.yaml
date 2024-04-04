@@ -63,18 +63,20 @@ paths:
                   type: number
       responses:
         '200':
-          description: Successful response
+          description: Successful static response
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - connector_id
+                  - status
                 properties:
                   data:
                     type: string
                   connector_id:
                     type: string
-                  replacements:
-                    $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                   status:
                     type: string
                   trace_data:

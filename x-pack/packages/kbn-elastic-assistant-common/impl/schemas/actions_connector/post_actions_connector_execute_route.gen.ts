@@ -46,10 +46,9 @@ export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRe
 
 export type ExecuteConnectorResponse = z.infer<typeof ExecuteConnectorResponse>;
 export const ExecuteConnectorResponse = z.object({
-  data: z.string().optional(),
-  connector_id: z.string().optional(),
-  replacements: Replacements.optional(),
-  status: z.string().optional(),
+  data: z.string(),
+  connector_id: z.string(),
+  status: z.string(),
   /**
    * Trace Data
    */
