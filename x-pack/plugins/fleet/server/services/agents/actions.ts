@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
 
-import _ from 'lodash';
+import { partition } from 'lodash';
 
 import { appContextService } from '../app_context';
 import type {
@@ -471,7 +471,7 @@ export const getAgentsByActionsIds = async (
   // 1. Agent actions stored in .fleet-actions, with type AgentActionType except 'POLICY_CHANGE'
   // 2. Agent policy actions, generated from .fleet-policies, with actionId `${hit.policy_id}:${hit.revision_idx}`
 
-  const [agentPolicyActionIds, agentActionIds] = _.partition(
+  const [agentPolicyActionIds, agentActionIds] = partition(
     actionsIds,
     (actionsId) => actionsId.split(':').length > 1
   );
