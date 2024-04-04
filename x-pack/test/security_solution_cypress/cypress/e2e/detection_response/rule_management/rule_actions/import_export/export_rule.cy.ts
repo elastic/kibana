@@ -163,7 +163,8 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
       );
     });
 
-    it('exports custom rules with exceptions', function () {
+    // https://github.com/elastic/kibana/issues/180029
+    it('exports custom rules with exceptions', { tags: ['@brokenInServerlessQA'] }, function () {
       // one rule with exception, one without it
       const expectedNumberCustomRulesToBeExported = 2;
 
