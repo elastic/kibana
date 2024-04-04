@@ -7,7 +7,6 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { isEmpty } from 'lodash';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
   CrowdstrikeConfig,
@@ -127,7 +126,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       },
       responseSchema: CrowdstrikeGetTokenResponseSchema,
     });
-    const token = response.data.access_token;
+    const token = response.data?.access_token;
     if (token) {
       // Clear any existing timeout
       clearTimeout(CrowdstrikeConnector.tokenExpiryTimeout);
@@ -159,7 +158,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
       // TODO TC: When we have access to API - verify if we catch an error or response.errors
       // if (response.errors.length) {
-      //   if (response.errors[0].code === 401 && response.errors[0].message === 'access denied, invalid bearer token' && !retried) {
+      //   if (response.errors[0].code === 401 !retried) {
       //     CrowdstrikeConnector.token = null;
       //     return this.crowdstrikeApiRequest(req, true);
       //   }

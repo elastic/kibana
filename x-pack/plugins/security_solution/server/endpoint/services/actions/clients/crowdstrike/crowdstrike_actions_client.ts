@@ -54,12 +54,15 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
   ): Promise<LogsEndpointAction> {
     const agentId = actionRequest.endpoint_ids[0];
-    const agentDetails = await this.getAgentDetails(agentId);
+    const eventDetails = await super.getEventDetailsById({
+      index: ['logs-crowdstrike.fdr-default', 'logs-crowdstrike.falcon-default'],
+      term: { 'crowdstrike.event.DeviceId': agentId },
+    });
 
     return super.writeActionRequestToEndpointIndex({
       ...actionRequest,
       hosts: {
-        [agentId]: { name: agentDetails[0].hostname },
+        [agentId]: { name: eventDetails['crowdstrike.event.HostName'] },
       },
     });
   }

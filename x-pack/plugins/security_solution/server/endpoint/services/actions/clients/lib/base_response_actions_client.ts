@@ -126,6 +126,11 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
 } & Pick<LogsEndpointActionResponse, 'error'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
+export interface ResponseActionsClientGetEventDetailsOptions {
+  index: string;
+  id: string;
+}
+
 export type ResponseActionsClientValidateRequestResponse =
   | {
       isValid: true;
@@ -463,6 +468,41 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       });
 
     return doc;
+  }
+
+  protected async getEventDetailsById(
+    options: ResponseActionsClientGetEventDetailsOptions
+    // TODO TC: Add proper types
+  ): Promise<unknown> {
+    const doc = this.buildActionResponseEsDoc(options);
+
+    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
+
+    const search = {
+      index: options.index,
+      body: {
+        query: {
+          bool: {
+            filter: [{ term: options.term }],
+          },
+        },
+      },
+    };
+    const result = await this.options.esClient
+      // TODO TC: Add proper types
+      .search<unknown>(search, {
+        ignore: [404],
+      })
+      .catch((err) => {
+        throw new ResponseActionsClientError(
+          `Failed to fetch event document: ${err.message}`,
+          err.statusCode ?? 500,
+          err
+        );
+      });
+
+    // double check after kibana_system has proper access to logs
+    return result?.data?.hits?.hits?.[0]._source;
   }
 
   protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {

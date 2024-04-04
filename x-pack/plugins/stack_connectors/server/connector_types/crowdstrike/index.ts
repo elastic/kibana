@@ -18,7 +18,6 @@ import {
 } from '../../../common/crowdstrike/schema';
 import { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
 import { CrowdstrikeConnector } from './crowdstrike';
-import { renderParameterTemplates } from './render';
 
 export const getCrowdstrikeConnectorType = (): SubActionConnectorType<
   CrowdstrikeConfig,
@@ -34,5 +33,4 @@ export const getCrowdstrikeConnectorType = (): SubActionConnectorType<
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
-  renderParameterTemplates,
 });
