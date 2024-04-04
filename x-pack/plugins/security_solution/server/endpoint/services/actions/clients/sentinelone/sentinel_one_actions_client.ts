@@ -378,6 +378,33 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
+  public async attemptToComplete(actionDetails: ActionDetails) {
+    if (actionDetails.command === 'get-file') {
+      const s1Agent = await this.getAgentDetails(actionDetails.agents[0]);
+
+      // 1. query the Activity log in S1 looking for the response to a file retrieval for our agent
+      const results = await this.sendAction(SUB_ACTION.GET_ACTIVITIES, {
+        activityTypes: 80,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        createdAt__gt: actionDetails.startedAt,
+        agentIds: s1Agent.id,
+        limit: 1, // POC code... this will not work in prod.
+      });
+
+      this.log.debug(stringify(results.data));
+
+      // FYI:
+      //   request for the file is `activityType=81`
+      //   Both request and response seem to share the same `data.commandBatchUuid` - maybe this is a way to sync these up to get the correct one
+
+      if (results.data.data.length) {
+        // Activity was completed and we got a response. Store a response doc for it
+      }
+    }
+
+    return actionDetails;
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,

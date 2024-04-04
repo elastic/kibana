@@ -15,7 +15,7 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { getActionDetailsById } from '../../services';
+import { getActionDetailsById, SentinelOneActionsClient } from '../../services';
 import { errorHandler } from '../error_handler';
 
 /**
@@ -59,15 +59,33 @@ export const getActionDetailsRequestHandler = (
 > => {
   return async (context, req, res) => {
     try {
+      const user = endpointContext.service.security?.authc.getCurrentUser(req);
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const connectorActions = (await context.actions).getActionsClient();
+
+      let actionDetails = await getActionDetailsById(
+        esClient,
+        endpointContext.service.getEndpointMetadataService(),
+        req.params.action_id
+      );
+
+      // POC Code - attempt to mark response actions for s1 complete
+      if (actionDetails.agentType === 'sentinel_one' && !actionDetails.isCompleted) {
+        const s1Client = new SentinelOneActionsClient({
+          esClient,
+          casesClient,
+          connectorActions,
+          endpointService: endpointContext.service,
+          username: user?.username || 'unknown',
+        });
+
+        actionDetails = await s1Client.attemptToComplete(actionDetails);
+      }
+
       return res.ok({
         body: {
-          data: await getActionDetailsById(
-            (
-              await context.core
-            ).elasticsearch.client.asInternalUser,
-            endpointContext.service.getEndpointMetadataService(),
-            req.params.action_id
-          ),
+          data: actionDetails,
         },
       });
     } catch (error) {
