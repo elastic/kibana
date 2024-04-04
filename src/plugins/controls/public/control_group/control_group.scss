@@ -88,10 +88,8 @@ $controlMinWidth: $euiSize * 14;
     max-width: 40%;
   }
 
-  &-isEditable {
-    .controlFrame__formControlLayoutLabel {
-      padding-left: 0;
-    }
+  .controlFrame__formControlLayoutLabel {
+    padding-left: 0;
   }
 
   .controlFrame__formControlLayout {
