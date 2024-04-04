@@ -11,7 +11,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { EcsFlat } from '@elastic/ecs';
 import type { RuntimeFieldSpec } from '../types';
-import { FieldSpec, DataView, IIndexPatternFieldList } from '..';
+import { FieldSpec, DataView } from '..';
 import {
   shortenDottedString,
   isDataViewFieldSubtypeMulti,
@@ -31,6 +31,10 @@ export interface ToSpecConfig {
   getFormatterForField?: DataView['getFormatterForField'];
 }
 
+export interface DataViewFieldContext {
+  ecs: boolean;
+}
+
 /**
  * Data view field class
  * @public
@@ -43,23 +47,23 @@ export class DataViewField implements DataViewFieldBase {
    */
   private readonly kbnFieldType: KbnFieldType;
   /**
-   * Returns the field list the DataViewField is part of
+   * Returns context configuration for the actual field, e.g if it's part of an ECS fields list
    * @private
    */
-  private readonly getParentFieldList: (() => IIndexPatternFieldList) | undefined;
+  private readonly getContext: (() => DataViewFieldContext) | undefined;
 
   /**
    * DataView constructor
    * @constructor
    * @param spec Configuration for the field
-   * @param fieldList Field list the field is part of
+   * @param getContext Get Context of the field
    */
-  constructor(spec: FieldSpec, fieldList?: IIndexPatternFieldList) {
+  constructor(spec: FieldSpec, getContext?: (() => DataViewFieldContext) | undefined) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    if (fieldList) {
-      this.getParentFieldList = () => fieldList;
+    if (getContext) {
+      this.getContext = getContext;
     }
   }
 
@@ -202,11 +206,15 @@ export class DataViewField implements DataViewFieldBase {
     if (this.spec.customDescription) {
       return this.spec.customDescription;
     }
-    if (this.getParentFieldList && this.getParentFieldList().hasEcsFields()) {
-      const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
-      return description || '';
+    if (this.getContext && this.getContext().ecs) {
+      return this.ecsDescription;
     }
     return '';
+  }
+
+  public get ecsDescription() {
+    const { description } = EcsFlat[this.name as keyof typeof EcsFlat] ?? {};
+    return description || '';
   }
 
   /**
