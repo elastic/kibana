@@ -762,7 +762,7 @@ export class ListClient {
    * @param options.meta Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" for no meta values.
    * @param options.version Version number of the list, typically this should be 1 unless you are re-creating a list you deleted or something unusual.
    * @param options.refresh If true, then refresh the index after importing the list items.
-  */
+   */
   public importListItemsToStream = async ({
     deserializer,
     serializer,
