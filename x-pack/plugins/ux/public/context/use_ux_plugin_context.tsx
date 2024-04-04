@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { ObservabilityLayerWizardConfig } from './observability_layer_wizard';
+import { useContext } from 'react';
+import { PluginContext } from './plugin_context';
+
+export function useUxPluginContext() {
+  return useContext(PluginContext);
+}
