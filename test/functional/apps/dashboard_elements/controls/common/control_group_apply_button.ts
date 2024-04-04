@@ -12,15 +12,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
-  const browser = getService('browser');
   const pieChart = getService('pieChart');
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { common, dashboard, header, dashboardControls, timePicker } = getPageObjects([
-    'common',
+  const { dashboard, header, dashboardControls, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -38,6 +35,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await elasticChart.setNewChartUiDebugFlag();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+
+      // save the dashboard before adding controls
+      await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      await dashboard.expectMissingUnsavedChangesBadge();
 
       // populate an initial set of controls and get their ids.
       await dashboardControls.createControl({
@@ -59,21 +62,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListWaitForLoading(controlIds[0]);
       await dashboardControls.rangeSliderWaitForLoading(controlIds[1]);
 
-      const before = await browser.getSessionStorage('dashboardStateManagerPanels');
-      log.debug('BEFORE', before);
-
-      await common.sleep(600);
-      // save the dashboard
-      await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
+      // re-save the dashboard
+      await dashboard.clickQuickSave();
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
-
-      const after = await browser.getSessionStorage('dashboardStateManagerPanels');
-      log.debug('after', after);
       await dashboard.expectMissingUnsavedChangesBadge();
     });
 
-    it.skip('able to set apply button setting', async () => {
+    it('able to set apply button setting', async () => {
       await dashboardControls.updateShowApplyButtonSetting(true);
       await testSubjects.existOrFail('controlGroup--applyFiltersButton');
       await dashboard.expectUnsavedChangesBadge();
@@ -83,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.expectMissingUnsavedChangesBadge();
     });
 
-    it.skip('renabling auto-apply forces filters to be published', async () => {
+    it('renabling auto-apply forces filters to be published', async () => {
       const optionsListId = controlIds[0];
       await dashboardControls.verifyApplyButtonEnabled(false);
       await dashboardControls.optionsListOpenPopover(optionsListId);
@@ -101,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickDiscardChanges();
     });
 
-    describe.skip('options list selections', () => {
+    describe('options list selections', () => {
       let optionsListId: string;
 
       before(async () => {
@@ -146,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('range slider selections', () => {
+    describe('range slider selections', () => {
       let rangeSliderId: string;
 
       before(async () => {
@@ -192,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('time slider selections', () => {
+    describe('time slider selections', () => {
       let valueBefore: string;
 
       before(async () => {
