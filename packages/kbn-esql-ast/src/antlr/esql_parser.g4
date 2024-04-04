@@ -108,7 +108,7 @@ field
     ;
 
 fromCommand
-    : FROM fromIdentifier (COMMA fromIdentifier)* fromOptions? metadata?
+    : FROM fromIdentifier (COMMA fromIdentifier)* metadata? fromOptions?
     ;
 
 fromIdentifier

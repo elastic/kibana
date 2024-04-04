@@ -1371,7 +1371,7 @@ export default class esql_parser extends Parser {
 			case 1:
 				{
 				this.state = 277;
-				this.fromOptions();
+				this.metadata();
 				}
 				break;
 			}
@@ -1381,7 +1381,7 @@ export default class esql_parser extends Parser {
 			case 1:
 				{
 				this.state = 280;
-				this.metadata();
+				this.fromOptions();
 				}
 				break;
 			}
@@ -3097,8 +3097,8 @@ export default class esql_parser extends Parser {
 	263,3,48,24,0,263,264,5,33,0,0,264,265,3,10,5,0,265,267,1,0,0,0,266,261,
 	1,0,0,0,266,262,1,0,0,0,267,27,1,0,0,0,268,269,5,6,0,0,269,274,3,30,15,
 	0,270,271,5,34,0,0,271,273,3,30,15,0,272,270,1,0,0,0,273,276,1,0,0,0,274,
-	272,1,0,0,0,274,275,1,0,0,0,275,278,1,0,0,0,276,274,1,0,0,0,277,279,3,32,
-	16,0,278,277,1,0,0,0,278,279,1,0,0,0,279,281,1,0,0,0,280,282,3,36,18,0,
+	272,1,0,0,0,274,275,1,0,0,0,275,278,1,0,0,0,276,274,1,0,0,0,277,279,3,36,
+	18,0,278,277,1,0,0,0,278,279,1,0,0,0,279,281,1,0,0,0,280,282,3,32,16,0,
 	281,280,1,0,0,0,281,282,1,0,0,0,282,29,1,0,0,0,283,284,7,2,0,0,284,31,1,
 	0,0,0,285,286,5,71,0,0,286,291,3,34,17,0,287,288,5,34,0,0,288,290,3,34,
 	17,0,289,287,1,0,0,0,290,293,1,0,0,0,291,289,1,0,0,0,291,292,1,0,0,0,292,
@@ -4011,11 +4011,11 @@ export class FromCommandContext extends ParserRuleContext {
 	public COMMA(i: number): TerminalNode {
 		return this.getToken(esql_parser.COMMA, i);
 	}
-	public fromOptions(): FromOptionsContext {
-		return this.getTypedRuleContext(FromOptionsContext, 0) as FromOptionsContext;
-	}
 	public metadata(): MetadataContext {
 		return this.getTypedRuleContext(MetadataContext, 0) as MetadataContext;
+	}
+	public fromOptions(): FromOptionsContext {
+		return this.getTypedRuleContext(FromOptionsContext, 0) as FromOptionsContext;
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_fromCommand;
