@@ -896,5 +896,53 @@ describe('Actions Plugin', () => {
         expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
       });
     });
+
+    describe('isSystemActionConnector()', () => {
+      it('should return true if the connector is a system connector', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        expect(pluginStart.isSystemActionConnector('system-connector-.cases')).toBe(true);
+      });
+
+      it('should return false if the connector is not a system connector', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        pluginSetup.registerType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          isSystemActionType: true,
+          executor,
+        });
+
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        expect(pluginStart.isSystemActionConnector('preconfiguredServerLog')).toBe(false);
+      });
+    });
   });
 });

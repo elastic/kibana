@@ -21,24 +21,19 @@ export function ErrorSampleContextualInsight({
   error: APMError;
   transaction?: Transaction;
 }) {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = useApmPluginContext();
+  const { observabilityAIAssistant } = useApmPluginContext();
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
 
-  const messages = useMemo<Message[]>(() => {
+  const messages = useMemo<Message[] | undefined>(() => {
     const serviceName = error.service.name;
     const languageName = error.service.language?.name ?? '';
     const runtimeName = error.service.runtime?.name ?? '';
     const runtimeVersion = error.service.runtime?.version ?? '';
     const transactionName = transaction?.transaction.name ?? '';
 
-    return getContextualInsightMessages({
+    return observabilityAIAssistant?.getContextualInsightMessages({
       message: `I'm looking at an exception and trying to understand what it means`,
       instructions: `I'm an SRE. I am looking at an exception and trying to understand what it means.
 
@@ -68,13 +63,14 @@ export function ErrorSampleContextualInsight({
     transaction,
     logStacktrace,
     exceptionStacktrace,
-    getContextualInsightMessages,
+    observabilityAIAssistant,
   ]);
 
-  return ObservabilityAIAssistantContextualInsight && messages ? (
+  return observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight &&
+    messages ? (
     <>
       <EuiFlexItem>
-        <ObservabilityAIAssistantContextualInsight
+        <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
           messages={messages}
           title={i18n.translate(
             'xpack.apm.errorGroupContextualInsight.explainErrorTitle',
