@@ -55,7 +55,9 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return { valid: false, error: 'Missing criticality level' };
   }
 
-  if (!isValidCriticalityLevel(criticalityLevel)) {
+  const lowerCaseCriticalityLevel = criticalityLevel.toLowerCase();
+
+  if (!isValidCriticalityLevel(lowerCaseCriticalityLevel)) {
     return { valid: false, error: `Invalid criticality level ${trimColumn(criticalityLevel)}` };
   }
 
@@ -70,7 +72,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     record: {
       idField,
       idValue,
-      criticalityLevel,
+      criticalityLevel: lowerCaseCriticalityLevel,
     },
   };
 };
