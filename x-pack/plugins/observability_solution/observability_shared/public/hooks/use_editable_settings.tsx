@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
@@ -16,7 +16,6 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { ObservabilityApp } from '../../typings/common';
 
 function getSettingsFields({
   settingsKeys,
@@ -46,7 +45,7 @@ function getSettingsFields({
   return fields;
 }
 
-export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
+export function useEditableSettings(settingsKeys: string[]) {
   const {
     services: { settings },
   } = useKibana();
@@ -94,6 +93,21 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
     }
   }
 
+  async function saveSingleSetting(
+    id: string,
+    change: UnsavedFieldChange<UiSettingsType>['unsavedValue']
+  ) {
+    if (settings) {
+      try {
+        setIsSaving(true);
+        await settings.client.set(id, change);
+        setForceReloadSettings((state) => ++state);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  }
+
   return {
     fields,
     unsavedChanges,
@@ -101,5 +115,6 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
     saveAll,
     isSaving,
     cleanUnsavedChanges,
+    saveSingleSetting,
   };
 }

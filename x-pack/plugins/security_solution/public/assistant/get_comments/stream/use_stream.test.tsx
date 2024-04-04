@@ -40,7 +40,7 @@ const defaultProps = {
   refetchCurrentConversation,
   reader: readerComplete,
   isError: false,
-  connectorTypeTitle: 'OpenAI',
+  llmType: '.gen-ai',
 };
 describe('useStream', () => {
   beforeEach(() => {

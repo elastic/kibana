@@ -28,6 +28,7 @@ import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -72,6 +73,9 @@ function getProps(): UnifiedDataTableProps {
       storage: services.storage as unknown as Storage,
       data: services.data,
       theme: services.theme,
+    },
+    cellActionsMetadata: {
+      someKey: 'someValue',
     },
   };
 }
@@ -253,13 +257,16 @@ describe('UnifiedDataTable', () => {
         columns: ['message'],
         onFieldEdited: jest.fn(),
       });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: undefined,
-          getCellValue: expect.any(Function),
-          fields: undefined,
-        })
-      );
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: undefined,
+        getCellValue: expect.any(Function),
+        fields: undefined,
+        dataGridRef: expect.any(Object),
+        metadata: {
+          dataViewId: 'the-data-view-id',
+          someKey: 'someValue',
+        },
+      });
     });
 
     it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
@@ -269,16 +276,19 @@ describe('UnifiedDataTable', () => {
         onFieldEdited: jest.fn(),
         cellActionsTriggerId: 'test',
       });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: 'test',
-          getCellValue: expect.any(Function),
-          fields: [
-            dataViewMock.getFieldByName('@timestamp')?.toSpec(),
-            dataViewMock.getFieldByName('message')?.toSpec(),
-          ],
-        })
-      );
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+        triggerId: 'test',
+        getCellValue: expect.any(Function),
+        fields: [
+          dataViewMock.getFieldByName('@timestamp')?.toSpec(),
+          dataViewMock.getFieldByName('message')?.toSpec(),
+        ],
+        dataGridRef: expect.any(Object),
+        metadata: {
+          dataViewId: 'the-data-view-id',
+          someKey: 'someValue',
+        },
+      });
     });
   });
 
@@ -531,7 +541,7 @@ describe('UnifiedDataTable', () => {
       },
       flattened: { test: jest.fn() },
     };
-    const columnTypesOverride = { testField: 'number ' };
+    const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
     const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
       <div data-test-subj="test-document-view">{hit.id}</div>
     ));
@@ -540,7 +550,7 @@ describe('UnifiedDataTable', () => {
       ...getProps(),
       expandedDoc,
       setExpandedDoc: jest.fn(),
-      columnTypes: columnTypesOverride,
+      columnsMeta: columnsMetaOverride,
       renderDocumentView: renderDocumentViewMock,
       externalControlColumns: [testLeadingControlColumn],
     });
@@ -551,7 +561,7 @@ describe('UnifiedDataTable', () => {
       expandedDoc,
       getProps().rows,
       ['_source'],
-      columnTypesOverride
+      columnsMetaOverride
     );
   });
 

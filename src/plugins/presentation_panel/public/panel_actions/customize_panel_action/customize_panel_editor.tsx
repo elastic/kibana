@@ -30,9 +30,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
+  apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
   getPanelTitle,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
@@ -187,9 +189,7 @@ export const CustomizePanelEditor = ({
               size="xs"
               data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
               onClick={() => setPanelDescription(api.defaultPanelDescription?.value)}
-              disabled={
-                hideTitle || !editMode || api.defaultPanelDescription?.value === panelDescription
-              }
+              disabled={!editMode || api.defaultPanelDescription?.value === panelDescription}
               aria-label={i18n.translate(
                 'presentationPanel.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
                 {
@@ -208,7 +208,7 @@ export const CustomizePanelEditor = ({
             id="panelDescriptionInput"
             className="panelDescriptionInputText"
             data-test-subj="customEmbeddablePanelDescriptionInput"
-            disabled={hideTitle || !editMode}
+            disabled={!editMode}
             name="description"
             value={panelDescription ?? ''}
             onChange={(e) => setPanelDescription(e.target.value)}
@@ -220,12 +220,16 @@ export const CustomizePanelEditor = ({
             )}
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
       </div>
     );
   };
 
   const renderCustomTimeRangeComponent = () => {
-    if (!apiPublishesUnifiedSearch(api) || !(api.isCompatibleWithUnifiedSearch?.() ?? true))
+    if (
+      !apiPublishesTimeRange(api) ||
+      !((api as PublishesUnifiedSearch).isCompatibleWithUnifiedSearch?.() ?? true)
+    )
       return null;
 
     return (

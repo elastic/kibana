@@ -7,8 +7,11 @@
 
 import { createFleetTestRendererMock } from '../../../../../mock';
 import type { MockedFleetStartServices } from '../../../../../mock';
+import { useAuthz } from '../../../../../hooks/use_authz';
 
 import { useFleetServerUnhealthy } from './use_fleet_server_unhealthy';
+
+jest.mock('../../../../../hooks/use_authz');
 
 function defaultHttpClientGetImplementation(path: any) {
   if (typeof path !== 'string') {
@@ -86,6 +89,17 @@ const mockApiCallsWithError = (http: MockedFleetStartServices['http']) => {
 };
 
 describe('useFleetServerUnhealthy', () => {
+  beforeEach(() => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+        readAgentPolicies: true,
+      },
+      integrations: {
+        readIntegrationPolicies: true,
+      },
+    } as any);
+  });
   it('should return isUnHealthy:false with an online fleet slerver', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockApiCallsWithHealthyFleetServer(testRenderer.startServices.http);

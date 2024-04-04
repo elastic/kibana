@@ -7,7 +7,7 @@
 
 export const buildIndexPatternRegExp = (basePatterns: string[]) => {
   // Create the base patterns union with strict boundaries
-  const basePatternGroup = `\\b(${basePatterns.join('|')})\\b[^,\\s]+`;
+  const basePatternGroup = `\\b(${basePatterns.join('|')})\\b([^,\\s]+)?`;
   // Apply base patterns union for local and remote clusters
   const localAndRemotePatternGroup = `((${basePatternGroup})|([^:,\\s]+:${basePatternGroup}))`;
   // Handle trailing comma and multiple pattern concatenation

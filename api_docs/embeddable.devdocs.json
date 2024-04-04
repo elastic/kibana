@@ -746,9 +746,9 @@
             "signature": [
               "<ApiType extends unknown = unknown>(panelPackage: ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-common.PanelPackage",
                 "text": "PanelPackage"
               },
@@ -767,9 +767,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/presentation-containers",
+                    "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-common.PanelPackage",
                     "text": "PanelPackage"
                   }
@@ -792,9 +792,9 @@
             "signature": [
               "(idToRemove: string, { panelType, initialState }: ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-common.PanelPackage",
                 "text": "PanelPackage"
               },
@@ -828,9 +828,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/presentation-containers",
+                    "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-common.PanelPackage",
                     "text": "PanelPackage"
                   }
@@ -2255,7 +2255,9 @@
             "label": "viewMode",
             "description": [],
             "signature": [
-              "{ readonly value: ",
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -2263,9 +2265,7 @@
                 "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
-              "; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ",
+              "; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -2635,19 +2635,19 @@
                 "section": "def-common.PublishesLastSavedState",
                 "text": "PublishesLastSavedState"
               },
-              " & { addNewPanel: <ApiType extends unknown = unknown>(panel: ",
+              " & ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
-                "text": "PanelPackage"
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.CanAddNewPanel",
+                "text": "CanAddNewPanel"
               },
-              ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>; registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+              " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-common.PanelPackage",
                 "text": "PanelPackage"
               },
@@ -2681,7 +2681,9 @@
             "label": "dataViews",
             "description": [],
             "signature": [
-              "{ readonly value: ",
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2689,9 +2691,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ",
+              "[] | undefined; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3045,7 +3045,9 @@
             "label": "query$",
             "description": [],
             "signature": [
-              "{ readonly value: ",
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3061,9 +3063,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ",
+              " | undefined; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3609,9 +3609,9 @@
             "label": "panelTitle",
             "description": [],
             "signature": [
-              "{ readonly value: string | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3773,9 +3773,9 @@
             "label": "dataLoading",
             "description": [],
             "signature": [
-              "{ readonly value: boolean | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -3937,7 +3937,9 @@
             "label": "filters$",
             "description": [],
             "signature": [
-              "{ readonly value: ",
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -3945,9 +3947,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ",
+              "[] | undefined; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4301,7 +4301,9 @@
             "label": "onPhaseChange",
             "description": [],
             "signature": [
-              "{ readonly value: ",
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -4309,9 +4311,7 @@
                 "section": "def-common.PhaseEvent",
                 "text": "PhaseEvent"
               },
-              " | undefined; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ",
+              " | undefined; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -4679,9 +4679,9 @@
             "label": "blockingError",
             "description": [],
             "signature": [
-              "{ readonly value: Error | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => Error | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: Error | undefined; error: (err: any) => void; forEach: { (next: (value: Error | undefined) => void): Promise<void>; (next: (value: Error | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => Error | undefined; pipe: { (): ",
               "Observable",
               "<Error | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -4860,7 +4860,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4874,7 +4874,9 @@
             "label": "timeRange$",
             "description": [],
             "signature": [
-              "{ readonly value: ",
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -4882,9 +4884,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ",
+              " | undefined; error: (err: any) => void; forEach: { (next: (value: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5238,9 +5238,9 @@
             "label": "hidePanelTitle",
             "description": [],
             "signature": [
-              "{ readonly value: boolean | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: boolean | undefined; error: (err: any) => void; forEach: { (next: (value: boolean | undefined) => void): Promise<void>; (next: (value: boolean | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => boolean | undefined; pipe: { (): ",
               "Observable",
               "<boolean | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5432,9 +5432,9 @@
             "label": "panelDescription",
             "description": [],
             "signature": [
-              "{ readonly value: string | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5596,9 +5596,9 @@
             "label": "disabledActionIds",
             "description": [],
             "signature": [
-              "{ readonly value: string[] | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string[] | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string[] | undefined; error: (err: any) => void; forEach: { (next: (value: string[] | undefined) => void): Promise<void>; (next: (value: string[] | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string[] | undefined; pipe: { (): ",
               "Observable",
               "<string[] | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -5806,7 +5806,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/publishes_unified_search.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5858,7 +5858,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_title.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5905,7 +5905,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_description.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5947,9 +5947,9 @@
             "label": "savedObjectId",
             "description": [],
             "signature": [
-              "{ readonly value: string | undefined; source: ",
+              "{ source: ",
               "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "<any> | undefined; readonly value: string | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
               "Observable",
               "<string | undefined>; <A>(op1: ",
               "OperatorFunction",
@@ -7685,6 +7685,213 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.embeddableInputToSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "embeddableInputToSubject",
+        "description": [],
+        "signature": [
+          "<T extends unknown = unknown, LegacyInput extends ",
+          "CommonLegacyInput",
+          " = ",
+          "CommonLegacyInput",
+          ">(subscription: ",
+          "Subscription",
+          ", embeddable: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<LegacyInput, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          ", any>, key: keyof LegacyInput, useExplicitInput?: boolean) => ",
+          "BehaviorSubject",
+          "<T | undefined>"
+        ],
+        "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "subscription",
+            "description": [],
+            "signature": [
+              "Subscription"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<LegacyInput, ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableOutput",
+                "text": "EmbeddableOutput"
+              },
+              ", any>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof LegacyInput"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableInputToSubject.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "useExplicitInput",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.embeddableOutputToSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "embeddableOutputToSubject",
+        "description": [],
+        "signature": [
+          "<T extends unknown = unknown, LegacyOutput extends ",
+          "CommonLegacyOutput",
+          " = ",
+          "CommonLegacyOutput",
+          ">(subscription: ",
+          "Subscription",
+          ", embeddable: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<",
+          "CommonLegacyInput",
+          ", LegacyOutput, any>, key: keyof LegacyOutput) => ",
+          "BehaviorSubject",
+          "<T | undefined>"
+        ],
+        "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableOutputToSubject.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "subscription",
+            "description": [],
+            "signature": [
+              "Subscription"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableOutputToSubject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.IEmbeddable",
+                "text": "IEmbeddable"
+              },
+              "<",
+              "CommonLegacyInput",
+              ", LegacyOutput, any>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.embeddableOutputToSubject.$3",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "keyof LegacyOutput"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.EmbeddablePanel",
         "type": "Function",
         "tags": [],
@@ -7885,79 +8092,6 @@
               ">"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/diff_embeddable_input.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.initializeReactEmbeddableTitles",
-        "type": "Function",
-        "tags": [],
-        "label": "initializeReactEmbeddableTitles",
-        "description": [],
-        "signature": [
-          "(rawState: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.SerializedReactEmbeddableTitles",
-            "text": "SerializedReactEmbeddableTitles"
-          },
-          ") => { titlesApi: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReactEmbeddableTitlesApi",
-            "text": "ReactEmbeddableTitlesApi"
-          },
-          "; titleComparators: ",
-          "EmbeddableStateComparators",
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.SerializedReactEmbeddableTitles",
-            "text": "SerializedReactEmbeddableTitles"
-          },
-          ">; serializeTitles: () => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.SerializedReactEmbeddableTitles",
-            "text": "SerializedReactEmbeddableTitles"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.initializeReactEmbeddableTitles.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "rawState",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.SerializedReactEmbeddableTitles",
-                "text": "SerializedReactEmbeddableTitles"
-              }
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -8803,7 +8937,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, }: { maybeId?: string | undefined; type: string; state: ",
+          "<StateType>>({ maybeId, type, state, parentApi, onApiAvailable, panelProps, onAnyStateChange, }: { maybeId?: string | undefined; type: string; state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
@@ -8819,7 +8953,23 @@
             "section": "def-common.PresentationContainer",
             "text": "PresentationContainer"
           },
-          " | undefined; onApiAvailable?: ((api: ApiType) => void) | undefined; }) => JSX.Element"
+          " | undefined; onApiAvailable?: ((api: ApiType) => void) | undefined; panelProps?: Pick<",
+          {
+            "pluginId": "presentationPanel",
+            "scope": "public",
+            "docId": "kibPresentationPanelPluginApi",
+            "section": "def-public.PresentationPanelProps",
+            "text": "PresentationPanelProps"
+          },
+          "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined; onAnyStateChange?: ((state: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<StateType>) => void) | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -8830,7 +8980,7 @@
             "id": "def-public.ReactEmbeddableRenderer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n}",
+            "label": "{\n  maybeId,\n  type,\n  state,\n  parentApi,\n  onApiAvailable,\n  panelProps,\n  onAnyStateChange,\n}",
             "description": [],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
             "deprecated": false,
@@ -8934,6 +9084,77 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.panelProps",
+                "type": "Object",
+                "tags": [],
+                "label": "panelProps",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "presentationPanel",
+                    "scope": "public",
+                    "docId": "kibPresentationPanelPluginApi",
+                    "section": "def-public.PresentationPanelProps",
+                    "text": "PresentationPanelProps"
+                  },
+                  "<ApiType, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.onAnyStateChange",
+                "type": "Function",
+                "tags": [],
+                "label": "onAnyStateChange",
+                "description": [
+                  "\nThis `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable\nas it changes. This is **not** expected to change over the lifetime of the component."
+                ],
+                "signature": [
+                  "((state: ",
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.SerializedPanelState",
+                    "text": "SerializedPanelState"
+                  },
+                  "<StateType>) => void) | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.ReactEmbeddableRenderer.$1.onAnyStateChange.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/presentation-containers",
+                        "scope": "common",
+                        "docId": "kibKbnPresentationContainersPluginApi",
+                        "section": "def-common.SerializedPanelState",
+                        "text": "SerializedPanelState"
+                      },
+                      "<StateType>"
+                    ],
+                    "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -8947,7 +9168,9 @@
         "type": "Function",
         "tags": [],
         "label": "registerReactEmbeddableFactory",
-        "description": [],
+        "description": [
+          "\nRegisters a new React embeddable factory. This should be called at plugin start time.\n"
+        ],
         "signature": [
           "<StateType extends object = object, APIType extends ",
           {
@@ -8965,7 +9188,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<StateType>>(factory: ",
+          "<StateType>>(type: string, getFactory: () => Promise<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8973,7 +9196,7 @@
             "section": "def-public.ReactEmbeddableFactory",
             "text": "ReactEmbeddableFactory"
           },
-          "<StateType, APIType>) => void"
+          "<StateType, APIType>>) => void"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
         "deprecated": false,
@@ -8982,11 +9205,31 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.registerReactEmbeddableFactory.$1",
-            "type": "Object",
+            "type": "string",
             "tags": [],
-            "label": "factory",
-            "description": [],
+            "label": "type",
+            "description": [
+              "The key to register the factory under. This should be the same as the `type` key in the factory definition."
+            ],
             "signature": [
+              "string"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.registerReactEmbeddableFactory.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "getFactory",
+            "description": [
+              "an async function that gets the factory definition for this key. This should always async import the\nactual factory definition file to avoid polluting page load."
+            ],
+            "signature": [
+              "() => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8994,7 +9237,7 @@
                 "section": "def-public.ReactEmbeddableFactory",
                 "text": "ReactEmbeddableFactory"
               },
-              "<StateType, APIType>"
+              "<StateType, APIType>>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
             "deprecated": false,
@@ -9182,60 +9425,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.serializeReactEmbeddableTitles",
-        "type": "Function",
-        "tags": [],
-        "label": "serializeReactEmbeddableTitles",
-        "description": [],
-        "signature": [
-          "(titlesApi: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ReactEmbeddableTitlesApi",
-            "text": "ReactEmbeddableTitlesApi"
-          },
-          ") => ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.SerializedReactEmbeddableTitles",
-            "text": "SerializedReactEmbeddableTitles"
-          }
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.serializeReactEmbeddableTitles.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "titlesApi",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.ReactEmbeddableTitlesApi",
-                "text": "ReactEmbeddableTitlesApi"
-              }
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.shouldFetch$",
         "type": "Function",
         "tags": [],
@@ -9304,7 +9493,13 @@
             "text": "PresentationContainer"
           },
           " | undefined, comparators: ",
-          "EmbeddableStateComparators",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.StateComparators",
+            "text": "StateComparators"
+          },
           "<StateType>, deserializeState: (state: ",
           {
             "pluginId": "@kbn/presentation-containers",
@@ -9368,7 +9563,13 @@
             "label": "comparators",
             "description": [],
             "signature": [
-              "EmbeddableStateComparators",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.StateComparators",
+                "text": "StateComparators"
+              },
               "<StateType>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
@@ -11007,7 +11208,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -12987,8 +13188,22 @@
               "(initialState: StateType, buildApi: (apiRegistration: ",
               "ReactEmbeddableApiRegistration",
               "<StateType, ApiType>, comparators: ",
-              "EmbeddableStateComparators",
-              "<StateType>) => ApiType) => Promise<{ Component: React.FC<{}>; api: ApiType; }>"
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.StateComparators",
+                "text": "StateComparators"
+              },
+              "<StateType>) => ApiType, uuid: string, parentApi?: ",
+              {
+                "pluginId": "@kbn/presentation-containers",
+                "scope": "common",
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.PresentationContainer",
+                "text": "PresentationContainer"
+              },
+              " | undefined) => Promise<{ Component: React.FC<{}>; api: ApiType; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -13020,13 +13235,56 @@
                   "(apiRegistration: ",
                   "ReactEmbeddableApiRegistration",
                   "<StateType, ApiType>, comparators: ",
-                  "EmbeddableStateComparators",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.StateComparators",
+                    "text": "StateComparators"
+                  },
                   "<StateType>) => ApiType"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$3",
+                "type": "string",
+                "tags": [],
+                "label": "uuid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "parentApi",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.PresentationContainer",
+                    "text": "PresentationContainer"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -13206,62 +13464,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.SerializedReactEmbeddableTitles",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedReactEmbeddableTitles",
-        "description": [],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.SerializedReactEmbeddableTitles.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.SerializedReactEmbeddableTitles.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.SerializedReactEmbeddableTitles.hidePanelTitles",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidePanelTitles",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -13418,7 +13620,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"create\" | \"type\" | \"latestVersion\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
+          "<I, O, E, T>, \"type\" | \"create\" | \"latestVersion\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -13649,36 +13851,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.ReactEmbeddableTitlesApi",
-        "type": "Type",
-        "tags": [],
-        "label": "ReactEmbeddableTitlesApi",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
-          },
-          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; } & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelDescription",
-            "text": "PublishesPanelDescription"
-          },
-          " & { setPanelDescription: (newTitle: string | undefined) => void; }"
-        ],
-        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

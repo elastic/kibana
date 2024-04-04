@@ -99,7 +99,6 @@ export function registerGetDatasetInfoFunction({
           return (field.esTypes ?? [field.type]).map((type) => {
             return {
               name: field.name,
-              description: field.customLabel || '',
               type,
             };
           });
