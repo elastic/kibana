@@ -100,7 +100,7 @@ export async function getLogCategories({
             aggs: {
               sample: {
                 top_hits: {
-                  sort: [{ '@timestamp': 'desc' }],
+                  sort: { '@timestamp': 'desc' as const },
                   size: 1,
                   _source: ['message'],
                 },
@@ -114,9 +114,8 @@ export async function getLogCategories({
 
   return categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
     ({ doc_count: docCount, key, sample }) => {
-      // Supress error: Element implicitly has an 'any' type because expression of type '0' can't be used to index type 'SearchHitsMetadata<unknown>'.
-      // @ts-expect-error
-      const sampleMessage = sample.hits.hits[0]._source.message as string;
+      const sampleMessage = (sample.hits.hits[0]._source as { message: string })
+        .message;
       return { key: key as string, docCount, sampleMessage };
     }
   );
