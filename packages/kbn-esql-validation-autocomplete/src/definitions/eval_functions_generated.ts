@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GeneratedFunctionDefinition } from './types';
+import type { FunctionDefinition } from './types';
 
-export const generatedFunctions: GeneratedFunctionDefinition[] = [
+export const generatedFunctions: FunctionDefinition[] = [
   {
     type: 'eval',
     name: 'abs',
@@ -59,6 +59,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -109,6 +111,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -160,6 +164,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -211,6 +217,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -462,6 +470,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -513,6 +523,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -523,6 +535,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
     }),
     alias: undefined,
     signatures: [],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -573,6 +587,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -709,6 +725,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -749,6 +767,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -799,6 +819,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -849,6 +871,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -900,6 +924,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -913,7 +939,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         params: [
           {
             name: 'datePart',
-            type: 'string',
+            type: 'chrono_literal',
             optional: false,
           },
           {
@@ -940,6 +966,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -980,6 +1008,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1035,6 +1065,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'datetime',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1049,6 +1081,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1090,6 +1124,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'boolean',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1140,6 +1176,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1320,6 +1358,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1500,6 +1540,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1541,6 +1583,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1571,6 +1615,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1861,6 +1907,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1911,6 +1959,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1941,6 +1991,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -1992,6 +2044,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2063,6 +2117,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2214,6 +2270,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2314,6 +2372,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2465,6 +2525,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2616,6 +2678,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2727,6 +2791,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2778,6 +2844,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -2889,6 +2957,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3160,6 +3230,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3305,6 +3377,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3356,6 +3430,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3407,6 +3483,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3421,6 +3499,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3671,6 +3751,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3842,6 +3924,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3883,6 +3967,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3908,6 +3994,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3938,6 +4026,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -3988,6 +4078,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4038,6 +4130,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4078,6 +4172,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4128,6 +4224,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4258,6 +4356,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'boolean',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4388,6 +4488,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'boolean',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4518,6 +4620,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'boolean',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4548,6 +4652,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4578,6 +4684,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4619,6 +4727,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'boolean',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4670,6 +4780,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4720,6 +4832,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4770,6 +4884,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4784,6 +4900,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4864,6 +4982,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'boolean',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4905,6 +5025,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'cartesian_point',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -4956,6 +5078,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'cartesian_shape',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5036,6 +5160,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'datetime',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5086,6 +5212,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5176,6 +5304,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5216,6 +5346,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'geo_point',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5266,6 +5398,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'geo_shape',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5356,6 +5490,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5396,6 +5532,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'ip',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5486,6 +5624,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5516,6 +5656,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5566,6 +5708,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5716,6 +5860,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5807,6 +5953,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'number',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5837,6 +5985,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5877,6 +6027,8 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'version',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
   {
     type: 'eval',
@@ -5907,5 +6059,7 @@ export const generatedFunctions: GeneratedFunctionDefinition[] = [
         returnType: 'string',
       },
     ],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
+    supportedOptions: ['by'],
   },
 ];

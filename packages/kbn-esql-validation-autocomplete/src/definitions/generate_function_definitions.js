@@ -9,6 +9,7 @@
 const { readdirSync, readFileSync } = require('fs');
 const { writeFile } = require('fs/promises');
 const join = require('path').join;
+const _ = require('lodash');
 
 const aliasTable = {
   to_version: ['to_ver'],
@@ -37,15 +38,58 @@ const elasticsearchToKibanaType = (elasticsearchType) => {
 };
 
 /**
+ * Enrichments for function definitions
+ *
+ * This is the place to put information that is not reported by the `show functions` command
+ * and, hence, won't be present in the JSON file.
+ */
+const functionEnrichments = {
+  // log10: {
+  //   validate: validateLogFunctions,
+  // },
+  // log: {
+  //   validate: validateLogFunctions,
+  // },
+  date_extract: {
+    signatures: [
+      {
+        // override the first param as type chrono_literal
+        params: [{ type: 'chrono_literal' }],
+      },
+    ],
+  },
+  date_trunc: {
+    signatures: [
+      {
+        // override the first param to be of type time_literal
+        params: [{ type: 'time_literal' }],
+      },
+    ],
+  },
+  // TODO — reenable this when the signature is fixed on the ES side
+  // auto_bucket: {
+  //   signatures: new Array(4).fill({
+  //     params: [{}, {}, { literalOnly: true }, { literalOnly: true }],
+  //   }),
+  // },
+};
+
+/**
  * Builds a function definition object from a row of the "meta functions" table
  * @param {Array<any>} value — the row of the "meta functions" table, corresponding to a single function definition
  * @param {*} columnIndices — the indices of the columns in the "meta functions" table
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition) {
-  return {
+  const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
+    ...(ESFunctionDefinition.type === 'eval'
+      ? {
+          supportedCommands: ['stats', 'eval', 'where', 'row'],
+          supportedOptions: ['by'],
+        }
+      : { supportedCommands: ['stats'] }),
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     signatures: ESFunctionDefinition.signatures.map((signature) => ({
@@ -60,6 +104,12 @@ function getFunctionDefinition(ESFunctionDefinition) {
       variadic: undefined,
     })),
   };
+
+  if (functionEnrichments[ret.name]) {
+    _.merge(ret, functionEnrichments[ret.name]);
+  }
+
+  return ret;
 }
 
 function printGeneratedFunctionsFile(functionDefinitions) {
@@ -79,15 +129,17 @@ function printGeneratedFunctionsFile(functionDefinitions) {
     )} }),
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
+    supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
+    supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
 }`;
   };
 
   const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join(',\n');
 
   const fileContents = `import { i18n } from '@kbn/i18n';
-import type { GeneratedFunctionDefinition } from './types';
+import type { FunctionDefinition } from './types';
 
-export const generatedFunctions: GeneratedFunctionDefinition[] = [\n${functionDefinitionsString}\n];`;
+export const generatedFunctions: FunctionDefinition[] = [\n${functionDefinitionsString}\n];`;
 
   return fileContents;
 }
