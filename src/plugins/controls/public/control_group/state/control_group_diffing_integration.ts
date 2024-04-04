@@ -47,7 +47,10 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
               output: { filters, timeslice },
             } = this.getState();
 
-            const hasUnsavedChanges = false;
+            const hasUnsavedChanges = !(
+              compareFilters(filters ?? [], lastSavedFilters?.filters ?? [], COMPARE_ALL_OPTIONS) &&
+              isEqual(timeslice, lastSavedFilters?.timeslice)
+            );
 
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);
           });
