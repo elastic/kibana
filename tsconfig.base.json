@@ -1316,6 +1316,8 @@
       "@kbn/rison/*": ["packages/kbn-rison/*"],
       "@kbn/rollup-plugin": ["x-pack/plugins/rollup"],
       "@kbn/rollup-plugin/*": ["x-pack/plugins/rollup/*"],
+      "@kbn/router-to-openapispec": ["packages/kbn-router-to-openapispec"],
+      "@kbn/router-to-openapispec/*": ["packages/kbn-router-to-openapispec/*"],
       "@kbn/router-utils": ["packages/kbn-router-utils"],
       "@kbn/router-utils/*": ["packages/kbn-router-utils/*"],
       "@kbn/routing-example-plugin": ["examples/routing_example"],
@@ -1806,6 +1808,8 @@
       "@kbn/xstate-utils/*": ["packages/kbn-xstate-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
+      "@kbn/zod": ["packages/kbn-zod"],
+      "@kbn/zod/*": ["packages/kbn-zod/*"],
       "@kbn/zod-helpers": ["packages/kbn-zod-helpers"],
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING

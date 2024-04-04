@@ -453,6 +453,7 @@ x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
 packages/kbn-generate-csv @elastic/appex-sharedux
+packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux
@@ -906,6 +907,7 @@ packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/kbn-zod @elastic/kibana-core
 packages/kbn-zod-helpers @elastic/security-detection-rule-management
 ####
 ## Everything below this line overrides the default assignments for each package.

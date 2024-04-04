@@ -81,6 +81,10 @@ export class HttpService
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
+  public getRegisteredRouters(): IRouter[] {
+    return this.httpServer.getRegisteredRouters();
+  }
+
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
     const config = await firstValueFrom(this.config$);
@@ -195,6 +199,10 @@ export class HttpService
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      registerPrebootRoutes: this.internalPreboot!.registerRoutes,
+
+      getRegisteredRouters: this.getRegisteredRouters.bind(this),
     };
 
     return this.internalSetup;

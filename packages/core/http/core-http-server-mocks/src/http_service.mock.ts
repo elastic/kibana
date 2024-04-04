@@ -183,6 +183,8 @@ const createInternalSetupContractMock = () => {
     authRequestHeaders: createAuthHeaderStorageMock(),
     getServerInfo: jest.fn(),
     registerRouterAfterListening: jest.fn(),
+    registerPrebootRoutes: jest.fn(),
+    getRegisteredRouters: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());
@@ -260,6 +262,7 @@ const createHttpServiceMock = () => {
     getStartContract: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    getRegisteredRouters: jest.fn(),
   };
   mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());

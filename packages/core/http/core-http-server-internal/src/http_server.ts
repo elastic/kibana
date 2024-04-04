@@ -8,6 +8,7 @@
 
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
+import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -19,14 +20,14 @@ import {
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, pairwise } from 'rxjs';
+import { firstValueFrom, of, type Observable, type Subscription } from 'rxjs';
+import { take, pairwise, mergeMap } from 'rxjs';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -50,6 +51,7 @@ import { identity } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
+import { Semaphore } from '@kbn/std';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -204,6 +206,10 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
+  public getRegisteredRouters() {
+    return [...this.registeredRouters];
+  }
+
   private registerRouter(router: IRouter) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
@@ -330,6 +336,9 @@ export class HttpServer {
         this.configureRoute(route);
       }
     }
+
+    // TODO: consider adding a control for registering this route, conceivable that it is not needed in all cases...
+    this.registerOasEndpoint();
 
     await this.server.start();
     const serverPath =
@@ -621,6 +630,67 @@ export class HttpServer {
     this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
+    });
+  }
+
+  private getRouters(): {
+    routers: Router[];
+    versionedRouters: CoreVersionedRouter[];
+  } {
+    return this.getRegisteredRouters().reduce<{
+      routers: Router[];
+      versionedRouters: CoreVersionedRouter[];
+    }>(
+      (acc, r) => {
+        if ((r as Router).getRoutes(true).length > 0) {
+          acc.routers.push(r as Router);
+        }
+        const versionedRouter = r.versioned as CoreVersionedRouter;
+        if (versionedRouter.getRoutes().length > 0) {
+          acc.versionedRouters.push(versionedRouter);
+        }
+        return acc;
+      },
+      { routers: [], versionedRouters: [] }
+    );
+  }
+
+  private generateOasSemaphore = new Semaphore(1);
+  private registerOasEndpoint() {
+    this.server!.route({
+      path: '/api/oas',
+      method: 'GET',
+      handler: async (req, h) => {
+        return await firstValueFrom(
+          of(1).pipe(
+            this.generateOasSemaphore.acquire(),
+            mergeMap(async () => {
+              const pathStartsWith = req.query?.pathStartsWith;
+              try {
+                // Potentially quite expensive
+                const result = generateOpenApiDocument(this.getRouters(), {
+                  baseUrl: 'todo',
+                  title: 'todo',
+                  version: '0.0.0',
+                  pathStartsWith,
+                });
+                return h.response(result);
+              } catch (e) {
+                this.log.error(e);
+                return h.response({ message: e.message }).code(500);
+              }
+            })
+          )
+        );
+      },
+      options: {
+        app: { access: 'public' },
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
     });
   }
 

@@ -32,9 +32,11 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access'>;
+  options?: Omit<RouteConfigOptions<Method>, 'access' | 'oas'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
+  /** A human-readable description of this route */
+  description?: string;
   /**
    * When enabled, the router will also check for the presence of an `apiVersion`
    * query parameter to determine the route version to resolve to:
@@ -185,12 +187,33 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
+interface ZodEsque<V> {
+  _output: V;
+}
+
+/**
+ * We accept three different types of validation for maximum flexibility and to enable
+ * teams to decide when or if they would like to opt into OAS spec generation for their
+ * public routes via zod.
+ */
+export type VersionedSpecValidation<V = unknown> =
+  | Type<V>
+  | RouteValidationFunction<V>
+  | ZodEsque<V>;
+
 /** @public */
-export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
+export type VersionedRouteRequestValidation<P, Q, B> = Omit<
+  RouteValidatorFullConfigRequest<P, Q, B>,
+  'params' | 'query' | 'body'
+> & {
+  params?: VersionedSpecValidation<P>;
+  query?: VersionedSpecValidation<Q>;
+  body?: VersionedSpecValidation<B>;
+};
 
 /** @public */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  [statusCode: number]: { body: VersionedSpecValidation<any> };
   unsafe?: { body?: boolean };
 }
 
@@ -228,7 +251,7 @@ export interface AddVersionOpts<P, Q, B> {
    * Validation for this version of a route
    * @public
    */
-  validate: false | FullValidationConfig<P, Q, B>;
+  validate: false | FullValidationConfig<P, Q, B> | (() => FullValidationConfig<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**

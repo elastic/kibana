@@ -64,6 +64,9 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
+
+  registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
+  getRegisteredRouters: () => IRouter[];
 }
 
 /** @internal */
