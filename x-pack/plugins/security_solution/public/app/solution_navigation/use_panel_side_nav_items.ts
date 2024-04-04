@@ -52,16 +52,7 @@ export const usePanelSideNavItems = (navLinks: SolutionNavLink[]): SolutionSideN
   const getKibanaLinkProps = useGetLinkProps();
 
   const getLinkProps = useCallback<GetLinkProps>(
-    (link) => {
-      if (link.externalUrl) {
-        return {
-          href: link.externalUrl,
-          openInNewTab: true,
-        };
-      } else {
-        return getKibanaLinkProps({ id: link.id });
-      }
-    },
+    (link) => getKibanaLinkProps({ id: link.id }),
     [getKibanaLinkProps]
   );
 

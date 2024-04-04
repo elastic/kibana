@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { partition } from 'lodash/fp';
-import { i18n } from '@kbn/i18n';
 import type {
   AppDeepLinkId,
   NodeDefinition,
@@ -20,13 +19,7 @@ import {
 } from '@kbn/security-solution-navigation';
 import type { SolutionPageName, SolutionLinkCategory, SolutionNavLink } from './types';
 import { getNavLinkIdFromSolutionPageName, isBreadcrumbHidden } from './util';
-
-const SECURITY_PROJECT_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.nav.solution.title',
-  {
-    defaultMessage: 'Security',
-  }
-);
+import { SOLUTION_NAME } from '../../common/translations';
 
 export const formatNavigationTree = (
   solutionNavLinks: SolutionNavLink[],
@@ -42,7 +35,7 @@ export const formatNavigationTree = (
       {
         type: 'navGroup',
         id: 'security_solution_nav',
-        title: SECURITY_PROJECT_TITLE,
+        title: SOLUTION_NAME,
         icon: 'logoSecurity',
         breadcrumbStatus: 'hidden',
         defaultIsCollapsed: false,

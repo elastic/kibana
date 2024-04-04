@@ -12,7 +12,6 @@ export interface NavigationLink<T extends string = string> {
   categories?: LinkCategories<T>;
   description?: string;
   disabled?: boolean;
-  externalUrl?: string;
   id: T;
   landingIcon?: IconType;
   landingImage?: string;

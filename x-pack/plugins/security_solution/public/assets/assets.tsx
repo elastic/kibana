@@ -15,22 +15,16 @@ import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { useRootNavLink } from '../common/links/nav_links';
 
 const INTEGRATIONS_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.assets.integrationsCallout.title',
-  {
-    defaultMessage: 'Integrations',
-  }
+  'xpack.securitySolution.assets.integrationsCallout.title',
+  { defaultMessage: 'Integrations' }
 );
 const INTEGRATIONS_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolutionServerless.assets.integrationsCallout.content',
-  {
-    defaultMessage: 'Choose an integration to start collecting and analyzing your data.',
-  }
+  'xpack.securitySolution.assets.integrationsCallout.content',
+  { defaultMessage: 'Choose an integration to start collecting and analyzing your data.' }
 );
 const INTEGRATIONS_CALLOUT_BUTTON_TEXT = i18n.translate(
-  'xpack.securitySolutionServerless.assets.integrationsCallout.buttonText',
-  {
-    defaultMessage: 'Browse integrations',
-  }
+  'xpack.securitySolution.assets.integrationsCallout.buttonText',
+  { defaultMessage: 'Browse integrations' }
 );
 
 export const Assets: React.FC = () => {

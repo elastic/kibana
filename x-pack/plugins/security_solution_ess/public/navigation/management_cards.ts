@@ -4,10 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
+import {
+  getNavigationPropsFromId,
+  SecurityPageName,
+  ExternalPageName,
+} from '@kbn/security-solution-navigation';
 import type { Services } from '../common/services';
 
+const SecurityManagementCards = new Map<string, CardNavExtensionDefinition['category']>([
+  [ExternalPageName.visualize, 'content'],
+  [ExternalPageName.maps, 'content'],
+  [SecurityPageName.entityAnalyticsManagement, 'alerts'],
+]);
 export const enableManagementCardsLanding = (services: Services) => {
-  services.management.setupCardsNavigation({
-    enabled: true,
+  const { securitySolution, management, application } = services;
+
+  securitySolution.getNavLinks$().subscribe((navLinks) => {
+    const cardNavDefinitions = navLinks.reduce<Record<string, CardNavExtensionDefinition>>(
+      (acc, navLink) => {
+        if (SecurityManagementCards.has(navLink.id)) {
+          const { appId, deepLinkId, path } = getNavigationPropsFromId(navLink.id);
+
+          acc[navLink.id] = {
+            category: SecurityManagementCards.get(navLink.id) ?? 'other',
+            title: navLink.title,
+            description: navLink.description ?? '',
+            icon: navLink.landingIcon ?? '',
+            href: application.getUrlForApp(appId, { deepLinkId, path }),
+            skipValidation: true,
+          };
+        }
+        return acc;
+      },
+      {}
+    );
+
+    management.setupCardsNavigation({
+      enabled: true,
+      extendCardNavDefinitions: cardNavDefinitions,
+    });
   });
 };
