@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isActiveTimeline } from '../../../../../helpers';
@@ -52,6 +52,8 @@ export const FlyoutFooterComponent = ({
   scopeId,
   refetchFlyoutData,
 }: FlyoutFooterProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
   const ruleIndexRaw = useMemo(
     () =>
@@ -165,7 +167,12 @@ export const FlyoutFooterComponent = ({
           />
         )}
       {isAddEventFilterModalOpen && detailsEcsData != null && (
-        <EventFiltersFlyout data={detailsEcsData} onCancel={closeAddEventFilterModal} />
+        <EventFiltersFlyout
+          data={detailsEcsData}
+          onCancel={closeAddEventFilterModal}
+          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+          maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+        />
       )}
       {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
         <OsqueryFlyout
