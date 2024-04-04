@@ -191,7 +191,7 @@ describe('rules_settings_modal', () => {
       'This elasticsearch request will edit this rule.'
     );
     expect(result.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
-      "PUT kbn:/api/alerting/rule0de7273e-c5db-4d5c-8e28-1aab363e1abc
+      "PUT kbn:/api/alerting/rule/0de7273e-c5db-4d5c-8e28-1aab363e1abc
       {
         \\"name\\": \\"test\\",
         \\"tags\\": [

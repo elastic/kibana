@@ -115,7 +115,7 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
       <EuiModalBody>
         <EuiCodeBlock language="json" isCopyable data-test-subj="modalRequestCodeBlock">
           {`${edit ? 'PUT' : 'POST'} kbn:${BASE_ALERTING_API_PATH}/rule${
-            edit ? ruleId : ''
+            edit ? `/${ruleId}` : ''
           }\n${formattedRequest}`}
         </EuiCodeBlock>
       </EuiModalBody>
