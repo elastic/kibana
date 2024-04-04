@@ -14,18 +14,12 @@ import {
   EuiEmptyPrompt,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
-  EuiDataGridCellProps,
-  EuiDataGridControlColumn,
   EuiButton,
   EuiCode,
   EuiCopy,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  ALERT_CASE_IDS,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_RULE_UUID,
-} from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
@@ -95,7 +89,6 @@ export type AlertsTableStateProps = {
    */
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
-  renderCellContext?: EuiDataGridCellProps['renderCellContext'];
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -108,7 +101,7 @@ const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   columns: [],
   sort: [],
-  getRenderCellValue: () => () => null,
+  getRenderCellValue: () => null,
 };
 
 type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
@@ -144,8 +137,6 @@ const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
 
 const stableEmptyArray: string[] = [];
-const emptyLeadingColumns: EuiDataGridControlColumn[] = [];
-const emptyTrailingColumns: EuiDataGridControlColumn[] = [];
 const defaultPageSizeOptions = [10, 20, 50, 100];
 
 const emptyRowSelection = new Map<number, RowSelectionState>();
@@ -204,9 +195,9 @@ const AlertsTableStateWithQueryProvider = memo(
     query,
     pageSize,
     leadingControlColumns,
+    trailingControlColumns,
     rowHeightsOptions,
-    renderCellValue,
-    renderCellContext,
+    cellContext,
     columns: propColumns,
     gridStyle,
     browserFields: propBrowserFields,
@@ -277,6 +268,10 @@ const AlertsTableStateWithQueryProvider = memo(
       pageSize: pageSize ?? DefaultPagination.pageSize,
     });
 
+    const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
+      setPagination(_pagination);
+    }, []);
+
     const {
       columns,
       browserFields,
@@ -295,10 +290,6 @@ const AlertsTableStateWithQueryProvider = memo(
       defaultColumns: columnConfigByClient,
       initialBrowserFields: propBrowserFields,
     });
-
-    const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
-      setPagination(_pagination);
-    }, []);
 
     const [
       isLoading,
@@ -408,36 +399,6 @@ const AlertsTableStateWithQueryProvider = memo(
       [id]
     );
 
-    const useFetchAlertsData = useCallback(() => {
-      return {
-        activePage: pagination.pageIndex,
-        alerts,
-        alertsCount,
-        isInitializing,
-        isLoading,
-        getInspectQuery,
-        onPageChange,
-        onSortChange,
-        refresh,
-        sort,
-        oldAlertsData,
-        ecsAlertsData,
-      };
-    }, [
-      alerts,
-      alertsCount,
-      ecsAlertsData,
-      getInspectQuery,
-      isInitializing,
-      isLoading,
-      oldAlertsData,
-      onPageChange,
-      onSortChange,
-      pagination,
-      refresh,
-      sort,
-    ]);
-
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
     }, [casesService?.ui]);
@@ -469,13 +430,11 @@ const AlertsTableStateWithQueryProvider = memo(
         bulkActions: stableEmptyArray,
         deletedEventIds: stableEmptyArray,
         disabledCellActions: stableEmptyArray,
-        pageSize: pagination.pageSize,
         pageSizeOptions: defaultPageSizeOptions,
         id,
-        leadingControlColumns: leadingControlColumns ?? emptyLeadingColumns,
+        leadingControlColumns,
         showAlertStatusWithFlapping,
-        trailingControlColumns: emptyTrailingColumns,
-        useFetchAlertsData,
+        trailingControlColumns,
         visibleColumns,
         'data-test-subj': 'internalAlertsState',
         browserFields,
@@ -485,8 +444,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onColumnResize,
         query,
         rowHeightsOptions,
-        renderCellValue,
-        renderCellContext,
+        cellContext,
         gridStyle,
         controls: persistentControls,
         showInspectButton,
@@ -494,17 +452,28 @@ const AlertsTableStateWithQueryProvider = memo(
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
+        isInitializing,
+        pagination,
+        sort,
+        isLoading,
+        alerts,
+        oldAlertsData,
+        ecsAlertsData,
+        getInspectQuery,
+        refetch: refresh,
+        alertsCount,
+        onSortChange,
+        onPageChange,
       }),
       [
         alertsTableConfiguration,
         memoizedCases,
         memoizedMaintenanceWindows,
         columns,
-        pagination.pageSize,
         id,
         leadingControlColumns,
+        trailingControlColumns,
         showAlertStatusWithFlapping,
-        useFetchAlertsData,
         visibleColumns,
         browserFields,
         onToggleColumn,
@@ -513,7 +482,6 @@ const AlertsTableStateWithQueryProvider = memo(
         onColumnResize,
         query,
         rowHeightsOptions,
-        renderCellValue,
         gridStyle,
         persistentControls,
         showInspectButton,
@@ -521,7 +489,19 @@ const AlertsTableStateWithQueryProvider = memo(
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        renderCellContext,
+        cellContext,
+        isInitializing,
+        pagination,
+        sort,
+        isLoading,
+        alerts,
+        oldAlertsData,
+        ecsAlertsData,
+        getInspectQuery,
+        refresh,
+        alertsCount,
+        onSortChange,
+        onPageChange,
       ]
     );
 

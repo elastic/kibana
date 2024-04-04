@@ -129,7 +129,7 @@ export function registerAlertsTableConfiguration(
     },
     columns,
     useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
-    getRenderCellValue: getRenderCellValue(fieldFormats),
+    getRenderCellValue,
     sort,
     useActionsColumn: () => ({
       renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {

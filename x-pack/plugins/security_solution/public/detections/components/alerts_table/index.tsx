@@ -256,7 +256,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
   );
 
-  const renderCellContext = useCallback(() => {
+  const cellContext = useMemo(() => {
     return {
       isDraggable: false,
       rowRenderers: defaultRowRenderers,
@@ -279,7 +279,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       columns: finalColumns,
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
-      renderCellContext,
+      cellContext,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -299,7 +299,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onAlertTableUpdate,
       runtimeMappings,
       isEventRenderedView,
-      renderCellContext,
+      cellContext,
     ]
   );
 

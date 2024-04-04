@@ -65,7 +65,7 @@ function InternalAlertsPage() {
     },
     uiSettings,
   } = kibanaServices;
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
@@ -222,6 +222,7 @@ function InternalAlertsPage() {
                 query={esQuery}
                 showAlertStatusWithFlapping
                 pageSize={ALERTS_PER_PAGE}
+                cellContext={{ observabilityRuleTypeRegistry }}
               />
             )}
           </EuiFlexItem>

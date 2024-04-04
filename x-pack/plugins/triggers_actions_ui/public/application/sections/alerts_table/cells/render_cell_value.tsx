@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import {
   ALERT_DURATION,
   AlertConsumers,
@@ -22,15 +22,9 @@ import {
   FieldFormatParams,
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
-import { GetRenderCellValue } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-
-interface Props {
-  columnId: string;
-  data: any;
-}
 
 export const getMappedNonEcsValue = ({
   data,
@@ -59,12 +53,11 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
-export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRenderCellValue => {
+export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): RenderCellValue => {
   const alertValueFormatter = getAlertFormatters(fieldFormats);
 
   return () =>
-    (props): ReactNode => {
-      const { columnId, data } = props as Props;
+    ({ columnId, data }: { columnId: string; data: Array<{ field: string; value: any }> }) => {
       if (data == null) return null;
 
       const mappedNonEcsValue = getMappedNonEcsValue({

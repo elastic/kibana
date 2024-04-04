@@ -27,11 +27,7 @@ export const getAlertsPageTableConfiguration = (
   id: observabilityFeatureId,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
   columns: getColumns({ showRuleName: true }),
-  getRenderCellValue: ({ setFlyoutAlert }) =>
-    getRenderCellValue({
-      observabilityRuleTypeRegistry,
-      setFlyoutAlert,
-    }),
+  getRenderCellValue,
   sort: [
     {
       [ALERT_START]: {

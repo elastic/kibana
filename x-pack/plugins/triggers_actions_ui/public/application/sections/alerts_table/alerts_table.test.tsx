@@ -213,25 +213,6 @@ afterAll(() => {
 });
 
 describe('AlertsTable', () => {
-  const fetchAlertsData = {
-    activePage: 0,
-    alerts,
-    alertsCount: alerts.length,
-    isInitializing: false,
-    isLoading: false,
-    getInspectQuery: jest.fn().mockImplementation(() => ({ request: {}, response: {} })),
-    onPageChange: jest.fn(),
-    onSortChange: jest.fn(),
-    refresh: jest.fn(),
-    sort: [],
-    ecsAlertsData,
-    oldAlertsData,
-  };
-
-  const useFetchAlertsData = () => {
-    return fetchAlertsData;
-  };
-
   const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
     id: '',
     columns,
@@ -266,6 +247,22 @@ describe('AlertsTable', () => {
         ),
       };
     },
+    useActionsColumn: () => {
+      return {
+        renderCustomActionsRow: () => (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="analyzeEvent"
+              color="primary"
+              onClick={() => {}}
+              size="s"
+              data-test-subj="fake-action"
+              aria-label="fake-action"
+            />
+          </EuiFlexItem>
+        ),
+      };
+    },
   };
 
   const browserFields: BrowserFields = {
@@ -297,19 +294,27 @@ describe('AlertsTable', () => {
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
-    pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
     trailingControlColumns: [],
-    useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
-    updatedAt: Date.now(),
     onToggleColumn: () => {},
     onResetColumns: () => {},
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},
+    pagination: { pageIndex: 0, pageSize: 1 },
+    sort: [],
+    isLoading: false,
+    alerts,
+    oldAlertsData,
+    ecsAlertsData,
+    getInspectQuery: () => ({ request: [], response: [] }),
+    refetch: () => {},
+    alertsCount: alerts.length,
+    onSortChange: jest.fn(),
+    onPageChange: jest.fn(),
   };
 
   const defaultBulkActionsState = {
@@ -317,6 +322,7 @@ describe('AlertsTable', () => {
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: 4,
+    updatedAt: Date.now(),
   };
 
   const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -376,19 +382,20 @@ describe('AlertsTable', () => {
         skipPointerEventsCheck: true,
       });
 
-      expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
+      expect(tableProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
       ]);
     });
 
     it('should support pagination', async () => {
-      const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-
+      const renderResult = render(
+        <AlertsTableWithProviders {...tableProps} pagination={{ pageIndex: 0, pageSize: 1 }} />
+      );
       userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
         skipPointerEventsCheck: true,
       });
 
-      expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+      expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
 
     it('should show when it was updated', () => {
@@ -405,7 +412,7 @@ describe('AlertsTable', () => {
       const props = {
         ...tableProps,
         showAlertStatusWithFlapping: true,
-        pageSize: alerts.length,
+        pagination: { pageIndex: 0, pageSize: 10 },
         alertsTableConfiguration: {
           ...alertsTableConfiguration,
           getRenderCellValue: undefined,
@@ -431,6 +438,7 @@ describe('AlertsTable', () => {
               rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
             },
           ],
+          pagination: { pageIndex: 0, pageSize: 1 },
         };
         const wrapper = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
@@ -529,6 +537,10 @@ describe('AlertsTable', () => {
       it('should render no action column if there is neither the action nor the expand action config is set', () => {
         const customTableProps = {
           ...tableProps,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: undefined,
+          },
         };
 
         const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
@@ -544,7 +556,7 @@ describe('AlertsTable', () => {
           mockedFn = jest.fn();
           customTableProps = {
             ...tableProps,
-            pageSize: 2,
+            pagination: { pageIndex: 0, pageSize: 10 },
             alertsTableConfiguration: {
               ...alertsTableConfiguration,
               useActionsColumn: () => {
@@ -623,7 +635,6 @@ describe('AlertsTable', () => {
       beforeEach(() => {
         customTableProps = {
           ...tableProps,
-          pageSize: 2,
           alertsTableConfiguration: {
             ...alertsTableConfiguration,
             useCellActions: mockedUseCellActions,
@@ -692,13 +703,19 @@ describe('AlertsTable', () => {
       });
 
       it('should show the cases titles correctly', async () => {
-        render(<AlertsTableWithProviders {...props} />);
+        render(<AlertsTableWithProviders {...props} pagination={{ pageIndex: 0, pageSize: 10 }} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
         expect(await screen.findByText('Test case 2')).toBeInTheDocument();
       });
 
       it('show loading skeleton if it loads cases', async () => {
-        render(<AlertsTableWithProviders {...props} cases={{ ...props.cases, isLoading: true }} />);
+        render(
+          <AlertsTableWithProviders
+            {...props}
+            pagination={{ pageIndex: 0, pageSize: 10 }}
+            cases={{ ...props.cases, isLoading: true }}
+          />
+        );
 
         expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(4);
       });

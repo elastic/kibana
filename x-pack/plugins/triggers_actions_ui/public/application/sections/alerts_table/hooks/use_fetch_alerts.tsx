@@ -121,7 +121,6 @@ function alertReducer(state: AlertStateReducer, action: AlertActions) {
           totalAlerts: action.totalAlerts,
           oldAlertsData: action.oldAlertsData,
           ecsAlertsData: action.ecsAlertsData,
-          // updatedAt: action.updatedAt,
         },
       };
     case 'resetPagination':

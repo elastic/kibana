@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RenderCellValueWithContext } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type {
-  AlertsTableConfigurationRegistryContract,
-  GetRenderCellValue,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -37,12 +33,12 @@ const registerAlertsTableConfiguration = (
   const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
   const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
 
-  const renderCellValueHookAlertPage: GetRenderCellValue = getRenderCellValueHook({
+  const renderCellValueHookAlertPage = getRenderCellValueHook({
     scopeId: SourcererScopeName.detections,
     tableId: TableId.alertsOnAlertsPage,
   });
 
-  const renderCellValueHookCasePage: GetRenderCellValue = getRenderCellValueHook({
+  const renderCellValueHookCasePage = getRenderCellValueHook({
     scopeId: SourcererScopeName.detections,
     tableId: TableId.alertsOnCasePage,
   });

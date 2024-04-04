@@ -28,11 +28,7 @@ export const getRuleDetailsTableConfiguration = (
   id: RULE_DETAILS_ALERTS_TABLE_CONFIG_ID,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
   columns: getColumns(),
-  getRenderCellValue: ({ setFlyoutAlert }) =>
-    getRenderCellValue({
-      observabilityRuleTypeRegistry,
-      setFlyoutAlert,
-    }),
+  getRenderCellValue,
   sort: [
     {
       [ALERT_START]: {

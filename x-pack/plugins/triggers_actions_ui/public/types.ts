@@ -25,7 +25,6 @@ import type {
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
   EuiDataGridCellProps,
-  RenderCellValueWithContext,
   RenderCellValue,
 } from '@elastic/eui';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
@@ -562,14 +561,12 @@ export type AlertsTableProps = {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  pageSize: number;
   pageSizeOptions: number[];
   id?: string;
-  leadingControlColumns: EuiDataGridControlColumn[];
+  leadingControlColumns?: EuiDataGridControlColumn[];
   showAlertStatusWithFlapping?: boolean;
-  trailingControlColumns: EuiDataGridControlColumn[];
-  renderCellContext?: EuiDataGridCellProps['renderCellContext'];
-  useFetchAlertsData: () => FetchAlertData;
+  trailingControlColumns?: EuiDataGridControlColumn[];
+  cellContext?: EuiDataGridCellProps['cellContext'];
   visibleColumns: string[];
   'data-test-subj': string;
   browserFields: any;
@@ -590,6 +587,17 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
+  pagination: RuleRegistrySearchRequestPagination;
+  sort: SortCombinations[];
+  isLoading: boolean;
+  alerts: Alerts;
+  oldAlertsData: FetchAlertData['oldAlertsData'];
+  ecsAlertsData: FetchAlertData['ecsAlertsData'];
+  getInspectQuery: GetInspectQuery;
+  refetch: () => void;
+  alertsCount: number;
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;
@@ -598,8 +606,6 @@ export interface TimelineNonEcsData {
   field: string;
   value?: string[] | null;
 }
-
-export type GetRenderCellValue = React.FC<{ [x: string]: any }>;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -733,7 +739,7 @@ export interface AlertsTableConfigurationRegistry {
     footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
-  getRenderCellValue?: GetRenderCellValue;
+  getRenderCellValue?: RenderCellValue;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;

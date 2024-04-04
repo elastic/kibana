@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, memo } from 'react';
 import type { EuiDataGridSorting, EuiDataGridSchemaDetector } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useDataGridColumnSorting, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
@@ -210,6 +210,18 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
 
     return (
       <ActionsContainer>
+        {showSelectAllCheckbox && (
+          <EventsTh role="checkbox">
+            <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiCheckbox
+                data-test-subj="select-all-events"
+                id={'select-all-events'}
+                checked={isSelectAllChecked}
+                onChange={handleSelectAllChange}
+              />
+            </EventsThContent>
+          </EventsTh>
+        )}
         <EventsTh role="button">
           <FieldBrowserContainer>
             {triggersActionsUi.getFieldBrowser({

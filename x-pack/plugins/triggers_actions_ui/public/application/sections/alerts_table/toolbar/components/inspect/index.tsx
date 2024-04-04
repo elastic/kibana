@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { GetInspectQuery } from '../../../../../../types';
 
 import { HoverVisibilityContainer } from './hover_visibility_container';
@@ -43,13 +43,13 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 }) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
-  const onOpenModal = () => {
+  const onOpenModal = useCallback(() => {
     setIsShowingModal(true);
-  };
+  }, []);
 
-  const onCloseModal = () => {
+  const onCloseModal = useCallback(() => {
     setIsShowingModal(false);
-  };
+  }, []);
 
   return (
     <>

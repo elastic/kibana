@@ -37,7 +37,6 @@ export type {
   AlertsTableFlyoutBaseProps,
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
-  GetRenderCellValue,
   FieldBrowserOptions,
   FieldBrowserProps,
   RuleDefinitionProps,

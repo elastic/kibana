@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 
 import { BulkActionsHeader, BulkActionsRowCell } from './components';
 
 export type GetLeadingControlColumn = () => EuiDataGridControlColumn;
 
-const BulkActionLeadingControlColumnRowCellRender = (
-  cveProps: EuiDataGridCellValueElementProps
-) => {
-  const { visibleRowIndex: rowIndex } = cveProps as EuiDataGridCellValueElementProps & {
-    visibleRowIndex: number;
-  };
-  return <BulkActionsRowCell rowIndex={rowIndex} />;
-};
+const BulkActionLeadingControlColumnRowCellRender = memo(
+  (cveProps: EuiDataGridCellValueElementProps) => {
+    const { visibleRowIndex: rowIndex } = cveProps as EuiDataGridCellValueElementProps & {
+      visibleRowIndex: number;
+    };
+    return <BulkActionsRowCell rowIndex={rowIndex} />;
+  }
+);
 
 export const getLeadingControlColumn: GetLeadingControlColumn = (): EuiDataGridControlColumn => ({
   id: 'bulkActions',
