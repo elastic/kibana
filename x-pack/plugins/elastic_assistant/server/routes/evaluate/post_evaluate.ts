@@ -129,9 +129,7 @@ export const postEvaluateRoute = (
           });
 
           // Fetch any tools registered by the request's originating plugin
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(
-            'securitySolution'
-          );
+          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
 
           // Get a scoped esClient for passing to the agents for retrieval, and
           // writing results to the output index

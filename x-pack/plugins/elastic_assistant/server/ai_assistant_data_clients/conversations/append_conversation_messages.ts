@@ -103,8 +103,8 @@ export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) 
       ...(message.traceData
         ? {
             trace_data: {
-              trace_id: message.traceData.traceId ?? '',
-              transaction_id: message.traceData.transactionId ?? '',
+              trace_id: message.traceData.traceId,
+              transaction_id: message.traceData.transactionId,
             },
           }
         : {}),
