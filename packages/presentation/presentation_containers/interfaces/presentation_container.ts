@@ -13,17 +13,13 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
-import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
   panelType: string;
   initialState?: object;
 }
 
-export interface PresentationContainer
-  extends Partial<PublishesViewMode>,
-    CanAddNewPanel,
-    PublishesLastSavedState {
+export interface PresentationContainer extends Partial<PublishesViewMode>, CanAddNewPanel {
   addNewPanel: <ApiType extends unknown = unknown>(
     panel: PanelPackage,
     displaySuccessMessage?: boolean
