@@ -100,40 +100,51 @@ export const eqlExecutor = async ({
     }
     const eqlSignalSearchStart = performance.now();
 
-    const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
-      request
-    );
-
-    const eqlSignalSearchEnd = performance.now();
-    const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
-    result.searchAfterTimes = [eqlSearchDuration];
-
-    let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
-    if (response.hits.sequences !== undefined) {
-      newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
-    } else if (response.hits.events !== undefined) {
-      newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
-    } else {
-      throw new Error(
-        'eql query response should have either `sequences` or `events` but had neither'
-      );
-    }
-
-    if (newSignals?.length) {
-      const createResult = await bulkCreate(
-        newSignals,
-        undefined,
-        createEnrichEventsFunction({
-          services,
-          logger: ruleExecutionLogger,
-        })
+    try {
+      const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
+        request
       );
 
-      addToSearchAfterReturn({ current: result, next: createResult });
+      const eqlSignalSearchEnd = performance.now();
+      const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
+      result.searchAfterTimes = [eqlSearchDuration];
+
+      let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
+      if (response.hits.sequences !== undefined) {
+        newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
+      } else if (response.hits.events !== undefined) {
+        newSignals = wrapHits(response.hits.events, buildReasonMessageForEqlAlert);
+      } else {
+        throw new Error(
+          'eql query response should have either `sequences` or `events` but had neither'
+        );
+      }
+
+      if (newSignals?.length) {
+        const createResult = await bulkCreate(
+          newSignals,
+          undefined,
+          createEnrichEventsFunction({
+            services,
+            logger: ruleExecutionLogger,
+          })
+        );
+
+        addToSearchAfterReturn({ current: result, next: createResult });
+      }
+      if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
+        result.warningMessages.push(getMaxSignalsWarning());
+      }
+      return result;
+    } catch (error) {
+      if ((error.message as string).includes('verification_exception')) {
+        // We report errors that are more related to user configuration of rules rather than system outages as "user errors"
+        // so SLO dashboards can show less noise around system outages
+        result.userError = true;
+      }
+      result.errors.push(error.message);
+      result.success = false;
+      return result;
     }
-    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
-      result.warningMessages.push(getMaxSignalsWarning());
-    }
-    return result;
   });
 };
