@@ -46,11 +46,14 @@ export const getGenAiTokenTracking = async ({
   // this is an async iterator from the OpenAI sdk
   if (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') {
     try {
-      const data = result.data as Array<Stream<ChatCompletionChunk>>;
+      const data = result.data as {
+        consumerStream: Stream<ChatCompletionChunk>;
+        tokenCountStream: Stream<ChatCompletionChunk>;
+      };
       // the async interator is teed in the subaction response, double check that it has two streams
-      if (data.length === 2) {
+      if (data.tokenCountStream) {
         const { total, prompt, completion } = await getTokenCountFromInvokeAsyncIterator({
-          streamIterable: data[1],
+          streamIterable: data.tokenCountStream,
           body: (validatedParams as { subActionParams: InvokeAsyncIteratorBody }).subActionParams,
           logger,
         });

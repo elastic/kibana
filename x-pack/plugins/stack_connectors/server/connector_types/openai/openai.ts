@@ -272,12 +272,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * Streamed security solution AI Assistant requests (langchain)
    * Uses the official OpenAI Node library, which handles Server-sent events for you.
    * @param body - the OpenAI Invoke request body
-   * @returns a Stream<ChatCompletionChunk> array "teed", teed[0] is used for the UI and teed[1] for token tracking
-   * the result is meant to be read/transformed on the server and sent to the client via Server Sent Events
+   * @returns {
+   *  consumerStream: Stream<ChatCompletionChunk>; the result to be read/transformed on the server and sent to the client via Server Sent Events
+   *  tokenCountStream: Stream<ChatCompletionChunk>; the result for token counting stream
+   * }
    */
-  public async invokeAsyncIterator(
-    body: InvokeAIActionParams
-  ): Promise<Array<Stream<ChatCompletionChunk>>> {
+  public async invokeAsyncIterator(body: InvokeAIActionParams): Promise<{
+    consumerStream: Stream<ChatCompletionChunk>;
+    tokenCountStream: Stream<ChatCompletionChunk>;
+  }> {
     try {
       const { signal, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
@@ -294,7 +297,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       });
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
-      return teed;
+      return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);

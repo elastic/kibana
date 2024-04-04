@@ -22,7 +22,7 @@ jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 const mockTee = jest.fn();
 
 const mockCreate = jest.fn().mockImplementation(() => ({
-  tee: mockTee,
+  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
 }));
 
 jest.mock('openai', () => ({

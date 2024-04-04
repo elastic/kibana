@@ -215,7 +215,7 @@ describe('getGenAiTokenTracking', () => {
     const result = {
       actionId: '123',
       status: 'ok' as const,
-      data: [mockStream, mockStream],
+      data: { consumerStream: mockStream, tokenCountStream: mockStream },
     };
     const validatedParams = {
       subAction: 'invokeAsyncIterator',

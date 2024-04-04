@@ -140,13 +140,16 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       }
 
       // cast typing as this is the contract of the actions client
-      const result = get('data', actionResult) as Array<Stream<ChatCompletionChunk>>;
+      const result = get('data', actionResult) as {
+        consumerStream: Stream<ChatCompletionChunk>;
+        tokenCountStream: Stream<ChatCompletionChunk>;
+      };
 
-      if (result.length === 0) {
+      if (result.consumerStream == null) {
         throw new Error(`${LLM_TYPE}: action result data is empty ${actionResult}`);
       }
 
-      return result[0];
+      return result.consumerStream;
     });
   }
   formatRequestForActionsClient(completionRequest: ChatCompletionCreateParamsStreaming): {
