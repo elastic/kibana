@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
@@ -19,6 +19,7 @@ import {
   DATE_PICKER_FORMAT,
 } from './constants';
 import { generateAddServicesToExistingHost } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -139,11 +140,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      synthtraceApmClient = new ApmSynthtraceEsClient({
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
         client: esClient,
-        logger: createLogger(LogLevel.info),
-        version: (await apmSynthtraceKibanaClient.installApmPackage()).version,
-        refreshAfterIndex: true,
+        packageVersion: version,
       });
 
       const services = generateAddServicesToExistingHost({

@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 import { ServicesAPIResponseRT } from '@kbn/infra-plugin/common/http_api/host_details';
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateServicesData, generateServicesLogsOnlyData } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const SERVICES_ENDPOINT = '/api/infra/services';
 
@@ -23,15 +24,13 @@ export default function ({ getService }: FtrProviderContext) {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();
-    before(
-      async () =>
-        (synthtraceApmClient = new ApmSynthtraceEsClient({
-          client: esClient,
-          logger: createLogger(LogLevel.info),
-          version: (await apmSynthtraceKibanaClient.installApmPackage()).version,
-          refreshAfterIndex: true,
-        }))
-    );
+    before(async () => {
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
+        client: esClient,
+        packageVersion: version,
+      });
+    });
     after(async () => apmSynthtraceKibanaClient.uninstallApmPackage());
 
     describe('with transactions', () => {
