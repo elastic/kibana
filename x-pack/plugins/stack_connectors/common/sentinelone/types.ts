@@ -21,6 +21,7 @@ import {
   SentinelOneActionParamsSchema,
   SentinelOneGetAgentFilesParamsSchema,
   SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
 } from './schema';
 
 export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
@@ -52,6 +53,8 @@ export type SentinelOneGetAgentFilesParams = TypeOf<typeof SentinelOneGetAgentFi
 export type SentinelOneDownloadAgentFileParams = TypeOf<
   typeof SentinelOneDownloadAgentFileParamsSchema
 >;
+
+export type SentinelOneGetActivitiesParams = TypeOf<typeof SentinelOneGetActivitiesParamsSchema>;
 
 export type SentinelOneIsolateHostParams = TypeOf<typeof SentinelOneIsolateHostParamsSchema>;
 

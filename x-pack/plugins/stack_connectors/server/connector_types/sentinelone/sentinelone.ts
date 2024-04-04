@@ -38,10 +38,13 @@ import {
   SentinelOneGetAgentFilesResponseSchema,
   SentinelOneDownloadAgentFileParamsSchema,
   SentinelOneDownloadAgentFileResponseSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneGetActivitiesResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
   SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
   SentinelOneGetAgentFilesParams,
 } from '../../../common/sentinelone/types';
 
@@ -59,6 +62,7 @@ export class SentinelOneConnector extends SubActionConnector<
     remoteScripts: string;
     remoteScriptStatus: string;
     remoteScriptsExecute: string;
+    activities: string;
   };
 
   constructor(params: ServiceParams<SentinelOneConfig, SentinelOneSecrets>) {
@@ -71,6 +75,7 @@ export class SentinelOneConnector extends SubActionConnector<
       remoteScriptStatus: `${this.config.url}${API_PATH}/remote-scripts/status`,
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
       agents: `${this.config.url}${API_PATH}/agents`,
+      activities: `${this.config.url}${API_PATH}/activities`,
     };
 
     this.registerSubActions();
@@ -93,6 +98,12 @@ export class SentinelOneConnector extends SubActionConnector<
       name: SUB_ACTION.DOWNLOAD_AGENT_FILE,
       method: 'downloadAgentFile',
       schema: SentinelOneDownloadAgentFileParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.GET_ACTIVITIES,
+      method: 'getActivities',
+      schema: SentinelOneGetActivitiesParamsSchema,
     });
 
     this.registerSubAction({
@@ -165,6 +176,15 @@ export class SentinelOneConnector extends SubActionConnector<
       url: `${this.urls.agents}/${agentId}/uploads/${activityId}`,
       method: 'get',
       responseSchema: SentinelOneDownloadAgentFileResponseSchema,
+    });
+  }
+
+  public async getActivities(queryParams?: SentinelOneGetActivitiesParams) {
+    return this.sentinelOneApiRequest({
+      url: this.urls.activities,
+      method: 'get',
+      params: queryParams,
+      responseSchema: SentinelOneGetActivitiesResponseSchema,
     });
   }
 
