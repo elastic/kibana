@@ -55,16 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
       await dataViews.createFromSearchBar({ name: dataViewToCreate });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitForWithTimeout(
-        'data view selector to include a newly created dataview',
-        5000,
-        async () => {
-          const dataViewTitle = await PageObjects.discover.getCurrentlySelectedDataView();
-          // data view editor will add wildcard symbol by default
-          // so we need to include it in our original title when comparing
-          return dataViewTitle === `${dataViewToCreate}*`;
-        }
-      );
+      await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
     });
   });
 }

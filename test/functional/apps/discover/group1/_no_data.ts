@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const retry = getService('retry');
-  const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -51,16 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.waitForWithTimeout(
-        'data view selector to include a newly created dataview',
-        5000,
-        async () => {
-          const dataViewTitle = await PageObjects.discover.getCurrentlySelectedDataView();
-          // data view editor will add wildcard symbol by default
-          // so we need to include it in our original title when comparing
-          return dataViewTitle === `${dataViewToCreate}*`;
-        }
-      );
+      await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
     });
 
     it('skips to Discover to try ES|QL', async () => {

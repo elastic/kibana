@@ -525,23 +525,11 @@ export class DiscoverPageObject extends FtrService {
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
-  public async isAdHocDataViewSelected() {
-    const dataView = await this.getCurrentlySelectedDataView();
-    await this.testSubjects.click('discover-dataView-switch-link');
-    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
-    await this.testSubjects.click('discover-dataView-switch-link');
-    return hasBadge;
-  }
-
   public async selectIndexPattern(
     indexPattern: string,
     waitUntilLoadingHasFinished: boolean = true
   ) {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
-    await this.find.clickByCssSelector(
-      `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
-    );
+    await this.dataViews.switchTo(indexPattern);
     if (waitUntilLoadingHasFinished) {
       await this.header.waitUntilLoadingHasFinished();
     }
@@ -682,12 +670,6 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
-  }
-
-  public async getCurrentlySelectedDataView() {
-    await this.testSubjects.existOrFail('discover-sidebar');
-    const button = await this.testSubjects.find('discover-dataView-switch-link');
-    return button.getAttribute('title');
   }
 
   /**

@@ -1040,13 +1040,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Returns the current index pattern of the data panel
-     */
-    async getDataPanelIndexPattern() {
-      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
-    },
-
-    /**
      * Returns the current index pattern of the first layer
      */
     async getFirstLayerIndexPattern() {

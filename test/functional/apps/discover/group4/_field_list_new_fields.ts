@@ -58,10 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-
-      await retry.waitFor('current data view to get updated', async () => {
-        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
-      });
+      await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(1);
@@ -108,10 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
-
-      await retry.waitFor('current data view to get updated', async () => {
-        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
-      });
+      await dataViews.waitForSwitcherToBe(`${initialPattern}*`);
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(1);

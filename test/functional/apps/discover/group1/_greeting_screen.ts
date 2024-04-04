@@ -49,11 +49,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataViews.createFromPrompt({ name: 'logs', hasTimeField: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(false);
+      expect(await dataViews.isAdHoc()).to.be(false);
 
       await dataViews.createFromSearchBar({ name: 'log', adHoc: true, hasTimeField: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(true);
+      expect(await dataViews.isAdHoc()).to.be(true);
 
       expect(await PageObjects.discover.getIndexPatterns()).to.eql(['log*\nTemporary', 'logs*']);
     });

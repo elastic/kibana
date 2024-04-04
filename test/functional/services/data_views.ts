@@ -83,12 +83,20 @@ export class DataViewsService extends FtrService {
    * Switch Data View from top search bar
    */
   public async switchTo(name: string) {
+    const selectedDataView = await this.getSelectedName();
+    if (name === selectedDataView) {
+      return;
+    }
     await this.testSubjects.click('*dataView-switch-link');
     await this.testSubjects.existOrFail('indexPattern-switcher');
     await this.testSubjects.setValue('indexPattern-switcher--input', name);
     await this.find.clickByCssSelector(`[title="${name}"]`);
+    await this.waitForSwitcherToBe(name);
   }
 
+  /**
+   * Waits for selected Data View to equal name argument
+   */
   public async waitForSwitcherToBe(name: string) {
     await this.retry.waitFor(
       'Data View switcher to be updated',
@@ -122,11 +130,5 @@ export class DataViewsService extends FtrService {
     if (await this.testSubjects.exists('confirmModalConfirmButton')) {
       await this.testSubjects.click('confirmModalConfirmButton');
     }
-  }
-
-  async changeName(newName: string) {
-    await this.testSubjects.click('editIndexPatternButton');
-    await this.create({ name: newName });
-    await this.testSubjects.click('confirmModalConfirmButton');
   }
 }

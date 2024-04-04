@@ -114,10 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow switching to another data view and back', async () => {
       await dataViews.switchTo('logstash-*');
-      await dataViews.waitForSwitcherToBe('logstash-*');
       await PageObjects.lens.waitForFieldMissing('runtimefield');
       await dataViews.switchTo('*stash*');
-      await dataViews.waitForSwitcherToBe('*stash*');
       await PageObjects.lens.waitForField('runtimefield');
     });
 

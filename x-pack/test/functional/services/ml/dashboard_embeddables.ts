@@ -140,11 +140,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
     },
 
     async selectDiscoverIndexPattern(indexPattern: string) {
-      await retry.tryForTime(2 * 1000, async () => {
-        await PageObjects.discover.selectIndexPattern(indexPattern);
-        const indexPatternTitle = await dataViews.getSelectedName();
-        expect(indexPatternTitle).to.be(indexPattern);
-      });
+      await dataViews.switchTo(indexPattern);
     },
   };
 }

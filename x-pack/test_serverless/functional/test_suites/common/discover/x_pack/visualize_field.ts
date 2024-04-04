@@ -129,11 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await retry.try(async () => {
-        const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-        expect(selectedPattern).to.eql('logst*');
-      });
+      await dataViews.waitForSwitcherToBe('logst*');
     });
 
     // TODO: ES|QL tests removed since ES|QL isn't supported in Serverless

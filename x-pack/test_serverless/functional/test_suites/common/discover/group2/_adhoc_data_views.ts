@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
+      expect(await dataViews.getSelectedName()).to.be('logstash*');
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
+      expect(await dataViews.getSelectedName()).to.be('logstash*');
     });
 
     it('should support query and filtering', async () => {

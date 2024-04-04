@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.hasFilter('extension', 'css')).to.be(false);
       expect(await queryBar.getQueryString()).to.be('');
       expect(await dataViews.getSelectedName()).to.be('logs**');
-      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(true);
+      expect(await dataViews.isAdHoc()).to.be(true);
     });
 
     it('should work correctly for ESQL mode', async () => {

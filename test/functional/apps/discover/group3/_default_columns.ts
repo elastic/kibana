@@ -80,21 +80,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await dataViews.switchTo('Kibana Sample Data Logs (TSDB)');
-      await dataViews.waitForSwitcherToBe('Kibana Sample Data Logs (TSDB)');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['timestamp', 'message', 'extension']);
 
       await dataViews.switchTo('kibana_sample_data_flights');
-      await dataViews.waitForSwitcherToBe('kibana_sample_data_flights');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['timestamp', 'DestCountry']);
 
       await dataViews.switchTo('logstash-*');
-      await dataViews.waitForSwitcherToBe('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -109,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
       await dataViews.switchTo('Kibana Sample Data Logs (TSDB)');
-      await dataViews.waitForSwitcherToBe('Kibana Sample Data Logs (TSDB)');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -121,7 +117,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await dataViews.switchTo('logstash-*');
-      await dataViews.waitForSwitcherToBe('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -143,7 +138,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await dataViews.switchTo('kibana_sample_data_flights');
-      await dataViews.waitForSwitcherToBe('kibana_sample_data_flights');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
