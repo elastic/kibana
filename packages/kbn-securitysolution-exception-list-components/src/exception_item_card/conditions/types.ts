@@ -15,6 +15,7 @@ import type {
   EntryNested,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ElementType } from 'react';
 
 export type Entry =
   | EntryExists
@@ -29,5 +30,5 @@ export interface CriteriaConditionsProps {
   entries: Entries;
   dataTestSubj: string;
   os?: ExceptionListItemSchema['os_types'];
-  React.ComponentType<{ listId: string; children: React.ReactNode }>;
+  showValueListModal: ElementType;
 }
