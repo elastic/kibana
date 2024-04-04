@@ -25,6 +25,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
+
   // if some installation already exists
   if (installedPkg) {
     const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
@@ -71,7 +72,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     }
   } else {
     logger.debug(`Package install - Create installation`);
-    // step create_installation
+
     await createInstallation({
       savedObjectsClient,
       packageInfo,
@@ -80,8 +81,4 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
       verificationResult,
     });
   }
-  // Use a shared array that is updated by each operation. This allows each operation to accurately update the
-  // installation object with it's references without requiring a refresh of the SO index on each update (faster).
-  const esReferences = installedPkg?.attributes.installed_es ?? [];
-  return { esReferences };
 }

@@ -560,6 +560,7 @@ export enum INSTALL_STATES {
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;

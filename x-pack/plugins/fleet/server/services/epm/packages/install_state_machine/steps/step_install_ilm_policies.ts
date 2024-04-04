@@ -17,7 +17,12 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 
 export async function stepInstallILMPolicies(context: InstallContext) {
-  const { logger, esReferences, packageInstallContext, esClient, savedObjectsClient } = context;
+  const { logger, packageInstallContext, esClient, savedObjectsClient, installedPkg } = context;
+
+  // Array that gets updated by each operation. This allows each operation to accurately update the
+  // installation object with its references without requiring a refresh of the SO index on each update (faster).
+  const esReferences = installedPkg?.attributes.installed_es ?? [];
+
   let updatedEsReferences: EsAssetReference[] = [];
 
   // currently only the base package has an ILM policy

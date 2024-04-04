@@ -18,11 +18,40 @@ export interface State {
 
 export type StatusName = 'success' | 'failed' | 'pending';
 export type StateMachineStates<T extends string> = Record<T, State>;
+/*
+ * Data structure defining the state machine
+ *  {
+ *    context: {},
+ *    states: {
+ *      state1: {
+ *        onTransition: onState1Transition,
+ *        onPostTransition: onPostTransition,
+ *        nextState: 'state2',
+ *      },
+ *      state2: {
+ *        onTransition: onState2Transition,
+ *        onPostTransition: onPostTransition,,
+ *        nextState: 'state3',
+ *      },
+ *      state3: {
+ *        onTransition: onState3Transition,
+ *        onPostTransition: onPostTransition,
+ *        nextState: 'end',
+ *      }
+ *    }
+ */
 export interface StateMachineDefinition<T extends string> {
-  context?: any;
+  context: StateContext<string>;
   states: StateMachineStates<T>;
 }
-
+/*
+ * Generic state machine implemented to handle state transitions, based on a provided data structure
+ * currentStateName: iniital state
+ * definition: data structure defined as a StateMachineDefinition
+ * context: object keeping the state between transitions. All the transition functions accept it as input parameter and write to it
+ *
+ * It recursively traverses all the states until it finds the last state.
+ */
 export async function handleState(
   currentStateName: string,
   definition: StateMachineDefinition<string>,
@@ -76,7 +105,7 @@ export async function handleState(
       await executePostTransition(logger, updatedContext, currentState);
 
       // bubble up the error
-      throw errorMessage;
+      throw error;
     }
   } else {
     currentStatus = 'failed';

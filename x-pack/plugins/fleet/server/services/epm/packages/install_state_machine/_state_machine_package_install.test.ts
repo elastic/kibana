@@ -14,7 +14,10 @@ import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/serv
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { PackageSavedObjectConflictError } from '../../../../errors';
+import {
+  PackageSavedObjectConflictError,
+  ConcurrentInstallOperationError,
+} from '../../../../errors';
 
 import type { Installation } from '../../../../../common';
 
@@ -89,7 +92,7 @@ describe('_stateMachineInstallPackage', () => {
     jest.mocked(restartInstallation).mockReset();
   });
 
-  it('handles errors from installKibanaAssets', async () => {
+  it('Handles errors from installKibanaAssets', async () => {
     // force errors from this function
     mockedInstallKibanaAssetsAndReferences.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
@@ -105,43 +108,39 @@ describe('_stateMachineInstallPackage', () => {
     });
 
     // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
-    let thrownError;
-    try {
-      await _stateMachineInstallPackage({
-        savedObjectsClient: soClient,
-        // @ts-ignore
-        savedObjectsImporter: jest.fn(),
-        esClient,
-        logger: loggerMock.create(),
-        packageInstallContext: {
-          assetsMap: new Map(),
-          paths: [],
-          packageInfo: {
-            title: 'title',
-            name: 'xyz',
-            version: '4.5.6',
-            description: 'test',
-            type: 'integration',
-            categories: ['cloud', 'custom'],
-            format_version: 'string',
-            release: 'experimental',
-            conditions: { kibana: { version: 'x.y.z' } },
-            owner: { github: 'elastic/fleet' },
-          },
+    const installationPromise = _stateMachineInstallPackage({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext: {
+        assetsMap: new Map(),
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
         },
-        installType: 'install',
-        installSource: 'registry',
-        spaceId: DEFAULT_SPACE_ID,
-      });
-    } catch (error) {
-      thrownError = error;
-    }
-    expect(thrownError).toEqual(
-      `Error during execution of state \"save_archive_entries_from_assets_map\" with status \"failed\": mocked async error A: should be caught`
-    );
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    // if we have a .catch this will fail nicely (test pass)
+    // otherwise the test will fail with either of the mocked errors
+    await expect(installationPromise).rejects.toThrow('mocked');
+    await expect(installationPromise).rejects.toThrow('should be caught');
   });
 
-  it('do not install ILM policies if disabled in config', async () => {
+  it('Do not install ILM policies if disabled in config', async () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
@@ -198,7 +197,7 @@ describe('_stateMachineInstallPackage', () => {
     expect(installIlmForDataStream).not.toBeCalled();
   });
 
-  it('install ILM policies if not disabled in config', async () => {
+  it('Installs ILM policies if not disabled in config', async () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
@@ -255,7 +254,7 @@ describe('_stateMachineInstallPackage', () => {
     expect(installIlmForDataStream).toBeCalled();
   });
 
-  describe('when package is stuck in `installing`', () => {
+  describe('When package is stuck in `installing`', () => {
     const mockInstalledPackageSo: SavedObject<Installation> = {
       id: 'mocked-package',
       attributes: {
@@ -292,7 +291,7 @@ describe('_stateMachineInstallPackage', () => {
       );
     });
 
-    describe('timeout reached', () => {
+    describe('When timeout is reached', () => {
       it('restarts installation', async () => {
         await _stateMachineInstallPackage({
           savedObjectsClient: soClient,
@@ -324,45 +323,38 @@ describe('_stateMachineInstallPackage', () => {
       });
     });
 
-    describe('Timeout not reached', () => {
-      describe('Force flag not provided', () => {
-        it('throws concurrent installation error if force flag is not provided', async () => {
-          // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
-          let thrownError;
-          try {
-            await _stateMachineInstallPackage({
-              savedObjectsClient: soClient,
-              // @ts-ignore
-              savedObjectsImporter: jest.fn(),
-              esClient,
-              logger: loggerMock.create(),
-              packageInstallContext: {
-                paths: [],
-                assetsMap: new Map(),
-                packageInfo: {
-                  name: mockInstalledPackageSo.attributes.name,
-                  version: mockInstalledPackageSo.attributes.version,
-                  title: mockInstalledPackageSo.attributes.name,
-                } as any,
+    describe('When timeout is not reached', () => {
+      describe('With no force flag', () => {
+        it('throws concurrent installation error', async () => {
+          const installPromise = _stateMachineInstallPackage({
+            savedObjectsClient: soClient,
+            // @ts-ignore
+            savedObjectsImporter: jest.fn(),
+            esClient,
+            logger: loggerMock.create(),
+            packageInstallContext: {
+              paths: [],
+              assetsMap: new Map(),
+              packageInfo: {
+                name: mockInstalledPackageSo.attributes.name,
+                version: mockInstalledPackageSo.attributes.version,
+                title: mockInstalledPackageSo.attributes.name,
+              } as any,
+            },
+            installedPkg: {
+              ...mockInstalledPackageSo,
+              attributes: {
+                ...mockInstalledPackageSo.attributes,
+                install_started_at: new Date(Date.now() - 1000).toISOString(),
               },
-              installedPkg: {
-                ...mockInstalledPackageSo,
-                attributes: {
-                  ...mockInstalledPackageSo.attributes,
-                  install_started_at: new Date(Date.now() - 1000).toISOString(),
-                },
-              },
-            });
-          } catch (error) {
-            thrownError = error;
-          }
-          expect(thrownError).toEqual(
-            `Error during execution of state \"create_restart_installation\" with status \"failed\": Concurrent installation or upgrade of test-package-1.0.0 detected, aborting.`
-          );
+            },
+          });
+
+          await expect(installPromise).rejects.toThrowError(ConcurrentInstallOperationError);
         });
       });
 
-      describe('force flag provided', () => {
+      describe('With force flag provided', () => {
         it('restarts installation', async () => {
           await _stateMachineInstallPackage({
             savedObjectsClient: soClient,
@@ -395,7 +387,7 @@ describe('_stateMachineInstallPackage', () => {
     });
   });
 
-  it('surfaces saved object conflicts error', async () => {
+  it('Surfaces saved object conflicts error', async () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
@@ -415,40 +407,33 @@ describe('_stateMachineInstallPackage', () => {
     mockedInstallKibanaAssetsAndReferences.mockRejectedValueOnce(
       new PackageSavedObjectConflictError('test')
     );
-    let thrownError;
-    // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
-    try {
-      await _stateMachineInstallPackage({
-        savedObjectsClient: soClient,
-        // @ts-ignore
-        savedObjectsImporter: jest.fn(),
-        esClient,
-        logger: loggerMock.create(),
-        packageInstallContext: {
-          packageInfo: {
-            title: 'title',
-            name: 'xyz',
-            version: '4.5.6',
-            description: 'test',
-            type: 'integration',
-            categories: ['cloud', 'custom'],
-            format_version: 'string',
-            release: 'experimental',
-            conditions: { kibana: { version: 'x.y.z' } },
-            owner: { github: 'elastic/fleet' },
-          } as any,
-          assetsMap: new Map(),
-          paths: [],
-        },
-        installType: 'install',
-        installSource: 'registry',
-        spaceId: DEFAULT_SPACE_ID,
-      });
-    } catch (error) {
-      thrownError = error;
-    }
-    expect(thrownError).toEqual(
-      `Error during execution of state "save_archive_entries_from_assets_map" with status "failed": test`
-    );
+
+    const installPromise = _stateMachineInstallPackage({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext: {
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        } as any,
+        assetsMap: new Map(),
+        paths: [],
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    await expect(installPromise).rejects.toThrowError(PackageSavedObjectConflictError);
   });
 });

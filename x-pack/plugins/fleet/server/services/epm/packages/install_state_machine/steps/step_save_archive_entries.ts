@@ -15,8 +15,7 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
-  const { packageInstallContext, savedObjectsClient, installSource, kibanaAssetPromise } = context;
-  const installedKibanaAssetsRefs = await kibanaAssetPromise;
+  const { packageInstallContext, savedObjectsClient, installSource } = context;
 
   const { packageInfo } = packageInstallContext;
 
@@ -36,5 +35,5 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
     })
   );
 
-  return { packageAssetRefs, installedKibanaAssetsRefs };
+  return { packageAssetRefs };
 }

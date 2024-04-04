@@ -44,6 +44,7 @@ import {
   stepInstallTransforms,
   stepDeletePreviousPipelines,
   stepSaveArchiveEntries,
+  stepResolveKibanaPromise,
   stepSaveSystemObject,
   updateLatestExecutedState,
 } from './steps';
@@ -128,6 +129,11 @@ export async function _stateMachineInstallPackage(
       },
       save_archive_entries_from_assets_map: {
         onTransition: stepSaveArchiveEntries,
+        nextState: 'resolve_kibana_promise',
+        onPostTransition: updateLatestExecutedState,
+      },
+      resolve_kibana_promise: {
+        onTransition: stepResolveKibanaPromise,
         nextState: 'update_so',
         onPostTransition: updateLatestExecutedState,
       },
