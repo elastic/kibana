@@ -5,26 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-// We want to allow both right-clicking to open in a new tab and clicking through
-// the "Open in Console" link. We could use `RedirectAppLinks` at the top level
-// but that inserts a div which messes up the layout of the inspector.
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
-import type { ConnectionRequestParams } from '@elastic/transport';
+import React, { useCallback } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
-import React, { useCallback } from 'react';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { InspectorPluginStartDeps } from '../../../../plugin';
-
-interface RequestCodeViewerLinksProps {
-  indexPattern?: string;
-  requestParams?: ConnectionRequestParams;
-  json: string;
-  value: string;
-}
+import { RequestCodeViewer } from './req_code_viewer';
+import type { InspectorKibanaServices } from '../types';
 
 const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel', {
   defaultMessage: 'Open in Console',
@@ -34,19 +24,36 @@ const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearc
   defaultMessage: 'Open in Search Profiler',
 });
 
-/**
- * @internal
- */
-export const RequestCodeViewerLinks = ({
-  indexPattern,
+interface RequestDetailsRequestContentProps {
+  indexPattern?: string;
+  requestParams?: ConnectionRequestParams;
+  json: string;
+}
+
+export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContentProps> = ({
   requestParams,
+  indexPattern,
   json,
-  value,
-}: RequestCodeViewerLinksProps) => {
-  const { services } = useKibana<InspectorPluginStartDeps>();
+}) => {
+  const { services } = useKibana<InspectorKibanaServices>();
+
+  function getValue(): string {
+    if (!requestParams) {
+      return json;
+    }
+
+    const fullPath = requestParams.querystring
+      ? `${requestParams.path}?${requestParams.querystring}`
+      : requestParams.path;
+
+    return `${requestParams.method} ${fullPath}\n${json}`;
+  }
+
+  const value = getValue();
 
   const navigateToUrl = services.application?.navigateToUrl;
 
+  // "Open in Console" button
   const devToolsDataUri = compressToEncodedURIComponent(value);
   const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
@@ -60,6 +67,7 @@ export const RequestCodeViewerLinks = ({
     [consoleHref, navigateToUrl]
   );
 
+  // "Open in Search Profiler" button
   const searchProfilerDataUri = compressToEncodedURIComponent(json);
   const searchProfilerHref = services.share.url.locators
     .get('SEARCH_PROFILER_LOCATOR')
@@ -73,40 +81,37 @@ export const RequestCodeViewerLinks = ({
     [searchProfilerHref, navigateToUrl]
   );
 
-  return (
-    <>
-      {shouldShowDevToolsLink && (
-        <EuiFlexItem grow={false}>
-          <div>
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              iconType="wrench"
-              href={consoleHref}
-              onClick={handleDevToolsLinkClick}
-              data-test-subj="inspectorRequestOpenInConsoleButton"
-            >
-              {openInConsoleLabel}
-            </EuiButtonEmpty>
-          </div>
-        </EuiFlexItem>
-      )}
-      {shouldShowsearchProfilerLink && (
-        <EuiFlexItem grow={false}>
-          <div>
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              iconType="visBarHorizontal"
-              href={searchProfilerHref}
-              onClick={handleSearchProfilerLinkClick}
-              data-test-subj="inspectorRequestOpenInSearchProfilerButton"
-            >
-              {openInSearchProfilerLabel}
-            </EuiButtonEmpty>
-          </div>
-        </EuiFlexItem>
-      )}
-    </>
-  );
+  const actions: React.ReactNode[] = [];
+
+  if (shouldShowDevToolsLink) {
+    actions.push(
+      <EuiButtonEmpty
+        size="xs"
+        flush="right"
+        iconType="wrench"
+        href={consoleHref}
+        onClick={handleDevToolsLinkClick}
+        data-test-subj="inspectorRequestOpenInConsoleButton"
+      >
+        {openInConsoleLabel}
+      </EuiButtonEmpty>
+    );
+  }
+
+  if (shouldShowsearchProfilerLink) {
+    actions.push(
+      <EuiButtonEmpty
+        size="xs"
+        flush="right"
+        iconType="visBarHorizontal"
+        href={searchProfilerHref}
+        onClick={handleSearchProfilerLinkClick}
+        data-test-subj="inspectorRequestOpenInSearchProfilerButton"
+      >
+        {openInSearchProfilerLabel}
+      </EuiButtonEmpty>
+    );
+  }
+
+  return <RequestCodeViewer value={value} actions={actions} />;
 };

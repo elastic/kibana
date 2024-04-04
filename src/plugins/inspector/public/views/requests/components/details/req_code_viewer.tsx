@@ -11,18 +11,14 @@
 // but that inserts a div which messes up the layout of the inspector.
 
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { ConnectionRequestParams } from '@elastic/transport';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
-import { RequestCodeViewerLinks } from './req_code_viewer_links';
 
 interface RequestCodeViewerProps {
-  indexPattern?: string;
-  requestParams?: ConnectionRequestParams;
-  json: string;
-  includeOpenInAppLinks: boolean;
+  value: string;
+  actions?: React.ReactNode[];
 }
 
 const copyToClipboardLabel = i18n.translate('inspector.requests.copyToClipboardLabel', {
@@ -32,26 +28,7 @@ const copyToClipboardLabel = i18n.translate('inspector.requests.copyToClipboardL
 /**
  * @internal
  */
-export const RequestCodeViewer = ({
-  indexPattern,
-  requestParams,
-  json,
-  includeOpenInAppLinks,
-}: RequestCodeViewerProps) => {
-  function getValue() {
-    if (!requestParams) {
-      return json;
-    }
-
-    const fullPath = requestParams.querystring
-      ? `${requestParams.path}?${requestParams.querystring}`
-      : requestParams.path;
-
-    return `${requestParams.method} ${fullPath}\n${json}`;
-  }
-
-  const value = getValue();
-
+export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) => {
   return (
     <EuiFlexGroup
       direction="column"
@@ -65,7 +42,7 @@ export const RequestCodeViewer = ({
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
             <div>
-              <EuiCopy textToCopy={json}>
+              <EuiCopy textToCopy={value}>
                 {(copy) => (
                   <EuiButtonEmpty
                     size="xs"
@@ -80,14 +57,12 @@ export const RequestCodeViewer = ({
               </EuiCopy>
             </div>
           </EuiFlexItem>
-          {includeOpenInAppLinks && (
-            <RequestCodeViewerLinks
-              requestParams={requestParams}
-              indexPattern={indexPattern}
-              json={json}
-              value={value}
-            />
-          )}
+          {!!actions &&
+            actions.map((action, index) => (
+              <EuiFlexItem grow={false} key={index}>
+                <div>{action}</div>
+              </EuiFlexItem>
+            ))}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
