@@ -20,9 +20,18 @@ interface Props {
   searchResultComponent?: React.ReactElement;
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
+  isSemanticTextEnabled?: boolean;
+  indexName?: string;
 }
 export const DocumentFields = React.memo(
-  ({ searchComponent, searchResultComponent, onCancelAddingNewFields, isAddingFields }: Props) => {
+  ({
+    searchComponent,
+    searchResultComponent,
+    onCancelAddingNewFields,
+    isAddingFields,
+    isSemanticTextEnabled,
+    indexName,
+  }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
     const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -44,6 +53,8 @@ export const DocumentFields = React.memo(
         <DocumentFieldsTreeEditor
           onCancelAddingNewFields={onCancelAddingNewFields}
           isAddingFields={isAddingFields}
+          isSemanticTextEnabled={isSemanticTextEnabled}
+          indexName={indexName}
         />
       );
 
