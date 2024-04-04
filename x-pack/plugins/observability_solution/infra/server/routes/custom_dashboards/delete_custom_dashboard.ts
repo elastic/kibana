@@ -6,22 +6,19 @@
  */
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import {
-  InfraGetCustomDashboardsRequestPathParamsRT,
-  InfraGetCustomDashboardsResponseBodyRT,
-} from '../../../common/http_api/custom_dashboards_api';
+import { InfraDeleteCustomDashboardsRequestParamsRT } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
 import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
-import { findCustomDashboard } from './lib/find_custom_dashboard';
+import { deleteCustomDashboard } from './lib/delete_custom_dashboard';
 
-export function initGetCustomDashboardRoute(framework: KibanaFramework) {
-  const validateParams = createRouteValidationFunction(InfraGetCustomDashboardsRequestPathParamsRT);
+export function initDeleteCustomDashboardRoute(framework: KibanaFramework) {
+  const validateParams = createRouteValidationFunction(InfraDeleteCustomDashboardsRequestParamsRT);
 
   framework.registerRoute(
     {
-      method: 'get',
-      path: '/api/infra/{assetType}/custom-dashboards',
+      method: 'delete',
+      path: '/api/infra/{assetType}/custom-dashboards/{id}',
       validate: {
         params: validateParams,
       },
@@ -34,11 +31,15 @@ export function initGetCustomDashboardRoute(framework: KibanaFramework) {
 
       await checkCustomDashboardsEnabled(uiSettingsClient);
 
-      const params = request.params;
-      const customDashboards = await findCustomDashboard(params.assetType, savedObjectsClient);
+      const { id } = request.params;
+
+      await deleteCustomDashboard({
+        savedObjectsClient,
+        savedObjectId: id,
+      });
 
       return response.ok({
-        body: InfraGetCustomDashboardsResponseBodyRT.encode(customDashboards),
+        body: id,
       });
     })
   );
