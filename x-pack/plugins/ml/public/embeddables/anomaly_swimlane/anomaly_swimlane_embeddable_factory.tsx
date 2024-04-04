@@ -8,23 +8,19 @@
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import fastIsEqual from 'fast-deep-equal';
-
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
 import React, { Suspense, useEffect } from 'react';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import type { AnomalySwimlaneEmbeddableServices, AnomalySwimlaneEmbeddableUserInput } from '..';
+import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
-import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { JobId } from '../../shared';
 import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddable';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 import EmbeddableSwimLaneContainer from './embeddable_swim_lane_container';
+import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
 
 /**
@@ -75,21 +71,16 @@ export const getAnomalySwimLaneEmbeddableFactory = (
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const services = await getServices(getStartServices);
-
       const subscriptions = new Subscription();
 
-      const jobIds = new BehaviorSubject<JobId[]>(state.jobIds);
-      const swimlaneType = new BehaviorSubject<SwimlaneType>(state.swimlaneType);
-      const viewBy = new BehaviorSubject<string | undefined>(state.viewBy);
-      const fromPage = new BehaviorSubject<number>(1);
-      const perPage = new BehaviorSubject<number | undefined>(
-        state.perPage ?? SWIM_LANE_DEFAULT_PAGE_SIZE
-      );
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const { appliedTimeRange$, serializeTimeRange, timeRangeComparators, timeRangeApi } =
         initializeTimeRange(state, parentApi);
+
+      const { swimLaneControlsApi, serializeSwimLaneState, swimLaneComparators } =
+        initializeSwimLaneControls(state, titlesApi);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
@@ -111,31 +102,15 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           filters$,
           // @ts-ignore
           appliedTimeRange$,
-          jobIds,
-          swimlaneType,
-          viewBy,
-          fromPage,
-          perPage,
+          ...swimLaneControlsApi,
           interval,
           setInterval: (v) => interval.next(v),
-          updateUserInput: (update: AnomalySwimlaneEmbeddableUserInput) => {
-            jobIds.next(update.jobIds);
-            swimlaneType.next(update.swimlaneType);
-            viewBy.next(update.viewBy);
-            titlesApi.setPanelTitle(update.panelTitle);
-          },
-          updatePagination: (update: { perPage?: number; fromPage: number }) => {
-            fromPage.next(update.fromPage);
-            if (update.perPage) {
-              perPage.next(update.perPage);
-            }
-          },
           dataViews: buildDataViewPublishingApi(
             {
               anomalyDetectorService: services[2].anomalyDetectorService,
               dataViewsService: services[1].data.dataViews,
             },
-            { jobIds },
+            { jobIds: swimLaneControlsApi.jobIds },
             subscriptions
           ),
           dataLoading: dataLoading$,
@@ -144,13 +119,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
               rawState: {
                 ...serializeTitles(),
                 ...serializeTimeRange(),
-                jobIds: jobIds.value,
-                swimlaneType: swimlaneType.value,
-                viewBy: viewBy.value,
-                perPage: perPage.value,
-                timeRange: appliedTimeRange$.value,
+                ...serializeSwimLaneState(),
               },
-
               references: [],
             };
           },
@@ -158,10 +128,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         {
           ...timeRangeComparators,
           ...titleComparators,
-          jobIds: [jobIds, jobIds.next, fastIsEqual],
-          swimlaneType: [swimlaneType, swimlaneType.next],
-          viewBy: [viewBy, viewBy.next],
-          perPage: [perPage, perPage.next],
+          ...swimLaneComparators,
         }
       );
 
