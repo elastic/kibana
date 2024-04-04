@@ -98,8 +98,10 @@ export function InnerFieldItem(props: FieldItemProps) {
       });
     }
     // IndexPatternField type
-    return new DataViewField(field);
-  }, [field]);
+    return new DataViewField(field, () => ({
+      ecs: Boolean(indexPattern?.getFieldByName('ecs.version')),
+    }));
+  }, [field, indexPattern]);
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);
