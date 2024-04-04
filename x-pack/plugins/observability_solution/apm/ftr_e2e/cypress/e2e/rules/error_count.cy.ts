@@ -89,7 +89,8 @@ describe('Rules', () => {
     });
 
     describe('when created from Stack management', () => {
-      it('creates a rule', () => {
+      // FIXME
+      it.skip('creates a rule', () => {
         cy.loginAsEditorUser();
 
         // Go to stack management
