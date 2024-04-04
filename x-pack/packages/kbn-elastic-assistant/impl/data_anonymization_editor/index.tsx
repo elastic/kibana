@@ -10,7 +10,6 @@ import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
@@ -78,9 +77,7 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
       ) : (
         <ContextEditor
-          anonymizationFields={
-            selectedPromptContext.anonymizationFields as FindAnonymizationFieldsResponse
-          }
+          anonymizationFields={selectedPromptContext.anonymizationFields}
           onListUpdated={onListUpdated}
           rawData={selectedPromptContext.rawData}
         />

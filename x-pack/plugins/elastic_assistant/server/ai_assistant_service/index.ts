@@ -301,25 +301,23 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      let conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
+      const conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
         spaceId
       );
       if (!conversationsIndexName) {
-        conversationsIndexName = await this.conversationsDataStream.installSpace(spaceId);
+        await this.conversationsDataStream.installSpace(spaceId);
       }
 
-      let promptsIndexName = await this.promptsDataStream.getInstalledSpaceName(spaceId);
+      const promptsIndexName = await this.promptsDataStream.getInstalledSpaceName(spaceId);
       if (!promptsIndexName) {
-        promptsIndexName = await this.promptsDataStream.installSpace(spaceId);
+        await this.promptsDataStream.installSpace(spaceId);
       }
 
-      let anonymizationFieldsIndexName =
+      const anonymizationFieldsIndexName =
         await this.anonymizationFieldsDataStream.getInstalledSpaceName(spaceId);
 
       if (!anonymizationFieldsIndexName) {
-        anonymizationFieldsIndexName = await this.anonymizationFieldsDataStream.installSpace(
-          spaceId
-        );
+        await this.anonymizationFieldsDataStream.installSpace(spaceId);
         this.createDefaultAnonymizationFields(spaceId);
       }
     } catch (error) {

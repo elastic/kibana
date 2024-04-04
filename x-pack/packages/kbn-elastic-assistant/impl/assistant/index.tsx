@@ -402,13 +402,18 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     const promptContext: PromptContext | undefined = promptContexts[promptContextId];
-    if (promptContext != null) {
+    if (
+      promptContext != null &&
+      !isLoadingAnonymizationFields &&
+      !isErrorAnonymizationFields &&
+      anonymizationData
+    ) {
       setAutoPopulatedOnce(true);
 
       if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
         const addNewSelectedPromptContext = async () => {
           const newSelectedPromptContext = await getNewSelectedPromptContext({
-            anonymizationFields,
+            anonymizationFields: anonymizationData,
             promptContext,
           });
 
@@ -434,6 +439,9 @@ const AssistantComponent: React.FC<Props> = ({
     selectedPromptContexts,
     autoPopulatedOnce,
     anonymizationFields,
+    isLoadingAnonymizationFields,
+    isErrorAnonymizationFields,
+    anonymizationData,
   ]);
 
   // Show missing connector callout if no connectors are configured
@@ -594,6 +602,7 @@ const AssistantComponent: React.FC<Props> = ({
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
+            anonymizationFields={anonymizationFields}
             refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}

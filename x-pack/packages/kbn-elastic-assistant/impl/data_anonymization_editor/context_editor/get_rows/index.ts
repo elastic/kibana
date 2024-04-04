@@ -6,6 +6,7 @@
  */
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 import { ContextEditorRow } from '../types';
 
 export const getRows = ({
@@ -16,18 +17,21 @@ export const getRows = ({
   rawData: Record<string, string[]> | null;
 }): ContextEditorRow[] => {
   if (rawData !== null && typeof rawData === 'object') {
-    const rawFields = Object.keys(rawData);
+    const rawFields = Object.keys(rawData).sort();
 
-    return anonymizationFields.data
-      .filter((f) => rawFields.includes(f.field))
-      .sort((a, b) => (a.field > b.field ? 1 : -1))
-      .map<ContextEditorRow>((anonymizationField) => ({
-        field: anonymizationField.field,
-        allowed: anonymizationField.allowed ?? false,
-        anonymized: anonymizationField.anonymized ?? false,
-        denied: !!anonymizationField.allowed,
-        rawValues: rawData[anonymizationField.field],
-      }));
+    return rawFields.reduce<ContextEditorRow[]>(
+      (acc, field) => [
+        ...acc,
+        {
+          field,
+          allowed: isAllowed({ anonymizationFields: anonymizationFields.data, field }),
+          anonymized: isAnonymized({ anonymizationFields: anonymizationFields.data, field }),
+          denied: isDenied({ anonymizationFields: anonymizationFields.data, field }),
+          rawValues: rawData[field],
+        },
+      ],
+      []
+    );
   } else {
     return anonymizationFields.data.map<ContextEditorRow>((anonymizationField) => ({
       field: anonymizationField.field,

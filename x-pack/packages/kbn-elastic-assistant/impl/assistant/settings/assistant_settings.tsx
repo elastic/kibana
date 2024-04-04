@@ -38,7 +38,6 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
-import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -68,6 +67,7 @@ interface Props {
   selectedConversation: Conversation;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  anonymizationFields: FindAnonymizationFieldsResponse;
   refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
@@ -83,6 +83,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     onConversationSelected,
     conversations,
+    anonymizationFields,
     refetchAnonymizationFieldsResults,
   }) => {
     const {
@@ -92,17 +93,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
     } = useAssistantContext();
-
-    const [anonymizationFields, setAnonymizationFields] = useState<FindAnonymizationFieldsResponse>(
-      { data: [], page: 1, perPage: 5, total: 0 }
-    );
-    const { data: anonymizationData, isLoading, isError } = useFetchAnonymizationFields({ http });
-
-    useEffect(() => {
-      if (!isLoading && !isError) {
-        setAnonymizationFields(anonymizationData ?? {});
-      }
-    }, [anonymizationData, isError, isLoading]);
 
     const {
       conversationSettings,

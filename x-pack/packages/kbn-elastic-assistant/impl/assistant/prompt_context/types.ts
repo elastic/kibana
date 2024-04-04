@@ -70,7 +70,7 @@ export interface PromptContext {
  */
 export interface SelectedPromptContext {
   /** fields allowed to be included in a conversation */
-  anonymizationFields?: FindAnonymizationFieldsResponse;
+  anonymizationFields: FindAnonymizationFieldsResponse;
   /** unique id of the selected `PromptContext` */
   promptContextId: string;
   /** this data is not anonymized  */

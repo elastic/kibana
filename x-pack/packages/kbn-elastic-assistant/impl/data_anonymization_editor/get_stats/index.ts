@@ -10,7 +10,7 @@ import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common
 import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { Stats } from '../helpers';
 
-export const getStats = ({ allow, allowReplacement, rawData }: SelectedPromptContext): Stats => {
+export const getStats = ({ anonymizationFields, rawData }: SelectedPromptContext): Stats => {
   const ZERO_STATS = {
     allowed: 0,
     anonymized: 0,
@@ -23,16 +23,19 @@ export const getStats = ({ allow, allowReplacement, rawData }: SelectedPromptCon
   } else {
     const rawFields = Object.keys(rawData);
 
-    const allowReplacementSet = new Set(allowReplacement);
-    const allowSet = new Set(allow);
-
     return rawFields.reduce<Stats>(
       (acc, field) => ({
-        allowed: acc.allowed + (isAllowed({ allowSet, field }) ? 1 : 0),
+        allowed:
+          acc.allowed +
+          (isAllowed({ anonymizationFields: anonymizationFields.data, field }) ? 1 : 0),
         anonymized:
           acc.anonymized +
-          (isAllowed({ allowSet, field }) && isAnonymized({ allowReplacementSet, field }) ? 1 : 0),
-        denied: acc.denied + (isDenied({ allowSet, field }) ? 1 : 0),
+          (isAllowed({ anonymizationFields: anonymizationFields.data, field }) &&
+          isAnonymized({ anonymizationFields: anonymizationFields.data, field })
+            ? 1
+            : 0),
+        denied:
+          acc.denied + (isDenied({ anonymizationFields: anonymizationFields.data, field }) ? 1 : 0),
         total: acc.total + 1,
       }),
       ZERO_STATS

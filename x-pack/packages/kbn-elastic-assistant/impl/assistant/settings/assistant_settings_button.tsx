@@ -24,6 +24,7 @@ interface Props {
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  anonymizationFields: FindAnonymizationFieldsResponse;
   refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
@@ -40,6 +41,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     refetchConversationsState,
+    anonymizationFields,
     refetchAnonymizationFieldsResults,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
@@ -93,6 +95,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             onClose={handleCloseModal}
             onSave={handleSave}
             conversations={conversations}
+            anonymizationFields={anonymizationFields}
             refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}

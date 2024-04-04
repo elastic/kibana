@@ -41,6 +41,7 @@ interface OwnProps {
   title: string | JSX.Element;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  anonymizationFields: FindAnonymizationFieldsResponse;
   refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
@@ -66,6 +67,7 @@ export const AssistantHeader: React.FC<Props> = ({
   setCurrentConversation,
   conversations,
   refetchConversationsState,
+  anonymizationFields,
   refetchAnonymizationFieldsResults,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
@@ -150,6 +152,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}
                   refetchConversationsState={refetchConversationsState}
+                  anonymizationFields={anonymizationFields}
                   refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
                 />
               </EuiFlexItem>

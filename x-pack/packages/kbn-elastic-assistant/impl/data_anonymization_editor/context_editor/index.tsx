@@ -109,7 +109,7 @@ const ContextEditorComponent: React.FC<Props> = ({
         onReset={onReset}
         onSelectAll={onSelectAll}
         selected={selected}
-        totalFields={anonymizationFields.total}
+        totalFields={rawData == null ? anonymizationFields.total : Object.keys(rawData).length}
       />
     ),
     [anonymizationFields.total, onListUpdated, onReset, onSelectAll, rawData, selected]
