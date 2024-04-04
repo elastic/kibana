@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
@@ -19,6 +20,7 @@ import {
   ASSET_CRITICALITY_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
   RISK_ENGINE_SETTINGS_URL,
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
 } from '../../../common/constants';
 
 import type {
@@ -139,6 +141,28 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
+    /**
+     * Create asset criticality
+     */
+    const uploadAssetCriticalityFile = async (
+      fileContent: string,
+      fileName: string = 'unknown-file.csv'
+    ): Promise<AssetCriticalityCsvUploadResponse> => {
+      const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
+      const body = new FormData();
+      body.append('file', file);
+
+      return http.fetch<AssetCriticalityCsvUploadResponse>(ASSET_CRITICALITY_CSV_UPLOAD_URL, {
+        version: '1',
+        method: 'POST',
+        headers: {
+          // 'Content-Type': 'text/csv',
+          'Content-Type': undefined,
+        },
+        body,
+      });
+    };
+
     const getRiskScoreIndexStatus = ({
       query,
       signal,
@@ -179,6 +203,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,
       fetchAssetCriticality,
+      uploadAssetCriticalityFile,
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
     };

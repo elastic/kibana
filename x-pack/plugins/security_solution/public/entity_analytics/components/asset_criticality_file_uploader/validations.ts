@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash/fp';
-import type { CriticalityLevels } from '../../../../common/entity_analytics/asset_criticality';
-import { MAX_FILE_LINES, VALID_CRITICALITY_LEVELS } from './constants';
+import { parseAssetCriticalityCsvRow } from '../../../../common/entity_analytics/asset_criticality';
+import { MAX_FILE_SIZE, SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from './constants';
 
 export const validateParsedContent = (
   data: string[][]
@@ -16,16 +17,54 @@ export const validateParsedContent = (
     return { valid: [], invalid: [], error: 'The file is empty' };
   }
 
-  // validate colum count
-  if (data.length > MAX_FILE_LINES) {
-    return { valid: [], invalid: [], error: 'The file has too many lines. Max lines is 10.000' };
-  }
-
-  const [valid, invalid] = partition(validateLine, data);
+  const [valid, invalid] = partition((row) => parseAssetCriticalityCsvRow(row).valid, data);
 
   return { valid, invalid };
 };
 
-const validateLine = (data: string[]) =>
-  data.length === 2 &&
-  VALID_CRITICALITY_LEVELS.includes(data[1].toLowerCase() as CriticalityLevels);
+export const validateFile = (
+  file: File,
+  formatBytes: (bytes: number) => string
+): { valid: false; errorMessage: string } | { valid: true } => {
+  if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
+    return {
+      valid: false,
+      errorMessage: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.unsupportedFileTypeError',
+        {
+          defaultMessage: `Invalid file format selected. Please choose a {supportedFileExtensions} file and try again`,
+          values: { supportedFileExtensions: SUPPORTED_FILE_EXTENSIONS.join(', ') },
+        }
+      ),
+    };
+  }
+
+  if (file.size === 0) {
+    return {
+      valid: false,
+      errorMessage: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.emptyFileErrorMessage',
+        {
+          defaultMessage: `The selected file is empty.`,
+        }
+      ),
+    };
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      valid: false,
+      errorMessage: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.emptyFileErrorMessage',
+        {
+          defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
+          values: {
+            fileSize: formatBytes(file.size),
+            maxFileSize: formatBytes(MAX_FILE_SIZE),
+          },
+        }
+      ),
+    };
+  }
+  return { valid: true };
+};
