@@ -437,7 +437,7 @@
         "label": "useUpdateUserProfile",
         "description": [],
         "signature": [
-          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends ",
+          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends Partial<",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -445,7 +445,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -453,7 +453,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
@@ -1471,6 +1471,20 @@
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.solutionNavOptOut",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solutionNavOptOut",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1574,7 +1588,7 @@
         "label": "UpdateUserProfileHook",
         "description": [],
         "signature": [
-          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends ",
+          "({ notificationSuccess, pageReloadChecker, }?: Props) => { update: <D extends Partial<",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1582,7 +1596,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          ">(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
+          ">>(updatedData: D) => Promise<void>; showSuccessNotification: ({ isRefreshRequired }?: { isRefreshRequired?: boolean | undefined; }) => void; userProfileData: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -1590,7 +1604,7 @@
             "section": "def-common.UserProfileData",
             "text": "UserProfileData"
           },
-          " | null | undefined; isLoading: boolean; }"
+          " | null | undefined; isLoading: boolean; userProfileEnabled: boolean | undefined; }"
         ],
         "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
         "deprecated": false,
