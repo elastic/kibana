@@ -10,7 +10,7 @@ import React, { CSSProperties, useCallback, useEffect, useRef, useState } from '
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { ConsoleMenu } from '../../../components';
 import {
@@ -35,15 +35,19 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
-  const getCurl = useCallback(async (): Promise<string> => {
-    return actionsProvider.current
-      ? actionsProvider.current.getCurl(esHostService.getHost())
-      : Promise.resolve('');
+  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+  }, []);
+
+  const getCurlCallback = useCallback(async (): Promise<string> => {
+    const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
+    return curl ?? '';
   }, [esHostService]);
 
-  const sendRequests = useCallback(async () => {
+  const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
   }, [dispatch, http, toasts, trackUiMetric]);
+
   const [value, setValue] = useState(initialTextValue);
 
   const setInitialValue = useSetInitialValue;
@@ -73,7 +77,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           >
             <EuiLink
               color="success"
-              onClick={sendRequests}
+              onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                 defaultMessage: 'Click to send request',
@@ -85,7 +89,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <ConsoleMenu
-            getCurl={getCurl}
+            getCurl={getCurlCallback}
             getDocumentation={() => {
               return Promise.resolve(null);
             }}
@@ -105,9 +109,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
         }}
-        editorDidMount={(editor) => {
-          actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
-        }}
+        editorDidMount={editorDidMountCallback}
       />
     </div>
   );

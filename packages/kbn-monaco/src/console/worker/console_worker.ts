@@ -8,23 +8,23 @@
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { ConsoleParseResult, ConsoleWorkerDefinition, ConsoleParser } from '../types';
+import { ConsoleParserResult, ConsoleWorkerDefinition, ConsoleParser } from '../types';
 import { createParser } from '../parser';
 
 export class ConsoleWorker implements ConsoleWorkerDefinition {
   private parser: ConsoleParser | undefined;
-  private parseResult: ConsoleParseResult | undefined;
+  private parserResult: ConsoleParserResult | undefined;
 
   constructor(private ctx: monaco.worker.IWorkerContext) {}
 
-  getParseResult(modelUri: string): ConsoleParseResult | undefined {
+  getParserResult(modelUri: string): ConsoleParserResult | undefined {
     if (!this.parser) {
       this.parser = createParser();
     }
     const model = this.ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
     if (model) {
-      this.parseResult = this.parser(model.getValue());
+      this.parserResult = this.parser(model.getValue());
     }
-    return this.parseResult;
+    return this.parserResult;
   }
 }
