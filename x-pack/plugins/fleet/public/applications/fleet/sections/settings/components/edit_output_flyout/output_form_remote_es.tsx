@@ -23,6 +23,9 @@ interface Props {
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    serviceToken: false,
+  });
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
 
@@ -34,6 +37,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
         inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
         inputs.serviceTokenInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: true });
       }
     }
   }, [
@@ -42,6 +46,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     inputs.serviceTokenSecretInput,
     isFirstLoad,
     setIsFirstLoad,
+    isConvertedToSecret,
   ]);
 
   const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
@@ -80,6 +85,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             />
           }
           {...inputs.serviceTokenInput.formRowProps}
+          initialValue={inputs.serviceTokenInput.value}
           useSecretsStorage={useSecretsStorage}
           onToggleSecretStorage={onToggleSecretAndClearValue}
         >
@@ -103,7 +109,9 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           })}
           {...inputs.serviceTokenSecretInput.formRowProps}
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
+          initialValue={inputs.serviceTokenSecretInput.value}
           useSecretsStorage={useSecretsStorage}
+          isConvertedToSecret={isConvertedToSecret.serviceToken}
           onToggleSecretStorage={onToggleSecretAndClearValue}
         >
           <EuiFieldText
