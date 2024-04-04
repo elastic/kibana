@@ -9,6 +9,7 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
+  SLO_SERVERITY_HISTORY_FIELD,
 } from '../../../../common/field_names/slo';
 
 export const sloRuleFieldMap = {
@@ -25,6 +26,11 @@ export const sloRuleFieldMap = {
   [SLO_INSTANCE_ID_FIELD]: {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  [SLO_SERVERITY_HISTORY_FIELD]: {
+    type: 'object',
+    array: true,
     required: false,
   },
 };

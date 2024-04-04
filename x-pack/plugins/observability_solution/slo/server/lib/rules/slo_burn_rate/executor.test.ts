@@ -376,7 +376,7 @@ describe('BurnRateRuleExecutor', () => {
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
         spaceId: 'irrelevant',
-        state: {},
+        state: { history: [] },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
       });

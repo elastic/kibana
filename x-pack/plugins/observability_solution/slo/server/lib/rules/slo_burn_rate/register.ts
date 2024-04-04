@@ -22,6 +22,7 @@ import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
+  IMPROVING_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
@@ -80,6 +81,7 @@ export function sloBurnRateRuleType(
       MEDIUM_PRIORITY_ACTION,
       LOW_PRIORITY_ACTION,
       SUPPRESSED_PRIORITY_ACTION,
+      IMPROVING_PRIORITY_ACTION,
     ],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: sloFeatureId,
@@ -100,6 +102,8 @@ export function sloBurnRateRuleType(
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
         { name: 'suppressedAction', description: suppressedActionVariableDescription },
+        { name: 'previousActionGroup', description: previousActionGroupActionVariableDescription },
+        { name: 'improvedActionGroup', description: improvedActionGroupActionVariableDescription },
       ],
     },
     alerts: {
@@ -178,5 +182,20 @@ export const suppressedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.suppressedActionDescription',
   {
     defaultMessage: 'The suppressed action group.',
+  }
+);
+export const previousActionGroupActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.previousActionGroupDescription',
+  {
+    defaultMessage:
+      'The action group from the previous execution. Only available as part of the "Improving" action group.',
+  }
+);
+
+export const improvedActionGroupActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.improvedActionGroupDescription',
+  {
+    defaultMessage:
+      'The action group that would have triggerd. Only available as part of the "Improving" action group.',
   }
 );

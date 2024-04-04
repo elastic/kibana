@@ -17,6 +17,7 @@ import {
   LOW_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
+import { InstanceHistory } from '../../../../common/types';
 
 export enum AlertStates {
   OK,
@@ -42,7 +43,9 @@ export type BurnRateRuleParams = {
   windows: WindowSchema[];
   dependencies?: Dependency[];
 } & Record<string, any>;
-export type BurnRateRuleTypeState = RuleTypeState; // no specific rule state
+export type BurnRateRuleTypeState = RuleTypeState & {
+  history: InstanceHistory[];
+}; // no specific rule state
 export type BurnRateAlertState = AlertState; // no specific alert state
 export type BurnRateAlertContext = AlertContext; // no specific alert context
 export type BurnRateAllowedActionGroups = ActionGroupIdsOf<

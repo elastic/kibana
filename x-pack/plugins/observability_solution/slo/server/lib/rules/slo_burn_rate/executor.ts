@@ -16,16 +16,17 @@ import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/ser
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
-import { upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, DurationUnit, toDurationUnit } from '@kbn/slo-schema';
 import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { ExecutorType } from '@kbn/alerting-plugin/server';
+import { upperCase } from 'lodash';
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
+  SLO_SERVERITY_HISTORY_FIELD,
 } from '../../../../common/field_names/slo';
 import { Duration } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
@@ -38,16 +39,20 @@ import {
   BurnRateRuleTypeState,
   WindowSchema,
 } from './types';
+
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
+  IMPROVING_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
+import { computeActionGroup } from './lib/compute_action_group';
+import { InstanceHistory, InstanceHistoryRecord } from '../../../../common/types';
 
 export const getRuleExecutor = ({
   basePath,
@@ -74,7 +79,7 @@ export const getRuleExecutor = ({
       BurnRateAllowedActionGroups
     >
   > {
-    const { services, params, logger, startedAt, spaceId, getTimeRange } = options;
+    const { services, params, logger, startedAt, spaceId, getTimeRange, state } = options;
 
     const { savedObjectsClient: soClient, scopedClusterClient: esClient, alertsClient } = services;
 
@@ -86,13 +91,14 @@ export const getRuleExecutor = ({
     const slo = await sloRepository.findById(params.sloId);
 
     if (!slo.enabled) {
-      return { state: {} };
+      return { state: { history: [] } };
     }
 
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
     const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
+    const history: InstanceHistory[] = [];
 
     const suppressResults =
       params.dependencies && results.some((res) => res.shouldAlert)
@@ -135,6 +141,24 @@ export const getRuleExecutor = ({
             hasReachedLimit = true;
             break; // once limit is reached, we break out of the loop and don't schedule any more alerts
           }
+
+          const { actionGroup, latestHistoryEvent, historyRecord } = computeActionGroup(
+            new Date(dateEnd),
+            state.history || [],
+            instanceId,
+            windowDef.actionGroup,
+            shouldSuppress
+          );
+
+          // If the alert has been improving for too long, then we need to stop
+          // maintain the current status and let it recover so the next status
+          // can trigger a new event
+          if (alertHasBeenImprovingTooLong(windowDef, latestHistoryEvent)) {
+            break;
+          }
+
+          history.push(historyRecord);
+
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -143,13 +167,11 @@ export const getRuleExecutor = ({
             shortWindowDuration,
             shortWindowBurnRate,
             windowDef,
-            shouldSuppress
+            shouldSuppress,
+            latestHistoryEvent?.improvingFrom
           );
 
           const alertId = instanceId;
-          const actionGroup = shouldSuppress
-            ? SUPPRESSED_PRIORITY_ACTION.id
-            : windowDef.actionGroup;
 
           const { uuid, start } = alertsClient.report({
             id: alertId,
@@ -164,6 +186,7 @@ export const getRuleExecutor = ({
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
+              [SLO_SERVERITY_HISTORY_FIELD]: historyRecord.history,
             },
           });
 
@@ -176,7 +199,7 @@ export const getRuleExecutor = ({
             basePath.publicBaseUrl
           );
 
-          const context = {
+          const context: BurnRateAlertContext = {
             alertDetailsUrl,
             reason,
             longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
@@ -190,6 +213,11 @@ export const getRuleExecutor = ({
             slo,
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
           };
+
+          if (latestHistoryEvent.improvingFrom) {
+            context.previousActionGroup = latestHistoryEvent.improvingFrom;
+            context.improvedActionGroup = latestHistoryEvent.actionGroup;
+          }
 
           alertsClient.setAlertData({ id: alertId, context });
           scheduledActionsCount++;
@@ -233,7 +261,7 @@ export const getRuleExecutor = ({
       });
     }
 
-    return { state: {} };
+    return { state: { history } };
   };
 
 function getActionGroupName(id: string) {
@@ -257,12 +285,17 @@ function buildReason(
   shortWindowDuration: Duration,
   shortWindowBurnRate: number,
   windowDef: WindowSchema,
-  suppressed: boolean
+  suppressed: boolean,
+  improvedFromActionGroup?: string
 ) {
   const actionGroupName = suppressed
     ? `${upperCase(SUPPRESSED_PRIORITY_ACTION.name)} - ${upperCase(
         getActionGroupName(actionGroup)
       )}`
+    : improvedFromActionGroup
+    ? `${upperCase(IMPROVING_PRIORITY_ACTION.name)} - ${upperCase(
+        getActionGroupName(improvedFromActionGroup)
+      )} -> ${upperCase(getActionGroupName(actionGroup))}`
     : upperCase(getActionGroupName(actionGroup));
   if (instanceId === ALL_VALUE) {
     return i18n.translate('xpack.slo.alerting.burnRate.reason', {
@@ -291,4 +324,21 @@ function buildReason(
       instanceId,
     },
   });
+}
+
+function alertHasBeenImprovingTooLong(
+  windowDef: WindowSchema,
+  latestHistoryEvent: InstanceHistoryRecord
+) {
+  if (!latestHistoryEvent.improvingFrom) {
+    return false;
+  }
+
+  const windowDuration = new Duration(
+    windowDef.longWindow.value,
+    toDurationUnit(windowDef.longWindow.unit)
+  );
+  const eventDurationInMinutes = (Date.now() - latestHistoryEvent.timerange.from) / 60_000;
+  const eventDuration = new Duration(eventDurationInMinutes, DurationUnit.Minute);
+  return !eventDuration.isShorterThan(windowDuration);
 }
