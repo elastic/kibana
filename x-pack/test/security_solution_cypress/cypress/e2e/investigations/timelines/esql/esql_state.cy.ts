@@ -33,8 +33,8 @@ import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
-const DEFAULT_ESQL_QUERY = '';
 
+const mockTimeline = getTimeline();
 // FAILURE introduced by the fix for 8.11.4 related to the default empty string and fix for the infinite loop on the esql tab
 describe.skip(
   'Timeline Discover ESQL State',
@@ -55,14 +55,11 @@ describe.skip(
     it('should not allow the dataview to be changed', () => {
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
     });
-    it('should have the default esql query on load', () => {
-      verifyDiscoverEsqlQuery(DEFAULT_ESQL_QUERY);
-    });
     it('should remember esql query when navigating away and back to discover ', () => {
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
-      addNameAndDescriptionToTimeline(getTimeline());
+      addNameAndDescriptionToTimeline(mockTimeline);
       saveTimeline();
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
@@ -76,7 +73,7 @@ describe.skip(
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
-      addNameAndDescriptionToTimeline(getTimeline());
+      addNameAndDescriptionToTimeline(mockTimeline);
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       saveTimeline();

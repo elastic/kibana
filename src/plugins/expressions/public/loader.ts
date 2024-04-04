@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { delay, filter, map, shareReplay } from 'rxjs/operators';
+import { delay, filter, map, shareReplay } from 'rxjs';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import { Adapters } from '@kbn/inspector-plugin/public';

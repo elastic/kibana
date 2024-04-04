@@ -86,12 +86,7 @@ export const createConversations = async (
             ...c,
             messages: (c.messages ?? []).map(transformMessage),
             title: c.id,
-            replacements: c.replacements
-              ? Object.keys(c.replacements).map((uuid) => ({
-                  uuid,
-                  value: c.replacements[uuid],
-                }))
-              : [],
+            replacements: c.replacements,
           };
           return res;
         }, {}),
