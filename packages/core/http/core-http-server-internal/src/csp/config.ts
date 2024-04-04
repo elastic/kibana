@@ -83,6 +83,13 @@ const configSchema = schema.object(
     report_to: schema.arrayOf(schema.string(), {
       defaultValue: [],
     }),
+    report_only: schema.maybe(
+      schema.object({
+        form_action: schema.arrayOf(schema.string(), {
+          defaultValue: [],
+        }),
+      })
+    ),
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
     disableEmbedding: schema.oneOf([schema.literal<boolean>(false)], { defaultValue: false }),
