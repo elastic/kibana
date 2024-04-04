@@ -17,7 +17,7 @@ export const ViewAgentsButton: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
 }> = ({ action, onClickViewAgents }) => {
-  if (action.type === 'UPDATE_TAGS' || action.type === 'POLICY_CHANGE') {
+  if (action.type === 'UPDATE_TAGS') {
     return null;
   }
 
