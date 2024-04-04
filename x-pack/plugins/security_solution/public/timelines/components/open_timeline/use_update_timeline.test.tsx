@@ -18,7 +18,6 @@ import {
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
 import { useUpdateTimeline } from './use_update_timeline';
-import type { DispatchUpdateTimeline } from './types';
 import type { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -67,7 +66,6 @@ describe('dispatchUpdateTimeline', () => {
   const anchor = '2020-03-27T20:34:51.337Z';
   const unix = moment(anchor).valueOf();
   let clock: sinon.SinonFakeTimers;
-  let timelineDispatch: DispatchUpdateTimeline;
 
   const defaultArgs = {
     duplicate: true,
