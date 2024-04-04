@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
 import { getFieldConfig } from '../../../lib';
-import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
+import { Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
 interface Props {
   onChange(value: string): void;
@@ -65,22 +65,18 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
 
-  const renderSelect = (field: FieldHook, opts: SuperSelectOption[]) => {
-    return (
-      <SuperSelectField
-        field={field}
-        euiFieldProps={{ options: opts }}
-        data-test-subj={dataTestSubj}
-      />
-    );
-  };
-
   return (
     <Form form={form}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <UseField path="main" config={fieldConfigModelId}>
-            {(field) => renderSelect(field, inferenceIdOptions)}
+            {(field) => (
+              <SuperSelectField
+                field={field}
+                euiFieldProps={{ options: inferenceIdOptions }}
+                data-test-subj={dataTestSubj}
+              />
+            )}
           </UseField>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useLoadIndexMappings } from '../../../../../services';
 import { getFieldConfig } from '../../../lib';
-import { FieldHook, Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
+import { Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
 
 interface Props {
@@ -48,20 +48,16 @@ export const ReferenceFieldSelects = ({
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
 
-  const renderSelect = (field: FieldHook, opts: SuperSelectOption[]) => {
-    return (
-      <SuperSelectField
-        field={field}
-        euiFieldProps={{ options: opts }}
-        data-test-subj={dataTestSubj}
-      />
-    );
-  };
-
   return (
     <Form form={form}>
       <UseField path="main" config={fieldConfigReferenceField}>
-        {(field) => renderSelect(field, referenceFieldOptions)}
+        {(field) => (
+          <SuperSelectField
+            field={field}
+            euiFieldProps={{ options: referenceFieldOptions }}
+            data-test-subj={dataTestSubj}
+          />
+        )}
       </UseField>
     </Form>
   );
