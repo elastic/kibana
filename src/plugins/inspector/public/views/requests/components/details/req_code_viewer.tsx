@@ -13,12 +13,12 @@
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 
 interface RequestCodeViewerProps {
   value: string;
-  actions?: React.ReactNode[];
+  actions?: Array<{ name: string; action: ReactNode }>;
 }
 
 const copyToClipboardLabel = i18n.translate('inspector.requests.copyToClipboardLabel', {
@@ -58,9 +58,9 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
             </div>
           </EuiFlexItem>
           {!!actions &&
-            actions.map((action, index) => (
-              <EuiFlexItem grow={false} key={index}>
-                <div>{action}</div>
+            actions.map((item) => (
+              <EuiFlexItem grow={false} key={item.name}>
+                <div>{item.action}</div>
               </EuiFlexItem>
             ))}
         </EuiFlexGroup>

@@ -7,7 +7,7 @@
  */
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, ReactNode } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
@@ -81,36 +81,42 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
     [searchProfilerHref, navigateToUrl]
   );
 
-  const actions: React.ReactNode[] = [];
+  const actions: Array<{ name: string; action: ReactNode }> = [];
 
   if (shouldShowDevToolsLink) {
-    actions.push(
-      <EuiButtonEmpty
-        size="xs"
-        flush="right"
-        iconType="wrench"
-        href={consoleHref}
-        onClick={handleDevToolsLinkClick}
-        data-test-subj="inspectorRequestOpenInConsoleButton"
-      >
-        {openInConsoleLabel}
-      </EuiButtonEmpty>
-    );
+    actions.push({
+      name: 'openInConsole',
+      action: (
+        <EuiButtonEmpty
+          size="xs"
+          flush="right"
+          iconType="wrench"
+          href={consoleHref}
+          onClick={handleDevToolsLinkClick}
+          data-test-subj="inspectorRequestOpenInConsoleButton"
+        >
+          {openInConsoleLabel}
+        </EuiButtonEmpty>
+      ),
+    });
   }
 
   if (shouldShowsearchProfilerLink) {
-    actions.push(
-      <EuiButtonEmpty
-        size="xs"
-        flush="right"
-        iconType="visBarHorizontal"
-        href={searchProfilerHref}
-        onClick={handleSearchProfilerLinkClick}
-        data-test-subj="inspectorRequestOpenInSearchProfilerButton"
-      >
-        {openInSearchProfilerLabel}
-      </EuiButtonEmpty>
-    );
+    actions.push({
+      name: 'openInSearchProfiler',
+      action: (
+        <EuiButtonEmpty
+          size="xs"
+          flush="right"
+          iconType="visBarHorizontal"
+          href={searchProfilerHref}
+          onClick={handleSearchProfilerLinkClick}
+          data-test-subj="inspectorRequestOpenInSearchProfilerButton"
+        >
+          {openInSearchProfilerLabel}
+        </EuiButtonEmpty>
+      ),
+    });
   }
 
   return <RequestCodeViewer value={value} actions={actions} />;
