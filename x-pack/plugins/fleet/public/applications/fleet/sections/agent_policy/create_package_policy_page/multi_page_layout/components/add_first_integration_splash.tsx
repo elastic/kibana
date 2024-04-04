@@ -97,7 +97,7 @@ const AddIntegrationStepsIllustrations = () => {
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
+            <EuiText textAlign="center" size="xs">
               <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.installAgentStepTitle"
@@ -133,7 +133,7 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiImage alt="" src={assetsBasePath + '2_add_integration.svg'} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
+            <EuiText textAlign="center" size="xs">
               <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.addIntegrationStepTitle"
@@ -169,7 +169,7 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiImage alt="" src={assetsBasePath + '3_confirm_data.svg'} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
+            <EuiText textAlign="center" size="xs">
               <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.confirmDataStepTitle"
