@@ -16,7 +16,7 @@ import { getControlGroupMock } from './control_group';
 
 /**
  *
- *  Retrieves a simple of AlertFilterControls Item.
+ *  Retrieves a sample AlertFilterControls Item.
  *   - Can also call callback onFilterChange with custom args
  *
  * @example

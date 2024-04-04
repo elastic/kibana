@@ -181,7 +181,7 @@ const PageContent = () => {
       ) : (
         <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="globalAlertsPageContent">
           <UrlSyncedAlertsSearchBar
-            appName="test"
+            appName="global-alerts-page"
             featureIds={featureIds}
             showFilterControls
             showFilterBar

@@ -12,8 +12,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -37,9 +35,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
   it('renders children', () => {
     const wrapper = shallow(
       <EnterpriseSearchPageTemplateWrapper>
-        <div className="hello">
-          {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
-        </div>
+        <div className="hello">world</div>
       </EnterpriseSearchPageTemplateWrapper>
     );
 
@@ -75,14 +71,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper
           isEmptyState
-          emptyState={
-            <div className="emptyState">
-              <FormattedMessage
-                id="xpack.enterpriseSearch..div.nothingHereYetLabel"
-                defaultMessage="Nothing here yet!"
-              />
-            </div>
-          }
+          emptyState={<div className="emptyState">Nothing here yet!</div>}
         >
           <div className="test" />
         </EnterpriseSearchPageTemplateWrapper>
@@ -99,13 +88,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper
           isEmptyState={false}
-          emptyState={
-            <div className="emptyState">
-              {i18n.translate('xpack.enterpriseSearch..div.nothingHereYetLabel', {
-                defaultMessage: 'Nothing here yet!',
-              })}
-            </div>
-          }
+          emptyState={<div className="emptyState">Nothing here yet!</div>}
         >
           <div className="test" />
         </EnterpriseSearchPageTemplateWrapper>
@@ -248,13 +231,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
   describe('Embedded Console', () => {
     it('renders embedded console if available', () => {
-      const FakeEmbeddedConsole: React.FC = () => (
-        <div className="embedded_console">
-          {i18n.translate('xpack.enterpriseSearch.fakeEmbeddedConsole.div.fooLabel', {
-            defaultMessage: 'foo',
-          })}
-        </div>
-      );
+      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
       const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
 
       setMockValues({
@@ -264,22 +241,14 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper>
-          <div className="hello">
-            {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
-          </div>
+          <div className="hello">world</div>
         </EnterpriseSearchPageTemplateWrapper>
       );
 
       expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(true);
     });
     it('Hides embedded console if available but page template prop set to hide', () => {
-      const FakeEmbeddedConsole: React.FC = () => (
-        <div className="embedded_console">
-          {i18n.translate('xpack.enterpriseSearch.fakeEmbeddedConsole.div.fooLabel', {
-            defaultMessage: 'foo',
-          })}
-        </div>
-      );
+      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
       const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
 
       setMockValues({
@@ -289,9 +258,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       const wrapper = shallow(
         <EnterpriseSearchPageTemplateWrapper hideEmbeddedConsole>
-          <div className="hello">
-            {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
-          </div>
+          <div className="hello">world</div>
         </EnterpriseSearchPageTemplateWrapper>
       );
 

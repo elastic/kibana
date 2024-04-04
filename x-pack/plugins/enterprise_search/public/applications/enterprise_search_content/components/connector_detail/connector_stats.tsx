@@ -168,9 +168,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
       </EuiFlexItem>
       <EuiFlexItem>
         <StatCard
-          title={i18n.translate('xpack.enterpriseSearch.connectorStats.statCard.indexLabel', {
-            defaultMessage: 'Index',
-          })}
+          title="Index"
           content={
             connector.index_name ? (
               indexData ? (
