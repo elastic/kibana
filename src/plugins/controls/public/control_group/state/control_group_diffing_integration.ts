@@ -48,6 +48,11 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
             } = this.getState();
 
             const hasUnsavedChanges = !(
+              persistableControlGroupInputIsEqual(
+                currentInput,
+                lastSavedInput,
+                false // never diff selections for unsaved changes - compare the output filters instead
+              ) &&
               compareFilters(filters ?? [], lastSavedFilters?.filters ?? [], COMPARE_ALL_OPTIONS) &&
               isEqual(timeslice, lastSavedFilters?.timeslice)
             );

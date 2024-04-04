@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { dashboard, header, dashboardControls, timePicker } = getPageObjects([
+  const { common, dashboard, header, dashboardControls, timePicker } = getPageObjects([
+    'common',
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -61,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const before = await browser.getSessionStorage('dashboardStateManagerPanels');
       log.debug('BEFORE', before);
 
+      await common.sleep(600);
       // save the dashboard
       await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
       await header.waitUntilLoadingHasFinished();
