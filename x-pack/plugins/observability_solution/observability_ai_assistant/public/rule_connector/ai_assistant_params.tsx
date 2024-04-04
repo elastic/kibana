@@ -5,30 +5,62 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextAreaWithMessageVariables, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ObsAIAssistantActionParams } from './types';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams>
 > = ({ errors, index, messageVariables, editAction, actionParams }) => {
+  const { http } = useKibana().services;
+
+  const [loading, setLoading] = useState(false);
+  const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
+  const [selectedConnector, setSelectedConnector] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+
+    http
+      .get<FindActionResult[]>('/internal/observability_ai_assistant/connectors')
+      .then((results) => {
+        setConnectors(results);
+      })
+      .catch((err) => {
+        setConnectors(undefined);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [http]);
+
   return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.observabilityAiAssistant.alertConnector.selectLlmConnector', {
+    <>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.observabilityAiAssistant.alertConnector.selectLlmConnector', {
           defaultMessage: 'Connector',
         })}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      >
         <EuiSelect
+          fullWidth
           data-test-subj="observabilityAiAssistantAlertConnectorSelect"
-          options={[{ value: 'azure-open-ai', text: 'azure-open-ai' }]}
-          value="azure-open-ai"
+          isLoading={loading}
+          options={connectors?.map((connector) => {
+            return { value: connector.id, text: connector.name };
+          })}
+          onChange={(event) => {
+            setSelectedConnector(event.target.value);
+            editAction('connector', event.target.value, index);
+          }}
+          value={selectedConnector}
         />
-      </EuiFlexItem>
+      </EuiFormRow>
+
       <EuiFlexItem grow={false}>
         <TextAreaWithMessageVariables
           index={index}
@@ -45,7 +77,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           errors={(errors.text ?? []) as string[]}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </>
   );
 };
 

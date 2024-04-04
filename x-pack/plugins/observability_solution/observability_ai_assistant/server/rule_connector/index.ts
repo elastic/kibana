@@ -103,7 +103,7 @@ async function executor(
       .complete({
         functionClient,
         persist: true,
-        connectorId: 'azure-open-ai',
+        connectorId: execOptions.params.connector,
         signal: new AbortController().signal,
         messages: [
           {
