@@ -41,6 +41,15 @@ export function MachineLearningExpandedJobDetailsProvider(
 
     async openForecastTab(jobId: string) {
       await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-forecasts'), 3_000);
+      await this.assertJobDetailsTabOpen('mlJobListTab-forecasts');
+    },
+
+    async assertJobDetailsTabOpen(tabSubj: string) {
+      const isSelected = await testSubjects.getAttribute(tabSubj, 'aria-selected');
+      expect(isSelected).to.eql(
+        'true',
+        `Expected job details tab [${tabSubj}] to be open, got: isSelected=[${isSelected}]`
+      );
     },
 
     async assertAnnotationsEdit(jobId: string): Promise<void> {
