@@ -6,6 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import supertestLib from 'supertest';
+import url from 'url';
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
@@ -30,7 +32,10 @@ import {
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   getEqlRuleForAlertTesting,
   getOpenAlerts,
@@ -42,6 +47,8 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -62,6 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
+  const request = supertestLib(url.format(config.get('servers.kibana')));
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
@@ -194,6 +202,42 @@ export default ({ getService }: FtrProviderContext) => {
           module: 'auditd',
         }),
       });
+    });
+
+    it('classifies verification_exception errors as user errors', async () => {
+      function getMetricsRequest(reset: boolean = false) {
+        return request
+          .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200)
+          .then((response) => response.body);
+      }
+
+      await getMetricsRequest(true);
+      const rule: EqlRuleCreateProps = {
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
+        query: 'file where field.doesnt.exist == true',
+      };
+      const createdRule = await createRule(supertest, log, rule);
+      await waitForRuleFailure({ supertest, log, id: createdRule.id });
+
+      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL);
+      const response = await supertest
+        .get(route)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .query({ id: createdRule.id })
+        .expect(200);
+
+      const ruleResponse = response.body;
+      expect(
+        ruleResponse.execution_summary.last_execution.message.includes('verification_exception')
+      ).eql(true);
+
+      const metricsResponse = await getMetricsRequest();
+      expect(
+        metricsResponse.metrics.task_run.value.by_type['alerting:siem__eqlRule'].user_errors
+      ).eql(1);
     });
 
     it('generates up to max_alerts for non-sequence EQL queries', async () => {
