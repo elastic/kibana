@@ -5,38 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import React from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextAreaWithMessageVariables, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ObsAIAssistantActionParams } from './types';
+import { ObservabilityAIAssistantService } from '../types';
+import { useGenAIConnectorsWithoutContext } from '../hooks/use_genai_connectors';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
-  ActionParamsProps<ObsAIAssistantActionParams>
-> = ({ errors, index, messageVariables, editAction, actionParams }) => {
-  const { http } = useKibana().services;
-
-  const [loading, setLoading] = useState(false);
-  const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
-  const [selectedConnector, setSelectedConnector] = useState('');
-
-  useEffect(() => {
-    setLoading(true);
-
-    http
-      .get<FindActionResult[]>('/internal/observability_ai_assistant/connectors')
-      .then((results) => {
-        setConnectors(results);
-      })
-      .catch((err) => {
-        setConnectors(undefined);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [http]);
+  ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
+> = ({ errors, index, messageVariables, editAction, actionParams, service }) => {
+  const { connectors, loading, selectConnector, selectedConnector } =
+    useGenAIConnectorsWithoutContext(service);
 
   return (
     <>
@@ -54,7 +36,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             return { value: connector.id, text: connector.name };
           })}
           onChange={(event) => {
-            setSelectedConnector(event.target.value);
+            selectConnector(event.target.value);
             editAction('connector', event.target.value, index);
           }}
           value={selectedConnector}

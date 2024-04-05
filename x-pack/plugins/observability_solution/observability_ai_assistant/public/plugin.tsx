@@ -88,7 +88,9 @@ export class ObservabilityAIAssistantPlugin
 
     const isEnabled = service.isEnabled();
 
-    pluginsStart.triggersActionsUi.actionTypeRegistry.register(getObsAIAssistantConnectorType());
+    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+      getObsAIAssistantConnectorType(service)
+    );
 
     return {
       service,
