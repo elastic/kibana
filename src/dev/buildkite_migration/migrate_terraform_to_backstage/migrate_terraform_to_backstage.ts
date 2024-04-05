@@ -245,7 +245,7 @@ function convertBuildkiteResources({
     const targetPipelineName = pipelineSchedule.pipeline_id?.match(
       /buildkite_pipeline\.([^.]+).id/
     )?.[1];
-    const pipelineCandidate = pipelines.find((p) => p.metadata.name === targetPipelineName);
+    const pipelineCandidate = pipelines.find((p) => p.pipelineId === targetPipelineName);
 
     if (!pipelineCandidate) {
       log.warning(
@@ -286,6 +286,10 @@ function convertBuildkiteResources({
     return null;
   }
 
+  // This is a temporary field, to match schedules
+  pipelines.forEach((pipeline) => {
+    delete pipeline.pipelineId;
+  });
   return pipelines;
 }
 
@@ -304,6 +308,14 @@ function renameField(fieldName: string, newFieldName: string, obj: any) {
 
 function slugify(str: string) {
   return str.replace(/[^a-zA-Z0-9-]+/g, '-').toLowerCase();
+}
+
+function makeCanonicalPipelineId(pipelineSlug: string) {
+  let canonicalPipelineId = `bk-` + pipelineSlug;
+  if (canonicalPipelineId.length > 63) {
+    canonicalPipelineId = canonicalPipelineId + '-TOO-LONG-FIND-SOMETHING-SHORTER!';
+  }
+  return canonicalPipelineId;
 }
 
 function convertBuildkitePipeline(
@@ -330,10 +342,7 @@ function convertBuildkitePipeline(
   const providerSettings = pipeline.provider_settings?.[0] || {};
 
   const pipelineSlug = slugify(pipeline.name);
-  let canonicalPipelineId = `bk-` + pipelineSlug;
-  if (canonicalPipelineId.length > 63) {
-    canonicalPipelineId = canonicalPipelineId + '-TOO-LONG-FIND-SOMETHING-SHORTER!';
-  }
+  const canonicalPipelineId = makeCanonicalPipelineId(pipelineSlug);
 
   const teams = pipeline.team.reduce(
     (acc, team) => ({ ...acc, [team.slug]: { access_level: team.access_level } }),
@@ -346,9 +355,10 @@ function convertBuildkitePipeline(
       teams[team] = { access_level: 'MANAGE_BUILD_AND_READ' };
     }
   });
-  teams.everyone = { access_level: 'BULID_AND_READ' };
+  teams.everyone = { access_level: 'BUILD_AND_READ' };
 
   const pipelineObj = {
+    pipelineId,
     apiVersion: 'backstage.io/v1alpha1',
     kind: 'Resource',
     metadata: {
