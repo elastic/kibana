@@ -13,6 +13,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ObsAIAssistantActionParams } from './types';
 import { ObservabilityAIAssistantService } from '../types';
+import { AssistantAvatar } from '../components/assistant_avatar';
 
 export function getConnectorType(
   service: ObservabilityAIAssistantService
@@ -20,8 +21,9 @@ export function getConnectorType(
   return {
     id: '.observability-ai-assistant',
     modalWidth: 675,
-    iconClass: 'logoSlack',
+    iconClass: () => <AssistantAvatar />,
     isSystemActionType: true,
+    isExperimental: true,
     selectMessage: i18n.translate(
       'xpack.observabilityAiAssistant.alertConnector.selectMessageText',
       {
