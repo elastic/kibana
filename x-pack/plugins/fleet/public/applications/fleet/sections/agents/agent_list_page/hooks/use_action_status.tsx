@@ -18,8 +18,9 @@ export function useActionStatus(
   nActions: number,
   dateFilter: moment.Moment | null
 ) {
-  const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
   const [isFirstLoading, setIsFirstLoading] = useState(true);
+  const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
+  const [actionCount, setActionCount] = useState(0);
   const [areActionsFullyLoaded, setAreActionsFullyLoaded] = useState(false);
   const { notifications, overlays } = useStartServices();
 
@@ -36,7 +37,8 @@ export function useActionStatus(
       if (!res.data) {
         throw new Error('No data');
       }
-      setAreActionsFullyLoaded(currentActions.length === res.data.items.length);
+      setAreActionsFullyLoaded(actionCount < nActions);
+      setActionCount(res.data.items.length);
       setCurrentActions(res.data.items);
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -45,8 +47,7 @@ export function useActionStatus(
         }),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nActions, dateFilter, notifications.toasts]);
+  }, [nActions, dateFilter, actionCount, notifications.toasts]);
 
   if (isFirstLoading) {
     loadActions();
