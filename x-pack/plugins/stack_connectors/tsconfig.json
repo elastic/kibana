@@ -39,8 +39,6 @@
     "@kbn/ui-theme",
     "@kbn/cases-components",
     "@kbn/code-editor-mock",
-    "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",
