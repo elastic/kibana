@@ -11,8 +11,16 @@
 
 import { find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
-import { Subject, Subscription, forkJoin } from 'rxjs';
-import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  Subject,
+  Subscription,
+  forkJoin,
+  map,
+  debounceTime,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
