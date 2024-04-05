@@ -22,7 +22,6 @@ export function registerSummarizationFunction({
         'This function allows the Elastic Assistant to summarize things from the conversation.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           id: {
             type: 'string',
