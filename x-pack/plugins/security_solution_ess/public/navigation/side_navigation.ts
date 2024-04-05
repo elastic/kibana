@@ -13,14 +13,14 @@ export const SOLUTION_NAME = i18n.translate('xpack.securitySolutionEss.nav.solut
   defaultMessage: 'Security',
 });
 
-export const initSideNavigation = (services: Services) => {
+export const initSideNavigation = async (services: Services) => {
   const { securitySolution, navigation } = services;
 
   navigation.isSolutionNavEnabled$.subscribe((isSolutionNavigationEnabled) => {
     securitySolution.setIsSolutionNavigationEnabled(isSolutionNavigationEnabled);
   });
 
-  const { navigationTree$, panelContentProvider } = securitySolution.getSolutionNavigation();
+  const { navigationTree$, panelContentProvider } = await securitySolution.getSolutionNavigation();
   navigation.addSolutionNavigation({
     id: 'security',
     homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,

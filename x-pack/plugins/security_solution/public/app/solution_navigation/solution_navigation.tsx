@@ -62,12 +62,12 @@ const getPanelContentProvider = (
   return withNavigationProvider(PanelContentProvider, core);
 };
 
-export interface GetSolutionNavigation {
+export interface SolutionNavigation {
   navigationTree$: Observable<NavigationTreeDefinition>;
   panelContentProvider: PanelContentProvider;
 }
 
-export const getSolutionNavigation = (core: CoreStart): GetSolutionNavigation => {
+export const getSolutionNavigation = (core: CoreStart): SolutionNavigation => {
   const panelContentProvider: PanelContentProvider = () => ({
     content: getPanelContentProvider(core, navLinks$),
   });

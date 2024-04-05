@@ -16,11 +16,11 @@ const PROJECT_SETTINGS_TITLE = i18n.translate(
   { defaultMessage: 'Project Settings' }
 );
 
-export const initSideNavigation = (services: Services) => {
+export const initSideNavigation = async (services: Services) => {
   services.securitySolution.setIsSolutionNavigationEnabled(true);
 
   const { navigationTree$, panelContentProvider } =
-    services.securitySolution.getSolutionNavigation();
+    await services.securitySolution.getSolutionNavigation();
 
   const serverlessNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>

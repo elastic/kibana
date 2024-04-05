@@ -86,7 +86,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
-import type { GetSolutionNavigation } from './app/solution_navigation/solution_navigation';
+import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -195,7 +195,7 @@ export interface PluginStart {
   getUpselling: () => UpsellingService;
   setOnboardingPageSettings: OnboardingPageService;
   setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
-  getSolutionNavigation: () => GetSolutionNavigation;
+  getSolutionNavigation: () => Promise<SolutionNavigation>;
 }
 
 export type InspectResponse = Inspect & { response: string[] };

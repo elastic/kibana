@@ -48,7 +48,7 @@ export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) =
   }
   if (isSolutionNavEnabled) {
     // import solution nav links only when solution nav is enabled
-    lazyLoadSolutionNavLinks().then((createSolutionNavLinks$) => {
+    lazySolutionNavLinks().then((createSolutionNavLinks$) => {
       currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
         navLinksUpdater$.next(links);
       });
@@ -74,8 +74,8 @@ export const useRootNavLink = (linkId: SecurityPageName): NavigationLink | undef
   return useNavLinks().find(({ id }) => id === linkId);
 };
 
-const lazyLoadSolutionNavLinks = async () =>
+const lazySolutionNavLinks = async () =>
   import(
-    /* webpackChunkName: "solutionNavLinks" */
+    /* webpackChunkName: "solution_nav_links" */
     '../../app/solution_navigation/links/nav_links'
   ).then(({ createSolutionNavLinks$ }) => createSolutionNavLinks$);

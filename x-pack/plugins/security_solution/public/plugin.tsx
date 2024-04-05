@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
-import { combineLatestWith } from 'rxjs/operators';
+import { Subject, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,

@@ -14,7 +14,6 @@ import { navLinks$, updateNavLinks } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
-import { getSolutionNavigation } from './app/solution_navigation';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
@@ -50,7 +49,7 @@ export class PluginContract {
         this.isSolutionNavigationEnabled$.next(isSolutionNavigationEnabled);
         updateNavLinks(isSolutionNavigationEnabled, core);
       },
-      getSolutionNavigation: () => getSolutionNavigation(core),
+      getSolutionNavigation: () => lazySolutionNavigation(core),
     };
   }
 
@@ -63,14 +62,21 @@ export class PluginContract {
   }
 }
 
+/**
+ * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+ * See https://webpack.js.org/api/module-methods/#magic-comments
+ */
 const lazyResolver = async () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
   const { resolverPluginSetup } = await import(
     /* webpackChunkName: "resolver" */
     './resolver'
   );
   return resolverPluginSetup();
+};
+const lazySolutionNavigation = async (core: CoreStart) => {
+  const { getSolutionNavigation } = await import(
+    /* webpackChunkName: "solution_navigation" */
+    './app/solution_navigation'
+  );
+  return getSolutionNavigation(core);
 };
