@@ -59,6 +59,7 @@ export interface AnomalySwimlaneEmbeddableUserInput {
 }
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
+  id?: string;
   jobIds: JobId[];
   swimlaneType: SwimlaneType;
   viewBy?: string;

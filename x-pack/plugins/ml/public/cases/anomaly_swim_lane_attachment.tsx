@@ -84,7 +84,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         <>
           <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
           <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
-            maybeId={props.attachmentId}
+            maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
             state={{
               rawState: inputProps,
