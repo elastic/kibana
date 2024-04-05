@@ -55,15 +55,14 @@ async function zipMessageToStream(
 ) {
   return new Promise(async (resolve, reject) => {
     try {
-      const before = Date.now();
+      const before = performance.now();
       const gzipped = await pDeflate(message, {
         flush: constants.Z_SYNC_FLUSH,
       });
       const base64Compressed = gzipped.toString('base64');
-      const duration = Date.now() - before;
       if (collector) {
         // 1 ASCII character = 1 byte
-        collector.addMetric(duration, base64Compressed.length);
+        collector.addMetric(performance.now() - before, base64Compressed.length);
       }
       output.write(base64Compressed);
       output.write(delimiter);
