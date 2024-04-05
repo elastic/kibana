@@ -31,7 +31,7 @@ export function LogsOverview({
       onRemoveColumn={onRemoveColumn}
     >
       <LogsOverviewHeader doc={parsedDoc} />
-      <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} />
+      <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
     </FieldActionsProvider>
   );
 }

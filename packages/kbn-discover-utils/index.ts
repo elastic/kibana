@@ -31,6 +31,7 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  fieldConstants,
   formatFieldValue,
   formatHit,
   getDocId,
