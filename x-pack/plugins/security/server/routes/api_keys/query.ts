@@ -38,8 +38,8 @@ export function defineQueryApiKeysAndAggregationsRoute({
       validate: {
         body: schema.object({
           query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          size: schema.maybe(schema.number()),
           from: schema.maybe(schema.number()),
+          size: schema.maybe(schema.number()),
           sort: schema.maybe(
             schema.object({
               field: schema.string(),
@@ -54,6 +54,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        // const max
         const esClient = (await context.core).elasticsearch.client;
         const authenticationService = getAuthenticationService();
 
@@ -80,9 +81,9 @@ export function defineQueryApiKeysAndAggregationsRoute({
 
         const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
           query,
+          sort: transformedSort,
           size,
           from,
-          sort: transformedSort,
         });
 
         const aggregationResponse = await esClient.asCurrentUser.security.queryApiKeys({

@@ -51,6 +51,8 @@ export interface ApiKeysTableProps {
   sortingOptions: QueryApiKeySortOptions;
 }
 
+export const MAX_PAGINATED_ITEMS = 10000;
+
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   apiKeys,
   createdApiKey,
@@ -233,6 +235,8 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     });
   }
 
+  const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEMS;
+
   return (
     <>
       <EuiSearchBar
@@ -282,8 +286,19 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           ) : undefined
         }
       />
-      <EuiSpacer />
-
+      <EuiSpacer size="s" />
+      {exceededResultCount && (
+        <>
+          <EuiText color="subdued" size="s" data-test-subj="apiKeysTableTooManyResultsLabel">
+            <FormattedMessage
+              id="apiKeysManagement.apiKeysTable.table.tooManyResultsLabel"
+              defaultMessage="Showing {limit} of {totalItemCount, plural, one {# api key} other {# api keys}}"
+              values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiBasicTable
         items={apiKeys}
         itemId="id"

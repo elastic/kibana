@@ -25,7 +25,7 @@ import { Route } from '@kbn/shared-ux-router';
 
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
-import { ApiKeysTable } from './api_keys_table';
+import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
 import type { CategorizedApiKey } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
 import type { ApiKey } from '../../../../common/model';
@@ -78,6 +78,9 @@ export const APIKeysGridPage: FunctionComponent = () => {
     field: 'creation',
     direction: 'desc',
   });
+  const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
+  const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
+  const readOnly = !useCapabilities('api_keys').save;
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
     const queryContainer = parseSearchBarQuery(query);
@@ -88,6 +91,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
       size: pageSize,
       sort: tableSort,
     };
+
     return Promise.all([
       new APIKeysAPIClient(services.http).queryApiKeys(requestBody),
       authc.getCurrentUser(),
@@ -99,10 +103,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
     setFrom(0);
     setTableSort({ field: 'creation', direction: 'desc' });
   };
-
-  const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
-  const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
-  const readOnly = !useCapabilities('api_keys').save;
 
   const onTableChange = ({ page, sort }: Criteria<ApiKey>) => {
     setFrom(page?.index! * pageSize);
@@ -166,7 +166,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
   const pagination = {
     pageIndex: from / pageSize,
     pageSize,
-    totalItemCount: totalKeys,
+    totalItemCount: totalKeys < MAX_PAGINATED_ITEMS ? totalKeys : MAX_PAGINATED_ITEMS,
     pageSizeOptions: [25, 50, 100],
   };
 
