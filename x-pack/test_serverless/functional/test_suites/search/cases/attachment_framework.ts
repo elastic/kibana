@@ -55,7 +55,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('does not show actions to add lens visualization to case', async () => {
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.missingOrFail('embeddablePanelAction-embeddable_addToNewCase');
         await testSubjects.missingOrFail('embeddablePanelAction-embeddable_addToExistingCase');
       });
     });

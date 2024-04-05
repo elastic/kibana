@@ -125,6 +125,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // give up to 2 minutes for response
       timeout: 120000,
       ...axiosOptions,
+      headers: {
+        ...this.config.headers,
+        ...axiosOptions.headers,
+      },
     });
     return response.data;
   }
@@ -147,12 +151,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     );
 
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+
     const response = await this.request({
       url: this.url,
       method: 'post',
       responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
       data: executeBody,
       ...axiosOptions,
+      headers: {
+        ...this.config.headers,
+        ...axiosOptions.headers,
+      },
     });
     return stream ? pipeStreamingResponse(response) : response.data;
   }

@@ -13,11 +13,13 @@ export const ConfigSchema = schema.oneOf([
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
     apiUrl: schema.string(),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 ]);
 

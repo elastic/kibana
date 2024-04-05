@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
@@ -15,8 +14,10 @@ import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { NormalizedExternalConnectorClientExecuteOptions } from '../lib/normalized_external_connector_client';
-import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
+import type {
+  NormalizedExternalConnectorClientExecuteOptions,
+  NormalizedExternalConnectorClient,
+} from '../lib/normalized_external_connector_client';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
@@ -45,7 +46,7 @@ import type {
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
-  connectorActions: ActionsClient | IUnsecuredActionsClient;
+  connectorActions: NormalizedExternalConnectorClient;
 };
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
@@ -54,11 +55,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
-    this.connectorActionsClient = new NormalizedExternalConnectorClient(
-      SENTINELONE_CONNECTOR_ID,
-      connectorActions,
-      this.log
-    );
+    this.connectorActionsClient = connectorActions;
+    connectorActions.setup(SENTINELONE_CONNECTOR_ID);
   }
 
   protected async writeActionRequestToEndpointIndex(

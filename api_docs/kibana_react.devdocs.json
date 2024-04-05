@@ -512,18 +512,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
             "plugin": "uiActions",
             "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
           },
@@ -713,18 +701,6 @@
           },
           {
             "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
             "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
           },
           {
@@ -950,6 +926,18 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx"
           },
           {
             "plugin": "lens",
@@ -2506,27 +2494,11 @@
           },
           {
             "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
             "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
           },
           {
             "plugin": "security",
             "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/solution_nav_userprofile_toggle/solution_nav_userprofile_toggle.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/solution_nav_userprofile_toggle/solution_nav_userprofile_toggle.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2666,14 +2638,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
@@ -2755,14 +2719,6 @@
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
           },
           {
             "plugin": "cases",
@@ -3127,14 +3083,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
           },
           {
             "plugin": "synthetics",

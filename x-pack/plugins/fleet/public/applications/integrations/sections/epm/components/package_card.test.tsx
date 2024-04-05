@@ -109,4 +109,22 @@ describe('package card', () => {
     });
     expect(window.open).toHaveBeenCalledWith('https://google.com', '_blank');
   });
+
+  it.each([true, false])(
+    'renders card with a badge when quickstart flag is enabled',
+    async (isQuickstart) => {
+      const {
+        utils: { queryByTitle },
+      } = renderPackageCard({
+        id: 'card-1',
+        url: 'https://google.com',
+        fromIntegrations: 'installed',
+        title: 'System',
+        description: 'System',
+        isQuickstart,
+      } as PackageCardProps);
+      const badgeElement = await queryByTitle('Quickstart');
+      expect(!!badgeElement).toEqual(isQuickstart);
+    }
+  );
 });
