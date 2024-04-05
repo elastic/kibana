@@ -9,6 +9,7 @@
 import { CoreSetup } from '@kbn/core/public';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { JobAppParamsPDFV2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import React from 'react';
 import { ReportingAPIClient } from '../..';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
@@ -42,6 +43,7 @@ export interface ApplicationProps {
 export interface ReportingPublicComponents {
   /** Needed for Canvas PDF reports */
   ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | undefined;
+  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element | undefined;
   ReportingModalPDF(props: ApplicationProps): JSX.Element | undefined;
   ReportingModalPNG(props: ApplicationProps): JSX.Element | undefined;
 }
@@ -63,6 +65,24 @@ export function getSharedComponents(
           <ScreenCapturePanelContent
             requiresSavedState={false}
             reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
+    },
+    ReportingPanelPNGV2(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PNG_REPORT_TYPE_V2}
             apiClient={apiClient}
             toasts={core.notifications.toasts}
             uiSettings={core.uiSettings}

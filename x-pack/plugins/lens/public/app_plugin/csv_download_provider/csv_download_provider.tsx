@@ -189,7 +189,7 @@ export const downloadCsvShareProvider = ({
   };
 
   return {
-    id: 'csvDownload',
+    id: 'csvDownloadLens',
     getShareMenuItems,
   };
 };

@@ -95,7 +95,7 @@ export const reportingCsvShareProvider = ({
         .createReportingJob(reportType, decoratedJobParams)
         .then(() => {
           toastsReport.addSuccess({
-            title: intlReport.formatMessage(
+            title: intlReport?.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -127,7 +127,7 @@ export const reportingCsvShareProvider = ({
         })
         .catch((error) => {
           toastsReport.addError(error, {
-            title: intlReport.formatMessage({
+            title: intlReport!.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),

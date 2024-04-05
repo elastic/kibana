@@ -66,7 +66,9 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
 const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
   // EuiCopy equivalent
   const [, setIsTextVisible] = useState<boolean>(false);
-  const afterMessage = <FormattedMessage id="share.afterMessageClick" defaultMessage="Copied" />;
+  const afterMessage = (
+    <FormattedMessage id="sharedUXPackages.afterMessageClick" defaultMessage="Copied" />
+  );
 
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();

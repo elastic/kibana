@@ -310,7 +310,7 @@ export const reportingExportModalProvider = ({
         .createReportingJob('printablePdfV2', decoratedJobParams)
         .then(() => {
           toastsReport.addSuccess({
-            title: intlReport.formatMessage(
+            title: intlReport?.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -342,7 +342,7 @@ export const reportingExportModalProvider = ({
         })
         .catch((error: any) => {
           toastsReport.addError(error, {
-            title: intlReport.formatMessage({
+            title: intlReport!.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
@@ -372,7 +372,7 @@ export const reportingExportModalProvider = ({
         .createReportingJob('printablePdfV2', decoratedJobParams)
         .then(() => {
           toastsReport.addSuccess({
-            title: intlReport.formatMessage(
+            title: intlReport?.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -404,7 +404,7 @@ export const reportingExportModalProvider = ({
         })
         .catch((error: any) => {
           toastsReport.addError(error, {
-            title: intlReport.formatMessage({
+            title: intlReport!.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
@@ -431,7 +431,7 @@ export const reportingExportModalProvider = ({
         .createReportingJob('pngV2', decoratedJobParams)
         .then(() => {
           toastsReport.addSuccess({
-            title: intlReport.formatMessage(
+            title: intlReport?.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -463,7 +463,7 @@ export const reportingExportModalProvider = ({
         })
         .catch((error: any) => {
           toastsReport.addError(error, {
-            title: intlReport.formatMessage({
+            title: intlReport!.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),

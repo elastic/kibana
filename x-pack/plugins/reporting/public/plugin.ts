@@ -223,29 +223,8 @@ export class ReportingPublicPlugin
             theme: core.theme,
           })
         );
-        shareSetup.register(
-          reportingCsvShareModalProvider({
-            apiClient,
-            uiSettings,
-            license,
-            application,
-            usesUiCapabilities,
-            theme: core.theme,
-          })
-        );
-
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingExportModalProvider({
-              apiClient,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-            })
-          );
-          // needed for Canvas
+          // needed for Canvas and legacy tests
           shareSetup.register(
             reportingScreenshotShareProvider({
               apiClient,
@@ -257,6 +236,31 @@ export class ReportingPublicPlugin
               theme: core.theme,
             })
           );
+        }
+        if (shareSetup.isNewVersion) {
+          shareSetup.register(
+            reportingCsvShareModalProvider({
+              apiClient,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+            })
+          );
+
+          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+            shareSetup.register(
+              reportingExportModalProvider({
+                apiClient,
+                uiSettings,
+                license,
+                application,
+                usesUiCapabilities,
+                theme: core.theme,
+              })
+            );
+          }
         }
       });
     });

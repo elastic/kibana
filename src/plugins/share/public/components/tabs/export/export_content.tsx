@@ -288,7 +288,6 @@ const ExportContentUi = ({
       <EuiModalFooter // dashboard has three buttons in the footer and needs to have them in the footer
         css={{ padding: 0, ...styling }}
       >
-        {objectType}
         {renderLayoutOptionsSwitch()}
         {showCopyURLButton()}
         {renderGenerateReportButton()}

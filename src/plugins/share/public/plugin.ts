@@ -84,7 +84,7 @@ export class SharePlugin
     >
 {
   private config: ClientConfigType;
-  private readonly shareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareMenuRegistry?: ShareMenuRegistry;
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
@@ -94,6 +94,7 @@ export class SharePlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.shareMenuRegistry = new ShareMenuRegistry(this.config);
   }
 
   public setup(core: CoreSetup): SharePublicSetup {
@@ -138,7 +139,7 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      ...this.shareMenuRegistry.setup(),
+      ...this.shareMenuRegistry!.setup(),
       kibanaVersion: this.kibanaVersion,
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
@@ -157,7 +158,7 @@ export class SharePlugin
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
-      this.shareMenuRegistry.start(),
+      this.shareMenuRegistry!.start(),
       disableEmbed,
       this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider

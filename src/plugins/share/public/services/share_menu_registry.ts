@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ShareContext, ShareMenuProvider } from '../types';
+import { ClientConfigType, ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
+  private config?: ClientConfigType;
+
+  constructor(config: ClientConfigType) {
+    this.config = config;
+  }
 
   public setup() {
     return {
@@ -21,13 +26,26 @@ export class ShareMenuRegistry {
        * @param shareMenuProvider
        */
       register: (shareMenuProvider: ShareMenuProvider) => {
-        // if (this.shareMenuProviders.has(shareMenuProvider.id)) {
-        //   throw new Error(
-        //     `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
-        //   );
-        // }
-        this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+        if (
+          !this.config?.new_version.enabled &&
+          (shareMenuProvider.id === 'csvReports' || shareMenuProvider.id === 'screenCaptureReports')
+        ) {
+          this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+        } else if (
+          shareMenuProvider.id === 'csvReportsModal' ||
+          shareMenuProvider.id === 'modalImageReports' ||
+          shareMenuProvider.id === 'csvDownloadLens'
+        ) {
+          this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+        }
       },
+      //     if (this.shareMenuProviders.has(shareMenuProvider.id)) {
+      //       throw new Error(
+      //         `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
+      //       );
+      //     }
+      //     this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+      //   },
     };
   }
 

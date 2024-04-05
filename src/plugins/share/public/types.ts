@@ -52,8 +52,8 @@ export interface ShareContext {
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
-  intl: InjectedIntl;
   toasts: ToastsSetup;
+  intl?: InjectedIntl;
 }
 
 /**
