@@ -30,7 +30,7 @@ import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
 
-export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
+export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
     hasReference: { type: timelineSavedObjectType, id: timelineId },

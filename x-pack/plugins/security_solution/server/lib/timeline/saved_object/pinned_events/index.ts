@@ -48,8 +48,7 @@ export const deleteAllPinnedEventsOnTimeline = async (
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
+    hasReference: { type: timelineSavedObjectType, id: timelineId },
   };
   const pinnedEventToBeDeleted = await getAllSavedPinnedEvents(request, options);
   await Promise.all(
