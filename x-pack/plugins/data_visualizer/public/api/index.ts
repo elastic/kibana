@@ -13,7 +13,7 @@ import type {
   IndexDataVisualizerSpec,
 } from '../application';
 
-interface SpecWithLinks {
+export interface SpecWithLinks {
   resultLinks: ResultLinks;
   component: FileDataVisualizerSpec;
 }
