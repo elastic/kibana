@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
@@ -16,6 +16,7 @@ import { StartChatPanel } from './start_chat_panel';
 
 export const SetUpConnectorPanelForStartChat: React.FC = () => {
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
+  const [showCallout, setShowAddedCallout] = useState(false);
   const {
     services: {
       triggersActionsUi: { getAddConnectorFlyout: ConnectorFlyout },
@@ -25,68 +26,69 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
     data: connectors,
     refetch: refetchConnectors,
     isLoading: isConnectorListLoading,
-    isSuccess: isConnectorListLoadSuccess,
   } = useLoadConnectors();
   const handleConnectorCreated = () => {
     refetchConnectors();
+    setShowAddedCallout(true);
     setConnectorFlyoutOpen(false);
   };
 
-  if (isConnectorListLoading || !isConnectorListLoadSuccess) {
-    return <EuiLoadingSpinner data-test-subj="loadingSpinner" />;
-  }
-
-  return Object.keys(connectors).length ? (
-    <EuiCallOut
-      title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.settled', {
-        defaultMessage:
-          '{connectorsNames} {count, plural, one {connector} other {connectors}} added',
-        values: {
-          connectorsNames: Object.values(connectors)
-            .map((connector) => connector.title)
-            .join(', '),
-          count: Object.values(connectors).length,
-        },
-      })}
-      iconType="check"
-      color="success"
-      data-test-subj="connectorsAdded"
-    />
-  ) : (
+  return connectors && !isConnectorListLoading ? (
     <>
-      <StartChatPanel
-        title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.title', {
-          defaultMessage: 'Set up a Gen AI connector',
-        })}
-        description={
-          <FormattedMessage
-            id="xpack.searchPlayground.emptyPrompts.setUpConnector.description"
-            defaultMessage="A large-language model is required to use a chat bot. Set up a connection to your LLM provider to continue."
-          />
-        }
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              data-test-subj="setupGenAIConnectorButton"
-              onClick={() => setConnectorFlyoutOpen(true)}
-            >
-              <FormattedMessage
-                id="xpack.searchPlayground.emptyPrompts.setUpConnector.btn"
-                defaultMessage="Set up GenAI connector"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </StartChatPanel>
-      {connectorFlyoutOpen && (
-        <ConnectorFlyout
-          featureId={GenerativeAIForSearchPlaygroundConnectorFeatureId}
-          onConnectorCreated={handleConnectorCreated}
-          onClose={() => setConnectorFlyoutOpen(false)}
+      {!!Object.keys(connectors).length && showCallout && (
+        <EuiCallOut
+          title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.settled', {
+            defaultMessage:
+              '{connectorsNames} {count, plural, one {connector} other {connectors}} added',
+            values: {
+              connectorsNames: Object.values(connectors)
+                .map((connector) => connector.title)
+                .join(', '),
+              count: Object.values(connectors).length,
+            },
+          })}
+          iconType="check"
+          color="success"
+          data-test-subj="connectorsAdded"
         />
       )}
+      {!Object.keys(connectors).length && (
+        <>
+          <StartChatPanel
+            title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.title', {
+              defaultMessage: 'Set up a Gen AI connector',
+            })}
+            description={
+              <FormattedMessage
+                id="xpack.searchPlayground.emptyPrompts.setUpConnector.description"
+                defaultMessage="A large-language model is required to use a chat bot. Set up a connection to your LLM provider to continue."
+              />
+            }
+          >
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  data-test-subj="setupGenAIConnectorButton"
+                  onClick={() => setConnectorFlyoutOpen(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.searchPlayground.emptyPrompts.setUpConnector.btn"
+                    defaultMessage="Set up GenAI connector"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </StartChatPanel>
+          {connectorFlyoutOpen && (
+            <ConnectorFlyout
+              featureId={GenerativeAIForSearchPlaygroundConnectorFeatureId}
+              onConnectorCreated={handleConnectorCreated}
+              onClose={() => setConnectorFlyoutOpen(false)}
+            />
+          )}
+        </>
+      )}
     </>
-  );
+  ) : null;
 };
