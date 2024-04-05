@@ -22,6 +22,53 @@ const routerOptions: RouterOptions = {
 };
 
 describe('Router', () => {
+  describe('#getRoutes', () => {
+    it('returns expected route metadata', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      const validation = schema.object({ foo: schema.string() });
+      router.post(
+        { path: '/', validate: { body: validation, query: validation, params: validation } },
+        (context, req, res) => res.ok()
+      );
+      const routes = router.getRoutes();
+      expect(routes).toHaveLength(1);
+      const [route] = routes;
+      expect(route).toMatchObject({
+        handler: expect.any(Function),
+        method: 'post',
+        path: '/',
+        validationSchemas: { body: validation, query: validation, params: validation },
+        isVersioned: false,
+      });
+    });
+
+    it('can exclude versioned routes', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      const validation = schema.object({ foo: schema.string() });
+      router.post(
+        {
+          path: '/versioned',
+          validate: { body: validation, query: validation, params: validation },
+        },
+        (context, req, res) => res.ok(),
+        { isVersioned: true }
+      );
+      router.get(
+        {
+          path: '/unversioned',
+          validate: { body: validation, query: validation, params: validation },
+        },
+        (context, req, res) => res.ok()
+      );
+      const routes = router.getRoutes({ excludeVersionedRoutes: true });
+      expect(routes).toHaveLength(1);
+      const [route] = routes;
+      expect(route).toMatchObject({
+        method: 'get',
+        path: '/unversioned',
+      });
+    });
+  });
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
