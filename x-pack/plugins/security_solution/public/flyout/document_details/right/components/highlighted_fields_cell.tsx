@@ -10,7 +10,9 @@ import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { SentinelOneAgentStatus } from '../../../../detections/components/host_isolation/sentinel_one_agent_status';
+import { CrowdstrikeAgentStatus } from '../../../../detections/components/host_isolation/crowdstrike_agent_status';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
+import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../../../common/utils/crowdstrike_alert_check';
 import { EndpointAgentStatusById } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { useRightPanelContext } from '../context';
 import {
@@ -83,34 +85,42 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField,
-}) => (
-  <>
-    {values != null &&
-      values.map((value, i) => {
-        return (
-          <EuiFlexItem
-            grow={false}
-            key={`${i}-${value}`}
-            data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
-          >
-            {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
-              <LinkFieldCell value={value} />
-            ) : field === AGENT_STATUS_FIELD_NAME &&
-              originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
-              <SentinelOneAgentStatus
-                agentId={String(value ?? '')}
-                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-              />
-            ) : field === AGENT_STATUS_FIELD_NAME ? (
-              <EndpointAgentStatusById
-                endpointAgentId={String(value ?? '')}
-                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-              />
-            ) : (
-              <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
-            )}
-          </EuiFlexItem>
-        );
-      })}
-  </>
-);
+}) => {
+  return (
+    <>
+      {values != null &&
+        values.map((value, i) => {
+          return (
+            <EuiFlexItem
+              grow={false}
+              key={`${i}-${value}`}
+              data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
+            >
+              {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
+                <LinkFieldCell value={value} />
+              ) : field === AGENT_STATUS_FIELD_NAME &&
+                originalField === CROWDSTRIKE_AGENT_ID_FIELD ? (
+                <CrowdstrikeAgentStatus
+                  agentId={String(value ?? '')}
+                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+                />
+              ) : field === AGENT_STATUS_FIELD_NAME &&
+                originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
+                <SentinelOneAgentStatus
+                  agentId={String(value ?? '')}
+                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+                />
+              ) : field === AGENT_STATUS_FIELD_NAME ? (
+                <EndpointAgentStatusById
+                  endpointAgentId={String(value ?? '')}
+                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+                />
+              ) : (
+                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
+              )}
+            </EuiFlexItem>
+          );
+        })}
+    </>
+  );
+};

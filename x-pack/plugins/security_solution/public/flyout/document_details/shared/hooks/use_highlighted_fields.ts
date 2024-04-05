@@ -9,6 +9,10 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import {
+  CROWDSTRIKE_AGENT_ID_FIELD,
+  isAlertFromCrowdstrikeEvent,
+} from '../../../../common/utils/crowdstrike_alert_check';
+import {
   SENTINEL_ONE_AGENT_ID_FIELD,
   isAlertFromSentinelOneEvent,
 } from '../../../../common/utils/sentinelone_alert_check';
@@ -107,6 +111,13 @@ export const useHighlightedFields = ({
     if (
       field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
       !isAlertFromSentinelOneEvent({ data: dataFormattedForFieldBrowser })
+    ) {
+      return acc;
+    }
+
+    if (
+      field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
+      !isAlertFromCrowdstrikeEvent({ data: dataFormattedForFieldBrowser })
     ) {
       return acc;
     }

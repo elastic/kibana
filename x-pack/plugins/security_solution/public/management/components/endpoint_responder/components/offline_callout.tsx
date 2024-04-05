@@ -43,6 +43,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
     [data, endpointDetails?.host_status, endpointId, isEndpointAgent, isSentinelOneAgent]
   );
 
+  // TODO TC: include crowdstrike status
   if (
     (isEndpointAgent && !endpointDetails) ||
     (isSentinelOneV1Enabled && isSentinelOneAgent && !data)
