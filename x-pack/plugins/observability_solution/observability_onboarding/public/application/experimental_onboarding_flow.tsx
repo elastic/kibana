@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  PackageListGrid,
-  useAvailablePackages,
-} from '@kbn/fleet-plugin/public';
+
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { EuiPanel } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import React from 'react';
@@ -21,35 +17,6 @@ import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form'
 import { Header } from './header/header';
 
 const queryClient = new QueryClient();
-
-interface Props {
-  selectedCategory?: string;
-}
-
-function OnboardingFlowPackageList({
-  selectedCategory = 'observability',
-}: Props) {
-  const availablePackages = useAvailablePackages({
-    prereleaseIntegrationsEnabled: false,
-  });
-  return (
-    <EuiPanel>
-      <PackageListGrid
-        list={availablePackages.filteredCards.filter((card) =>
-          card.categories.includes(selectedCategory)
-        )}
-        searchTerm={''}
-        setSearchTerm={() => {}}
-        selectedCategory={selectedCategory}
-        setCategory={() => {}}
-        categories={[]}
-        setUrlandReplaceHistory={() => {}}
-        setUrlandPushHistory={() => {}}
-        showSearchTools={false}
-      />
-    </EuiPanel>
-  );
-}
 
 export function ExperimentalOnboardingFlow() {
   return (
@@ -78,7 +45,6 @@ export function ExperimentalOnboardingFlow() {
           >
             <OnboardingFlowForm />
             <EuiSpacer size="xl" />
-            <OnboardingFlowPackageList />
           </EuiPageTemplate.Section>
           <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
             <Footer />

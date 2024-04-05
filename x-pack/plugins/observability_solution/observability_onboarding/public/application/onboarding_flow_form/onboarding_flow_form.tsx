@@ -16,12 +16,11 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-  EuiFlexGrid,
   EuiAvatar,
   useEuiTheme,
 } from '@elastic/eui';
+
+import { OnboardingFlowPackageList } from '../packages_list';
 
 interface UseCaseOption {
   id: string;
@@ -227,32 +226,61 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {/* Mock integrations grid */}
-          <EuiFlexGrid columns={3} css={{ margin: 20 }}>
-            {new Array(6).fill(null).map((_, index) => (
-              <EuiCard
-                key={index}
-                layout="horizontal"
-                title={selectedId!}
-                titleSize="xs"
-                description={selectedId!}
-                icon={<EuiIcon type="logoObservability" size="l" />}
-                betaBadgeProps={
-                  index === 0
-                    ? {
-                        label: 'Quick Start',
-                        color: 'accent',
-                        size: 's',
-                      }
-                    : undefined
-                }
-                hasBorder
-                css={{
-                  borderColor: index === 0 ? '#ba3d76' : undefined,
-                }}
-              />
-            ))}
-          </EuiFlexGrid>
+          <OnboardingFlowPackageList
+            featuredCards={['kubernetes', 'prometheus', 'docker']}
+            generatedCards={[
+              {
+                id: 'azure-generated',
+                title: 'Azure',
+                description: 'Collect logs and metrics from Microsoft Azure',
+                name: 'azure',
+                categories: ['observability'],
+                icons: [],
+                url: 'https://azure.com',
+                version: '',
+                integration: '',
+              },
+              {
+                id: 'aws-generated',
+                title: 'AWS',
+                description:
+                  'Collect logs and metrics from Amazon Web Services (AWS)',
+                name: 'aws',
+                categories: ['observability'],
+                icons: [],
+                url: 'https://aws.com',
+                version: '',
+                integration: '',
+              },
+              {
+                id: 'gcp-generated',
+                title: 'Google Cloud Platfrm',
+                description:
+                  'Collect logs and metrics from Google Cloud Platform',
+                name: 'gcp',
+                categories: ['observability'],
+                icons: [],
+                url: 'https://gcp.com',
+                version: '',
+                integration: '',
+              },
+            ]}
+          />
+
+          <EuiText
+            css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}
+            size="s"
+            color="subdued"
+          >
+            {i18n.translate(
+              'xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText',
+              {
+                defaultMessage:
+                  'Not seeing yours? Search through our 300+ ways of ingesting data:',
+              }
+            )}
+          </EuiText>
+          <OnboardingFlowPackageList showSearchBar={true} />
         </>
       )}
     </EuiPanel>
