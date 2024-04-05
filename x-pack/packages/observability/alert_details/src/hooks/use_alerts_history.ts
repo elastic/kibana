@@ -6,7 +6,6 @@
  */
 
 import { type HttpSetup } from '@kbn/core/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
@@ -106,7 +105,6 @@ export async function fetchTriggeredAlertsHistory({
   dateRange,
   signal,
   instanceId,
-  queries = [],
 }: {
   featureIds: ValidFeatureId[];
   http: HttpSetup;
@@ -117,7 +115,6 @@ export async function fetchTriggeredAlertsHistory({
   };
   signal?: AbortSignal;
   instanceId?: string;
-  queries?: QueryDslQueryContainer[];
 }): Promise<FetchAlertsHistory> {
   try {
     const responseES = await http.post<AggsESResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -142,7 +139,6 @@ export async function fetchTriggeredAlertsHistory({
                     },
                   ]
                 : []),
-              ...queries,
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,
