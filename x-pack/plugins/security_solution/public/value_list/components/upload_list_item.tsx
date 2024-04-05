@@ -18,7 +18,7 @@ import {
   UPLOAD_TOOLTIP,
   FAILED_TO_UPLOAD_LIST_ITEM_TITLE,
   FAILED_TO_UPLOAD_LIST_ITEM,
-  SUCCESFULY_UPLOAD_LIST_ITEMS,
+  SUCCESSFULY_UPLOAD_LIST_ITEMS,
 } from '../translations';
 
 const validFileTypes = ['text/csv', 'text/plain'];
@@ -60,7 +60,7 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
 
   useEffect(() => {
     if (!importState.loading && importState.result) {
-      addSuccess(SUCCESFULY_UPLOAD_LIST_ITEMS, toastOptions);
+      addSuccess(SUCCESSFULY_UPLOAD_LIST_ITEMS, toastOptions);
     } else if (!importState.loading && importState.error) {
       addError(FAILED_TO_UPLOAD_LIST_ITEM, {
         title: FAILED_TO_UPLOAD_LIST_ITEM_TITLE,

@@ -11,10 +11,10 @@ export const ADD_LIST_ITEM = i18n.translate('xpack.securitySolution.listItems.ad
   defaultMessage: 'Add list item',
 });
 
-export const SUCCESFULLY_ADDED_ITEM = i18n.translate(
+export const SUCCESSFULLY_ADDED_ITEM = i18n.translate(
   'xpack.securitySolution.listItems.successfullyAddedItem',
   {
-    defaultMessage: 'Succesfully added list item',
+    defaultMessage: 'Successfully added list item',
   }
 );
 
@@ -47,10 +47,10 @@ export const ADDING_LIST_ITEM_BUTTON = i18n.translate(
   }
 );
 
-export const SUCCESFULLY_DELETED_ITEM = i18n.translate(
+export const SUCCESSFULLY_DELETED_ITEM = i18n.translate(
   'xpack.securitySolution.listItems.successfullyDeletedItem',
   {
-    defaultMessage: 'Succesfully deleted list item',
+    defaultMessage: 'Successfully deleted list item',
   }
 );
 
@@ -61,10 +61,10 @@ export const EDIT_TEXT_INLINE_LABEL = i18n.translate(
   }
 );
 
-export const SUCCESFULLY_UPDATED_LIST_ITEM = i18n.translate(
+export const SUCCESSFULLY_UPDATED_LIST_ITEM = i18n.translate(
   'xpack.securitySolution.listItems.successfullyUpdatedListItem',
   {
-    defaultMessage: 'Succesfully updated list item',
+    defaultMessage: 'Successfully updated list item',
   }
 );
 
@@ -94,7 +94,7 @@ export const FAILED_TO_FETCH_LIST_ITEM = i18n.translate(
   'xpack.securitySolution.listItems.failedToFetchListItem',
   {
     defaultMessage:
-      'Failed to load list items. You can change the search query or contact your administartor',
+      'Failed to load list items. You can change the search query or contact your administrator',
   }
 );
 
@@ -109,10 +109,10 @@ export const DELETE_LIST_ITEM_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SUCCESFULY_UPLOAD_LIST_ITEMS = i18n.translate(
-  'xpack.securitySolution.listItems.succesfullyUploadListItems',
+export const SUCCESSFULY_UPLOAD_LIST_ITEMS = i18n.translate(
+  'xpack.securitySolution.listItems.successfullyUploadListItems',
   {
-    defaultMessage: 'Succesfully uploaded list items',
+    defaultMessage: 'Successfully uploaded list items',
   }
 );
 
@@ -131,7 +131,7 @@ export const FAILED_TO_UPLOAD_LIST_ITEM_TITLE = i18n.translate(
 );
 
 export const UPLOAD_TOOLTIP = i18n.translate('xpack.securitySolution.listItems.uploadTooltip', {
-  defaultMessage: 'All items from file will be added as new items',
+  defaultMessage: 'All items from the file will be added as new items',
 });
 
 export const UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT = i18n.translate(

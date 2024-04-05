@@ -20,7 +20,7 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import {
   ADD_LIST_ITEM,
-  SUCCESFULLY_ADDED_ITEM,
+  SUCCESSFULLY_ADDED_ITEM,
   VALUE_REQUIRED,
   VALUE_LABEL,
   ADD_VALUE_LIST_PLACEHOLDER,
@@ -34,7 +34,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
   const http = useKibana().services.http;
   const createListItemMutation = useCreateListItemMutation({
     onSuccess: () => {
-      addSuccess(SUCCESFULLY_ADDED_ITEM);
+      addSuccess(SUCCESSFULLY_ADDED_ITEM);
     },
     onError: (error) => {
       addError(error, {

@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
-import { SUCCESFULLY_DELETED_ITEM } from '../translations';
+import { SUCCESSFULLY_DELETED_ITEM } from '../translations';
 
 const toastOptions = {
   toastLifeTimeMs: 5000,
@@ -21,7 +21,7 @@ export const DeleteListItem = ({ id, value }: { id: string; value: string }) => 
   const http = useKibana().services.http;
   const deleteListItemMutation = useDeleteListItemMutation({
     onSuccess: () => {
-      addSuccess(SUCCESFULLY_DELETED_ITEM, toastOptions);
+      addSuccess(SUCCESSFULLY_DELETED_ITEM, toastOptions);
     },
     onError: (error) => {
       addError(error, {
