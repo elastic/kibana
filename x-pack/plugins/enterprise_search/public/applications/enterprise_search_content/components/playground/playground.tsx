@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useSearchParams } from 'react-router-dom-v5-compat';
+
 import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
@@ -15,10 +17,18 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const index: string | null = searchParams.has('defaultIndexName')
+    ? searchParams.get('defaultIndexName')
+    : null;
   const { searchPlayground } = useValues(KibanaLogic);
 
   return (
-    <searchPlayground.PlaygroundProvider>
+    <searchPlayground.PlaygroundProvider
+      defaultValues={{
+        indices: index ? [index] : [],
+      }}
+    >
       <EnterpriseSearchContentPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
