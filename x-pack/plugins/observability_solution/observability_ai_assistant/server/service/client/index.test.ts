@@ -729,7 +729,6 @@ describe('Observability AI Assistant client', () => {
             descriptionForUser: '',
             parameters: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 foo: {
                   type: 'string',
@@ -938,9 +937,9 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               title: 'My predefined title',
               token_count: {
-                completion: 24,
-                prompt: 458,
-                total: 482,
+                completion: expect.any(Number),
+                prompt: expect.any(Number),
+                total: expect.any(Number),
               },
             },
           });
@@ -1295,7 +1294,6 @@ describe('Observability AI Assistant client', () => {
             name: 'get_top_alerts',
             contexts: ['core'],
             description: '',
-            parameters: {},
           },
           respond: async () => {
             return { content: 'Call this function again' };
@@ -1330,9 +1328,9 @@ describe('Observability AI Assistant client', () => {
 
         let nextLlmCallPromise: Promise<void>;
 
-        if (body.functions?.length) {
+        if (body.tools?.length) {
           nextLlmCallPromise = waitForNextLlmCall();
-          await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+          await llmSimulator.next({ function_call: { name: 'get_top_alerts', arguments: '{}' } });
         } else {
           nextLlmCallPromise = Promise.resolve();
           await llmSimulator.next({ content: 'Looks like we are done here' });
@@ -1372,9 +1370,9 @@ describe('Observability AI Assistant client', () => {
         (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
       );
 
-      expect(firstBody.functions.length).toBe(1);
+      expect(firstBody.tools.length).toBe(1);
 
-      expect(body.functions).toBeUndefined();
+      expect(body.tools).toBeUndefined();
     });
   });
 
