@@ -49,7 +49,7 @@ export const getAssetCriticalityDoc = async (opts: {
   es: Client;
   idField: string;
   idValue: string;
-}) => {
+}): Promise<AssetCriticalityRecord | undefined> => {
   const { es, idField, idValue } = opts;
   try {
     const doc = await es.get({
@@ -57,7 +57,7 @@ export const getAssetCriticalityDoc = async (opts: {
       id: `${idField}:${idValue}`,
     });
 
-    return doc._source;
+    return doc._source as AssetCriticalityRecord;
   } catch (e) {
     return undefined;
   }

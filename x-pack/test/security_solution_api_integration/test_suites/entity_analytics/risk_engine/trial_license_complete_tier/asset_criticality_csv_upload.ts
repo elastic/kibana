@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
-
+    const log = getService('log');
     const expectAssetCriticalityDocMatching = async (expectedDoc: {
       id_field: string;
       id_value: string;
@@ -32,11 +32,11 @@ export default ({ getService }: FtrProviderContext) => {
       expect(omit(esDoc, '@timestamp')).to.eql(expectedDoc);
     };
     before(async () => {
-      await cleanAssetCriticality({ es: esClient, namespace: 'default' });
+      await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
     });
 
     after(async () => {
-      await cleanAssetCriticality({ es: esClient, namespace: 'default' });
+      await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
     });
 
     describe('Asset Criticality privileges API', () => {
