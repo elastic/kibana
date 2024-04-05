@@ -38,7 +38,10 @@ export interface IBasePath {
   /**
    * sets `basePath` value, specific for an incoming request.
    */
-  set(request: KibanaRequest, requestSpecificBasePath: string): void;
+  set(
+    request: KibanaRequest,
+    requestSpecificBasePath: string | { id: string; basePath: string }
+  ): void;
 
   /**
    * Prepends `path` with the basePath.
