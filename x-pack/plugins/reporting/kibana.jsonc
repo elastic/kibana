@@ -23,13 +23,13 @@
       "screenshotMode",
       "share",
       "features",
-      "lens"
     ],
     "optionalPlugins": [
       "security",
       "spaces",
       "usageCollection",
-      "screenshotting"
+      "screenshotting",
+      "lens"
     ],
     "requiredBundles": [
       "embeddable",

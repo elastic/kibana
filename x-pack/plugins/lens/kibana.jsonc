@@ -36,7 +36,6 @@
       "eventAnnotation",
       "unifiedSearch",
       "contentManagement",
-      "licensing"
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",
@@ -46,7 +45,8 @@
       "globalSearch",
       "savedObjectsTagging",
       "spaces",
-      "serverless"
+      "serverless",
+      "licensing"
     ],
     "requiredBundles": [
       "unifiedSearch",
