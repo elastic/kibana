@@ -82,6 +82,7 @@ export interface AssistantTelemetry {
   reportAssistantSettingToggled: (params: {
     isEnabledKnowledgeBase?: boolean;
     isEnabledRAGAlerts?: boolean;
+    assistantStreamingEnabled?: boolean;
   }) => void;
 }
 

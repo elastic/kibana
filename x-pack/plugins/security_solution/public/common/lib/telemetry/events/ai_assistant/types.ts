@@ -31,6 +31,7 @@ export interface ReportAssistantQuickPromptParams {
 export interface ReportAssistantSettingToggledParams {
   isEnabledKnowledgeBase?: boolean;
   isEnabledRAGAlerts?: boolean;
+  assistantStreamingEnabled?: boolean;
 }
 
 export type ReportAssistantTelemetryEventParams =
