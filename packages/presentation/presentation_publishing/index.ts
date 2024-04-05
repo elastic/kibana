@@ -116,6 +116,7 @@ export {
   apiHasLegacyLibraryTransforms,
 } from './interfaces/has_library_transforms';
 export {
+  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,
