@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiLink, EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiLink,
+  EuiTitle,
+  EuiText,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -32,9 +40,11 @@ export interface ConversationSettingsProps {
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnector?: AIConnector;
+  assistantStreamingEnabled: boolean;
   http: HttpSetup;
   onSelectedConversationChange: (conversation?: Conversation) => void;
   selectedConversation?: Conversation;
+  setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
@@ -48,12 +58,14 @@ export interface ConversationSettingsProps {
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
   ({
     allSystemPrompts,
+    assistantStreamingEnabled,
     defaultConnector,
     selectedConversation,
     onSelectedConversationChange,
     conversationSettings,
     http,
     isDisabled = false,
+    setAssistantStreamingEnabled,
     setConversationSettings,
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
@@ -342,7 +354,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         setConversationsSettingsBulkActions,
       ]
     );
-
     return (
       <>
         <EuiTitle size={'s'}>
@@ -418,6 +429,21 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               />
             </EuiFormRow>
           )}
+        <EuiSpacer size="l" />
+        <EuiTitle size={'s'}>
+          <h2>{i18n.SETTINGS_ALL_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size={'s'}>{i18n.SETTINGS_ALL_DESCRIPTION}</EuiText>
+        <EuiHorizontalRule margin={'s'} />
+        <EuiFormRow fullWidth display="rowCompressed" label={i18n.STREAMING_TITLE}>
+          <EuiSwitch
+            label={<EuiText size="xs">{i18n.STREAMING_HELP_TEXT_TITLE}</EuiText>}
+            checked={assistantStreamingEnabled}
+            onChange={(e) => setAssistantStreamingEnabled(e.target.checked)}
+            compressed
+          />
+        </EuiFormRow>
       </>
     );
   }
