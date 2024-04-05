@@ -140,6 +140,7 @@ describe('Lens Field Item', () => {
         documentField,
       ],
       isTimeBased: jest.fn(),
+      getFieldByName: jest.fn(),
     } as unknown as IndexPattern;
 
     defaultProps = {

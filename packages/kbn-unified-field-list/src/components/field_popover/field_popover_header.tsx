@@ -53,7 +53,6 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     return null;
   }
   const description = showEcsInfo ? field?.ecsDescription : field?.customDescription;
-  console.log({ showEcsInfo, description });
 
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',
