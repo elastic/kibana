@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
         log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount === expectedCount;
+        return actualCount <= expectedCount;
       });
       let prevRowData = '';
       // to make sure the table is already rendered

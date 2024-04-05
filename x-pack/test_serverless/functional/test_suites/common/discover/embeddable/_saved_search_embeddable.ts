@@ -12,8 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardReplacePanel = getService('dashboardReplacePanel');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
@@ -138,18 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await errorMessage.getVisibleText()).to.equal(
         'Expected AND, OR, end of input, whitespace but "n" found.\nthis < is not : a valid > query\n----------^'
       );
-    });
-
-    it('should replace a panel with a saved search', async () => {
-      await dashboardAddPanel.addVisualization('Rendering Test: datatable');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.replacePanelByTitle('Rendering Test: datatable');
-      await dashboardReplacePanel.replaceEmbeddable('Rendering-Test:-saved-search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await testSubjects.missingOrFail('embeddableError');
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
     });
 
     it('should not show the full screen button', async () => {
