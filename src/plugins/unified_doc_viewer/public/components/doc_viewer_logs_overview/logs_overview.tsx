@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useDocDetail } from '../../hooks/use_doc_detail';
-import { DiscoverActionsProvider } from '../../hooks/use_discover_action';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
+import { FieldActionsProvider } from '../../hooks/use_field_actions';
 
 export function LogsOverview({
+  columns,
   dataView,
   hit,
   filter,
@@ -22,15 +23,15 @@ export function LogsOverview({
 }: DocViewRenderProps) {
   const parsedDoc = useDocDetail(hit, { dataView });
 
-  const actions = useMemo(
-    () => ({ filter, onAddColumn, onRemoveColumn }),
-    [filter, onAddColumn, onRemoveColumn]
-  );
-
   return (
-    <DiscoverActionsProvider value={actions}>
+    <FieldActionsProvider
+      columns={columns}
+      filter={filter}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
+    >
       <LogsOverviewHeader doc={parsedDoc} />
       <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={doc.flattened} />
-    </DiscoverActionsProvider>
+    </FieldActionsProvider>
   );
 }

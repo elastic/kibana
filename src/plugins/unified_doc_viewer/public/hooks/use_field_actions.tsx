@@ -6,78 +6,96 @@
  * Side Public License, v 1.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import createContainer from 'constate';
 import { copyToClipboard, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverActionsContext } from './use_discover_action';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
-interface HoverActionProps {
+interface WithFieldParam {
   field: string;
+}
+
+interface WithValueParam {
   value: string;
 }
 
-export interface HoverActionType {
+interface TFieldActionParams extends WithFieldParam, WithValueParam {}
+
+export interface TFieldAction {
   id: string;
-  tooltipContent: string;
   iconType: IconType;
+  label: string;
   onClick: () => void;
-  display: boolean;
 }
 
-export const useFieldActions = ({ field, value }: HoverActionProps): HoverActionType[] => {
-  const filterForText = actionFilterForText(value);
-  const filterOutText = actionFilterOutText(value);
-  const actions = useDiscoverActionsContext();
-  const [columnAdded, setColumnAdded] = useState<boolean>(false);
+type UseFieldActionsDeps = Pick<
+  DocViewRenderProps,
+  'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
+>;
+
+const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFieldActionsDeps) => {
+  return useMemo(
+    () => ({
+      addColumn: onAddColumn,
+      addFilterExist: ({ field }: WithFieldParam) => filter && filter('_exists_', field, '+'),
+      addFilterIn: ({ field, value }: TFieldActionParams) => filter && filter(field, value, '+'),
+      addFilterOut: ({ field, value }: TFieldActionParams) => filter && filter(field, value, '-'),
+      copyToClipboard,
+      removeColumn: onRemoveColumn,
+      toggleFieldColumn: ({ field }: WithFieldParam) => {
+        if (!columns) return;
+        const isFieldInTable = columns.includes(field);
+        if (isFieldInTable && onRemoveColumn) {
+          onRemoveColumn(field);
+        } else if (!isFieldInTable && onAddColumn) {
+          onAddColumn(field);
+        }
+      },
+    }),
+    [columns, filter, onAddColumn, onRemoveColumn]
+  );
+};
+
+export const [FieldActionsProvider, useFieldActionsContext] = createContainer(useFieldActions);
+
+export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldAction[] => {
+  const actions = useFieldActionsContext();
 
   return useMemo(
     () => [
       {
         id: 'addToFilterAction',
-        tooltipContent: filterForText,
         iconType: 'plusInCircle',
-        onClick: () => actions?.addFilter && actions.addFilter(field, value, '+'),
-        display: true,
+        label: actionFilterForText(value),
+        onClick: () => actions.addFilterIn({ field, value }),
       },
       {
         id: 'removeFromFilterAction',
-        tooltipContent: filterOutText,
         iconType: 'minusInCircle',
-        onClick: () => actions?.addFilter && actions.addFilter(field, value, '-'),
-        display: true,
+        label: actionFilterOutText(value),
+        onClick: () => actions.addFilterOut({ field, value }),
       },
       {
         id: 'filterForFieldPresentAction',
-        tooltipContent: filterForFieldPresentLabel,
         iconType: 'filter',
-        onClick: () => actions?.addFilter && actions.addFilter('_exists_', field, '+'),
-        display: true,
+        label: filterForFieldPresentLabel,
+        onClick: () => actions.addFilterExist({ field }),
       },
       {
         id: 'toggleColumnAction',
-        tooltipContent: toggleColumnLabel,
         iconType: 'listAdd',
-        onClick: () => {
-          if (actions) {
-            if (columnAdded) {
-              actions?.removeColumn?.(field);
-            } else {
-              actions?.addColumn?.(field);
-            }
-            setColumnAdded(!columnAdded);
-          }
-        },
-        display: true,
+        label: toggleColumnLabel,
+        onClick: () => actions.toggleFieldColumn({ field }),
       },
       {
         id: 'copyToClipboardAction',
-        tooltipContent: copyToClipboardLabel,
         iconType: 'copyClipboard',
-        onClick: () => copyToClipboard(value as string),
-        display: true,
+        label: copyToClipboardLabel,
+        onClick: () => actions.copyToClipboard(value),
       },
     ],
-    [filterForText, filterOutText, actions, field, value, columnAdded]
+    [actions, field, value]
   );
 };
 
