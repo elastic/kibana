@@ -782,8 +782,6 @@ export default function (providerContext: FtrProviderContext) {
         const agentPolicy = await createAgentPolicy();
         const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
 
-        console.log(JSON.stringify({ packagePolicyWithSecrets }, null, 2));
-
         // secrets should be in plain text i.e not a secret reference
         expect(packagePolicyWithSecrets.vars.package_var_secret.value).eql('package_secret_val');
         expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value).eql(
