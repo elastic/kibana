@@ -398,7 +398,21 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       //   Both request and response seem to share the same `data.commandBatchUuid` - maybe this is a way to sync these up to get the correct one
 
       if (results.data.data.length) {
-        // Activity was completed and we got a response. Store a response doc for it
+        const activityRecord = results.data.data[0];
+
+        // eslint-disable-next-line require-atomic-updates
+        actionDetails.isCompleted = true;
+        // eslint-disable-next-line require-atomic-updates
+        actionDetails.wasSuccessful = true;
+        // eslint-disable-next-line require-atomic-updates
+        actionDetails.status = 'successful';
+
+        // eslint-disable-next-line require-atomic-updates
+        actionDetails.s1FileInfo = {
+          downloadUrl: activityRecord.data.downloadUrl,
+          s1AgentId: activityRecord.agentId,
+          activityId: activityRecord.id,
+        };
       }
     }
 
