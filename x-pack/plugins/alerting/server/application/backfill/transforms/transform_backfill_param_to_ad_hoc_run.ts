@@ -17,13 +17,14 @@ export const transformBackfillParamToAdHocRun = (
   rule: RuleDomain,
   spaceId: string
 ): AdHocRunSO => {
+  const schedule = calculateSchedule(param.start, rule.schedule.interval, param.end);
   return {
     apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
     apiKeyToUse: rule.apiKey!,
     createdAt: new Date().toISOString(),
     duration: rule.schedule.interval,
     enabled: true,
-    ...(param.end ? { end: param.end } : {}),
+    end: param.end ? param.end : schedule && schedule.length > 0 ? schedule[0].runAt : undefined,
     rule: {
       name: rule.name,
       tags: rule.tags,
@@ -43,6 +44,6 @@ export const transformBackfillParamToAdHocRun = (
     spaceId,
     start: param.start,
     status: adHocRunStatus.PENDING,
-    schedule: calculateSchedule(param.start, rule.schedule.interval, param.end),
+    schedule,
   };
 };

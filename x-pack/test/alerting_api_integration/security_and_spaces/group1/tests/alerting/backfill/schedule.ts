@@ -10,6 +10,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-
 import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
+import { asyncForEach } from '../../../../../../functional/services/transform/api';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { checkAAD, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -21,9 +22,18 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('schedule backfill', () => {
+    let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    afterEach(async () => {
+      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+        await supertest
+          .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
+          .set('kbn-xsrf', 'foo');
+      });
+      backfillIds = [];
+      await objectRemover.removeAll();
+    });
 
     async function getAdHocRunSO(id: string) {
       const result = await es.get({
@@ -161,6 +171,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               expect(result.length).to.eql(2);
               expect(typeof result[0].id).to.be('string');
+              backfillIds.push({ id: result[0].id, spaceId: apiOptions.spaceId });
               expect(result[0].duration).to.eql('12h');
               expect(result[0].enabled).to.eql(true);
               expect(result[0].start).to.eql('2023-10-19T12:00:00.000Z');
@@ -233,10 +244,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               ]);
 
               expect(typeof result[1].id).to.be('string');
+              backfillIds.push({ id: result[1].id, spaceId: apiOptions.spaceId });
               expect(result[1].duration).to.eql('12h');
               expect(result[1].enabled).to.eql(true);
               expect(result[1].start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(result[1].end).to.be(undefined);
+              expect(result[1].end).to.eql('2023-10-20T00:00:00.000Z');
               expect(result[1].status).to.eql('pending');
               expect(result[1].space_id).to.eql(space.id);
               expect(typeof result[1].created_at).to.be('string');
@@ -334,7 +346,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRun2.duration).to.eql('12h');
               expect(adHocRun2.enabled).to.eql(true);
               expect(adHocRun2.start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(adHocRun2.end).to.be(undefined);
+              expect(adHocRun2.end).to.eql('2023-10-20T00:00:00.000Z');
               expect(adHocRun2.status).to.eql('pending');
               expect(adHocRun2.spaceId).to.eql(space.id);
               testExpectedRule(adHocRun2, undefined, true);
@@ -425,6 +437,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               expect(result.length).to.eql(3);
               expect(typeof result[0].id).to.be('string');
+              backfillIds.push({ id: result[0].id, spaceId: apiOptions.spaceId });
               expect(result[0].duration).to.eql('12h');
               expect(result[0].enabled).to.eql(true);
               expect(result[0].start).to.eql('2023-10-19T12:00:00.000Z');
@@ -457,10 +470,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               ]);
 
               expect(typeof result[1].id).to.be('string');
+              backfillIds.push({ id: result[1].id, spaceId: apiOptions.spaceId });
               expect(result[1].duration).to.eql('12h');
               expect(result[1].enabled).to.eql(true);
               expect(result[1].start).to.eql('2023-10-18T12:00:00.000Z');
-              expect(result[1].end).to.be(undefined);
+              expect(result[1].end).to.eql('2023-10-19T00:00:00.000Z');
               expect(result[1].status).to.eql('pending');
               expect(result[1].space_id).to.eql(space.id);
               expect(typeof result[1].created_at).to.be('string');
@@ -474,6 +488,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               ]);
 
               expect(typeof result[2].id).to.be('string');
+              backfillIds.push({ id: result[2].id, spaceId: apiOptions.spaceId });
               expect(result[2].duration).to.eql('12h');
               expect(result[2].enabled).to.eql(true);
               expect(result[2].start).to.eql('2023-12-30T12:00:00.000Z');
@@ -552,7 +567,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRun2.duration).to.eql('12h');
               expect(adHocRun2.enabled).to.eql(true);
               expect(adHocRun2.start).to.eql('2023-10-18T12:00:00.000Z');
-              expect(adHocRun2.end).to.be(undefined);
+              expect(adHocRun2.end).to.eql('2023-10-19T00:00:00.000Z');
               expect(adHocRun2.status).to.eql('pending');
               expect(adHocRun2.spaceId).to.eql(space.id);
               testExpectedRule(adHocRun2, undefined, true);
@@ -876,6 +891,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // successful schedule
               expect(typeof result[0].id).to.be('string');
+              backfillIds.push({ id: result[0].id, spaceId: apiOptions.spaceId });
               expect(result[0].duration).to.eql('12h');
               expect(result[0].enabled).to.eql(true);
               expect(result[0].start).to.eql('2023-10-19T12:00:00.000Z');
@@ -904,10 +920,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // successful schedule
               expect(typeof result[1].id).to.be('string');
+              backfillIds.push({ id: result[1].id, spaceId: apiOptions.spaceId });
               expect(result[1].duration).to.eql('12h');
               expect(result[1].enabled).to.eql(true);
               expect(result[1].start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(result[1].end).to.be(undefined);
+              expect(result[1].end).to.eql('2023-10-20T00:00:00.000Z');
               expect(result[1].status).to.eql('pending');
               expect(result[1].space_id).to.eql(space.id);
               expect(typeof result[1].created_at).to.be('string');
@@ -946,10 +963,11 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
 
               // successful schedule
               expect(typeof result[5].id).to.be('string');
+              backfillIds.push({ id: result[5].id, spaceId: apiOptions.spaceId });
               expect(result[5].duration).to.eql('12h');
               expect(result[5].enabled).to.eql(true);
               expect(result[5].start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(result[5].end).to.be(undefined);
+              expect(result[5].end).to.eql('2023-10-20T00:00:00.000Z');
               expect(result[5].status).to.eql('pending');
               expect(result[5].space_id).to.eql(space.id);
               expect(typeof result[5].created_at).to.be('string');
@@ -1004,7 +1022,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRun2.duration).to.eql('12h');
               expect(adHocRun2.enabled).to.eql(true);
               expect(adHocRun2.start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(adHocRun2.end).to.be(undefined);
+              expect(adHocRun2.end).to.eql('2023-10-20T00:00:00.000Z');
               expect(adHocRun2.status).to.eql('pending');
               expect(adHocRun2.spaceId).to.eql(space.id);
               testExpectedRule(adHocRun2, undefined, true);
@@ -1022,7 +1040,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRun3.duration).to.eql('12h');
               expect(adHocRun3.enabled).to.eql(true);
               expect(adHocRun3.start).to.eql('2023-10-19T12:00:00.000Z');
-              expect(adHocRun3.end).to.be(undefined);
+              expect(adHocRun3.end).to.eql('2023-10-20T00:00:00.000Z');
               expect(adHocRun3.status).to.eql('pending');
               expect(adHocRun3.spaceId).to.eql(space.id);
               testExpectedRule(adHocRun3, undefined, true);

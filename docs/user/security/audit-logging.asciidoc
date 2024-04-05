@@ -86,6 +86,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a rule.
 | `failure` | User is not authorized to create a rule.
 
+.2+| `ad_hoc_run_create`
+| `unknown` | User is creating an ad hoc run.
+| `failure` | User is not authorized to create an ad hoc run.
+
 .2+| `space_create`
 | `unknown` | User is creating a space.
 | `failure` | User is not authorized to create a space.
@@ -253,6 +257,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is deleting a rule.
 | `failure` | User is not authorized to delete a rule.
 
+.2+| `ad_hoc_run_delete`
+| `unknown` | User is deleting an ad hoc run.
+| `failure` | User is not authorized to delete an ad hoc run.
+
 .2+| `space_delete`
 | `unknown` | User is deleting a space.
 | `failure` | User is not authorized to delete a space.
@@ -323,6 +331,14 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `rule_schedule_backfill`
 | `success` | User has accessed a rule as part of a backfill schedule operation.
 | `failure` | User is not authorized to access rule for backfill scheduling.
+
+.2+| `ad_hoc_run_get`
+| `success` | User has accessed an ad hoc run.
+| `failure` | User is not authorized to access ad hoc run.
+
+.2+| `ad_hoc_run_find`
+| `success` | User has accessed an ad hoc run as part of a search operation.
+| `failure` | User is not authorized to search for ad hoc runs.
 
 .2+| `space_get`
 | `success` | User has accessed a space.

@@ -7,11 +7,13 @@
 
 import {
   Logger,
+  SavedObject,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import { isNumber } from 'lodash';
 import {
   ScheduleBackfillError,
@@ -25,6 +27,7 @@ import {
 } from '../application/backfill/transforms';
 import { RuleDomain } from '../application/rule/types';
 import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/audit_events';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
@@ -34,6 +37,7 @@ interface ConstructorOpts {
 }
 
 interface BulkQueueOpts {
+  auditLogger?: AuditLogger;
   params: ScheduleBackfillParams;
   rules: RuleDomain[];
   ruleTypeRegistry: RuleTypeRegistry;
@@ -49,6 +53,7 @@ export class BackfillClient {
   }
 
   public async bulkQueue({
+    auditLogger,
     params,
     rules,
     ruleTypeRegistry,
@@ -92,7 +97,24 @@ export class BackfillClient {
 
     // TODO bulk schedule the underlying tasks
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
-      transformAdHocRunToBackfillResult
+      (so: SavedObject<AdHocRunSO>) => {
+        if (so.error) {
+          auditLogger?.log(
+            adHocRunAuditEvent({
+              action: AdHocRunAuditAction.CREATE,
+              error: new Error(so.error.message),
+            })
+          );
+        } else {
+          auditLogger?.log(
+            adHocRunAuditEvent({
+              action: AdHocRunAuditAction.CREATE,
+              savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id: so.id },
+            })
+          );
+        }
+        return transformAdHocRunToBackfillResult(so);
+      }
     );
     return Array.from(resultOrErrorMap.keys()).map((ndx: number) => {
       const indexOrError = resultOrErrorMap.get(ndx);

@@ -11,5 +11,8 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 export default function backfillTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('backfill rule runs', () => {
     loadTestFile(require.resolve('./schedule'));
+    loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./delete'));
   });
 }

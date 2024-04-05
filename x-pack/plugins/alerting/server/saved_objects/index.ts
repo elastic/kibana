@@ -176,6 +176,22 @@ export function setupSavedObjects(
         createdAt: {
           type: 'date',
         },
+        end: {
+          type: 'date',
+        },
+        rule: {
+          properties: {
+            alertTypeId: {
+              type: 'keyword',
+            },
+            consumer: {
+              type: 'keyword',
+            },
+          },
+        },
+        start: {
+          type: 'date',
+        },
         // TODO to allow searching/filtering by status
         // status: {
         //   type: 'keyword'

@@ -12,6 +12,7 @@ import type {
   ScheduleBackfillResults,
 } from '../../../../../../application/backfill/methods/schedule/types';
 import { ScheduleBackfillResponseBodyV1 } from '../../../../../../../common/routes/backfill/apis/schedule';
+import { transformBackfillToBackfillResponseV1 } from '../../../../transforms';
 
 export const transformResponse = (
   results: ScheduleBackfillResults
@@ -21,38 +22,6 @@ export const transformResponse = (
       return result as ScheduleBackfillError;
     }
 
-    const backfillResult = result as Backfill;
-    const { createdAt, rule, spaceId, schedule, ...rest } = backfillResult;
-
-    const {
-      alertTypeId,
-      apiKeyOwner,
-      apiKeyCreatedByUser,
-      createdBy,
-      createdAt: ruleCreatedAt,
-      updatedBy,
-      updatedAt,
-      ...restRule
-    } = rule;
-    return {
-      ...rest,
-      created_at: createdAt,
-      space_id: spaceId,
-      rule: {
-        ...restRule,
-        rule_type_id: alertTypeId,
-        api_key_owner: apiKeyOwner,
-        api_key_created_by_user: apiKeyCreatedByUser,
-        created_by: createdBy,
-        created_at: ruleCreatedAt,
-        updated_by: updatedBy,
-        updated_at: updatedAt,
-      },
-      schedule: schedule.map(({ runAt, status, interval }) => ({
-        run_at: runAt,
-        status,
-        interval,
-      })),
-    };
+    return transformBackfillToBackfillResponseV1(result as Backfill);
   });
 };
