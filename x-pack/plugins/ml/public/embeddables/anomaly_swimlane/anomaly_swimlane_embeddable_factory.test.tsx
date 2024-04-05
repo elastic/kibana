@@ -7,41 +7,62 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import {
+  ReactEmbeddableRenderer,
+  registerReactEmbeddableFactory,
+} from '@kbn/embeddable-plugin/public';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-import type { AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
 
 jest.mock('./anomaly_swimlane_embeddable', () => ({
   AnomalySwimlaneEmbeddable: jest.fn(),
 }));
 
 describe('getAnomalySwimLaneEmbeddableFactory', () => {
+  // Mock dependencies
+  const pluginStartDeps = { data: dataPluginMock.createStartContract() };
+
+  const getStartServices = coreMock.createSetup({
+    pluginStartDeps,
+  }).getStartServices;
+
+  const factory = getAnomalySwimLaneEmbeddableFactory(getStartServices);
+
+  beforeEach(() => {
+    registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
+      return factory;
+    });
+  });
+
   it('should init embeddable api based on provided state', async () => {
-    // Mock dependencies
-    const pluginStartDeps = { data: dataPluginMock.createStartContract() };
+    const rawState = { jobIds: ['my-job'], viewBy: 'overall' } as AnomalySwimLaneEmbeddableState;
 
-    const getStartServices = coreMock.createSetup({
-      pluginStartDeps,
-    }).getStartServices;
+    const onApiAvailable = jest.fn() as jest.MockedFunction<
+      (api: AnomalySwimLaneEmbeddableApi) => void
+    >;
 
-    const factory = getAnomalySwimLaneEmbeddableFactory(getStartServices);
+    const { getByTestId } = render(
+      <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+        maybeId={'maybe_id'}
+        type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
+        state={{
+          rawState,
+        }}
+        onApiAvailable={onApiAvailable}
+      />
+    );
 
-    // Assert the returned factory
-    expect(factory.type).toBe('ml_anomaly_swimlane');
+    await waitFor(() => {
+      const resultApi = onApiAvailable.mock.calls[0][0];
 
-    // Test the buildEmbeddable function
-    const state = {
-      jobIds: ['my-job-id'],
-      swimlaneType: 'overall',
-    } as AnomalySwimLaneEmbeddableState;
+      expect(resultApi.jobIds.value).toEqual(['my-job']);
+      expect(resultApi.viewBy.value).toEqual('overall');
+    });
 
-    const buildApi = jest.fn((v) => v);
-    const uuid = '123';
-
-    const embeddable = await factory.buildEmbeddable(state, buildApi, uuid);
-
-    // Assert the returned embeddable api
-    expect(embeddable.api).toBeDefined();
-    expect(embeddable.api.jobIds.getValue()).toEqual(state.jobIds);
-    expect(embeddable.api.swimlaneType.getValue()).toEqual(state.swimlaneType);
+    // const swimLaneElement = getByTestId('mlSwimLaneEmbeddable_maybe_id');
+    // expect(swimLaneElement).toBeInTheDocument();
   });
 });

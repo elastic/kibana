@@ -18,7 +18,8 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
@@ -174,12 +175,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           const I18nContext = i18n.Context;
           const timeBuckets = useTimeBuckets(uiSettings);
 
-          useEffect(function onUnmount() {
-            return () => {
-              onDestroy();
-              subscriptions.unsubscribe();
-            };
-          }, []);
+          useUnmount(() => {
+            onDestroy();
+            subscriptions.unsubscribe();
+          });
 
           const [fromPage, perPage, swimlaneType, swimlaneData, error] =
             useBatchedPublishingSubjects(
@@ -238,8 +237,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                     data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
                   >
                     <SwimlaneContainer
-                      id={'id'}
-                      data-test-subj={`mlSwimLaneEmbeddable_${'id'}`}
+                      id={uuid}
+                      data-test-subj={`mlSwimLaneEmbeddable_${uuid}`}
                       timeBuckets={timeBuckets}
                       swimlaneData={swimlaneData!}
                       swimlaneType={swimlaneType}
