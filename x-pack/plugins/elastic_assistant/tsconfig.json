@@ -43,6 +43,8 @@
     "@kbn/config-schema",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin-types-common",
+    "@kbn/ml-response-stream",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
