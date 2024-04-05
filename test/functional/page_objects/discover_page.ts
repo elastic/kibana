@@ -355,7 +355,7 @@ export class DiscoverPageObject extends FtrService {
       })
     );
     // Remove control columns
-    return result.filter(Boolean).slice(2).join(' ');
+    return result.slice(2).join(' ');
   }
 
   public async getDocTableIndexLegacy(index: number) {
