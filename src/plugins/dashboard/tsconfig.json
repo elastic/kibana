@@ -76,6 +76,8 @@
     "@kbn/managed-content-badge",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-analytics",
+    "@kbn/user-profile-components",
+    "@kbn/security-plugin-types-server",
   ],
   "exclude": ["target/**/*"]
 }
