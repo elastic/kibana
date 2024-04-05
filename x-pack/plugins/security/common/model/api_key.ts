@@ -77,3 +77,22 @@ export interface ApiKeyToInvalidate {
   id: string;
   name: string;
 }
+
+export interface AggregationResponse<V> {
+  buckets: Array<{ key: V; doc_count: number }>;
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+}
+export interface ApiKeyAggregations {
+  usernames?: AggregationResponse<string>;
+  types?: AggregationResponse<'rest' | 'cross_cluster' | 'managed'>;
+  expired?: { doc_count: number };
+  managed?: {
+    buckets: { metadataBased: { doc_count: number }; namePrefixBased: { doc_count: number } };
+  };
+}
+
+export interface ApiKeyAggregationsResponse {
+  total: number;
+  aggregations: ApiKeyAggregations;
+}
