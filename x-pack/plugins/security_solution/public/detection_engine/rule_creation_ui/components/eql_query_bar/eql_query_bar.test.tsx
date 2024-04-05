@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 
 import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import type { EqlQueryBarProps } from './eql_query_bar';
 import { EqlQueryBar } from './eql_query_bar';
 import { getEqlValidationError } from './validators.mock';
-import { fireEvent, render, within } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -113,71 +112,6 @@ describe('EqlQueryBar', () => {
     );
 
     expect(getByTestId('eql-validation-errors-popover')).toBeInTheDocument();
-  });
-
-  describe('onUsingSequenceQuery', () => {
-    it('should call onUsingSequenceQuery with true when input starts with "sequence"', () => {
-      const mockOnUsingSequenceQuery = jest.fn();
-
-      render(
-        <TestProviders>
-          <EqlQueryBar
-            dataTestSubj="test-subject"
-            field={mockField}
-            isLoading={false}
-            indexPattern={mockIndexPattern}
-            onUsingSequenceQuery={mockOnUsingSequenceQuery}
-          />
-        </TestProviders>
-      );
-
-      const inputElement = screen.getByTestId('eqlQueryBarTextInput');
-      fireEvent.change(inputElement, { target: { value: 'sequence someQuery' } });
-
-      expect(mockOnUsingSequenceQuery).toHaveBeenCalledWith(true);
-    });
-
-    it('should call onUsingSequenceQuery with false when input does not start with "sequence"', () => {
-      const mockOnUsingSequenceQuery = jest.fn();
-
-      render(
-        <TestProviders>
-          <EqlQueryBar
-            dataTestSubj="test-subject"
-            field={mockField}
-            isLoading={false}
-            indexPattern={mockIndexPattern}
-            onUsingSequenceQuery={mockOnUsingSequenceQuery}
-          />
-        </TestProviders>
-      );
-
-      const inputElement = screen.getByTestId('eqlQueryBarTextInput');
-      fireEvent.change(inputElement, { target: { value: 'someQuery' } });
-
-      expect(mockOnUsingSequenceQuery).toHaveBeenCalledWith(false);
-    });
-
-    it('should call onUsingSequenceQuery with false when input is an empty string', () => {
-      const mockOnUsingSequenceQuery = jest.fn();
-
-      render(
-        <TestProviders>
-          <EqlQueryBar
-            dataTestSubj="test-subject"
-            field={mockField}
-            isLoading={false}
-            indexPattern={mockIndexPattern}
-            onUsingSequenceQuery={mockOnUsingSequenceQuery}
-          />
-        </TestProviders>
-      );
-
-      const inputElement = screen.getByTestId('eqlQueryBarTextInput');
-      fireEvent.change(inputElement, { target: { value: '' } });
-
-      expect(mockOnUsingSequenceQuery).toHaveBeenCalledWith(false);
-    });
   });
 
   describe('EQL options interaction', () => {
