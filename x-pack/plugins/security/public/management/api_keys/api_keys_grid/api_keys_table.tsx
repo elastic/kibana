@@ -291,7 +291,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         <>
           <EuiText color="subdued" size="s" data-test-subj="apiKeysTableTooManyResultsLabel">
             <FormattedMessage
-              id="apiKeysManagement.apiKeysTable.table.tooManyResultsLabel"
+              id="xpack.security.management.apiKeys.table.tooManyResultsLabel"
               defaultMessage="Showing {limit} of {totalItemCount, plural, one {# api key} other {# api keys}}"
               values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
             />
