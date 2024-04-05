@@ -158,6 +158,7 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
   ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
 `;
 
+// eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
   isUpdateView = false,
