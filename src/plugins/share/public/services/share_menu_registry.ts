@@ -28,7 +28,9 @@ export class ShareMenuRegistry {
       register: (shareMenuProvider: ShareMenuProvider) => {
         if (
           !this.newVersion &&
-          (shareMenuProvider.id === 'csvReports' || shareMenuProvider.id === 'screenCaptureReports')
+          (shareMenuProvider.id === 'csvReports' ||
+            shareMenuProvider.id === 'screenCaptureReports' ||
+            shareMenuProvider.id === 'csvDownloadLens')
         ) {
           if (this.shareMenuProviders.has(shareMenuProvider.id)) {
             throw new Error(

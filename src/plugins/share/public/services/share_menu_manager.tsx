@@ -179,6 +179,8 @@ export class ShareMenuManager {
                   onClose();
                   session.close();
                 },
+                theme,
+                i18n,
               }}
             />,
             { i18n, theme }
