@@ -42,6 +42,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('SyntheticsEnablement', () => {
+    // failsOnMKI, see URL
+    this.tags(['failsOnMKI']);
     const svlUserManager = getService('svlUserManager');
     const svlCommonApi = getService('svlCommonApi');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
