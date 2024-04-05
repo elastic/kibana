@@ -62,7 +62,7 @@ export class CreateSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
-            document: createTempSummaryDocument(slo, this.spaceId),
+            document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
             refresh: true,
           }),
         { logger: this.logger }
@@ -103,7 +103,7 @@ export class CreateSLO {
 
     const summaryTransform = this.summaryTransformManager.inspect(slo);
 
-    const temporaryDoc = createTempSummaryDocument(slo, this.spaceId);
+    const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
     return {
       pipeline,

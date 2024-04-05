@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IBasePath } from '@kbn/core-http-server';
 import {
   ALL_VALUE,
   BudgetingMethod,
@@ -57,7 +58,11 @@ export interface EsSummaryDocument {
   kibanaUrl?: string;
 }
 
-export function createTempSummaryDocument(slo: SLODefinition, spaceId: string): EsSummaryDocument {
+export function createTempSummaryDocument(
+  slo: SLODefinition,
+  spaceId: string,
+  basePath: IBasePath
+): EsSummaryDocument {
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
 
   return {
@@ -72,7 +77,7 @@ export function createTempSummaryDocument(slo: SLODefinition, spaceId: string): 
     slo: {
       indicator: {
         type: slo.indicator.type,
-        params: JSON.stringify(slo.indicator.params),
+        params: JSON.stringify(slo.indicator.params), // added in 8.14
       },
       timeWindow: {
         duration: slo.timeWindow.duration.format(),
@@ -92,8 +97,8 @@ export function createTempSummaryDocument(slo: SLODefinition, spaceId: string): 
         timesliceWindow: slo.objective.timesliceWindow?.format() ?? undefined,
       },
       tags: slo.tags,
-      createdAt: slo.createdAt.toISOString(),
-      updatedAt: slo.updatedAt.toISOString(),
+      createdAt: slo.createdAt.toISOString(), // added in 8.14
+      updatedAt: slo.updatedAt.toISOString(), // added in 8.14
     },
     goodEvents: 0,
     totalEvents: 0,
@@ -106,5 +111,6 @@ export function createTempSummaryDocument(slo: SLODefinition, spaceId: string): 
     status: 'NO_DATA',
     isTempDoc: true,
     spaceId,
+    kibanaUrl: basePath.publicBaseUrl ?? '', // added in 8.14
   };
 }

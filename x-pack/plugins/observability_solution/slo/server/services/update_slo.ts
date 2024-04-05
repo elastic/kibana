@@ -99,7 +99,7 @@ export class UpdateSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${updatedSlo.id}`,
-            document: createTempSummaryDocument(updatedSlo, this.spaceId),
+            document: createTempSummaryDocument(updatedSlo, this.spaceId, this.basePath),
             refresh: true,
           }),
         { logger: this.logger }

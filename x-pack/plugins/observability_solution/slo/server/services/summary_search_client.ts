@@ -143,7 +143,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
             ...(isRemote &&
               !!remoteSloDefinition && {
                 remote: {
-                  kibanaUrl: summaryDoc.kibanaUrl!,
+                  kibanaUrl: summaryDoc.kibanaUrl ?? '',
                   remoteName,
                   slo: remoteSloDefinition,
                 },
