@@ -424,15 +424,25 @@ describe('helpers', () => {
   describe('getSummaryTableMarkdownHeader', () => {
     test('it returns the expected header', () => {
       const isILMAvailable = true;
-      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
+      const displayDocSize = true;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize)).toEqual(
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|'
       );
     });
 
     test('it returns the expected header when isILMAvailable is false', () => {
       const isILMAvailable = false;
-      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
-        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|'
+      const displayDocSize = false;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize)).toEqual(
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|'
+      );
+    });
+
+    test('it returns the expected header when displayDocSize is false', () => {
+      const isILMAvailable = false;
+      const displayDocSize = false;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize)).toEqual(
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|'
       );
     });
   });
@@ -481,9 +491,25 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           isILMAvailable: false,
           patternDocsCount: 57410,
-          sizeInBytes: 28413,
+          sizeInBytes: undefined,
         })
-      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- | 27.7KB |\n');
+      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- |\n');
+    });
+
+    test('it returns the expected row when sizeInBytes is undefined', () => {
+      expect(
+        getSummaryTableMarkdownRow({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          incompatible: undefined, // <--
+          ilmPhase: undefined, // <--
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          patternDocsCount: 57410,
+          sizeInBytes: undefined,
+        })
+      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- |\n');
     });
   });
 
@@ -517,10 +543,28 @@ describe('helpers', () => {
           isILMAvailable: false,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
-          sizeInBytes: 28413,
+          sizeInBytes: undefined,
         })
       ).toEqual(
-        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | 27.7KB |\n\n'
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 |\n\n'
+      );
+    });
+
+    test('it returns the expected comment when sizeInBytes is undefined', () => {
+      expect(
+        getSummaryTableMarkdownComment({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: mockPartitionedFieldMetadata,
+          patternDocsCount: 57410,
+          sizeInBytes: undefined,
+        })
+      ).toEqual(
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 |\n\n'
       );
     });
   });
@@ -554,7 +598,7 @@ describe('helpers', () => {
           sizeInBytes: undefined,
         })
       ).toEqual(
-        '| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n'
+        '| Incompatible fields | Indices checked | Indices | Docs |\n|---------------------|-----------------|---------|------|\n| -- | -- | -- | 0 |\n'
       );
     });
   });
@@ -588,7 +632,7 @@ describe('helpers', () => {
           sizeInBytes: undefined,
         })
       ).toEqual(
-        '# Data quality\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n\n'
+        '# Data quality\n\n| Incompatible fields | Indices checked | Indices | Docs |\n|---------------------|-----------------|---------|------|\n| -- | -- | -- | 0 |\n\n'
       );
     });
   });

@@ -285,7 +285,7 @@ export const getSizeInBytes = ({
 }: {
   indexName: string;
   stats: Record<string, MeteringStatsIndex> | null;
-}): number => (stats && stats[indexName]?.size_in_bytes) ?? 0;
+}): number | undefined => (stats && stats[indexName]?.size_in_bytes) ?? undefined;
 
 export const getTotalDocsCount = ({
   indexNames,
@@ -305,11 +305,21 @@ export const getTotalSizeInBytes = ({
 }: {
   indexNames: string[];
   stats: Record<string, MeteringStatsIndex> | null;
-}): number =>
-  indexNames.reduce(
-    (acc: number, indexName: string) => acc + getSizeInBytes({ stats, indexName }),
-    0
-  );
+}): number | undefined => {
+  let sum;
+  for (let i = 0; i < indexNames.length; i++) {
+    const currentSizeInBytes = getSizeInBytes({ stats, indexName: indexNames[i] });
+    if (currentSizeInBytes != null) {
+      if (sum == null) {
+        sum = 0;
+      }
+      sum += currentSizeInBytes;
+    } else {
+      return undefined;
+    }
+  }
+  return sum;
+};
 
 export const EMPTY_STAT = '--';
 

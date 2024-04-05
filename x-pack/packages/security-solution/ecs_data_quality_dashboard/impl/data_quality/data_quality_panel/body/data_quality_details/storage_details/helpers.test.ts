@@ -73,13 +73,13 @@ describe('helpers', () => {
     test('it returns zero when the pattern exists in the rollup, but does not have a sizeInBytes', () => {
       const pattern = 'valid-*';
 
-      expect(getPatternSizeInBytes({ pattern, patternRollups: noSizeInBytes })).toEqual(0);
+      expect(getPatternSizeInBytes({ pattern, patternRollups: noSizeInBytes })).toBeUndefined();
     });
 
-    test('it returns zero when the pattern does NOT exist in the rollup', () => {
+    test('it returns undefined when the pattern does NOT exist in the rollup', () => {
       const pattern = 'does-not-exist-*';
 
-      expect(getPatternSizeInBytes({ pattern, patternRollups })).toEqual(0);
+      expect(getPatternSizeInBytes({ pattern, patternRollups })).toBeUndefined();
     });
   });
 
@@ -93,6 +93,7 @@ describe('helpers', () => {
         index: null,
         pattern,
         sizeInBytes: auditbeatWithAllResults.sizeInBytes,
+        docsCount: auditbeatWithAllResults.docsCount,
       });
     });
   });
@@ -113,6 +114,7 @@ describe('helpers', () => {
           index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
           pattern: 'auditbeat-*',
           sizeInBytes: 18791790,
+          docsCount: 19123,
         },
         {
           color: euiThemeVars.euiColorDanger,
@@ -120,6 +122,7 @@ describe('helpers', () => {
           index: 'auditbeat-custom-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 28409,
+          docsCount: 4,
         },
         {
           color: euiThemeVars.euiColorDanger,
@@ -127,6 +130,7 @@ describe('helpers', () => {
           index: 'auditbeat-custom-empty-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 247,
+          docsCount: 0,
         },
       ]);
     });
@@ -145,6 +149,7 @@ describe('helpers', () => {
           index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
           pattern: 'auditbeat-*',
           sizeInBytes: 18791790,
+          docsCount: 19123,
         },
         {
           color: euiThemeVars.euiColorDanger,
@@ -152,6 +157,7 @@ describe('helpers', () => {
           index: 'auditbeat-custom-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 28409,
+          docsCount: 4,
         },
         {
           color: euiThemeVars.euiColorDanger,
@@ -159,6 +165,7 @@ describe('helpers', () => {
           index: 'auditbeat-custom-empty-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 247,
+          docsCount: 0,
         },
       ]);
     });
@@ -179,6 +186,7 @@ describe('helpers', () => {
           index: null,
           pattern: '.alerts-security.alerts-default',
           sizeInBytes: 29717961631,
+          docsCount: 26093,
         },
         {
           color: euiThemeVars.euiColorSuccess,
@@ -186,14 +194,23 @@ describe('helpers', () => {
           index: '.internal.alerts-security.alerts-default-000001',
           pattern: '.alerts-security.alerts-default',
           sizeInBytes: 0,
+          docsCount: 26093,
         },
-        { color: null, ilmPhase: null, index: null, pattern: 'auditbeat-*', sizeInBytes: 18820446 },
+        {
+          color: null,
+          ilmPhase: null,
+          index: null,
+          pattern: 'auditbeat-*',
+          sizeInBytes: 18820446,
+          docsCount: 19127,
+        },
         {
           color: euiThemeVars.euiColorSuccess,
           ilmPhase: 'hot',
           index: '.ds-auditbeat-8.6.1-2023.02.07-000001',
           pattern: 'auditbeat-*',
           sizeInBytes: 18791790,
+          docsCount: 19123,
         },
         {
           color: euiThemeVars.euiColorDanger,
@@ -201,6 +218,7 @@ describe('helpers', () => {
           index: 'auditbeat-custom-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 28409,
+          docsCount: 4,
         },
         {
           color: euiThemeVars.euiColorDanger,
@@ -208,6 +226,7 @@ describe('helpers', () => {
           index: 'auditbeat-custom-empty-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 247,
+          docsCount: 0,
         },
         {
           color: null,
@@ -215,6 +234,7 @@ describe('helpers', () => {
           index: null,
           pattern: 'packetbeat-*',
           sizeInBytes: 1096520898,
+          docsCount: 3258632,
         },
         {
           color: euiThemeVars.euiColorPrimary,
@@ -222,6 +242,7 @@ describe('helpers', () => {
           index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           pattern: 'packetbeat-*',
           sizeInBytes: 584326147,
+          docsCount: 1630289,
         },
         {
           color: euiThemeVars.euiColorPrimary,
@@ -229,6 +250,7 @@ describe('helpers', () => {
           index: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           pattern: 'packetbeat-*',
           sizeInBytes: 512194751,
+          docsCount: 1628343,
         },
       ]);
     });
@@ -249,6 +271,7 @@ describe('helpers', () => {
           indexName: '.internal.alerts-security.alerts-default-000001',
           pattern: '.alerts-security.alerts-default',
           sizeInBytes: 0,
+          docsCount: 26093,
         },
         {
           ilmPhase: 'hot',
@@ -256,6 +279,7 @@ describe('helpers', () => {
           indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
           pattern: 'auditbeat-*',
           sizeInBytes: 18791790,
+          docsCount: 19123,
         },
         {
           ilmPhase: 'unmanaged',
@@ -263,6 +287,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-empty-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 247,
+          docsCount: 0,
         },
         {
           ilmPhase: 'unmanaged',
@@ -270,18 +295,21 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           pattern: 'auditbeat-*',
           sizeInBytes: 28409,
+          docsCount: 4,
         },
         {
           ilmPhase: 'hot',
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           pattern: 'packetbeat-*',
           sizeInBytes: 512194751,
+          docsCount: 1628343,
         },
         {
           ilmPhase: 'hot',
           indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           pattern: 'packetbeat-*',
           sizeInBytes: 584326147,
+          docsCount: 1630289,
         },
       ]);
     });
@@ -295,6 +323,7 @@ describe('helpers', () => {
         })
       ).toEqual([
         {
+          docsCount: 26093,
           ilmPhase: undefined,
           incompatible: 0,
           indexName: '.internal.alerts-security.alerts-default-000001',
@@ -302,6 +331,7 @@ describe('helpers', () => {
           sizeInBytes: 0,
         },
         {
+          docsCount: 19123,
           ilmPhase: undefined,
           incompatible: 0,
           indexName: '.ds-auditbeat-8.6.1-2023.02.07-000001',
@@ -309,6 +339,7 @@ describe('helpers', () => {
           sizeInBytes: 18791790,
         },
         {
+          docsCount: 0,
           ilmPhase: undefined,
           incompatible: 1,
           indexName: 'auditbeat-custom-empty-index-1',
@@ -316,6 +347,7 @@ describe('helpers', () => {
           sizeInBytes: 247,
         },
         {
+          docsCount: 4,
           ilmPhase: undefined,
           incompatible: 3,
           indexName: 'auditbeat-custom-index-1',
@@ -323,12 +355,14 @@ describe('helpers', () => {
           sizeInBytes: 28409,
         },
         {
+          docsCount: 1628343,
           ilmPhase: undefined,
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           pattern: 'packetbeat-*',
           sizeInBytes: 512194751,
         },
         {
+          docsCount: 1630289,
           ilmPhase: undefined,
           indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           pattern: 'packetbeat-*',
@@ -373,6 +407,7 @@ describe('helpers', () => {
           ilmPhase: 'hot',
           incompatible: 0,
           sizeInBytes: 0,
+          docsCount: 26093,
         },
         'auditbeat-*.ds-auditbeat-8.6.1-2023.02.07-000001': {
           pattern: 'auditbeat-*',
@@ -380,6 +415,7 @@ describe('helpers', () => {
           ilmPhase: 'hot',
           incompatible: 0,
           sizeInBytes: 18791790,
+          docsCount: 19123,
         },
         'auditbeat-*auditbeat-custom-empty-index-1': {
           pattern: 'auditbeat-*',
@@ -387,6 +423,7 @@ describe('helpers', () => {
           ilmPhase: 'unmanaged',
           incompatible: 1,
           sizeInBytes: 247,
+          docsCount: 0,
         },
         'auditbeat-*auditbeat-custom-index-1': {
           pattern: 'auditbeat-*',
@@ -394,14 +431,17 @@ describe('helpers', () => {
           ilmPhase: 'unmanaged',
           incompatible: 3,
           sizeInBytes: 28409,
+          docsCount: 4,
         },
         'packetbeat-*.ds-packetbeat-8.6.1-2023.02.04-000001': {
           pattern: 'packetbeat-*',
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           ilmPhase: 'hot',
           sizeInBytes: 512194751,
+          docsCount: 1628343,
         },
         'packetbeat-*.ds-packetbeat-8.5.3-2023.02.04-000001': {
+          docsCount: 1630289,
           pattern: 'packetbeat-*',
           indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           ilmPhase: 'hot',
@@ -457,14 +497,20 @@ describe('helpers', () => {
 
     it('returns the expected number of layers', () => {
       expect(
-        getLayersMultiDimensional({ formatBytes, layer0FillColor, pathToFlattenedBucketMap }).length
+        getLayersMultiDimensional({
+          valueFormatter: formatBytes,
+          layer0FillColor,
+          pathToFlattenedBucketMap,
+        }).length
       ).toEqual(2);
     });
 
     it('returns the expected fillLabel valueFormatter function', () => {
-      getLayersMultiDimensional({ formatBytes, layer0FillColor, pathToFlattenedBucketMap }).forEach(
-        (x) => expect(x.fillLabel.valueFormatter(123)).toEqual('123B')
-      );
+      getLayersMultiDimensional({
+        valueFormatter: formatBytes,
+        layer0FillColor,
+        pathToFlattenedBucketMap,
+      }).forEach((x) => expect(x.fillLabel.valueFormatter(123)).toEqual('123B'));
     });
   });
 });

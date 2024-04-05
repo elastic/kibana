@@ -335,7 +335,7 @@ const PatternComponent: React.FC<Props> = ({
             ilmExplainPhaseCounts={ilmExplainPhaseCounts}
             pattern={pattern}
             patternDocsCount={patternRollup?.docsCount ?? 0}
-            patternSizeInBytes={patternRollup?.sizeInBytes ?? 0}
+            patternSizeInBytes={patternRollup?.sizeInBytes}
           />
           <EuiSpacer />
         </EuiFlexItem>

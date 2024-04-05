@@ -218,18 +218,21 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
   }
 };
 
-export const getSummaryTableMarkdownHeader = (isILMAvailable: boolean): string =>
-  isILMAvailable
+export const getSummaryTableMarkdownHeader = (
+  isILMAvailable: boolean,
+  displayDocSize: boolean
+): string =>
+  isILMAvailable && displayDocSize
     ? `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
         DOCS
       )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
         ILM_PHASE
       )}|${getHeaderSeparator(SIZE)}|`
-    : `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${SIZE} |
+    : `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
         DOCS
-      )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(SIZE)}|`;
+      )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|`;
 
 export const getSummaryTableMarkdownRow = ({
   docsCount,
@@ -252,7 +255,7 @@ export const getSummaryTableMarkdownRow = ({
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }): string =>
-  isILMAvailable
+  isILMAvailable && Number.isInteger(sizeInBytes)
     ? `| ${getResultEmoji(incompatible)} | ${escape(indexName)} | ${formatNumber(
         docsCount
       )} (${getDocsCountPercent({
@@ -267,7 +270,7 @@ export const getSummaryTableMarkdownRow = ({
       )} (${getDocsCountPercent({
         docsCount,
         patternDocsCount,
-      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${formatBytes(sizeInBytes)} |
+      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} |
 `;
 
 export const getSummaryTableMarkdownComment = ({
@@ -291,7 +294,7 @@ export const getSummaryTableMarkdownComment = ({
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }): string =>
-  `${getSummaryTableMarkdownHeader(isILMAvailable)}
+  `${getSummaryTableMarkdownHeader(isILMAvailable, Number.isInteger(sizeInBytes))}
 ${getSummaryTableMarkdownRow({
   docsCount,
   formatBytes,
@@ -322,13 +325,22 @@ export const getStatsRollupMarkdownComment = ({
   indicesChecked: number | undefined;
   sizeInBytes: number | undefined;
 }): string =>
-  `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${SIZE} | ${DOCS} |
+  Number.isInteger(sizeInBytes)
+    ? `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${SIZE} | ${DOCS} |
 |${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
-    INDICES_CHECKED
-  )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(SIZE)}|${getHeaderSeparator(DOCS)}|
+        INDICES_CHECKED
+      )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(SIZE)}|${getHeaderSeparator(DOCS)}|
 | ${incompatible ?? EMPTY_STAT} | ${indicesChecked ?? EMPTY_STAT} | ${
-    indices ?? EMPTY_STAT
-  } | ${formatBytes(sizeInBytes)} | ${formatNumber(docsCount)} |
+        indices ?? EMPTY_STAT
+      } | ${formatBytes(sizeInBytes)} | ${formatNumber(docsCount)} |
+`
+    : `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${DOCS} |
+|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+        INDICES_CHECKED
+      )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(DOCS)}|
+| ${incompatible ?? EMPTY_STAT} | ${indicesChecked ?? EMPTY_STAT} | ${
+        indices ?? EMPTY_STAT
+      } | ${formatNumber(docsCount)} |
 `;
 
 export const getDataQualitySummaryMarkdownComment = ({

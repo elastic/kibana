@@ -42,7 +42,7 @@ export interface IndexSummaryTableItem {
   ilmPhase: IlmPhase | undefined;
   pattern: string;
   patternDocsCount: number;
-  sizeInBytes: number;
+  sizeInBytes: number | undefined;
   checkedAt: number | undefined;
 }
 
@@ -120,6 +120,24 @@ export const getSummaryTableILMPhaseColumn = (
       ]
     : [];
 
+export const getSummaryTableSizeInBytesColumn = ({
+  formatBytes,
+}: {
+  formatBytes: (value: number | undefined) => string;
+}): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
+  {
+    field: 'sizeInBytes',
+    name: i18n.SIZE,
+    render: (_, { sizeInBytes }) =>
+      Number.isInteger(sizeInBytes) ? (
+        <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
+          <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+        </EuiToolTip>
+      ) : null,
+    sortable: true,
+    truncateText: false,
+  },
+];
 export const getSummaryTableColumns = ({
   formatBytes,
   formatNumber,
@@ -232,11 +250,12 @@ export const getSummaryTableColumns = ({
   {
     field: 'sizeInBytes',
     name: i18n.SIZE,
-    render: (_, { sizeInBytes }) => (
-      <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
-        <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
-      </EuiToolTip>
-    ),
+    render: (_, { sizeInBytes }) =>
+      Number.isInteger(sizeInBytes) ? (
+        <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
+          <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+        </EuiToolTip>
+      ) : null,
     sortable: true,
     truncateText: false,
   },

@@ -108,7 +108,29 @@ ${ECS_IS_A_PERMISSIVE_SCHEMA}
         })
       ).toEqual([
         '### auditbeat-custom-index-1\n',
-        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | 27.7KB |\n\n',
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 |\n\n',
+        '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
+        `#### 4 Custom field mappings\n\nThese fields are not defined by the Elastic Common Schema (ECS), version ${EcsVersion}.\n\nECS is a permissive schema. If your events have additional data that cannot be mapped to ECS, you can simply add them to your events, using custom field names.\n`,
+        '#### Custom fields - auditbeat-custom-index-1\n\n\n| Field | Index mapping type | \n|-------|--------------------|\n| host.name.keyword | `keyword` | `--` |\n| some.field | `text` | `--` |\n| some.field.keyword | `keyword` | `--` |\n| source.ip.keyword | `keyword` | `--` |\n',
+      ]);
+    });
+
+    test('it returns the expected comment without Size when Size is undefined', () => {
+      expect(
+        getAllCustomMarkdownComments({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: mockPartitionedFieldMetadata,
+          patternDocsCount: 57410,
+          sizeInBytes: undefined,
+        })
+      ).toEqual([
+        '### auditbeat-custom-index-1\n',
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 |\n\n',
         '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
         `#### 4 Custom field mappings\n\nThese fields are not defined by the Elastic Common Schema (ECS), version ${EcsVersion}.\n\nECS is a permissive schema. If your events have additional data that cannot be mapped to ECS, you can simply add them to your events, using custom field names.\n`,
         '#### Custom fields - auditbeat-custom-index-1\n\n\n| Field | Index mapping type | \n|-------|--------------------|\n| host.name.keyword | `keyword` | `--` |\n| some.field | `text` | `--` |\n| some.field.keyword | `keyword` | `--` |\n| source.ip.keyword | `keyword` | `--` |\n',

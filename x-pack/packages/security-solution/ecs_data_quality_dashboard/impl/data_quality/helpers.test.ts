@@ -62,8 +62,8 @@ import {
   auditbeatWithAllResults,
 } from './mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from './mock/stats/mock_stats';
-import { mockStatsGreenIndex } from './mock/stats/mock_stats_green_index';
-import { mockStatsYellowIndex } from './mock/stats/mock_stats_yellow_index';
+import { mockStatsAuditbeatIndex } from './mock/stats/mock_stats_packetbeat_index';
+import { mockStatsPacketbeatIndex } from './mock/stats/mock_stats_auditbeat_index';
 import {
   COLD_DESCRIPTION,
   FROZEN_DESCRIPTION,
@@ -751,12 +751,12 @@ describe('helpers', () => {
   describe('getDocsCount', () => {
     test('it returns the expected docs count when `stats` contains the `indexName`', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].num_docs;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].num_docs;
 
       expect(
         getDocsCount({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -767,7 +767,7 @@ describe('helpers', () => {
       expect(
         getDocsCount({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(0);
     });
@@ -789,37 +789,37 @@ describe('helpers', () => {
       expect(
         getDocsCount({
           indexName,
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
         })
-      ).toEqual(mockStatsGreenIndex[indexName].num_docs);
+      ).toEqual(mockStatsAuditbeatIndex[indexName].num_docs);
     });
   });
 
   describe('getSizeInBytes', () => {
     test('it returns the expected size when `stats` contains the `indexName`', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].size_in_bytes;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].size_in_bytes;
 
       expect(
         getSizeInBytes({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
 
-    test('it returns zero when `stats` does NOT contain the `indexName`', () => {
+    test('it returns undefined when `stats` does NOT contain the `indexName`', () => {
       const indexName = 'not-gonna-find-it';
 
       expect(
         getSizeInBytes({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
-      ).toEqual(0);
+      ).toBeUndefined();
     });
 
-    test('it returns zero when `stats` is null', () => {
+    test('it returns undefined when `stats` is null', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
 
       expect(
@@ -827,7 +827,7 @@ describe('helpers', () => {
           indexName,
           stats: null,
         })
-      ).toEqual(0);
+      ).toBeUndefined();
     });
 
     test('it returns the expected size for a green index, where `primaries.store.size_in_bytes` and `total.store.size_in_bytes` have different values', () => {
@@ -836,21 +836,21 @@ describe('helpers', () => {
       expect(
         getSizeInBytes({
           indexName,
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
         })
-      ).toEqual(mockStatsGreenIndex[indexName].size_in_bytes);
+      ).toEqual(mockStatsAuditbeatIndex[indexName].size_in_bytes);
     });
   });
 
   describe('getTotalDocsCount', () => {
     test('it returns the expected total given a subset of index names in the stats', () => {
       const indexName = '.ds-packetbeat-8.5.3-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].num_docs;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].num_docs;
 
       expect(
         getTotalDocsCount({
           indexNames: [indexName],
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -864,7 +864,7 @@ describe('helpers', () => {
       expect(
         getTotalDocsCount({
           indexNames: allIndexNamesInStats,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(3258632);
     });
@@ -873,19 +873,19 @@ describe('helpers', () => {
       expect(
         getTotalDocsCount({
           indexNames: [], // <-- empty
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(0);
     });
 
     test('it returns the expected total for a green index', () => {
       const indexName = 'auditbeat-custom-index-1';
-      const expectedCount = mockStatsGreenIndex[indexName].num_docs;
+      const expectedCount = mockStatsAuditbeatIndex[indexName].num_docs;
 
       expect(
         getTotalDocsCount({
           indexNames: [indexName],
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -894,12 +894,12 @@ describe('helpers', () => {
   describe('getTotalSizeInBytes', () => {
     test('it returns the expected total given a subset of index names in the stats', () => {
       const indexName = '.ds-packetbeat-8.5.3-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].size_in_bytes;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].size_in_bytes;
 
       expect(
         getTotalSizeInBytes({
           indexNames: [indexName],
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -913,28 +913,58 @@ describe('helpers', () => {
       expect(
         getTotalSizeInBytes({
           indexNames: allIndexNamesInStats,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(1464758182);
     });
 
-    test('it returns zero given an empty collection of index names', () => {
+    test('it returns undefined given an empty collection of index names', () => {
       expect(
         getTotalSizeInBytes({
           indexNames: [], // <-- empty
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
-      ).toEqual(0);
+      ).toBeUndefined();
     });
 
-    test('it returns the expected total for a green index', () => {
+    test('it returns undefined if sizeInByte in not an integer', () => {
       const indexName = 'auditbeat-custom-index-1';
-      const expectedCount = mockStatsGreenIndex[indexName].size_in_bytes;
 
       expect(
         getTotalSizeInBytes({
           indexNames: [indexName],
-          stats: mockStatsGreenIndex,
+          stats: { [indexName]: { ...mockStatsAuditbeatIndex[indexName], size_in_bytes: null } },
+        })
+      ).toBeUndefined();
+    });
+
+    test('it returns the expected total for an index', () => {
+      const indexName = 'auditbeat-custom-index-1';
+      const expectedCount = mockStatsAuditbeatIndex[indexName].size_in_bytes;
+
+      expect(
+        getTotalSizeInBytes({
+          indexNames: [indexName],
+          stats: mockStatsAuditbeatIndex,
+        })
+      ).toEqual(expectedCount);
+    });
+
+    test('it returns the expected total for indices', () => {
+      const expectedCount = Object.values(mockStatsPacketbeatIndex).reduce(
+        (acc, { size_in_bytes: sizeInBytes }) => {
+          return acc + (sizeInBytes ?? 0);
+        },
+        0
+      );
+
+      expect(
+        getTotalSizeInBytes({
+          indexNames: [
+            '.ds-packetbeat-8.6.1-2023.02.04-000001',
+            '.ds-packetbeat-8.5.3-2023.02.04-000001',
+          ],
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });

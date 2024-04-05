@@ -120,23 +120,25 @@ const StatsRollupComponent: React.FC<Props> = ({
         </IndicesStatContainer>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <IndicesStatContainer>
-          <EuiToolTip
-            content={
-              pattern != null
-                ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
-                : i18n.TOTAL_SIZE_TOOL_TIP
-            }
-          >
-            <EuiStat
-              description={sizeDescription}
-              title={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
-              titleSize={STAT_TITLE_SIZE}
-            />
-          </EuiToolTip>
-        </IndicesStatContainer>
-      </EuiFlexItem>
+      {Number.isInteger(sizeInBytes) && (
+        <EuiFlexItem grow={false}>
+          <IndicesStatContainer>
+            <EuiToolTip
+              content={
+                pattern != null
+                  ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
+                  : i18n.TOTAL_SIZE_TOOL_TIP
+              }
+            >
+              <EuiStat
+                description={sizeDescription}
+                title={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
+                titleSize={STAT_TITLE_SIZE}
+              />
+            </EuiToolTip>
+          </IndicesStatContainer>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <DocsContainer>

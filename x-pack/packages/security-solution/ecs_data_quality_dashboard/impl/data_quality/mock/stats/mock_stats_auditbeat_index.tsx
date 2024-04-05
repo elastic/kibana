@@ -7,14 +7,7 @@
 
 import { MeteringStatsIndex } from '../../types';
 
-/**
- * In a deployment where indices have a `yellow` health status, the
- * [`_stats`](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-stats.html)
- * API returns, (for an arbitrary index), results where the index's
- * `primaries.docs.count` and `total.docs.count` have the same value, per this
- * mock `_stats` API output
- */
-export const mockStatsYellowIndex: Record<string, MeteringStatsIndex> = {
+export const mockStatsPacketbeatIndex: Record<string, MeteringStatsIndex> = {
   '.ds-packetbeat-8.6.1-2023.02.04-000001': {
     uuid: 'x5Uuw4j4QM2YidHLNixCwg',
     num_docs: 1628343,
