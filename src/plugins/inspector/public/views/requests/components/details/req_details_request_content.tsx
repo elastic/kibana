@@ -75,7 +75,7 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
   // Check if both the Dev Tools UI and the SearchProfiler UI are enabled.
   const canShowsearchProfiler =
     services.application?.capabilities?.dev_tools.show && searchProfilerHref !== undefined;
-  const shouldShowsearchProfilerLink = !!(indexPattern && canShowsearchProfiler);
+  const shouldShowSearchProfilerLink = !!(indexPattern && canShowsearchProfiler);
   const handleSearchProfilerLinkClick = useCallback(
     () => searchProfilerHref && navigateToUrl && navigateToUrl(searchProfilerHref),
     [searchProfilerHref, navigateToUrl]
@@ -101,7 +101,7 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
     });
   }
 
-  if (shouldShowsearchProfilerLink) {
+  if (shouldShowSearchProfilerLink) {
     actions.push({
       name: 'openInSearchProfiler',
       action: (
