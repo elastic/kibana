@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z, ZodFirstPartyTypeKind } from 'zod';
 import React, { useState } from 'react';
 import {
   EuiDescribedFormGroup,
@@ -24,66 +24,48 @@ export const settingComponentRegistry = new Map<
 >();
 
 settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
-  const [error, setError] = useState('');
-
-  const agentPolicyFormContext = useAgentPolicyFormContext();
-  const fieldKey = `configuredSetting-${settingsConfig.name}`;
-
-  const defaultValue: number =
-    settingsConfig.schema instanceof z.ZodDefault
-      ? settingsConfig.schema._def.defaultValue()
-      : undefined;
-  const coercedSchema = settingsConfig.schema as z.ZodNumber;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const validationResults = coercedSchema.safeParse(Number(e.target.value));
-
-    if (!validationResults.success) {
-      setError(validationResults.error.issues[0].message);
-      return;
-    }
-    const newAdvancedSettings = {
-      ...(agentPolicyFormContext?.agentPolicy.advanced_settings ?? {}),
-      [settingsConfig.api_field.name]: parseInt(e.target.value, 10), // TODO support float?
-    };
-
-    agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
-    setError('');
-  };
-
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h4>{settingsConfig.title}</h4>}
-      description={
-        <>
-          {settingsConfig.description}.{' '}
-          <EuiLink href={settingsConfig.learnMoreLink} external>
-            Learn more.
-          </EuiLink>
-        </>
-      }
-    >
-      <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
+    <SettingsFieldWrapper
+      settingsConfig={settingsConfig}
+      typeName={z.number()._def.typeName}
+      renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
         <EuiFieldNumber
           fullWidth
           data-test-subj={fieldKey}
-          value={
-            agentPolicyFormContext?.agentPolicy.advanced_settings?.[
-              settingsConfig.api_field.name
-            ] ?? defaultValue
-          }
+          value={fieldValue}
+          onChange={handleChange}
+          isInvalid={isInvalid}
           min={coercedSchema.minValue ?? undefined}
           max={coercedSchema.maxValue ?? undefined}
-          onChange={handleChange}
-          isInvalid={!!error}
         />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+      )}
+    />
   );
 });
 
 settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
+  return (
+    <SettingsFieldWrapper
+      settingsConfig={settingsConfig}
+      typeName={z.string()._def.typeName}
+      renderItem={({ fieldKey, fieldValue, handleChange, isInvalid }: any) => (
+        <EuiFieldText
+          fullWidth
+          data-test-subj={fieldKey}
+          value={fieldValue}
+          onChange={handleChange}
+          isInvalid={isInvalid}
+        />
+      )}
+    />
+  );
+});
+
+const SettingsFieldWrapper: React.FC<{
+  settingsConfig: SettingsConfig;
+  typeName: keyof typeof ZodFirstPartyTypeKind;
+  renderItem: Function;
+}> = ({ settingsConfig, typeName, renderItem }) => {
   const [error, setError] = useState('');
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
@@ -94,8 +76,19 @@ settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
       : undefined;
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
+  const convertValue = (value: string, type: keyof typeof ZodFirstPartyTypeKind): any => {
+    if (type === ZodFirstPartyTypeKind.ZodNumber) {
+      if (value === '') {
+        return 0;
+      }
+      return parseInt(value, 10);
+    }
+    return value;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const validationResults = coercedSchema.safeParse(e.target.value);
+    const newValue = convertValue(e.target.value, typeName);
+    const validationResults = coercedSchema.safeParse(newValue);
 
     if (!validationResults.success) {
       setError(validationResults.error.issues[0].message);
@@ -104,13 +97,17 @@ settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
 
     const newAdvancedSettings = {
       ...(agentPolicyFormContext?.agentPolicy.advanced_settings ?? {}),
-      [settingsConfig.api_field.name]: e.target.value,
+      [settingsConfig.api_field.name]: newValue,
     };
 
     agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
 
     setError('');
   };
+
+  const fieldValue =
+    agentPolicyFormContext?.agentPolicy.advanced_settings?.[settingsConfig.api_field.name] ??
+    defaultValue;
 
   return (
     <EuiDescribedFormGroup
@@ -126,21 +123,11 @@ settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
       }
     >
       <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
-        <EuiFieldText
-          fullWidth
-          data-test-subj={fieldKey}
-          value={
-            agentPolicyFormContext?.agentPolicy.advanced_settings?.[
-              settingsConfig.api_field.name
-            ] ?? defaultValue
-          }
-          onChange={handleChange}
-          isInvalid={!!error}
-        />
+        {renderItem({ fieldValue, handleChange, isInvalid: !!error, fieldKey, coercedSchema })}
       </EuiFormRow>
     </EuiDescribedFormGroup>
   );
-});
+};
 
 export function ConfiguredSettings({
   configuredSettings,
