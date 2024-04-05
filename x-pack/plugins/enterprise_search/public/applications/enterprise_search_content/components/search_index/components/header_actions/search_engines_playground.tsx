@@ -17,7 +17,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { PLAYGROUND_PATH } from '../../../../routes';
 
 export interface SearchEnginesPlaygroundProps {
-  indexName?: string;
+  indexName: string;
   ingestionMethod: string;
 }
 
@@ -25,10 +25,8 @@ export const SearchEnginesPlayground: React.FC<SearchEnginesPlaygroundProps> = (
   indexName,
   ingestionMethod,
 }) => {
-  let playgroundUrl = ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH;
-  if (indexName) {
-    playgroundUrl = `${playgroundUrl}/${indexName}`;
-  }
+  const playgroundUrl =
+    ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH + `?defaultIndexName=${indexName}`;
 
   return (
     <EuiButton
