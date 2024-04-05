@@ -271,7 +271,8 @@ const ExportContentUi = ({
   };
 
   const styling =
-    selectedRadio === 'printablePdfV2' && (objectType === 'dashboard' || objectType === 'lens')
+    selectedRadio === 'printablePdfV2' &&
+    (objectType === 'dashboard' || objectType === 'lens' || objectType === 'visualizations')
       ? { justifyContent: 'center', alignItems: 'center' }
       : {};
 
