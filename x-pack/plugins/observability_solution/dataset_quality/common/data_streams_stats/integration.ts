@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { IntegrationType } from './types';
+import { DashboardType, IntegrationType } from './types';
 
 export class Integration {
   name: IntegrationType['name'];
   title: string;
   version: string;
   icons?: IntegrationType['icons'];
+  dashboards?: DashboardType[];
 
   private constructor(integration: Integration) {
     this.name = integration.name;
     this.title = integration.title || integration.name;
     this.version = integration.version || '1.0.0';
     this.icons = integration.icons;
+    this.dashboards = integration.dashboards || [];
   }
 
   public static create(integration: IntegrationType) {
@@ -25,6 +27,7 @@ export class Integration {
       ...integration,
       title: integration.title || integration.name,
       version: integration.version || '1.0.0',
+      dashboards: integration.dashboards || [],
     };
 
     return new Integration(integrationProps);

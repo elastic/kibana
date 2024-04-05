@@ -21,6 +21,8 @@ import {
   METADATA_UNITED_TRANSFORM,
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
+  METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_UNITED_TRANSFORM_V2,
   POLICY_RESPONSE_INDEX,
 } from '../../../../../common/endpoint/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -80,7 +82,9 @@ export const cyLoadEndpointDataHandler = async (
     // need this before indexing docs so that the united transform doesn't
     // create a checkpoint with a timestamp after the doc timestamps
     await stopTransform(esClient, metadataTransformPrefix);
+    await stopTransform(esClient, METADATA_CURRENT_TRANSFORM_V2);
     await stopTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await stopTransform(esClient, METADATA_UNITED_TRANSFORM_V2);
   }
 
   // load data into the system
@@ -105,12 +109,15 @@ export const cyLoadEndpointDataHandler = async (
   );
 
   if (waitUntilTransformed) {
+    // missing transforms are ignored, start either name
     await startTransform(esClient, metadataTransformPrefix);
+    await startTransform(esClient, METADATA_CURRENT_TRANSFORM_V2);
 
     const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
     await waitForEndpoints(esClient, 'endpoint_index', metadataIds);
 
     await startTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await startTransform(esClient, METADATA_UNITED_TRANSFORM_V2);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));

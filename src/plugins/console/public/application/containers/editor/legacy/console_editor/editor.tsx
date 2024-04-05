@@ -34,6 +34,7 @@ import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
 import { StorageKeys } from '../../../../../services';
+import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -53,14 +54,6 @@ const abs: CSSProperties = {
   bottom: '0',
   right: '0',
 };
-
-const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
-{
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
-}`;
 
 const inputId = 'ConAppInputTextarea';
 
