@@ -17,13 +17,13 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuItemIcon,
-  useIsWithinBreakpoints,
   EuiText,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiPopoverProps,
   EuiToolTip,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import type { FlyoutActionItem } from '../../customizations';
 
@@ -35,10 +35,35 @@ export interface DiscoverGridFlyoutActionsProps {
 
 export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutActionsProps) {
   const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const isMobileScreen = dimensions?.width ? dimensions.width < euiTheme.breakpoint.xs : false;
+  const isLargeScreen = dimensions?.width ? dimensions.width > euiTheme.breakpoint.m : false;
+  return (
+    <EuiFlexGroup ref={setRef}>
+      <EuiFlexItem>
+        <FlyoutActions
+          flyoutActions={flyoutActions}
+          isMobileScreen={isMobileScreen}
+          isLargeScreen={isLargeScreen}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function FlyoutActions({
+  flyoutActions,
+  isMobileScreen,
+  isLargeScreen,
+}: {
+  flyoutActions: DiscoverGridFlyoutActionsProps['flyoutActions'];
+  isMobileScreen: boolean;
+  isLargeScreen: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
   const [isMoreFlyoutActionsPopoverOpen, setIsMoreFlyoutActionsPopoverOpen] =
     useState<boolean>(false);
-  const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
-  const isLargeScreen = useIsWithinBreakpoints(['xl']);
 
   if (isMobileScreen) {
     return (
