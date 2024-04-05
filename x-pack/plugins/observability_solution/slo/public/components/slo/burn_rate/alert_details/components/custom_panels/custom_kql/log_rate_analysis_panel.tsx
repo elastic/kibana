@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { pick } from 'lodash';
+import { pick, orderBy } from 'lodash';
 import { GetSLOResponse, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -23,13 +23,20 @@ import { buildEsQuery } from '@kbn/observability-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Filter } from '@kbn/es-query';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
+import { colorTransformer, Color } from '@kbn/observability-shared-plugin/common';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
 import { useKibana } from '../../../../../../../utils/kibana_react';
-
 interface Props {
   slo: GetSLOResponse;
   alert: BurnRateAlert;
   rule: BurnRateRule;
+}
+
+interface SignificantFieldValue {
+  field: string;
+  value: string | number;
+  docCount: number;
+  pValue: number | null;
 }
 
 // TODO check the validity of the query & write some tests
@@ -69,6 +76,10 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
 
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+  const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
+    | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
+    | undefined
+  >();
   const params = slo.indicator.params;
   const { index, timestampField } = params;
   const { data: dataViews = [] } = useFetchDataViews();
@@ -112,6 +123,26 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
       : alertStart.clone().add(10, 'minutes').valueOf(),
   };
 
+  const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
+    const significantFieldValues = orderBy(
+      analysisResults?.significantItems?.map((item) => ({
+        field: item.fieldName,
+        value: item.fieldValue,
+        docCount: item.doc_count,
+        pValue: item.pValue,
+      })),
+      ['pValue', 'docCount'],
+      ['asc', 'asc']
+    ).slice(0, 50);
+
+    const logRateAnalysisType = analysisResults?.analysisType;
+    setLogRateAnalysisParams(
+      significantFieldValues && logRateAnalysisType
+        ? { logRateAnalysisType, significantFieldValues }
+        : undefined
+    );
+  };
+
   return (
     <EuiPanel hasBorder={true} data-test-subj="logRateAnalysisBurnRateAlertDetails">
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -132,6 +163,9 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
             esSearchQuery={esSearchQuery}
             timeRange={timeRange}
             initialAnalysisStart={initialAnalysisStart}
+            barColorOverride={colorTransformer(Color.color0)}
+            barHighlightColorOverride={colorTransformer(Color.color1)}
+            onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
               'analytics',
               'application',
