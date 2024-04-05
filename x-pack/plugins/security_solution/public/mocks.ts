@@ -36,7 +36,7 @@ const startMock = (): PluginStart => ({
   getUpselling: () => upselling,
   setOnboardingPageSettings: onboardingPageService,
   setIsSolutionNavigationEnabled: jest.fn(),
-  getSolutionNavigation: jest.fn(() => ({
+  getSolutionNavigation: jest.fn(async () => ({
     navigationTree$: of({ body: [], footer: [] }),
     panelContentProvider: jest.fn(),
   })),
