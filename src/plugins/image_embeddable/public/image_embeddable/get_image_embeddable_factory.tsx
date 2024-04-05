@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
@@ -45,6 +45,8 @@ export const getImageEmbeddableFactory = ({
         () => titlesApi.panelTitle.getValue(),
         initialState
       );
+      // if it is provided, start the dynamic actions manager
+      const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
@@ -92,7 +94,6 @@ export const getImageEmbeddableFactory = ({
           ],
         }
       );
-
       return {
         api: embeddable,
         Component: () => {
@@ -105,12 +106,15 @@ export const getImageEmbeddableFactory = ({
             };
           }, []);
 
+          useEffect(() => {
+            return () => {
+              // if it was started, stop the dynamic actions manager on unmount
+              maybeStopDynamicActions?.stopDynamicActions();
+            };
+          }, []);
+
           return (
-            <ImageEmbeddableComponent
-              api={privateImageEmbeddableApi}
-              filesClient={filesClient}
-              startDynamicActions={dynamicActionsApi?.startDynamicActions}
-            />
+            <ImageEmbeddableComponent api={privateImageEmbeddableApi} filesClient={filesClient} />
           );
         },
       };

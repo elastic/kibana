@@ -28,14 +28,9 @@ interface ImageEmbeddableProps {
     imageConfig$: PublishingSubject<ImageConfig>;
   };
   filesClient: FilesClient<FileImageMetadata>;
-  startDynamicActions?: ReactEmbeddableDynamicActionsApi['startDynamicActions'];
 }
 
-export const ImageEmbeddable = ({
-  api,
-  filesClient,
-  startDynamicActions,
-}: ImageEmbeddableProps) => {
+export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
   const [imageConfig, dynamicActionsState] = useBatchedPublishingSubjects(
     api.imageConfig$,
     api.dynamicActionsState$
@@ -49,16 +44,6 @@ export const ImageEmbeddable = ({
      */
     api.setDataLoading(true);
   }, [api, imageConfig]);
-
-  useEffect(() => {
-    if (!startDynamicActions) return;
-    // start the dynamic actions manager on mount
-    const { stopDynamicActions } = startDynamicActions();
-    return () => {
-      // stop the dynamic actions manager on unmount
-      stopDynamicActions();
-    };
-  }, [startDynamicActions]);
 
   useEffect(() => {
     // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
