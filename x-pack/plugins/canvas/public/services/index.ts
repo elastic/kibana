@@ -21,6 +21,7 @@ import { CanvasPlatformService } from './platform';
 import { CanvasReportingService } from './reporting';
 import { CanvasVisualizationsService } from './visualizations';
 import { CanvasWorkpadService } from './workpad';
+import { CanvasUiActionsService } from './ui_actions';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
@@ -35,6 +36,7 @@ export interface CanvasPluginServices {
   reporting: CanvasReportingService;
   visualizations: CanvasVisualizationsService;
   workpad: CanvasWorkpadService;
+  uiActions: CanvasUiActionsService;
 }
 
 export const pluginServices = new PluginServices<CanvasPluginServices>();
@@ -55,3 +57,4 @@ export const useReportingService = () => (() => pluginServices.getHooks().report
 export const useVisualizationsService = () =>
   (() => pluginServices.getHooks().visualizations.useService())();
 export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();
+export const useUiActionsService = () => (() => pluginServices.getHooks().uiActions.useService())();

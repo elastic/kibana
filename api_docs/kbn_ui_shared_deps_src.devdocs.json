@@ -357,17 +357,6 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.rxjsoperators",
-            "type": "string",
-            "tags": [],
-            "label": "'rxjs/operators'",
-            "description": [],
-            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.numeral",
             "type": "string",
             "tags": [],
