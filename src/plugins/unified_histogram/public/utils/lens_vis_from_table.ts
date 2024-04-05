@@ -23,6 +23,10 @@ export const enrichLensAttributesWithTablesData = ({
 
   const layers = attributes.state.datasourceStates.textBased?.layers;
 
+  if (!layers) {
+    return attributes;
+  }
+
   const updatedAttributes = {
     ...attributes,
     state: {
@@ -37,14 +41,12 @@ export const enrichLensAttributesWithTablesData = ({
     },
   };
 
-  if (layers) {
-    for (const key of Object.keys(layers)) {
-      const newLayer = { ...layers[key], table };
-      if (!table) {
-        delete newLayer.table;
-      }
-      updatedAttributes.state.datasourceStates.textBased.layers[key] = newLayer;
+  for (const key of Object.keys(layers)) {
+    const newLayer = { ...layers[key], table };
+    if (!table) {
+      delete newLayer.table;
     }
+    updatedAttributes.state.datasourceStates.textBased.layers[key] = newLayer;
   }
 
   return updatedAttributes;

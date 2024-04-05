@@ -733,7 +733,7 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   // requestData should match
   if (
     (Object.keys(requestData) as Array<keyof UnifiedHistogramVisContext['requestData']>).some(
-      (key) => requestData[key] !== externalVisContext.requestData[key]
+      (key) => !isEqual(requestData[key], externalVisContext.requestData[key])
     )
   ) {
     return false;

@@ -42,6 +42,7 @@ import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
 import { DataDocumentsMsg, RecordRawType } from '../../services/discover_data_state_container';
+import { useSavedSearch } from '../../services/discover_state_provider';
 
 const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -61,7 +62,7 @@ export const useDiscoverHistogram = ({
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
-  const savedSearchState = useObservable(stateContainer.savedSearchState.getCurrent$());
+  const savedSearchState = useSavedSearch();
 
   /**
    * API initialization

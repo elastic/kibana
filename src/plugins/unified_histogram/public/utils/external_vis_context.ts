@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 
@@ -77,17 +77,13 @@ export const isSuggestionShapeAndVisContextCompatible = (
 
   if (suggestion?.visualizationId === 'lnsXY') {
     return (
-      // @ts-expect-error visualization state has different structure between vis types
-      suggestion?.visualizationState?.preferredSeriesType ===
-      // @ts-expect-error visualization state has different structure between vis types
-      externalVisContext?.attributes?.state?.visualization?.preferredSeriesType
+      (suggestion?.visualizationState as XYState)?.preferredSeriesType ===
+      (externalVisContext?.attributes?.state?.visualization as XYState)?.preferredSeriesType
     );
   }
 
   return (
-    // @ts-expect-error visualization state has different structure between vis types
-    suggestion?.visualizationState?.shape ===
-    // @ts-expect-error visualization state has different structure between vis types
-    externalVisContext?.attributes?.state?.visualization?.shape
+    (suggestion?.visualizationState as PieVisualizationState)?.shape ===
+    (externalVisContext?.attributes?.state?.visualization as PieVisualizationState)?.shape
   );
 };
