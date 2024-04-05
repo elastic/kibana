@@ -21,7 +21,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useForm, Form, FormConfig, UseField } from '../../../shared_imports';
+import { useFormData, useForm, Form, FormConfig, UseField } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
@@ -37,6 +37,7 @@ import {
   ManagedPipelineBadge,
 } from '../pipeline_elements';
 
+import { EditActionsContextButton } from './edit_actions';
 import { TestPipelineActions } from '../pipeline_editor/components/test_pipeline';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
@@ -119,6 +120,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     defaultValue: defaultFormValues,
     onSubmit: handleSave,
   });
+  const [formData] = useFormData({ form });
 
   const onEditorFlyoutOpen = useCallback(() => {
     setIsRequestVisible(false);
@@ -236,7 +238,12 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="m" direction="rowReverse">
+              <EuiFlexGroup gutterSize="s" direction="rowReverse">
+                {isEditing && (
+                  <EuiFlexItem>
+                    <EditActionsContextButton pipelineName={formData.name} />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem>
                   <EuiButton
                     fill
