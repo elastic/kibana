@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const AI_ASSISTANT_LAST_USED_PROMPT_STORAGE = 'ai-assistant-last-used-prompts';
@@ -20,7 +21,7 @@ export function usePreviousPrompts() {
     addPrompt: (prompt: string) => {
       if (previousPrompts[0] !== prompt) {
         // Keep track of the last 5 prompts
-        setPreviousPrompts([prompt].concat(previousPrompts.filter((_, index) => index < 4)));
+        setPreviousPrompts((previous = []) => uniq([prompt].concat(previous).slice(0, 5)));
       }
     },
   };
