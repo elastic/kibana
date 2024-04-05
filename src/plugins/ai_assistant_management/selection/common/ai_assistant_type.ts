@@ -7,7 +7,6 @@
  */
 
 export enum AIAssistantType {
-  Security = 'security',
   Observability = 'observability',
   Default = 'default',
   Never = 'never',
