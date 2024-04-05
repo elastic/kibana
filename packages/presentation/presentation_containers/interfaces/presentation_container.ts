@@ -23,10 +23,6 @@ export interface PanelPackage {
 export interface PresentationContainer
   extends Partial<PublishesViewMode & PublishesSettings>,
     CanAddNewPanel {
-  addNewPanel: <ApiType extends unknown = unknown>(
-    panel: PanelPackage,
-    displaySuccessMessage?: boolean
-  ) => Promise<ApiType | undefined>;
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
