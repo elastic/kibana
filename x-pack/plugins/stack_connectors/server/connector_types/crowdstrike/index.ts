@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { CROWDSTRIKE_CONNECTOR_ID, CROWDSTRIKE_TITLE } from '../../../common/crowdstrike/constants';
 import {
   CrowdstrikeConfigSchema,
@@ -30,7 +26,6 @@ export const getCrowdstrikeConnectorType = (): SubActionConnectorType<
     config: CrowdstrikeConfigSchema,
     secrets: CrowdstrikeSecretsSchema,
   },
-  validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
 });

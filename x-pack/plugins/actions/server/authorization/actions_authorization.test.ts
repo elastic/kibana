@@ -18,6 +18,7 @@ import {
   CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG,
   CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG,
 } from '../feature';
+import { forEach } from 'lodash';
 
 const request = {} as KibanaRequest;
 
@@ -237,50 +238,54 @@ describe('ensureAuthorized', () => {
     });
   });
 
-  test('checks SentinelOne connector privileges correctly', async () => {
-    const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
-      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
+  describe('Bi-directional connectors', () => {
+    forEach(['.sentinelone', '.crowdstrike'], (actionTypeId) => {
+      test(`checks ${actionTypeId} connector privileges correctly`, async () => {
+        const { authorization } = mockSecurity();
+        const checkPrivileges: jest.MockedFunction<
+          ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+        > = jest.fn();
 
-    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-    const actionsAuthorization = new ActionsAuthorization({
-      request,
-      authorization,
-    });
+        authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+        const actionsAuthorization = new ActionsAuthorization({
+          request,
+          authorization,
+        });
 
-    checkPrivileges.mockResolvedValueOnce({
-      username: 'some-user',
-      hasAllRequested: true,
-      privileges: [
-        {
-          privilege: mockAuthorizationAction('myType', 'execute'),
-          authorized: true,
-        },
-      ],
-    });
+        checkPrivileges.mockResolvedValueOnce({
+          username: 'some-user',
+          hasAllRequested: true,
+          privileges: [
+            {
+              privilege: mockAuthorizationAction('myType', 'execute'),
+              authorized: true,
+            },
+          ],
+        });
 
-    await actionsAuthorization.ensureAuthorized({
-      operation: 'execute',
-      actionTypeId: '.sentinelone',
-    });
+        await actionsAuthorization.ensureAuthorized({
+          operation: 'execute',
+          actionTypeId,
+        });
 
-    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
-      ACTION_SAVED_OBJECT_TYPE,
-      'get'
-    );
+        expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+          ACTION_SAVED_OBJECT_TYPE,
+          'get'
+        );
 
-    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
-      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-      'create'
-    );
+        expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          'create'
+        );
 
-    expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: [
-        mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
-        mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
-        ADVANCED_EXECUTE_AUTHZ,
-      ],
+        expect(checkPrivileges).toHaveBeenCalledWith({
+          kibana: [
+            mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
+            mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+            ADVANCED_EXECUTE_AUTHZ,
+          ],
+        });
+      });
     });
   });
 });
