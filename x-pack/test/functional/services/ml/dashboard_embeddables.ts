@@ -10,16 +10,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
-  { getService, getPageObjects }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  // const ml = getService('ml');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['discover']);
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
