@@ -161,7 +161,7 @@ function getLensTopNavConfig(options: {
 
   if (actions.getUnderlyingDataUrl.visible) {
     const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
-      defaultMessage: 'Explore data in Discover',
+      defaultMessage: 'Explore in Discover',
     });
 
     topNavMenu.push({

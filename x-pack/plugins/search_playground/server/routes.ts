@@ -13,7 +13,7 @@ import { IRouter } from '@kbn/core/server';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
-import { Prompt } from './utils/prompt';
+import { Prompt } from '../common/prompt';
 import { errorHandler } from './utils/error_handler';
 import { APIRoutes } from './types';
 
@@ -63,6 +63,15 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
         openAIApiKey: data.api_key,
       });
 
+      let sourceFields = {};
+
+      try {
+        sourceFields = JSON.parse(data.source_fields);
+      } catch (e) {
+        log.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
+
       const chain = ConversationalChain({
         model,
         rag: {
@@ -73,8 +82,11 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
               return query.query;
             } catch (e) {
               log.error('Failed to parse the Elasticsearch query', e);
+              throw Error(e);
             }
           },
+          content_field: sourceFields,
+          size: Number(data.docSize),
         },
         prompt: Prompt(data.prompt, {
           citations: data.citations,

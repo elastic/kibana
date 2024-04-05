@@ -15,7 +15,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
