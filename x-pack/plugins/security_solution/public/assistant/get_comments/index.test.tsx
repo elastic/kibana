@@ -12,10 +12,11 @@ import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_con
 const user: ConversationRole = 'user';
 const currentConversation = {
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
     provider: OpenAiProviderType.OpenAi,
   },
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   id: '1',
   title: '1',
@@ -30,8 +31,11 @@ const currentConversation = {
 };
 const showAnonymizedValues = false;
 const testProps = {
+  abortStream: jest.fn(),
+  setIsStreaming: jest.fn(),
   refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
+  isEnabledLangChain: false,
   isFetchingResponse: false,
   currentConversation,
   showAnonymizedValues,
@@ -47,10 +51,11 @@ describe('getComments', () => {
       currentConversation: {
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
           provider: OpenAiProviderType.OpenAi,
         },
-        replacements: [],
+        replacements: {},
         id: '1',
         title: '1',
         messages: [
