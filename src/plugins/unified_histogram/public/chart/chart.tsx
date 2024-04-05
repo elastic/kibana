@@ -183,12 +183,13 @@ export function Chart({
 
   const onSuggestionSelectorChange = useCallback(
     (suggestion: Suggestion | undefined) => {
+      setIsFlyoutVisible(false);
       onSuggestionContextEdit({
         suggestion,
         type: UnifiedHistogramSuggestionType.lensSuggestion,
       });
     },
-    [onSuggestionContextEdit]
+    [onSuggestionContextEdit, setIsFlyoutVisible]
   );
 
   useEffect(() => {

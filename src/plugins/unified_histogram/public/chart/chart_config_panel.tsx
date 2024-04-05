@@ -93,7 +93,8 @@ export function ChartConfigPanel({
         previousQuery.current = query;
       }
     }
-    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
+    const suggestionHasChanged =
+      currentSuggestion?.visualizationId !== previousSuggestion?.current?.visualizationId;
     // rerender the component if the data has changed or the suggestion
     // as I can have different suggestions for the same data
     if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {

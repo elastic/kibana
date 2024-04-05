@@ -701,9 +701,7 @@ function deriveLensSuggestionFromLensAttributes({
       }
 
       return {
-        title: i18n.translate('unifiedHistogram.lensUnfamiliarVisSubtypeTitle', {
-          defaultMessage: 'Customized',
-        }),
+        title: externalVisContext.attributes.title,
         visualizationId: externalVisContext.attributes.visualizationType,
         visualizationState: externalVisContext.attributes.state.visualization,
         datasourceState,
