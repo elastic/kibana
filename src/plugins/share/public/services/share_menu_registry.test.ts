@@ -12,7 +12,7 @@ import { ShareMenuItem, ShareContext } from '../types';
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {
     test('throws when registering duplicate id', () => {
-      const setup = new ShareMenuRegistry().setup();
+      const setup = new ShareMenuRegistry(false).setup();
       setup.register({
         id: 'myTest',
         getShareMenuItems: () => [],
@@ -31,7 +31,7 @@ describe('ShareActionsRegistry', () => {
   describe('start', () => {
     describe('getActions', () => {
       test('returns a flat list of actions returned by all providers', () => {
-        const service = new ShareMenuRegistry();
+        const service = new ShareMenuRegistry(false);
         const registerFunction = service.setup().register;
         const shareAction1 = {} as ShareMenuItem;
         const shareAction2 = {} as ShareMenuItem;

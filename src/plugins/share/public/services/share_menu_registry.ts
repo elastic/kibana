@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ClientConfigType, ShareContext, ShareMenuProvider } from '../types';
+import { ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
-  private config?: ClientConfigType;
+  private newVersion: boolean;
 
-  constructor(config: ClientConfigType) {
-    this.config = config;
+  constructor(newVersion: boolean) {
+    this.newVersion = newVersion;
   }
 
   public setup() {
@@ -27,7 +27,7 @@ export class ShareMenuRegistry {
        */
       register: (shareMenuProvider: ShareMenuProvider) => {
         if (
-          !this.config?.new_version.enabled &&
+          !this.newVersion &&
           (shareMenuProvider.id === 'csvReports' || shareMenuProvider.id === 'screenCaptureReports')
         ) {
           this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);

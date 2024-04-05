@@ -94,7 +94,7 @@ export class SharePlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.shareMenuRegistry = new ShareMenuRegistry(this.config);
+    this.shareMenuRegistry = new ShareMenuRegistry(this.config.new_version.enabled);
   }
 
   public setup(core: CoreSetup): SharePublicSetup {
