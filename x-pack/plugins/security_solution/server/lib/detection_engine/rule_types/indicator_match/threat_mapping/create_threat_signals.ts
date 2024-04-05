@@ -73,6 +73,7 @@ export const createThreatSignals = async ({
   licensing,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
+  const threatFieldsLength = threatMatchedFields.threat.length;
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
     services,
     threatMatchedFields,
@@ -198,22 +199,14 @@ export const createThreatSignals = async ({
           err.includes('failed to create query: maxClauseCount is set to')
         );
 
-        const regex = /[0-9]/g;
-        const foundMaxClauseCountValue = failureMessage?.match(regex);
+        const regex = /[0-9]+/g;
+        const foundMaxClauseCountValue = failureMessage?.match(regex)?.[0];
 
-        if (!isEmpty(foundMaxClauseCountValue) && foundMaxClauseCountValue != null) {
-          const tempVal = parseInt(foundMaxClauseCountValue.join(''), 10);
-          let val = MAX_CLAUSE_DEFAULT_VALUE;
-          if (tempVal === 0) {
-            // if the resulting max clause count error is 0, don't subtract 1 from that.
-            // rare case that really should not happen unless ES claims heap size is 0.
-            // ref: https://github.com/elastic/elasticsearch/issues/86136
-            val = tempVal;
-          } else {
-            // minus 1 since it needs to be one less than the max
-            // provided by elasticsearch error message.
-            val = tempVal - 1;
-          }
+        if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+          const tempVal = parseInt(foundMaxClauseCountValue, 10);
+          // minus 1 since it needs to be one less than the max
+          // provided by elasticsearch error message.
+          const val = (tempVal - 1) / (threatFieldsLength + 1);
           ruleExecutionLogger.warn(
             `maxClauseCount error received from elasticsearch, setting IM rule page size to ${val}`
           );
