@@ -12,13 +12,15 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldSpec, RuntimeField } from '../types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
+const fakeDataView = {} as DataView;
+
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
     return JSON.parse(JSON.stringify(obj));
   }
 
   function getField(values = {}) {
-    return new DataViewField({ ...fieldValues, ...values });
+    return new DataViewField({ ...fieldValues, ...values }, fakeDataView);
   }
 
   const fieldValues = {
@@ -146,12 +148,12 @@ describe('Field', function () {
   });
 
   it('exports the property to JSON', () => {
-    const field = new DataViewField(fieldValues);
+    const field = new DataViewField(fieldValues, fakeDataView);
     expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
-    const field = new DataViewField(fieldValues);
+    const field = new DataViewField(fieldValues, fakeDataView);
     const getFormatterForField = () =>
       ({
         toJSON: () => ({

@@ -75,7 +75,8 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
 // To be removed in the future
 export const fieldList = (
   specs: FieldSpec[] = [],
-  shortDotsEnable = false
+  shortDotsEnable = false,
+  dataView: DataView
 ): IIndexPatternFieldList => {
   class FldList extends Array<DataViewField> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
@@ -101,7 +102,7 @@ export const fieldList = (
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec): DataViewField => {
-      const newField = new DataViewField({ ...field, shortDotsEnable });
+      const newField = new DataViewField({ ...field, shortDotsEnable }, dataView);
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
@@ -117,7 +118,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new DataViewField(field);
+      const newField = new DataViewField(field, dataView);
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);

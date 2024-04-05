@@ -10,6 +10,7 @@ import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewFieldBase } from '@kbn/es-query';
 import type { RuntimeFieldSpec } from '../types';
+import type { AbstractDataView } from '../data_views/abstract_data_views';
 import { FieldSpec, DataView } from '..';
 import {
   shortenDottedString,
@@ -36,6 +37,7 @@ export interface ToSpecConfig {
  */
 export class DataViewField implements DataViewFieldBase {
   readonly spec: FieldSpec;
+  private readonly dataView: AbstractDataView;
   // not writable or serialized
   /**
    * Kbn field type, used mainly for formattering.
@@ -47,10 +49,11 @@ export class DataViewField implements DataViewFieldBase {
    * @constructor
    * @param spec Configuration for the field
    */
-  constructor(spec: FieldSpec) {
+  constructor(spec: FieldSpec, dataView: AbstractDataView) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
     this.kbnFieldType = getKbnFieldType(spec.type);
+    this.dataView = dataView;
   }
 
   // writable attrs

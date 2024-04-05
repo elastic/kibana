@@ -131,13 +131,16 @@ export class DataViewLazy extends AbstractDataView {
           return col;
         }
         if (!cachedField) {
-          cachedField = new DataViewField({
-            ...field,
-            count: this.fieldAttrs?.[field.name]?.count,
-            customLabel: this.fieldAttrs?.[field.name]?.customLabel,
-            customDescription: this.fieldAttrs?.[field.name]?.customDescription,
-            shortDotsEnable: this.shortDotsEnable,
-          });
+          cachedField = new DataViewField(
+            {
+              ...field,
+              count: this.fieldAttrs?.[field.name]?.count,
+              customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+              customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+              shortDotsEnable: this.shortDotsEnable,
+            },
+            this
+          );
           this.fieldCache.set(field.name, cachedField);
         }
         col[field.name] = cachedField;
@@ -296,17 +299,20 @@ export class DataViewLazy extends AbstractDataView {
       fld.spec.type = castEsToKbnFieldTypeName(fieldType);
       fld.spec.esTypes = [fieldType];
     } else {
-      fld = new DataViewField({
-        name: fieldName,
-        runtimeField: runtimeFieldSpec,
-        type: castEsToKbnFieldTypeName(fieldType),
-        esTypes: [fieldType],
-        aggregatable: true,
-        searchable: true,
-        count: config.popularity ?? 0,
-        readFromDocValues: false,
-        shortDotsEnable: this.shortDotsEnable,
-      });
+      fld = new DataViewField(
+        {
+          name: fieldName,
+          runtimeField: runtimeFieldSpec,
+          type: castEsToKbnFieldTypeName(fieldType),
+          esTypes: [fieldType],
+          aggregatable: true,
+          searchable: true,
+          count: config.popularity ?? 0,
+          readFromDocValues: false,
+          shortDotsEnable: this.shortDotsEnable,
+        },
+        this
+      );
       this.fieldCache.set(fieldName, fld);
     }
 
@@ -388,15 +394,18 @@ export class DataViewLazy extends AbstractDataView {
       if (fld && !fld.scripted && fld.isMapped) {
         this.fieldCache.delete(field.name);
       }
-      fld = new DataViewField({
-        ...field,
-        scripted: true,
-        searchable: false,
-        aggregatable: false,
-        count: this.fieldAttrs?.[field.name]?.count,
-        customLabel: this.fieldAttrs?.[field.name]?.customLabel,
-        customDescription: this.fieldAttrs?.[field.name]?.customDescription,
-      });
+      fld = new DataViewField(
+        {
+          ...field,
+          scripted: true,
+          searchable: false,
+          aggregatable: false,
+          count: this.fieldAttrs?.[field.name]?.count,
+          customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+          customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+        },
+        this
+      );
       this.fieldCache.set(field.name, fld);
       dataViewFields[field.name] = fld;
     });
@@ -434,13 +443,16 @@ export class DataViewLazy extends AbstractDataView {
         fld.spec.runtimeField = undefined; // unset if it was a runtime field but now mapped
         fld.spec.isMapped = true;
       } else {
-        fld = new DataViewField({
-          ...field,
-          count: this.fieldAttrs?.[field.name]?.count,
-          customLabel: this.fieldAttrs?.[field.name]?.customLabel,
-          customDescription: this.fieldAttrs?.[field.name]?.customDescription,
-          shortDotsEnable: this.shortDotsEnable,
-        });
+        fld = new DataViewField(
+          {
+            ...field,
+            count: this.fieldAttrs?.[field.name]?.count,
+            customLabel: this.fieldAttrs?.[field.name]?.customLabel,
+            customDescription: this.fieldAttrs?.[field.name]?.customDescription,
+            shortDotsEnable: this.shortDotsEnable,
+          },
+          this
+        );
         this.fieldCache.set(field.name, fld);
       }
       dataViewFields[field.name] = fld;
