@@ -177,7 +177,7 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
   }
   if (cspConfig.report_uri?.length) {
     enforceDirectives.set('report-uri', cspConfig.report_uri);
-    reportOnlyDirectives.set('report-to', cspConfig.report_uri);
+    reportOnlyDirectives.set('report-uri', cspConfig.report_uri);
   }
   if (cspConfig.report_to?.length) {
     enforceDirectives.set('report-to', cspConfig.report_to);
