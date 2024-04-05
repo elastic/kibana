@@ -32,25 +32,26 @@ const StatFlexItem = styled(EuiFlexItem)`
 export interface Props {
   defaultPageSize?: number;
   anonymizationFields: FindAnonymizationFieldsResponse;
+  anonymizationFieldsBulkActions: PerformBulkActionRequestBody;
   setAnonymizationFieldsBulkActions: React.Dispatch<
     React.SetStateAction<PerformBulkActionRequestBody>
   >;
   setUpdatedAnonymizationData: React.Dispatch<
     React.SetStateAction<FindAnonymizationFieldsResponse>
   >;
-  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 const AnonymizationSettingsComponent: React.FC<Props> = ({
   defaultPageSize,
   anonymizationFields,
+  anonymizationFieldsBulkActions,
   setAnonymizationFieldsBulkActions,
-  refetchAnonymizationFieldsResults,
   setUpdatedAnonymizationData,
 }) => {
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
       const updatedFieldsKeys = updates.map((u) => u.field);
+
       const updatedFields = updates.map((u) => ({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...anonymizationFields.data.find((f) => f.field === u.field)!,
@@ -62,8 +63,9 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
           : {}),
       }));
       setAnonymizationFieldsBulkActions({
+        ...anonymizationFieldsBulkActions,
         // Only update makes sense now, as long as we don't have an add new field design/UX
-        update: updatedFields,
+        update: [...(anonymizationFieldsBulkActions?.update ?? []), ...updatedFields],
       });
       setUpdatedAnonymizationData({
         ...anonymizationFields,
@@ -73,7 +75,12 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
         ],
       });
     },
-    [anonymizationFields, setAnonymizationFieldsBulkActions, setUpdatedAnonymizationData]
+    [
+      anonymizationFields,
+      anonymizationFieldsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
+    ]
   );
 
   const onReset = useCallback(() => {

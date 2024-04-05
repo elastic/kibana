@@ -11,7 +11,7 @@ import { getRows } from '.';
 
 describe('getRows', () => {
   const defaultArgs: {
-    anonymizationFields: SelectedPromptContext['anonymizationFields'];
+    anonymizationFields: SelectedPromptContext['contextAnonymizationFields'];
     rawData: Record<string, string[]> | null;
   } = {
     anonymizationFields: {
@@ -86,7 +86,7 @@ describe('getRows', () => {
     ];
 
     const nullRawData: {
-      anonymizationFields: SelectedPromptContext['anonymizationFields'];
+      anonymizationFields: SelectedPromptContext['contextAnonymizationFields'];
       rawData: Record<string, string[]> | null;
     } = {
       ...defaultArgs,

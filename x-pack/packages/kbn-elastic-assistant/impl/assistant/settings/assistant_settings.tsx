@@ -107,6 +107,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       conversationsSettingsBulkActions,
       updatedAnonymizationData,
       setConversationsSettingsBulkActions,
+      anonymizationFieldsBulkActions,
       setAnonymizationFieldsBulkActions,
       setUpdatedAnonymizationData,
     } = useSettingsUpdater(conversations, anonymizationFields);
@@ -332,9 +333,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   <AnonymizationSettings
                     defaultPageSize={5}
                     anonymizationFields={updatedAnonymizationData}
+                    anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
                     setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
                     setUpdatedAnonymizationData={setUpdatedAnonymizationData}
-                    refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
                   />
                 )}
                 {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (

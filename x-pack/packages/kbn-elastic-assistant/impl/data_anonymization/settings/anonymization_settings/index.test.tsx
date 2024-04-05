@@ -54,7 +54,8 @@ const props: Props = {
     ],
   },
   setAnonymizationFieldsBulkActions: jest.fn(),
-  refetchAnonymizationFieldsResults: jest.fn(),
+  setUpdatedAnonymizationData: jest.fn(),
+  anonymizationFieldsBulkActions: {},
 };
 
 const mockUseAssistantContext = {

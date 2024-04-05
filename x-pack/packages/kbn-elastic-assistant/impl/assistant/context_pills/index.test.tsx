@@ -31,8 +31,7 @@ const mockPromptContexts: Record<string, PromptContext> = {
 };
 
 const defaultProps = {
-  defaultAllow: [],
-  defaultAllowReplacement: [],
+  anonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
   promptContexts: mockPromptContexts,
 };
 
@@ -79,8 +78,7 @@ describe('ContextPills', () => {
   it('it does NOT invoke setSelectedPromptContexts() when the prompt is already selected', async () => {
     const context = mockPromptContexts.context1;
     const mockSelectedPromptContext: SelectedPromptContext = {
-      allow: [],
-      allowReplacement: [],
+      contextAnonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
       promptContextId: context.id,
       rawData: 'test-raw-data',
     };
@@ -109,8 +107,7 @@ describe('ContextPills', () => {
   it('disables selected context pills', () => {
     const context = mockPromptContexts.context1;
     const mockSelectedPromptContext: SelectedPromptContext = {
-      allow: [],
-      allowReplacement: [],
+      contextAnonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
       promptContextId: context.id,
       rawData: 'test-raw-data',
     };

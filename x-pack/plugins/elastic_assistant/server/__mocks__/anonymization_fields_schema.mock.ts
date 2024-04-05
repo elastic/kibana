@@ -6,16 +6,16 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { SearchEsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
   PerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 
 export const getAnonymizationFieldsSearchEsMock = () => {
-  const searchResponse: estypes.SearchResponse<SearchEsAnonymizationFieldsSchema> = {
+  const searchResponse: estypes.SearchResponse<EsAnonymizationFieldsSchema> = {
     took: 3,
     timed_out: false,
     _shards: {
@@ -41,8 +41,8 @@ export const getAnonymizationFieldsSearchEsMock = () => {
             namespace: 'default',
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             field: 'testField',
-            default_allow: true,
-            default_allow_replacement: false,
+            allowed: true,
+            anonymized: false,
             created_by: 'elastic',
             users: [
               {
@@ -59,15 +59,15 @@ export const getAnonymizationFieldsSearchEsMock = () => {
 
 export const getCreateAnonymizationFieldSchemaMock = (): AnonymizationFieldCreateProps => ({
   field: 'testField',
-  defaultAllow: false,
-  defaultAllowReplacement: true,
+  allowed: false,
+  anonymized: true,
 });
 
 export const getUpdateAnonymizationFieldSchemaMock = (
   promptId = 'prompt-1'
 ): AnonymizationFieldUpdateProps => ({
-  defaultAllowReplacement: true,
-  defaultAllow: false,
+  anonymized: true,
+  allowed: false,
   id: promptId,
 });
 
@@ -76,7 +76,7 @@ export const getAnonymizationFieldMock = (
 ): AnonymizationFieldResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   field: 'testField',
-  defaultAllow: false,
+  allowed: false,
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',
   updatedAt: '2019-12-13T16:40:33.400Z',
@@ -94,14 +94,14 @@ export const getQueryAnonymizationFieldParams = (
   return isUpdate
     ? {
         field: 'testField',
-        defaultAllowReplacement: true,
-        defaultAllow: false,
+        anonymized: true,
+        allowed: false,
         id: '1',
       }
     : {
         field: 'test 2',
-        defaultAllowReplacement: true,
-        defaultAllow: false,
+        anonymized: true,
+        allowed: false,
       };
 };
 

@@ -113,25 +113,40 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
   ) => {
     const updatedAt = new Date().toISOString();
     const filterByUser = authenticatedUser
-      ? [
-          {
-            nested: {
-              path: 'users',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match: authenticatedUser.profile_uid
-                        ? { 'users.id': authenticatedUser.profile_uid }
-                        : { 'users.name': authenticatedUser.username },
+      ? {
+          filter: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'users',
+                      },
                     },
-                  ],
+                  },
                 },
-              },
+                {
+                  nested: {
+                    path: 'users',
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            match: authenticatedUser.profile_uid
+                              ? { 'users.id': authenticatedUser.profile_uid }
+                              : { 'users.name': authenticatedUser.username },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
             },
           },
-        ]
-      : [];
+        }
+      : {};
 
     const responseToUpdate = await this.options.esClient.search({
       body: {
@@ -149,8 +164,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                   ],
                 },
               },
-              ...filterByUser,
             ],
+            ...filterByUser,
           },
         },
       },

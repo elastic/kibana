@@ -13,7 +13,7 @@ export const getRows = ({
   anonymizationFields,
   rawData,
 }: {
-  anonymizationFields: FindAnonymizationFieldsResponse;
+  anonymizationFields?: FindAnonymizationFieldsResponse;
   rawData: Record<string, string[]> | null;
 }): ContextEditorRow[] => {
   if (rawData !== null && typeof rawData === 'object') {
@@ -24,16 +24,16 @@ export const getRows = ({
         ...acc,
         {
           field,
-          allowed: isAllowed({ anonymizationFields: anonymizationFields.data, field }),
-          anonymized: isAnonymized({ anonymizationFields: anonymizationFields.data, field }),
-          denied: isDenied({ anonymizationFields: anonymizationFields.data, field }),
+          allowed: isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field }),
+          anonymized: isAnonymized({ anonymizationFields: anonymizationFields?.data ?? [], field }),
+          denied: isDenied({ anonymizationFields: anonymizationFields?.data ?? [], field }),
           rawValues: rawData[field],
         },
       ],
       []
     );
   } else {
-    return anonymizationFields.data.map<ContextEditorRow>((anonymizationField) => ({
+    return (anonymizationFields?.data ?? []).map<ContextEditorRow>((anonymizationField) => ({
       field: anonymizationField.field,
       allowed: anonymizationField.allowed ?? false,
       anonymized: anonymizationField.anonymized ?? false,

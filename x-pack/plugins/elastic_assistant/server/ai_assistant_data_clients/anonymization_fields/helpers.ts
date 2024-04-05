@@ -77,13 +77,8 @@ export const transformToUpdateScheme = (
 ): UpdateAnonymizationFieldSchema => {
   return {
     id,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
     updated_at: updatedAt,
+    updated_by: user.username,
     allowed,
     anonymized,
   };
@@ -97,13 +92,8 @@ export const transformToCreateScheme = (
   return {
     updated_at: createdAt,
     field,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
     created_at: createdAt,
+    created_by: user.username,
     allowed,
     anonymized,
   };
@@ -118,11 +108,11 @@ export const getUpdateScript = ({
 }) => {
   return {
     source: `
-    if (params.assignEmpty == true || params.containsKey('default_allow')) {
-      ctx._source.default_allow = params.default_allow;
+    if (params.assignEmpty == true || params.containsKey('allowed')) {
+      ctx._source.allowed = params.allowed;
     }
-    if (params.assignEmpty == true || params.containsKey('default_allow_replacement')) {
-      ctx._source.default_allow_replacement = params.default_allow_replacement;
+    if (params.assignEmpty == true || params.containsKey('anonymized')) {
+      ctx._source.anonymized = params.anonymized;
     }
     ctx._source.updated_at = params.updated_at;
   `,

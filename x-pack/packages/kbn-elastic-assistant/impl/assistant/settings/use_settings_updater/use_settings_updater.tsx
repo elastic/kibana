@@ -32,6 +32,7 @@ interface UseSettingsUpdater {
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
+  anonymizationFieldsBulkActions: PerformBulkActionRequestBody;
   setAnonymizationFieldsBulkActions: React.Dispatch<
     React.SetStateAction<PerformBulkActionRequestBody>
   >;
@@ -158,6 +159,7 @@ export const useSettingsUpdater = (
     saveSettings,
     updatedAnonymizationData,
     setUpdatedAnonymizationData,
+    anonymizationFieldsBulkActions,
     setAnonymizationFieldsBulkActions,
     setUpdatedKnowledgeBaseSettings,
     setUpdatedQuickPromptSettings,

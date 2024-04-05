@@ -6,10 +6,8 @@
  */
 
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
-import { getIsDataAnonymizable } from '.';
+import { getIsDataAnonymizable, updateSelectedPromptContext } from '.';
 import { SelectedPromptContext } from '../../assistant/prompt_context/types';
-
-import { BatchUpdateListItem } from '../context_editor/types';
 
 describe('helpers', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -82,7 +80,7 @@ describe('helpers', () => {
     it('returns true when the field is in the allowReplacementSet', () => {
       const field = 'user.name';
 
-      expect(isAnonymized({ allowReplacementSet, field })).toBe(true);
+      expect(isAnonymized({ anonymizationFields, field })).toBe(true);
     });
 
     it('returns false when the field is NOT in the allowReplacementSet', () => {
@@ -178,7 +176,7 @@ describe('helpers', () => {
         selectedPromptContext,
         update: 'allowReplacement',
       });
-      expect(result.allowReplacement).toEqual(['user.name', 'event.type']);
+      expect(result.contextAnonymizationFields).toEqual(['user.name', 'event.type']);
     });
 
     it('updates the allowReplacement list when update is `allowReplacement` and the operation is `remove`', () => {
@@ -188,7 +186,7 @@ describe('helpers', () => {
         selectedPromptContext,
         update: 'allowReplacement',
       });
-      expect(result.allowReplacement).toEqual([]);
+      expect(result.contextAnonymizationFields).toEqual([]);
     });
 
     it('does not update selectedPromptContext when update is not "allow" or "allowReplacement"', () => {
@@ -200,98 +198,6 @@ describe('helpers', () => {
       });
 
       expect(result).toEqual(selectedPromptContext);
-    });
-  });
-
-  describe('updateDefaultList', () => {
-    it('updates the `defaultAllow` list to add a field when the operation is add', () => {
-      const currentList = ['test1', 'test2'];
-      const setDefaultList = jest.fn();
-      const update = 'defaultAllow';
-      const updates: BatchUpdateListItem[] = [{ field: 'test3', operation: 'add', update }];
-
-      updateDefaultList({ currentList, setDefaultList, update, updates });
-
-      expect(setDefaultList).toBeCalledWith([...currentList, 'test3']);
-    });
-
-    it('updates the `defaultAllow` list to remove a field when the operation is remove', () => {
-      const currentList = ['test1', 'test2'];
-      const setDefaultList = jest.fn();
-      const update = 'defaultAllow';
-      const updates: BatchUpdateListItem[] = [{ field: 'test1', operation: 'remove', update }];
-
-      updateDefaultList({ currentList, setDefaultList, update, updates });
-
-      expect(setDefaultList).toBeCalledWith(['test2']);
-    });
-
-    it('does NOT invoke `setDefaultList` when `update` does NOT match any of the batched `updates` types', () => {
-      const currentList = ['test1', 'test2'];
-      const setDefaultList = jest.fn();
-      const update = 'allow';
-      const updates: BatchUpdateListItem[] = [
-        { field: 'test1', operation: 'remove', update: 'defaultAllow' }, // update does not match
-      ];
-
-      updateDefaultList({ currentList, setDefaultList, update, updates });
-
-      expect(setDefaultList).not.toBeCalled();
-    });
-
-    it('does NOT invoke `setDefaultList` when `updates` is empty', () => {
-      const currentList = ['test1', 'test2'];
-      const setDefaultList = jest.fn();
-      const update = 'defaultAllow';
-      const updates: BatchUpdateListItem[] = []; // no updates
-
-      updateDefaultList({ currentList, setDefaultList, update, updates });
-
-      expect(setDefaultList).not.toBeCalled();
-    });
-  });
-
-  describe('updateDefaults', () => {
-    const setDefaultAllow = jest.fn();
-    const setDefaultAllowReplacement = jest.fn();
-
-    const defaultAllow = ['field1', 'field2'];
-    const defaultAllowReplacement = ['field2'];
-    const batchUpdateListItems: BatchUpdateListItem[] = [
-      {
-        field: 'field1',
-        operation: 'remove',
-        update: 'defaultAllow',
-      },
-      {
-        field: 'host.name',
-        operation: 'add',
-        update: 'defaultAllowReplacement',
-      },
-    ];
-
-    it('updates defaultAllow with filtered updates', () => {
-      updateDefaults({
-        defaultAllow,
-        defaultAllowReplacement,
-        setDefaultAllow,
-        setDefaultAllowReplacement,
-        updates: batchUpdateListItems,
-      });
-
-      expect(setDefaultAllow).toHaveBeenCalledWith(['field2']);
-    });
-
-    it('updates defaultAllowReplacement with filtered updates', () => {
-      updateDefaults({
-        defaultAllow,
-        defaultAllowReplacement,
-        setDefaultAllow,
-        setDefaultAllowReplacement,
-        updates: batchUpdateListItems,
-      });
-
-      expect(setDefaultAllowReplacement).toHaveBeenCalledWith(['field2', 'host.name']);
     });
   });
 });

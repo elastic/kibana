@@ -74,17 +74,6 @@ export const getColumns = ({
                 update: rawData == null ? 'defaultAllow' : 'allow',
               },
             ]);
-
-            if (rawData == null && allowed) {
-              // when editing defaults, remove the default replacement if the field is no longer allowed
-              onListUpdated([
-                {
-                  field,
-                  operation: 'remove',
-                  update: 'defaultAllowReplacement',
-                },
-              ]);
-            }
           }}
         />
       ),
