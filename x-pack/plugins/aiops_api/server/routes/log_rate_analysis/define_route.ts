@@ -29,7 +29,7 @@ export const defineRoute = (
   coreStart: CoreStart,
   usageCounter?: UsageCounter
 ) => {
-  router.get(
+  router.post(
     {
       path: '/api/aiops/log_rate_analysis',
       validate: false,

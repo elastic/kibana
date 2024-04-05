@@ -57,7 +57,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
     // const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return response.ok({
-      body: [],
+      body: 'CAN HAS LOG RATE ANALYSIS',
     });
   };
 }
