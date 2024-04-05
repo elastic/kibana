@@ -532,6 +532,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         ecsData: ecsAlertsData,
         dataGridRef,
         pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
       })
     : getCellActionsStub;
 
