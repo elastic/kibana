@@ -156,6 +156,7 @@ export const HASH_TO_VERSION_MAP = {
   'core-usage-stats|3d1b76c39bfb2cc8296b024d73854724': '7.14.1',
   'csp-rule-template|6ee70dc06c0ca3ddffc18222f202ab25': '10.0.0',
   'dashboard|b8aa800aa5e0d975c5e8dc57f03d41f8': '10.2.0',
+  'endpoint:unified-user-artifact-manifest|393c6e4f5f16288c24ef9057e4d76a4c': '10.0.0',
   'endpoint:user-artifact-manifest|7502b5c5bc923abe8aa5ccfd636e8c3d': '10.0.0',
   'enterprise_search_telemetry|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'epm-packages-assets|44621b2f6052ef966da47b7c3a00f33b': '10.0.0',
