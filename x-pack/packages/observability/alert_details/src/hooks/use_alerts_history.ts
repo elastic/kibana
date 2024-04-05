@@ -29,7 +29,6 @@ export interface Props {
     to: string;
   };
   instanceId?: string;
-  queries?: QueryDslQueryContainer[];
 }
 
 interface FetchAlertsHistory {
@@ -56,7 +55,6 @@ export function useAlertsHistory({
   dateRange,
   http,
   instanceId,
-  queries,
 }: Props): UseAlertsHistory {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
@@ -71,7 +69,6 @@ export function useAlertsHistory({
         dateRange,
         signal,
         instanceId,
-        queries,
       });
     },
     refetchOnWindowFocus: false,
