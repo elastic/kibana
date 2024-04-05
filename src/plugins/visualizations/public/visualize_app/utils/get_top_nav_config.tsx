@@ -10,6 +10,7 @@ import React from 'react';
 import moment from 'moment';
 import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
+import { InjectedIntl } from '@kbn/i18n-react';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
@@ -72,6 +73,8 @@ export interface TopNavConfigParams {
   eventEmitter?: EventEmitter;
 }
 
+type ExtendedProps = TopNavConfigParams & { intl: InjectedIntl };
+
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -101,7 +104,8 @@ export const getTopNavConfig = (
     setNavigateToLens,
     showBadge,
     eventEmitter,
-  }: TopNavConfigParams,
+    intl,
+  }: ExtendedProps,
   {
     data,
     application,
@@ -410,6 +414,8 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            intl,
+            toasts: toastNotifications,
           });
         }
       },

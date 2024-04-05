@@ -542,7 +542,7 @@ export const reportingExportModalProvider = ({
   };
 
   return {
-    id: 'screenCaptureReports',
+    id: 'modalImageReports',
     getShareMenuItems,
   };
 };

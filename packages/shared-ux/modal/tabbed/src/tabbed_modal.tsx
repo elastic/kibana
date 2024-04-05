@@ -13,6 +13,7 @@ import React, {
   type FC,
   type ReactElement,
   useCallback,
+  useState,
 } from 'react';
 import {
   EuiButton,
@@ -23,9 +24,11 @@ import {
   EuiModalHeaderTitle,
   EuiTabs,
   EuiTab,
+  EuiToolTip,
   type EuiTabProps,
   type CommonProps,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ModalContextProvider,
   useModalContext,
@@ -61,6 +64,10 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
 }
 
 const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
+  // EuiCopy equivalent
+  const [, setIsTextVisible] = useState<boolean>(false);
+  const afterMessage = <FormattedMessage id="share.afterMessageClick" defaultMessage="Copied" />;
+
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
 
@@ -118,20 +125,23 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       </EuiModalBody>
       {modalActionBtn && (
         <EuiModalFooter>
-          <EuiButton
-            isDisabled={
-              modalActionBtn.style ? modalActionBtn.style({ state: selectedTabState }) : false
-            }
-            fill
-            data-test-subj={modalActionBtn.dataTestSubj}
-            data-share-url={state.url}
-            onClick={() => {
-              // @ts-ignore state will not be null because of the modalActionBtn check
-              modalActionBtn!.handler!({ state: selectedTabId });
-            }}
-          >
-            {modalActionBtn.label}
-          </EuiButton>
+          <EuiToolTip content={afterMessage} onMouseOut={() => setIsTextVisible(false)}>
+            <EuiButton
+              isDisabled={
+                modalActionBtn.style ? modalActionBtn.style({ state: selectedTabState }) : false
+              }
+              fill
+              data-test-subj={modalActionBtn.dataTestSubj}
+              data-share-url={state.url}
+              onClick={() => {
+                // @ts-ignore state will not be null because of the modalActionBtn check
+                modalActionBtn!.handler!({ state: selectedTabId });
+                setIsTextVisible(true);
+              }}
+            >
+              {modalActionBtn.label}
+            </EuiButton>
+          </EuiToolTip>
         </EuiModalFooter>
       )}
     </EuiModal>

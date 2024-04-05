@@ -196,7 +196,7 @@ export const reportingCsvShareProvider = ({
   };
 
   return {
-    id: 'csvReports',
+    id: 'csvReportsModal',
     getShareMenuItems,
   };
 };

@@ -24,6 +24,7 @@ const exportTabReducer: IExportTab['reducer'] = (state, action) => {
 
 const ExportTabContent = () => {
   const { shareMenuItems, objectType, isDirty, onClose, toasts, intl } = useShareTabsContext()!;
+
   const aggregateReportTypes: ShareMenuItem[] = [];
 
   shareMenuItems.map((shareMenuItem) => {

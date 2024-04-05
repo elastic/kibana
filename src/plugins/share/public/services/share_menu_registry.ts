@@ -26,7 +26,6 @@ export class ShareMenuRegistry {
         //     `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
         //   );
         // }
-
         this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
       },
     };

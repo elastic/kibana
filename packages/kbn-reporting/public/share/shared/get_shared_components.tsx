@@ -37,13 +37,13 @@ export interface ApplicationProps {
    * A function to callback when the Reporting panel should be closed
    */
   onClose: () => void;
-  objectType: string;
-  downloadCsvFromLens?: () => void;
 }
 
 export interface ReportingPublicComponents {
   /** Needed for Canvas PDF reports */
   ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | undefined;
+  ReportingModalPDF(props: ApplicationProps): JSX.Element | undefined;
+  ReportingModalPNG(props: ApplicationProps): JSX.Element | undefined;
 }
 
 /**
@@ -57,6 +57,42 @@ export function getSharedComponents(
 ): ReportingPublicComponents {
   return {
     ReportingPanelPDFV2(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
+    },
+    ReportingModalPDF(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
+    },
+    ReportingModalPNG(props: ApplicationProps) {
       const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
       if (props.layoutOption === 'canvas') {
         return (

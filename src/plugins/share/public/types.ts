@@ -103,7 +103,7 @@ export interface ShareMenuItem {
  * default built-in share options. Each share provider needs a globally unique id.
  * */
 export interface ShareMenuProvider {
-  readonly id: string;
+  id: string;
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 

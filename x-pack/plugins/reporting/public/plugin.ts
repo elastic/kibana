@@ -245,7 +245,7 @@ export class ReportingPublicPlugin
               theme: core.theme,
             })
           );
-
+          // needed for Canvas
           shareSetup.register(
             reportingScreenshotShareProvider({
               apiClient,
