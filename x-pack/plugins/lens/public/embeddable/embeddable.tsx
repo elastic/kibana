@@ -41,7 +41,7 @@ import {
   ErrorLike,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -1507,7 +1507,9 @@ export class Embeddable
     const input = this.getInput();
 
     // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    // this is necessary for the dataview embeddable but not the ES|QL one
     if (
+      !Boolean(this.isTextBasedLanguage()) &&
       input.timeRange == null &&
       indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
     ) {

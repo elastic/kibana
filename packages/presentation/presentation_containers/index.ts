@@ -9,14 +9,12 @@
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
-  useExpandedPanelId,
   type CanDuplicatePanels,
   type CanExpandPanels,
 } from './interfaces/panel_management';
 export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
-  type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
