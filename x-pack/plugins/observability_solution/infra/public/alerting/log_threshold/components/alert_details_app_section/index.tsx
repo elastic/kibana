@@ -12,6 +12,7 @@ import {
   ALERT_CONTEXT,
   ALERT_END,
   ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
@@ -245,6 +246,7 @@ const AlertDetailsAppSection = ({
               ...rule,
               params: { ...rule.params, timeSize: 12, timeUnit: 'h' },
             }}
+            instanceId={alert.fields[ALERT_INSTANCE_ID]}
             groups={groups}
           />
         </EuiFlexItem>

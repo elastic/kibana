@@ -23,7 +23,7 @@ import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import DateMath from '@kbn/datemath';
-import { getGroupQueries, useAlertsHistory } from '@kbn/observability-alert-details';
+import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Group } from '@kbn/observability-alert-details';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
@@ -32,9 +32,11 @@ import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_th
 
 const LogsHistoryChart = ({
   rule,
+  instanceId,
   groups,
 }: {
   rule: Rule<PartialRuleParams>;
+  instanceId?: string;
   groups?: Group[];
 }) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
@@ -52,7 +54,6 @@ const LogsHistoryChart = ({
     buckets: 30,
   };
 
-  const queries = getGroupQueries(groups);
   const {
     data: { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts },
     isLoading,
@@ -62,7 +63,7 @@ const LogsHistoryChart = ({
     featureIds: [AlertConsumers.LOGS],
     ruleId: rule.id,
     dateRange,
-    queries,
+    instanceId,
   });
 
   if (isError) {
