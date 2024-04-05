@@ -414,7 +414,7 @@ function DiscoverDocumentsComponent({
                   settings={grid}
                   onFilter={onAddFilter as DocViewFilterFn}
                   onSetColumns={onSetColumns}
-                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  onSort={onSort}
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
                   configHeaderRowHeight={3}
