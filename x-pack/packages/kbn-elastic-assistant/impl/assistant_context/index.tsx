@@ -70,18 +70,15 @@ export interface AssistantProviderProps {
   baseSystemPrompts?: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
-  getComments: ({
-    currentConversation,
-    isFetchingResponse,
-    refetchCurrentConversation,
-    regenerateMessage,
-    showAnonymizedValues,
-  }: {
+  getComments: (commentArgs: {
+    abortStream: () => void;
     currentConversation: Conversation;
+    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
+    setIsStreaming: (isStreaming: boolean) => void;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
@@ -114,17 +111,15 @@ export interface UseAssistantContext {
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
   baseConversations: Record<string, Conversation>;
-  getComments: ({
-    currentConversation,
-    showAnonymizedValues,
-    refetchCurrentConversation,
-    isFetchingResponse,
-  }: {
+  getComments: (commentArgs: {
+    abortStream: () => void;
     currentConversation: Conversation;
+    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
+    setIsStreaming: (isStreaming: boolean) => void;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
