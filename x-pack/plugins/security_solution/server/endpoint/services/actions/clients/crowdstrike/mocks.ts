@@ -185,9 +185,40 @@ const createConstructorOptionsMock = (): CrowdstrikeActionsClientOptionsMock => 
   };
 };
 
+interface CrowdstrikeEventSearchResponseMock {
+  hits: {
+    hits: Array<{
+      _id: string;
+      _index: string;
+      fields: Record<string, string[]>;
+    }>;
+  };
+  _shards: { total: number; successful: number; failed: number };
+  took: number;
+  timed_out: boolean;
+}
+
+const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => ({
+  hits: {
+    hits: [
+      {
+        _id: '1-2-3',
+        _index: 'logs-crowdstrike.fdr-default',
+        fields: {
+          'crowdstrike.event.HostName': ['Crowdstrike-1460'],
+        },
+      },
+    ],
+  },
+  _shards: { total: 1, successful: 1, failed: 0 },
+  took: 1,
+  timed_out: false,
+});
+
 export const CrowdstrikeMock = {
   createGetAgentsResponse: createCrowdstrikeGetAgentsApiResponseMock,
   createCrowdstrikeAgentDetails: createCrowdstrikeAgentDetailsMock,
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,
+  createEventSearchResponse: createEventSearchResponseMock,
 };
