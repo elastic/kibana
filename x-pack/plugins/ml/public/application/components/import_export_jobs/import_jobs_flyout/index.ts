@@ -7,6 +7,6 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export const ExportJobsFlyout = dynamic(async () => ({
+export const ImportJobsFlyout = dynamic(async () => ({
   default: (await import('./import_jobs_flyout')).ImportJobsFlyout,
 }));
