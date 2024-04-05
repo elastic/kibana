@@ -244,11 +244,7 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
-    this.publishingSubscription.add(
-      this.savedObjectId.subscribe(() => {
-        this.hadContentfulRender = false;
-      })
-    );
+
     this.startAuditingReactEmbeddableChildren();
   }
 
