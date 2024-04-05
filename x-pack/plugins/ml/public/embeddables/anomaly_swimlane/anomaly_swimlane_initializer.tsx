@@ -25,13 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimlaneEmbeddableInput } from '..';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableUserInput } from '..';
 
-interface ExplicitInput {
-  panelTitle: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
+export type ExplicitInput = Omit<AnomalySwimlaneEmbeddableUserInput, 'jobIds'>;
 
 export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;

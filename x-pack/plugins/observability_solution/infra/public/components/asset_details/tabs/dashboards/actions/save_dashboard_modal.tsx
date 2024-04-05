@@ -29,8 +29,10 @@ import type {
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
 import { useDashboardFetcher, FETCH_STATUS } from '../../../hooks/use_dashboards_fetcher';
-import { useUpdateCustomDashboard } from '../../../hooks/use_update_custom_dashboards';
-import { useCustomDashboard } from '../../../hooks/use_custom_dashboards';
+import {
+  useUpdateCustomDashboard,
+  useCreateCustomDashboard,
+} from '../../../hooks/use_custom_dashboards';
 import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 
 interface Props {
@@ -53,23 +55,31 @@ export function SaveDashboardModal({
   const [, setUrlState] = useAssetDetailsUrlState();
 
   const [assetNameEnabled, setAssetNameFiltersEnabled] = useState(
-    currentDashboard?.hostNameFilterEnabled ?? true
+    currentDashboard?.dashboardFilterAssetIdEnabled ?? true
   );
   const [selectedDashboard, setSelectedDashboard] = useState<
     Array<EuiComboBoxOptionOption<string>>
-  >(currentDashboard ? [{ label: currentDashboard.title, value: currentDashboard.id }] : []);
+  >(
+    currentDashboard
+      ? [{ label: currentDashboard.title, value: currentDashboard.dashboardSavedObjectId }]
+      : []
+  );
 
-  const { loading, updateCustomDashboard } = useUpdateCustomDashboard();
-  const { dashboards, loading: savedObjectDashboardsLoading } = useCustomDashboard({ assetType });
+  const { isUpdateLoading, updateCustomDashboard } = useUpdateCustomDashboard();
+  const { isCreateLoading, createCustomDashboard } = useCreateCustomDashboard();
 
   const isEditMode = !!currentDashboard?.id;
+  const loading = isUpdateLoading || isCreateLoading;
 
   const options = useMemo(
     () =>
       allAvailableDashboards?.map((dashboardItem: DashboardItem) => ({
         label: dashboardItem.attributes.title,
         value: dashboardItem.id,
-        disabled: customDashboards?.some(({ id }) => dashboardItem.id === id) ?? false,
+        disabled:
+          customDashboards?.some(
+            ({ dashboardSavedObjectId }) => dashboardItem.id === dashboardSavedObjectId
+          ) ?? false,
       })),
     [allAvailableDashboards, customDashboards]
   );
@@ -78,29 +88,32 @@ export function SaveDashboardModal({
     async function () {
       const [newDashboard] = selectedDashboard;
       try {
-        if (newDashboard.value && !savedObjectDashboardsLoading) {
-          const dashboardList =
-            dashboards?.dashboardIdList?.filter(({ id }) => id !== newDashboard.value) || [];
-          const result = await updateCustomDashboard({
-            assetType,
-            dashboardIdList: [
-              ...dashboardList,
-              {
-                id: newDashboard.value,
-                hostNameFilterEnabled: assetNameEnabled,
-              },
-            ],
-          });
+        if (newDashboard.value) {
+          if (isEditMode && currentDashboard.id) {
+            const result = await updateCustomDashboard({
+              assetType,
+              id: currentDashboard.id,
+              dashboardSavedObjectId: newDashboard.value,
+              dashboardFilterAssetIdEnabled: assetNameEnabled,
+            });
 
-          if (result && !loading) {
-            notifications.toasts.success(
-              isEditMode
-                ? getEditSuccessToastLabels(newDashboard.label)
-                : getLinkSuccessToastLabels(newDashboard.label)
-            );
-            setUrlState({ dashboardId: newDashboard.value });
-            onRefresh();
+            if (result && !isUpdateLoading) {
+              notifications.toasts.success(getEditSuccessToastLabels(newDashboard.label));
+            }
+          } else {
+            const result = await createCustomDashboard({
+              assetType,
+              dashboardSavedObjectId: newDashboard.value,
+              dashboardFilterAssetIdEnabled: assetNameEnabled,
+            });
+
+            if (result && !isCreateLoading) {
+              notifications.toasts.success(getLinkSuccessToastLabels(newDashboard.label));
+            }
           }
+
+          setUrlState({ dashboardId: newDashboard.value });
+          onRefresh();
         }
       } catch (error) {
         notifications.toasts.danger({
@@ -116,16 +129,17 @@ export function SaveDashboardModal({
     [
       selectedDashboard,
       onClose,
-      savedObjectDashboardsLoading,
-      dashboards?.dashboardIdList,
-      updateCustomDashboard,
-      assetType,
-      assetNameEnabled,
-      loading,
-      notifications.toasts,
       isEditMode,
       setUrlState,
       onRefresh,
+      updateCustomDashboard,
+      assetType,
+      currentDashboard?.id,
+      assetNameEnabled,
+      isUpdateLoading,
+      notifications.toasts,
+      createCustomDashboard,
+      isCreateLoading,
     ]
   );
 
@@ -179,7 +193,13 @@ export function SaveDashboardModal({
                     }
                   )}
                 >
-                  <EuiIcon type="questionInCircle" title="Icon with tooltip" />
+                  <EuiIcon
+                    type="questionInCircle"
+                    title={i18n.translate(
+                      'xpack.infra.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                      { defaultMessage: 'Icon with tooltip' }
+                    )}
+                  />
                 </EuiToolTip>
               </p>
             }
@@ -193,7 +213,7 @@ export function SaveDashboardModal({
         <EuiButtonEmpty
           data-test-subj="infraSelectDashboardCancelButton"
           onClick={onClose}
-          isDisabled={loading || savedObjectDashboardsLoading}
+          isDisabled={loading}
         >
           {i18n.translate('xpack.infra.customDashboards.selectDashboard.cancel', {
             defaultMessage: 'Cancel',
@@ -202,7 +222,7 @@ export function SaveDashboardModal({
         <EuiButton
           data-test-subj="infraSelectDashboardButton"
           onClick={onClickSave}
-          isLoading={loading || savedObjectDashboardsLoading}
+          isLoading={loading}
           fill
         >
           {isEditMode

@@ -679,11 +679,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createAnomalyDetectionJob(jobConfig: Job, space?: string) {
       const jobId = jobConfig.job_id;
+
       log.debug(
         `Creating anomaly detection job with id '${jobId}' ${
           space ? `in space '${space}' ` : ''
         }...`
       );
+
+      if (await this.adJobExist(jobId)) {
+        log.debug('> Job already exists.');
+        return;
+      }
 
       const { body, status } = await kbnSupertest
         .put(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}`)
@@ -1515,8 +1521,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return ingestPipeline;
     },
 
+    async ingestPipelineExists(modelId: string, usePrefix: boolean = true): Promise<boolean> {
+      const { status } = await esSupertest.get(
+        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
+      );
+      if (status !== 200) return false;
+      return true;
+    },
+
     async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
+
+      if (!(await this.ingestPipelineExists(modelId, usePrefix))) {
+        log.debug('> Ingest pipeline does not exist, nothing to delete');
+        return;
+      }
+
       const { body, status } = await esSupertest.delete(
         `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
       );

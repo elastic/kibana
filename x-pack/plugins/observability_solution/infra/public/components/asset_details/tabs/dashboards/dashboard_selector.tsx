@@ -29,12 +29,14 @@ export function DashboardSelector({
 
   useMount(() => {
     if (!currentDashboardId) {
-      setUrlState({ dashboardId: customDashboards[0]?.id });
+      setUrlState({ dashboardId: customDashboards[0]?.dashboardSavedObjectId });
     }
   });
 
   useEffect(() => {
-    const preselectedDashboard = customDashboards.find(({ id }) => id === currentDashboardId);
+    const preselectedDashboard = customDashboards.find(
+      ({ dashboardSavedObjectId }) => dashboardSavedObjectId === currentDashboardId
+    );
     // preselect dashboard
     if (preselectedDashboard) {
       setSelectedDashboard(preselectedDashboard);
@@ -57,17 +59,17 @@ export function DashboardSelector({
         defaultMessage: 'Dashboard',
       })}
       singleSelection={{ asPlainText: true }}
-      options={customDashboards.map(({ id, title }) => {
+      options={customDashboards.map(({ dashboardSavedObjectId, title }) => {
         return {
           label: title,
-          value: id,
+          value: dashboardSavedObjectId,
         };
       })}
       selectedOptions={
         selectedDashboard
           ? [
               {
-                value: selectedDashboard.id,
+                value: selectedDashboard.dashboardSavedObjectId,
                 label: selectedDashboard.title,
               },
             ]

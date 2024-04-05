@@ -18,13 +18,11 @@ import {
   MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../../screens/timeline';
 import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
 import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
-
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 const author = Cypress.env('ELASTICSEARCH_USERNAME');
 const link = 'https://www.elastic.co/';

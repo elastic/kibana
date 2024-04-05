@@ -30,6 +30,6 @@ fi
 
 QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
-BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate serverless-sec-sol-cypress-bk-api-key)
+BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
 QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_USE_LATEST_COMMIT=$KIBANA_OVERRIDE_FLAG BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status

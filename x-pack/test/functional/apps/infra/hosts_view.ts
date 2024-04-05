@@ -160,7 +160,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
 
   describe('Hosts View', function () {
-    let synthtraceApmClient: any;
+    let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
       const kibanaClient = new ApmSynthtraceKibanaClient({
         target: getKibanaServerUrl(),
@@ -174,25 +174,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         version: kibanaVersion,
         refreshAfterIndex: true,
       });
-      await Promise.all([
-        synthtraceApmClient.index(
-          generateAddServicesToExistingHost({
-            from: DATES.metricsAndLogs.hosts.processesDataStartDate,
-            to: DATES.metricsAndLogs.hosts.processesDataEndDate,
-            hostName: 'Jennys-MBP.fritz.box',
-            servicesPerHost: 3,
-          })
-        ),
+
+      const services = generateAddServicesToExistingHost({
+        from: DATES.metricsAndLogs.hosts.processesDataStartDate,
+        to: DATES.metricsAndLogs.hosts.processesDataEndDate,
+        hostName: 'Jennys-MBP.fritz.box',
+        servicesPerHost: 3,
+      });
+
+      await browser.setWindowSize(1600, 1200);
+
+      return Promise.all([
+        synthtraceApmClient.index(services),
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
-      await browser.setWindowSize(1600, 1200);
     });
 
     after(async () => {
-      await Promise.all([
+      return Promise.all([
         synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
@@ -239,8 +241,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/176951
-        describe.skip('Overview Tab', () => {
+        describe('Overview Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickOverviewTab();
           });

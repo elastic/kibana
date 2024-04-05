@@ -7,7 +7,7 @@
 
 import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { schema, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { InfraCustomDashboard } from '../../../common/custom_dashboards';
 
 export const INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'infra-custom-dashboards';
@@ -16,30 +16,12 @@ const properties: Record<keyof InfraCustomDashboard, SavedObjectsFieldMapping> =
   assetType: {
     type: 'keyword',
   },
-  dashboardIdList: {
-    properties: {
-      id: {
-        type: 'keyword',
-      },
-      hostNameFilterEnabled: {
-        type: 'keyword',
-      },
-    },
-    type: 'nested',
+  dashboardSavedObjectId: {
+    type: 'keyword',
   },
-};
-
-const createV1Schema: Record<keyof InfraCustomDashboard & 'kquery', Type<any>> = {
-  dashboardIdList: schema.arrayOf(schema.string()),
-  assetType: schema.string(),
-  kuery: schema.maybe(schema.string()),
-};
-
-const createV2Schema: Record<keyof InfraCustomDashboard, Type<any>> = {
-  dashboardIdList: schema.arrayOf(
-    schema.object({ id: schema.string(), hostNameFilterEnabled: schema.boolean() })
-  ),
-  assetType: schema.string(),
+  dashboardFilterAssetIdEnabled: {
+    type: 'boolean',
+  },
 };
 
 export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
@@ -62,13 +44,37 @@ export const infraCustomDashboardsSavedObjectType: SavedObjectsType = {
     '1': {
       changes: [],
       schemas: {
-        create: schema.object(createV1Schema),
+        create: schema.object({
+          dashboardIdList: schema.arrayOf(schema.string()),
+          assetType: schema.string(),
+          kuery: schema.maybe(schema.string()),
+        }),
       },
     },
     '2': {
-      changes: [],
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            dashboardSavedObjectId: {
+              type: 'keyword',
+            },
+            dashboardFilterAssetIdEnabled: {
+              type: 'boolean',
+            },
+          },
+        },
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: ['dashboardIdList', 'kuery'],
+        },
+      ],
       schemas: {
-        create: schema.object(createV2Schema),
+        create: schema.object({
+          dashboardSavedObjectId: schema.string(),
+          assetType: schema.string(),
+          dashboardFilterAssetIdEnabled: schema.boolean(),
+        }),
       },
     },
   },

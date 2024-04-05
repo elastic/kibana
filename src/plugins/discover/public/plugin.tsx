@@ -78,6 +78,7 @@ import {
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
+import { ConfigSchema, ExperimentalFeatures } from '../common/config';
 
 /**
  * @public
@@ -207,7 +208,10 @@ export interface DiscoverStartPlugins {
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.experimentalFeatures =
+      initializerContext.config.get().experimental ?? this.experimentalFeatures;
+  }
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private historyService = new HistoryService();
@@ -221,6 +225,9 @@ export class DiscoverPlugin
   private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
     enabled: false,
     showLogsExplorerTabs: false,
+  };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2Enabled: false,
   };
 
   setup(
@@ -355,6 +362,7 @@ export class DiscoverPlugin
             displayMode: 'standalone',
             inlineTopNav: this.inlineTopNav,
           },
+          experimentalFeatures: this.experimentalFeatures,
         });
 
         return () => {

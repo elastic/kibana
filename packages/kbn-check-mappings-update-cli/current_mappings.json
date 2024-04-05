@@ -1564,16 +1564,11 @@
       "assetType": {
         "type": "keyword"
       },
-      "dashboardIdList": {
-        "properties": {
-          "hostNameFilterEnabled": {
-            "type": "keyword"
-          },
-          "id": {
-            "type": "keyword"
-          }
-        },
-        "type": "nested"
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       }
     }
   },

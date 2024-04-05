@@ -5,53 +5,225 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import type { InfraCustomDashboard } from '../../../../common/custom_dashboards';
-import { InfraCustomDashboardRT } from '../../../../common/http_api/custom_dashboards_api';
-import { useHTTPRequest } from '../../../hooks/use_http_request';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import type {
+  InfraCustomDashboard,
+  InfraSavedCustomDashboard,
+  InfraCustomDashboardAssetType,
+} from '../../../../common/custom_dashboards';
+import {
+  InfraCustomDashboardRT,
+  InfraDeleteCustomDashboardsResponseBodyRT,
+} from '../../../../common/http_api/custom_dashboards_api';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
-import { useRequestObservable } from './use_request_observable';
 
-interface UseDashboardProps {
-  assetType: InventoryItemType;
-}
+type ActionType = 'create' | 'update' | 'delete';
+const errorMessages: Record<ActionType, string> = {
+  create: i18n.translate('xpack.infra.linkDashboards.addFailure.toast.title', {
+    defaultMessage: 'Error while linking dashboards',
+  }),
+  update: i18n.translate('xpack.infra.updatingLinkedDashboards.addFailure.toast.title', {
+    defaultMessage: 'Error while updating linked dashboards',
+  }),
+  delete: i18n.translate('xpack.infra.deletingLinkedDashboards.addFailure.toast.title', {
+    defaultMessage: 'Error while deleting linked dashboards',
+  }),
+};
 
-export function useCustomDashboard({ assetType }: UseDashboardProps) {
-  const { request$ } = useRequestObservable();
+const decodeResponse = (response: any) => {
+  return pipe(
+    InfraCustomDashboardRT.decode(response),
+    fold(throwErrors(createPlainError), identity)
+  );
+};
 
-  const decodeResponse = (response: any) => {
+export const useUpdateCustomDashboard = () => {
+  const { services } = useKibanaContextForPlugin();
+  const { notifications } = useKibana();
+
+  const onError = useCallback(
+    (errorMessage: string) => {
+      if (errorMessage) {
+        notifications.toasts.danger({
+          title: errorMessages.update,
+          body: errorMessage,
+        });
+      }
+    },
+    [notifications.toasts]
+  );
+
+  const [updateCustomDashboardRequest, updateCustomDashboard] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async ({
+        assetType,
+        id,
+        dashboardSavedObjectId,
+        dashboardFilterAssetIdEnabled,
+      }: InfraSavedCustomDashboard) => {
+        const rawResponse = await services.http.fetch(
+          `/api/infra/${assetType}/custom-dashboards/${id}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({
+              assetType,
+              dashboardSavedObjectId,
+              dashboardFilterAssetIdEnabled,
+            }),
+          }
+        );
+
+        return decodeResponse(rawResponse);
+      },
+      onResolve: (response) => response,
+      onReject: (e: Error | unknown) => onError((e as Error)?.message),
+    },
+    []
+  );
+
+  const isUpdateLoading = useMemo(
+    () => updateCustomDashboardRequest.state === 'pending',
+    [updateCustomDashboardRequest.state]
+  );
+
+  const hasUpdateError = useMemo(
+    () => updateCustomDashboardRequest.state === 'rejected',
+    [updateCustomDashboardRequest.state]
+  );
+
+  return {
+    updateCustomDashboard,
+    isUpdateLoading,
+    hasUpdateError,
+  };
+};
+
+export const useDeleteCustomDashboard = () => {
+  const { services } = useKibanaContextForPlugin();
+  const { notifications } = useKibana();
+
+  const decodeDeleteResponse = (response: any) => {
     return pipe(
-      InfraCustomDashboardRT.decode(response),
+      InfraDeleteCustomDashboardsResponseBodyRT.decode(response),
       fold(throwErrors(createPlainError), identity)
     );
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<InfraCustomDashboard>(
-    `/api/infra/custom-dashboards/${assetType}`,
-    'GET',
-    undefined,
-    decodeResponse,
-    undefined,
-    undefined,
-    true
+  const onError = useCallback(
+    (errorMessage: string) => {
+      if (errorMessage) {
+        notifications.toasts.danger({
+          title: errorMessages.delete,
+          body: errorMessage,
+        });
+      }
+    },
+    [notifications.toasts]
   );
 
-  useEffect(() => {
-    if (request$) {
-      request$.next(makeRequest);
-    } else {
-      makeRequest();
-    }
-  }, [makeRequest, request$]);
+  const [deleteCustomDashboardRequest, deleteCustomDashboard] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async ({
+        assetType,
+        id,
+      }: {
+        assetType: InfraCustomDashboardAssetType;
+        id: string;
+      }) => {
+        const rawResponse = await services.http.fetch(
+          `/api/infra/${assetType}/custom-dashboards/${id}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        return decodeDeleteResponse(rawResponse);
+      },
+      onResolve: (response) => response,
+      onReject: (e: Error | unknown) => onError((e as Error)?.message),
+    },
+    []
+  );
+
+  const isDeleteLoading = useMemo(
+    () => deleteCustomDashboardRequest.state === 'pending',
+    [deleteCustomDashboardRequest.state]
+  );
+
+  const hasDeleteError = useMemo(
+    () => deleteCustomDashboardRequest.state === 'rejected',
+    [deleteCustomDashboardRequest.state]
+  );
 
   return {
-    error: (error && error.message) || null,
-    loading,
-    dashboards: response,
-    reload: makeRequest,
+    deleteCustomDashboard,
+    isDeleteLoading,
+    hasDeleteError,
   };
-}
+};
+
+export const useCreateCustomDashboard = () => {
+  const { services } = useKibanaContextForPlugin();
+  const { notifications } = useKibana();
+
+  const onError = useCallback(
+    (errorMessage: string) => {
+      if (errorMessage) {
+        notifications.toasts.danger({
+          title: errorMessages.delete,
+          body: errorMessage,
+        });
+      }
+    },
+    [notifications.toasts]
+  );
+
+  const [createCustomDashboardRequest, createCustomDashboard] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async ({
+        assetType,
+        dashboardSavedObjectId,
+        dashboardFilterAssetIdEnabled,
+      }: InfraCustomDashboard) => {
+        const rawResponse = await services.http.fetch(`/api/infra/${assetType}/custom-dashboards`, {
+          method: 'POST',
+          body: JSON.stringify({
+            dashboardSavedObjectId,
+            dashboardFilterAssetIdEnabled,
+          }),
+        });
+
+        return decodeResponse(rawResponse);
+      },
+      onResolve: (response) => response,
+      onReject: (e: Error | unknown) => onError((e as Error)?.message),
+    },
+    []
+  );
+
+  const isCreateLoading = useMemo(
+    () => createCustomDashboardRequest.state === 'pending',
+    [createCustomDashboardRequest.state]
+  );
+
+  const hasCreateError = useMemo(
+    () => createCustomDashboardRequest.state === 'rejected',
+    [createCustomDashboardRequest.state]
+  );
+
+  return {
+    createCustomDashboard,
+    isCreateLoading,
+    hasCreateError,
+  };
+};

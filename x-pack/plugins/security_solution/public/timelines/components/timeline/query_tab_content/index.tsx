@@ -23,6 +23,11 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { DataLoadingState } from '@kbn/unified-data-table';
+import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import memoizeOne from 'memoize-one';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
@@ -43,7 +48,7 @@ import type {
   RowRenderer,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../common/store';
@@ -59,6 +64,16 @@ import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
+import { defaultUdtHeaders } from '../unified_components/default_headers';
+import { UnifiedTimelineBody } from '../body/unified_timeline_body';
+import { getColumnHeaders } from '../body/column_headers/helpers';
+
+const memoizedGetColumnHeaders: (
+  headers: ColumnHeaderOptions[],
+  browserFields: BrowserFields,
+  isEventRenderedView: boolean
+) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+
 const QueryTabHeaderContainer = styled.div`
   width: 100%;
 `;
@@ -173,6 +188,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
+  expandedDetail,
 }) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -191,6 +207,18 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { uiSettings, timelineFilterManager } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const currentTimeline = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? TimelineId.active)
+  );
+
+  const { sampleSize } = currentTimeline;
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
@@ -237,9 +265,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [combinedQueries, end, loadingSourcerer, start]
   );
 
+  const defaultColumns = useMemo(
+    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
+    [unifiedComponentsInTimelineEnabled]
+  );
+
+  const localColumns = useMemo(
+    () => (isEmpty(columns) ? defaultColumns : columns),
+    [columns, defaultColumns]
+  );
+
+  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
+
   const getTimelineQueryFields = () => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const columnFields = columnsHeader.map((c) => c.id);
+    const columnFields = augumentedColumnHeaders.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
   };
@@ -255,12 +294,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     dispatch(
       timelineActions.initializeTimelineSettings({
         id: timelineId,
+        defaultColumns,
       })
     );
-  }, [dispatch, timelineId]);
+  }, [dispatch, timelineId, defaultColumns]);
 
   const [
-    isQueryLoading,
+    dataLoadingState,
     { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
@@ -270,13 +310,18 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: kqlQuery.language,
-    limit: itemsPerPage,
+    limit: unifiedComponentsInTimelineEnabled ? sampleSize : itemsPerPage,
     runtimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
   });
+
+  const isQueryLoading = useMemo(
+    () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(dataLoadingState),
+    [dataLoadingState]
+  );
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
@@ -305,11 +350,88 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   // is not getting refreshed when using browser navigation.
   const showEventsCountBadge = !isBlankTimeline && totalCount >= 0;
 
+  const header = useMemo(
+    () => (
+      <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
+        <InPortal node={timelineEventsCountPortalNode}>
+          {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+        </InPortal>
+        <EuiFlexGroup gutterSize="s" direction="column">
+          {!unifiedComponentsInTimelineEnabled &&
+            timelineFullScreen &&
+            setTimelineFullScreen != null && (
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <ExitFullScreen
+                    fullScreen={timelineFullScreen}
+                    setFullScreen={setTimelineFullScreen}
+                  />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          <EuiFlexItem data-test-subj="timeline-date-picker-container">
+            <QueryTabHeaderContainer data-test-subj="timelineHeader">
+              <QueryTabHeader
+                filterManager={timelineFilterManager}
+                show={show && activeTab === TimelineTabs.query}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                status={status}
+                timelineId={timelineId}
+              />
+            </QueryTabHeaderContainer>
+          </EuiFlexItem>
+          {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
+          {/* https://github.com/elastic/kibana/issues/17156 */}
+          {/* <EuiFlexItem grow={false}> */}
+          {/*   <TimelineKpi timelineId={timelineId} /> */}
+          {/* </EuiFlexItem> */}
+        </EuiFlexGroup>
+      </StyledEuiFlyoutHeader>
+    ),
+    [
+      activeTab,
+      timelineFilterManager,
+      show,
+      showCallOutUnauthorizedMsg,
+      status,
+      timelineId,
+      setTimelineFullScreen,
+      timelineFullScreen,
+      unifiedComponentsInTimelineEnabled,
+      timelineEventsCountPortalNode,
+      showEventsCountBadge,
+      totalCount,
+    ]
+  );
+
+  if (unifiedComponentsInTimelineEnabled) {
+    return (
+      <UnifiedTimelineBody
+        header={header}
+        columns={augumentedColumnHeaders}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        sort={sort}
+        events={events}
+        refetch={refetch}
+        dataLoadingState={dataLoadingState}
+        totalCount={isBlankTimeline ? 0 : totalCount}
+        onEventClosed={onEventClosed}
+        expandedDetail={expandedDetail}
+        showExpandedDetails={showExpandedDetails}
+        onChangePage={loadPage}
+        activeTab={activeTab}
+        updatedAt={refreshedAt}
+        isTextBasedQuery={false}
+        pageInfo={pageInfo}
+      />
+    );
+  }
+
   return (
     <>
-      <InPortal node={timelineEventsCountPortalNode}>
-        {showEventsCountBadge ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
-      </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
         inputId={InputsModelId.timeline}
@@ -320,39 +442,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
-          <StyledEuiFlyoutHeader
-            data-test-subj={`${activeTab}-tab-flyout-header`}
-            hasBorder={false}
-          >
-            <EuiFlexGroup gutterSize="s" direction="column">
-              {timelineFullScreen && setTimelineFullScreen != null && (
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <ExitFullScreen
-                      fullScreen={timelineFullScreen}
-                      setFullScreen={setTimelineFullScreen}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem data-test-subj="timeline-date-picker-container">
-                <QueryTabHeaderContainer data-test-subj="timelineHeader">
-                  <QueryTabHeader
-                    filterManager={timelineFilterManager}
-                    show={show && activeTab === TimelineTabs.query}
-                    showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                    status={status}
-                    timelineId={timelineId}
-                  />
-                </QueryTabHeaderContainer>
-              </EuiFlexItem>
-              {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
-              {/* https://github.com/elastic/kibana/issues/17156 */}
-              {/* <EuiFlexItem grow={false}> */}
-              {/*   <TimelineKpi timelineId={timelineId} /> */}
-              {/* </EuiFlexItem> */}
-            </EuiFlexGroup>
-          </StyledEuiFlyoutHeader>
+          {header}
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
@@ -441,6 +531,7 @@ const makeMapStateToProps = () => {
       status,
       timelineType,
     } = timeline;
+
     const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId);
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 

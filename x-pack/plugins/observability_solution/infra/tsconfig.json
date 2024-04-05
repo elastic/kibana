@@ -74,7 +74,6 @@
     "@kbn/core-http-server",
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/aiops-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/metrics-data-access-plugin",
     "@kbn/expressions-plugin",
@@ -96,7 +95,10 @@
     "@kbn/core-lifecycle-server",
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
-    "@kbn/shared-svg"
+    "@kbn/shared-svg",
+    "@kbn/aiops-log-rate-analysis"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -8,7 +8,6 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConversationResponse,
-  Replacement,
   Reader,
   ConversationUpdateProps,
   Provider,
@@ -19,6 +18,7 @@ import {
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
+import { EsReplacementSchema } from './types';
 
 export interface UpdateConversationSchema {
   id: UUID;
@@ -37,14 +37,13 @@ export interface UpdateConversationSchema {
   }>;
   api_config?: {
     connector_id?: string;
-    connector_type_title?: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
   };
   summary?: ConversationSummary;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: Replacement[];
+  replacements?: EsReplacementSchema[];
   updated_at?: string;
 }
 
@@ -118,13 +117,17 @@ export const transformToUpdateScheme = (
     title,
     api_config: {
       connector_id: apiConfig?.connectorId,
-      connector_type_title: apiConfig?.connectorTypeTitle,
       default_system_prompt_id: apiConfig?.defaultSystemPromptId,
       model: apiConfig?.model,
       provider: apiConfig?.provider,
     },
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    replacements,
+    replacements: replacements
+      ? Object.keys(replacements).map((key) => ({
+          uuid: key,
+          value: replacements[key],
+        }))
+      : undefined,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
       content: message.content,

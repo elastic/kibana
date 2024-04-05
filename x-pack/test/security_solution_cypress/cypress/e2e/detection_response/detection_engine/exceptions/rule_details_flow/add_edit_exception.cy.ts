@@ -37,7 +37,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
-import { deleteAlertsAndRules, deleteExceptionLists } from '../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -54,7 +54,7 @@ import {
 import {
   createExceptionList,
   createExceptionListItem,
-  deleteExceptionList,
+  deleteExceptionLists,
 } from '../../../../../tasks/api_calls/exceptions';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
@@ -79,9 +79,6 @@ describe(
       login();
       deleteAlertsAndRules();
       deleteExceptionLists();
-
-      const exceptionList = getExceptionList();
-      deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
     });
 
     describe('existing list and items', () => {

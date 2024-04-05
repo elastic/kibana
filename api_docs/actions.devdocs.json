@@ -2077,7 +2077,7 @@
                 "id": "def-server.UnsecuredActionsClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "params",
+                "label": "opts",
                 "description": [],
                 "signature": [
                   "UnsecuredActionsClientOpts"
@@ -2173,6 +2173,46 @@
                 "signature": [
                   "ExecuteOptions",
                   "[]"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.UnsecuredActionsClient.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "(spaceId: string) => Promise<",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ConnectorWithExtraFindData",
+                "text": "ConnectorWithExtraFindData"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.UnsecuredActionsClient.getAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
                 "deprecated": false,
@@ -3075,6 +3115,46 @@
         "children": [
           {
             "parentPluginId": "actions",
+            "id": "def-server.IUnsecuredActionsClient.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "(spaceId: string) => Promise<",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ConnectorWithExtraFindData",
+                "text": "ConnectorWithExtraFindData"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.IUnsecuredActionsClient.getAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.IUnsecuredActionsClient.execute",
             "type": "Function",
             "tags": [],
@@ -3361,6 +3441,14 @@
           ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
           "Connector",
           ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
+          },
+          "[]>; getAllSystemConnectors: () => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -4073,6 +4161,38 @@
               "description": [],
               "signature": [
                 "Record<string, unknown>"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.isSystemActionConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "isSystemActionConnector",
+          "description": [],
+          "signature": [
+            "(connectorId: string) => boolean"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginStartContract.isSystemActionConnector.$1",
+              "type": "string",
+              "tags": [],
+              "label": "connectorId",
+              "description": [],
+              "signature": [
+                "string"
               ],
               "path": "x-pack/plugins/actions/server/plugin.ts",
               "deprecated": false,

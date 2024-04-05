@@ -22,7 +22,7 @@ export function GotoDashboardLink({
   } = useKibanaContextForPlugin();
 
   const url = dashboardLocator?.getRedirectUrl({
-    dashboardId: currentDashboard?.id,
+    dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
   return (
     <EuiButtonEmpty

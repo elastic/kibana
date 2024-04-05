@@ -12,8 +12,8 @@ import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-import { useUpdateCustomDashboard } from '../../../hooks/use_update_custom_dashboards';
-import { useCustomDashboard } from '../../../hooks/use_custom_dashboards';
+import { useDeleteCustomDashboard } from '../../../hooks/use_custom_dashboards';
+import { useFetchCustomDashboard } from '../../../hooks/use_fetch_custom_dashboards';
 import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 
 export function UnlinkDashboard({
@@ -29,21 +29,24 @@ export function UnlinkDashboard({
   const { notifications } = useKibana();
 
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { updateCustomDashboard, loading } = useUpdateCustomDashboard();
-  const { dashboards } = useCustomDashboard({ assetType });
+  const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
+  const { dashboards, loading } = useFetchCustomDashboard({ assetType });
 
   const onConfirm = useCallback(
     async function () {
       try {
-        const dashboardList =
-          dashboards?.dashboardIdList?.filter(({ id }) => id !== currentDashboard.id) || [];
-        const result = await updateCustomDashboard({
+        const linkedDashboards =
+          dashboards?.filter(
+            ({ dashboardSavedObjectId }) =>
+              dashboardSavedObjectId !== currentDashboard.dashboardSavedObjectId
+          ) || [];
+        const result = await deleteCustomDashboard({
           assetType,
-          dashboardIdList: [...dashboardList],
+          id: currentDashboard.id,
         });
-        setUrlState({ dashboardId: dashboardList[0]?.id });
+        setUrlState({ dashboardId: linkedDashboards[0]?.dashboardSavedObjectId });
 
-        if (result && !loading) {
+        if (result && !isDeleteLoading) {
           notifications.toasts.success({
             title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
@@ -65,13 +68,14 @@ export function UnlinkDashboard({
     },
     [
       isModalVisible,
-      dashboards?.dashboardIdList,
-      updateCustomDashboard,
+      dashboards,
+      deleteCustomDashboard,
       assetType,
-      setUrlState,
-      loading,
       currentDashboard.id,
+      currentDashboard.dashboardSavedObjectId,
       currentDashboard?.title,
+      setUrlState,
+      isDeleteLoading,
       notifications.toasts,
       onRefresh,
     ]
@@ -108,7 +112,7 @@ export function UnlinkDashboard({
           )}
           buttonColor="danger"
           defaultFocusedButton="confirm"
-          isLoading={loading}
+          isLoading={loading || isDeleteLoading}
         >
           <p>
             {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.body', {

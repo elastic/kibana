@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
 import { embeddableOutputToSubject } from '@kbn/embeddable-plugin/public';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
@@ -43,6 +44,7 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   // API
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
   public entityFields: BehaviorSubject<MlEntityField[] | undefined>;
 
   private apiSubscriptions = new Subscription();
@@ -53,6 +55,12 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
     parent?: IContainer
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
+
+    this.jobIds = embeddableInputToSubject<JobId[], AnomalyChartsEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'jobIds'
+    );
 
     this.entityFields = embeddableOutputToSubject<MlEntityField[], AnomalyChartsEmbeddableOutput>(
       this.apiSubscriptions,

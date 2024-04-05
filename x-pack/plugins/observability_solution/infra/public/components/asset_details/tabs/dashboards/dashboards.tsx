@@ -26,13 +26,13 @@ import {
 
 import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import type {
-  DashboardIdItem,
+  InfraSavedCustomDashboard,
   DashboardItemWithTitle,
 } from '../../../../../common/custom_dashboards';
 
 import { EmptyDashboards } from './empty_dashboards';
 import { EditDashboard, GotoDashboardLink, LinkDashboard, UnlinkDashboard } from './actions';
-import { useCustomDashboard } from '../../hooks/use_custom_dashboards';
+import { useFetchCustomDashboard } from '../../hooks/use_fetch_custom_dashboards';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { FETCH_STATUS, useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
@@ -52,7 +52,7 @@ export function Dashboards() {
   const { metrics } = useDataViewsContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
 
-  const { dashboards, loading, reload } = useCustomDashboard({ assetType: asset.type });
+  const { dashboards, loading, reload } = useFetchCustomDashboard({ assetType: asset.type });
 
   useEffect(() => {
     const allAvailableDashboardsMap = new Map<string, DashboardItem>();
@@ -60,9 +60,11 @@ export function Dashboards() {
       allAvailableDashboardsMap.set(availableDashboard.id, availableDashboard);
     });
     const filteredCustomDashboards =
-      dashboards?.dashboardIdList?.reduce<DashboardItemWithTitle[]>(
-        (result: DashboardItemWithTitle[], customDashboard: DashboardIdItem) => {
-          const matchedDashboard = allAvailableDashboardsMap.get(customDashboard.id);
+      dashboards?.reduce<DashboardItemWithTitle[]>(
+        (result: DashboardItemWithTitle[], customDashboard: InfraSavedCustomDashboard) => {
+          const matchedDashboard = allAvailableDashboardsMap.get(
+            customDashboard.dashboardSavedObjectId
+          );
           if (matchedDashboard) {
             result.push({
               title: matchedDashboard.attributes.title,
@@ -76,11 +78,15 @@ export function Dashboards() {
     setCustomDashboards(filteredCustomDashboards);
     // set a default dashboard if there is no selected dashboard
     if (!urlState?.dashboardId) {
-      setUrlState({ dashboardId: currentDashboard?.id ?? filteredCustomDashboards[0]?.id });
+      setUrlState({
+        dashboardId:
+          currentDashboard?.dashboardSavedObjectId ??
+          filteredCustomDashboards[0]?.dashboardSavedObjectId,
+      });
     }
   }, [
     allAvailableDashboards,
-    currentDashboard?.id,
+    currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
     urlState?.dashboardId,
@@ -98,7 +104,7 @@ export function Dashboards() {
     if (!dashboard) return;
     dashboard.updateInput({
       filters:
-        metrics.dataView && currentDashboard?.hostNameFilterEnabled
+        metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
           ? getFilterByAssetName(asset.name, asset.type, metrics.dataView)
           : [],
       timeRange: { from: dateRange.from, to: dateRange.to },
@@ -126,7 +132,7 @@ export function Dashboards() {
             </h4>
           }
         />
-      ) : !!dashboards?.dashboardIdList?.length ? (
+      ) : !!dashboards?.length ? (
         <>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow>
