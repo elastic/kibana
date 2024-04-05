@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     describe('[PUT] /internal/uptime/service/enablement', () => {
-      const roles: RoleName[] = ['admin', 'editor', 'system_indices_superuser', 'viewer'];
+      const roles: RoleName[] = ['admin', 'editor', 'viewer'];
 
       roles.forEach((role) => {
         it(`${role} role has appropriate permissions for API keys`, async () => {
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const { body } = await enablementPut(role);
 
-          if (['system_indices_superuser', 'admin'].indexOf(role) !== -1) {
+          if (['admin'].indexOf(role) !== -1) {
             expect(body).to.eql(ALL_ENABLED);
           } else {
             expect(body).to.eql({
@@ -166,13 +166,13 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
-          await enablementDelete('system_indices_superuser');
+          await enablementDelete();
         }
       });
       it('admin can delete api key', async () => {
-        await enablementPut('system_indices_superuser');
+        await enablementPut();
 
-        const delResponse = await enablementDelete('system_indices_superuser');
+        const delResponse = await enablementDelete();
 
         expect(delResponse.body).eql({});
         const apiResponse = await enablementPut();
@@ -180,10 +180,23 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body).eql(ALL_ENABLED);
       });
 
-      it('with an editor user', async () => {
+      it('editor user cannot delete API key', async () => {
         await enablementPut();
         await enablementDelete('editor', 403);
         const apiResponse = await enablementPut('editor');
+        expect(apiResponse.body).eql({
+          areApiKeysEnabled: true,
+          canManageApiKeys: false,
+          canEnable: false,
+          isEnabled: true,
+          isValidApiKey: true,
+        });
+      });
+
+      it('viewer user cannot delete API key', async () => {
+        await enablementPut();
+        await enablementDelete('viewer', 403);
+        const apiResponse = await enablementPut('viewer');
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
           canManageApiKeys: false,
