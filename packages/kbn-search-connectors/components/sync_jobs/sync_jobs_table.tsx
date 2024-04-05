@@ -63,7 +63,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           {
             field: 'indexed_document_count',
             name: i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
-              defaultMessage: 'Docs added',
+              defaultMessage: 'Docs upserted',
             }),
             sortable: true,
             truncateText: true,

@@ -7,9 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-// @ts-ignore
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
-// @ts-ignore
 import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
 
 import { handleEsError } from '../../../shared_imports';
@@ -37,7 +35,6 @@ export function registerGrokSimulateRoute(framework: KibanaFramework) {
         const esClient = (await requestContext.core).elasticsearch.client;
         const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(request.body);
         const simulateResponseFromES = await esClient.asCurrentUser.ingest.simulate({
-          // @ts-expect-error pipeline._meta defined as mandatory
           body: grokdebuggerRequest.upstreamJSON,
         });
         const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(simulateResponseFromES);

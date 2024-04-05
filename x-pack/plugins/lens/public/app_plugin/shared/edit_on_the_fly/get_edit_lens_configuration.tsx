@@ -13,7 +13,7 @@ import { Provider } from 'react-redux';
 import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -223,13 +223,15 @@ export async function getEditLensConfiguration(
 
     return getWrapper(
       <Provider store={lensStore}>
-        <I18nProvider>
-          <KibanaContextProvider services={lensServices}>
-            <RootDragDropProvider>
-              <LensEditConfigurationFlyout {...configPanelProps} />
-            </RootDragDropProvider>
-          </KibanaContextProvider>
-        </I18nProvider>
+        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+          <I18nProvider>
+            <KibanaContextProvider services={lensServices}>
+              <RootDragDropProvider>
+                <LensEditConfigurationFlyout {...configPanelProps} />
+              </RootDragDropProvider>
+            </KibanaContextProvider>
+          </I18nProvider>
+        </KibanaThemeProvider>
       </Provider>
     );
   };
