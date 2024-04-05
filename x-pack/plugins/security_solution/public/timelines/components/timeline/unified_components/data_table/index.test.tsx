@@ -77,7 +77,8 @@ const getTimelineFromStore = (
   return store.getState().timeline.timelineById[timelineId];
 };
 
-describe('unified data table', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/179843
+describe.skip('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
   });

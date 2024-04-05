@@ -7,7 +7,7 @@
  */
 
 import { NewsfeedStorage, getStorageKey } from './storage';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 
 describe('NewsfeedStorage', () => {
   const storagePrefix = 'test';
