@@ -212,14 +212,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
-                // TODO Kevin: Tecnically this should not be empty since we fallback to a dummy indicator params in case the summary document does not have the stringified params
-                disabled={!hasWriteCapabilities || (isRemote && isEmpty(slo.indicator.params))}
+                disabled={!hasWriteCapabilities}
                 icon="copy"
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
-                toolTipContent={
-                  isRemote && isEmpty(slo.indicator.params) ? NOT_AVAILABLE_FOR_REMOTE : ''
-                }
               >
                 {i18n.translate('xpack.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',
