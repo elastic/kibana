@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
   CROWDSTRIKE_CONNECTOR_ID,
@@ -26,10 +25,10 @@ import type {
   ResponseActionsClientValidateRequestResponse,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
-import { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
+import type { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
-  connectorActions: ActionsClient | IUnsecuredActionsClient;
+  connectorActions: NormalizedExternalConnectorClient;
 };
 
 export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
@@ -38,11 +37,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   constructor({ connectorActions, ...options }: CrowdstrikeActionsClientOptions) {
     super(options);
-    this.connectorActionsClient = new NormalizedExternalConnectorClient(
-      CROWDSTRIKE_CONNECTOR_ID,
-      connectorActions,
-      this.log
-    );
+    this.connectorActionsClient = connectorActions;
+    connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
   }
 
   protected async writeActionRequestToEndpointIndex(

@@ -10,13 +10,12 @@ import { responseActionsClientMock } from '../mocks';
 import { CrowdstrikeActionsClient } from './crowdstrike_actions_client';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsNotSupportedError } from '../errors';
-import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CrowdstrikeActionsClientOptionsMock } from './mocks';
 import { CrowdstrikeMock } from './mocks';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-
+import type { NormalizedExternalConnectorClient } from '../../..';
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
 
@@ -31,7 +30,7 @@ const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 describe('CrowdstrikeActionsClient class', () => {
   let classConstructorOptions: CrowdstrikeActionsClientOptionsMock;
   let crowdstrikeActionsClient: ResponseActionsClient;
-  let connectorActionsMock: ActionsClientMock;
+  let connectorActionsMock: NormalizedExternalConnectorClient;
 
   const createCrowdstrikeIsolationOptions = (
     overrides: Omit<
@@ -81,7 +80,6 @@ describe('CrowdstrikeActionsClient class', () => {
       await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
-        actionId: 'crowdstrike-connector-instance-id',
         params: {
           subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {
@@ -153,7 +151,6 @@ describe('CrowdstrikeActionsClient class', () => {
       await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
-        actionId: 'crowdstrike-connector-instance-id',
         params: {
           subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {

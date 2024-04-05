@@ -15,9 +15,10 @@ import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/appl
 import { merge } from 'lodash';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
+import type { NormalizedExternalConnectorClient } from '../../..';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
-  connectorActions: ActionsClientMock;
+  connectorActions: NormalizedExternalConnectorClient;
 }
 
 const createCrowdstrikeAgentDetailsMock = (
@@ -181,7 +182,9 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
 const createConstructorOptionsMock = (): CrowdstrikeActionsClientOptionsMock => {
   return {
     ...responseActionsClientMock.createConstructorOptions(),
-    connectorActions: createConnectorActionsClientMock(),
+    connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
+      createConnectorActionsClientMock()
+    ),
   };
 };
 
