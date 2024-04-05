@@ -5806,7 +5806,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7691,10 +7691,22 @@
         "label": "embeddableInputToSubject",
         "description": [],
         "signature": [
-          "<T extends unknown = unknown, LegacyInput extends ",
-          "CommonLegacyInput",
+          "<ValueType extends unknown = unknown, LegacyInput extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
           " = ",
-          "CommonLegacyInput",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
           ">(subscription: ",
           "Subscription",
           ", embeddable: ",
@@ -7715,7 +7727,7 @@
           },
           ", any>, key: keyof LegacyInput, useExplicitInput?: boolean) => ",
           "BehaviorSubject",
-          "<T | undefined>"
+          "<ValueType | undefined>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
         "deprecated": false,
@@ -7808,10 +7820,22 @@
         "label": "embeddableOutputToSubject",
         "description": [],
         "signature": [
-          "<T extends unknown = unknown, LegacyOutput extends ",
-          "CommonLegacyOutput",
+          "<ValueType extends unknown = unknown, LegacyOutput extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
           " = ",
-          "CommonLegacyOutput",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
           ">(subscription: ",
           "Subscription",
           ", embeddable: ",
@@ -7823,10 +7847,16 @@
             "text": "IEmbeddable"
           },
           "<",
-          "CommonLegacyInput",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.EmbeddableInput",
+            "text": "EmbeddableInput"
+          },
           ", LegacyOutput, any>, key: keyof LegacyOutput) => ",
           "BehaviorSubject",
-          "<T | undefined>"
+          "<ValueType | undefined>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",
         "deprecated": false,
@@ -7863,7 +7893,13 @@
                 "text": "IEmbeddable"
               },
               "<",
-              "CommonLegacyInput",
+              {
+                "pluginId": "embeddable",
+                "scope": "common",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-common.EmbeddableInput",
+                "text": "EmbeddableInput"
+              },
               ", LegacyOutput, any>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/compatibility/embeddable_compatibility_utils.ts",

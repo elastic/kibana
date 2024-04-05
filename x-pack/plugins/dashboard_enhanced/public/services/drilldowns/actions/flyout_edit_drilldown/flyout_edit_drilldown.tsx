@@ -26,7 +26,6 @@ import {
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   apiHasDynamicActions,
-  embeddableEnhancedDrilldownGrouping,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
@@ -54,7 +53,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
-  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
