@@ -3333,7 +3333,13 @@ describe('Task Runner', () => {
     });
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
-    expect(runnerResult.taskRunError).toEqual(new Error('an error occurred,second error occurred'));
+    expect(runnerResult.taskRunError?.message).toBe(
+      'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred'
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred',
+      { tags: ['test', '1', 'rule-run-failed'] }
+    );
   });
 
   test('returns user error if all the errors are user error', async () => {
