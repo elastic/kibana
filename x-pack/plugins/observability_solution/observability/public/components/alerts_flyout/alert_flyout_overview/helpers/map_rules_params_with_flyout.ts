@@ -195,6 +195,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold,
         comparator: thresholdComparator,
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], threshold),
       } as unknown as FlyoutThresholdData;
       return [ESQueryFlyoutMap];
 
