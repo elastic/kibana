@@ -16,6 +16,7 @@ import {
   selectIndicatorMatchType,
   selectNewTermsRuleType,
   selectThresholdRuleType,
+  openSuppressionFieldsTooltip,
 } from '../../../../tasks/create_new_rule';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
 import { login } from '../../../../tasks/login';
@@ -41,22 +42,13 @@ describe(
 
       it('can not create rule with rule execution suppression on basic license for all rules with enabled suppression', () => {
         // Default query rule
-        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-        cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
-        // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
-        cy.get(TOOLTIP).contains('Platinum license');
+        openSuppressionFieldsTooltip();
 
         selectIndicatorMatchType();
-        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-        cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
-        // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
-        cy.get(TOOLTIP).contains('Platinum license');
+        openSuppressionFieldsTooltip();
 
         selectNewTermsRuleType();
-        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-        cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
-        // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
-        cy.get(TOOLTIP).contains('Platinum license');
+        openSuppressionFieldsTooltip();
 
         selectThresholdRuleType();
         cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.disabled');
