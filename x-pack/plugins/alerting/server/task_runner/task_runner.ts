@@ -686,10 +686,18 @@ export class TaskRunner<
 
       const { errors: errorsFromLastRun } = this.ruleResult.getLastRunResults();
       if (errorsFromLastRun.length > 0) {
+        const isUserError = !errorsFromLastRun.some((lastRunError) => !lastRunError.userError);
+        const lasRunErrorMessages = errorsFromLastRun
+          .map((lastRunError) => lastRunError.message)
+          .join(',');
+        const errorMessage = `Executing Rule ${this.ruleType.id}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
+        this.logger.error(errorMessage, {
+          tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+        });
         return {
           taskRunError: createTaskRunError(
-            new Error(errorsFromLastRun.join(',')),
-            TaskErrorSource.FRAMEWORK
+            new Error(errorMessage),
+            isUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
           ),
         };
       }

@@ -416,7 +416,7 @@ export interface PublicMetricsSetters {
 }
 
 export interface PublicLastRunSetters {
-  addLastRunError: (outcome: string) => void;
+  addLastRunError: (message: string, userError?: boolean) => void;
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
