@@ -36,8 +36,23 @@ export const ViewAgentsButton: React.FunctionComponent<{
     </EuiButtonEmpty>
   );
 
-  if (action.nbAgentsActionCreated <= MAX_VIEW_AGENTS_COUNT) {
+  if (action.type !== 'POLICY_CHANGE' && action.nbAgentsActionCreated <= MAX_VIEW_AGENTS_COUNT) {
     return button;
+  }
+
+  if (action.type === 'POLICY_CHANGE') {
+    return (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.viewAgentsButtonPolicyChangeTooltip"
+            defaultMessage="View agents currently assigned to this policy"
+          />
+        }
+      >
+        {button}
+      </EuiToolTip>
+    );
   }
 
   return (
@@ -45,7 +60,7 @@ export const ViewAgentsButton: React.FunctionComponent<{
       content={
         <FormattedMessage
           id="xpack.fleet.agentActivityFlyout.viewAgentsButtonDisabledMaxTooltip"
-          defaultMessage="The view agents feature is only available for action impacting less then {agentCount} agents"
+          defaultMessage="The view agents feature is only available for action impacting less than {agentCount} agents"
           values={{
             agentCount: MAX_VIEW_AGENTS_COUNT,
           }}
