@@ -60,7 +60,7 @@ import { saveEditedRule, visitEditRulePage } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { getDetails } from '../../../../tasks/rule_details';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getEditedRule();
   const expectedEditedtags = rule.tags?.join('');
   const expectedEditedIndexPatterns = rule.index;
