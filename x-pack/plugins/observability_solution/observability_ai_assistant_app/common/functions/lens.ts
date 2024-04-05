@@ -32,13 +32,11 @@ export const lensFunctionDefinition = {
     'Use this function to create custom visualizations, using Lens, that can be saved to dashboards.',
   parameters: {
     type: 'object',
-    additionalProperties: false,
     properties: {
       layers: {
         type: 'array',
         items: {
           type: 'object',
-          additionalProperties: false,
           properties: {
             label: {
               type: 'string',
@@ -54,7 +52,6 @@ export const lensFunctionDefinition = {
             },
             format: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 id: {
                   type: 'string',
@@ -84,7 +81,6 @@ export const lensFunctionDefinition = {
       },
       breakdown: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           field: {
             type: 'string',

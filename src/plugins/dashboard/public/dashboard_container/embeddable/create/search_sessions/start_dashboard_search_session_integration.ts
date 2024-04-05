@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { pairwise, skip } from 'rxjs/operators';
+import { pairwise, skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -83,6 +83,7 @@ export function startDashboardSearchSessionIntegration(
 
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         this.searchSessionId = updatedSearchSessionId;
+        this.searchSessionId$.next(updatedSearchSessionId);
       }
     });
 
