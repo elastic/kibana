@@ -31,7 +31,14 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
   return (res.hits.total as number) > 0;
 }
 
-export async function allFleetServerVersionsAreAtLeast(
+/**
+ * This function checks if all Fleet Server agents are running at least a given version, but with
+ * some important caveats related to enabling the secrets storage feature:
+ *
+ * 1. Any unenrolled agents are ignored if they are running an outdated version
+ * 2. Managed agents in an inactive state are ignored if they are running an outdated version.
+ */
+export async function checkFleetServerVersionsForSecretsStorage(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   version: string
@@ -82,9 +89,13 @@ export async function allFleetServerVersionsAreAtLeast(
       const agentStatus = await getAgentStatusById(esClient, soClient, fleetServerAgent.id);
 
       // Any unenrolled Fleet Server agents can be ignored
-      if (agentStatus === 'unenrolled') {
+      if (
+        agentStatus === 'unenrolled' ||
+        fleetServerAgent.status === 'unenrolling' ||
+        fleetServerAgent.unenrolled_at
+      ) {
         logger.debug(
-          `Found outdated Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
+          `Found unenrolled Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring`
         );
         continue;
       }
@@ -96,7 +107,10 @@ export async function allFleetServerVersionsAreAtLeast(
       // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's
       // running on an outdated version. This prevents users with offline Elastic Agent on Cloud policies from
       // being stuck when it comes to enabling secrets, as agents can't be unenrolled from managed policies via Fleet UI.
-      if (isManagedAgentPolicy && agentStatus === 'offline') {
+      if (
+        (isManagedAgentPolicy && ['offline', 'inactive'].includes(agentStatus)) ||
+        !fleetServerAgent.active
+      ) {
         logger.debug(
           `Found outdated managed Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
         );

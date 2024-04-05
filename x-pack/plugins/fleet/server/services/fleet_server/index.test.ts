@@ -17,7 +17,7 @@ import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 
-import { allFleetServerVersionsAreAtLeast } from '.';
+import { checkFleetServerVersionsForSecretsStorage } from '.';
 
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
@@ -30,7 +30,7 @@ const mockedGetAgentStatusById = getAgentStatusById as jest.MockedFunction<
   typeof getAgentStatusById
 >;
 
-describe('allFleetServerVersionsAreAtLeast', () => {
+describe('checkFleetServerVersionsForSecretsStorage', () => {
   let mockContext: MockedFleetAppContext;
 
   beforeEach(() => {
@@ -103,7 +103,11 @@ describe('allFleetServerVersionsAreAtLeast', () => {
 
     mockedGetAgentStatusById.mockResolvedValue('online');
 
-    const result = await allFleetServerVersionsAreAtLeast(esClientMock, soClientMock, version);
+    const result = await checkFleetServerVersionsForSecretsStorage(
+      esClientMock,
+      soClientMock,
+      version
+    );
     expect(result).toBe(true);
   });
 });
