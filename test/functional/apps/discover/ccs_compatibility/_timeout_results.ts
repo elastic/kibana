@@ -79,6 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // View cluster details shows timed out
       await testSubjects.click('searchResponseWarningsViewDetails');
+      await testSubjects.click('viewDetailsContextMenu');
       await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
       const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
       expect(txt).to.be('Request timed out before completion. Results may be incomplete or empty.');
