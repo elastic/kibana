@@ -72,6 +72,7 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
+// https://github.com/elastic/kibana/issues/179958
 describe(
   'Detection rules, bulk edit of rule actions',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
