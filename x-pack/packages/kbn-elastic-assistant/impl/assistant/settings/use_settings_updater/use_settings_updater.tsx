@@ -124,13 +124,18 @@ export const useSettingsUpdater = (
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
     const didUpdateRAGAlerts =
       knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
-    if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
+    const didUpdateAssistantStreamingEnabled =
+      assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
+    if (didUpdateKnowledgeBase || didUpdateRAGAlerts || didUpdateAssistantStreamingEnabled) {
       assistantTelemetry?.reportAssistantSettingToggled({
         ...(didUpdateKnowledgeBase
           ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
           : {}),
         ...(didUpdateRAGAlerts
           ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
+          : {}),
+        ...(didUpdateAssistantStreamingEnabled
+          ? { assistantStreamingEnabled: updatedAssistantStreamingEnabled }
           : {}),
       });
     }
@@ -152,6 +157,7 @@ export const useSettingsUpdater = (
     knowledgeBase.isEnabledRAGAlerts,
     updatedAssistantStreamingEnabled,
     updatedKnowledgeBaseSettings,
+    assistantStreamingEnabled,
     setAssistantStreamingEnabled,
     setKnowledgeBase,
     setDefaultAllow,
