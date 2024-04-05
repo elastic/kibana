@@ -87,14 +87,14 @@ export default function ({
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
@@ -136,14 +136,14 @@ export default function ({
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('');
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
