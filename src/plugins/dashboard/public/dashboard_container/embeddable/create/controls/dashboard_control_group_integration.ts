@@ -10,7 +10,7 @@ import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query'
 import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, skip } from 'rxjs/operators';
+import { distinctUntilChanged, skip } from 'rxjs';
 
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';

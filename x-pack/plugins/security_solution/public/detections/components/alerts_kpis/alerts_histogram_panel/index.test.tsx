@@ -21,8 +21,11 @@ import * as helpers from './helpers';
 import { mockAlertSearchResponse } from './mock_data';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { allowedExperimentalValues } from '../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -110,10 +113,27 @@ jest.mock('../common/hooks', () => {
   };
 });
 
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseIsExperimentalFeatureEnabled = jest.fn((feature: keyof ExperimentalFeatures) => {
+  if (feature === 'alertsPageChartsEnabled') return false;
+  if (feature === 'chartEmbeddablesEnabled') return false;
+  return allowedExperimentalValues[feature];
+});
+
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => ({
   useAlertHistogramCount: jest.fn().mockReturnValue(999),
+}));
+
+jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
+  useVisualizationResponse: jest.fn().mockReturnValue({
+    responses: [
+      {
+        hits: { total: 0 },
+        aggregations: { myAgg: { buckets: [{ key: 'A' }, { key: 'B' }, { key: 'C' }] } },
+      },
+    ],
+    loading: false,
+  }),
 }));
 
 const defaultProps = {
@@ -131,6 +151,10 @@ describe('AlertsHistogramPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+      mockUseIsExperimentalFeatureEnabled
+    );
   });
 
   it('renders correctly', () => {
@@ -838,6 +862,38 @@ describe('AlertsHistogramPanel', () => {
           </TestProviders>
         );
         expect(mockUseQueryAlerts.mock.calls[0][0].skip).toBeTruthy();
+      });
+    });
+
+    it('should render correct subtitle with alert count', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+      });
+    });
+
+    it('should render correct subtitle with empty string', async () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        responses: [
+          {
+            hits: { total: 0 },
+            aggregations: { myAgg: { buckets: [] } },
+          },
+        ],
+        loading: false,
+      });
+
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
       });
     });
   });

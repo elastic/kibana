@@ -41,12 +41,9 @@ export function registerContextFunction({
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           queries: {
             type: 'array',
-            additionalItems: false,
-            additionalProperties: false,
             description: 'The query for the semantic search',
             items: {
               type: 'string',
@@ -54,8 +51,6 @@ export function registerContextFunction({
           },
           categories: {
             type: 'array',
-            additionalItems: false,
-            additionalProperties: false,
             description:
               'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
@@ -271,7 +266,6 @@ async function scoreSuggestions({
       'Use this function to score documents based on how relevant they are to the conversation.',
     parameters: {
       type: 'object',
-      additionalProperties: false,
       properties: {
         scores: {
           description: `The document IDs and their scores, as CSV. Example:
@@ -292,7 +286,7 @@ async function scoreSuggestions({
     (
       await chat('score_suggestions', {
         connectorId,
-        messages: [...messages.slice(0, -1), newUserMessage],
+        messages: [...messages.slice(0, -2), newUserMessage],
         functions: [scoreFunction],
         functionCall: 'score',
         signal,
