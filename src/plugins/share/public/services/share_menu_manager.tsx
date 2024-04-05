@@ -156,7 +156,6 @@ export class ShareMenuManager {
           toMountPoint(
             <ShareMenuV2
               shareContext={{
-                i18n,
                 allowEmbed,
                 allowShortUrl,
                 objectId,
@@ -175,7 +174,6 @@ export class ShareMenuManager {
                 isDirty,
                 isEmbedded: allowEmbed,
                 shareMenuItems: menuItems,
-                theme,
                 toasts,
                 onClose: () => {
                   onClose();
