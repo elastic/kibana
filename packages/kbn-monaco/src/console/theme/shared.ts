@@ -9,26 +9,22 @@
 import { makeHighContrastColor } from '@elastic/eui';
 import { darkMode, euiThemeVars } from '@kbn/ui-theme';
 
-import { themeRuleGroupBuilderFactory } from '../common/theme';
-import { monaco } from '../monaco_imports';
+import { themeRuleGroupBuilderFactory } from '../../common/theme';
+import { monaco } from '../../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
 const background = euiThemeVars.euiColorLightestShade;
-const methodTextColor = '#DD0A73';
-const urlTextColor = '#00A69B';
 const stringTextColor = '#009926';
 const commentTextColor = '#4C886B';
 const variableTextColor = '#0079A5';
 const booleanTextColor = '#585CF6';
 const numericTextColor = variableTextColor;
-export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
+export const buildConsoleSharedTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
     base: darkMode ? 'vs-dark' : 'vs',
     inherit: true,
     rules: [
-      ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
-      ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
       ...buildRuleGroup(
         ['string', 'string-literal', 'multi-string', 'punctuation.end-triple-quote'],
         makeHighContrastColor(stringTextColor)(background)
