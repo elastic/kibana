@@ -24,11 +24,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import DateMath from '@kbn/datemath';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
-import type { Group } from '@kbn/observability-alert-details';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
 import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
+import type { Group } from '../types';
 
 const LogsHistoryChart = ({
   rule,

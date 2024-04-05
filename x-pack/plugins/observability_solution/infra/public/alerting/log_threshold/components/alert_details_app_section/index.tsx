@@ -19,7 +19,6 @@ import moment from 'moment';
 import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Group } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
@@ -36,6 +35,7 @@ import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLicense } from '../../../../hooks/use_license';
+import type { Group } from './types';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
