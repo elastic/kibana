@@ -288,7 +288,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('creates instanceId for SLOs with multi groupBy', async () => {
-      createSLOInput.groupBy = ['system.network.name'];
+      createSLOInput.groupBy = ['system.network.name', 'event.dataset'];
 
       const apiResponse = await supertestAPI
         .post('/api/observability/slos')
@@ -306,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // @ts-ignore
         expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql(
-          'nRhhd3qXpv6TOCOSFMqgiyzDmWY='
+          'eth1,system.network'
         );
       });
     });
@@ -329,9 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await esClient.search(getEsQuery(id));
 
         // @ts-ignore
-        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql(
-          'nRhhd3qXpv6TOCOSFMqgiyzDmWY='
-        );
+        expect(response.aggregations?.last_doc.hits?.hits[0]._source.slo.instanceId).eql('eth1');
       });
     });
 

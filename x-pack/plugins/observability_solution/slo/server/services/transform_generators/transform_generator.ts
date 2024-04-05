@@ -17,8 +17,6 @@ export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
-    const groupings = [slo.groupBy].flat().filter((value) => !!value);
-    const hasGroupings = !groupings.includes(ALL_VALUE) && groupings.length;
     return {
       'slo.id': {
         type: 'keyword',
@@ -32,16 +30,6 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      ...(hasGroupings
-        ? {}
-        : {
-            'slo.instanceId': {
-              type: 'keyword',
-              script: {
-                source: `emit('${ALL_VALUE}')`,
-              },
-            },
-          }),
     };
   }
 
