@@ -12,9 +12,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [require.resolve('../../common/visualizations/group2')],
+    testFiles: [require.resolve('../../common/visualizations/group3')],
     junit: {
-      reportName: 'Serverless Search Functional Tests - Common Group 2',
+      reportName: 'Serverless Search Functional Tests - Common Group 3',
     },
   };
 }
