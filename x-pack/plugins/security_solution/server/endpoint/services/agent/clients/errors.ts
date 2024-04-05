@@ -25,7 +25,7 @@ export class AgentStatusClientError extends CustomHttpRequestError {
   }
 
   toString() {
-    return JSON.stringify(stringify(this.toJSON()), null, 2);
+    return stringify(this.toJSON());
   }
 }
 
