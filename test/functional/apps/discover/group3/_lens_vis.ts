@@ -551,7 +551,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
-      expect(await getCurrentVisChartTitle()).to.be('Customized');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
 
       await browser.refresh();
 
@@ -560,7 +560,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
-      expect(await getCurrentVisChartTitle()).to.be('Customized');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
 
       await monacoEditor.setCodeEditorValue(
         'from logstash-* | stats averageB = avg(bytes) by extension.raw'
@@ -581,7 +581,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Customized');
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Pie');
-      expect(await getCurrentVisChartTitle()).to.be('Customized');
+      expect(await getCurrentVisChartTitle()).to.be('Donut');
     });
 
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
