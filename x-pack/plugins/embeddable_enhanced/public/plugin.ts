@@ -158,9 +158,8 @@ export class EmbeddableEnhancedPlugin
     };
     const storage = new DynamicActionStorage(uuid, getTitle, api);
     const dynamicActions = new DynamicActionManager({
-      isCompatible: async (context: unknown) => {
-        if (!(context as EmbeddableApiContext).embeddable) return false;
-        const { embeddable } = context as EmbeddableApiContext;
+      isCompatible: async (context: EmbeddableApiContext) => {
+        const { embeddable } = context;
         return apiHasUniqueId(embeddable) && embeddable.uuid === uuid;
       },
       storage,

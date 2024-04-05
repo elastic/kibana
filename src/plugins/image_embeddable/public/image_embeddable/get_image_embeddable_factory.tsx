@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
@@ -18,6 +18,7 @@ import { initializeTitles } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
+import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import { FileImageMetadata } from '../imports';
 import { filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
@@ -37,10 +38,6 @@ export const getImageEmbeddableFactory = ({
       return state.rawState as ImageEmbeddableSerializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
-      const { ImageEmbeddable: ImageEmbeddableComponent } = await import(
-        '../components/image_embeddable'
-      );
-
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
       const dynamicActionsApi = embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
@@ -98,17 +95,24 @@ export const getImageEmbeddableFactory = ({
 
       return {
         api: embeddable,
-        Component: () => (
-          <ImageEmbeddableComponent
-            api={{
+        Component: () => {
+          const privateImageEmbeddableApi = useMemo(() => {
+            /** Memoize the API so that the reference stays consistent and it can be used as a dependency */
+            return {
               ...embeddable,
               imageConfig$,
-              setDataLoading: (loading) => dataLoading$.next(loading),
-            }}
-            filesClient={filesClient}
-            startDynamicActions={dynamicActionsApi?.startDynamicActions}
-          />
-        ),
+              setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
+            };
+          }, []);
+
+          return (
+            <ImageEmbeddableComponent
+              api={privateImageEmbeddableApi}
+              filesClient={filesClient}
+              startDynamicActions={dynamicActionsApi?.startDynamicActions}
+            />
+          );
+        },
       };
     },
   };

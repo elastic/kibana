@@ -7,10 +7,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 
 import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { imageClickTrigger } from '../actions';
 import { ImageEmbeddableApi } from '../image_embeddable/types';
@@ -37,14 +36,19 @@ export const ImageEmbeddable = ({
   filesClient,
   startDynamicActions,
 }: ImageEmbeddableProps) => {
-  const imageConfig = useStateFromPublishingSubject(api.imageConfig$);
-  const dynamicActionsState = useStateFromPublishingSubject(api.dynamicActionsState$);
-
+  const [imageConfig, dynamicActionsState] = useBatchedPublishingSubjects(
+    api.imageConfig$,
+    api.dynamicActionsState$
+  );
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
-  useMount(() => {
+  useEffect(() => {
+    /**
+     * set the loading to `true` any time the image changes; the ImageViewer component
+     * is responsible for setting loading to `false` again once the image loads
+     */
     api.setDataLoading(true);
-  });
+  }, [api, imageConfig]);
 
   useEffect(() => {
     if (!startDynamicActions) return;
