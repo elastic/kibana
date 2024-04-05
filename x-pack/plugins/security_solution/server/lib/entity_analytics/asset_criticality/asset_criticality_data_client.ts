@@ -252,14 +252,13 @@ export class AssetCriticalityDataClient {
             message: record.message,
             index,
           });
-          return;
-        }
+        } else {
+          currentBatch.push({ record, index });
 
-        currentBatch.push({ record, index });
-
-        if (currentBatch.length === batchSize) {
-          batchPromises.push(flushBatch(currentBatch));
-          currentBatch = [];
+          if (currentBatch.length === batchSize) {
+            batchPromises.push(flushBatch(currentBatch));
+            currentBatch = [];
+          }
         }
         index++;
       };
