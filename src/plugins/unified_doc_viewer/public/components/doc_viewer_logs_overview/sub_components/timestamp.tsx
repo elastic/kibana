@@ -8,10 +8,9 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { FlyoutDoc } from '../../../../common/document';
 
 interface TimestampProps {
-  timestamp: FlyoutDoc['@timestamp'];
+  timestamp?: string;
 }
 
 export function Timestamp({ timestamp }: TimestampProps) {

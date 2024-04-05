@@ -65,25 +65,25 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
   return useMemo(
     () => [
       {
-        id: 'addToFilterAction',
+        id: 'addFilterInAction',
         iconType: 'plusInCircle',
         label: actionFilterForText(value),
         onClick: () => actions.addFilterIn({ field, value }),
       },
       {
-        id: 'removeFromFilterAction',
+        id: 'addFilterOutremoveFromFilterAction',
         iconType: 'minusInCircle',
         label: actionFilterOutText(value),
         onClick: () => actions.addFilterOut({ field, value }),
       },
       {
-        id: 'filterForFieldPresentAction',
+        id: 'addFilterExistAction',
         iconType: 'filter',
         label: filterForFieldPresentLabel,
         onClick: () => actions.addFilterExist({ field }),
       },
       {
-        id: 'toggleColumnAction',
+        id: 'toggleFieldColumnAction',
         iconType: 'listAdd',
         label: toggleColumnLabel,
         onClick: () => actions.toggleFieldColumn({ field }),
@@ -99,20 +99,16 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
   );
 };
 
-const actionFilterForText = (text: string) =>
-  i18n.translate('unifiedDocViewer.fieldActions.filterFor', {
+const actionFilterForText = (value: string) =>
+  i18n.translate('unifiedDocViewer.fieldActions.filterIn', {
     defaultMessage: 'Filter for this {value}',
-    values: {
-      value: text,
-    },
+    values: { value },
   });
 
-const actionFilterOutText = (text: string) =>
+const actionFilterOutText = (value: string) =>
   i18n.translate('unifiedDocViewer.fieldActions.filterOut', {
     defaultMessage: 'Filter out this {value}',
-    values: {
-      value: text,
-    },
+    values: { value },
   });
 
 const filterForFieldPresentLabel = i18n.translate(
