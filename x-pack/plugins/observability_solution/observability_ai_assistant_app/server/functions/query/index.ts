@@ -11,6 +11,8 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
+import { validateQuery, getActions, wrapAsEditorMessage } from '@kbn/esql-validation-autocomplete';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -351,7 +353,7 @@ export function registerQueryFunction({
       });
 
       return esqlResponse$.pipe(
-        emitWithConcatenatedMessage((msg) => {
+        emitWithConcatenatedMessage(async (msg) => {
           if (msg.message.function_call.name) {
             return msg;
           }
@@ -359,6 +361,13 @@ export function registerQueryFunction({
           const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];
+
+          const { errors } = await validateQuery(esqlQuery ?? '', getAstAndSyntaxErrors, {
+            ignoreOnMissingCallbacks: true,
+          });
+
+          const editorErrors = wrapAsEditorMessage('error', errors);
+          const actions = await getActions(esqlQuery ?? '', editorErrors, getAstAndSyntaxErrors);
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 

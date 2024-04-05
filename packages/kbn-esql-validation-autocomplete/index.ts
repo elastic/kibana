@@ -29,6 +29,8 @@ export { validateQuery } from './src/validation/validation';
 export { suggest } from './src/autocomplete/autocomplete';
 // Quick fixes function
 export { getActions } from './src/code_actions/actions';
+// covert to EditorMessage
+export { wrapAsEditorMessage } from './src/code_actions/testing_utils';
 
 /**
  * Some utility functions that can be useful to build more feature

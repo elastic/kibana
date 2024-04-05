@@ -92,6 +92,7 @@ interface VisualizeESQLProps {
   userOverrides?: unknown;
   /** User's preferation chart type as it comes from the model */
   preferredChartType?: ChartType;
+  /** Error messages returned by the query validator */
   errorMessages?: string[];
   ObservabilityAIAssistantMultipaneFlyoutContext: ObservabilityAIAssistantPublicStart['ObservabilityAIAssistantMultipaneFlyoutContext'];
 }
