@@ -351,15 +351,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               lists: params.exceptionsList,
             });
 
+            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
               ruleExecutionLogger,
               experimentalFeatures,
-              startedAtOverridden ? startedAt : undefined
+              alertTimestampOverride
             );
 
-            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const wrapHits = wrapHitsFactory({
               ignoreFields: [...ignoreFields, ...legacySignalFields],
