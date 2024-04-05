@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../shared_imports';
 
-import { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from '.';
+import { LoadFromJsonButton, OnDoneLoadJsonHandler } from '.';
 
 export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
@@ -71,9 +71,6 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson, hasProc
             }}
           />
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TestPipelineActions />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

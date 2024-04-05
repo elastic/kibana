@@ -10,25 +10,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Processor } from '../../../../common/types';
 
 import { getUseField, getFormRow, Field, JsonEditorField } from '../../../shared_imports';
 
 import {
-  ProcessorsEditorContextProvider,
-  OnUpdateHandler,
   OnDoneLoadJsonHandler,
   PipelineEditor,
 } from '../pipeline_editor';
 
 interface Props {
-  processors: Processor[];
-  onFailure?: Processor[];
   onLoadJson: OnDoneLoadJsonHandler;
-  onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
   hasMeta: boolean;
-  onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
   canEditName?: boolean;
 }
@@ -37,13 +30,9 @@ const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
-  processors,
-  onFailure,
   onLoadJson,
-  onProcessorsUpdate,
   hasVersion,
   hasMeta,
-  onEditorFlyoutOpen,
 }) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
@@ -86,13 +75,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       </FormRow>
 
       {/* Pipeline Processors Editor */}
-      <ProcessorsEditorContextProvider
-        onFlyoutOpen={onEditorFlyoutOpen}
-        onUpdate={onProcessorsUpdate}
-        value={{ processors, onFailure }}
-      >
-        <PipelineEditor onLoadJson={onLoadJson} />
-      </ProcessorsEditorContextProvider>
+      <PipelineEditor onLoadJson={onLoadJson} />
 
       {/* _meta field */}
       <FormRow

@@ -8,10 +8,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
-  EuiTextTruncate,
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
@@ -27,7 +25,7 @@ import { useForm, Form, FormConfig, UseField } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
-import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
+import { ProcessorsEditorContextProvider, OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 import {
   DeprecatedPipelineBadge,
   DeprecatedPipelineCallout,
@@ -35,6 +33,7 @@ import {
   ManagedPipelineBadge,
 } from '../pipeline_elements';
 
+import { TestPipelineActions } from '../pipeline_editor/components/test_pipeline';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
@@ -144,7 +143,14 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   );
 
   return (
-    <>
+    <ProcessorsEditorContextProvider
+      onFlyoutOpen={onEditorFlyoutOpen}
+      onUpdate={onProcessorsChangeHandler}
+      value={{
+        processors: processorsState.processors,
+        onFailure: processorsState.onFailure,
+      }}
+    >
       <Form
         form={form}
         data-test-subj="pipelineForm"
@@ -239,6 +245,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem>
+                  <TestPipelineActions />
+                </EuiFlexItem>
+                <EuiFlexItem>
                   <EuiButton
                     data-test-subj="showRequestLink"
                     iconType="console"
@@ -297,10 +306,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onLoadJson={({ processors, on_failure: onFailure }) => {
             setProcessorsState({ processors, onFailure });
           }}
-          onEditorFlyoutOpen={onEditorFlyoutOpen}
-          processors={processorsState.processors}
-          onFailure={processorsState.onFailure}
-          onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           hasMeta={Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)}
           isEditing={isEditing}
@@ -319,6 +324,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       </Form>
 
       <EuiSpacer size="m" />
-    </>
+    </ProcessorsEditorContextProvider>
   );
 };
