@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
