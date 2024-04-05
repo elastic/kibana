@@ -169,7 +169,6 @@ const ExportContentUi = ({
               {(copy) => (
                 <EuiButtonEmpty
                   iconType="copy"
-                  disabled={isDirty}
                   flush="both"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
@@ -225,7 +224,7 @@ const ExportContentUi = ({
         })}
       >
         <EuiButton
-          disabled={isDirty}
+          fill={!isDirty}
           data-test-subj="generateReportButton"
           isLoading={Boolean(isCreatingReport)}
         >
@@ -234,8 +233,8 @@ const ExportContentUi = ({
       </EuiToolTip>
     ) : (
       <EuiButton
-        disabled={isDirty}
-        fill
+        // allows read only users the ability to generate reports
+        fill={!isDirty}
         onClick={() => {
           setIsCreatingReport(true);
           getReport();

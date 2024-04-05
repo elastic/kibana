@@ -8,6 +8,7 @@
 
 import type {
   ApplicationStart,
+  I18nStart,
   IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
@@ -23,6 +24,7 @@ export interface ExportModalShareOpts {
   license: ILicense;
   application: ApplicationStart;
   theme: ThemeServiceSetup;
+  i18n: I18nStart;
 }
 
 export interface ExportPanelShareOpts {

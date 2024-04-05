@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { checkLicense } from '../../license_check';
 import {
   ExportModalShareOpts,
@@ -231,6 +231,7 @@ export const reportingExportModalProvider = ({
   application,
   usesUiCapabilities,
   theme,
+  i18n: i18nStart,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -332,7 +333,7 @@ export const reportingExportModalProvider = ({
                   ),
                 }}
               />,
-              { theme$: theme.theme$ }
+              { theme, i18n: i18nStart }
             ),
             'data-test-subj': 'queueReportSuccess',
           });
@@ -394,7 +395,7 @@ export const reportingExportModalProvider = ({
                   ),
                 }}
               />,
-              { theme$: theme.theme$ }
+              { theme, i18n: i18nStart }
             ),
             'data-test-subj': 'queueReportSuccess',
           });
@@ -453,7 +454,7 @@ export const reportingExportModalProvider = ({
                   ),
                 }}
               />,
-              { theme$: theme.theme$ }
+              { theme, i18n: i18nStart }
             ),
             'data-test-subj': 'queueReportSuccess',
           });
