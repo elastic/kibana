@@ -43,21 +43,43 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     schema: z.number().int().min(0).default(0),
   },
   {
-    name: 'agent.download.path',
+    name: 'agent.download.target_directory',
     api_field: {
-      name: 'agent_download_path',
+      name: 'agent_download_target_directory',
     },
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentBinaryDownloadPathTitle', {
-      defaultMessage: 'Agent binary download path',
-    }),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentBinaryDownloadPathDescription',
+    title: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryTitle',
       {
-        defaultMessage:
-          'The disk path to which the agent binary will be downloaded the agent binary',
+        defaultMessage: 'Agent binary target directory',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription',
+      {
+        defaultMessage: 'The disk path to which the agent binary will be downloaded',
       }
     ),
     learnMoreLink: 'https://docs.elastic.co/...',
     schema: z.string(),
+  },
+  {
+    name: 'agent.logging.metrics.period',
+    api_field: {
+      name: 'agent_logging_metrics_period',
+    },
+    title: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodTitle',
+      {
+        defaultMessage: 'Agent logging metrics period',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription',
+      {
+        defaultMessage: 'The frequency of agent metrics logging',
+      }
+    ),
+    learnMoreLink: 'https://docs.elastic.co/...',
+    schema: z.string().default('30s'),
   },
 ];
