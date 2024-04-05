@@ -665,6 +665,7 @@
     "@kbn/response-stream-plugin": "link:examples/response_stream",
     "@kbn/rison": "link:packages/kbn-rison",
     "@kbn/rollup-plugin": "link:x-pack/plugins/rollup",
+    "@kbn/router-to-openapispec": "link:packages/kbn-router-to-openapispec",
     "@kbn/router-utils": "link:packages/kbn-router-utils",
     "@kbn/routing-example-plugin": "link:examples/routing_example",
     "@kbn/rrule": "link:packages/kbn-rrule",
@@ -893,6 +894,7 @@
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
+    "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "^0.0.20",
     "@langchain/core": "^0.1.45",
@@ -1019,6 +1021,7 @@
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
     "joi": "^17.7.1",
+    "joi-to-json": "^4.2.0",
     "jquery": "^3.5.0",
     "js-levenshtein": "^1.1.6",
     "js-search": "^1.4.3",
@@ -1163,7 +1166,8 @@
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
-    "zod": "^3.22.3"
+    "zod": "^3.22.3",
+    "zod-to-json-schema": "3.20.4"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",

@@ -4847,6 +4847,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -6672,6 +6676,10 @@
   uid ""
 
 "@kbn/zod-helpers@link:packages/kbn-zod-helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/zod@link:packages/kbn-zod":
   version "0.0.0"
   uid ""
 
@@ -13913,6 +13921,11 @@ colorspace@1.1.x:
     color "3.0.x"
     text-hex "1.0.x"
 
+combinations@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/combinations/-/combinations-1.0.0.tgz#d6bd9ce6468a13eba4651c85b57db12547892b1c"
+  integrity sha512-aVgTfI/dewHblSn4gF+NZHvS7wtwg9YAPF2EknHMdH+xLsXLLIMpmHkSj64Zxs/R2m9VAAgn3bENjssrn7V4vQ==
+
 combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.8.tgz"
@@ -20850,6 +20863,15 @@ jest@^29.6.1:
     import-local "^3.0.2"
     jest-cli "^29.6.1"
 
+joi-to-json@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.2.0.tgz#189407a2a9be6e74c39c33d6b7845d6c8cdcd423"
+  integrity sha512-BYC66pwElodr/yOvGbyk0jYi48LIbtbdcwHntZIizcEVnRS7auMa5kmkhVaKB95c0xCpDG8EedbQp/Tvqx5WLw==
+  dependencies:
+    combinations "^1.0.0"
+    lodash "^4.17.21"
+    semver-compare "^1.0.0"
+
 joi@^17.3.0, joi@^17.7.1:
   version "17.7.1"
   resolved "https://registry.yarnpkg.com/joi/-/joi-17.7.1.tgz#854fc85c7fa3cfc47c91124d30bffdbb58e06cec"
@@ -27685,6 +27707,11 @@ selfsigned@^2.0.1:
   dependencies:
     node-forge "^1"
 
+semver-compare@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/semver-compare/-/semver-compare-1.0.0.tgz#0dee216a1c941ab37e9efb1788f6afc5ff5537fc"
+  integrity sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==
+
 semver-diff@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/semver-diff/-/semver-diff-4.0.0.tgz#3afcf5ed6d62259f5c72d0d5d50dffbdc9680df5"
@@ -32171,6 +32198,11 @@ zod-to-json-schema@3.20.3:
   version "3.20.3"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.20.3.tgz#8c95d8c20f20455ffa0b4b526c29703f35f6d787"
   integrity sha512-/Q3wnyxAfCt94ZcrGiXXoiAfRqasxl9CX64LZ9fj+4dKH68zulUtU0uk1WMxQPfAxQ0ZI70dKzcoW7hHj+DwSQ==
+
+zod-to-json-schema@3.20.4:
+  version "3.20.4"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.20.4.tgz#155f687c5a059fdc0f1bb3ff32d6e9200036b6f4"
+  integrity sha512-Un9+kInJ2Zt63n6Z7mLqBifzzPcOyX+b+Exuzf7L1+xqck9Q2EPByyTRduV3kmSPaXaRer1JCsucubpgL1fipg==
 
 zod-to-json-schema@^3.20.4, zod-to-json-schema@^3.22.3:
   version "3.22.3"

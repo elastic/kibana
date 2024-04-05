@@ -63,7 +63,11 @@ export type {
   RouteValidator,
   RouteValidatorRequestAndResponses,
 } from './route_validator';
-export { RouteValidationError } from './route_validator';
+export {
+  RouteValidationError,
+  type RouteValidatorContainer,
+  type RouteValidatorFullConfigContainer,
+} from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';
 export type { IKibanaSocket } from './socket';
 export type {
