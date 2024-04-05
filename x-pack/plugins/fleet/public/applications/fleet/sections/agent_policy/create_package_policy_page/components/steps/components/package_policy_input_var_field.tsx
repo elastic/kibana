@@ -185,6 +185,7 @@ function getInputComponent({
   if (multi) {
     return (
       <MultiTextInput
+        fieldLabel={fieldLabel}
         value={value ?? []}
         onChange={onChange}
         onBlur={() => setIsDirty(true)}
