@@ -81,11 +81,11 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'on',
         'with',
       ],
-      euiThemeVars.euiColorPrimaryText
+      '#765b96'
     ),
 
     // functions
-    ...buildRuleGroup(['functions'], euiThemeVars.euiColorPrimaryText),
+    ...buildRuleGroup(['functions'], '#a34a68'),
 
     // operators
     ...buildRuleGroup(
