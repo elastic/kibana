@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CanAddNewPanel, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
@@ -16,7 +17,7 @@ import {
 import { uiActionsService } from '../services/kibana_services';
 
 const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {
-  const { apiCanAddNewPanel } = await import('@kbn/presentation-publishing');
+  const { apiCanAddNewPanel } = await import('@kbn/presentation-containers');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiCanAddNewPanel(parentApi) ? (parentApi as CanAddNewPanel) : undefined;
 };
