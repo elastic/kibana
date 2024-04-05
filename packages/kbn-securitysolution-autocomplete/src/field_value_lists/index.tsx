@@ -127,7 +127,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
       <>
         {selectedValue && (
           <ShowValueListModal shouldShowContentIfModalNotAvailable={false} listId={selectedValue}>
-            Show value list
+            {i18n.SHOW_VALUE_LIST_MODAL}
           </ShowValueListModal>
         )}
         {!allowLargeValueLists && (
@@ -158,25 +158,23 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
       helpText={helpText}
       fullWidth
     >
-      <>
-        <EuiComboBox
-          async
-          data-test-subj="valuesAutocompleteComboBox listsComboxBox"
-          fullWidth
-          isClearable={isClearable}
-          isDisabled={isDisabled}
-          isInvalid={error != null}
-          isLoading={isLoadingState}
-          onBlur={setIsTouchedValue}
-          onChange={handleValuesChange}
-          options={comboOptions}
-          placeholder={placeholder}
-          selectedOptions={selectedComboOptions}
-          singleSelection={SINGLE_SELECTION}
-          sortMatchesBy="startsWith"
-          aria-label={ariaLabel}
-        />
-      </>
+      <EuiComboBox
+        async
+        data-test-subj="valuesAutocompleteComboBox listsComboxBox"
+        fullWidth
+        isClearable={isClearable}
+        isDisabled={isDisabled}
+        isInvalid={error != null}
+        isLoading={isLoadingState}
+        onBlur={setIsTouchedValue}
+        onChange={handleValuesChange}
+        options={comboOptions}
+        placeholder={placeholder}
+        selectedOptions={selectedComboOptions}
+        singleSelection={SINGLE_SELECTION}
+        sortMatchesBy="startsWith"
+        aria-label={ariaLabel}
+      />
     </EuiFormRow>
   );
 };
