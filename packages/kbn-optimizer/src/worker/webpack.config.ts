@@ -17,6 +17,9 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+// @ts-expect-error
+import VisualizerPlugin from 'webpack-visualizer-plugin2';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -80,7 +83,18 @@ export function getWebpackConfig(
         context: worker.repoRoot,
         manifest: DLL_MANIFEST,
       }),
-      ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
+      // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.
+      ...(worker.profileWebpack
+        ? [
+            new EmitStatsPlugin(bundle),
+            new StatoscopeWebpackPlugin({
+              open: false,
+              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
+            }),
+            new VisualizerPlugin({ filename: `${bundle.id}.visualizer.html` }),
+          ]
+        : []),
+      // @ts-ignore something is wrong with the StatoscopeWebpackPlugin type.
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
