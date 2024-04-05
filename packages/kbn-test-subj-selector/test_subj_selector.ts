@@ -8,7 +8,7 @@
 
 function selectorToTerms(selector: string) {
   return selector
-    .replace(/\s*~\s*/g, '*') // css locator with '*' operator cannot contain spaces
+    .replace(/\s*\*\s*/g, '*') // css locator with '*' operator cannot contain spaces
     .replace(/\s*~\s*/g, '~') // css locator with '~' operator cannot contain spaces
     .replace(/\s*>\s*/g, '>') // remove all whitespace around joins >
     .replace(/\s*&\s*/g, '&') // remove all whitespace around joins &
@@ -35,6 +35,10 @@ function termToCssSelector(term: string) {
  * testSubject selector syntax rules:
  *
  *   - `data-test-subj` values can include spaces
+ *
+ *   - prefixing a value with `*` will allow matching any word in a `data-test-subj` that contains a specified text
+ *   - example: `*foo`
+ *   - css equivalent: `[data-test-subj*="foo"]`
  *
  *   - prefixing a value with `~` will allow matching a single word in a `data-test-subj` that uses several space delimited list words
  *     - example: `~foo`
