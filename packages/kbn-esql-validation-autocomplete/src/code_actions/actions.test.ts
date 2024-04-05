@@ -9,7 +9,6 @@
 import { getActions } from './actions';
 import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
-import { wrapAsEditorMessage } from './testing_utils';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 function getCallbackMocks() {
@@ -82,8 +81,7 @@ function testQuickFixesFn(
       callbackMocks
     );
 
-    const monacoErrors = wrapAsEditorMessage('error', errors);
-    const actions = await getActions(statement, monacoErrors, getAstAndSyntaxErrors, callbackMocks);
+    const actions = await getActions(statement, errors, getAstAndSyntaxErrors, callbackMocks);
     const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
     expect(edits).toEqual(
       !options || !options.equalityCheck || options.equalityCheck === 'equal'
@@ -269,9 +267,8 @@ describe('quick fixes logic', () => {
         undefined,
         callbackMocks
       );
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, {
+        await getActions(statement, errors, getAstAndSyntaxErrors, {
           getFieldsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
@@ -291,9 +288,8 @@ describe('quick fixes logic', () => {
         undefined,
         callbackMocks
       );
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, undefined);
+        await getActions(statement, errors, getAstAndSyntaxErrors, undefined);
       } catch {
         fail('Should not throw');
       }
