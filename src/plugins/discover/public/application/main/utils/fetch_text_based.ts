@@ -7,6 +7,7 @@
  */
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -46,6 +47,15 @@ export function fetchTextBased(
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
+          inspectorTitle: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
+            defaultMessage: 'Results',
+          }),
+          inspectorDescription: i18n.translate(
+            'discover.inspectorTextBasedRequestDescriptionDocument',
+            {
+              defaultMessage: 'This request queries Elasticsearch using ES|QL to fetch results.',
+            }
+          ),
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();

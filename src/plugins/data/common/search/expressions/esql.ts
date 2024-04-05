@@ -110,7 +110,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     fn(
       input,
       { query, /* timezone, */ timeField, locale },
-      { abortSignal, inspectorAdapters, getKibanaRequest }
+      { abortSignal, inspectorAdapters, getKibanaRequest, inspectorTitle, inspectorDescription }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -156,14 +156,17 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             }
 
             const request = inspectorAdapters.requests.start(
-              i18n.translate('data.search.dataRequest.title', {
-                defaultMessage: 'Data',
-              }),
-              {
-                description: i18n.translate('data.search.es_search.dataRequest.description', {
-                  defaultMessage:
-                    'This request queries Elasticsearch to fetch the data for the visualization.',
+              inspectorTitle ??
+                i18n.translate('data.search.dataRequest.title', {
+                  defaultMessage: 'Data',
                 }),
+              {
+                description:
+                  inspectorDescription ??
+                  i18n.translate('data.search.es_search.dataRequest.description', {
+                    defaultMessage:
+                      'This request queries Elasticsearch to fetch the data for the visualization.',
+                  }),
               },
               startTime
             );

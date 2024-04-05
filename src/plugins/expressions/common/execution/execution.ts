@@ -289,6 +289,8 @@ export class Execution<
       isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
+      inspectorTitle: execution.params.inspectorTitle,
+      inspectorDescription: execution.params.inspectorDescription,
     };
 
     this.result = this.input$.pipe(

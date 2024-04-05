@@ -173,6 +173,9 @@ export interface ExpressionExecutionParams {
    * @deafult 0
    */
   throttle?: number;
+
+  inspectorTitle?: string;
+  inspectorDescription?: string;
 }
 
 /**
