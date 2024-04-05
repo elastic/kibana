@@ -43,9 +43,3 @@ export class AgentStatusNotSupportedError extends AgentStatusClientError {
     );
   }
 }
-
-export class UnsupportedAgentTypeError extends AgentStatusClientError {
-  constructor(message: string, statusCode = 501, meta?: unknown) {
-    super(message, statusCode, meta);
-  }
-}
