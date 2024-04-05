@@ -17,12 +17,12 @@ export async function stepInstallTransforms(context: InstallContext) {
     esClient,
     savedObjectsClient,
     logger,
-    esReferences,
     force,
     authorizationHeader,
   } = context;
+  let esReferences = context.esReferences ?? [];
 
-  const res = await withPackageSpan('Install transforms', () =>
+  ({ esReferences } = await withPackageSpan('Install transforms', () =>
     installTransforms({
       packageInstallContext,
       esClient,
@@ -32,6 +32,6 @@ export async function stepInstallTransforms(context: InstallContext) {
       force,
       authorizationHeader,
     })
-  );
-  return { esReferences: res.esReferences || esReferences };
+  ));
+  return { esReferences };
 }

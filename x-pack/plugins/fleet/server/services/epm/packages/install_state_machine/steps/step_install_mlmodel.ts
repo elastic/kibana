@@ -12,10 +12,11 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 
 export async function stepInstallMlModel(context: InstallContext) {
-  const { logger, esReferences, packageInstallContext, esClient, savedObjectsClient } = context;
+  const { logger, packageInstallContext, esClient, savedObjectsClient } = context;
+  let esReferences = context.esReferences ?? [];
 
-  const updatedEsReferences = await withPackageSpan('Install ML models', () =>
-    installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences || [])
+  esReferences = await withPackageSpan('Install ML models', () =>
+    installMlModel(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
   );
-  return { esReferences: updatedEsReferences || esReferences };
+  return { esReferences };
 }

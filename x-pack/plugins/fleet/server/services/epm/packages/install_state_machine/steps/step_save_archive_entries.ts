@@ -22,8 +22,8 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
   const packageAssetResults = await withPackageSpan('Update archive entries', () =>
     saveArchiveEntriesFromAssetsMap({
       savedObjectsClient,
-      assetsMap: packageInstallContext.assetsMap,
-      paths: packageInstallContext.paths,
+      assetsMap: packageInstallContext?.assetsMap,
+      paths: packageInstallContext?.paths,
       packageInfo,
       installSource,
     })
