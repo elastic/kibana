@@ -195,7 +195,7 @@
   "cases-connector-mappings": [
     "owner"
   ],
-  "cases-oracle": [
+  "cases-rules": [
     "cases",
     "cases.id",
     "counter",

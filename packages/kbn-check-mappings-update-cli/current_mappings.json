@@ -669,7 +669,7 @@
       }
     }
   },
-  "cases-oracle": {
+  "cases-rules": {
     "dynamic": false,
     "properties": {
       "cases": {
@@ -1592,11 +1592,11 @@
       "assetType": {
         "type": "keyword"
       },
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
       "dashboardFilterAssetIdEnabled": {
         "type": "boolean"
+      },
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
