@@ -55,17 +55,17 @@ export const useSloActions = ({
       setIsActionsPopoverOpen(false);
     } else {
       const locator = locators.get<RulesParams>(rulesLocatorID);
+      if (!locator) return undefined;
 
+      // TODO Kevin: Fix missing spaceId in URL...
       if (slo.remote && slo.remote.kibanaUrl !== '') {
         const basePath = http.basePath.get();
-        const url = await locator?.getUrl({ params: { sloId: slo.id } });
-        // since basePath is already included in the kibanaUrl, we need to remove it from the start of url
+        const url = await locator.getUrl({ params: { sloId: slo.id } });
+        // since basePath is already included in the locatorUrl, we need to remove it from the start of url
         const urlWithoutBasePath = url?.replace(basePath, '');
         openRemoteKibana(slo.remote.kibanaUrl, urlWithoutBasePath);
       } else {
-        if (slo.id && locator) {
-          locator.navigate({ params: { sloId: slo.id } }, { replace: false });
-        }
+        locator.navigate({ params: { sloId: slo.id } }, { replace: false });
       }
     }
   };
