@@ -1302,7 +1302,7 @@ const createOracleRecord = async ({
     id: `cases-rules:${oracleId}`,
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     document: {
-      CASE_RULES_SAVED_OBJECT: {
+      [CASE_RULES_SAVED_OBJECT]: {
         createdAt: creationDate,
         updatedAt: null,
         cases: [],

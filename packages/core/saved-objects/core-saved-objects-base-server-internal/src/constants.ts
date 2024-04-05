@@ -146,6 +146,7 @@ export const HASH_TO_VERSION_MAP = {
   'cases-comments|93535d41ca0279a4a2e5d08acd3f28e3': '10.0.0',
   'cases-configure|c124bd0be4c139d0f0f91fb9eeca8e37': '10.0.0',
   'cases-connector-mappings|a98c33813f364f0b068e8c592ac6ef6d': '10.0.0',
+  'cases-rules|8c2066eba9ff06ff92c2b17d1e86e44a': '10.0.0',
   'cases-telemetry|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'cases-user-actions|07a6651cf37853dd5d64bfb2c796e102': '10.0.0',
   'cases|8f7dc53b17c272ea19f831537daa082d': '10.1.0',

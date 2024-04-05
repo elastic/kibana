@@ -195,7 +195,7 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-comments",
             "cases-configure",
             "cases-connector-mappings",
-            "cases-oracle",
+            "cases-rules",
             "cases-telemetry",
             "cases-user-actions",
             "cloud-security-posture-settings",
