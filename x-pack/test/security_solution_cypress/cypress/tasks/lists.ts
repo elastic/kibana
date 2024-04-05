@@ -18,7 +18,7 @@ import {
   VALUE_LIST_ITEMS_MODAL_INFO,
   VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER,
   VALUE_LIST_ITEMS_ADD_INPUT,
-  VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT
+  VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT,
 } from '../screens/lists';
 import { EUI_INLINE_SAVE_BUTTON } from '../screens/common/controls';
 import { rootRequest } from './api_calls/common';
