@@ -22,7 +22,7 @@ import {
 import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useIntegrations } from '../../../../detections/components/rules/related_integrations/use_integrations';
-import { IntegrationStatus } from './integration_status';
+import { IntegrationStatusBadge } from './integration_status_badge';
 import * as i18n from './translations';
 
 interface RelatedIntegrationItemFormProps {
@@ -163,7 +163,11 @@ function transformIntegrationToOption(
 ): EuiComboBoxOptionOption<Integration> {
   const label = [
     integration.integration_title ?? integration.package_title,
-    integration.is_enabled ? ': Enabled' : integration.is_installed ? ': Disabled' : '',
+    integration.is_enabled
+      ? `: ${i18n.INTEGRATION_ENABLED}`
+      : integration.is_installed
+      ? `: ${i18n.INTEGRATION_DISABLED}`
+      : '',
   ].join('');
 
   return {
@@ -193,10 +197,7 @@ function renderIntegrationOption(
         <EuiTextTruncate text={value.integration_title ?? value.package_title} truncation="end" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <IntegrationStatus
-          isIntegrationInstalled={value.is_installed}
-          isIntegrationEnabled={value.is_enabled}
-        />
+        <IntegrationStatusBadge isInstalled={value.is_installed} isEnabled={value.is_enabled} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

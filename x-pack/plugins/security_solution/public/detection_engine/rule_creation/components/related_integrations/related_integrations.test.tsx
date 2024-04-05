@@ -142,7 +142,7 @@ describe('RelatedIntegrations form part', () => {
           is_enabled: true,
         },
       ],
-    ])('shows package status "%s" in combo box popover', async (status, integrationData) => {
+    ])('shows integration status "%s" in combo box popover', async (status, integrationData) => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [integrationData],
       });
@@ -154,6 +154,59 @@ describe('RelatedIntegrations form part', () => {
 
       expect(screen.getByRole('option')).toHaveTextContent(status);
     });
+
+    it.each([
+      [
+        'Package A',
+        {
+          package_name: 'package-a',
+          package_title: 'Package A',
+          latest_package_version: '1.2.0',
+          is_installed: false,
+          is_enabled: false,
+        },
+      ],
+      [
+        'Package A: Disabled',
+        {
+          package_name: 'package-a',
+          package_title: 'Package A',
+          installed_package_version: '1.2.0',
+          latest_package_version: '1.2.0',
+          is_installed: true,
+          is_enabled: false,
+        },
+      ],
+      [
+        'Package A: Enabled',
+        {
+          package_name: 'package-a',
+          package_title: 'Package A',
+          installed_package_version: '1.2.0',
+          latest_package_version: '1.2.0',
+          is_installed: true,
+          is_enabled: true,
+        },
+      ],
+    ])(
+      'shows integration name with its status "%s" when selected in combo box',
+      async (nameWithStatus, integrationData) => {
+        fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
+          integrations: [integrationData],
+        });
+
+        render(<TestForm />, { wrapper: createReactQueryWrapper() });
+
+        await addRelatedIntegrationRow();
+        await selectFirstEuiComboBoxOption({
+          comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
+        });
+
+        expect(screen.getByTestId(COMBO_BOX_SELECTION_TEST_ID)).toHaveTextContent(
+          new RegExp(`^${nameWithStatus}$`)
+        );
+      }
+    );
 
     it('shows integration version dependency corresponding to the latest package version when integration is NOT installed', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
@@ -535,8 +588,6 @@ describe('RelatedIntegrations form part', () => {
       await waitForIntegrationsToBeLoaded();
       await removeRelatedIntegrationRow();
       await submitForm();
-
-      screen.debug();
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: undefined,

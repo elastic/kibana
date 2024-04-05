@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 export const RELATED_INTEGRATIONS_LABEL = i18n.translate(
@@ -74,5 +75,33 @@ export const VERSION_DEPENDENCY_INVALID = i18n.translate(
   {
     defaultMessage:
       'Version dependency is invalid semver. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
+  }
+);
+
+export const INTEGRATION_NOT_INSTALLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.notInstalledText',
+  {
+    defaultMessage: 'Not installed',
+  }
+);
+
+export const INTEGRATION_INSTALLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.installedText',
+  {
+    defaultMessage: 'Installed',
+  }
+);
+
+export const INTEGRATION_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.disabledText',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
+
+export const INTEGRATION_ENABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.enabledText',
+  {
+    defaultMessage: 'Enabled',
   }
 );
