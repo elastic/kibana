@@ -22,6 +22,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const browser = getService('browser');
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const log = getService('log');
 
   const driver = getService('__webdriver__');
 
@@ -67,7 +68,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConnectors();
       await deleteConversations();
 
-      proxy = await createLlmProxy();
+      proxy = await createLlmProxy(log);
 
       await ui.auth.login();
 
@@ -301,7 +302,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConversations();
 
       await ui.auth.logout();
-      await proxy.close();
+      proxy.close();
     });
   });
 }

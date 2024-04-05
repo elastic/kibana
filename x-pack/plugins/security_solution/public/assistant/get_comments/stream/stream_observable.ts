@@ -7,14 +7,13 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { handleBedrockChunk } from '@kbn/elastic-assistant-common';
 import type { PromptObservableState } from './types';
 import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
 interface StreamObservable {
-  connectorTypeTitle: string;
+  llmType: string;
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
   isError: boolean;
@@ -28,7 +27,7 @@ interface StreamObservable {
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = ({
-  connectorTypeTitle,
+  llmType,
   isError,
   reader,
   setLoading,
@@ -114,41 +113,16 @@ export const getStreamObservable = ({
               });
             } else if (value != null) {
               const chunk: Uint8Array = value;
-
-              // Concatenate the current chunk to the existing buffer.
-              bedrockBuffer = concatChunks(bedrockBuffer, chunk);
-              // Get the length of the next message in the buffer.
-              let messageLength = getMessageLength(bedrockBuffer);
-
-              // Initialize an array to store fully formed message chunks.
-              const buildChunks = [];
-              // Process the buffer until no complete messages are left.
-              while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
-                // Extract a chunk of the specified length from the buffer.
-                const extractedChunk = bedrockBuffer.slice(0, messageLength);
-                // Add the extracted chunk to the array of fully formed message chunks.
-                buildChunks.push(extractedChunk);
-                // Remove the processed chunk from the buffer.
-                bedrockBuffer = bedrockBuffer.slice(messageLength);
-                // Get the length of the next message in the updated buffer.
-                messageLength = getMessageLength(bedrockBuffer);
-              }
-
-              const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
-              // Decode and parse each message chunk, extracting the 'completion' property.
-              buildChunks.forEach((bChunk) => {
-                const event = awsDecoder.decode(bChunk);
-                const body = JSON.parse(
-                  Buffer.from(JSON.parse(decoder.decode(event.body)).bytes, 'base64').toString()
-                );
-                content = body.completion;
-                chunks.push(content);
+              const chunkHandler = (decodedChunk: string) => {
+                chunks.push(decodedChunk);
                 observer.next({
                   chunks,
                   message: chunks.join(''),
                   loading: true,
                 });
-              });
+              };
+              const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer, chunkHandler });
+              bedrockBuffer = processedChunk.bedrockBuffer;
             }
           } catch (err) {
             observer.error(err);
@@ -163,17 +137,15 @@ export const getStreamObservable = ({
     // this should never actually happen
     function badConnector() {
       observer.next({
-        chunks: [
-          `Invalid connector type - ${connectorTypeTitle} is not a supported GenAI connector.`,
-        ],
-        message: `Invalid connector type - ${connectorTypeTitle} is not a supported GenAI connector.`,
+        chunks: [`Invalid connector type - ${llmType} is not a supported GenAI connector.`],
+        message: `Invalid connector type - ${llmType} is not a supported GenAI connector.`,
         loading: false,
       });
       observer.complete();
     }
 
-    if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
-    else if (connectorTypeTitle === 'OpenAI') readOpenAI();
+    if (llmType === '.bedrock') readBedrock();
+    else if (llmType === '.gen-ai') readOpenAI();
     else badConnector();
 
     return () => {
@@ -229,36 +201,5 @@ const getOpenAIChunks = (lines: string[]): string[] => {
     });
   return nextChunk;
 };
-
-/**
- * Concatenates two Uint8Array buffers.
- *
- * @param {Uint8Array} a - First buffer.
- * @param {Uint8Array} b - Second buffer.
- * @returns {Uint8Array} - Concatenated buffer.
- */
-function concatChunks(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const newBuffer = new Uint8Array(a.length + b.length);
-  // Copy the contents of the first buffer to the new buffer.
-  newBuffer.set(a);
-  // Copy the contents of the second buffer to the new buffer starting from the end of the first buffer.
-  newBuffer.set(b, a.length);
-  return newBuffer;
-}
-
-/**
- * Gets the length of the next message from the buffer.
- *
- * @param {Uint8Array} buffer - Buffer containing the message.
- * @returns {number} - Length of the next message.
- */
-function getMessageLength(buffer: Uint8Array): number {
-  // If the buffer is empty, return 0.
-  if (buffer.byteLength === 0) return 0;
-  // Create a DataView to read the Uint32 value at the beginning of the buffer.
-  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  // Read and return the Uint32 value (message length).
-  return view.getUint32(0, false);
-}
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

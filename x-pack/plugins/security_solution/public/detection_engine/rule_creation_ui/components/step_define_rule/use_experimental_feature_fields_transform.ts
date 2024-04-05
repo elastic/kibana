@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isThreatMatchRule, isEqlRule } from '../../../../../common/detection_engine/utils';
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -16,22 +16,16 @@ import { isThreatMatchRule, isEqlRule } from '../../../../../common/detection_en
 export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineStepRule>>(): ((
   fields: T
 ) => T) => {
-  const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForIndicatorMatchRuleEnabled'
-  );
-  const isAlertSuppressionForEqlRuleEnabledNonSequence = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForEqlRuleEnabledNonSequence'
+  const isAlertSuppressionForNonSequenceEqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNonSequenceEqlRuleEnabled'
   );
   const transformer = useCallback(
     (fields: T) => {
-      const isIndicatorMatchSuppressionDisabled = isThreatMatchRule(fields.ruleType)
-        ? !isAlertSuppressionForIndicatorMatchRuleEnabled
-        : false;
       const isEqlSuppressionDisabled = isEqlRule(fields.ruleType)
-        ? !isAlertSuppressionForEqlRuleEnabledNonSequence
+        ? !isAlertSuppressionForNonSequenceEqlRuleEnabled
         : false;
       // reset any alert suppression values hidden behind feature flag
-      if (isEqlSuppressionDisabled || isIndicatorMatchSuppressionDisabled) {
+      if (isEqlSuppressionDisabled) {
         return {
           ...fields,
           groupByFields: [],
@@ -43,7 +37,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForIndicatorMatchRuleEnabled, isAlertSuppressionForEqlRuleEnabledNonSequence]
+    [isAlertSuppressionForNonSequenceEqlRuleEnabled]
   );
 
   return transformer;

@@ -458,7 +458,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -466,7 +466,7 @@
             "section": "def-public.FilterItemsProps",
             "text": "FilterItemsProps"
           },
-          ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
+          ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>) => JSX.Element"
         ],
         "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
         "deprecated": false,
@@ -488,7 +488,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
+              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\"> & React.RefAttributes<React.Component<Pick<",
               {
                 "pluginId": "unifiedSearch",
                 "scope": "public",
@@ -496,7 +496,7 @@
                 "section": "def-public.FilterItemsProps",
                 "text": "FilterItemsProps"
               },
-              ", \"filters\" | \"indexPatterns\" | \"readOnly\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
+              ", \"filters\" | \"indexPatterns\" | \"filtersForSuggestions\" | \"suggestionsAbstraction\" | \"onFiltersUpdated\" | \"readOnly\" | \"hiddenPanelOptions\" | \"timeRangeForSuggestionsOverride\">, any, any>>"
             ],
             "path": "src/plugins/unified_search/public/filter_bar/index.tsx",
             "deprecated": false,
@@ -727,7 +727,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; hideTextBasedRunQueryLabel?: boolean | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; onTextBasedSavedAndExit?: (({ onSave }: ",
               "OnSaveTextLanguageQueryProps",
               ") => void) | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               "SuggestionsListSize",

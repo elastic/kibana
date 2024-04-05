@@ -15,21 +15,6 @@ describe('redirectToDashboard', () => {
   } as unknown as LensEmbeddableInput;
   const mockServices = makeDefaultServices();
 
-  it('should return error in case of allowByValueEmbeddables false', () => {
-    expect(() => {
-      redirectToDashboard({
-        embeddableInput,
-        dashboardFeatureFlag: {
-          allowByValueEmbeddables: false,
-        },
-        dashboardId: 'id',
-        originatingApp: '',
-        getOriginatingPath: jest.fn(),
-        stateTransfer: mockServices.stateTransfer,
-      });
-    }).toThrow('redirectToDashboard called with by-value embeddables disabled');
-  });
-
   it('should call the navigateToWithEmbeddablePackage with the correct args if originatingApp is given', () => {
     const navigateToWithEmbeddablePackageSpy = jest.fn();
     const transferService = {
@@ -38,9 +23,6 @@ describe('redirectToDashboard', () => {
     } as unknown as LensAppServices['stateTransfer'];
     redirectToDashboard({
       embeddableInput,
-      dashboardFeatureFlag: {
-        allowByValueEmbeddables: true,
-      },
       dashboardId: 'id',
       originatingApp: 'security',
       getOriginatingPath: jest.fn(),
@@ -60,9 +42,6 @@ describe('redirectToDashboard', () => {
     } as unknown as LensAppServices['stateTransfer'];
     redirectToDashboard({
       embeddableInput,
-      dashboardFeatureFlag: {
-        allowByValueEmbeddables: true,
-      },
       dashboardId: 'id',
       originatingApp: '',
       getOriginatingPath: jest.fn(),

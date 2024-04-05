@@ -121,59 +121,62 @@ export const eqlExecutor = async ({
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
     result.searchAfterTimes = [eqlSearchDuration];
 
-    let createResult;
+    let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
     const { events, sequences } = response.hits;
-    const isEventSuppressionActive = isAlertSuppressionActive && events?.length;
 
-    // Validating events until the implementation of suppression for sequence-based queries
-    if (isEventSuppressionActive) {
-      const alertSuppression = completeRule.ruleParams.alertSuppression;
-      createResult = await bulkCreateSuppressedAlertsInMemory({
-        enrichedEvents: events,
-        toReturn: result,
-        wrapHits,
-        bulkCreate,
-        services,
-        buildReasonMessage: buildReasonMessageForEqlAlert,
-        ruleExecutionLogger,
-        tuple,
-        alertSuppression,
-        wrapSuppressedHits,
-        alertTimestampOverride,
-        alertWithSuppression,
-      });
-      // TODO: If the user uses the API with Suppression fields for Sequence queries, we log a warning message that the suppression will be ignored
-    } else {
-      const newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> =
-        sequences !== undefined
-          ? wrapSequences(sequences, buildReasonMessageForEqlAlert)
-          : events !== undefined
-          ? wrapHits(events, buildReasonMessageForEqlAlert)
-          : (() => {
-              throw new Error(
-                'eql query response should have either `sequences` or `events` but had neither'
-              );
-            })();
-
-      if (newSignals?.length) {
-        createResult = await bulkCreate(
-          newSignals,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
-        addToSearchAfterReturn({ current: result, next: createResult });
+    if (events) {
+      if (isAlertSuppressionActive) {
+        await bulkCreateSuppressedAlertsInMemory({
+          enrichedEvents: events,
+          toReturn: result,
+          wrapHits,
+          bulkCreate,
+          services,
+          buildReasonMessage: buildReasonMessageForEqlAlert,
+          ruleExecutionLogger,
+          tuple,
+          alertSuppression: completeRule.ruleParams.alertSuppression,
+          wrapSuppressedHits,
+          alertTimestampOverride,
+          alertWithSuppression,
+        });
+      } else {
+        newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
       }
+    } else if (sequences) {
+      if (isAlertSuppressionActive && completeRule.ruleParams.alertSuppression) {
+        result.warningMessages.push(
+          'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.'
+        );
+      }
+      newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
+    } else {
+      throw new Error(
+        'eql query response should have either `sequences` or `events` but had neither'
+      );
     }
-    const maxSignalsWarning = isEventSuppressionActive
-      ? getSuppressionMaxSignalsWarning()
-      : getMaxSignalsWarning();
 
-    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals)
+    if (newSignals?.length) {
+      const createResult = await bulkCreate(
+        newSignals,
+        undefined,
+        createEnrichEventsFunction({
+          services,
+          logger: ruleExecutionLogger,
+        })
+      );
+      addToSearchAfterReturn({ current: result, next: createResult });
+    }
+
+    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
+      const maxSignalsWarning =
+        isAlertSuppressionActive && events?.length
+          ? getSuppressionMaxSignalsWarning()
+          : getMaxSignalsWarning();
+
       result.warningMessages.push(maxSignalsWarning);
+    }
 
     return result;
   });

@@ -35,12 +35,12 @@ describe(
   'Detection rules, Event Correlation, Alert Suppression',
   {
     tags: ['@ess'],
-    // alertSuppressionForEqlRuleEnabledNonSequence feature flag is also enabled in a global config
+    // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
     env: {
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForEqlRuleEnabledNonSequence',
+            'alertSuppressionForNonSequenceEqlRuleEnabled',
           ])}`,
         ],
       },
@@ -52,6 +52,9 @@ describe(
       login();
       visit(CREATE_RULE_URL);
       startBasicLicense();
+    });
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
     it('can not create rule with rule execution suppression on basic license for non-sequence based alerts', () => {

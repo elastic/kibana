@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { combineLatest, debounceTime, of, ReplaySubject, takeUntil } from 'rxjs';
+import { combineLatest, debounceTime, ReplaySubject, takeUntil } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
@@ -103,35 +103,6 @@ export class NavigationPublicPlugin
       chrome.project.setCloudUrls(cloud);
       this.addDefaultSolutionNavigation({ chrome });
       this.susbcribeToSolutionNavUiSettings(core);
-
-      // Temp. This is temporary to simulate adding a solution nav after bootstrapping
-      setTimeout(() => {
-        this.addSolutionNavigation({
-          id: 'security',
-          title: 'Security',
-          icon: 'logoSecurity',
-          homePage: 'dashboards', // Temp. Wil be updated when all links are registered
-          navigationTree$: of({
-            body: [
-              // Temp. In future work this will be loaded from a package
-              {
-                type: 'navGroup',
-                id: 'security_project_nav',
-                title: 'Security',
-                icon: 'logoSecurity',
-                breadcrumbStatus: 'hidden',
-                defaultIsCollapsed: false,
-                children: [
-                  {
-                    link: 'dashboards',
-                    spaceBefore: 'm',
-                  },
-                ],
-              },
-            ],
-          }),
-        });
-      }, 5000);
     }
 
     return {

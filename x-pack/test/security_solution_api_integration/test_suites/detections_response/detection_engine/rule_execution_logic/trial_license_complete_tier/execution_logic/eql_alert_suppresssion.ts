@@ -25,6 +25,7 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
+  waitForRuleSuccess,
 } from '../../../../../../../common/utils/security_solution';
 import {
   getEqlRuleForAlertTesting,
@@ -34,10 +35,13 @@ import {
   dataGeneratorFactory,
   patchRule,
   setAlertStatus,
+  fetchRule,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQuery = (id: string) => `any where id == "${id}"`;
+const getSequenceQuery = (id: string) =>
+  `sequence by id [any where id == "${id}"] [any where id == "${id}"]`;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -54,21 +58,20 @@ export default ({ getService }: FtrProviderContext) => {
   });
 
   describe('@ess @serverless EQL type rules, alert suppression', () => {
-    describe('Non-Sequence Alert', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
-      });
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+    });
 
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
-        );
-      });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+    });
 
+    afterEach(async () => {
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
+    });
+
+    describe('non-sequence queries', () => {
       // First test creates a real rule - remaining tests use preview API
       it('should suppress alert for 2 times rule executions with a suppression duration exceeding the rule execution', async () => {
         const id = uuidv4();
@@ -129,6 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
             name: 'host-a',
           },
         };
+
         // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
         // trigger an update to the existing alert without changing the timestamp
         await indexListOfSourceDocuments([secondDocument, secondDocument]);
@@ -166,6 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(suppressionEnd).toBeLessThan(new Date().getTime());
         expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
       });
+
       it('should NOT suppress and update an alert if the alert is closed', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date().toISOString();
@@ -244,6 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
       });
+
       it('should NOT suppress alerts when suppression period is less than rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -319,6 +325,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
       });
+
       it('should suppress alerts in the time window that covers 3 rule executions', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -390,6 +397,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
         });
       });
+
       it('should correctly suppress when using a timestamp override', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -456,6 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
+
       it('should deduplicate multiple alerts while suppressing new ones', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -516,6 +525,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
         });
       });
+
       it('should suppress alerts with missing fields', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -606,6 +616,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
       });
+
       it('should NOT suppress alerts with missing fields if configured so', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -692,6 +703,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
         });
       });
+
       describe('rule execution only', () => {
         it('should suppress alerts during rule execution only', async () => {
           const id = uuidv4();
@@ -1468,6 +1480,82 @@ export default ({ getService }: FtrProviderContext) => {
           });
           expect(previewAlerts.length).toEqual(100);
         });
+      });
+
+      it('adds to rule execution state', async () => {
+        const eventId = uuidv4();
+        await indexGeneratedSourceDocuments({
+          docsCount: 10,
+          seed: (_index, _id, timestamp) => ({
+            id: eventId,
+            '@timestamp': timestamp,
+            agent: { name: 'group_me' },
+          }),
+        });
+
+        const ruleParams: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getQuery(eventId),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+        };
+
+        const { id } = await createRule(supertest, log, ruleParams);
+        await waitForRuleSuccess({ supertest, log, id });
+        const rule = await fetchRule(supertest, { id });
+
+        const lastExecution = rule?.execution_summary?.last_execution!;
+        expect(lastExecution.status).toEqual('succeeded');
+        expect(lastExecution.metrics).toEqual(
+          expect.objectContaining({
+            total_indexing_duration_ms: expect.any(Number),
+            total_search_duration_ms: expect.any(Number),
+          })
+        );
+      });
+    });
+
+    describe('sequence queries', () => {
+      it('logs a warning if suppression is configured', async () => {
+        const id = uuidv4();
+        await indexGeneratedSourceDocuments({
+          docsCount: 10,
+          seed: () => ({ id }),
+        });
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getSequenceQuery(id),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          invocationCount: 1,
+        });
+
+        const [{ warnings }] = logs;
+
+        expect(warnings).toContain(
+          'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.'
+        );
       });
     });
   });

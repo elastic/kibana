@@ -29,7 +29,7 @@ describe(
   'Detection rules, Event Correlation, Alert Suppression',
   {
     tags: ['@serverless'],
-    // alertSuppressionForEqlRuleEnabledNonSequence feature flag is also enabled in a global config
+    // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
     env: {
       ftrConfig: {
         productTypes: [
@@ -38,7 +38,7 @@ describe(
         ],
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForEqlRuleEnabledNonSequence',
+            'alertSuppressionForNonSequenceEqlRuleEnabled',
           ])}`,
         ],
       },

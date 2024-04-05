@@ -16,7 +16,7 @@ const licensingMock = {
   license$: of({ hasAtLeast: jest.fn() }), // Use 'of' to create an observable
 } as unknown as IsAlertSuppressionActiveParams['licensing'];
 
-const experimentalFeatureKey = 'alertSuppressionForEqlRuleEnabledNonSequence';
+const experimentalFeatureKey = 'alertSuppressionForNonSequenceEqlRuleEnabled';
 const experimentalFeaturesMock = {
   [experimentalFeatureKey]: true,
 } as IsAlertSuppressionActiveParams['experimentalFeatures'];

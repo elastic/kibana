@@ -44,31 +44,80 @@ describe('eql_executor', () => {
   });
 
   describe('eqlExecutor', () => {
-    it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
-      const result = await eqlExecutor({
-        inputIndex: DEFAULT_INDEX_PATTERN,
-        runtimeMappings: {},
-        completeRule: eqlCompleteRule,
-        tuple,
-        ruleExecutionLogger,
-        services: alertServices,
-        version,
-        bulkCreate: jest.fn(),
-        wrapHits: jest.fn(),
-        wrapSequences: jest.fn(),
-        primaryTimestamp: '@timestamp',
-        exceptionFilter: undefined,
-        unprocessedExceptions: [getExceptionListItemSchemaMock()],
-        wrapSuppressedHits: jest.fn(),
-        alertTimestampOverride: undefined,
-        alertWithSuppression: jest.fn(),
-        isAlertSuppressionActive: false,
+    describe('warning scenarios', () => {
+      it('warns when exception list for eql rule contains value list exceptions', async () => {
+        const result = await eqlExecutor({
+          inputIndex: DEFAULT_INDEX_PATTERN,
+          runtimeMappings: {},
+          completeRule: eqlCompleteRule,
+          tuple,
+          ruleExecutionLogger,
+          services: alertServices,
+          version,
+          bulkCreate: jest.fn(),
+          wrapHits: jest.fn(),
+          wrapSequences: jest.fn(),
+          primaryTimestamp: '@timestamp',
+          exceptionFilter: undefined,
+          unprocessedExceptions: [getExceptionListItemSchemaMock()],
+          wrapSuppressedHits: jest.fn(),
+          alertTimestampOverride: undefined,
+          alertWithSuppression: jest.fn(),
+          isAlertSuppressionActive: false,
+        });
+        expect(result.warningMessages).toEqual([
+          `The following exceptions won't be applied to rule execution: ${
+            getExceptionListItemSchemaMock().name
+          }`,
+        ]);
       });
-      expect(result.warningMessages).toEqual([
-        `The following exceptions won't be applied to rule execution: ${
-          getExceptionListItemSchemaMock().name
-        }`,
-      ]);
+
+      it('warns when a sequence query is used with alert suppression', async () => {
+        // mock a sequences response
+        alertServices.scopedClusterClient.asCurrentUser.eql.search.mockReset().mockResolvedValue({
+          hits: {
+            total: { relation: 'eq', value: 10 },
+            sequences: [],
+          },
+        });
+
+        const ruleWithSequenceAndSuppression = getCompleteRuleMock<EqlRuleParams>({
+          ...params,
+          query: 'sequence [any where true] [any where true]',
+          alertSuppression: {
+            groupBy: ['event.type'],
+            duration: {
+              value: 10,
+              unit: 'm',
+            },
+            missingFieldsStrategy: 'suppress',
+          },
+        });
+
+        const result = await eqlExecutor({
+          inputIndex: DEFAULT_INDEX_PATTERN,
+          runtimeMappings: {},
+          completeRule: ruleWithSequenceAndSuppression,
+          tuple,
+          ruleExecutionLogger,
+          services: alertServices,
+          version,
+          bulkCreate: jest.fn(),
+          wrapHits: jest.fn(),
+          wrapSequences: jest.fn(),
+          primaryTimestamp: '@timestamp',
+          exceptionFilter: undefined,
+          unprocessedExceptions: [],
+          wrapSuppressedHits: jest.fn(),
+          alertTimestampOverride: undefined,
+          alertWithSuppression: jest.fn(),
+          isAlertSuppressionActive: true,
+        });
+
+        expect(result.warningMessages).toContain(
+          'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.'
+        );
+      });
     });
   });
 });

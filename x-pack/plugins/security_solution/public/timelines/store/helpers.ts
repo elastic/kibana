@@ -1157,6 +1157,7 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
+      eventIdToNoteIds: omit(eventId, timeline.eventIdToNoteIds),
     },
   };
 };

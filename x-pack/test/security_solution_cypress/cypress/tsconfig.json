@@ -41,5 +41,6 @@
     "@kbn/es-query",
     "@kbn/ml-plugin",
     "@kbn/license-management-plugin",
+    "@kbn/actions-plugin",
   ]
 }

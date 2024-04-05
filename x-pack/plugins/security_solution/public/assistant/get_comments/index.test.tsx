@@ -13,7 +13,6 @@ const user: ConversationRole = 'user';
 const currentConversation = {
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-    connectorTypeTitle: 'OpenAI',
     provider: OpenAiProviderType.OpenAi,
   },
   replacements: [],
@@ -24,7 +23,7 @@ const currentConversation = {
     {
       role: user,
       content: 'Hello {name}',
-      timestamp: '2022-01-01',
+      timestamp: '2024-03-19T18:59:18.174Z',
       isError: false,
     },
   ],
@@ -49,7 +48,6 @@ describe('getComments', () => {
         category: 'assistant',
         apiConfig: {
           connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-          connectorTypeTitle: 'OpenAI',
           provider: OpenAiProviderType.OpenAi,
         },
         replacements: [],
@@ -66,5 +64,12 @@ describe('getComments', () => {
       },
     });
     expect(result[0].eventColor).toEqual('danger');
+  });
+
+  it('It transforms message timestamp from server side ISO format to local date string', () => {
+    const result = getComments(testProps);
+    expect(result[0].timestamp).toEqual(
+      `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`
+    );
   });
 });

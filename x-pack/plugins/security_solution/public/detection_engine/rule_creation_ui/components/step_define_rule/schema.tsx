@@ -19,6 +19,7 @@ import {
 import {
   isEsqlRule,
   isNewTermsRule,
+  isSuppressionRuleConfiguredWithGroupBy,
   isThreatMatchRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
@@ -39,7 +40,7 @@ import {
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
 } from './translations';
-import { getQueryRequiredMessage, showSuppressionMaxGroupValidationError } from './utils';
+import { getQueryRequiredMessage } from './utils';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -129,9 +130,10 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [],
   },
-  eqlOptions: {},
+  eqlOptions: {
+    fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
+  },
   queryBar: {
-    fieldsToValidateOnChange: ['queryBar'],
     validations: [
       {
         validator: (
@@ -602,7 +604,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          if (!showSuppressionMaxGroupValidationError(formData.ruleType)) {
+          if (!isSuppressionRuleConfiguredWithGroupBy(formData.ruleType)) {
             return;
           }
           return fieldValidators.maxLengthField({

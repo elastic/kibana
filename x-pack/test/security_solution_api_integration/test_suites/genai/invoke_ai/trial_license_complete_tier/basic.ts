@@ -19,7 +19,6 @@ const mockRequest = {
   subAction: 'invokeAI',
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
-  llmType: 'bedrock',
   replacements: [],
 };
 
@@ -85,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should execute a chat completion', async () => {
         const response = await postActionsClientExecute(
           openaiActionId,
-          { ...mockRequest, llmType: 'openai' },
+          { ...mockRequest },
           supertest
         );
 

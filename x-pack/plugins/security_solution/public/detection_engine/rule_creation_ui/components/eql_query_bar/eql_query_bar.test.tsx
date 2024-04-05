@@ -14,6 +14,7 @@ import { mockQueryBar } from '../../../rule_management_ui/components/rules_table
 import type { EqlQueryBarProps } from './eql_query_bar';
 import { EqlQueryBar } from './eql_query_bar';
 import { getEqlValidationError } from './validators.mock';
+import { fireEvent, render, within } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -176,6 +177,40 @@ describe('EqlQueryBar', () => {
       fireEvent.change(inputElement, { target: { value: '' } });
 
       expect(mockOnUsingSequenceQuery).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('EQL options interaction', () => {
+    const mockOptionsData = {
+      keywordFields: [],
+      dateFields: [{ label: 'timestamp', value: 'timestamp' }],
+      nonDateFields: [],
+    };
+
+    it('invokes onOptionsChange when the EQL options change', () => {
+      const onOptionsChangeMock = jest.fn();
+
+      const { getByTestId, getByText } = render(
+        <TestProviders>
+          <EqlQueryBar
+            dataTestSubj="myQueryBar"
+            field={mockField}
+            isLoading={false}
+            optionsData={mockOptionsData}
+            indexPattern={mockIndexPattern}
+            onOptionsChange={onOptionsChangeMock}
+          />
+        </TestProviders>
+      );
+
+      // open options popover
+      fireEvent.click(getByTestId('eql-settings-trigger'));
+      // display combobox options
+      within(getByTestId(`eql-timestamp-field`)).getByRole('combobox').focus();
+      // select timestamp
+      getByText('timestamp').click();
+
+      expect(onOptionsChangeMock).toHaveBeenCalledWith('timestampField', 'timestamp');
     });
   });
 });

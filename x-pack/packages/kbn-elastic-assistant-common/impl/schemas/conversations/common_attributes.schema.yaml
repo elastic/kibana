@@ -117,14 +117,10 @@ components:
       type: object
       required:
         - connectorId
-        - connectorTypeTitle
       properties:
         connectorId:
           type: string
           description: connector Id
-        connectorTypeTitle:
-          type: string
-          description: connector Type Title
         defaultSystemPromptId:
           type: string
           description: defaultSystemPromptId

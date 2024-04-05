@@ -6,7 +6,6 @@
  */
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
-import { merge } from 'lodash';
 import { Conversation } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
@@ -102,9 +101,7 @@ const updateConversationRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.update(
-      merge({}, params.body.conversation, { conversation: { id: params.path.conversationId } })
-    );
+    return client.update(params.path.conversationId, params.body.conversation);
   },
 });
 
