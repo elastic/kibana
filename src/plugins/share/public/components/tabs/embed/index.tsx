@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { copyToClipboard } from '@elastic/eui';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-
 import { EmbedContent } from './embed_content';
 import { useShareTabsContext } from '../../context';
 
@@ -43,7 +42,7 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ dispatch }) => {
 
   const onChange = useCallback(
     (shareUrl: string) => {
-      dispatch!({
+      dispatch({
         type: EMBED_TAB_ACTIONS.SET_EMBED_URL,
         payload: shareUrl,
       });

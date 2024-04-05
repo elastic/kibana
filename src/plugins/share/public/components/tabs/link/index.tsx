@@ -60,13 +60,13 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
 
   const setDashboardLink = useCallback(
     (url: string) => {
-      dispatch!({ type: LINK_TAB_ACTIONS.SET_DASHBOARD_URL, payload: url });
+      dispatch({ type: LINK_TAB_ACTIONS.SET_DASHBOARD_URL, payload: url });
     },
     [dispatch]
   );
 
   const setIsNotSaved = useCallback(() => {
-    dispatch!({
+    dispatch({
       type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
       payload: objectType === 'lens' ? isDirty : false,
     });
