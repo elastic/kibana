@@ -434,10 +434,6 @@ export class DataGridService extends FtrService {
     return detailRows[0];
   }
 
-  public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
-    await this.docTable.addInclusiveFilter(detailsRow, fieldName);
-  }
-
   public async getTableDocViewRow(
     detailsRow: WebElementWrapper,
     fieldName: string
@@ -460,13 +456,6 @@ export class DataGridService extends FtrService {
       await this.testSubjects.existOrFail(inlineButtonsGroupSelector);
     }
     await this.testSubjects.click(`${actionName}-${fieldName}`);
-  }
-
-  public async removeInclusiveFilter(
-    detailsRow: WebElementWrapper,
-    fieldName: string
-  ): Promise<void> {
-    await this.docTable.removeInclusiveFilter(detailsRow, fieldName);
   }
 
   public async hasNoResults() {
