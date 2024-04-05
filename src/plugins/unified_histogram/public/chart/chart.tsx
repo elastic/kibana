@@ -222,6 +222,29 @@ export function Chart({
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
+  if (!breakdown.field) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.logRateAnalysisButton', {
+        defaultMessage: 'Run log rate analysis',
+      }),
+      iconType: 'stats',
+      isDisabled: isFlyoutVisible,
+      'data-test-subj': 'unifiedHistogramLogRateAnalysis',
+      onClick: async () => {
+        console.log('services', services);
+        console.log('log rate analysis time range', getTimeRange());
+        console.log('log rate analysis request', request);
+        console.log('log rate analysis chart', chart);
+
+        const timeRange = getTimeRange();
+        const resp = await services.http.post('/api/aiops/log_rate_analysis', {
+          body: {},
+        });
+        console.log('resp', resp);
+      },
+    });
+  }
+
   if (canEditVisualizationOnTheFly) {
     actions.push({
       label: i18n.translate('unifiedHistogram.editVisualizationButton', {
