@@ -8,7 +8,6 @@
 import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
-  SnapshotRepositorySettings,
   PluginStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -292,9 +291,10 @@ export function registerRepositoriesRoutes({
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
           name,
           body: {
+            // @ts-expect-error upgrade to @elastic/elasticsearch v8.13.0: can't be string, only valid "source"
             type,
             // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}
-            settings: serializeRepositorySettings(settings) as SnapshotRepositorySettings,
+            settings: serializeRepositorySettings(settings),
           },
           verify: false,
         });
@@ -325,9 +325,10 @@ export function registerRepositoriesRoutes({
         // Otherwise update repository
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
           name,
-          body: {
+          repository: {
+            // @ts-expect-error our type is a string, which doesn't match any of the overloads "source", "s3", "azure", ...
             type,
-            settings: serializeRepositorySettings(settings) as SnapshotRepositorySettings,
+            settings: serializeRepositorySettings(settings),
           },
           verify: false,
         });

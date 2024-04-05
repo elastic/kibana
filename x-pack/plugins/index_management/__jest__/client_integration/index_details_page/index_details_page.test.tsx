@@ -577,6 +577,44 @@ describe('<IndexDetailsPage />', () => {
           JSON.stringify({ mappings: mockIndexMappingResponse }, null, 2)
         );
       });
+
+      it('can add a semantic_text field and can save mappings', async () => {
+        const mockIndexMappingResponseForSemanticText: any = {
+          ...testIndexMappings.mappings,
+          properties: {
+            ...testIndexMappings.mappings.properties,
+            sem: {
+              type: 'semantic_text',
+              inference_id: 'my-elser',
+            },
+          },
+        };
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponseForSemanticText,
+        });
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'sem', type: 'semantic_text' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+        // add field button is available again
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.find('semField-datatype').props()['data-type-value']).toBe('semantic_text');
+        expect(httpSetup.get).toHaveBeenCalledTimes(5);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/mapping/${testIndexName}`,
+          requestOptions
+        );
+        // refresh mappings and page re-renders
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.actions.mappings.isSearchBarDisabled()).toBe(false);
+        const treeViewContent = testBed.actions.mappings.getTreeViewContent('semField');
+        expect(treeViewContent).toContain('sem');
+        await testBed.actions.mappings.clickToggleViewButton();
+        const jsonContent = testBed.actions.mappings.getCodeBlockContent();
+        expect(jsonContent).toEqual(
+          JSON.stringify({ mappings: mockIndexMappingResponseForSemanticText }, null, 2)
+        );
+      });
       it('there is a callout with error message when save mappings fail', async () => {
         const error = {
           statusCode: 400,

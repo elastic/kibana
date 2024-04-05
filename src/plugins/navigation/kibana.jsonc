@@ -8,6 +8,6 @@
     "browser": true,
     "optionalPlugins": ["cloud","security"],
     "requiredPlugins": ["unifiedSearch"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": []
   }
 }
