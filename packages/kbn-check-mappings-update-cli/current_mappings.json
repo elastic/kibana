@@ -1563,15 +1563,16 @@
     }
   },
   "infra-custom-dashboards": {
+    "dynamic": false,
     "properties": {
       "assetType": {
         "type": "keyword"
       },
-      "dashboardIdList": {
+      "dashboardSavedObjectId": {
         "type": "keyword"
       },
-      "kuery": {
-        "type": "text"
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       }
     }
   },
