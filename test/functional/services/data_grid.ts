@@ -26,7 +26,6 @@ interface SelectOptions {
 export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly docTable = this.ctx.getService('docTable');
   private readonly retry = this.ctx.getService('retry');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
