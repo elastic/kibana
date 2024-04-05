@@ -17,6 +17,8 @@ import type {
   HasType,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesWritablePanelTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -33,6 +35,7 @@ import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type {
   AnomalyExplorerChartsEmbeddableType,
+  AnomalySingleMetricViewerEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
@@ -40,6 +43,8 @@ import type {
 export type MlEmbeddableBaseApi = Partial<
   HasParentApi<PublishesUnifiedSearch> & PublishesViewMode & PublishesUnifiedSearch
 >;
+
+export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {
@@ -122,7 +127,7 @@ export interface SingleMetricViewerEmbeddableCustomInput {
   functionDescription?: string;
   panelTitle: string;
   selectedDetectorIndex: number;
-  selectedEntities: MlEntityField[];
+  selectedEntities?: MlEntity;
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;
@@ -132,6 +137,21 @@ export interface SingleMetricViewerEmbeddableCustomInput {
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
+
+export interface SingleMetricViewerComponentApi {
+  functionDescription?: PublishingSubject<string>;
+  jobIds: PublishingSubject<JobId[]>;
+  selectedDetectorIndex: PublishingSubject<number>;
+  selectedEntities?: PublishingSubject<MlEntity>;
+
+  updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
+}
+
+export interface SingleMetricViewerEmbeddableApi
+  extends HasType<AnomalySingleMetricViewerEmbeddableType>,
+    PublishesWritablePanelTitle,
+    MlEmbeddableBaseApi,
+    SingleMetricViewerComponentApi {}
 
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
