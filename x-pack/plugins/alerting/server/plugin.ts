@@ -284,12 +284,14 @@ export class AlertingPlugin {
       );
     }
 
+    const taskManagerStartPromise = core
+      .getStartServices()
+      .then(([_, alertingStart]) => alertingStart.taskManager);
+
     this.backfillClient = new BackfillClient({
       logger: this.logger,
       taskManagerSetup: plugins.taskManager,
-      taskManagerStartPromise: core
-        .getStartServices()
-        .then(([_, alertingStart]) => alertingStart.taskManager),
+      taskManagerStartPromise,
       taskRunnerFactory: this.taskRunnerFactory,
     });
 
@@ -337,10 +339,7 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      registerAlertingUsageCollector(
-        usageCollection,
-        core.getStartServices().then(([_, { taskManager }]) => taskManager)
-      );
+      registerAlertingUsageCollector(usageCollection, taskManagerStartPromise);
       const eventLogIndex = this.eventLogService.getIndexPattern();
       initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, eventLogIndex);
     }

@@ -174,17 +174,6 @@ export class AdHocTaskRunner {
     }
 
     const { rule } = adHocRunData;
-    if (apm.currentTransaction) {
-      apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-      apm.currentTransaction.addLabels({
-        alerting_rule_consumer: rule.consumer,
-        alerting_rule_name: rule.name,
-        alerting_rule_tags: rule.tags.join(', '),
-        alerting_rule_type_id: rule.alertTypeId,
-        alerting_rule_params: JSON.stringify(rule.params),
-      });
-    }
-
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
@@ -372,10 +361,15 @@ export class AdHocTaskRunner {
       }
 
       if (apm.currentTransaction) {
-        apm.currentTransaction.name = `Execute Alerting Rule`;
+        apm.currentTransaction.name = `Execute Backfill for Alerting Rule`;
         apm.currentTransaction.addLabels({
           alerting_rule_space_id: spaceId,
           alerting_rule_id: rule.id,
+          alerting_rule_consumer: rule.consumer,
+          alerting_rule_name: rule.name,
+          alerting_rule_tags: rule.tags.join(', '),
+          alerting_rule_type_id: rule.alertTypeId,
+          alerting_rule_params: JSON.stringify(rule.params),
         });
       }
 
@@ -417,7 +411,7 @@ export class AdHocTaskRunner {
     });
   }
 
-  private async processRunResults(ruleRunMetrics: Result<RuleTaskStateAndMetrics, Error>) {
+  private async processAdHocRunResults(ruleRunMetrics: Result<RuleTaskStateAndMetrics, Error>) {
     const {
       params: { adHocRunParamsId, spaceId },
       startedAt,
@@ -536,7 +530,7 @@ export class AdHocTaskRunner {
     } catch (err) {
       runMetrics = asErr(err);
     }
-    await this.processRunResults(runMetrics);
+    await this.processAdHocRunResults(runMetrics);
 
     this.shouldDeleteTask = this.shouldDeleteTask || !this.hasAnyPendingRuns();
 

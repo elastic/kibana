@@ -17,7 +17,6 @@ export class AdHocTaskRunningHandler {
   private logger: Logger;
 
   private runningTimeoutId?: NodeJS.Timeout;
-  private isUpdating: boolean = false;
   private runningPromise?: Promise<void>;
 
   constructor(client: ISavedObjectsRepository, logger: Logger) {
@@ -39,12 +38,11 @@ export class AdHocTaskRunningHandler {
 
   public async waitFor(): Promise<void> {
     this.stop();
-    if (this.isUpdating && this.runningPromise) return this.runningPromise;
+    if (this.runningPromise) return this.runningPromise;
     else return Promise.resolve();
   }
 
   private setRunning(adHocRunParamsId: string, schedule: AdHocRunSchedule[], namespace?: string) {
-    this.isUpdating = true;
     this.runningPromise = partiallyUpdateAdHocRun(
       this.client,
       adHocRunParamsId,
@@ -58,11 +56,9 @@ export class AdHocTaskRunningHandler {
     this.runningPromise
       .then(() => {
         this.runningPromise = undefined;
-        this.isUpdating = false;
       })
       .catch((err) => {
         this.runningPromise = undefined;
-        this.isUpdating = false;
         this.logger.error(
           `error updating status and schedule attribute for ad hoc run ${adHocRunParamsId} ${err.message}`
         );

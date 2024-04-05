@@ -123,7 +123,7 @@ export class BackfillClient {
     const createSOResult = Array.from(soToCreateOrErrorMap.keys()).map((ndx: number) => {
       const indexOrError = soToCreateOrErrorMap.get(ndx);
       if (isNumber(indexOrError)) {
-        return transformedResponse[indexOrError as number];
+        return transformedResponse[indexOrError];
       } else {
         return indexOrError as ScheduleBackfillError;
       }
