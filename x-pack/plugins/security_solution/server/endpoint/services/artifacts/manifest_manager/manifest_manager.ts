@@ -872,7 +872,7 @@ export class ManifestManager {
     return new UnifiedManifestClient(this.savedObjectsClient);
   }
 
-  protected async getAllUnifiedManifestsSOFromCache(): Promise<InternalUnifiedManifestSchema[]> {
+  public async getAllUnifiedManifestsSOFromCache(): Promise<InternalUnifiedManifestSchema[]> {
     // Fetch Unified Manifests from SO on getLatestManifest, cache them and remove on successful commit.
     // This is to avoid fetching Unified Manifests from SO on every getLatestManifest call which is every task run (1 minute).
     if (!this.cachedUnifiedManifestsSO.length) {
@@ -902,6 +902,7 @@ export class ManifestManager {
         { artifactId: string; policyId: undefined } | { artifactId: string; policyId: string }
       >;
       semanticVersion: string;
+      schemaVersion: ManifestSchemaVersion;
     };
   } {
     const globalUnifiedManifest = unifiedManifestsSo.find((a) => a.policyId === '.global');
@@ -929,7 +930,8 @@ export class ManifestManager {
             []
           ),
         ],
-        semanticVersion: globalUnifiedManifest?.semanticVersion ?? '1.0.0', //
+        semanticVersion: globalUnifiedManifest?.semanticVersion ?? '1.0.0',
+        schemaVersion: this.schemaVersion,
       },
     };
   }
@@ -1019,7 +1021,7 @@ export class ManifestManager {
   public async bumpGlobalUnifiedManifestVersion() {
     const globalUnifiedManifestSO =
       await this.getUnifiedManifestClient().getUnifiedManifestByPolicyId('.global');
-    if (!globalUnifiedManifestSO.saved_objects.length) {
+    if (!globalUnifiedManifestSO?.saved_objects?.length) {
       this.logger.warn('No Global Unified Manifest found to bump version');
       return;
     }
