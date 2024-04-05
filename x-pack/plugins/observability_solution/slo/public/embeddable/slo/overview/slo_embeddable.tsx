@@ -86,7 +86,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
       this.getInput();
     const queryClient = new QueryClient();
     const { observabilityRuleTypeRegistry } = this.deps.observability;
-    // const observabilityRuleTypeRegistry = this.deps.observabilityRuleTypeRegistry;
     const I18nContext = this.deps.i18n.Context;
 
     const renderOverview = () => {
