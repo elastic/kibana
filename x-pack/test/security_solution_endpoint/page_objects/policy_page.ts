@@ -15,6 +15,16 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
 
   return {
     /**
+     * Navigates to the Endpoint Policy List page
+     */
+    async navigateToPolicyList() {
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        `/policy`
+      );
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    },
+    /**
      * Navigates to the Endpoint Policy Details page
      *
      * @param policyId
@@ -27,6 +37,12 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
+    /**
+     * Ensures the current page is the policy list page
+     */
+    async ensureIsOnListPage() {
+      await testSubjects.existOrFail('policyListPage');
+    },
     /**
      * Finds and returns the Policy Details Page Save button
      */
@@ -127,7 +143,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
 
     /**
      * Used when looking a the Ingest create/edit package policy pages. Finds the endpoint
-     * custom configuaration component
+     * custom configuration component
      * @param onEditPage
      */
     async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {

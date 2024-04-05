@@ -36,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
       await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
     loadTestFile(require.resolve('./endpoint_list'));
+    loadTestFile(require.resolve('./policy_list'));
     loadTestFile(require.resolve('./policy_details'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./trusted_apps_list'));
