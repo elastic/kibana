@@ -193,7 +193,11 @@ export const postEvaluateRoute = (
                         ...(connectorName != null ? [connectorName] : []),
                         runName,
                       ],
-                      tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
+                      tracers: getLangSmithTracer({
+                        projectName: detailedRunName,
+                        exampleId,
+                        logger,
+                      }),
                     },
                     replacements: {},
                   });

@@ -52,7 +52,8 @@ interface Props {
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
-  const { actionTypeRegistry, basePath, http } = useAssistantContext();
+  const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
+    useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
   const {
     data: evalResponse,
@@ -92,7 +93,26 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     },
     [setOutputIndex]
   );
-  // Dataset
+  /** Trace Options **/
+  const onApmUrlChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithProjectChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithApiKeyChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  /** Dataset **/
   const [useLangSmithDataset, setUseLangSmithDataset] = useState(true);
   const datasetToggleButton = useMemo(() => {
     return (
@@ -421,6 +441,42 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
             value={outputIndex}
             onChange={onOutputIndexChange}
             aria-label="evaluation-output-index-textfield"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.APM_URL_LABEL}
+          fullWidth
+          helpText={i18n.APM_URL_DESCRIPTION}
+        >
+          <EuiFieldText
+            value={traceOptions.apmUrl}
+            onChange={onApmUrlChange}
+            aria-label="apm-url-textfield"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.LANGSMITH_PROJECT_LABEL}
+          fullWidth
+          helpText={i18n.LANGSMITH_PROJECT_DESCRIPTION}
+        >
+          <EuiFieldText
+            value={traceOptions.langSmithProject}
+            onChange={onLangSmithProjectChange}
+            aria-label="langsmith-project-textfield"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          display="rowCompressed"
+          label={i18n.LANGSMITH_API_KEY_LABEL}
+          fullWidth
+          helpText={i18n.LANGSMITH_API_KEY_DESCRIPTION}
+        >
+          <EuiFieldText
+            value={traceOptions.langSmithApiKey}
+            onChange={onLangSmithApiKeyChange}
+            aria-label="langsmith-api-key-textfield"
           />
         </EuiFormRow>
       </EuiAccordion>
