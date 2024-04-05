@@ -221,7 +221,6 @@ export class AssetCriticalityDataClient {
           const upsertResult = await this.bulkUpsert(batch.map((b) => b.record));
           const startIndex = batch[0].index;
           upsertResult.forEach((result, resultIndex) => {
-            stats.total++;
             if ('error' in result) {
               errors.push({
                 message: result.error,
@@ -246,7 +245,9 @@ export class AssetCriticalityDataClient {
       };
 
       const addToBatch = (record: AssetCriticalityUpsert | Error) => {
+        stats.total++;
         if (record instanceof Error) {
+          stats.errors++;
           errors.push({
             message: record.message,
             index,
