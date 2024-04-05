@@ -249,10 +249,7 @@ describe('publishing subject', () => {
           <>
             <button
               onClick={() => {
-                // using setTimeout to move next calls outside of callstack from onClick
-                setTimeout(() => {
-                  setSubjectFoo(new BehaviorSubject<string>('foo'));
-                }, 0);
+                setSubjectFoo(new BehaviorSubject<string>('foo'));
               }}
             />
             <span>{`valueFoo: ${valueFoo}`}</span>
