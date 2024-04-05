@@ -46,7 +46,10 @@ export class AIAssistantManagementSelectionPlugin
         value: this.config.preferredAIAssistantType,
         description: i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
-          { defaultMessage: 'Where the Observability AI Assistant is visible' }
+          {
+            defaultMessage:
+              '<em>[technical preview]</em> Whether to show the Observability AI Assistant menu item in Observability, everywhere, or nowhere.',
+          }
         ),
         schema: schema.oneOf(
           [
