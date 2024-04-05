@@ -106,7 +106,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   };
 
   const onChangeDateFilter = (date: moment.Moment | null) => {
-    setDateFilter(date);
+    setDateFilter(date?.startOf('day') ?? null);
     setNActions(defaultNActions);
   };
 
