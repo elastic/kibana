@@ -35,10 +35,13 @@ const initialDefaultAllowReplacement = ['replacement1'];
 const setAllQuickPromptsMock = jest.fn();
 const setAllSystemPromptsMock = jest.fn();
 const setDefaultAllowMock = jest.fn();
+const setAssistantStreamingEnabled = jest.fn();
 const setDefaultAllowReplacementMock = jest.fn();
 const setKnowledgeBaseMock = jest.fn();
 const reportAssistantSettingToggled = jest.fn();
 const mockValues = {
+  assistantStreamingEnabled: true,
+  setAssistantStreamingEnabled,
   assistantTelemetry: { reportAssistantSettingToggled },
   allSystemPrompts: mockSystemPrompts,
   allQuickPrompts: mockQuickPrompts,
@@ -69,6 +72,7 @@ const updatedValues = {
     isEnabledKnowledgeBase: false,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
+  assistantStreamingEnabled: false,
 };
 
 jest.mock('../../../assistant_context', () => {
@@ -93,6 +97,7 @@ describe('useSettingsUpdater', () => {
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
         setUpdatedKnowledgeBaseSettings,
+        setUpdatedAssistantStreamingEnabled,
         resetSettings,
       } = result.current;
 
@@ -103,6 +108,7 @@ describe('useSettingsUpdater', () => {
       setUpdatedDefaultAllow(updatedValues.defaultAllow);
       setUpdatedDefaultAllowReplacement(updatedValues.defaultAllowReplacement);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
+      setUpdatedAssistantStreamingEnabled(updatedValues.assistantStreamingEnabled);
 
       expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
       expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
@@ -110,6 +116,9 @@ describe('useSettingsUpdater', () => {
       expect(result.current.defaultAllow).toEqual(updatedValues.defaultAllow);
       expect(result.current.defaultAllowReplacement).toEqual(updatedValues.defaultAllowReplacement);
       expect(result.current.knowledgeBase).toEqual(updatedValues.knowledgeBase);
+      expect(result.current.assistantStreamingEnabled).toEqual(
+        updatedValues.assistantStreamingEnabled
+      );
 
       resetSettings();
 
@@ -119,6 +128,9 @@ describe('useSettingsUpdater', () => {
       expect(result.current.defaultAllow).toEqual(mockValues.defaultAllow);
       expect(result.current.defaultAllowReplacement).toEqual(mockValues.defaultAllowReplacement);
       expect(result.current.knowledgeBase).toEqual(mockValues.knowledgeBase);
+      expect(result.current.assistantStreamingEnabled).toEqual(
+        mockValues.assistantStreamingEnabled
+      );
     });
   });
 

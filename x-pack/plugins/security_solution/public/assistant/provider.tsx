@@ -21,6 +21,7 @@ import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/ass
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
+import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
@@ -73,6 +74,7 @@ export const createConversations = async (
         timestamp: timestamp == null ? new Date().toISOString() : timestamp,
       };
     };
+    const connectors = await loadConnectors({ http });
 
     // post bulk create
     const bulkResult = await bulkChangeConversations(
@@ -80,6 +82,16 @@ export const createConversations = async (
       {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         create: conversationsToCreate.reduce((res: Record<string, Conversation>, c: any) => {
+          // ensure actionTypeId is added to apiConfig from legacy conversation data
+          if (c.apiConfig && !c.apiConfig.actionTypeId) {
+            const selectedConnector = (connectors ?? []).find(
+              (connector) => connector.id === c.apiConfig.connectorId
+            );
+            c.apiConfig = {
+              ...c.apiConfig,
+              actionTypeId: selectedConnector?.actionTypeId,
+            };
+          }
           res[c.id] = {
             ...c,
             messages: (c.messages ?? []).map(transformMessage),

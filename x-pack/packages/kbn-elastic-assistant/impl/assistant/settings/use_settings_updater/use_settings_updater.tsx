@@ -18,6 +18,7 @@ import {
 import { bulkChangeAnonymizationFields } from '../../api/anonymization_fields/use_bulk_anonymization_fields';
 
 interface UseSettingsUpdater {
+  assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   updatedAnonymizationData: FindAnonymizationFieldsResponse;
@@ -39,6 +40,7 @@ interface UseSettingsUpdater {
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   saveSettings: () => Promise<boolean>;
 }
 
@@ -54,6 +56,8 @@ export const useSettingsUpdater = (
     knowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
+    assistantStreamingEnabled,
+    setAssistantStreamingEnabled,
     setKnowledgeBase,
     http,
     toasts,
@@ -78,6 +82,8 @@ export const useSettingsUpdater = (
     useState<PerformBulkActionRequestBody>({});
   const [updatedAnonymizationData, setUpdatedAnonymizationData] =
     useState<FindAnonymizationFieldsResponse>(anonymizationFields);
+  const [updatedAssistantStreamingEnabled, setUpdatedAssistantStreamingEnabled] =
+    useState<boolean>(assistantStreamingEnabled);
   // Knowledge Base
   const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
     useState<KnowledgeBaseConfig>(knowledgeBase);
@@ -90,9 +96,17 @@ export const useSettingsUpdater = (
     setConversationsSettingsBulkActions({});
     setUpdatedQuickPromptSettings(allQuickPrompts);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
+    setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
     setUpdatedSystemPromptSettings(allSystemPrompts);
     setUpdatedAnonymizationData(anonymizationFields);
-  }, [allQuickPrompts, allSystemPrompts, anonymizationFields, conversations, knowledgeBase]);
+  }, [
+    allQuickPrompts,
+    allSystemPrompts,
+    anonymizationFields,
+    assistantStreamingEnabled,
+    conversations,
+    knowledgeBase,
+  ]);
 
   /**
    * Save all pending settings
@@ -113,7 +127,9 @@ export const useSettingsUpdater = (
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
     const didUpdateRAGAlerts =
       knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
-    if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
+    const didUpdateAssistantStreamingEnabled =
+      assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
+    if (didUpdateKnowledgeBase || didUpdateRAGAlerts || didUpdateAssistantStreamingEnabled) {
       assistantTelemetry?.reportAssistantSettingToggled({
         ...(didUpdateKnowledgeBase
           ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
@@ -121,8 +137,12 @@ export const useSettingsUpdater = (
         ...(didUpdateRAGAlerts
           ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
           : {}),
+        ...(didUpdateAssistantStreamingEnabled
+          ? { assistantStreamingEnabled: updatedAssistantStreamingEnabled }
+          : {}),
       });
     }
+    setAssistantStreamingEnabled(updatedAssistantStreamingEnabled);
     setKnowledgeBase(updatedKnowledgeBaseSettings);
     const hasBulkAnonymizationFields =
       anonymizationFieldsBulkActions.create ||
@@ -143,7 +163,10 @@ export const useSettingsUpdater = (
     toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
+    updatedAssistantStreamingEnabled,
     updatedKnowledgeBaseSettings,
+    assistantStreamingEnabled,
+    setAssistantStreamingEnabled,
     setKnowledgeBase,
     anonymizationFieldsBulkActions,
     assistantTelemetry,
@@ -153,6 +176,7 @@ export const useSettingsUpdater = (
     conversationSettings,
     conversationsSettingsBulkActions,
     knowledgeBase: updatedKnowledgeBaseSettings,
+    assistantStreamingEnabled: updatedAssistantStreamingEnabled,
     quickPromptSettings: updatedQuickPromptSettings,
     resetSettings,
     systemPromptSettings: updatedSystemPromptSettings,
@@ -162,6 +186,7 @@ export const useSettingsUpdater = (
     anonymizationFieldsBulkActions,
     setAnonymizationFieldsBulkActions,
     setUpdatedKnowledgeBaseSettings,
+    setUpdatedAssistantStreamingEnabled,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,
     setConversationSettings,

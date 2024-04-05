@@ -116,14 +116,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
     },
 
-    async parseSummaryPanel(): Promise<SummaryPanelKpi> {
+    async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
         { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
         { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
         { title: texts.activeDatasets, key: 'activeDatasets' },
         { title: texts.estimatedData, key: 'estimatedData' },
-      ];
+      ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
         kpiTitleAndKeys.map(async ({ title, key }) => ({
