@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
 import {
   EuiBadge,
@@ -635,10 +635,10 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
 
   if (aggregationResponse) {
     const { usernames, types, expired, managed } = aggregationResponse;
-    types?.buckets.forEach((type) => {
+    (types?.buckets as estypes.AggregationsStringTermsBucket[]).forEach((type) => {
       typeFilters.add(type.key);
     });
-    usernames?.buckets.forEach((username) => {
+    (usernames?.buckets as estypes.AggregationsStringTermsBucket[]).forEach((username) => {
       usernameFilters.add(username.key);
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
