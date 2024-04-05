@@ -8,6 +8,7 @@
 
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
+import { once } from 'lodash';
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import * as Rx from 'rxjs';
 
@@ -18,6 +19,44 @@ import {
   isApiCompatibleWithCustomizePanelAction,
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
+
+const createDocumentMouseMoveListener = once(() => Rx.fromEvent<MouseEvent>(document, 'mousemove'));
+const createDocumentMouseUpListener = once(() => Rx.fromEvent<MouseEvent>(document, 'mouseup'));
+
+// TODO: Handle Enter keypress
+const usePresentationPanelTitleClickHandler = (titleElmRef?: HTMLElement) => {
+  const onClick = useRef<Rx.Observable<{ dragged: boolean }> | null>(null);
+
+  const mouseup = createDocumentMouseUpListener();
+  const mousemove = createDocumentMouseMoveListener();
+
+  useEffect(() => {
+    if (titleElmRef) {
+      const mousedown = Rx.fromEvent<MouseEvent>(titleElmRef, 'mousedown');
+
+      onClick.current = mousedown
+        .pipe(
+          Rx.mergeMap(function (md) {
+            // create reference for when mouse is down
+            const startX = md.offsetX;
+            const startY = md.offsetY;
+
+            return mousemove
+              .pipe(
+                Rx.map(function (mm) {
+                  return { dragged: startX !== mm.clientX && startY !== mm.clientY };
+                })
+              )
+              .pipe(Rx.takeUntil(mouseup))
+              .pipe(Rx.defaultIfEmpty({ dragged: false }));
+          })
+        )
+        .pipe(Rx.repeatWhen(() => mousedown));
+    }
+  }, [mousemove, mouseup, titleElmRef]);
+
+  return titleElmRef ? onClick.current : null;
+};
 
 export const PresentationPanelTitle = ({
   api,
@@ -57,51 +96,20 @@ export const PresentationPanelTitle = ({
     );
   }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api]);
 
-  const onClick = useRef<Rx.Observable<{ dragged: boolean }> | null>(null);
+  const onClick = usePresentationPanelTitleClickHandler(panelTitleElmRef);
 
   useEffect(() => {
-    if (panelTitleElmRef) {
-      const mouseup = Rx.fromEvent<MouseEvent>(document, 'mouseup');
-      const mousemove = Rx.fromEvent<MouseEvent>(document, 'mousemove');
-      const mousedown = Rx.fromEvent<MouseEvent>(panelTitleElmRef, 'mousedown');
+    const panelTitleClickSubscription = onClick?.subscribe(function onClickHandler({ dragged }) {
+      if (!dragged) {
+        openCustomizePanelFlyout({
+          api: api as CustomizePanelActionApi,
+          focusOnTitle: true,
+        });
+      }
+    });
 
-      onClick.current = mousedown
-        .pipe(
-          Rx.mergeMap(function (md) {
-            // create reference for when mouse is down
-            const startX = md.offsetX;
-            const startY = md.offsetY;
-
-            return mousemove
-              .pipe(
-                Rx.map(function (mm) {
-                  return { dragged: startX !== mm.clientX && startY !== mm.clientY };
-                })
-              )
-              .pipe(Rx.takeUntil(mouseup))
-              .pipe(Rx.defaultIfEmpty({ dragged: false }));
-          })
-        )
-        .pipe(Rx.repeatWhen(() => mousedown));
-    }
-  }, [panelTitleElmRef]);
-
-  useEffect(() => {
-    if (panelTitleElmRef) {
-      const panelTitleClickSubscription = onClick.current?.subscribe(function onClickHandler({
-        dragged,
-      }) {
-        if (!dragged) {
-          openCustomizePanelFlyout({
-            api: api as CustomizePanelActionApi,
-            focusOnTitle: true,
-          });
-        }
-      });
-
-      return () => panelTitleClickSubscription?.unsubscribe();
-    }
-  }, [panelTitleElmRef, api]);
+    return () => panelTitleClickSubscription?.unsubscribe();
+  }, [api, onClick]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (!panelDescription) {
