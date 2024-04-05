@@ -718,7 +718,7 @@ export class TaskRunner<
         const isUserError = !errorsFromLastRun.some((lastRunError) => !lastRunError.userError);
         return {
           taskRunError: createTaskRunError(
-            new Error(errorsFromLastRun.join(',')),
+            new Error(errorsFromLastRun.map((lastRunError) => lastRunError.message).join(',')),
             isUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
           ),
         };

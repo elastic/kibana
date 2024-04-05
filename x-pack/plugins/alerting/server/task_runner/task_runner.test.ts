@@ -3333,6 +3333,7 @@ describe('Task Runner', () => {
     });
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.taskRunError).toEqual(new Error('an error occurred,second error occurred'));
   });
 
   test('returns user error if all the errors are user error', async () => {
