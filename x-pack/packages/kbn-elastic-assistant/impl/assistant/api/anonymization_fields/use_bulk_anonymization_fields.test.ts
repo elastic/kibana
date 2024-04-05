@@ -127,7 +127,11 @@ describe('bulkChangeAnonymizationFields', () => {
       update: {},
       delete: { ids: [] },
     };
-    await bulkChangeAnonymizationFields(httpMock, anonymizationFieldsActions, toasts as unknown as IToasts);
+    await bulkChangeAnonymizationFields(
+      httpMock,
+      anonymizationFieldsActions,
+      toasts as unknown as IToasts
+    );
     expect(toasts.addError.mock.calls[0][0]).toEqual(
       new Error('Error message: Error updating anonymization field for conversation Conversation 1')
     );
@@ -144,7 +148,11 @@ describe('bulkChangeAnonymizationFields', () => {
       delete: { ids: [] },
     };
 
-    await bulkChangeAnonymizationFields(httpMock, anonymizationFieldsActions, toasts as unknown as IToasts);
+    await bulkChangeAnonymizationFields(
+      httpMock,
+      anonymizationFieldsActions,
+      toasts as unknown as IToasts
+    );
     expect(toasts.addError.mock.calls[0][0]).toEqual(new Error(''));
   });
 });
