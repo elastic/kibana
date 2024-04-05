@@ -10,6 +10,7 @@ import path from 'path';
 import { paths } from '../../../common/locators/paths';
 
 // TODO Kevin: Add spaceId in remote schema?
+// TODO Kevin: Change remote.kibanaUrl to be optional? (since some summary document may not have it until kibana upgrade)
 export function createRemoteSloDetailsUrl(
   slo: SLOWithSummaryResponse,
   spaceId: string = 'default'
@@ -25,5 +26,34 @@ export function createRemoteSloDetailsUrl(
   );
 
   const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
+  return remoteUrl.toString();
+}
+
+export function createRemoteSloDeleteUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
+  if (!slo.remote || slo.remote.kibanaUrl === '') {
+    return undefined;
+  }
+
+  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const detailsPath = paths.sloDetails(
+    slo.id,
+    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
+  );
+
+  const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
+  remoteUrl.searchParams.append('delete', 'true');
+
+  return remoteUrl.toString();
+}
+
+export function createRemoteSloEditUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
+  if (!slo.remote || slo.remote.kibanaUrl === '') {
+    return undefined;
+  }
+
+  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const editPath = paths.sloEdit(slo.id);
+  const remoteUrl = new URL(path.join(spacePath, editPath), slo.remote.kibanaUrl);
+
   return remoteUrl.toString();
 }

@@ -7,24 +7,22 @@
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
-
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { sloFeatureId } from '@kbn/observability-plugin/common';
-import { isEmpty } from 'lodash';
-import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
-import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
-import { useSloActions } from '../hooks/use_slo_actions';
-import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useDeleteSlo } from '../../../hooks/use_delete_slo';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { useKibana } from '../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
+import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
 import { useGetQueryParams } from '../hooks/use_get_query_params';
+import { useSloActions } from '../hooks/use_slo_actions';
 
 export interface Props {
   slo?: SLOWithSummaryResponse;
@@ -38,6 +36,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     http: { basePath },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+
   const hasApmReadCapabilities = capabilities.apm.show;
   const { hasWriteCapabilities } = useCapabilities();
 
@@ -46,7 +45,6 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
-
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
   const { mutate: deleteSlo } = useDeleteSlo();

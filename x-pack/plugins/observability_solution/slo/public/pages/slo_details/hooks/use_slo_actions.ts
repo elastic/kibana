@@ -8,10 +8,15 @@
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { BurnRateRuleParams } from '../../../typings';
 import { paths } from '../../../../common/locators/paths';
-import { formatRemoteKibanaUrl, openRemoteKibana } from '../../../utils/slo/utils';
+import { useSpace } from '../../../hooks/use_space';
+import { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
+import {
+  createRemoteSloDeleteUrl,
+  createRemoteSloEditUrl,
+} from '../../../utils/slo/remote_slo_urls';
+import { openRemoteKibana } from '../../../utils/slo/utils';
 
 // TODO Kevin: Refactor: can we remove the undefined check somehow?
 // TODO Kevin: Refactor remote url generation
@@ -32,6 +37,7 @@ export const useSloActions = ({
     },
     http,
   } = useKibana().services;
+  const spaceId = useSpace();
 
   if (!slo) {
     return {
@@ -50,7 +56,7 @@ export const useSloActions = ({
     } else {
       const locator = locators.get<RulesParams>(rulesLocatorID);
 
-      if (slo.remote) {
+      if (slo.remote && slo.remote.kibanaUrl !== '') {
         const basePath = http.basePath.get();
         const url = await locator?.getUrl({ params: { sloId: slo.id } });
         // since basePath is already included in the kibanaUrl, we need to remove it from the start of url
@@ -71,11 +77,10 @@ export const useSloActions = ({
   );
 
   // TODO Kevin: Issue with spaceId not taken into account.
-  const remoteDeleteUrl =
-    formatRemoteKibanaUrl(slo?.remote?.kibanaUrl ?? '', detailsUrl) + `&delete=true`;
+  const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
 
   const sloEditUrl = slo.remote
-    ? formatRemoteKibanaUrl(slo.remote.kibanaUrl, paths.sloEdit(slo.id))
+    ? createRemoteSloEditUrl(slo, spaceId)
     : http.basePath.prepend(paths.sloEdit(slo.id));
 
   return {
