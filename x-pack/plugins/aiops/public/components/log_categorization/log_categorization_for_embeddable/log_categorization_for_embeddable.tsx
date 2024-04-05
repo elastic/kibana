@@ -156,7 +156,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       timeField === undefined ||
       earliest === undefined ||
       latest === undefined ||
-      minimumTimeRangeOption === undefined
+      minimumTimeRangeOption === undefined ||
+      mounted.current !== true
     ) {
       return;
     }
@@ -180,6 +181,10 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       searchQuery
     );
 
+    if (mounted.current !== true) {
+      return;
+    }
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
         runValidateFieldRequest(index, selectedField.name, timeField, timeRange, searchQuery, {
@@ -196,32 +201,34 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         ),
       ]);
 
-      if (mounted.current === true) {
-        setFieldValidationResult(validationResult);
-        const { categories, hasExamples } = categorizationResult;
+      if (mounted.current !== true) {
+        return;
+      }
 
-        if (timeRange.useSubAgg) {
-          const categoriesInBucket = categorizationResult.categories
-            .map((category) => ({
-              ...category,
-              count: category.subFieldCount ?? category.subTimeRangeCount!,
-              examples: category.subFieldExamples!,
-              sparkline: category.subFieldSparkline,
-            }))
-            .filter((category) => category.count > 0)
-            .sort((a, b) => b.count - a.count);
-          setData({
-            categories: categoriesInBucket,
-            displayExamples: hasExamples,
-            totalCategories: categories.length,
-          });
-        } else {
-          setData({
-            categories,
-            displayExamples: hasExamples,
-            totalCategories: categories.length,
-          });
-        }
+      setFieldValidationResult(validationResult);
+      const { categories, hasExamples } = categorizationResult;
+
+      if (timeRange.useSubAgg) {
+        const categoriesInBucket = categorizationResult.categories
+          .map((category) => ({
+            ...category,
+            count: category.subFieldCount ?? category.subTimeRangeCount!,
+            examples: category.subFieldExamples!,
+            sparkline: category.subFieldSparkline,
+          }))
+          .filter((category) => category.count > 0)
+          .sort((a, b) => b.count - a.count);
+        setData({
+          categories: categoriesInBucket,
+          displayExamples: hasExamples,
+          totalCategories: categories.length,
+        });
+      } else {
+        setData({
+          categories,
+          displayExamples: hasExamples,
+          totalCategories: categories.length,
+        });
       }
     } catch (error) {
       toasts.addError(error, {
