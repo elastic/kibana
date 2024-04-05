@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
-import { getViewModeSubject, useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  useBatchedOptionalPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
 import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
