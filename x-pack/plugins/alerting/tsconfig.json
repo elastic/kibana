@@ -48,6 +48,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n-react",
     "@kbn/ui-theme",
     "@kbn/core-doc-links-server-mocks",
     "@kbn/doc-links",
@@ -68,7 +69,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-execution-context-server-mocks",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*"
