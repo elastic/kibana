@@ -8,7 +8,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { imageClickTrigger } from '../actions';

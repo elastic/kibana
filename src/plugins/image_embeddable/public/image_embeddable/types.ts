@@ -23,7 +23,7 @@ export type ImageEmbeddableSerializedState = SerializedTitles &
 export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableSerializedState> &
   HasEditCapabilities &
   HasSupportedTriggers &
-  Partial<HasDynamicActions>;
+  HasDynamicActions;
 
 export type ImageSizing = 'fill' | 'contain' | 'cover' | 'none';
 

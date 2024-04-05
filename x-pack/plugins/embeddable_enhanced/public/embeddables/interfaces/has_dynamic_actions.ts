@@ -9,11 +9,11 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '../../plugin';
 
-export interface HasDynamicActions {
+export type HasDynamicActions = Partial<{
   enhancements: { dynamicActions: DynamicActionManager };
   setDynamicActions: (newState: DynamicActionsSerializedState['enhancements']) => void;
   dynamicActionsState$: PublishingSubject<DynamicActionsSerializedState['enhancements']>;
-}
+}>;
 
 export const apiHasDynamicActions = (api: unknown): api is HasDynamicActions => {
   const apiMaybeHasDynamicActions = api as HasDynamicActions;
