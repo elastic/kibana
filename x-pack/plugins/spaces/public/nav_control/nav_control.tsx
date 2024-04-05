@@ -36,7 +36,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
             <Suspense fallback={<EuiLoadingSpinner />}>
               <LazyNavControlPopover
                 spacesManager={spacesManager}
-                serverBasePath={core.http.basePath.serverBasePath}
+                serverBasePath={core.http.basePath.get()}
                 anchorPosition="downLeft"
                 capabilities={core.application.capabilities}
                 navigateToApp={core.application.navigateToApp}

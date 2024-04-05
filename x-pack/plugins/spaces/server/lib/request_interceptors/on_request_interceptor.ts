@@ -33,11 +33,13 @@ export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDep
     if (pathHasExplicitSpaceIdentifier) {
       const reqBasePath = `/s/${spaceId}`;
 
-      http.basePath.set(request, reqBasePath);
+      http.basePath.set(request, { id: 'spaces', basePath: reqBasePath });
 
-      const newPathname = path.substr(reqBasePath.length) || '/';
+      const indexPath = path.indexOf(reqBasePath);
+      const otherBasePaths = indexPath > 0 ? path.slice(0, indexPath) : '';
+      const newPathname = path.slice(indexPath + reqBasePath.length) || '/';
 
-      return toolkit.rewriteUrl(`${newPathname}${request.url.search}`);
+      return toolkit.rewriteUrl(`${otherBasePaths}${newPathname}${request.url.search}`);
     }
 
     return toolkit.next();
