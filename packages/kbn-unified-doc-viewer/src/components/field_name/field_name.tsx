@@ -23,6 +23,7 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
+  showEcsInfo?: boolean;
 }
 
 export function FieldName({
@@ -32,6 +33,7 @@ export function FieldName({
   fieldIconProps,
   scripted = false,
   highlight = '',
+  showEcsInfo = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName =
@@ -39,6 +41,7 @@ export function FieldName({
   const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
+  const description = showEcsInfo ? fieldMapping?.ecsDescription : fieldMapping?.customDescription;
 
   return (
     <Fragment>
@@ -58,9 +61,9 @@ export function FieldName({
           </EuiToolTip>
         </EuiFlexItem>
 
-        {fieldMapping?.description ? (
+        {description ? (
           <EuiFlexItem grow={false}>
-            <FieldDescriptionIconButton field={fieldMapping} />
+            <FieldDescriptionIconButton name={fieldMapping?.name} description={description} />
           </EuiFlexItem>
         ) : null}
 

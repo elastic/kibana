@@ -46,11 +46,6 @@ export class DataViewField implements DataViewFieldBase {
    * Kbn field type, used mainly for formattering.
    */
   private readonly kbnFieldType: KbnFieldType;
-  /**
-   * Returns context configuration for the actual field, e.g if it's part of an ECS fields list
-   * @private
-   */
-  private readonly getContext: (() => DataViewFieldContext) | undefined;
 
   /**
    * DataView constructor
@@ -58,13 +53,10 @@ export class DataViewField implements DataViewFieldBase {
    * @param spec Configuration for the field
    * @param getContext Get Context of the field
    */
-  constructor(spec: FieldSpec, getContext?: (() => DataViewFieldContext) | undefined) {
+  constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    if (getContext) {
-      this.getContext = getContext;
-    }
   }
 
   // writable attrs
@@ -200,16 +192,6 @@ export class DataViewField implements DataViewFieldBase {
       : this.spec.shortDotsEnable
       ? shortenDottedString(this.spec.name)
       : this.spec.name;
-  }
-
-  public get description() {
-    if (this.spec.customDescription) {
-      return this.spec.customDescription;
-    }
-    if (this.getContext && this.getContext().ecs) {
-      return this.ecsDescription;
-    }
-    return '';
   }
 
   public get ecsDescription() {

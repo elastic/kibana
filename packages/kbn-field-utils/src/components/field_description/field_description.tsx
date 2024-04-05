@@ -13,35 +13,34 @@ import { css } from '@emotion/react';
 const MAX_VISIBLE_LENGTH = 110;
 
 export interface FieldDescriptionProps {
-  field: {
-    name: string;
-    description?: string;
-  };
+  name?: string;
   color?: 'subdued';
   truncate?: boolean;
+  description?: string;
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
-  field,
+  name,
   color,
   truncate = true,
+  description,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const description = (field?.description || '').trim();
+  const displayedDescription = (description || '').trim();
 
-  const isTooLong = Boolean(truncate && description.length > MAX_VISIBLE_LENGTH);
+  const isTooLong = Boolean(truncate && displayedDescription.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(isTooLong);
 
-  if (!description) {
+  if (!name || !displayedDescription) {
     return null;
   }
 
   return (
-    <div data-test-subj={`fieldDescription-${field.name}`}>
+    <div data-test-subj={`fieldDescription-${name}`}>
       {isTruncated ? (
         <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
           <button
-            data-test-subj={`toggleFieldDescription-${field.name}`}
+            data-test-subj={`toggleFieldDescription-${name}`}
             title={i18n.translate('fieldUtils.fieldDescription.viewMoreButton', {
               defaultMessage: 'View full field description',
             })}
@@ -61,19 +60,19 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
               }
             `}
           >
-            <EuiTextBlockTruncate lines={2}>{description}</EuiTextBlockTruncate>
+            <EuiTextBlockTruncate lines={2}>{displayedDescription}</EuiTextBlockTruncate>
           </button>
         </EuiText>
       ) : (
         <>
           <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
-            {description}
+            {displayedDescription}
           </EuiText>
           {isTooLong && (
             <EuiButtonEmpty
               size="xs"
               flush="both"
-              data-test-subj={`toggleFieldDescription-${field.name}`}
+              data-test-subj={`toggleFieldDescription-${name}`}
               onClick={() => setIsTruncated(true)}
             >
               {i18n.translate('fieldUtils.fieldDescription.viewLessButton', {

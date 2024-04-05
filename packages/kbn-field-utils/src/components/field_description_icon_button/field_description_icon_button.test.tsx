@@ -12,13 +12,13 @@ import { render, screen } from '@testing-library/react';
 
 describe('FieldDescriptionIconButton', () => {
   it('should render correctly when no custom description', async () => {
-    const { container } = render(<FieldDescriptionIconButton field={{ name: 'bytes' }} />);
+    const { container } = render(<FieldDescriptionIconButton name="bytes" />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render correctly with a short description', async () => {
     const description = 'test this desc';
-    render(<FieldDescriptionIconButton field={{ name: 'bytes', description }} />);
+    render(<FieldDescriptionIconButton name={'bytes'} description={description} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toBeNull();
     screen.queryByTestId('fieldDescriptionPopoverButton-bytes')?.click();
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
@@ -26,7 +26,7 @@ describe('FieldDescriptionIconButton', () => {
 
   it('should render correctly with a long description', async () => {
     const description = 'test this long desc '.repeat(8).trim();
-    render(<FieldDescriptionIconButton field={{ name: 'bytes', description }} />);
+    render(<FieldDescriptionIconButton name={'bytes'} description={description} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toBeNull();
     screen.queryByTestId('fieldDescriptionPopoverButton-bytes')?.click();
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);

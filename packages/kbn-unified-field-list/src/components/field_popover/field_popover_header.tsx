@@ -33,6 +33,7 @@ export interface FieldPopoverHeaderProps {
   onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
+  showEcsInfo?: boolean;
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -46,10 +47,13 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onAddFilter,
   onEditField,
   onDeleteField,
+  showEcsInfo,
 }) => {
   if (!field) {
     return null;
   }
+  const description = showEcsInfo ? field?.ecsDescription : field?.customDescription;
+  console.log({ showEcsInfo, description });
 
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',
@@ -153,10 +157,10 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {field.description ? (
+      {description ? (
         <>
           <EuiSpacer size="xs" />
-          <FieldDescription field={field} />
+          <FieldDescription name={field.name} description={description} />
         </>
       ) : null}
     </>

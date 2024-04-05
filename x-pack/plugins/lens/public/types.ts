@@ -85,6 +85,7 @@ export interface IndexPattern {
   hasRestrictions: boolean;
   spec: DataViewSpec;
   isPersisted: boolean;
+  hasEcsFields?: boolean;
 }
 
 export type IndexPatternField = FieldSpec & {

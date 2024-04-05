@@ -12,14 +12,14 @@ import { render, screen } from '@testing-library/react';
 
 describe('FieldDescription', () => {
   it('should render correctly when no custom description', async () => {
-    render(<FieldDescription field={{ name: 'bytes' }} />);
+    render(<FieldDescription name={'bytes'} />);
     const desc = screen.queryByTestId('fieldDescription-bytes');
     expect(desc).toBeNull();
   });
 
   it('should render correctly with a short custom description', async () => {
     const description = 'test this desc';
-    render(<FieldDescription field={{ name: 'bytes', description }} />);
+    render(<FieldDescription name="bytes" description={description} />);
     const desc = screen.queryByTestId('fieldDescription-bytes');
     expect(desc).toHaveTextContent(description);
     const button = screen.queryByTestId('toggleFieldDescription-bytes');
@@ -28,7 +28,7 @@ describe('FieldDescription', () => {
 
   it('should render correctly with a long custom description', async () => {
     const description = 'test this long desc '.repeat(8).trim();
-    render(<FieldDescription field={{ name: 'bytes', description }} />);
+    render(<FieldDescription name={'bytes'} description={description} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
     screen.queryByTestId('toggleFieldDescription-bytes')?.click();
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
@@ -40,7 +40,7 @@ describe('FieldDescription', () => {
 
   it('should render a long custom description without truncation', async () => {
     const description = 'test this long desc '.repeat(8).trim();
-    render(<FieldDescription field={{ name: 'bytes', description }} truncate={false} />);
+    render(<FieldDescription name={'bytes'} description={description} truncate={false} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(description);
     const button = screen.queryByTestId('toggleFieldDescription-bytes');
     expect(button).toBeNull();

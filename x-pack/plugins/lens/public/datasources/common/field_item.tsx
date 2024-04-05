@@ -97,14 +97,9 @@ export function InnerFieldItem(props: FieldItemProps) {
         aggregatable: true,
       });
     }
-    const getContext = indexPattern?.getFieldByName
-      ? () => ({
-          ecs: Boolean(indexPattern?.getFieldByName('ecs.version')),
-        })
-      : undefined;
-    // IndexPatternField type
-    return new DataViewField(field, getContext);
-  }, [field, indexPattern]);
+    return new DataViewField(field);
+  }, [field]);
+  const showEcsInfo = Boolean(indexPattern?.getFieldByName('ecs.version'));
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);
@@ -239,6 +234,7 @@ export function InnerFieldItem(props: FieldItemProps) {
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}
               onDeleteField={removeFieldAndClose}
+              showEcsInfo={showEcsInfo}
             />
           );
         }}

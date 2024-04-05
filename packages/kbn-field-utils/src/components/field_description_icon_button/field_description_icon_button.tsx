@@ -10,20 +10,22 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiPopover, EuiPopoverProps, useEuiTheme } from '@elastic/eui';
-import { FieldDescription, FieldDescriptionProps } from '../field_description';
+import { FieldDescription } from '../field_description';
 
 export type FieldDescriptionIconButtonProps = Pick<EuiPopoverProps, 'css'> & {
-  field: FieldDescriptionProps['field'];
+  name?: string;
+  description?: string;
 };
 
 export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProps> = ({
-  field,
+  name,
+  description,
   ...otherProps
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  if (!field?.description) {
+  if (!description) {
     return null;
   }
 
@@ -48,12 +50,12 @@ export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProp
             title={buttonTitle}
             aria-label={buttonTitle}
             size="xs"
-            data-test-subj={`fieldDescriptionPopoverButton-${field.name}`}
+            data-test-subj={`fieldDescriptionPopoverButton-${name}`}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           />
         }
       >
-        <FieldDescription field={field} truncate={false} />
+        <FieldDescription name={name} truncate={false} description={description} />
       </EuiPopover>
     </span>
   );
