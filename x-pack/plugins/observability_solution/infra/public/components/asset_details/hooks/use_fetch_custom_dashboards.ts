@@ -20,7 +20,7 @@ interface UseDashboardProps {
   assetType: InventoryItemType;
 }
 
-export function useFetchCustomDashboard({ assetType }: UseDashboardProps) {
+export function useFetchCustomDashboards({ assetType }: UseDashboardProps) {
   const { request$ } = useRequestObservable();
 
   const decodeResponse = (response: any) => {

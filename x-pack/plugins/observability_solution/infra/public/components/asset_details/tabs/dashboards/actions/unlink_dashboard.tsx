@@ -13,7 +13,7 @@ import type {
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
 import { useDeleteCustomDashboard } from '../../../hooks/use_custom_dashboards';
-import { useFetchCustomDashboard } from '../../../hooks/use_fetch_custom_dashboards';
+import { useFetchCustomDashboards } from '../../../hooks/use_fetch_custom_dashboards';
 import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 
 export function UnlinkDashboard({
@@ -30,7 +30,7 @@ export function UnlinkDashboard({
 
   const [, setUrlState] = useAssetDetailsUrlState();
   const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
-  const { dashboards, loading } = useFetchCustomDashboard({ assetType });
+  const { dashboards, loading } = useFetchCustomDashboards({ assetType });
 
   const onConfirm = useCallback(
     async function () {

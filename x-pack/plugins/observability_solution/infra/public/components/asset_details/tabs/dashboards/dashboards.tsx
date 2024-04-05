@@ -32,7 +32,7 @@ import type {
 
 import { EmptyDashboards } from './empty_dashboards';
 import { EditDashboard, GotoDashboardLink, LinkDashboard, UnlinkDashboard } from './actions';
-import { useFetchCustomDashboard } from '../../hooks/use_fetch_custom_dashboards';
+import { useFetchCustomDashboards } from '../../hooks/use_fetch_custom_dashboards';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { FETCH_STATUS, useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
@@ -52,7 +52,7 @@ export function Dashboards() {
   const { metrics } = useDataViewsContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
 
-  const { dashboards, loading, reload } = useFetchCustomDashboard({ assetType: asset.type });
+  const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
 
   useEffect(() => {
     const allAvailableDashboardsMap = new Map<string, DashboardItem>();
