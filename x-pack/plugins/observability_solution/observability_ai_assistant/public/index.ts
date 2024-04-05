@@ -28,6 +28,8 @@ export type {
   RenderFunction,
 };
 
+export { defaultStarterPrompts } from './content/starter_prompts';
+
 export { AssistantAvatar } from './components/assistant_avatar';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';

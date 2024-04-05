@@ -35,6 +35,7 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -54,6 +55,7 @@ function InternalAlertsPage() {
     },
     http,
     notifications: { toasts },
+    observabilityAIAssistant,
     share: {
       url: { locators },
     },
@@ -71,6 +73,29 @@ function InternalAlertsPage() {
   });
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
+
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  useEffect(() => {
+    return setScreenContext?.({
+      screenDescription: `The rule types that are available are: ${JSON.stringify(
+        ruleTypesWithDescriptions
+      )}`,
+      starterPrompts: [
+        {
+          title: i18n.translate('xpack.observability.app.starterPrompts.explainRules.title', {
+            defaultMessage: 'Explain',
+          }),
+          prompt: i18n.translate('xpack.observability.app.starterPrompts.explainRules.prompt', {
+            defaultMessage: `Can you explain the rule types that are available?`,
+          }),
+          icon: 'sparkles',
+        },
+      ],
+    });
+  }, [filteredRuleTypes, ruleTypesWithDescriptions, setScreenContext]);
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
     const { x } = brushEvent as XYBrushEvent;

@@ -82,7 +82,7 @@ export const renderApp = ({
 
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
-  const unregisterPrompts = plugins.observabilityAIAssistant.service.setScreenContext({
+  const unregisterPrompts = plugins.observabilityAIAssistant?.service.setScreenContext({
     starterPrompts: [
       {
         title: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.title', {
@@ -160,7 +160,7 @@ export const renderApp = ({
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
     plugins.data.search.session.clear();
-    unregisterPrompts();
+    unregisterPrompts?.();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

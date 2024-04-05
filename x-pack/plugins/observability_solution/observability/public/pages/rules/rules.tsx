@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { lazy, useState } from 'react';
+import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
@@ -22,6 +22,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
+import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
 const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
 
@@ -35,6 +36,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     http,
     docLinks,
     notifications: { toasts },
+    observabilityAIAssistant,
     triggersActionsUi: {
       ruleTypeRegistry,
       getAddRuleFlyout: AddRuleFlyout,
@@ -74,6 +76,35 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
   );
+
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  useEffect(() => {
+    return setScreenContext?.({
+      screenDescription: `The rule types that are available are: ${JSON.stringify(
+        ruleTypesWithDescriptions
+      )}`,
+      starterPrompts: [
+        {
+          title: i18n.translate(
+            'xpack.observability.aiAssistant.starterPrompts.explainRules.title',
+            {
+              defaultMessage: 'Explain',
+            }
+          ),
+          prompt: i18n.translate(
+            'xpack.observability.aiAssistant.starterPrompts.explainRules.prompt',
+            {
+              defaultMessage: `Can you explain the rule types that are available?`,
+            }
+          ),
+          icon: 'sparkles',
+        },
+      ],
+    });
+  }, [filteredRuleTypes, ruleTypesWithDescriptions, setScreenContext]);
 
   const tabs = [
     {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,6 +25,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
 }) => {
   const {
     services: {
+      observabilityAIAssistant,
       observabilityShared: {
         navigation: { PageTemplate },
       },
@@ -34,6 +35,34 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
 
   const { http } = useKibana().services;
   const basePath = http!.basePath.get();
+
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  useEffect(() => {
+    return setScreenContext?.({
+      starterPrompts: [
+        ...(!isDataLoading && !hasData
+          ? [
+              {
+                title: i18n.translate(
+                  'xpack.infra.aiAssistant.starterPrompts.explainNoData.title',
+                  {
+                    defaultMessage: 'Explain',
+                  }
+                ),
+                prompt: i18n.translate(
+                  'xpack.infra.aiAssistant.starterPrompts.explainNoData.prompt',
+                  {
+                    defaultMessage: "Why don't I see any data?",
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
+    });
+  }, [hasData, isDataLoading, setScreenContext]);
 
   const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined

@@ -42,5 +42,6 @@ export function useHasRumData() {
   return {
     hasData: formatHasRumResult(response, dataViewTitle).hasData,
     loading,
+    dataViewTitle,
   };
 }

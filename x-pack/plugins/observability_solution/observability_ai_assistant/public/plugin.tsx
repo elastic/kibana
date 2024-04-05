@@ -10,15 +10,18 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { type ComponentType, lazy, type Ref } from 'react';
-import { i18n } from '@kbn/i18n';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
-import { createUseChat } from './hooks/use_chat';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
+import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
+import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
+import { createScreenContextAction } from './utils/create_screen_context_action';
+import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
+import { defaultStarterPrompts } from './content/starter_prompts';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -27,9 +30,6 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
-import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
-import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
-import { createScreenContextAction } from './utils/create_screen_context_action';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -66,63 +66,7 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     service.setScreenContext({
-      starterPrompts: [
-        {
-          title: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.doIHaveAlerts.title',
-            { defaultMessage: 'Alerts' }
-          ),
-          prompt: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.doIHaveAlerts.prompt',
-            {
-              defaultMessage: 'Do I have any alerts?',
-            }
-          ),
-          icon: 'bell',
-        },
-        {
-          title: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.howCanICreateANewRule.title',
-            {
-              defaultMessage: 'Rule creation',
-            }
-          ),
-          prompt: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.howCanICreateANewRule.prompt',
-            {
-              defaultMessage: 'How can I create a new rule?',
-            }
-          ),
-          icon: 'createSingleMetricJob',
-        },
-        {
-          title: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.whatAreCases.title',
-            {
-              defaultMessage: 'Cases',
-            }
-          ),
-          prompt: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.whatAreCases.prompt',
-            {
-              defaultMessage: 'What are cases?',
-            }
-          ),
-          icon: 'casesApp',
-        },
-        {
-          title: i18n.translate('xpack.observabilityAiAssistant.starterPrompts.whatAreSlos.title', {
-            defaultMessage: 'SLOs',
-          }),
-          prompt: i18n.translate(
-            'xpack.observabilityAiAssistant.starterPrompts.whatAreSlos.prompt',
-            {
-              defaultMessage: 'What are SLOs?',
-            }
-          ),
-          icon: 'bullseye',
-        },
-      ],
+      starterPrompts: defaultStarterPrompts,
     });
 
     const withProviders = <P extends {}, R = {}>(

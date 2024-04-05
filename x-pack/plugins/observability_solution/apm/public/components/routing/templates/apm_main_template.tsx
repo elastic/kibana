@@ -12,6 +12,7 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import React, { useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
@@ -118,21 +119,52 @@ export function ApmMainTemplate({
     isServerless: config?.serverlessOnboarding,
   });
 
+  let screenDescription = '';
+
+  if (!hasApmData && !hasApmIntegrations) {
+    screenDescription =
+      'The user does not have the APM integration installed and does not have APM data.';
+  } else {
+    screenDescription = hasApmData
+      ? 'The user has APM data.'
+      : 'The user does not have APM data.';
+    screenDescription = hasApmIntegrations
+      ? `${screenDescription} The user has the APM integration installed.`
+      : `${screenDescription} The user does not have the APM integration installed.`;
+  }
+
+  if (noDataConfig !== undefined) {
+    screenDescription = `${screenDescription} The user is looking at a screen that tells them they do not have any data.`;
+  }
+
   useEffect(() => {
     return aiAssistant?.service.setScreenContext({
-      screenDescription: [
-        hasApmData
-          ? 'The user has APM data.'
-          : 'The user does not have APM data.',
-        hasApmIntegrations
-          ? 'The user has the APM integration installed. '
-          : 'The user does not have the APM integration installed',
-        noDataConfig !== undefined
-          ? 'The user is looking at a screen that tells them they do not have any data.'
-          : '',
-      ].join('\n'),
+      screenDescription,
+      starterPrompts: [
+        ...(!hasApmData
+          ? [
+              {
+                title: i18n.translate(
+                  'xpack.apm.aiAssistant.starterPrompts.explainNoData.title',
+                  { defaultMessage: 'Explain' }
+                ),
+                prompt: i18n.translate(
+                  'xpack.apm.aiAssistant.starterPrompts.explainNoData.prompt',
+                  { defaultMessage: "Why don't I see any data?" }
+                ),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
     });
-  }, [hasApmData, hasApmIntegrations, noDataConfig, aiAssistant]);
+  }, [
+    hasApmData,
+    hasApmIntegrations,
+    noDataConfig,
+    aiAssistant,
+    screenDescription,
+  ]);
 
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
