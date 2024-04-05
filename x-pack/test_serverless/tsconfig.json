@@ -97,5 +97,6 @@
     "@kbn/share-plugin",
     "@kbn/es-query",
     "@kbn/utility-types",
+    "@kbn/synthetics-plugin",
   ]
 }

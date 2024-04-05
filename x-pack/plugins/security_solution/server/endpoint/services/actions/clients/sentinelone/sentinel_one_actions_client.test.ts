@@ -10,13 +10,13 @@ import { responseActionsClientMock } from '../mocks';
 import { SentinelOneActionsClient } from './sentinel_one_actions_client';
 import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsNotSupportedError } from '../errors';
-import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { SentinelOneActionsClientOptionsMock } from './mocks';
 import { sentinelOneMock } from './mocks';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
+import type { NormalizedExternalConnectorClient } from '../../..';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -32,7 +32,7 @@ const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 describe('SentinelOneActionsClient class', () => {
   let classConstructorOptions: SentinelOneActionsClientOptionsMock;
   let s1ActionsClient: ResponseActionsClient;
-  let connectorActionsMock: ActionsClientMock;
+  let connectorActionsMock: NormalizedExternalConnectorClient;
 
   const createS1IsolationOptions = (
     overrides: Omit<
@@ -79,7 +79,6 @@ describe('SentinelOneActionsClient class', () => {
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
-        actionId: 's1-connector-instance-id',
         params: {
           subAction: 'isolateHost',
           subActionParams: {
@@ -162,7 +161,6 @@ describe('SentinelOneActionsClient class', () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
-        actionId: 's1-connector-instance-id',
         params: {
           subAction: 'releaseHost',
           subActionParams: {
