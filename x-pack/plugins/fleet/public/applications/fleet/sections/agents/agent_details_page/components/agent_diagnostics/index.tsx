@@ -6,6 +6,7 @@
  */
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiPortal } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -30,14 +31,9 @@ import {
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from '../../../../../../../../common/services';
 
-import {
-  sendGetAgentUploads,
-  sendPostRequestDiagnostics,
-  useAuthz,
-  useLink,
-  useStartServices,
-} from '../../../../../hooks';
+import { sendGetAgentUploads, useAuthz, useLink, useStartServices } from '../../../../../hooks';
 import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
+import { AgentRequestDiagnosticsModal } from '../../../components/agent_request_diagnostics_modal';
 
 const FlexStartEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-start;
@@ -55,11 +51,11 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
   const authz = useAuthz();
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [diagnosticsEntries, setDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [prevDiagnosticsEntries, setPrevDiagnosticEntries] = useState<AgentDiagnostics[]>([]);
   const [loadInterval, setLoadInterval] = useState(10000);
+  const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -194,93 +190,78 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     },
   ];
 
-  async function onSubmit() {
-    try {
-      setIsSubmitting(true);
-      const { error } = await sendPostRequestDiagnostics(agent.id);
-      if (error) {
-        throw error;
-      }
-      setIsSubmitting(false);
-      const successMessage = i18n.translate(
-        'xpack.fleet.requestDiagnostics.successSingleNotificationTitle',
-        {
-          defaultMessage: 'Request diagnostics submitted',
-        }
-      );
-      notifications.toasts.addSuccess(successMessage);
-      loadData();
-    } catch (error) {
-      setIsSubmitting(false);
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.fleet.requestDiagnostics.fatalErrorNotificationTitle', {
-          defaultMessage:
-            'Error requesting diagnostics {count, plural, one {agent} other {agents}}',
-          values: { count: 1 },
-        }),
-      });
-    }
-  }
-
   const requestDiagnosticsButton = (
     <EuiButton
       fill
       size="m"
-      onClick={onSubmit}
-      disabled={
-        isSubmitting || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.allAgents
-      }
+      onClick={() => {
+        setIsRequestDiagnosticsModalOpen(true);
+      }}
+      disabled={!isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents}
     >
       <FormattedMessage
-        id="xpack.fleet.agentList.diagnosticsOneButton"
+        id="xpack.fleet.requestDiagnostics.diagnosticsOneButton"
         defaultMessage="Request diagnostics .zip"
       />
     </EuiButton>
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexItem>
-        <EuiCallOut
-          iconType="warning"
-          color="warning"
-          title={
-            <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.calloutTitle"
-              defaultMessage="Agent diagnostics"
-            />
-          }
-        >
-          <FormattedMessage
-            id="xpack.fleet.requestDiagnostics.calloutText"
-            defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
+    <>
+      {isRequestDiagnosticsModalOpen && (
+        <EuiPortal>
+          <AgentRequestDiagnosticsModal
+            agents={[agent]}
+            agentCount={1}
+            onClose={() => {
+              setIsRequestDiagnosticsModalOpen(false);
+            }}
           />
-        </EuiCallOut>
-      </EuiFlexItem>
-      <FlexStartEuiFlexItem>
-        {isAgentRequestDiagnosticsSupported(agent) ? (
-          requestDiagnosticsButton
-        ) : (
-          <EuiToolTip
-            content={
+        </EuiPortal>
+      )}
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem>
+          <EuiCallOut
+            iconType="warning"
+            color="warning"
+            title={
               <FormattedMessage
-                id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
-                defaultMessage="Requesting agent diagnostics is not supported for agents before version {version}."
-                values={{ version: MINIMUM_DIAGNOSTICS_AGENT_VERSION }}
+                id="xpack.fleet.fleetServerSetup.calloutTitle"
+                defaultMessage="Agent diagnostics"
               />
             }
           >
-            {requestDiagnosticsButton}
-          </EuiToolTip>
-        )}
-      </FlexStartEuiFlexItem>
-      <EuiFlexItem>
-        {isLoading ? (
-          <EuiSkeletonText lines={3} />
-        ) : (
-          <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <FormattedMessage
+              id="xpack.fleet.requestDiagnostics.calloutText"
+              defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
+            />
+          </EuiCallOut>
+        </EuiFlexItem>
+        <FlexStartEuiFlexItem>
+          {isAgentRequestDiagnosticsSupported(agent) ? (
+            requestDiagnosticsButton
+          ) : (
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
+                  defaultMessage="Requesting agent diagnostics is not supported for agents before version {version}."
+                  values={{ version: MINIMUM_DIAGNOSTICS_AGENT_VERSION }}
+                />
+              }
+            >
+              {requestDiagnosticsButton}
+            </EuiToolTip>
+          )}
+        </FlexStartEuiFlexItem>
+        <EuiFlexItem>
+          {isLoading ? (
+            <EuiSkeletonText lines={3} />
+          ) : (
+            <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

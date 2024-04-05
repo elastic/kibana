@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Transform } from 'stream';
+import { Readable, Transform } from 'stream';
+import { loggerMock } from '@kbn/logging-mocks';
 import { handleStreamStorage } from './parse_stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
@@ -26,6 +27,7 @@ function createStreamMock() {
     },
   };
 }
+const mockLogger = loggerMock.create();
 const onMessageSent = jest.fn();
 describe('handleStreamStorage', () => {
   beforeEach(() => {
@@ -43,20 +45,32 @@ describe('handleStreamStorage', () => {
       },
     ],
   };
+  let defaultProps = {
+    responseStream: jest.fn() as unknown as Readable,
+    actionTypeId: '.gen-ai',
+    onMessageSent,
+    logger: mockLogger,
+  };
 
   describe('OpenAI stream', () => {
     beforeEach(() => {
       stream = createStreamMock();
       stream.write(`data: ${JSON.stringify(chunk)}`);
+      defaultProps = {
+        responseStream: stream.transform,
+        actionTypeId: '.gen-ai',
+        onMessageSent,
+        logger: mockLogger,
+      };
     });
 
     it('saves the final string successful streaming event', async () => {
       stream.complete();
-      await handleStreamStorage(stream.transform, '.gen-ai', onMessageSent);
+      await handleStreamStorage(defaultProps);
       expect(onMessageSent).toHaveBeenCalledWith('Single.');
     });
     it('saves the error message on a failed streaming event', async () => {
-      const tokenPromise = handleStreamStorage(stream.transform, '.gen-ai', onMessageSent);
+      const tokenPromise = handleStreamStorage(defaultProps);
 
       stream.fail();
       await expect(tokenPromise).resolves.not.toThrow();
@@ -69,15 +83,21 @@ describe('handleStreamStorage', () => {
     beforeEach(() => {
       stream = createStreamMock();
       stream.write(encodeBedrockResponse('Simple.'));
+      defaultProps = {
+        responseStream: stream.transform,
+        actionTypeId: 'openai',
+        onMessageSent,
+        logger: mockLogger,
+      };
     });
 
     it('saves the final string successful streaming event', async () => {
       stream.complete();
-      await handleStreamStorage(stream.transform, '.bedrock', onMessageSent);
+      await handleStreamStorage({ ...defaultProps, actionTypeId: '.bedrock' });
       expect(onMessageSent).toHaveBeenCalledWith('Simple.');
     });
     it('saves the error message on a failed streaming event', async () => {
-      const tokenPromise = handleStreamStorage(stream.transform, '.bedrock', onMessageSent);
+      const tokenPromise = handleStreamStorage({ ...defaultProps, actionTypeId: '.bedrock' });
 
       stream.fail();
       await expect(tokenPromise).resolves.not.toThrow();
@@ -94,7 +114,13 @@ function encodeBedrockResponse(completion: string) {
     body: Uint8Array.from(
       Buffer.from(
         JSON.stringify({
-          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+          bytes: Buffer.from(
+            JSON.stringify({
+              type: 'content_block_delta',
+              index: 0,
+              delta: { type: 'text_delta', text: completion },
+            })
+          ).toString('base64'),
         })
       )
     ),

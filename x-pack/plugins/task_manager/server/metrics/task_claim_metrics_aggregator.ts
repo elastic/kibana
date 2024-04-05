@@ -26,6 +26,7 @@ interface TaskClaimCounts extends JsonObject {
 
 export type TaskClaimMetric = TaskClaimCounts & {
   duration: SerializedHistogram;
+  duration_values: number[];
 };
 
 export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
@@ -38,12 +39,14 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     return {
       ...this.counter.initialMetrics(),
       duration: { counts: [], values: [] },
+      duration_values: [],
     };
   }
   public collect(): TaskClaimMetric {
     return {
       ...this.counter.collect(),
       duration: this.durationHistogram.serialize(),
+      duration_values: this.durationHistogram.getAllValues(),
     };
   }
 

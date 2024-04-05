@@ -19,6 +19,8 @@ import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
 import { RulesParams } from '@kbn/observability-plugin/public';
 import { rulesLocatorID } from '@kbn/observability-plugin/common';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useCapabilities } from '../../../hooks/use_capabilities';
@@ -30,8 +32,10 @@ interface Props {
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
+  setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady?: (value: boolean) => void;
   btnProps?: Partial<EuiButtonIconProps>;
+  rules?: Array<Rule<BurnRateRuleParams>>;
 }
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
   ${(props) => props.shadow}
@@ -56,9 +60,11 @@ function IconPanel({ children, hasPanel }: { children: JSX.Element; hasPanel: bo
 
 export function SloItemActions({
   slo,
+  rules,
   isActionsPopoverOpen,
   setIsActionsPopoverOpen,
   setIsAddRuleFlyoutOpen,
+  setIsEditRuleFlyoutOpen,
   setDeleteConfirmationModalOpen,
   setDashboardAttachmentReady,
   btnProps,
@@ -98,8 +104,14 @@ export function SloItemActions({
   };
 
   const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
-    locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
+    if (rules?.length === 1) {
+      // if there is only one rule we can edit inline in flyout
+      setIsEditRuleFlyoutOpen(true);
+      setIsActionsPopoverOpen(false);
+    } else {
+      const locator = locators.get<RulesParams>(rulesLocatorID);
+      locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
+    }
   };
 
   const handleDelete = () => {
@@ -185,8 +197,9 @@ export function SloItemActions({
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
           >
-            {i18n.translate('xpack.slo.item.actions.manageRules', {
-              defaultMessage: 'Manage rules',
+            {i18n.translate('xpack.slo.item.actions.manageBurnRateRules', {
+              defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
+              values: { count: rules?.length ?? 0 },
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
