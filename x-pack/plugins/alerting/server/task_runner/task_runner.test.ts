@@ -3366,6 +3366,7 @@ describe('Task Runner', () => {
       taskInstance: mockedTaskInstance,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
+      internalSavedObjectsRepository,
     });
 
     ruleResultService.getLastRunResults.mockImplementation(() => ({
