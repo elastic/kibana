@@ -21,7 +21,7 @@ import {
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PanelPackage } from '@kbn/presentation-publishing';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
 
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';

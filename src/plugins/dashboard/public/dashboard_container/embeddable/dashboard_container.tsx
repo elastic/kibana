@@ -22,6 +22,7 @@ import {
   Container,
   DefaultEmbeddableApi,
   EmbeddableFactoryNotFoundError,
+  embeddableInputToSubject,
   isExplicitInputWithAttributes,
   PanelNotFoundError,
   reactEmbeddableRegistryHasKey,
@@ -137,6 +138,9 @@ export class DashboardContainer
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
+  public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+  public reload$ = new Subject<void>();
+  public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
@@ -203,6 +207,7 @@ export class DashboardContainer
 
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
+    this.searchSessionId$.next(initialSessionId);
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
@@ -240,6 +245,10 @@ export class DashboardContainer
       })
     );
     this.startAuditingReactEmbeddableChildren();
+    this.timeslice$ = embeddableInputToSubject<
+      [number, number] | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'timeslice');
   }
 
   public getAppContext() {
@@ -527,6 +536,9 @@ export class DashboardContainer
     this.dispatch.setLastReloadRequestTimeToNow({});
     if (refreshControlGroup) {
       this.controlGroup?.reload();
+
+      // only reload all panels if this refresh does not come from the control group.
+      this.reload$.next();
     }
   }
 
@@ -595,6 +607,7 @@ export class DashboardContainer
     const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
+    this.searchSessionId$.next(searchSessionId);
 
     batch(() => {
       this.dispatch.setLastSavedInput(

@@ -28,6 +28,20 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
+export {
+  onFetchContextChanged,
+  type FetchContext,
+} from './interfaces/fetch/on_fetch_context_changed';
+export {
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/fetch/publishes_unified_search';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
@@ -96,16 +110,6 @@ export {
   type PublishesWritablePanelTitle,
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
-export {
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
 export {
   useBatchedPublishingSubjects,
   usePublishingSubject,
