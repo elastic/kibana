@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
+import type { StartPlugins } from '../../../../plugin';
 import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
@@ -15,11 +16,13 @@ import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../
 import { ASSET_CRITICALITY_CSV_UPLOAD_URL, APP_ID } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
+import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
 
 export const assetCriticalityCSVUploadRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  config: ConfigType
+  config: ConfigType,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   const { batchSize } = config.entityAnalytics.assetCriticality.csvUpload;
   router.versioned
@@ -47,15 +50,23 @@ export const assetCriticalityCSVUploadRoute = (
         },
       },
       async (context, request, response) => {
-        const start = Date.now();
+        const start = new Date();
         const siemResponse = buildSiemResponse(response);
+
         try {
           await checkAndInitAssetCriticalityResources(context, logger);
+          const [coreStart] = await getStartServices();
+          const telemetry = coreStart.analytics;
           const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;
 
-          logger.debug(`Parsing asset criticality CSV file ${fileStream.hapi.filename}`);
+          const fileSize = fileStream.hapi.headers['content-length']
+            ? parseInt(fileStream.hapi.headers['content-length'], 10)
+            : undefined;
+          logger.debug(
+            `Parsing asset criticality CSV file ${fileStream.hapi.filename} of size ${fileSize} bytes`
+          );
 
           const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
             header: false,
@@ -69,13 +80,29 @@ export const assetCriticalityCSVUploadRoute = (
             recordsStream,
             batchSize,
           });
-          const end = Date.now();
+          const end = new Date();
+
+          const tookMs = end.getTime() - start.getTime();
           logger.debug(
-            `Asset criticality CSV upload completed in ${end - start}ms ${JSON.stringify(stats)}`
+            `Asset criticality CSV upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
           );
 
           // type assignment here to ensure that the response body stays in sync with the API schema
           const resBody: AssetCriticalityCsvUploadResponse = { errors, stats };
+
+          const [eventType, event] = createAssetCriticalityProcessedFileEvent({
+            parameters: {
+              fileSizeBytes: fileSize,
+            },
+            processing: {
+              startTime: start.toISOString(),
+              endTime: end.toISOString(),
+              tookMs,
+            },
+            result: stats,
+          });
+
+          telemetry.reportEvent(eventType, event);
 
           return response.ok({ body: resBody });
         } catch (error) {

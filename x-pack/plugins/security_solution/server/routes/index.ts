@@ -179,7 +179,7 @@ export const initRoutes = (
   assetCriticalityGetRoute(router, logger);
   assetCriticalityDeleteRoute(router, logger);
   assetCriticalityPrivilegesRoute(router, getStartServices, logger);
-  assetCriticalityCSVUploadRoute(router, logger, config);
+  assetCriticalityCSVUploadRoute(router, logger, config, getStartServices);
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
