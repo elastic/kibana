@@ -11,8 +11,6 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
-import { validateQuery, getActions, wrapAsEditorMessage } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -26,6 +24,7 @@ import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plu
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+import { correctQueryWithActions } from './correct_query_with_actions';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -357,17 +356,10 @@ export function registerQueryFunction({
           if (msg.message.function_call.name) {
             return msg;
           }
-
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
+          let esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];
-
-          const { errors } = await validateQuery(esqlQuery ?? '', getAstAndSyntaxErrors, {
-            ignoreOnMissingCallbacks: true,
-          });
-
-          const editorErrors = wrapAsEditorMessage('error', errors);
-          const actions = await getActions(esqlQuery ?? '', editorErrors, getAstAndSyntaxErrors);
+          esqlQuery = await correctQueryWithActions(esqlQuery ?? '');
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 
