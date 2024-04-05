@@ -10,4 +10,5 @@ import { CriticalityLevels } from '../../../../common/entity_analytics/asset_cri
 export const SUPPORTED_FILE_TYPES = ['text/csv', 'text/plain', 'text/tab-separated-values'];
 export const SUPPORTED_FILE_EXTENSIONS = ['CSV', 'TXT', 'TSV'];
 export const VALID_CRITICALITY_LEVELS = Object.values(CriticalityLevels);
-export const MAX_FILE_LINES = 10000;
+export const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+export const FILE_SIZE_TOLERANCE = 1024 * 50; // ~= 50kb

@@ -18,7 +18,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useFormatBytes } from '../../../../common/components/formatted_bytes';
 import {
+  MAX_FILE_SIZE,
   SUPPORTED_FILE_EXTENSIONS,
   SUPPORTED_FILE_TYPES,
   VALID_CRITICALITY_LEVELS,
@@ -30,7 +32,7 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
-const sampleCSVContent = `host-001,low_impact\nhost-029,medium_impact\nhost-002,extreme_impact`;
+const sampleCSVContent = `identifier,criticality,type\nuser-001,low_impact,user\nuser-002,medium_impact,user\nhost-001,extreme_impact,host`;
 
 const listStyle = css`
   list-style-type: disc;
@@ -44,6 +46,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
   errorMessage,
   isLoading,
 }) => {
+  const formatBytes = useFormatBytes();
   const { euiTheme } = useEuiTheme();
   return (
     <>
@@ -73,10 +76,13 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           </li>
           <li>
             <FormattedMessage
-              defaultMessage={'You can upload file up tp 100MB'}
+              defaultMessage={'You can upload file up to {maxFileSize}'}
               id={
                 'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit'
               }
+              values={{
+                maxFileSize: formatBytes(MAX_FILE_SIZE),
+              }}
             />
           </li>
         </ul>
@@ -98,20 +104,34 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
             {
               <FormattedMessage
                 defaultMessage={
-                  'Asset Identifier: Host.name or User.name. These ECS fields identify the host or user from ingested datasources'
+                  'Identifier: The unique identifier for each asset {hostName} or {userName}.'
                 }
                 id={
                   'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription'
                 }
+                values={{
+                  hostName: <b>{'Host.name'}</b>,
+                  userName: <b>{'User.name'}</b>,
+                }}
               />
             }
           </li>
           <li>
             <FormattedMessage
-              defaultMessage="Asset Criticality label: Any of the following labels: {labels}"
+              defaultMessage="Criticality label: Use any of these labels: {labels}"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
               values={{
                 labels: <b>{VALID_CRITICALITY_LEVELS.join(', ')}</b>,
+              }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              defaultMessage="Resource Type: Indicate whether the resource is a {host} or a {user}."
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
+              values={{
+                host: <b>{'host'}</b>,
+                user: <b>{'user'}</b>,
               }}
             />
           </li>

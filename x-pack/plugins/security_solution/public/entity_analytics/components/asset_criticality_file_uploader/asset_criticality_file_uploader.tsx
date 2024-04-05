@@ -17,28 +17,28 @@ import React, { useReducer } from 'react';
 import type { ParseConfig } from 'papaparse';
 import Papa from 'papaparse';
 import { i18n } from '@kbn/i18n';
+import { useFormatBytes } from '../../../common/components/formatted_bytes';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
-import { MAX_FILE_LINES, SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from './constants';
 import { AssetCriticalityValidationStep } from './components/validation_step';
-import { validateParsedContent } from './validations';
+import { validateFile, validateParsedContent } from './validations';
 import { reducer } from './reducer';
 import { getStepStatus } from './helpers';
+import { AssetCriticalityResultStep } from './components/result_step';
+import { useEntityAnalyticsRoutes } from '../../api/api';
 
 // TODO
-// add a third column
 // Should we support headers?
-// result step
-// api integration
+// result step UI
+// Add the info icon with the error message
 
 // WHAT DO I NEED FROM DESIGN?
-// 1. 3 columns design update
-// 2. navigation icon
 // 3. serverless navigation
-// 4. confirm that the file uploader and step components are ok
 // 5. Rename steps
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, { isLoading: false, step: 1 });
+  const formatBytes = useFormatBytes();
+  const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
 
   const onFileChange = (fileList: FileList | null) => {
     if (fileList?.length === 0) {
@@ -52,42 +52,48 @@ export const AssetCriticalityFileUploader: React.FC = () => {
     if (file) {
       dispatch({
         type: 'loadingFile',
-        payload: file,
+        payload: { fileName: file.name },
       });
-      if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
+
+      const fileValidation = validateFile(file, formatBytes);
+      if (!fileValidation.valid) {
         dispatch({
-          type: 'unsupportedFileType',
+          type: 'fileError',
           payload: {
             file,
-            error: i18n.translate(
-              'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.unsupportedFileTypeError',
-              {
-                defaultMessage: `Invalid file format selected. Please choose a {supportedFileExtensions} file and try again`,
-                values: { supportedFileExtensions: SUPPORTED_FILE_EXTENSIONS.join(', ') },
-              }
-            ),
+            message: fileValidation.errorMessage,
           },
         });
         return;
       }
 
       const parserConfig: ParseConfig = {
-        preview: MAX_FILE_LINES + 1,
+        dynamicTyping: true,
+        skipEmptyLines: true,
         complete(parsedFile, returnedFile) {
           const { invalid, valid, error } = validateParsedContent(parsedFile.data);
 
           if (error) {
-            dispatch({ type: 'fileValidationError', payload: { error } });
+            dispatch({ type: 'fileError', payload: { message: error, file } });
             return;
           }
 
+          const validLinesAsText = Papa.unparse(valid);
+          const invalidLinesAsText = Papa.unparse(invalid);
+
           dispatch({
             type: 'fileValidated',
-            payload: { file: returnedFile, validLines: valid, invalidLines: invalid }, //  textFile, parsedFile
+            payload: {
+              fileName: returnedFile?.name ?? '',
+              validLinesAsText,
+              invalidLinesAsText,
+              validLinesCount: valid.length,
+              invalidLinesCount: invalid.length,
+            },
           });
         },
         error(parserError) {
-          dispatch({ type: 'parserError', payload: parserError });
+          dispatch({ type: 'fileError', payload: { message: parserError.message, file } });
         },
       };
 
@@ -95,27 +101,44 @@ export const AssetCriticalityFileUploader: React.FC = () => {
     }
   };
 
+  console.log(JSON.stringify(state, null, 2));
+
   return (
     <div>
       <EuiStepsHorizontal
         size="s"
         steps={[
           {
-            title: 'Upload file',
+            title: i18n.translate(
+              'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.selectFileStepTitle',
+              {
+                defaultMessage: 'Select a file',
+              }
+            ),
             status: getStepStatus(1, state.step),
             onClick: () => {
               dispatch({ type: 'goToStep', payload: { step: 1 } });
             },
           },
           {
-            title: 'File settings',
+            title: i18n.translate(
+              'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileValidationStepTitle',
+              {
+                defaultMessage: 'File validation',
+              }
+            ),
             status: getStepStatus(2, state.step),
             onClick: () => {
               dispatch({ type: 'goToStep', payload: { step: 2 } });
             },
           },
           {
-            title: 'Results',
+            title: i18n.translate(
+              'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.resultsStepTitle',
+              {
+                defaultMessage: 'Results',
+              }
+            ),
             status: getStepStatus(3, state.step),
             onClick: () => {},
           },
@@ -128,19 +151,45 @@ export const AssetCriticalityFileUploader: React.FC = () => {
           <AssetCriticalityFilePickerStep
             onFileChange={onFileChange}
             isLoading={state.isLoading}
-            errorMessage={
-              state.parserError?.message ??
-              state.unsupportedFileTypeError ??
-              state.fileValidationError
-            }
+            errorMessage={state.fileError}
           />
         )}
 
-        {state.step === 2 && state.validLines && state.invalidLines && (
-          <AssetCriticalityValidationStep
-            validLines={state.validLines}
-            invalidLines={state.invalidLines}
-          />
+        {state.step === 2 &&
+          state.validLinesCount !== undefined &&
+          state.invalidLinesCount !== undefined &&
+          state.validLinesAsText !== undefined &&
+          state.invalidLinesAsText !== undefined && (
+            <AssetCriticalityValidationStep
+              validLinesCount={state.validLinesCount}
+              invalidLinesCount={state.invalidLinesCount}
+              validLinesAsText={state.validLinesAsText}
+              invalidLinesAsText={state.invalidLinesAsText}
+              onReturn={() => {
+                dispatch({ type: 'goToStep', payload: { step: 1 } });
+              }}
+              onConfirm={async () => {
+                if (state.validLinesAsText) {
+                  dispatch({
+                    type: 'uploadingFile',
+                  });
+
+                  const result = await uploadAssetCriticalityFile(
+                    state.validLinesAsText,
+                    state.fileName
+                  );
+
+                  dispatch({
+                    type: 'fileUploaded',
+                    payload: result,
+                  });
+                }
+              }}
+            />
+          )}
+
+        {state.step === 3 && state.fileUploadResponse && (
+          <AssetCriticalityResultStep result={state.fileUploadResponse} />
         )}
       </div>
     </div>

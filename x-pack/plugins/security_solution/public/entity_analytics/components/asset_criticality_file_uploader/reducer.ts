@@ -5,32 +5,48 @@
  * 2.0.
  */
 
+import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
+
 interface ReducerState {
-  parserError?: Papa.ParseError; // Unexpected error that happens when parsing a file
-  unsupportedFileTypeError?: string;
-  fileValidationError?: string;
+  fileError?: string;
+  //   parserError?: Papa.ParseError; // Unexpected error that happens when parsing a file
+  //   unsupportedFileTypeError?: string;
+  //   fileValidationError?: string;
   isLoading: boolean;
-  file?: File;
-  validLines?: string[][];
-  invalidLines?: string[][];
+  // file?: File;
+  // validLines?: string[][];
+  // invalidLines?: string[][];
   step: number;
+  fileUploadResponse?: AssetCriticalityCsvUploadResponse;
+
+  fileName?: string;
+  invalidLinesAsText?: string;
+  validLinesAsText?: string;
+  validLinesCount?: number;
+  invalidLinesCount?: number;
 }
 
 type ReducerAction =
+  | { type: 'uploadingFile' }
+  | { type: 'fileUploaded'; payload: AssetCriticalityCsvUploadResponse }
   | { type: 'goToStep'; payload: { step: number } }
-  | { type: 'loadingFile'; payload: File }
+  | { type: 'loadingFile'; payload: { fileName: string } }
   | {
       type: 'fileValidated';
-      payload: { file?: File; invalidLines: string[][]; validLines: string[][] };
+      payload: {
+        fileName: string;
+        invalidLinesAsText: string;
+        validLinesAsText: string;
+        validLinesCount: number;
+        invalidLinesCount: number;
+      };
     }
-  | { type: 'parserError'; payload: Papa.ParseError }
-  | { type: 'fileValidationError'; payload: { error: string } }
-  | { type: 'unsupportedFileType'; payload: { error: string; file: File } };
+  | { type: 'fileError'; payload: { message: string; file: File } };
 
 export const reducer = (state: ReducerState, action: ReducerAction): ReducerState => {
   switch (action.type) {
     case 'goToStep':
-      if (action.payload.step > state.step) {
+      if (action.payload.step > state.step || state.step === 3) {
         return state;
       }
 
@@ -49,11 +65,18 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
         };
       }
 
+      if (action.payload.step === 3) {
+        return {
+          isLoading: false,
+          step: 3,
+        };
+      }
+
       return state;
     case 'loadingFile':
       return {
         isLoading: true,
-        file: action.payload,
+        fileName: action.payload.fileName,
         step: 1,
       };
 
@@ -64,26 +87,25 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
         ...action.payload,
       };
 
-    case 'parserError':
+    case 'fileError':
       return {
         isLoading: false,
         step: 1,
-        parserError: action.payload,
+        fileError: action.payload.message,
       };
 
-    case 'unsupportedFileType':
+    case 'uploadingFile':
       return {
-        isLoading: false,
-        step: 1,
-        file: action.payload.file,
-        unsupportedFileTypeError: action.payload.error,
+        ...state,
+        isLoading: true,
       };
 
-    case 'fileValidationError':
+    case 'fileUploaded':
       return {
+        ...state,
+        fileUploadResponse: action.payload,
         isLoading: false,
-        step: 1,
-        fileValidationError: action.payload.error,
+        step: 3,
       };
 
     default:
