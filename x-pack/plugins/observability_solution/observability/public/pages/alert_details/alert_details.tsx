@@ -37,7 +37,6 @@ import { PageTitle, pageTitleContent } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
 import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
@@ -131,11 +130,6 @@ export function AlertDetails() {
     return <CenterJustifiedSpinner />;
   }
 
-  // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.formatted, config)) {
-    return <PageNotFound />;
-  }
-
   if (!isLoading && !alertDetail)
     return (
       <EuiPanel data-test-subj="alertDetailsError">
@@ -165,21 +159,26 @@ export function AlertDetails() {
   const OVERVIEW_TAB_ID = 'overview';
   const METADATA_TAB_ID = 'metadata';
 
-  const overviewTab = (
-    <>
-      <EuiSpacer size="l" />
-      <AlertSummary alertSummaryFields={summaryFields} />
-      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
-        <AlertDetailsAppSection
-          alert={alertDetail.formatted}
-          rule={rule}
-          timeZone={timeZone}
-          setAlertSummaryFields={setSummaryFields}
-          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
-        />
-      )}
-    </>
-  );
+  const overviewTab =
+    AlertDetailsAppSection &&
+    alertDetail &&
+    isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
+      <>
+        <EuiSpacer size="l" />
+        <AlertSummary alertSummaryFields={summaryFields} />
+        {rule && alertDetail?.formatted && (
+          <AlertDetailsAppSection
+            alert={alertDetail.formatted}
+            rule={rule}
+            timeZone={timeZone}
+            setAlertSummaryFields={setSummaryFields}
+            ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
+          />
+        )}
+      </>
+    ) : (
+      <></>
+    );
 
   const metadataTab = alertDetail?.raw && (
     <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel">
