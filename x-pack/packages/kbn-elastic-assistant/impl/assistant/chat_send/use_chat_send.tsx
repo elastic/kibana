@@ -32,6 +32,7 @@ export interface UseChatSendProps {
 }
 
 export interface UseChatSend {
+  abortStream: () => void;
   handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
@@ -63,7 +64,7 @@ export const useChatSend = ({
     toasts,
   } = useAssistantContext();
 
-  const { isLoading, sendMessage } = useSendMessage();
+  const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
@@ -224,6 +225,7 @@ export const useChatSend = ({
   ]);
 
   return {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,

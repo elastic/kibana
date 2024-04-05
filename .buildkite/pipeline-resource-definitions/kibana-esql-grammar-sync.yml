@@ -46,3 +46,8 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: BUILD_AND_READ
+      schedules:
+        Weekly build:
+          cronline: 0 0 * * 1 America/New_York
+          message: Weekly build
+          branch: main
