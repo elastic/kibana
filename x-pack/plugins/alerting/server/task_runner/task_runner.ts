@@ -715,10 +715,11 @@ export class TaskRunner<
 
       const { errors: errorsFromLastRun } = this.ruleResult.getLastRunResults();
       if (errorsFromLastRun.length > 0) {
+        const isUserError = !errorsFromLastRun.some((lastRunError) => !lastRunError.userError);
         return {
           taskRunError: createTaskRunError(
-            new Error(errorsFromLastRun.join(',')),
-            TaskErrorSource.FRAMEWORK
+            new Error(errorsFromLastRun.map((lastRunError) => lastRunError.message).join(',')),
+            isUserError ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
           ),
         };
       }

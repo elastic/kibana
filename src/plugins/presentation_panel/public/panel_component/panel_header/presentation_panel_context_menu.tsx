@@ -84,13 +84,14 @@ export const PresentationPanelContextMenu = ({
           (action) => disabledActions.indexOf(action.id) === -1
         );
       }
-      compatibleActions.sort(
-        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
-      );
 
       if (actionPredicate) {
         compatibleActions = compatibleActions.filter(({ id }) => actionPredicate(id));
       }
+
+      compatibleActions.sort(
+        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
+      );
 
       /**
        * Build context menu panel from actions
