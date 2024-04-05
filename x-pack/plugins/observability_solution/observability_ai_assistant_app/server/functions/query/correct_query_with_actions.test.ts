@@ -23,8 +23,16 @@ describe('correctQueryWithActions', () => {
   it(`fixes errors correctly for a query with one syntax error for eval`, async () => {
     // stats
     const fixedQuery = await correctQueryWithActions(
-      'from logstash-* | stats var0 = max(bytes) | eval ab(var0)'
+      'from logstash-* | stats var0 = max(bytes) | eval ab(var0) | limit 1'
     );
-    expect(fixedQuery).toBe('from logstash-* | stats var0 = max(bytes) | eval abs(var0)');
+    expect(fixedQuery).toBe('from logstash-* | stats var0 = max(bytes) | eval abs(var0) | limit 1');
+  });
+
+  it(`fixes errors correctly for a query with two syntax error for eval`, async () => {
+    // stats
+    const fixedQuery = await correctQueryWithActions(
+      'from logstash-* | stats var0 = max2(bytes) | eval ab(var0) | limit 1'
+    );
+    expect(fixedQuery).toBe('from logstash-* | stats var0 = max(bytes) | eval abs(var0) | limit 1');
   });
 });

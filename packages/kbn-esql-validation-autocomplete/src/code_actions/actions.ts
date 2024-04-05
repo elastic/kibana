@@ -223,7 +223,10 @@ async function getSpellingActionForFunctions(
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   // fallback to the last command if not found
   const commandContext =
-    ast.find((command) => command.location.max > error.endColumn) || ast[ast.length - 1];
+    ast.find(
+      (command) =>
+        error.startColumn > command.location.min && error.startColumn < command.location.max
+    ) || ast[ast.length - 1];
   if (!commandContext) {
     return [];
   }
