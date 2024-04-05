@@ -9,9 +9,11 @@ import React, { memo, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAgentStatus } from '../../../../common/hooks/use_agent_status';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_AGENT_TYPE,
+  type ResponseActionAgentType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
@@ -22,13 +24,9 @@ interface OfflineCalloutProps {
 }
 
 export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId, hostName }) => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-
   const { data } = useAgentStatus([endpointId], agentType, {
     refetchInterval: DEFAULT_POLL_INTERVAL,
-    enabled: agentType === 'endpoint' || (agentType === 'sentinel_one' && isSentinelOneV1Enabled),
+    enabled: RESPONSE_ACTION_AGENT_TYPE.includes(agentType),
   });
 
   const agentStatus = data?.[endpointId];
