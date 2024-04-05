@@ -10,6 +10,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -27,6 +28,7 @@ export interface Props {
     from: string;
     to: string;
   };
+  instanceId?: string;
   queries?: QueryDslQueryContainer[];
 }
 
@@ -70,6 +72,7 @@ export function useAlertsHistory({
   ruleId,
   dateRange,
   http,
+  instanceId,
   queries,
 }: Props): UseAlertsHistory {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
@@ -84,6 +87,7 @@ export function useAlertsHistory({
         ruleId,
         dateRange,
         signal,
+        instanceId,
         queries,
       });
     },
@@ -121,6 +125,7 @@ export async function fetchTriggeredAlertsHistory({
   ruleId,
   dateRange,
   signal,
+  instanceId,
   queries = [],
 }: {
   featureIds: ValidFeatureId[];
@@ -131,6 +136,7 @@ export async function fetchTriggeredAlertsHistory({
     to: string;
   };
   signal?: AbortSignal;
+  instanceId?: string;
   queries?: QueryDslQueryContainer[];
 }): Promise<FetchAlertsHistory> {
   try {
@@ -147,6 +153,15 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
+              ...(instanceId && instanceId !== '*'
+                ? [
+                    {
+                      term: {
+                        [ALERT_INSTANCE_ID]: instanceId,
+                      },
+                    },
+                  ]
+                : []),
               ...queries,
               {
                 range: {

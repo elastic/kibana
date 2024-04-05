@@ -47,20 +47,24 @@ interface LatencyAlertsHistoryChartProps {
   start: string;
   end: string;
   transactionType?: string;
+  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   environment: string;
   timeZone: string;
   ruleId: string;
+  alertInstanceId?: string;
 }
 export function LatencyAlertsHistoryChart({
   serviceName,
   start,
   end,
   transactionType,
+  transactionName,
   latencyAggregationType,
   environment,
   timeZone,
   ruleId,
+  alertInstanceId,
 }: LatencyAlertsHistoryChartProps) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -91,7 +95,7 @@ export function LatencyAlertsHistoryChart({
                 start,
                 end,
                 transactionType,
-                transactionName: undefined,
+                transactionName,
                 latencyAggregationType,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 documentType: preferred.source.documentType,
@@ -111,6 +115,7 @@ export function LatencyAlertsHistoryChart({
       latencyAggregationType,
       serviceName,
       start,
+      transactionName,
       transactionType,
       preferred,
     ]
@@ -144,6 +149,7 @@ export function LatencyAlertsHistoryChart({
     featureIds: [AlertConsumers.APM],
     ruleId,
     dateRange: { from: start, to: end },
+    instanceId: alertInstanceId,
   });
 
   if (isError) {
