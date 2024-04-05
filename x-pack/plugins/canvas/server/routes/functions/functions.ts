@@ -21,7 +21,7 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
     .get({
       path: API_ROUTE_FUNCTIONS,
       access: 'internal',
-      options: { tags: ['access:canvas'] },
+      options: { tags: ['access:canvasFns'] },
     })
     .addVersion({ version: '1', validate: false }, async (context, request, response) => {
       const functions = expressions.getFunctions('canvas');

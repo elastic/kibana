@@ -30,6 +30,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingStart }): Kiban
     privileges: {
       all: {
         app: ['canvas', 'kibana'],
+        api: ['canvasFns'],
         catalogue: ['canvas'],
         savedObject: {
           all: ['canvas-workpad', 'canvas-element'],
@@ -39,6 +40,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingStart }): Kiban
       },
       read: {
         app: ['canvas', 'kibana'],
+        api: ['canvasFns'],
         catalogue: ['canvas'],
         savedObject: {
           all: [],
