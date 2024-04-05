@@ -374,11 +374,10 @@ describe('SentinelOneActionsClient class', () => {
             },
           },
           index: SENTINEL_ONE_ACTIVITY_INDEX,
-          ignore_unavailable: true,
           query: {
             bool: {
               minimum_should_match: 1,
-              must: [{ term: { 'sentinel_one.activity.type': [1001, 2010] } }],
+              must: [{ terms: { 'sentinel_one.activity.type': [1001, 2010] } }],
               should: [
                 {
                   bool: {
@@ -415,11 +414,10 @@ describe('SentinelOneActionsClient class', () => {
             },
           },
           index: SENTINEL_ONE_ACTIVITY_INDEX,
-          ignore_unavailable: true,
           query: {
             bool: {
               minimum_should_match: 1,
-              must: [{ term: { 'sentinel_one.activity.type': [1002] } }],
+              must: [{ terms: { 'sentinel_one.activity.type': [1002] } }],
               should: [
                 {
                   bool: {

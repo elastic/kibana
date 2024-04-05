@@ -448,7 +448,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       const searchRequestOptions: SearchRequest = {
         index: SENTINEL_ONE_ACTIVITY_INDEX,
-        // ignore_unavailable: true,
         query,
         // There may be many documents for each host/agent, so we collapse it and only get back the
         // first one that came in after the isolate request was sent
