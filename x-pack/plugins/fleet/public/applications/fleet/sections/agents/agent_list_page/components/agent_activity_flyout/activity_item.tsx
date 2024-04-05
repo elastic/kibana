@@ -66,6 +66,7 @@ export const ActivityItem: React.FunctionComponent<{
       </EuiText>
     );
 
+  // TODO: investigate whether default completion is due to a bug
   const completedDescription = (
     <FormattedMessage
       id="xpack.fleet.agentActivityFlyout.completedDescription"
