@@ -18,28 +18,25 @@ const delimiter = '\n';
 const pDeflate = promisify(deflate);
 
 const BFETCH_SERVER_ENCODING_EVENT_TYPE = 'bfetch_server_encoding';
-interface ZipStreamMetric {
-  time: number;
-  messageSize: number;
-}
 
 class StreamMetricCollector {
-  private readonly _collector: ZipStreamMetric[] = [];
+  private readonly _collector: number[] = [];
   addMetric(time: number, messageSize: number) {
-    this._collector.push({ time, messageSize });
+    this._collector.push(time);
+    this._collector.push(messageSize);
   }
   getEBTPerformanceMetricEvent() {
     let totalTime = 0;
     let totalMessageSize = 0;
-    for (let i = 0; i < this._collector.length; i++) {
-      totalTime += this._collector[i].time;
-      totalMessageSize += this._collector[i].messageSize;
+    for (let i = 0; i < this._collector.length; i += 2) {
+      totalTime += this._collector[i];
+      totalMessageSize += this._collector[i + 1];
     }
     return {
       eventName: BFETCH_SERVER_ENCODING_EVENT_TYPE,
       duration: totalTime,
       key1: 'message_count',
-      value1: this._collector.length,
+      value1: this._collector.length / 2,
       key2: 'total_byte_size',
       value2: totalMessageSize,
       key3: 'stream_type',

@@ -108,7 +108,7 @@ export class BfetchServerPlugin
   }
 
   public start(core: CoreStart, plugins: BfetchServerStartDependencies): BfetchServerStart {
-    this._analyticsService = plugins.analytics;
+    this._analyticsService = core.analytics;
     return {};
   }
 
