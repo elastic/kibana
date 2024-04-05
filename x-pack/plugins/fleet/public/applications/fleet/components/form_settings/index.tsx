@@ -23,11 +23,11 @@ export const settingComponentRegistry = new Map<
   (settingsconfig: SettingsConfig) => React.ReactElement
 >();
 
-settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
-      typeName={z.number()._def.typeName}
+      typeName={ZodFirstPartyTypeKind.ZodNumber}
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
         <EuiFieldNumber
           fullWidth
@@ -43,11 +43,11 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
   );
 });
 
-settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
-      typeName={z.string()._def.typeName}
+      typeName={ZodFirstPartyTypeKind.ZodString}
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid }: any) => (
         <EuiFieldText
           fullWidth
