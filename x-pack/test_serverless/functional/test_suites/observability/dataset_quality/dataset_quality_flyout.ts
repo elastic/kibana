@@ -261,7 +261,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const apacheAccessDatasetHumanName = 'Apache access logs';
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-      // Get reference to "Show all" anchor element manually navigate to the href to avoid opening a new tab
       const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
       await testSubjects.click(degradedDocsShowAllSelector);
       await browser.switchTab(1);
