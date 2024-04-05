@@ -32,6 +32,7 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 import {
   getSharedComponents,
   reportingCsvShareProvider,
+  reportingCsvShareModalProvider,
   reportingExportModalProvider,
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
@@ -209,7 +210,7 @@ export class ReportingPublicPlugin
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([{ application }, { licensing, fieldFormats }]) => {
+    startServices$.subscribe(([{ application }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
           reportingCsvShareProvider({
@@ -222,12 +223,21 @@ export class ReportingPublicPlugin
             theme: core.theme,
           })
         );
+        shareSetup.register(
+          reportingCsvShareModalProvider({
+            apiClient,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
 
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
           shareSetup.register(
             reportingExportModalProvider({
               apiClient,
-              toasts,
               uiSettings,
               license,
               application,

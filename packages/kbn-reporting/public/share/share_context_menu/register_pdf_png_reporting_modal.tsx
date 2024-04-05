@@ -487,6 +487,7 @@ export const reportingExportModalProvider = ({
       label: 'PDF' as const,
       showRadios: objectType === 'dashboard' || objectType === 'lens',
       generateReportForPrinting: generateReportPDFForPrinting,
+      generateReport: generateReportPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (

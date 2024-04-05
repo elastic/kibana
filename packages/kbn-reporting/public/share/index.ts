@@ -10,7 +10,8 @@ export { getSharedComponents } from './shared';
 export {
   reportingScreenshotShareProvider,
   reportingExportModalProvider,
-} from './share_context_menu/register_pdf_png_reporting';
+} from './share_context_menu/register_pdf_png_reporting_modal';
 export { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+export { reportingCsvShareProvider as reportingCsvShareModalProvider } from './share_context_menu/register_csv_modal_reporting';
 export type { ReportingPublicComponents } from './shared/get_shared_components';
 export type { JobParamsProviderOptions } from './share_context_menu';
