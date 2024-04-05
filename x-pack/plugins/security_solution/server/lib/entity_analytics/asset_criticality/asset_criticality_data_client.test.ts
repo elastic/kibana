@@ -12,6 +12,9 @@ import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
 import { Readable } from 'node:stream';
 
+type MockInternalEsClient = ReturnType<
+  typeof elasticsearchServiceMock.createScopedClusterClient
+>['asInternalUser'];
 jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
@@ -86,9 +89,7 @@ describe('AssetCriticalityDataClient', () => {
   });
 
   describe('#search()', () => {
-    let esClientMock: ReturnType<
-      typeof elasticsearchServiceMock.createScopedClusterClient
-    >['asInternalUser'];
+    let esClientMock: MockInternalEsClient;
     let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
     let subject: AssetCriticalityDataClient;
 
@@ -200,13 +201,31 @@ describe('AssetCriticalityDataClient', () => {
   });
 
   describe('bulkUpsertFromStream', () => {
-    it('should call bulkUpsert and preserve record order', async () => {
-      const assetCriticalityDataClient = new AssetCriticalityDataClient({
-        esClient: esClientInternal,
-        logger,
+    const recordsToStream = (records: AssetCriticalityUpsert[]) => {
+      return new Readable({
+        objectMode: true,
+        read() {
+          records.forEach((record) => {
+            this.push(record);
+          });
+          this.push(null);
+        },
+      });
+    };
+
+    let subject: AssetCriticalityDataClient;
+    let esClientMock: MockInternalEsClient;
+
+    beforeEach(() => {
+      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+      subject = new AssetCriticalityDataClient({
+        esClient: esClientMock,
+        logger: loggingSystemMock.createLogger(),
         namespace: 'default',
       });
+    });
 
+    it('should call bulkUpsert and preserve record order', async () => {
       const records: AssetCriticalityUpsert[] = [
         {
           idField: 'host.name',
@@ -221,25 +240,15 @@ describe('AssetCriticalityDataClient', () => {
       ];
 
       records.forEach((record) => {
-        esClientInternal.bulk.mockResolvedValueOnce(createBulkResponseFromRecords([record]));
+        esClientMock.bulk.mockResolvedValueOnce(createBulkResponseFromRecords([record]));
       });
 
-      const recordsStream = new Readable({
-        objectMode: true,
-        read() {
-          records.forEach((record) => {
-            this.push(record);
-          });
-          this.push(null);
-        },
-      });
-
-      const res = await assetCriticalityDataClient.bulkUpsertFromStream({
-        recordsStream,
+      const res = await subject.bulkUpsertFromStream({
+        recordsStream: recordsToStream(records),
         batchSize: 1,
       });
 
-      expect(esClientInternal.bulk).toHaveBeenCalled();
+      expect(esClientMock.bulk).toHaveBeenCalled();
 
       expect(res).toEqual({
         errors: [],
@@ -247,6 +256,49 @@ describe('AssetCriticalityDataClient', () => {
           created: 0,
           updated: 2,
           errors: 0,
+          total: 2,
+        },
+      });
+    });
+
+    it('should handle catastrophic bulkUpsert errors errors', async () => {
+      const records: AssetCriticalityUpsert[] = [
+        {
+          idField: 'host.name',
+          idValue: 'host-1',
+          criticalityLevel: 'low_impact',
+        },
+        {
+          idField: 'host.name',
+          idValue: 'host-2',
+          criticalityLevel: 'high_impact',
+        },
+      ];
+
+      esClientMock.bulk.mockRejectedValue(new Error('catastrophic error'));
+
+      const res = await subject.bulkUpsertFromStream({
+        recordsStream: recordsToStream(records),
+        batchSize: 2,
+      });
+
+      expect(esClientMock.bulk).toHaveBeenCalled();
+
+      expect(res).toEqual({
+        errors: [
+          {
+            index: 0,
+            message: 'catastrophic error',
+          },
+          {
+            index: 1,
+            message: 'catastrophic error',
+          },
+        ],
+        stats: {
+          created: 0,
+          updated: 0,
+          errors: 2,
           total: 2,
         },
       });
