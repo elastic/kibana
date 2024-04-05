@@ -21,7 +21,8 @@ export function usePreviousPrompts() {
     addPrompt: (prompt: string) => {
       if (previousPrompts[0] !== prompt) {
         // Keep track of the last 5 prompts
-        setPreviousPrompts((previous = []) => uniq([prompt].concat(previous).slice(0, 5)));
+        const newPrompts = uniq([prompt].concat(previousPrompts.filter((_, index) => index < 4)));
+        setPreviousPrompts(newPrompts);
       }
     },
   };
