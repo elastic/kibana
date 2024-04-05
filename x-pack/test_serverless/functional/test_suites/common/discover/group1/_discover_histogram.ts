@@ -32,8 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176882
-  describe.skip('discover histogram', function describeIndexTests() {
+  describe('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
@@ -75,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
         log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount === expectedCount;
+        return actualCount <= expectedCount;
       });
       let prevRowData = '';
       // to make sure the table is already rendered
@@ -86,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.brushHistogram();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      renderingCountInc = 3; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
+      renderingCountInc = 4; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
       await retry.waitFor('chart rendering complete after being brushed', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc * 2;

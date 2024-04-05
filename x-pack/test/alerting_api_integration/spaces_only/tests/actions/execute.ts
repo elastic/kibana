@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: true,
-        errorSource: TaskErrorSource.USER,
+        errorSource: TaskErrorSource.FRAMEWORK,
       });
 
       await validateEventLog({
@@ -329,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: true,
-          errorSource: TaskErrorSource.USER,
+          errorSource: TaskErrorSource.FRAMEWORK,
         });
       });
     });

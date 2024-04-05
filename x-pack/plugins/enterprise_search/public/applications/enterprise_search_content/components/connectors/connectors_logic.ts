@@ -191,6 +191,10 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
           searchQuery,
           size: meta.page.size,
         }),
+        fetchConnectors: (state, payload) => ({
+          ...state,
+          ...payload,
+        }),
         onPaginate: (state, { newPageIndex }) => ({
           ...state,
           from: (newPageIndex - 1) * state.size,

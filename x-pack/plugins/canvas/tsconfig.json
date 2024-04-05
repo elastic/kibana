@@ -87,7 +87,8 @@
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/code-editor",
-    "@kbn/shared-ux-markdown",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
   ],
   "exclude": [
     "target/**/*",
