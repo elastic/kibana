@@ -97,6 +97,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
+      assistantStreamingEnabled,
+      setUpdatedAssistantStreamingEnabled,
       setUpdatedDefaultAllow,
       setUpdatedDefaultAllowReplacement,
       setUpdatedKnowledgeBaseSettings,
@@ -299,6 +301,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     allSystemPrompts={systemPromptSettings}
                     selectedConversation={selectedConversation}
                     isDisabled={selectedConversation == null}
+                    assistantStreamingEnabled={assistantStreamingEnabled}
+                    setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
                   />
