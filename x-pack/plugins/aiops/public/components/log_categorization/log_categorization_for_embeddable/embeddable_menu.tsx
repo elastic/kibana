@@ -143,7 +143,7 @@ export const EmbeddableMenu: FC<Props> = ({
 
         <EuiHorizontalRule margin="m" />
 
-        <SamplingPanel randomSampler={randomSampler} reload={reload} />
+        <SamplingPanel randomSampler={randomSampler} reload={reload} calloutPosition="bottom" />
       </EuiPanel>
     </EuiPopover>
   );

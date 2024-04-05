@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexItem, EuiSpacer, EuiCallOut, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,10 +19,11 @@ import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_s
 
 interface Props {
   randomSampler: RandomSampler;
+  calloutPosition?: 'top' | 'bottom';
   reload: () => void;
 }
 
-export const SamplingPanel: FC<Props> = ({ randomSampler, reload }) => {
+export const SamplingPanel: FC<Props> = ({ randomSampler, reload, calloutPosition = 'top' }) => {
   const samplingProbability = useObservable(
     randomSampler.getProbability$(),
     randomSampler.getProbability()
@@ -51,10 +52,12 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload }) => {
 
   return (
     <>
-      <EuiFlexItem grow={true}>
-        <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
-      </EuiFlexItem>
-      <EuiSpacer size="m" />
+      {calloutPosition === 'top' ? (
+        <CalloutInfoMessage
+          calloutInfoMessage={calloutInfoMessage}
+          calloutPosition={calloutPosition}
+        />
+      ) : null}
 
       <EuiFormRow
         data-test-subj="aiopsRandomSamplerOptionsFormRow"
@@ -64,6 +67,11 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload }) => {
             defaultMessage: 'Random sampling',
           }
         )}
+        helpText={
+          randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
+            <ProbabilityUsedMessage samplingProbability={samplingProbability} />
+          ) : null
+        }
       >
         <EuiSuperSelect
           data-test-subj="aiopsRandomSamplerOptionsSelect"
@@ -80,8 +88,11 @@ export const SamplingPanel: FC<Props> = ({ randomSampler, reload }) => {
         />
       ) : null}
 
-      {randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC ? (
-        <ProbabilityUsedMessage samplingProbability={samplingProbability} />
+      {calloutPosition === 'bottom' ? (
+        <CalloutInfoMessage
+          calloutInfoMessage={calloutInfoMessage}
+          calloutPosition={calloutPosition}
+        />
       ) : null}
     </>
   );
@@ -92,8 +103,6 @@ const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
 }) => {
   return samplingProbability !== null ? (
     <div data-test-subj="aiopsRandomSamplerProbabilityUsedMsg">
-      <EuiSpacer size="m" />
-
       <FormattedMessage
         id="xpack.aiops.logCategorization.randomSamplerSettingsPopUp.probabilityLabel"
         defaultMessage="Probability used: {samplingProbability}%"
@@ -102,3 +111,14 @@ const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
     </div>
   ) : null;
 };
+
+const CalloutInfoMessage: FC<{
+  calloutInfoMessage: string;
+  calloutPosition: 'top' | 'bottom';
+}> = ({ calloutInfoMessage, calloutPosition }) => (
+  <>
+    {calloutPosition === 'bottom' ? <EuiSpacer size="s" /> : null}
+    <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
+    {calloutPosition === 'top' ? <EuiSpacer size="s" /> : null}
+  </>
+);
