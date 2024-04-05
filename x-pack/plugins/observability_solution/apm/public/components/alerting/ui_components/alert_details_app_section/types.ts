@@ -29,8 +29,8 @@ export interface AlertDetailsAppSectionProps {
   alert: TopAlert<{
     [SERVICE_NAME]: string;
     [TRANSACTION_TYPE]: string;
-    [CONTAINER_ID]?: string;
-    [HOST_NAME]?: string;
+    [CONTAINER_ID]?: string[];
+    [HOST_NAME]?: string[];
     [TRANSACTION_NAME]?: string;
     [SERVICE_ENVIRONMENT]: string;
   }>;

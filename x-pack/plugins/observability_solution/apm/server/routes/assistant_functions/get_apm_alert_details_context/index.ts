@@ -35,8 +35,8 @@ export const apmAlertDetailsContextRt = t.intersection([
     'transaction.name': t.string,
 
     // alert fields
-    'host.name': t.string,
-    'container.id': t.string,
+    'host.name': t.array(t.string),
+    'container.id': t.array(t.string),
   }),
 ]);
 

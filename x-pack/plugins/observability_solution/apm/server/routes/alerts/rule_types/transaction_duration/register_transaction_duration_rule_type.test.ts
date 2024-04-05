@@ -30,6 +30,15 @@ describe('registerTransactionDurationRuleType', () => {
               avgLatency: {
                 value: 5500000,
               },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
+              top_hit_source_fields: {
+                hits: {
+                  total: { value: 0, relation: 'eq' },
+                  max_score: 0,
+                  hits: [],
+                },
+              },
             },
           ],
         },
@@ -84,6 +93,8 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'GET /orders',
         'transaction.type': 'request',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -109,6 +120,8 @@ describe('registerTransactionDurationRuleType', () => {
               avgLatency: {
                 value: 5500000,
               },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -168,6 +181,8 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'GET /products',
         'transaction.type': 'request',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -193,6 +208,8 @@ describe('registerTransactionDurationRuleType', () => {
               avgLatency: {
                 value: 5500000,
               },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -248,6 +265,8 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': undefined,
         'transaction.type': 'request',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -278,6 +297,8 @@ describe('registerTransactionDurationRuleType', () => {
               avgLatency: {
                 value: 5500000,
               },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -337,6 +358,8 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': 'tx-java',
         'transaction.type': 'request',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -362,6 +385,8 @@ describe('registerTransactionDurationRuleType', () => {
               avgLatency: {
                 value: 5500000,
               },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -423,6 +448,8 @@ describe('registerTransactionDurationRuleType', () => {
         'service.name': 'opbeans-java',
         'transaction.name': undefined,
         'transaction.type': 'request',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });

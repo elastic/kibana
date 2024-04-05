@@ -68,14 +68,8 @@ describe('Transaction error rate alert', () => {
               key: ['foo', 'env-foo', 'type-foo'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 10,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 10),
                 ],
               },
             },
@@ -83,14 +77,8 @@ describe('Transaction error rate alert', () => {
               key: ['bar', 'env-bar', 'type-bar'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 1,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 1),
                 ],
               },
             },
@@ -162,14 +150,8 @@ describe('Transaction error rate alert', () => {
               key: ['foo', 'env-foo', 'type-foo', 'tx-name-foo'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 10,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 10),
                 ],
               },
             },
@@ -177,14 +159,8 @@ describe('Transaction error rate alert', () => {
               key: ['bar', 'env-bar', 'type-bar', 'tx-name-bar'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 1,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 1),
                 ],
               },
             },
@@ -263,14 +239,8 @@ describe('Transaction error rate alert', () => {
               key: ['foo', 'env-foo', 'type-foo'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 10,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 10),
                 ],
               },
             },
@@ -278,14 +248,8 @@ describe('Transaction error rate alert', () => {
               key: ['bar', 'env-bar', 'type-bar'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 1,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 1),
                 ],
               },
             },
@@ -358,14 +322,8 @@ describe('Transaction error rate alert', () => {
               key: ['foo', 'ENVIRONMENT_NOT_DEFINED', 'type-foo'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 10,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 10),
                 ],
               },
             },
@@ -373,14 +331,8 @@ describe('Transaction error rate alert', () => {
               key: ['bar', 'ENVIRONMENT_NOT_DEFINED', 'type-bar'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 1,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 1),
                 ],
               },
             },
@@ -453,14 +405,8 @@ describe('Transaction error rate alert', () => {
               key: ['bar', 'env-bar', 'type-bar'],
               outcomes: {
                 buckets: [
-                  {
-                    key: 'success',
-                    doc_count: 90,
-                  },
-                  {
-                    key: 'failure',
-                    doc_count: 10,
-                  },
+                  getOutcomeBucket('success', 90),
+                  getOutcomeBucket('failure', 10),
                 ],
               },
             },
@@ -514,3 +460,12 @@ describe('Transaction error rate alert', () => {
     });
   });
 });
+
+function getOutcomeBucket(outcome: 'success' | 'failure', docCount: number) {
+  return {
+    key: outcome,
+    doc_count: docCount,
+    'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+    'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
+  };
+}

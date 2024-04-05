@@ -9,6 +9,7 @@ import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
+import { castArray, isEmpty } from 'lodash';
 import {
   SERVICE_NAME,
   CONTAINER_ID,
@@ -35,8 +36,8 @@ export async function getLogCategories({
     start: string;
     end: string;
     'service.name'?: string;
-    'host.name'?: string;
-    'container.id'?: string;
+    'host.name'?: string[];
+    'container.id'?: string[];
   };
 }): Promise<LogCategories> {
   const start = datemath.parse(args.start)?.valueOf()!;
@@ -122,21 +123,21 @@ export async function getLogCategories({
 }
 
 // field/value pairs should match, or the field should not exist
-function getShouldMatchOrNotExistFilter(
+export function getShouldMatchOrNotExistFilter(
   keyValuePairs: Array<{
     field: string;
-    value?: string;
+    value: string | string[] | undefined;
   }>
 ) {
   return keyValuePairs
-    .filter(({ value }) => value)
+    .filter(({ value }) => !isEmpty(value))
     .map(({ field, value }) => {
       return {
         bool: {
           should: [
             {
               bool: {
-                filter: [{ term: { [field]: value } }],
+                filter: [{ terms: { [field]: castArray(value) } }],
               },
             },
             {

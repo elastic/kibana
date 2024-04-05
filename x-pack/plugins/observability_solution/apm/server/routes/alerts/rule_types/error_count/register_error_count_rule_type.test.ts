@@ -63,58 +63,26 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'env-foo'],
               doc_count: 5,
-              latest: {
-                top: [
-                  {
-                    metrics: {
-                      'service.name': 'foo',
-                      'service.environment': 'env-foo',
-                    },
-                  },
-                ],
-              },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['foo', 'env-foo-2'],
               doc_count: 4,
-              latest: {
-                top: [
-                  {
-                    metrics: {
-                      'service.name': 'foo',
-                      'service.environment': 'env-foo-2',
-                    },
-                  },
-                ],
-              },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar'],
               doc_count: 3,
-              latest: {
-                top: [
-                  {
-                    metrics: {
-                      'service.name': 'bar',
-                      'service.environment': 'env-bar',
-                    },
-                  },
-                ],
-              },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar-2'],
               doc_count: 1,
-              latest: {
-                top: [
-                  {
-                    metrics: {
-                      'service.name': 'bar',
-                      'service.environment': 'env-bar-2',
-                    },
-                  },
-                ],
-              },
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -164,6 +132,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -190,6 +160,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -216,6 +188,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -246,18 +220,26 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'env-foo', 'tx-name-foo'],
               doc_count: 5,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['foo', 'env-foo-2', 'tx-name-foo-2'],
               doc_count: 4,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar', 'tx-name-bar'],
               doc_count: 3,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar-2', 'tx-name-bar-2'],
               doc_count: 1,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -313,6 +295,8 @@ describe('Error count alert', () => {
         'service.environment': 'env-foo',
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -341,6 +325,8 @@ describe('Error count alert', () => {
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
         'transaction.name': 'tx-name-foo-2',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -369,6 +355,8 @@ describe('Error count alert', () => {
         'service.environment': 'env-bar',
         'service.name': 'bar',
         'transaction.name': 'tx-name-bar',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -399,18 +387,26 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'env-foo', 'error-key-foo'],
               doc_count: 5,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['foo', 'env-foo-2', 'error-key-foo-2'],
               doc_count: 4,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar', 'error-key-bar'],
               doc_count: 3,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar-2', 'error-key-bar-2'],
               doc_count: 1,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -464,6 +460,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -490,6 +488,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -516,6 +516,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -546,18 +548,26 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'env-foo'],
               doc_count: 5,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['foo', 'env-foo-2'],
               doc_count: 4,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar'],
               doc_count: 3,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar-2'],
               doc_count: 1,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -607,6 +617,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -633,6 +645,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -659,6 +673,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -689,18 +705,26 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'ENVIRONMENT_NOT_DEFINED'],
               doc_count: 5,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['foo', 'ENVIRONMENT_NOT_DEFINED'],
               doc_count: 4,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar'],
               doc_count: 3,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar-2'],
               doc_count: 1,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -754,6 +778,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -780,6 +806,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -806,6 +834,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -841,18 +871,26 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'env-foo', 'error-key-foo', 'error-name-foo'],
               doc_count: 5,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['foo', 'env-foo-2', 'error-key-foo-2', 'error-name-foo2'],
               doc_count: 4,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar', 'error-key-bar', 'error-name-bar'],
               doc_count: 3,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
             {
               key: ['bar', 'env-bar-2', 'error-key-bar-2', 'error-name-bar2'],
               doc_count: 1,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -908,6 +946,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -936,6 +976,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo-2',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -964,6 +1006,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-bar',
         'service.name': 'bar',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });
@@ -1001,6 +1045,8 @@ describe('Error count alert', () => {
             {
               key: ['foo', 'env-foo'],
               doc_count: 5,
+              'container.id': { doc_count_error_upper_bound: 0, buckets: [] },
+              'host.name': { doc_count_error_upper_bound: 0, buckets: [] },
             },
           ],
         },
@@ -1050,6 +1096,8 @@ describe('Error count alert', () => {
         'processor.event': 'error',
         'service.environment': 'env-foo',
         'service.name': 'foo',
+        'container.id': [],
+        'host.name': [],
       },
     });
   });

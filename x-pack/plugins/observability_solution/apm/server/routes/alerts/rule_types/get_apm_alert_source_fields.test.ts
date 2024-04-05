@@ -5,25 +5,20 @@
  * 2.0.
  */
 
+import { AggregationResultOf } from '@kbn/es-types';
 import {
   getApmAlertSourceFields,
-  getServiceGroupFieldsAgg,
+  getApmAlertSourceFieldsAgg,
   flattenSourceDoc,
-} from './get_service_group_fields';
+} from './get_apm_alert_source_fields';
 
-const mockSourceObj = {
+const topHitsMock = {
   service: {
     name: 'testbeans',
     environment: 'testing',
     language: {
       name: 'typescript',
     },
-  },
-  container: {
-    id: 'my-container',
-  },
-  host: {
-    name: 'my-host',
   },
   labels: {
     team: 'test',
@@ -34,22 +29,35 @@ const mockSourceObj = {
   },
 };
 
-const mockBucket = {
-  source_fields: {
+type TermsAggResult = AggregationResultOf<{ terms: any }, unknown>;
+
+const aggregationResponseMock = {
+  top_hit_source_fields: {
     hits: {
-      hits: [{ _source: mockSourceObj }],
+      hits: [{ _source: topHitsMock }],
     },
   },
+  'container.id': {
+    buckets: [{ key: 'my-first-container' }, { key: 'my-second-container' }],
+  } as TermsAggResult,
+  'host.name': {
+    buckets: [{ key: 'my-only-host' }],
+  } as TermsAggResult,
 };
 
 describe('getSourceFields', () => {
   it('should return a flattened record of fields and values for a given bucket except for labels', () => {
-    const result = getApmAlertSourceFields(mockBucket);
+    const result = getApmAlertSourceFields(aggregationResponseMock);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
-        "container.id": "my-container",
-        "host.name": "my-host",
+        "container.id": Array [
+          "my-first-container",
+          "my-second-container",
+        ],
+        "host.name": Array [
+          "my-only-host",
+        ],
         "labels": Object {
           "event": Array [
             "event-0",
@@ -67,10 +75,22 @@ describe('getSourceFields', () => {
 
 describe('getSourceFieldsAgg', () => {
   it('should create a agg for specific source fields', () => {
-    const agg = getServiceGroupFieldsAgg();
+    const agg = getApmAlertSourceFieldsAgg();
     expect(agg).toMatchInlineSnapshot(`
       Object {
-        "source_fields": Object {
+        "container.id": Object {
+          "terms": Object {
+            "field": "container.id",
+            "size": 10,
+          },
+        },
+        "host.name": Object {
+          "terms": Object {
+            "field": "host.name",
+            "size": 10,
+          },
+        },
+        "top_hit_source_fields": Object {
           "top_hits": Object {
             "_source": Object {
               "includes": Array [
@@ -79,8 +99,6 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
-                "host.name",
-                "container.id",
               ],
             },
             "size": 1,
@@ -91,12 +109,24 @@ describe('getSourceFieldsAgg', () => {
   });
 
   it('should accept options for top_hits options', () => {
-    const agg = getServiceGroupFieldsAgg({
+    const agg = getApmAlertSourceFieldsAgg({
       sort: [{ 'transaction.duration.us': { order: 'desc' } }],
     });
     expect(agg).toMatchInlineSnapshot(`
       Object {
-        "source_fields": Object {
+        "container.id": Object {
+          "terms": Object {
+            "field": "container.id",
+            "size": 10,
+          },
+        },
+        "host.name": Object {
+          "terms": Object {
+            "field": "host.name",
+            "size": 10,
+          },
+        },
+        "top_hit_source_fields": Object {
           "top_hits": Object {
             "_source": Object {
               "includes": Array [
@@ -105,8 +135,6 @@ describe('getSourceFieldsAgg', () => {
                 "service.environment",
                 "service.language.name",
                 "labels",
-                "host.name",
-                "container.id",
               ],
             },
             "size": 1,
@@ -126,12 +154,10 @@ describe('getSourceFieldsAgg', () => {
 
 describe('flattenSourceDoc', () => {
   it('should flatten a given nested object with dot delim paths as keys except for labels', () => {
-    const result = flattenSourceDoc(mockSourceObj);
+    const result = flattenSourceDoc(topHitsMock);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
-        "container.id": "my-container",
-        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",
