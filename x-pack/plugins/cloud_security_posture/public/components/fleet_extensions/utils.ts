@@ -377,6 +377,11 @@ export const isBelowMinVersion = (version: string, minVersion: string) => {
   return semverLt(versionNumberOnly, minVersion);
 };
 
+/**
+ * Searches for a variable definition in a given packageInfo object based on a specified key.
+ * It navigates through nested arrays within the packageInfo object to locate the variable definition associated with the provided key.
+ * If found, it returns the variable definition object; otherwise, it returns undefined.
+ */
 export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
   return packageInfo?.data_streams
     ?.filter((datastreams) => datastreams !== undefined)

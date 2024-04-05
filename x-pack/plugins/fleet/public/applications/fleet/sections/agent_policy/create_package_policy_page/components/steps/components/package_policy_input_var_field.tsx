@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, memo, useMemo, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
@@ -56,7 +55,7 @@ const FormRow = styled(EuiFormRow)`
   }
 `;
 
-interface InputFieldProps {
+export interface InputFieldProps {
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;

@@ -66,6 +66,8 @@ export { PackagePolicyEditorDatastreamMappings } from './applications/fleet/sect
 export type { PackagePolicyEditorDatastreamMappingsProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings';
 export type { DynamicPagePathValues } from './constants';
 
+export type { InputFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
+
 export const PackagePolicyInputVarField = lazy(() =>
   import(
     './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
