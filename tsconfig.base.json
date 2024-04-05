@@ -1284,8 +1284,6 @@
       "@kbn/reporting-common/*": ["packages/kbn-reporting/common/*"],
       "@kbn/reporting-csv-share-panel": ["packages/kbn-reporting/get_csv_panel_actions"],
       "@kbn/reporting-csv-share-panel/*": ["packages/kbn-reporting/get_csv_panel_actions/*"],
-      "@kbn/reporting-example-plugin": ["x-pack/examples/reporting_example"],
-      "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
       "@kbn/reporting-export-types-csv": ["packages/kbn-reporting/export_types/csv"],
       "@kbn/reporting-export-types-csv/*": ["packages/kbn-reporting/export_types/csv/*"],
       "@kbn/reporting-export-types-csv-common": ["packages/kbn-reporting/export_types/csv_common"],
