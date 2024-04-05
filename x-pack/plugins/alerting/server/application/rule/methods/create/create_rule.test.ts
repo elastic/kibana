@@ -4272,7 +4272,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.actionTypeId]: definition for this key is missing]`
+        `[Error: Action fake-system-action is not a system action]`
       );
     });
 
@@ -4287,7 +4287,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.actionTypeId]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.group]: definition for this key is missing]`
       );
     });
 
@@ -4306,7 +4306,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.actionTypeId]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.frequency]: definition for this key is missing]`
       );
     });
 
@@ -4323,7 +4323,7 @@ describe('create()', () => {
 
       const data = getMockData({ systemActions: [systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.actionTypeId]: definition for this key is missing]`
+        `[Error: Error validating create data - [systemActions.0.alertsFilter]: definition for this key is missing]`
       );
     });
 
@@ -4350,7 +4350,7 @@ describe('create()', () => {
 
       const data = getMockData({ actions: [], systemActions: [systemAction, systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating create data - [systemActions.0.actionTypeId]: definition for this key is missing]`
+        `[Error: Cannot use the same system action twice]`
       );
     });
   });
